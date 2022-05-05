@@ -9,11 +9,17 @@ A cli tool for temporal cloud operations.
  ```sh
     $ go version
 ```
-2. Run go install.
+2. Clone the `tcld` repository and run `make`.
 ```
-    $ go install github.com/temporalio/tcld/cmd/tcld@latest
+    $ git clone https://github.com/temporalio/tcld.git
+    $ cd tcld
+    $ make
 ```
-3. Run `tcld version` to check if it worked.
+3. Copy the tcld executable to any directory that appears in the PATH environment variable; for example, `/usr/local/bin/`.
+```
+    $ cp tcld /usr/local/bin/tcld
+```
+4. Run `tcld version` to check if it worked.
 ```
     $ tcld version
 ```
@@ -64,3 +70,4 @@ Any update operations making changes to the namespaces hosted on temporal-cloud 
 # License
 
 MIT License, please see [LICENSE](https://github.com/temporalio/tcld/blob/master/LICENSE) for details.
+
