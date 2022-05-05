@@ -1,0 +1,15 @@
+name: Pull Request Pipeline
+on: [pull_request]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    name: sanity checks - pull request
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+      - name: run tests and build
+        run: make clean test bins
+      - name: lint
+        run: make tools lint
