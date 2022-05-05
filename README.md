@@ -15,9 +15,9 @@ A cli tool for temporal cloud operations.
     $ cd tcld
     $ make
 ```
-3. Copy the tcld executable to any directory that appears in the PATH environment variable; for example, `/usr/bin/`.
+3. Copy the tcld executable to any directory that appears in the PATH environment variable; for example, `/usr/local/bin/`.
 ```
-    $ cp tcld /usr/bin/tcld
+    $ cp tcld /usr/local/bin/tcld
 ```
 4. Run `tcld version` to check if it worked.
 ```
