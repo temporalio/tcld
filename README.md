@@ -9,15 +9,15 @@ A cli tool for temporal cloud operations.
  ```sh
     $ go version
 ```
-2. Clone the `tcld` repository and run `make tcld`.
+2. Clone the `tcld` repository and run `make`.
 ```
-    $ git clone https://github.com/temporalio/tcld
+    $ git clone https://github.com/temporalio/tcld.git
     $ cd tcld
-    $ make tcld
+    $ make
 ```
-3. Copy the tcld executable to any directory that appears in the PATH environment variable; for example, /usr/bin/.
+3. Copy the tcld executable to any directory that appears in the PATH environment variable; for example, `/usr/bin/`.
 ```
-    $ cp tcld /usr/local/bin/tcld
+    $ cp tcld /usr/bin/tcld
 ```
 4. Run `tcld version` to check if it worked.
 ```
