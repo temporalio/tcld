@@ -70,4 +70,3 @@ Any update operations making changes to the namespaces hosted on temporal-cloud 
 # License
 
 MIT License, please see [LICENSE](https://github.com/temporalio/tcld/blob/master/LICENSE) for details.
-
