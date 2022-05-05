@@ -61,6 +61,9 @@ Any update operations making changes to the namespaces hosted on temporal-cloud 
     $ tcld request get -r <request-id> -n <namespace>
 ```
 
+# Testing Pull Requests
+This is a test for our pull request settings.
+
 # License
 
 MIT License, please see [LICENSE](https://github.com/temporalio/tcld/blob/master/LICENSE) for details.
