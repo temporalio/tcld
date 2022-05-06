@@ -53,7 +53,7 @@ tcld namespace update accepted-client-ca set -n <namespace> --ca-certificate-fil
 ```
 tcld namespace update search-attributes add -n <namespace> --sa "<attribute-name>=<search-attribute-type>" --sa "<attribute-name>=<search-attribute-type>"
 ```
-Supported search attribute types: `SearchAttributeTypeKeyword SearchAttributeTypeText SearchAttributeTypeInt SearchAttributeTypeDouble SearchAttributeTypeDatetime SearchAttributeTypeBool`
+Supported search attribute types: `Keyword Text Int Double Datetime Bool`
 
 ### Rename existing search attribute:
 ```
