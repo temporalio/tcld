@@ -25,7 +25,7 @@ func NewVersionCommand() (CommandOut, error) {
 			}{
 				BuildDate: BuildDate,
 				Commit:    Commit,
-				Version:   Version,
+				Version:   getVersion(),
 			})
 		},
 	}}, nil
