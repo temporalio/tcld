@@ -8,9 +8,8 @@ TAG_COMMIT := $(shell git rev-list --abbrev-commit --tags --max-count=1)
 TAG := $(shell git describe --abbrev=0 --tags ${TAG_COMMIT} 2>/dev/null || true)
 COMMIT := $(shell git rev-parse --short HEAD)
 DATE := $(shell git log -1 --format=%cd --date=format:"%Y%m%d")
-VERSION := $(TAG:v%=%)
 APPPKG := $(PROJECT_ROOT)/app
-LINKER_FLAGS := -X $(APPPKG).BuildDate=$(DATE) -X $(APPPKG).Commit=$(COMMIT) -X $(APPPKG).Version=$(VERSION)
+LINKER_FLAGS := -X $(APPPKG).BuildDate=$(DATE) -X $(APPPKG).Commit=$(COMMIT) -X $(APPPKG).Version=$(TAG)
 
 
 ALL_SRC := $(shell find . -name "*.go")
