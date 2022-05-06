@@ -2,6 +2,10 @@ package app
 
 import "github.com/urfave/cli/v2"
 
+const (
+	DefaultVersion = "0.1.1"
+)
+
 var (
 	BuildDate string
 	Commit    string
@@ -25,4 +29,12 @@ func NewVersionCommand() (CommandOut, error) {
 			})
 		},
 	}}, nil
+}
+
+func getVersion() string {
+	version := Version
+	if len(version) == 0 {
+		version = DefaultVersion
+	}
+	return version
 }

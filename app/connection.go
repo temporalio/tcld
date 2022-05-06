@@ -44,7 +44,7 @@ func GetServerConnection(c *cli.Context) (context.Context, *grpc.ClientConn, err
 	}
 	ctx := context.Background()
 
-	ctx = metadata.AppendToOutgoingContext(ctx, "tcld-version", Version)
+	ctx = metadata.AppendToOutgoingContext(ctx, "tcld-version", getVersion())
 	ctx = metadata.AppendToOutgoingContext(ctx, "tcld-commit", Commit)
 
 	if len(tokens.AccessToken) > 0 {
