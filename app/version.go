@@ -3,7 +3,7 @@ package app
 import "github.com/urfave/cli/v2"
 
 const (
-	DefaultVersion = "0.1.1"
+	DefaultVersion = "v0.1.1"
 )
 
 var (
