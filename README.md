@@ -4,6 +4,10 @@ A cli tool for managing Temporal Cloud namespaces.
 > This cli tool is currently in `beta` and access to Temporal Cloud via the cli is restricted. Please reach out to temporal-cloud support for more information.
 
 # Installation
+## Install via Homebrew
+```
+brew install temporalio/brew/tcld
+```
 ## Build from source
 1. Verify that you have Go 1.18+ installed. If `go` is not installed, follow instructions on [the Go website](https://golang.org/doc/install).
 ```
