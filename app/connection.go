@@ -28,6 +28,7 @@ func GetServerConnection(c *cli.Context) (context.Context, *grpc.ClientConn, err
 		option = grpc.WithInsecure()
 	default:
 		option = grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+			MinVersion: tls.VersionTLS12,
 			ServerName: hostname,
 		}))
 	}

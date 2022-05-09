@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -56,7 +56,7 @@ type (
 
 func getTokenConfigPath(ctx *cli.Context) string {
 	configDir := ctx.Path(ConfigDirFlagName)
-	return path.Join(configDir, tokenFileName)
+	return filepath.Join(configDir, tokenFileName)
 }
 
 // TODO: support login config on windows

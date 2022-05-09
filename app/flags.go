@@ -2,7 +2,7 @@ package app
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/urfave/cli/v2"
 )
@@ -27,7 +27,7 @@ var (
 	}
 	ConfigDirFlag = &cli.PathFlag{
 		Name:     ConfigDirFlagName,
-		Value:    path.Join(os.Getenv("HOME"), ".config", "tcld"),
+		Value:    filepath.Join(os.Getenv("HOME"), ".config", "tcld"),
 		Usage:    "the config directory to use",
 		Hidden:   true,
 		Required: false,
