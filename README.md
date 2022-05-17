@@ -53,9 +53,9 @@ tcld namespace update accepted-client-ca set -n <namespace> --ca-certificate-fil
 ```
 > :warning: If the update removes a certificate, any clients (tctl/workers) still using the removed certificate will fail to connect to the namespace after the update completes.
 
-#### Performing a Certificate Rollover:
-It's important to do a rollover process when updating your CA certificates. This allows your namespace to serve both CA certs for a period of time until traffic to your old cert is gone. To do this follow these steps:
-1. Create a single file that contains both your old and new CA cert pem blocks. You can do this by simply concatenating each pem block on a new line.
+#### Performing a certificate rollover:
+It is important to do a rollover process when updating your CA certificates. This allows your namespace to serve both CA certificates for a period of time until traffic to your old certificate is gone. To do this follow these steps:
+1. Create a single file that contains both your old and new CA certificate PEM blocks. You can do this by simply concatenating each PEM block on a new line.
 ```
 -----BEGIN CERTIFICATE-----
 ... old CA cert ...
@@ -64,10 +64,10 @@ It's important to do a rollover process when updating your CA certificates. This
 ... new CA cert ...
 -----END CERTIFICATE-----
 ```
-2. Run the update accepted-client-ca command with the new CA cert bundle file.
+2. Run the `update accepted-client-ca set` command with the new CA certificate bundle file.
 3. Monitor traffic to your old certificate until it is gone.
-4. Create a new CA cert bundle file with the old cert removed.
-5. Run the update accepted-client-ca command again with the new file.
+4. Create a new CA certificate bundle file with the old certificate removed.
+5. Run the `update accepted-client-ca set` command again with the new file.
 
 ### Add new search attributes:
 ```
