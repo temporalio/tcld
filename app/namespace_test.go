@@ -141,50 +141,48 @@ func (s *NamespaceTestSuite) TestUpdateCA() {
 		expectErr    bool
 		expectUpdate morphUpdateReq
 	}{{
-		args: []string{"namespace", "update"},
+		args: []string{"namespace", "accepted-client-ca"},
 	}, {
-		args: []string{"namespace", "update", "accepted-client-ca"},
-	}, {
-		args:      []string{"namespace", "update", "accepted-client-ca", "set"},
+		args:      []string{"namespace", "accepted-client-ca", "set"},
 		expectErr: true,
 	}, {
-		args:      []string{"namespace", "update", "accepted-client-ca", "set", "--namespace", ns},
+		args:      []string{"namespace", "accepted-client-ca", "set", "--namespace", ns},
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "ca", "set", "-n", ns, "--ca-certificate", "cert2"},
+		args:      []string{"n", "ca", "set", "-n", ns, "--ca-certificate", "cert2"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) { g.Namespace.State = namespace.STATE_UPDATING },
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "ca", "set", "-n", ns, "--ca-certificate", "cert1"},
+		args:      []string{"n", "ca", "set", "-n", ns, "--ca-certificate", "cert1"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "ca", "set", "-n", ns, "--ca-certificate", "cert2"},
+		args:      []string{"n", "ca", "set", "-n", ns, "--ca-certificate", "cert2"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) { *g = namespaceservice.GetNamespaceResponse{} },
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "ca", "set", "-n", ns, "--ca-certificate", "cert2"},
+		args:      []string{"n", "ca", "set", "-n", ns, "--ca-certificate", "cert2"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 			r.Spec.AcceptedClientCa = "cert2"
 		},
 	}, {
-		args:      []string{"n", "u", "ca", "set", "-n", ns, "--ca-certificate", "cert2"},
+		args:      []string{"n", "ca", "set", "-n", ns, "--ca-certificate", "cert2"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) { g.Namespace.Spec.AcceptedClientCa = "" },
 		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 			r.Spec.AcceptedClientCa = "cert2"
 		},
 	}, {
-		args:      []string{"n", "u", "ca", "set", "-n", ns, "--ca-certificate-file", path},
+		args:      []string{"n", "ca", "set", "-n", ns, "--ca-certificate-file", path},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 			r.Spec.AcceptedClientCa = base64.StdEncoding.EncodeToString([]byte("cert2"))
 		},
 	}, {
-		args:      []string{"n", "u", "ca", "set", "-n", ns, "--ca-certificate-file", "nonexistingfile"},
+		args:      []string{"n", "ca", "set", "-n", ns, "--ca-certificate-file", "nonexistingfile"},
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "ca", "set", "-n", ns, "-c", "cert2", "--resource-version", "ver2"},
+		args:      []string{"n", "ca", "set", "-n", ns, "-c", "cert2", "--resource-version", "ver2"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 			r.Spec.AcceptedClientCa = "cert2"
@@ -251,29 +249,29 @@ func (s *NamespaceTestSuite) TestUpdateAddSearchAttrs() {
 		expectErr    bool
 		expectUpdate morphUpdateReq
 	}{{
-		args: []string{"namespace", "update", "search-attributes"},
+		args: []string{"namespace", "search-attributes"},
 	}, {
-		args:      []string{"namespace", "update", "search-attributes", "add"},
+		args:      []string{"namespace", "search-attributes", "add"},
 		expectErr: true,
 	}, {
-		args:      []string{"namespace", "update", "search-attributes", "add", "--namespace", ns},
+		args:      []string{"namespace", "search-attributes", "add", "--namespace", ns},
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "sa", "add", "-n", ns, "--search-attribute", "attr1"},
+		args:      []string{"n", "sa", "add", "-n", ns, "--search-attribute", "attr1"},
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "sa", "add", "-n", ns, "--search-attribute", "attr1=InvalidType"},
+		args:      []string{"n", "sa", "add", "-n", ns, "--search-attribute", "attr1=InvalidType"},
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "sa", "add", "-n", ns, "--sa", "attr1=Text"},
+		args:      []string{"n", "sa", "add", "-n", ns, "--sa", "attr1=Text"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) { g.Namespace.State = namespace.STATE_UPDATING },
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "sa", "add", "-n", ns, "--sa", "attr1=Text"},
+		args:      []string{"n", "sa", "add", "-n", ns, "--sa", "attr1=Text"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "sa", "add", "-n", ns, "--sa", "attr1=Text"},
+		args:      []string{"n", "sa", "add", "-n", ns, "--sa", "attr1=Text"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) { g.Namespace.Spec.SearchAttributes = nil },
 		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 			r.Spec.SearchAttributes = map[string]namespace.NamespaceSpec_SearchAttributeType{
@@ -281,7 +279,7 @@ func (s *NamespaceTestSuite) TestUpdateAddSearchAttrs() {
 			}
 		},
 	}, {
-		args: []string{"n", "u", "sa", "add", "-n", ns, "--sa", "attr2=Text",
+		args: []string{"n", "sa", "add", "-n", ns, "--sa", "attr2=Text",
 			"--sa", "attr3=Int", "--resource-version", "ver2"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
@@ -353,34 +351,34 @@ func (s *NamespaceTestSuite) TestUpdateRenameSearchAttrs() {
 		expectErr    bool
 		expectRename morphRenameReq
 	}{{
-		args:      []string{"namespace", "update", "search-attributes", "rename"},
+		args:      []string{"namespace", "search-attributes", "rename"},
 		expectErr: true,
 	}, {
-		args:      []string{"namespace", "update", "search-attributes", "rename", "--namespace", ns},
+		args:      []string{"namespace", "search-attributes", "rename", "--namespace", ns},
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "sa", "rn", "-n", ns, "--existing-name", "attr1"},
+		args:      []string{"n", "sa", "rn", "-n", ns, "--existing-name", "attr1"},
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "sa", "rn", "-n", ns, "--existing-name", "attr1", "--new-name", "attr3"},
+		args:      []string{"n", "sa", "rn", "-n", ns, "--existing-name", "attr1", "--new-name", "attr3"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) { g.Namespace.State = namespace.STATE_UPDATING },
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "sa", "rn", "-n", ns, "--existing-name", "unknown", "--new-name", "attr3"},
+		args:      []string{"n", "sa", "rn", "-n", ns, "--existing-name", "unknown", "--new-name", "attr3"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "sa", "rn", "-n", ns, "--existing-name", "attr1", "--new-name", "attr2"},
+		args:      []string{"n", "sa", "rn", "-n", ns, "--existing-name", "attr1", "--new-name", "attr2"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectErr: true,
 	}, {
-		args:      []string{"n", "u", "sa", "rn", "-n", ns, "--existing-name", "attr1", "--new-name", "attr3"},
+		args:      []string{"n", "sa", "rn", "-n", ns, "--existing-name", "attr1", "--new-name", "attr3"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectRename: func(r *namespaceservice.RenameCustomSearchAttributeRequest) {
 			r.NewCustomSearchAttributeName = "attr3"
 		},
 	}, {
-		args:      []string{"n", "u", "sa", "rn", "-n", ns, "--existing-name", "attr1", "--new-name", "attr3", "--resource-version", "ver2"},
+		args:      []string{"n", "sa", "rn", "-n", ns, "--existing-name", "attr1", "--new-name", "attr3", "--resource-version", "ver2"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectRename: func(r *namespaceservice.RenameCustomSearchAttributeRequest) {
 			r.NewCustomSearchAttributeName = "attr3"
