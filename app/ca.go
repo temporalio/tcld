@@ -82,14 +82,14 @@ func parseCertificates(encodedCerts string) (caCerts, error) {
 func (c caCerts) bundle() (string, error) {
 	out := make([]byte, 0)
 	for i := range c {
-		decodedCert, err := base64.StdEncoding.DecodeString(c[i].Base64EncodedData)
+		certBytes, err := base64.StdEncoding.DecodeString(c[i].Base64EncodedData)
 		if err != nil {
 			return "", fmt.Errorf("failed to base64 decode cert: %s", err.Error())
 		}
 		if len(out) != 0 {
 			out = append(out, []byte("\n")...)
 		}
-		out = append(out, decodedCert...)
+		out = append(out, certBytes...)
 	}
 	return base64.StdEncoding.EncodeToString(out), nil
 }

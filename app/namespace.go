@@ -21,12 +21,12 @@ const (
 
 var (
 	caCertificateFlag = &cli.StringFlag{
-		Name:    "ca-certificate",
+		Name:    caCertificateFlagName,
 		Usage:   "the base64 encoded ca certificate",
 		Aliases: []string{"c"},
 	}
 	caCertificateFileFlag = &cli.PathFlag{
-		Name:    "ca-certificate-file",
+		Name:    caCertificateFileFlagName,
 		Usage:   "the path to the ca pem file",
 		Aliases: []string{"f"},
 	}
@@ -84,12 +84,6 @@ func (c *NamespaceClient) getNamespace(namespace string) (*ns.Namespace, error) 
 }
 
 func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *ns.Namespace) error {
-	if n.State != ns.STATE_ACTIVE {
-		return fmt.Errorf("namespace not in '%s' state to perform update, current_state='%s'",
-			ns.Namespace_State_name[int32(ns.STATE_ACTIVE)],
-			ns.Namespace_State_name[int32(n.State)],
-		)
-	}
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
 		resourceVersion = v
@@ -107,12 +101,6 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *ns.Namespace) err
 }
 
 func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *ns.Namespace, existingName string, newName string) error {
-	if n.State != ns.STATE_ACTIVE {
-		return fmt.Errorf("namespace not in '%s' state to perform rename search attributes operation, current_state='%s'",
-			ns.Namespace_State_name[int32(ns.STATE_ACTIVE)],
-			ns.Namespace_State_name[int32(n.State)],
-		)
-	}
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
 		resourceVersion = v

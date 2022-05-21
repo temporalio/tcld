@@ -153,10 +153,6 @@ func (s *NamespaceTestSuite) TestUpdateCA() {
 		args:      []string{"namespace", "accepted-client-ca", "set", "--namespace", ns},
 		expectErr: true,
 	}, {
-		args:      []string{"n", "ca", "set", "-n", ns, "--ca-certificate", "cert2"},
-		expectGet: func(g *namespaceservice.GetNamespaceResponse) { g.Namespace.State = namespace.STATE_UPDATING },
-		expectErr: true,
-	}, {
 		args:      []string{"n", "ca", "set", "-n", ns, "--ca-certificate", "cert1"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectErr: true,
@@ -268,10 +264,6 @@ func (s *NamespaceTestSuite) TestUpdateAddSearchAttrs() {
 		expectErr: true,
 	}, {
 		args:      []string{"n", "sa", "add", "-n", ns, "--sa", "attr1=Text"},
-		expectGet: func(g *namespaceservice.GetNamespaceResponse) { g.Namespace.State = namespace.STATE_UPDATING },
-		expectErr: true,
-	}, {
-		args:      []string{"n", "sa", "add", "-n", ns, "--sa", "attr1=Text"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectErr: true,
 	}, {
@@ -362,10 +354,6 @@ func (s *NamespaceTestSuite) TestUpdateRenameSearchAttrs() {
 		expectErr: true,
 	}, {
 		args:      []string{"n", "sa", "rn", "-n", ns, "--existing-name", "attr1"},
-		expectErr: true,
-	}, {
-		args:      []string{"n", "sa", "rn", "-n", ns, "--existing-name", "attr1", "--new-name", "attr3"},
-		expectGet: func(g *namespaceservice.GetNamespaceResponse) { g.Namespace.State = namespace.STATE_UPDATING },
 		expectErr: true,
 	}, {
 		args:      []string{"n", "sa", "rn", "-n", ns, "--existing-name", "unknown", "--new-name", "attr3"},
