@@ -230,7 +230,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					if err != nil {
 						return err
 					}
-					err = existingCerts.add(newCerts)
+					existingCerts, err = addCerts(existingCerts, newCerts)
 					if err != nil {
 						return err
 					}
@@ -260,7 +260,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					if err != nil {
 						return err
 					}
-					removeCerts, err := parseCertificates(cert)
+					inCerts, err := parseCertificates(cert)
 					if err != nil {
 						return err
 					}
@@ -272,11 +272,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					if err != nil {
 						return err
 					}
-					err = existingCerts.remove(removeCerts)
+					certs, err := removeCerts(existingCerts, inCerts)
 					if err != nil {
 						return err
 					}
-					bundle, err := existingCerts.bundle()
+					bundle, err := certs.bundle()
 					if err != nil {
 						return err
 					}
@@ -284,6 +284,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						return errors.New("nothing to change")
 					}
 					n.Spec.AcceptedClientCa = bundle
+					y, err := ConfirmPrompt(ctx, "removing ca certificates can cause connectivity disruption if there are any clients using certificates that cannot be verified. confirm remove?")
+					if err != nil || !y {
+						return err
+					}
 					return c.updateNamespace(ctx, n)
 				},
 			}, {
@@ -388,6 +392,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					newName := ctx.String("new-name")
 					if _, exists := n.Spec.SearchAttributes[newName]; exists {
 						return fmt.Errorf("search attribute with new name '%s' already exists", ctx.String("new-name"))
+					}
+					y, err := ConfirmPrompt(ctx, "renaming search attribute may cause failures if any worker is still using the old name of the search-attributes. confirm rename?")
+					if err != nil || !y {
+						return err
 					}
 					return c.renameSearchAttribute(ctx, n, existingName, newName)
 				},

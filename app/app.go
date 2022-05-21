@@ -22,6 +22,7 @@ func NewApp(params AppParams) (*cli.App, error) {
 		Flags: []cli.Flag{
 			ServerFlag,
 			ConfigDirFlag,
+			AutoConfirmFlag,
 		},
 	}
 	app.Commands = params.Commands

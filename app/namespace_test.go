@@ -38,9 +38,13 @@ func (s *NamespaceTestSuite) SetupTest() {
 		}, nil
 	})
 	s.Require().NoError(err)
+	AutoConfirmFlag.Value = true
 	s.cliApp = &cli.App{
 		Name:     "test",
 		Commands: []*cli.Command{out.Command},
+		Flags: []cli.Flag{
+			AutoConfirmFlag,
+		},
 	}
 }
 

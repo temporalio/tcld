@@ -170,19 +170,22 @@ func TestCAAddAndRemove(t *testing.T) {
 	assert.NoError(t, err)
 
 	// add one cert
-	assert.NoError(t, certs.add(certs1))
+	certs, err = addCerts(certs, certs1)
+	assert.NoError(t, err)
 	assert.Len(t, certs, 1)
 	decodedCert1, err := base64.StdEncoding.DecodeString(certs[0].Base64EncodedData)
 	assert.NoError(t, err)
 	assert.Equal(t, cert1, string(decodedCert1))
 
 	// adding the same cert again should fail
-	assert.Error(t, certs.add(certs1))
+	_, err = addCerts(certs, certs1)
+	assert.Error(t, err)
 
 	certs2, err := parseCertificates(base64.StdEncoding.EncodeToString([]byte(cert2)))
 	assert.NoError(t, err)
 	// add the other cert
-	assert.NoError(t, certs.add(certs2))
+	certs, err = addCerts(certs, certs2)
+	assert.NoError(t, err)
 	assert.Len(t, certs, 2)
 	decodedCert1, err = base64.StdEncoding.DecodeString(certs[0].Base64EncodedData)
 	assert.NoError(t, err)
@@ -192,16 +195,19 @@ func TestCAAddAndRemove(t *testing.T) {
 	assert.Equal(t, cert2, string(decodedCert2))
 
 	// remove the first cert
-	assert.NoError(t, certs.remove(certs1))
+	certs, err = removeCerts(certs, certs1)
+	assert.NoError(t, err)
 	assert.Len(t, certs, 1)
 	decodedCert2, err = base64.StdEncoding.DecodeString(certs[0].Base64EncodedData)
 	assert.NoError(t, err)
 	assert.Equal(t, cert2, string(decodedCert2))
 
 	// removing the fist cert again should fail
-	assert.Error(t, certs.remove(certs1))
+	_, err = removeCerts(certs, certs1)
+	assert.Error(t, err)
 
 	// remove the first cert
-	assert.NoError(t, certs.remove(certs2))
+	certs, err = removeCerts(certs, certs2)
+	assert.NoError(t, err)
 	assert.Len(t, certs, 0)
 }
