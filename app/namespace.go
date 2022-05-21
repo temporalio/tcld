@@ -17,6 +17,7 @@ import (
 const (
 	caCertificateFlagName     = "ca-certificate"
 	caCertificateFileFlagName = "ca-certificate-file"
+	caCertificateFingerprint  = "ca-certificate-fingerprint"
 )
 
 var (
@@ -29,6 +30,11 @@ var (
 		Name:    caCertificateFileFlagName,
 		Usage:   "the path to the ca pem file",
 		Aliases: []string{"f"},
+	}
+	caCertificateFingerprintFlag = &cli.StringFlag{
+		Name:    caCertificateFingerprint,
+		Usage:   "the fingerprint of to the ca certificate",
+		Aliases: []string{"fingerprint"},
 	}
 )
 
@@ -118,6 +124,26 @@ func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *ns.Namespac
 	return PrintProto(res)
 }
 
+func (c *NamespaceClient) readAndParseCerts(ctx *cli.Context) (namespace *ns.Namespace, existing, read caCerts, err error) {
+	cert, err := readCACerts(ctx)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	newCerts, err := parseCertificates(cert)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	existingCerts, err := parseCertificates(n.Spec.AcceptedClientCa)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return n, existingCerts, newCerts, nil
+}
+
 func readCACerts(ctx *cli.Context) (string, error) {
 	cert := ctx.String(caCertificateFlagName)
 	if cert == "" {
@@ -174,8 +200,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Usage:   "manage client ca certificate used to verify client connections",
 			Aliases: []string{"ca"},
 			Subcommands: []*cli.Command{{
-				Name:  "get",
-				Usage: "get the accepted client ca certificates currently configured for the namespace",
+				Name:    "list",
+				Aliases: []string{"l"},
+				Usage:   "list the accepted client ca certificates currently configured for the namespace",
 				Flags: []cli.Flag{
 					NamespaceFlag,
 				},
@@ -192,8 +219,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 			}, {
 				Name:    "add",
-				Usage:   "add a new ca accepted client ca certificate",
 				Aliases: []string{"a"},
+				Usage:   "add a new ca accepted client ca certificate",
 				Flags: []cli.Flag{
 					NamespaceFlag,
 					RequestIDFlag,
@@ -202,19 +229,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					caCertificateFileFlag,
 				},
 				Action: func(ctx *cli.Context) error {
-					cert, err := readCACerts(ctx)
-					if err != nil {
-						return err
-					}
-					newCerts, err := parseCertificates(cert)
-					if err != nil {
-						return err
-					}
-					n, err := c.getNamespace(ctx.String(NamespaceFlagName))
-					if err != nil {
-						return err
-					}
-					existingCerts, err := parseCertificates(n.Spec.AcceptedClientCa)
+					n, existingCerts, newCerts, err := c.readAndParseCerts(ctx)
 					if err != nil {
 						return err
 					}
@@ -234,33 +249,22 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 			}, {
 				Name:    "remove",
-				Usage:   "remove existing certificates",
 				Aliases: []string{"r"},
+				Usage:   "remove existing certificates",
 				Flags: []cli.Flag{
 					NamespaceFlag,
 					RequestIDFlag,
 					ResourceVersionFlag,
 					caCertificateFlag,
 					caCertificateFileFlag,
+					caCertificateFingerprintFlag,
 				},
 				Action: func(ctx *cli.Context) error {
-					cert, err := readCACerts(ctx)
+					n, existingCerts, rmCerts, err := c.readAndParseCerts(ctx)
 					if err != nil {
 						return err
 					}
-					inCerts, err := parseCertificates(cert)
-					if err != nil {
-						return err
-					}
-					n, err := c.getNamespace(ctx.String(NamespaceFlagName))
-					if err != nil {
-						return err
-					}
-					existingCerts, err := parseCertificates(n.Spec.AcceptedClientCa)
-					if err != nil {
-						return err
-					}
-					certs, err := removeCerts(existingCerts, inCerts)
+					certs, err := removeCerts(existingCerts, rmCerts)
 					if err != nil {
 						return err
 					}
@@ -280,8 +284,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 			}, {
 
-				Name:  "set",
-				Usage: "set the accepted client ca certificate",
+				Name:    "set",
+				Aliases: []string{"s"},
+				Usage:   "set the accepted client ca certificate",
 				Flags: []cli.Flag{
 					NamespaceFlag,
 					RequestIDFlag,
