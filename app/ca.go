@@ -49,7 +49,9 @@ func parsePEM(bundle []byte) (certBlocks [][]byte, pemBlocks []byte, err error) 
 }
 
 func parseCertificates(encodedCerts string) (caCerts, error) {
-
+	if len(encodedCerts) == 0 {
+		return caCerts{}, nil
+	}
 	// decode the cert bundle
 	bundle, err := base64.StdEncoding.DecodeString(encodedCerts)
 	if err != nil {
