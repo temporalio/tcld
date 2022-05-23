@@ -60,7 +60,6 @@ It is important to do a rollover process when updating your CA certificates. Thi
 2. Run the `accepted-client-ca add` command with the new CA certificates.
 ```
 tcld namespace accepted-client-ca add -n <namespace> --ca-certificate-file <new-ca-pem-filepath>
-
 ```
 
 3. Update temporal clients to use the new certificates and monitor deployements to make sure all old certificate usage is phased out.
