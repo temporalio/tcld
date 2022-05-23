@@ -98,14 +98,6 @@ func generateRootX509CAForTest() (string, error) {
 	return strings.TrimSpace(string(pem.EncodeToMemory(&b))), nil
 }
 
-func generateEncodedRootX509CAForTest() (string, error) {
-	cert, err := generateRootX509CAForTest()
-	if err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString([]byte(cert)), nil
-}
-
 func TestCABundleParser(t *testing.T) {
 
 	cert1, err := generateRootX509CAForTest()
