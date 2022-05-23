@@ -62,11 +62,13 @@ It is important to do a rollover process when updating your CA certificates. Thi
 tcld namespace accepted-client-ca add -n <namespace> --ca-certificate-file <new-ca-pem-filepath>
 
 ```
+
 3. Update temporal clients to use the new certificates and monitor deployements to make sure all old certificate usage is phased out.
 4. Run the `accepted-client-ca remove` command to remove the old certificates.
 ```
 tcld namespace accepted-client-ca remove -n <namespace> --ca-certificate-file <old-ca-pem-filepath>
 ```
+
 Or use the fingerprint of the old ca certificate with the remove command.
 ```
 tcld namespace accepted-client-ca remove -n <namespace> --ca-certificate-fingerprint <old-ca-fingerprint>
