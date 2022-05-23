@@ -27,6 +27,7 @@ func ConfirmPrompt(ctx *cli.Context, msg string) (bool, error) {
 		reader := bufio.NewReader(os.Stdin)
 		var input rune
 		if ctx.Bool(AutoConfirmFlagName) {
+			fmt.Printf("y\n")
 			input = rune('y')
 		} else {
 			var err error

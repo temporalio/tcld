@@ -96,6 +96,10 @@ func (c caCerts) bundle() (string, error) {
 	return base64.StdEncoding.EncodeToString(out), nil
 }
 
+func (c caCerts) remove(i int) caCerts {
+	return append(c[:i], c[i+1:]...)
+}
+
 func addCerts(existingCerts, newCerts caCerts) (caCerts, error) {
 
 	for i := range newCerts {
@@ -111,14 +115,24 @@ func addCerts(existingCerts, newCerts caCerts) (caCerts, error) {
 func removeCerts(existingCerts, removeCerts caCerts) (caCerts, error) {
 
 	for i := range removeCerts {
-		for j := range existingCerts {
-			if removeCerts[i].Fingerprint == existingCerts[j].Fingerprint {
-				existingCerts = append((existingCerts)[:j], (existingCerts)[j+1:]...)
-				break
-			}
-			if j == len(existingCerts)-1 {
-				return nil, fmt.Errorf("certificate with fingerprint '%s' does not exists", removeCerts[i].Fingerprint)
-			}
+		var err error
+		existingCerts, err = removeCertWithFingerprint(existingCerts, removeCerts[i].Fingerprint)
+		if err != nil {
+			return existingCerts, err
+		}
+	}
+	return existingCerts, nil
+}
+
+func removeCertWithFingerprint(existingCerts caCerts, fingerprint string) (caCerts, error) {
+
+	for j := range existingCerts {
+		if fingerprint == existingCerts[j].Fingerprint {
+			existingCerts = append(existingCerts[:j], existingCerts[j+1:]...)
+			break
+		}
+		if j == len(existingCerts)-1 {
+			return nil, fmt.Errorf("certificate with fingerprint '%s' does not exists", fingerprint)
 		}
 	}
 	return existingCerts, nil

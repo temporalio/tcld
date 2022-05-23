@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	caCertificateFlagName     = "ca-certificate"
-	caCertificateFileFlagName = "ca-certificate-file"
-	caCertificateFingerprint  = "ca-certificate-fingerprint"
+	caCertificateFlagName            = "ca-certificate"
+	caCertificateFileFlagName        = "ca-certificate-file"
+	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
 )
 
 var (
@@ -32,9 +32,9 @@ var (
 		Aliases: []string{"f"},
 	}
 	caCertificateFingerprintFlag = &cli.StringFlag{
-		Name:    caCertificateFingerprint,
+		Name:    caCertificateFingerprintFlagName,
 		Usage:   "the fingerprint of to the ca certificate",
-		Aliases: []string{"fingerprint"},
+		Aliases: []string{"fp"},
 	}
 )
 
@@ -124,24 +124,24 @@ func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *ns.Namespac
 	return PrintProto(res)
 }
 
-func (c *NamespaceClient) readAndParseCerts(ctx *cli.Context) (namespace *ns.Namespace, existing, read caCerts, err error) {
-	cert, err := readCACerts(ctx)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	newCerts, err := parseCertificates(cert)
-	if err != nil {
-		return nil, nil, nil, err
-	}
+func (c *NamespaceClient) parseExistingCerts(ctx *cli.Context) (namespace *ns.Namespace, existing caCerts, err error) {
 	n, err := c.getNamespace(ctx.String(NamespaceFlagName))
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 	existingCerts, err := parseCertificates(n.Spec.AcceptedClientCa)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
-	return n, existingCerts, newCerts, nil
+	return n, existingCerts, nil
+}
+
+func readAndParseCACerts(ctx *cli.Context) (read caCerts, err error) {
+	cert, err := readCACerts(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return parseCertificates(cert)
 }
 
 func readCACerts(ctx *cli.Context) (string, error) {
@@ -229,7 +229,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					caCertificateFileFlag,
 				},
 				Action: func(ctx *cli.Context) error {
-					n, existingCerts, newCerts, err := c.readAndParseCerts(ctx)
+					newCerts, err := readAndParseCACerts(ctx)
+					if err != nil {
+						return err
+					}
+					n, existingCerts, err := c.parseExistingCerts(ctx)
 					if err != nil {
 						return err
 					}
@@ -260,13 +264,28 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					caCertificateFingerprintFlag,
 				},
 				Action: func(ctx *cli.Context) error {
-					n, existingCerts, rmCerts, err := c.readAndParseCerts(ctx)
+					n, existingCerts, err := c.parseExistingCerts(ctx)
 					if err != nil {
 						return err
 					}
-					certs, err := removeCerts(existingCerts, rmCerts)
-					if err != nil {
-						return err
+					var certs caCerts
+					if ctx.String(caCertificateFingerprintFlagName) != "" {
+						certs, err = removeCertWithFingerprint(
+							existingCerts,
+							ctx.String(caCertificateFingerprintFlagName),
+						)
+						if err != nil {
+							return err
+						}
+					} else {
+						readCerts, err := readAndParseCACerts(ctx)
+						if err != nil {
+							return err
+						}
+						certs, err = removeCerts(existingCerts, readCerts)
+						if err != nil {
+							return err
+						}
 					}
 					bundle, err := certs.bundle()
 					if err != nil {
