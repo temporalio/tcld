@@ -14,6 +14,30 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+const (
+	caCertificateFlagName            = "ca-certificate"
+	caCertificateFileFlagName        = "ca-certificate-file"
+	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
+)
+
+var (
+	caCertificateFlag = &cli.StringFlag{
+		Name:    caCertificateFlagName,
+		Usage:   "the base64 encoded ca certificate",
+		Aliases: []string{"c"},
+	}
+	caCertificateFileFlag = &cli.PathFlag{
+		Name:    caCertificateFileFlagName,
+		Usage:   "the path to the ca pem file",
+		Aliases: []string{"f"},
+	}
+	caCertificateFingerprintFlag = &cli.StringFlag{
+		Name:    caCertificateFingerprintFlagName,
+		Usage:   "the fingerprint of to the ca certificate",
+		Aliases: []string{"fp"},
+	}
+)
+
 type NamespaceClient struct {
 	client namespaceservice.NamespaceServiceClient
 	ctx    context.Context
@@ -65,17 +89,16 @@ func (c *NamespaceClient) getNamespace(namespace string) (*ns.Namespace, error) 
 	return res.Namespace, nil
 }
 
-func (c *NamespaceClient) updateNamespace(
-	namespace string,
-	requestID string,
-	resourceVersion string,
-	spec *ns.NamespaceSpec,
-) error {
+func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *ns.Namespace) error {
+	resourceVersion := n.ResourceVersion
+	if v := ctx.String(ResourceVersionFlagName); v != "" {
+		resourceVersion = v
+	}
 	res, err := c.client.UpdateNamespace(c.ctx, &namespaceservice.UpdateNamespaceRequest{
-		RequestId:       requestID,
-		Namespace:       namespace,
+		RequestId:       ctx.String(RequestIDFlagName),
+		Namespace:       n.Namespace,
 		ResourceVersion: resourceVersion,
-		Spec:            spec,
+		Spec:            n.Spec,
 	})
 	if err != nil {
 		return err
@@ -83,16 +106,14 @@ func (c *NamespaceClient) updateNamespace(
 	return PrintProto(res)
 }
 
-func (c *NamespaceClient) renameSearchAttribute(
-	namespace string,
-	requestID string,
-	resourceVersion string,
-	existingName string,
-	newName string,
-) error {
+func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *ns.Namespace, existingName string, newName string) error {
+	resourceVersion := n.ResourceVersion
+	if v := ctx.String(ResourceVersionFlagName); v != "" {
+		resourceVersion = v
+	}
 	res, err := c.client.RenameCustomSearchAttribute(c.ctx, &namespaceservice.RenameCustomSearchAttributeRequest{
-		RequestId:                         requestID,
-		Namespace:                         namespace,
+		RequestId:                         ctx.String(RequestIDFlagName),
+		Namespace:                         ctx.String(NamespaceFlagName),
 		ResourceVersion:                   resourceVersion,
 		ExistingCustomSearchAttributeName: existingName,
 		NewCustomSearchAttributeName:      newName,
@@ -101,6 +122,43 @@ func (c *NamespaceClient) renameSearchAttribute(
 		return err
 	}
 	return PrintProto(res)
+}
+
+func (c *NamespaceClient) parseExistingCerts(ctx *cli.Context) (namespace *ns.Namespace, existing caCerts, err error) {
+	n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+	if err != nil {
+		return nil, nil, err
+	}
+	existingCerts, err := parseCertificates(n.Spec.AcceptedClientCa)
+	if err != nil {
+		return nil, nil, err
+	}
+	return n, existingCerts, nil
+}
+
+func readAndParseCACerts(ctx *cli.Context) (read caCerts, err error) {
+	cert, err := readCACerts(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return parseCertificates(cert)
+}
+
+func readCACerts(ctx *cli.Context) (string, error) {
+	cert := ctx.String(caCertificateFlagName)
+	if cert == "" {
+		if ctx.Path(caCertificateFileFlagName) != "" {
+			data, err := ioutil.ReadFile(ctx.Path(caCertificateFileFlagName))
+			if err != nil {
+				return "", err
+			}
+			cert = base64.StdEncoding.EncodeToString(data)
+		}
+	}
+	if cert == "" {
+		return "", fmt.Errorf("no ca certificate provided")
+	}
+	return cert, nil
 }
 
 func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut, error) {
@@ -138,179 +196,221 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				return PrintProto(n)
 			},
 		}, {
-			Name:    "update",
-			Usage:   "update namespace specifications",
-			Aliases: []string{"u"},
+			Name:    "accepted-client-ca",
+			Usage:   "manage client ca certificate used to verify client connections",
+			Aliases: []string{"ca"},
 			Subcommands: []*cli.Command{{
-				Name:    "accepted-client-ca",
-				Usage:   "manage client ca certificate used to verify client connections",
-				Aliases: []string{"ca"},
-				Subcommands: []*cli.Command{{
-					Name:  "set",
-					Usage: "set the accepted client ca certificate",
-					Flags: []cli.Flag{
-						NamespaceFlag,
-						RequestIDFlag,
-						ResourceVersionFlag,
-						&cli.StringFlag{
-							Name:    "ca-certificate",
-							Usage:   "the base64 encoded ca certificate",
-							Aliases: []string{"c"},
-						},
-						&cli.PathFlag{
-							Name:    "ca-certificate-file",
-							Usage:   "the path to the ca pem file",
-							Aliases: []string{"f"},
-						},
-					},
-					Action: func(ctx *cli.Context) error {
-						cert := ctx.String("ca-certificate")
-						if cert == "" {
-							if ctx.Path("ca-certificate-file") != "" {
-								data, err := ioutil.ReadFile(ctx.Path("ca-certificate-file"))
-								if err != nil {
-									return err
-								}
-								cert = base64.StdEncoding.EncodeToString(data)
-							}
-						}
-						if cert == "" {
-							return fmt.Errorf("no ca certificate provided")
-						}
-						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
-						if err != nil {
-							return err
-						}
-						if n.State != ns.STATE_ACTIVE {
-							return fmt.Errorf("namespace not in '%s' state to perform update, current_state='%s'",
-								ns.Namespace_State_name[int32(ns.STATE_ACTIVE)],
-								ns.Namespace_State_name[int32(n.State)],
-							)
-						}
-						if n.Spec.AcceptedClientCa == cert {
-							return errors.New("nothing to change")
-						}
-						n.Spec.AcceptedClientCa = cert
-						resourceVersion := n.ResourceVersion
-						if v := ctx.String(ResourceVersionFlagName); v != "" {
-							resourceVersion = v
-						}
-						return c.updateNamespace(
-							ctx.String(NamespaceFlagName),
-							ctx.String(RequestIDFlagName),
-							resourceVersion,
-							n.Spec,
-						)
-					},
-				}},
+				Name:    "list",
+				Aliases: []string{"l"},
+				Usage:   "list the accepted client ca certificates currently configured for the namespace",
+				Flags: []cli.Flag{
+					NamespaceFlag,
+				},
+				Action: func(ctx *cli.Context) error {
+					n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+					if err != nil {
+						return err
+					}
+					out, err := parseCertificates(n.Spec.AcceptedClientCa)
+					if err != nil {
+						return err
+					}
+					return PrintObj(out)
+				},
 			}, {
-				Name:    "search-attributes",
-				Usage:   "manage search attributes used by namespace",
-				Aliases: []string{"sa"},
-				Subcommands: []*cli.Command{{
-					Name:    "add",
-					Usage:   "add a new namespace custom search attribute",
-					Aliases: []string{"a"},
-					Flags: []cli.Flag{
-						NamespaceFlag,
-						RequestIDFlag,
-						ResourceVersionFlag,
-						&cli.StringSliceFlag{
-							Name:     "search-attribute",
-							Usage:    fmt.Sprintf("flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
-							Aliases:  []string{"sa"},
-							Required: true,
-						},
-					},
-					Action: func(ctx *cli.Context) error {
-						csa, err := toSearchAttributes(ctx.StringSlice("search-attribute"))
-						if err != nil {
-							return err
-						}
-						n, err := c.getNamespace(
-							ctx.String(NamespaceFlagName),
+				Name:    "add",
+				Aliases: []string{"a"},
+				Usage:   "add a new ca accepted client ca certificate",
+				Flags: []cli.Flag{
+					NamespaceFlag,
+					RequestIDFlag,
+					ResourceVersionFlag,
+					caCertificateFlag,
+					caCertificateFileFlag,
+				},
+				Action: func(ctx *cli.Context) error {
+					newCerts, err := readAndParseCACerts(ctx)
+					if err != nil {
+						return err
+					}
+					n, existingCerts, err := c.parseExistingCerts(ctx)
+					if err != nil {
+						return err
+					}
+					existingCerts, err = addCerts(existingCerts, newCerts)
+					if err != nil {
+						return err
+					}
+					bundle, err := existingCerts.bundle()
+					if err != nil {
+						return err
+					}
+					if n.Spec.AcceptedClientCa == bundle {
+						return errors.New("nothing to change")
+					}
+					n.Spec.AcceptedClientCa = bundle
+					return c.updateNamespace(ctx, n)
+				},
+			}, {
+				Name:    "remove",
+				Aliases: []string{"r"},
+				Usage:   "remove existing certificates",
+				Flags: []cli.Flag{
+					NamespaceFlag,
+					RequestIDFlag,
+					ResourceVersionFlag,
+					caCertificateFlag,
+					caCertificateFileFlag,
+					caCertificateFingerprintFlag,
+				},
+				Action: func(ctx *cli.Context) error {
+					n, existingCerts, err := c.parseExistingCerts(ctx)
+					if err != nil {
+						return err
+					}
+					var certs caCerts
+					if ctx.String(caCertificateFingerprintFlagName) != "" {
+						certs, err = removeCertWithFingerprint(
+							existingCerts,
+							ctx.String(caCertificateFingerprintFlagName),
 						)
 						if err != nil {
 							return err
 						}
-						if n.State != ns.STATE_ACTIVE {
-							return fmt.Errorf("namespace not in '%s' state to perform update, current_state='%s'",
-								ns.Namespace_State_name[int32(ns.STATE_ACTIVE)],
-								ns.Namespace_State_name[int32(n.State)])
-						}
-						if n.Spec.SearchAttributes == nil {
-							n.Spec.SearchAttributes = make(map[string]namespace.NamespaceSpec_SearchAttributeType)
-						}
-						for attrName, attrType := range csa {
-							if _, ok := n.Spec.SearchAttributes[attrName]; ok {
-								return fmt.Errorf("attribute with name '%s' already exists", attrName)
-							} else {
-								n.Spec.SearchAttributes[attrName] = attrType
-							}
-						}
-						resourceVersion := n.ResourceVersion
-						if v := ctx.String(ResourceVersionFlagName); v != "" {
-							resourceVersion = v
-						}
-						return c.updateNamespace(
-							ctx.String(NamespaceFlagName),
-							ctx.String(RequestIDFlagName),
-							resourceVersion,
-							n.Spec,
-						)
-					},
-				}, {
-					Name:    "rename",
-					Usage:   "update the name of an existing custom search attribute",
-					Aliases: []string{"rn"},
-					Flags: []cli.Flag{
-						NamespaceFlag,
-						RequestIDFlag,
-						ResourceVersionFlag,
-						&cli.StringFlag{
-							Name:     "existing-name",
-							Usage:    "the name of an existing search attribute",
-							Aliases:  []string{"en"},
-							Required: true,
-						},
-						&cli.StringFlag{
-							Name:     "new-name",
-							Usage:    "the new name for the search attribute",
-							Aliases:  []string{"nn"},
-							Required: true,
-						},
-					},
-					Action: func(ctx *cli.Context) error {
-						n, err := c.getNamespace(
-							ctx.String(NamespaceFlagName),
-						)
+					} else {
+						readCerts, err := readAndParseCACerts(ctx)
 						if err != nil {
 							return err
 						}
-						if n.State != ns.STATE_ACTIVE {
-							return fmt.Errorf("namespace not in '%s' state to perform update, current_state='%s'",
-								ns.Namespace_State_name[int32(ns.STATE_ACTIVE)],
-								ns.Namespace_State_name[int32(n.State)])
+						certs, err = removeCerts(existingCerts, readCerts)
+						if err != nil {
+							return err
 						}
-						if _, exists := n.Spec.SearchAttributes[ctx.String("existing-name")]; !exists {
-							return fmt.Errorf("search attribute with name '%s' does not exist", ctx.String("existing-name"))
-						}
-						if _, exists := n.Spec.SearchAttributes[ctx.String("new-name")]; exists {
-							return fmt.Errorf("search attribute with new name '%s' already exists", ctx.String("new-name"))
-						}
-						resourceVersion := n.ResourceVersion
-						if v := ctx.String(ResourceVersionFlagName); v != "" {
-							resourceVersion = v
-						}
-						return c.renameSearchAttribute(
-							ctx.String(NamespaceFlagName),
-							ctx.String(RequestIDFlagName),
-							resourceVersion,
-							ctx.String("existing-name"),
-							ctx.String("new-name"),
-						)
+					}
+					bundle, err := certs.bundle()
+					if err != nil {
+						return err
+					}
+					if n.Spec.AcceptedClientCa == bundle {
+						return errors.New("nothing to change")
+					}
+					n.Spec.AcceptedClientCa = bundle
+					y, err := ConfirmPrompt(ctx, "removing ca certificates can cause connectivity disruption if there are any clients using certificates that cannot be verified. confirm remove?")
+					if err != nil || !y {
+						return err
+					}
+					return c.updateNamespace(ctx, n)
+				},
+			}, {
+
+				Name:    "set",
+				Aliases: []string{"s"},
+				Usage:   "set the accepted client ca certificate",
+				Flags: []cli.Flag{
+					NamespaceFlag,
+					RequestIDFlag,
+					ResourceVersionFlag,
+					caCertificateFlag,
+					caCertificateFileFlag,
+				},
+				Action: func(ctx *cli.Context) error {
+					cert, err := readCACerts(ctx)
+					if err != nil {
+						return err
+					}
+					n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+					if err != nil {
+						return err
+					}
+					if n.Spec.AcceptedClientCa == cert {
+						return errors.New("nothing to change")
+					}
+					n.Spec.AcceptedClientCa = cert
+					return c.updateNamespace(ctx, n)
+				},
+			}},
+		}, {
+			Name:    "search-attributes",
+			Usage:   "manage search attributes used by namespace",
+			Aliases: []string{"sa"},
+			Subcommands: []*cli.Command{{
+				Name:    "add",
+				Usage:   "add a new namespace custom search attribute",
+				Aliases: []string{"a"},
+				Flags: []cli.Flag{
+					NamespaceFlag,
+					RequestIDFlag,
+					ResourceVersionFlag,
+					&cli.StringSliceFlag{
+						Name:     "search-attribute",
+						Usage:    fmt.Sprintf("flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
+						Aliases:  []string{"sa"},
+						Required: true,
 					},
-				}},
+				},
+				Action: func(ctx *cli.Context) error {
+					csa, err := toSearchAttributes(ctx.StringSlice("search-attribute"))
+					if err != nil {
+						return err
+					}
+					n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+					if err != nil {
+						return err
+					}
+					if n.Spec.SearchAttributes == nil {
+						n.Spec.SearchAttributes = make(map[string]namespace.NamespaceSpec_SearchAttributeType)
+					}
+					for attrName, attrType := range csa {
+						if _, ok := n.Spec.SearchAttributes[attrName]; ok {
+							return fmt.Errorf("attribute with name '%s' already exists", attrName)
+						} else {
+							n.Spec.SearchAttributes[attrName] = attrType
+						}
+					}
+					return c.updateNamespace(ctx, n)
+				},
+			}, {
+				Name:    "rename",
+				Usage:   "update the name of an existing custom search attribute",
+				Aliases: []string{"rn"},
+				Flags: []cli.Flag{
+					NamespaceFlag,
+					RequestIDFlag,
+					ResourceVersionFlag,
+					&cli.StringFlag{
+						Name:     "existing-name",
+						Usage:    "the name of an existing search attribute",
+						Aliases:  []string{"en"},
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "new-name",
+						Usage:    "the new name for the search attribute",
+						Aliases:  []string{"nn"},
+						Required: true,
+					},
+				},
+				Action: func(ctx *cli.Context) error {
+					n, err := c.getNamespace(
+						ctx.String(NamespaceFlagName),
+					)
+					if err != nil {
+						return err
+					}
+					existingName := ctx.String("existing-name")
+					if _, exists := n.Spec.SearchAttributes[existingName]; !exists {
+						return fmt.Errorf("search attribute with name '%s' does not exist", ctx.String("existing-name"))
+					}
+					newName := ctx.String("new-name")
+					if _, exists := n.Spec.SearchAttributes[newName]; exists {
+						return fmt.Errorf("search attribute with new name '%s' already exists", ctx.String("new-name"))
+					}
+					y, err := ConfirmPrompt(ctx, "renaming search attribute may cause failures if any worker is still using the old name of the search-attributes. confirm rename?")
+					if err != nil || !y {
+						return err
+					}
+					return c.renameSearchAttribute(ctx, n, existingName, newName)
+				},
 			}},
 		}},
 	}}, nil
