@@ -49,35 +49,39 @@ tcld namespace get -n <namespace>
 
 ### Update the CA certificate:
 ```
-tcld namespace update accepted-client-ca set -n <namespace> --ca-certificate-file <ca-pem-filepath>
+tcld namespace accepted-client-ca set -n <namespace> --ca-certificate-file <ca-pem-filepath>
 ```
 > :warning: If the update removes a certificate, any clients (tctl/workers) still using the removed certificate will fail to connect to the namespace after the update completes.
 
 #### Performing a certificate rollover:
 It is important to do a rollover process when updating your CA certificates. This allows your namespace to serve both CA certificates for a period of time until traffic to your old certificate is gone. To do this follow these steps:
-1. Create a single file that contains both your old and new CA certificate PEM blocks. You can do this by simply concatenating each PEM block on a new line.
+
+1. Generate the new certificates.
+2. Run the `accepted-client-ca add` command with the new CA certificates.
 ```
------BEGIN CERTIFICATE-----
-... old CA cert ...
------END CERTIFICATE-----
------BEGIN CERTIFICATE-----
-... new CA cert ...
------END CERTIFICATE-----
+tcld namespace accepted-client-ca add -n <namespace> --ca-certificate-file <new-ca-pem-filepath>
 ```
-2. Run the `update accepted-client-ca set` command with the new CA certificate bundle file.
-3. Monitor traffic to your old certificate until it is gone.
-4. Create a new CA certificate bundle file with the old certificate removed.
-5. Run the `update accepted-client-ca set` command again with the new file.
+
+3. Update temporal clients to use the new certificates and monitor deployements to make sure all old certificate usage is phased out.
+4. Run the `accepted-client-ca remove` command to remove the old certificates.
+```
+tcld namespace accepted-client-ca remove -n <namespace> --ca-certificate-file <old-ca-pem-filepath>
+```
+
+Or use the fingerprint of the old ca certificate with the remove command.
+```
+tcld namespace accepted-client-ca remove -n <namespace> --ca-certificate-fingerprint <old-ca-fingerprint>
+```
 
 ### Add new search attributes:
 ```
-tcld namespace update search-attributes add -n <namespace> --sa "<attribute-name>=<search-attribute-type>" --sa "<attribute-name>=<search-attribute-type>"
+tcld namespace search-attributes add -n <namespace> --sa "<attribute-name>=<search-attribute-type>" --sa "<attribute-name>=<search-attribute-type>"
 ```
 Supported search attribute types: `Keyword Text Int Double Datetime Bool`
 
 ### Rename existing search attribute:
 ```
-tcld namespace update search-attributes rename -n <namespace> --existing-name <existing-attribute-name> --new-name <new-attribute-name>
+tcld namespace search-attributes rename -n <namespace> --existing-name <existing-attribute-name> --new-name <new-attribute-name>
 ```
 > :warning: Any workflows that are using the old search attribute name will fail after the update.
 
