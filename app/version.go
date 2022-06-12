@@ -15,7 +15,7 @@ var (
 func NewVersionCommand() (CommandOut, error) {
 	return CommandOut{Command: &cli.Command{
 		Name:    "version",
-		Usage:   "version information",
+		Usage:   "Version information",
 		Aliases: []string{"v"},
 		Action: func(c *cli.Context) error {
 			return PrintObj(&struct {

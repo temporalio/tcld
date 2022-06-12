@@ -23,17 +23,17 @@ const (
 var (
 	caCertificateFlag = &cli.StringFlag{
 		Name:    caCertificateFlagName,
-		Usage:   "the base64 encoded ca certificate",
+		Usage:   "The base64 encoded ca certificate",
 		Aliases: []string{"c"},
 	}
 	caCertificateFileFlag = &cli.PathFlag{
 		Name:    caCertificateFileFlagName,
-		Usage:   "the path to the ca pem file",
+		Usage:   "The path to the ca pem file",
 		Aliases: []string{"f"},
 	}
 	caCertificateFingerprintFlag = &cli.StringFlag{
 		Name:    caCertificateFingerprintFlagName,
-		Usage:   "the fingerprint of to the ca certificate",
+		Usage:   "The fingerprint of to the ca certificate",
 		Aliases: []string{"fp"},
 	}
 )
@@ -167,7 +167,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 	return CommandOut{Command: &cli.Command{
 		Name:    "namespace",
 		Aliases: []string{"n"},
-		Usage:   "namespace operations",
+		Usage:   "Namespace operations",
 		Before: func(ctx *cli.Context) error {
 			var err error
 			c, err = getNamespaceClientFn(ctx)
@@ -175,7 +175,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 		Subcommands: []*cli.Command{{
 			Name:    "list",
-			Usage:   "list all known namespaces",
+			Usage:   "List all known namespaces",
 			Aliases: []string{"l"},
 			Flags:   []cli.Flag{},
 			Action: func(ctx *cli.Context) error {
@@ -183,7 +183,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			},
 		}, {
 			Name:    "get",
-			Usage:   "get namespace information",
+			Usage:   "Get namespace information",
 			Aliases: []string{"g"},
 			Flags: []cli.Flag{
 				NamespaceFlag,
@@ -197,12 +197,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			},
 		}, {
 			Name:    "accepted-client-ca",
-			Usage:   "manage client ca certificate used to verify client connections",
+			Usage:   "Manage client ca certificate used to verify client connections",
 			Aliases: []string{"ca"},
 			Subcommands: []*cli.Command{{
 				Name:    "list",
 				Aliases: []string{"l"},
-				Usage:   "list the accepted client ca certificates currently configured for the namespace",
+				Usage:   "List the accepted client ca certificates currently configured for the namespace",
 				Flags: []cli.Flag{
 					NamespaceFlag,
 				},
@@ -220,7 +220,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			}, {
 				Name:    "add",
 				Aliases: []string{"a"},
-				Usage:   "add a new ca accepted client ca certificate",
+				Usage:   "Add a new ca accepted client ca certificate",
 				Flags: []cli.Flag{
 					NamespaceFlag,
 					RequestIDFlag,
@@ -254,7 +254,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			}, {
 				Name:    "remove",
 				Aliases: []string{"r"},
-				Usage:   "remove existing certificates",
+				Usage:   "Remove existing certificates",
 				Flags: []cli.Flag{
 					NamespaceFlag,
 					RequestIDFlag,
@@ -305,7 +305,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 				Name:    "set",
 				Aliases: []string{"s"},
-				Usage:   "set the accepted client ca certificate",
+				Usage:   "Set the accepted client ca certificate",
 				Flags: []cli.Flag{
 					NamespaceFlag,
 					RequestIDFlag,
@@ -331,11 +331,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			}},
 		}, {
 			Name:    "search-attributes",
-			Usage:   "manage search attributes used by namespace",
+			Usage:   "Manage search attributes used by namespace",
 			Aliases: []string{"sa"},
 			Subcommands: []*cli.Command{{
 				Name:    "add",
-				Usage:   "add a new namespace custom search attribute",
+				Usage:   "Add a new namespace custom search attribute",
 				Aliases: []string{"a"},
 				Flags: []cli.Flag{
 					NamespaceFlag,
@@ -343,7 +343,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					ResourceVersionFlag,
 					&cli.StringSliceFlag{
 						Name:     "search-attribute",
-						Usage:    fmt.Sprintf("flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
+						Usage:    fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
 						Aliases:  []string{"sa"},
 						Required: true,
 					},
@@ -371,7 +371,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 			}, {
 				Name:    "rename",
-				Usage:   "update the name of an existing custom search attribute",
+				Usage:   "Update the name of an existing custom search attribute",
 				Aliases: []string{"rn"},
 				Flags: []cli.Flag{
 					NamespaceFlag,
@@ -379,13 +379,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					ResourceVersionFlag,
 					&cli.StringFlag{
 						Name:     "existing-name",
-						Usage:    "the name of an existing search attribute",
+						Usage:    "The name of an existing search attribute",
 						Aliases:  []string{"en"},
 						Required: true,
 					},
 					&cli.StringFlag{
 						Name:     "new-name",
-						Usage:    "the new name for the search attribute",
+						Usage:    "The new name for the search attribute",
 						Aliases:  []string{"nn"},
 						Required: true,
 					},
