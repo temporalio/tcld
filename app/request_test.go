@@ -5,8 +5,10 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/gogo/protobuf/types"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
+	"github.com/temporalio/tcld/api/temporalcloudapi/request/v1"
 	"github.com/temporalio/tcld/api/temporalcloudapi/requestservice/v1"
 	"github.com/temporalio/tcld/api/temporalcloudapi/requestservicemock/v1"
 	"github.com/urfave/cli/v2"
@@ -36,6 +38,9 @@ func (s *RequestTestSuite) SetupTest() {
 	s.cliApp = &cli.App{
 		Name:     "test",
 		Commands: []*cli.Command{out.Command},
+		Flags: []cli.Flag{
+			RequestTimeoutFlag,
+		},
 	}
 }
 
@@ -48,7 +53,6 @@ func (s *RequestTestSuite) RunCmd(args ...string) error {
 }
 
 func (s *RequestTestSuite) TestGet() {
-
 	s.Error(s.RunCmd("request", "get"))
 	s.Error(s.RunCmd("request", "get", "--namespace", "ns1"))
 
@@ -61,6 +65,75 @@ func (s *RequestTestSuite) TestGet() {
 	s.mockService.EXPECT().GetRequestStatus(gomock.Any(), &requestservice.GetRequestStatusRequest{
 		Namespace: "ns1",
 		RequestId: "req1",
-	}).Return(&requestservice.GetRequestStatusResponse{}, nil).Times(1)
+	}).Return(&requestservice.GetRequestStatusResponse{
+		RequestStatus: &request.RequestStatus{
+			State:         request.STATE_PENDING,
+			CheckDuration: &types.Duration{Seconds: 1},
+		},
+	}, nil).Times(1)
 	s.NoError(s.RunCmd("request", "get", "--namespace", "ns1", "--request-id", "req1"))
+}
+
+func (s *RequestTestSuite) TestWait() {
+
+	s.Error(s.RunCmd("request", "wait"))
+	s.Error(s.RunCmd("request", "wait", "--namespace", "ns1"))
+
+	// an error is returned by the api
+	s.mockService.EXPECT().GetRequestStatus(gomock.Any(), &requestservice.GetRequestStatusRequest{
+		Namespace: "ns1",
+		RequestId: "req1",
+	}).Return(nil, errors.New("some error")).Times(1)
+	s.Error(s.RunCmd("request", "wait", "--namespace", "ns1", "--request-id", "req1"))
+
+	// call repetatively till a fulfilled is received
+	s.mockService.EXPECT().GetRequestStatus(gomock.Any(), &requestservice.GetRequestStatusRequest{
+		Namespace: "ns1",
+		RequestId: "req1",
+	}).Return(&requestservice.GetRequestStatusResponse{
+		RequestStatus: &request.RequestStatus{
+			State:         request.STATE_PENDING,
+			CheckDuration: &types.Duration{Seconds: 1},
+		},
+	}, nil).Times(2)
+	s.mockService.EXPECT().GetRequestStatus(gomock.Any(), &requestservice.GetRequestStatusRequest{
+		Namespace: "ns1",
+		RequestId: "req1",
+	}).Return(&requestservice.GetRequestStatusResponse{
+		RequestStatus: &request.RequestStatus{
+			State:         request.STATE_IN_PROGRESS,
+			CheckDuration: &types.Duration{Seconds: 1},
+		},
+	}, nil).Times(2)
+	s.mockService.EXPECT().GetRequestStatus(gomock.Any(), &requestservice.GetRequestStatusRequest{
+		Namespace: "ns1",
+		RequestId: "req1",
+	}).Return(&requestservice.GetRequestStatusResponse{
+		RequestStatus: &request.RequestStatus{
+			State:         request.STATE_FULFILLED,
+			CheckDuration: &types.Duration{Seconds: 1},
+		},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("request", "wait", "--namespace", "ns1", "--request-id", "req1"))
+
+	// call repetatively till a state changes to failed is received
+	s.mockService.EXPECT().GetRequestStatus(gomock.Any(), &requestservice.GetRequestStatusRequest{
+		Namespace: "ns1",
+		RequestId: "req1",
+	}).Return(&requestservice.GetRequestStatusResponse{
+		RequestStatus: &request.RequestStatus{
+			State:         request.STATE_PENDING,
+			CheckDuration: &types.Duration{Seconds: 1},
+		},
+	}, nil).Times(2)
+	s.mockService.EXPECT().GetRequestStatus(gomock.Any(), &requestservice.GetRequestStatusRequest{
+		Namespace: "ns1",
+		RequestId: "req1",
+	}).Return(&requestservice.GetRequestStatusResponse{
+		RequestStatus: &request.RequestStatus{
+			State:         request.STATE_FAILED,
+			CheckDuration: &types.Duration{Seconds: 1},
+		},
+	}, nil).Times(1)
+	s.Error(s.RunCmd("request", "wait", "--namespace", "ns1", "--request-id", "req1"))
 }
