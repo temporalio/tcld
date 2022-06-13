@@ -154,7 +154,7 @@ func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, cl
 func NewLoginCommand(c *LoginClient) (CommandOut, error) {
 	return CommandOut{Command: &cli.Command{
 		Name:    "login",
-		Usage:   "login as user",
+		Usage:   "Login as user",
 		Aliases: []string{"l"},
 		Before: func(ctx *cli.Context) error {
 			// attempt to create and or load the login config at the beginning
