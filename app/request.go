@@ -64,7 +64,7 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 	var c *RequestClient
 	return CommandOut{Command: &cli.Command{
 		Name:    "request",
-		Usage:   "manage asynchronous requests",
+		Usage:   "Manage asynchronous requests",
 		Aliases: []string{"r"},
 		Before: func(ctx *cli.Context) error {
 			var err error
@@ -74,13 +74,13 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 		},
 		Subcommands: []*cli.Command{{
 			Name:    "get",
-			Usage:   "get the request status",
+			Usage:   "Get the request status",
 			Aliases: []string{"g"},
 			Flags: []cli.Flag{
 				NamespaceFlag,
 				&cli.StringFlag{
 					Name:     "request-id",
-					Usage:    "the request-id of the asynchronous request",
+					Usage:    "The request-id of the asynchronous request",
 					Aliases:  []string{"r"},
 					Required: true,
 				},

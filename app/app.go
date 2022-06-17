@@ -18,7 +18,7 @@ type CommandOut struct {
 func NewApp(params AppParams) (*cli.App, error) {
 	app := &cli.App{
 		Name:  "tcld",
-		Usage: "temporal cloud cli",
+		Usage: "Temporal Cloud cli",
 		Flags: []cli.Flag{
 			ServerFlag,
 			ConfigDirFlag,

@@ -28,25 +28,25 @@ var (
 	ConfigDirFlag = &cli.PathFlag{
 		Name:     ConfigDirFlagName,
 		Value:    filepath.Join(os.Getenv("HOME"), ".config", "tcld"),
-		Usage:    "the config directory to use",
+		Usage:    "The config directory to use",
 		Hidden:   true,
 		Required: false,
 	}
 	NamespaceFlag = &cli.StringFlag{
 		Name:     NamespaceFlagName,
-		Usage:    "the namespace hosted on temporal cloud",
+		Usage:    "The namespace hosted on temporal cloud",
 		Aliases:  []string{"n"},
 		EnvVars:  []string{"TEMPORAL_CLOUD_NAMESPACE"},
 		Required: true,
 	}
 	RequestIDFlag = &cli.StringFlag{
 		Name:    RequestIDFlagName,
-		Usage:   "the request-id to use for the asynchronous operation, if not set the server will assign one (optional)",
+		Usage:   "The request-id to use for the asynchronous operation, if not set the server will assign one (optional)",
 		Aliases: []string{"r"},
 	}
 	ResourceVersionFlag = &cli.StringFlag{
 		Name:    ResourceVersionFlagName,
-		Usage:   "the resource-version (etag) to update from, if not set the cli will use the latest (optional)",
+		Usage:   "The resource-version (etag) to update from, if not set the cli will use the latest (optional)",
 		Aliases: []string{"v"},
 	}
 )
