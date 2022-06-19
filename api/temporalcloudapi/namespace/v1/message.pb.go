@@ -249,7 +249,7 @@ type Namespace struct {
 	Spec *NamespaceSpec `protobuf:"bytes,3,opt,name=spec,proto3" json:"spec,omitempty"`
 	// the current state of the namespace
 	State Namespace_State `protobuf:"varint,4,opt,name=state,proto3,enum=api.namespace.v1.Namespace_State" json:"state,omitempty"`
-	// the id of the request thats registering/updating the namespace, if any
+	// the id of the request that is creating/updating the namespace, if any
 	RequestId string `protobuf:"bytes,5,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	// the date and time when the namespace was last modified
 	LastModifiedTime *types.Timestamp `protobuf:"bytes,6,opt,name=last_modified_time,json=lastModifiedTime,proto3" json:"last_modified_time,omitempty"`
