@@ -14,6 +14,7 @@ import (
 	"github.com/temporalio/tcld/api/temporalcloudapi/namespaceservice/v1"
 	"github.com/temporalio/tcld/api/temporalcloudapi/namespaceservicemock/v1"
 	"github.com/temporalio/tcld/api/temporalcloudapi/request/v1"
+	"github.com/temporalio/tcld/api/temporalcloudapi/requestservicemock/v1"
 	"github.com/urfave/cli/v2"
 )
 
@@ -23,27 +24,40 @@ func TestNamespace(t *testing.T) {
 
 type NamespaceTestSuite struct {
 	suite.Suite
-	cliApp      *cli.App
-	mockCtrl    *gomock.Controller
-	mockService *namespaceservicemock.MockNamespaceServiceClient
+	cliApp         *cli.App
+	mockCtrl       *gomock.Controller
+	mockService    *namespaceservicemock.MockNamespaceServiceClient
+	mockReqService *requestservicemock.MockRequestServiceClient
 }
 
 func (s *NamespaceTestSuite) SetupTest() {
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = namespaceservicemock.NewMockNamespaceServiceClient(s.mockCtrl)
-	out, err := NewNamespaceCommand(func(ctx *cli.Context) (*NamespaceClient, error) {
+	s.mockReqService = requestservicemock.NewMockRequestServiceClient(s.mockCtrl)
+
+	getNamespaceClientFn := func(ctx *cli.Context) (*NamespaceClient, error) {
 		return &NamespaceClient{
 			ctx:    context.TODO(),
 			client: s.mockService,
 		}, nil
-	})
+	}
+	getRequestClientFn := func(ctx *cli.Context) (*RequestClient, error) {
+		return &RequestClient{
+			ctx:    context.TODO(),
+			client: s.mockReqService,
+		}, nil
+	}
+
+	out, err := NewNamespaceCommand(getNamespaceClientFn, getRequestClientFn)
 	s.Require().NoError(err)
 	AutoConfirmFlag.Value = true
+	AsyncRequestFlag.Value = true
 	s.cliApp = &cli.App{
 		Name:     "test",
 		Commands: []*cli.Command{out.Command},
 		Flags: []cli.Flag{
 			AutoConfirmFlag,
+			AsyncRequestFlag,
 		},
 	}
 }
