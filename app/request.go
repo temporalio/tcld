@@ -19,13 +19,15 @@ const (
 var (
 	RequestTimeoutFlag = &cli.DurationFlag{
 		Name:    RequestTimeoutFlagName,
-		Usage:   "Time to wair for asynchronous requests to finish",
+		Usage:   "Time to wait for asynchronous requests to finish",
 		EnvVars: []string{"REQUEST_TIMEOUT"},
+		Aliases: []string{"rt"},
 		Value:   time.Hour,
 	}
 	AsyncRequestFlag = &cli.BoolFlag{
 		Name:    AsyncRequestFlagName,
 		Usage:   "Do not block on asynchronous requests",
+		Aliases: []string{"a"},
 		EnvVars: []string{"ASYNC_REQUEST"},
 	}
 )
@@ -125,7 +127,7 @@ loop:
 	for {
 		select {
 		case <-timer.C:
-			return fmt.Errorf("timed out waiting for request, namespace=%s, requestID=%s, timeout=%s",
+			return fmt.Errorf("timed out waiting for request to complete, namespace=%s, requestID=%s, timeout=%s",
 				ctx.String(NamespaceFlagName),
 				requestID,
 				ctx.Duration(RequestTimeoutFlagName),
@@ -146,8 +148,8 @@ loop:
 				return fmt.Errorf("request was cancelled: %s", status.FailureReason)
 			}
 			if operation != "" {
-				fmt.Fprintf(writer, "waiting for %s operation to finish, current state: %s\n",
-					operation, request.RequestStatus_State_name[int32(status.State)])
+				fmt.Fprintf(writer, "waiting for %s operation (requestId='%s') to finish, current state: %s\n",
+					operation, requestID, request.RequestStatus_State_name[int32(status.State)])
 			} else {
 				fmt.Fprintf(writer, "waiting for request with '%s' id to finish, current state: %s\n",
 					requestID, request.RequestStatus_State_name[int32(status.State)])
@@ -168,8 +170,11 @@ func (c *RequestClient) HandleRequestStatus(
 	operation string,
 	status *request.RequestStatus,
 ) error {
-	if ctx.Bool(AsyncRequestFlagName) {
-		return PrintProto(status)
+	if err := PrintProto(status); err != nil {
+		return err
 	}
-	return c.waitOnRequest(ctx, operation, status.RequestId)
+	if !ctx.Bool(AsyncRequestFlagName) {
+		return c.waitOnRequest(ctx, operation, status.RequestId)
+	}
+	return nil
 }
