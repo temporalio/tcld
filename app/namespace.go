@@ -16,22 +16,24 @@ import (
 )
 
 const (
-	caCertificateFlagName            = "ca-certificate"
-	caCertificateFileFlagName        = "ca-certificate-file"
+	CaCertificateFlagName     = "ca-certificate"
+	CaCertificateFileFlagName = "ca-certificate-file"
+
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
 )
 
 var (
-	caCertificateFlag = &cli.StringFlag{
-		Name:    caCertificateFlagName,
+	CaCertificateFlag = &cli.StringFlag{
+		Name:    CaCertificateFlagName,
 		Usage:   "The base64 encoded ca certificate",
 		Aliases: []string{"c"},
 	}
-	caCertificateFileFlag = &cli.PathFlag{
-		Name:    caCertificateFileFlagName,
+	CaCertificateFileFlag = &cli.PathFlag{
+		Name:    CaCertificateFileFlagName,
 		Usage:   "The path to the ca pem file",
 		Aliases: []string{"f"},
 	}
+
 	caCertificateFingerprintFlag = &cli.StringFlag{
 		Name:    caCertificateFingerprintFlagName,
 		Usage:   "The fingerprint of to the ca certificate",
@@ -146,18 +148,19 @@ func (c *NamespaceClient) parseExistingCerts(ctx *cli.Context) (namespace *ns.Na
 }
 
 func readAndParseCACerts(ctx *cli.Context) (read caCerts, err error) {
-	cert, err := readCACerts(ctx)
+	cert, err := ReadCACerts(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return parseCertificates(cert)
 }
 
-func readCACerts(ctx *cli.Context) (string, error) {
-	cert := ctx.String(caCertificateFlagName)
+// ReadCACerts reads ca certs based on cli flags.
+func ReadCACerts(ctx *cli.Context) (string, error) {
+	cert := ctx.String(CaCertificateFlagName)
 	if cert == "" {
-		if ctx.Path(caCertificateFileFlagName) != "" {
-			data, err := ioutil.ReadFile(ctx.Path(caCertificateFileFlagName))
+		if ctx.Path(CaCertificateFileFlagName) != "" {
+			data, err := ioutil.ReadFile(ctx.Path(CaCertificateFileFlagName))
 			if err != nil {
 				return "", err
 			}
@@ -242,8 +245,8 @@ func NewNamespaceCommand(
 					NamespaceFlag,
 					RequestIDFlag,
 					ResourceVersionFlag,
-					caCertificateFlag,
-					caCertificateFileFlag,
+					CaCertificateFlag,
+					CaCertificateFileFlag,
 				},
 				Action: func(ctx *cli.Context) error {
 					newCerts, err := readAndParseCACerts(ctx)
@@ -280,8 +283,8 @@ func NewNamespaceCommand(
 					NamespaceFlag,
 					RequestIDFlag,
 					ResourceVersionFlag,
-					caCertificateFlag,
-					caCertificateFileFlag,
+					CaCertificateFlag,
+					CaCertificateFileFlag,
 					caCertificateFingerprintFlag,
 				},
 				Action: func(ctx *cli.Context) error {
@@ -335,11 +338,11 @@ func NewNamespaceCommand(
 					NamespaceFlag,
 					RequestIDFlag,
 					ResourceVersionFlag,
-					caCertificateFlag,
-					caCertificateFileFlag,
+					CaCertificateFlag,
+					CaCertificateFileFlag,
 				},
 				Action: func(ctx *cli.Context) error {
-					cert, err := readCACerts(ctx)
+					cert, err := ReadCACerts(ctx)
 					if err != nil {
 						return err
 					}
