@@ -36,6 +36,26 @@ func (m *MockNamespaceServiceClient) EXPECT() *MockNamespaceServiceClientMockRec
 	return m.recorder
 }
 
+// CreateNamespace mocks base method.
+func (m *MockNamespaceServiceClient) CreateNamespace(ctx context.Context, in *namespaceservice.CreateNamespaceRequest, opts ...grpc.CallOption) (*namespaceservice.CreateNamespaceResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateNamespace", varargs...)
+	ret0, _ := ret[0].(*namespaceservice.CreateNamespaceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateNamespace indicates an expected call of CreateNamespace.
+func (mr *MockNamespaceServiceClientMockRecorder) CreateNamespace(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNamespace", reflect.TypeOf((*MockNamespaceServiceClient)(nil).CreateNamespace), varargs...)
+}
+
 // GetNamespace mocks base method.
 func (m *MockNamespaceServiceClient) GetNamespace(ctx context.Context, in *namespaceservice.GetNamespaceRequest, opts ...grpc.CallOption) (*namespaceservice.GetNamespaceResponse, error) {
 	m.ctrl.T.Helper()
@@ -74,26 +94,6 @@ func (mr *MockNamespaceServiceClientMockRecorder) ListNamespaces(ctx, in interfa
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNamespaces", reflect.TypeOf((*MockNamespaceServiceClient)(nil).ListNamespaces), varargs...)
-}
-
-// RegisterNamespace mocks base method.
-func (m *MockNamespaceServiceClient) RegisterNamespace(ctx context.Context, in *namespaceservice.RegisterNamespaceRequest, opts ...grpc.CallOption) (*namespaceservice.RegisterNamespaceResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "RegisterNamespace", varargs...)
-	ret0, _ := ret[0].(*namespaceservice.RegisterNamespaceResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// RegisterNamespace indicates an expected call of RegisterNamespace.
-func (mr *MockNamespaceServiceClientMockRecorder) RegisterNamespace(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterNamespace", reflect.TypeOf((*MockNamespaceServiceClient)(nil).RegisterNamespace), varargs...)
 }
 
 // RenameCustomSearchAttribute mocks base method.
@@ -159,6 +159,21 @@ func (m *MockNamespaceServiceServer) EXPECT() *MockNamespaceServiceServerMockRec
 	return m.recorder
 }
 
+// CreateNamespace mocks base method.
+func (m *MockNamespaceServiceServer) CreateNamespace(arg0 context.Context, arg1 *namespaceservice.CreateNamespaceRequest) (*namespaceservice.CreateNamespaceResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateNamespace", arg0, arg1)
+	ret0, _ := ret[0].(*namespaceservice.CreateNamespaceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateNamespace indicates an expected call of CreateNamespace.
+func (mr *MockNamespaceServiceServerMockRecorder) CreateNamespace(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNamespace", reflect.TypeOf((*MockNamespaceServiceServer)(nil).CreateNamespace), arg0, arg1)
+}
+
 // GetNamespace mocks base method.
 func (m *MockNamespaceServiceServer) GetNamespace(arg0 context.Context, arg1 *namespaceservice.GetNamespaceRequest) (*namespaceservice.GetNamespaceResponse, error) {
 	m.ctrl.T.Helper()
@@ -187,21 +202,6 @@ func (m *MockNamespaceServiceServer) ListNamespaces(arg0 context.Context, arg1 *
 func (mr *MockNamespaceServiceServerMockRecorder) ListNamespaces(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNamespaces", reflect.TypeOf((*MockNamespaceServiceServer)(nil).ListNamespaces), arg0, arg1)
-}
-
-// RegisterNamespace mocks base method.
-func (m *MockNamespaceServiceServer) RegisterNamespace(arg0 context.Context, arg1 *namespaceservice.RegisterNamespaceRequest) (*namespaceservice.RegisterNamespaceResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RegisterNamespace", arg0, arg1)
-	ret0, _ := ret[0].(*namespaceservice.RegisterNamespaceResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// RegisterNamespace indicates an expected call of RegisterNamespace.
-func (mr *MockNamespaceServiceServerMockRecorder) RegisterNamespace(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterNamespace", reflect.TypeOf((*MockNamespaceServiceServer)(nil).RegisterNamespace), arg0, arg1)
 }
 
 // RenameCustomSearchAttribute mocks base method.
