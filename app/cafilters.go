@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/temporalio/tcld/api/temporalcloudapi/namespace/v1"
 )
 
 type certificateFilter struct {
@@ -16,13 +18,9 @@ type certificateFilter struct {
 
 type certificateFilters []certificateFilter
 
-func parseCertificateFilters(jsonFilters string) (certificateFilters, error) {
-	if len(strings.TrimSpace(jsonFilters)) == 0 {
-		return certificateFilters{}, nil
-	}
-
+func parseCertificateFilters(filterJson []byte) (certificateFilters, error) {
 	var filters certificateFilters
-	if err := json.Unmarshal([]byte(jsonFilters), &filters); err != nil {
+	if err := json.Unmarshal(filterJson, &filters); err != nil {
 		return certificateFilters{}, err
 	}
 
@@ -53,6 +51,21 @@ func (filters certificateFilters) validate() error {
 	}
 
 	return nil
+}
+
+func (filters certificateFilters) toSpec() []*namespace.CertificateFilterSpec {
+	var results []*namespace.CertificateFilterSpec
+
+	for _, filter := range filters {
+		results = append(results, &namespace.CertificateFilterSpec{
+			CommonName:             filter.CommonName,
+			Organization:           filter.Organization,
+			OrganizationalUnit:     filter.OrganizationalUnit,
+			SubjectAlternativeName: filter.SubjectAlternativeName,
+		})
+	}
+
+	return results
 }
 
 func isFieldSet(fieldValue string) bool {
