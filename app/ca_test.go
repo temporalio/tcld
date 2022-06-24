@@ -156,6 +156,10 @@ func TestCABundleParser(t *testing.T) {
 	out, err = parseCertificates(encodedBundle)
 	assert.Error(t, err)
 
+	// ignore trailing whitespaces
+	encodedBundle = base64.StdEncoding.EncodeToString([]byte(cert1 + "\n" + cert2 + "\n "))
+	out, err = parseCertificates(encodedBundle)
+	assert.NoError(t, err)
 }
 
 func TestCAAddAndRemove(t *testing.T) {
