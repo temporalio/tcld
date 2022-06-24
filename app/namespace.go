@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/temporalio/tcld/api/temporalcloudapi/namespace/v1"
-	ns "github.com/temporalio/tcld/api/temporalcloudapi/namespace/v1"
 	"github.com/temporalio/tcld/api/temporalcloudapi/namespaceservice/v1"
 	"github.com/urfave/cli/v2"
 )
@@ -77,7 +76,7 @@ func (c *NamespaceClient) listNamespaces() error {
 	}
 }
 
-func (c *NamespaceClient) getNamespace(namespace string) (*ns.Namespace, error) {
+func (c *NamespaceClient) getNamespace(namespace string) (*namespace.Namespace, error) {
 	res, err := c.client.GetNamespace(c.ctx, &namespaceservice.GetNamespaceRequest{
 		Namespace: namespace,
 	})
@@ -91,7 +90,7 @@ func (c *NamespaceClient) getNamespace(namespace string) (*ns.Namespace, error) 
 	return res.Namespace, nil
 }
 
-func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *ns.Namespace) error {
+func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespace) error {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
 		resourceVersion = v
@@ -108,7 +107,7 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *ns.Namespace) err
 	return PrintProto(res)
 }
 
-func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *ns.Namespace, existingName string, newName string) error {
+func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *namespace.Namespace, existingName string, newName string) error {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
 		resourceVersion = v
@@ -126,7 +125,7 @@ func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *ns.Namespac
 	return PrintProto(res)
 }
 
-func (c *NamespaceClient) parseExistingCerts(ctx *cli.Context) (namespace *ns.Namespace, existing caCerts, err error) {
+func (c *NamespaceClient) parseExistingCerts(ctx *cli.Context) (namespace *namespace.Namespace, existing caCerts, err error) {
 	n, err := c.getNamespace(ctx.String(NamespaceFlagName))
 	if err != nil {
 		return nil, nil, err
@@ -495,21 +494,21 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 func getSearchAttributeTypes() []string {
 	validTypes := []string{}
-	for i := 1; i < len(ns.NamespaceSpec_SearchAttributeType_name); i++ {
-		validTypes = append(validTypes, ns.NamespaceSpec_SearchAttributeType_name[int32(i)])
+	for i := 1; i < len(namespace.NamespaceSpec_SearchAttributeType_name); i++ {
+		validTypes = append(validTypes, namespace.NamespaceSpec_SearchAttributeType_name[int32(i)])
 	}
 	return validTypes
 }
 
-func toSearchAttributes(keyValues []string) (map[string]ns.NamespaceSpec_SearchAttributeType, error) {
-	res := map[string]ns.NamespaceSpec_SearchAttributeType{}
+func toSearchAttributes(keyValues []string) (map[string]namespace.NamespaceSpec_SearchAttributeType, error) {
+	res := map[string]namespace.NamespaceSpec_SearchAttributeType{}
 	for _, kv := range keyValues {
 		parts := strings.Split(kv, "=")
 		if len(parts) != 2 {
 			return nil, fmt.Errorf("invalid search attribute \"%s\" must be of format: \"name=type\"", kv)
 		}
 
-		val, ok := ns.NamespaceSpec_SearchAttributeType_value[parts[1]]
+		val, ok := namespace.NamespaceSpec_SearchAttributeType_value[parts[1]]
 		if !ok {
 			return nil, fmt.Errorf(
 				"search attribute type \"%s\" does not exist, acceptable types are: %s",
@@ -518,7 +517,7 @@ func toSearchAttributes(keyValues []string) (map[string]ns.NamespaceSpec_SearchA
 			)
 		}
 
-		res[parts[0]] = ns.NamespaceSpec_SearchAttributeType(val)
+		res[parts[0]] = namespace.NamespaceSpec_SearchAttributeType(val)
 	}
 	return res, nil
 }
