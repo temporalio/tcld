@@ -398,12 +398,16 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								}
 
 								fmt.Println("certificate filters before change:")
-								PrintObj(fromSpec(n.Spec.CertificateFilters))
+								if err := PrintObj(fromSpec(n.Spec.CertificateFilters)); err != nil {
+									return err
+								}
 
 								n.Spec.CertificateFilters = filters.toSpec()
 
 								fmt.Println("certificate filters after change:")
-								PrintObj(fromSpec(n.Spec.CertificateFilters))
+								if err := PrintObj(fromSpec(n.Spec.CertificateFilters)); err != nil {
+									return err
+								}
 
 								return c.updateNamespace(ctx, n)
 							},
@@ -429,7 +433,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								}
 
 								filters := fromSpec(n.Spec.CertificateFilters)
-								PrintObj(filters)
+								if err := PrintObj(filters); err != nil {
+									return err
+								}
 
 								jsonString, err := FormatJson(filters)
 								if err != nil {
