@@ -106,7 +106,6 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 		return err
 	}
 
-	fmt.Println("update request information:")
 	return PrintProto(res)
 }
 
@@ -409,7 +408,16 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 
-								return c.updateNamespace(ctx, n)
+								confirmed, err := ConfirmPrompt(ctx, "confirm certificate filter update operation?")
+								if err != nil {
+									return err
+								}
+
+								if confirmed {
+									return c.updateNamespace(ctx, n)
+								}
+
+								return nil
 							},
 						},
 						{
@@ -472,8 +480,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 
-								n.Spec.CertificateFilters = nil
-								return c.updateNamespace(ctx, n)
+								confirmed, err := ConfirmPrompt(ctx, "This will allow any client certificate that chains up to a configured CA in the bundle to connect to the namespace. confirm clear operation?")
+								if err != nil {
+									return err
+								}
+
+								if confirmed {
+									n.Spec.CertificateFilters = nil
+									return c.updateNamespace(ctx, n)
+								}
+
+								return nil
 							},
 						},
 					},
