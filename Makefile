@@ -19,7 +19,7 @@ TEST_ARG ?= -race -timeout=5m -cover -count=1
 tcld:
 	@go build -ldflags "$(LINKER_FLAGS)" -o tcld ./cmd/tcld/*.go
 
-bins: tcld
+bins: clean tcld
 
 test:
 	@$(foreach TEST_DIR,$(TEST_DIRS),\

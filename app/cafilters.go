@@ -16,29 +16,31 @@ type certificateFilter struct {
 	SubjectAlternativeName string `json:"subjectAlternativeName"`
 }
 
-type certificateFilters []certificateFilter
+type certificateFiltersConfig struct {
+	Filters []certificateFilter `json:"filters,omitempty"`
+}
 
-func parseCertificateFilters(filterJson []byte) (certificateFilters, error) {
-	var filters certificateFilters
-	if err := json.Unmarshal(filterJson, &filters); err != nil {
-		return certificateFilters{}, err
+func parseCertificateFilters(configJson []byte) (certificateFiltersConfig, error) {
+	if len(configJson) == 0 {
+		return certificateFiltersConfig{}, nil
+	}
+
+	var filters certificateFiltersConfig
+	if err := json.Unmarshal(configJson, &filters); err != nil {
+		return certificateFiltersConfig{}, err
 	}
 
 	if err := filters.validate(); err != nil {
-		return certificateFilters{}, err
+		return certificateFiltersConfig{}, err
 	}
 
 	return filters, nil
 }
 
-func (filters certificateFilters) validate() error {
-	if len(filters) == 0 {
-		return nil
-	}
-
+func (config certificateFiltersConfig) validate() error {
 	seenSet := make(map[certificateFilter]struct{})
 
-	for _, filter := range filters {
+	for _, filter := range config.Filters {
 		if !isFieldSet(filter.CommonName) && !isFieldSet(filter.Organization) && !isFieldSet(filter.OrganizationalUnit) && !isFieldSet(filter.SubjectAlternativeName) {
 			return errors.New("certificate filter must have at least one field set")
 		}
@@ -53,10 +55,10 @@ func (filters certificateFilters) validate() error {
 	return nil
 }
 
-func (filters certificateFilters) toSpec() []*namespace.CertificateFilterSpec {
+func (config certificateFiltersConfig) toSpec() []*namespace.CertificateFilterSpec {
 	var results []*namespace.CertificateFilterSpec
 
-	for _, filter := range filters {
+	for _, filter := range config.Filters {
 		results = append(results, &namespace.CertificateFilterSpec{
 			CommonName:             filter.CommonName,
 			Organization:           filter.Organization,
@@ -66,6 +68,21 @@ func (filters certificateFilters) toSpec() []*namespace.CertificateFilterSpec {
 	}
 
 	return results
+}
+
+func fromSpec(filters []*namespace.CertificateFilterSpec) certificateFiltersConfig {
+	var result certificateFiltersConfig
+
+	for _, filter := range filters {
+		result.Filters = append(result.Filters, certificateFilter{
+			CommonName:             filter.CommonName,
+			Organization:           filter.Organization,
+			OrganizationalUnit:     filter.OrganizationalUnit,
+			SubjectAlternativeName: filter.SubjectAlternativeName,
+		})
+	}
+
+	return result
 }
 
 func isFieldSet(fieldValue string) bool {
