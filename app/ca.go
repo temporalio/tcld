@@ -42,7 +42,7 @@ func parsePEM(bundle []byte) (certBlocks [][]byte, pemBlocks []byte, err error) 
 	}
 	// If p is greater than 0, then this means that there was a portion of the certificate that
 	// is/was malformed.
-	if len(p) > 0 {
+	if len(p) > 0 && strings.TrimSpace(string(p)) != "" {
 		return nil, nil, fmt.Errorf("failed to parse one or more certificates, remainingBytesLen=%d", len(p))
 	}
 	return certBlocks, pemBlocks, nil
