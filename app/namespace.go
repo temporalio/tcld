@@ -468,7 +468,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								}
 
 								fmt.Println("certificate filters to be cleared:")
-								PrintObj(fromSpec(n.Spec.CertificateFilters))
+								if err := PrintObj(fromSpec(n.Spec.CertificateFilters)); err != nil {
+									return err
+								}
 
 								n.Spec.CertificateFilters = nil
 								return c.updateNamespace(ctx, n)
