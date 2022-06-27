@@ -429,8 +429,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								}
 
 								filters := fromSpec(n.Spec.CertificateFilters)
-
-								fmt.Println("certificate filters: ")
 								PrintObj(filters)
 
 								jsonString, err := FormatJson(filters)
@@ -439,13 +437,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								}
 
 								exportFile := ctx.Path("certificate-filter-file")
-
 								if exportFile != "" {
 									if err := ioutil.WriteFile(exportFile, []byte(jsonString), 0644); err != nil {
 										return err
 									}
-
-									fmt.Printf("certificate filters written to: %s\r\n", exportFile)
 								}
 
 								return nil
