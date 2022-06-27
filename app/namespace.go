@@ -105,6 +105,8 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("update request information:")
 	return PrintProto(res)
 }
 
@@ -165,7 +167,6 @@ func ReadCACerts(ctx *cli.Context) (string, error) {
 }
 
 func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut, error) {
-
 	var c *NamespaceClient
 	return CommandOut{
 		Command: &cli.Command{
@@ -396,12 +397,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 
-								fmt.Println("Certificate Filters before change:")
+								fmt.Println("certificate filters before change:")
 								PrintObj(fromSpec(n.Spec.CertificateFilters))
 
 								n.Spec.CertificateFilters = filters.toSpec()
 
-								fmt.Println("Certificate Filters after change:")
+								fmt.Println("certificate filters after change:")
 								PrintObj(fromSpec(n.Spec.CertificateFilters))
 
 								return c.updateNamespace(ctx, n)
@@ -409,7 +410,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						},
 						{
 							Name:    "export",
-							Usage:   "Exports the existing certificate filters on the namespace",
+							Usage:   "Exports existing certificate filters on the namespace",
 							Aliases: []string{"exp"},
 							Flags: []cli.Flag{
 								NamespaceFlag,
@@ -429,7 +430,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 								filters := fromSpec(n.Spec.CertificateFilters)
 
-								fmt.Println("Configured Certificate Filters: ")
+								fmt.Println("certificate filters: ")
 								PrintObj(filters)
 
 								jsonString, err := FormatJson(filters)
@@ -437,10 +438,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 
-								if ctx.Path("certificate-filter-file") != "" {
-									if err := ioutil.WriteFile(ctx.Path("certificate-filter-file"), []byte(jsonString), 0644); err != nil {
+								exportFile := ctx.Path("certificate-filter-file")
+
+								if exportFile != "" {
+									if err := ioutil.WriteFile(exportFile, []byte(jsonString), 0644); err != nil {
 										return err
 									}
+
+									fmt.Printf("certificate filters written to: %s\r\n", exportFile)
 								}
 
 								return nil
@@ -448,7 +453,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						},
 						{
 							Name:    "clear",
-							Usage:   "Clears all certificate filters on the namespace. This will allow any certificate that changes to a configured CA in the Bundle to connect to the namespace",
+							Usage:   "Clears all certificate filters on the namespace. Note that this will allow *any* client certificate that chains up to a configured CA in the bundle to connect to the namespace",
 							Aliases: []string{"c"},
 							Flags: []cli.Flag{
 								NamespaceFlag,
@@ -461,7 +466,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 
-								fmt.Println("Certificate Filters prior to clearing them:")
+								fmt.Println("certificate filters to be cleared:")
 								PrintObj(fromSpec(n.Spec.CertificateFilters))
 
 								n.Spec.CertificateFilters = nil
@@ -509,6 +514,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 										n.Spec.SearchAttributes[attrName] = attrType
 									}
 								}
+
 								return c.updateNamespace(ctx, n)
 							},
 						},
