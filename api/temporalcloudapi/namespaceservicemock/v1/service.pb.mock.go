@@ -76,6 +76,26 @@ func (mr *MockNamespaceServiceClientMockRecorder) GetNamespace(ctx, in interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespace", reflect.TypeOf((*MockNamespaceServiceClient)(nil).GetNamespace), varargs...)
 }
 
+// GetNamespaces mocks base method.
+func (m *MockNamespaceServiceClient) GetNamespaces(ctx context.Context, in *namespaceservice.GetNamespacesRequest, opts ...grpc.CallOption) (*namespaceservice.GetNamespacesResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetNamespaces", varargs...)
+	ret0, _ := ret[0].(*namespaceservice.GetNamespacesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNamespaces indicates an expected call of GetNamespaces.
+func (mr *MockNamespaceServiceClientMockRecorder) GetNamespaces(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaces", reflect.TypeOf((*MockNamespaceServiceClient)(nil).GetNamespaces), varargs...)
+}
+
 // ListNamespaces mocks base method.
 func (m *MockNamespaceServiceClient) ListNamespaces(ctx context.Context, in *namespaceservice.ListNamespacesRequest, opts ...grpc.CallOption) (*namespaceservice.ListNamespacesResponse, error) {
 	m.ctrl.T.Helper()
@@ -187,6 +207,21 @@ func (m *MockNamespaceServiceServer) GetNamespace(arg0 context.Context, arg1 *na
 func (mr *MockNamespaceServiceServerMockRecorder) GetNamespace(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespace", reflect.TypeOf((*MockNamespaceServiceServer)(nil).GetNamespace), arg0, arg1)
+}
+
+// GetNamespaces mocks base method.
+func (m *MockNamespaceServiceServer) GetNamespaces(arg0 context.Context, arg1 *namespaceservice.GetNamespacesRequest) (*namespaceservice.GetNamespacesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNamespaces", arg0, arg1)
+	ret0, _ := ret[0].(*namespaceservice.GetNamespacesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNamespaces indicates an expected call of GetNamespaces.
+func (mr *MockNamespaceServiceServerMockRecorder) GetNamespaces(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaces", reflect.TypeOf((*MockNamespaceServiceServer)(nil).GetNamespaces), arg0, arg1)
 }
 
 // ListNamespaces mocks base method.

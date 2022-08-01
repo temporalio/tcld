@@ -525,7 +525,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 								if n.Spec.SearchAttributes == nil {
-									n.Spec.SearchAttributes = make(map[string]namespace.NamespaceSpec_SearchAttributeType)
+									n.Spec.SearchAttributes = make(map[string]namespace.SearchAttributeType)
 								}
 								for attrName, attrType := range csa {
 									if _, ok := n.Spec.SearchAttributes[attrName]; ok {
@@ -590,21 +590,21 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 func getSearchAttributeTypes() []string {
 	validTypes := []string{}
-	for i := 1; i < len(namespace.NamespaceSpec_SearchAttributeType_name); i++ {
-		validTypes = append(validTypes, namespace.NamespaceSpec_SearchAttributeType_name[int32(i)])
+	for i := 1; i < len(namespace.SearchAttributeType_name); i++ {
+		validTypes = append(validTypes, namespace.SearchAttributeType_name[int32(i)])
 	}
 	return validTypes
 }
 
-func toSearchAttributes(keyValues []string) (map[string]namespace.NamespaceSpec_SearchAttributeType, error) {
-	res := map[string]namespace.NamespaceSpec_SearchAttributeType{}
+func toSearchAttributes(keyValues []string) (map[string]namespace.SearchAttributeType, error) {
+	res := map[string]namespace.SearchAttributeType{}
 	for _, kv := range keyValues {
 		parts := strings.Split(kv, "=")
 		if len(parts) != 2 {
 			return nil, fmt.Errorf("invalid search attribute \"%s\" must be of format: \"name=type\"", kv)
 		}
 
-		val, ok := namespace.NamespaceSpec_SearchAttributeType_value[parts[1]]
+		val, ok := namespace.SearchAttributeType_value[parts[1]]
 		if !ok {
 			return nil, fmt.Errorf(
 				"search attribute type \"%s\" does not exist, acceptable types are: %s",
@@ -613,7 +613,7 @@ func toSearchAttributes(keyValues []string) (map[string]namespace.NamespaceSpec_
 			)
 		}
 
-		res[parts[0]] = namespace.NamespaceSpec_SearchAttributeType(val)
+		res[parts[0]] = namespace.SearchAttributeType(val)
 	}
 	return res, nil
 }

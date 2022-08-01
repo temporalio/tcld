@@ -12,8 +12,9 @@ import (
 	strings "strings"
 
 	proto "github.com/gogo/protobuf/proto"
+	v11 "github.com/temporalio/tcld/api/temporalcloudapi/auth/v1"
 	v1 "github.com/temporalio/tcld/api/temporalcloudapi/namespace/v1"
-	v11 "github.com/temporalio/tcld/api/temporalcloudapi/request/v1"
+	v12 "github.com/temporalio/tcld/api/temporalcloudapi/request/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -28,12 +29,15 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type CreateNamespaceRequest struct {
-	// the namespace in namespace_name.account_id format
+	// the namespace
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	// the namespace specification
 	Spec *v1.NamespaceSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
 	// the request id to use for this operation - optional
 	RequestId string `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	// once the namespace is created, assigns namespace roles to these users; it is guaranteed that the user sending
+	// this request will be assigned to admin role of the namespace
+	UserNamespacePermissions []*v11.UserNamespacePermissions `protobuf:"bytes,4,rep,name=user_namespace_permissions,json=userNamespacePermissions,proto3" json:"user_namespace_permissions,omitempty"`
 }
 
 func (m *CreateNamespaceRequest) Reset()      { *m = CreateNamespaceRequest{} }
@@ -89,9 +93,16 @@ func (m *CreateNamespaceRequest) GetRequestId() string {
 	return ""
 }
 
+func (m *CreateNamespaceRequest) GetUserNamespacePermissions() []*v11.UserNamespacePermissions {
+	if m != nil {
+		return m.UserNamespacePermissions
+	}
+	return nil
+}
+
 type CreateNamespaceResponse struct {
 	// the request status of the provisioning operation
-	RequestStatus *v11.RequestStatus `protobuf:"bytes,1,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
+	RequestStatus *v12.RequestStatus `protobuf:"bytes,1,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
 }
 
 func (m *CreateNamespaceResponse) Reset()      { *m = CreateNamespaceResponse{} }
@@ -126,7 +137,7 @@ func (m *CreateNamespaceResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_CreateNamespaceResponse proto.InternalMessageInfo
 
-func (m *CreateNamespaceResponse) GetRequestStatus() *v11.RequestStatus {
+func (m *CreateNamespaceResponse) GetRequestStatus() *v12.RequestStatus {
 	if m != nil {
 		return m.RequestStatus
 	}
@@ -239,15 +250,121 @@ func (m *ListNamespacesResponse) GetNextPageToken() string {
 	return ""
 }
 
+type GetNamespacesRequest struct {
+	// the requested size of the page to retrive, defaults to 30, max 90
+	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// the page token
+	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+}
+
+func (m *GetNamespacesRequest) Reset()      { *m = GetNamespacesRequest{} }
+func (*GetNamespacesRequest) ProtoMessage() {}
+func (*GetNamespacesRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{4}
+}
+func (m *GetNamespacesRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetNamespacesRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetNamespacesRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetNamespacesRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetNamespacesRequest.Merge(m, src)
+}
+func (m *GetNamespacesRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetNamespacesRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetNamespacesRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetNamespacesRequest proto.InternalMessageInfo
+
+func (m *GetNamespacesRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *GetNamespacesRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
+type GetNamespacesResponse struct {
+	// the list of namespaces
+	Namespaces []*v1.Namespace `protobuf:"bytes,1,rep,name=namespaces,proto3" json:"namespaces,omitempty"`
+	// the next page's token
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (m *GetNamespacesResponse) Reset()      { *m = GetNamespacesResponse{} }
+func (*GetNamespacesResponse) ProtoMessage() {}
+func (*GetNamespacesResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{5}
+}
+func (m *GetNamespacesResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetNamespacesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetNamespacesResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetNamespacesResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetNamespacesResponse.Merge(m, src)
+}
+func (m *GetNamespacesResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetNamespacesResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetNamespacesResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetNamespacesResponse proto.InternalMessageInfo
+
+func (m *GetNamespacesResponse) GetNamespaces() []*v1.Namespace {
+	if m != nil {
+		return m.Namespaces
+	}
+	return nil
+}
+
+func (m *GetNamespacesResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
+
 type GetNamespaceRequest struct {
-	// the namespace in namespace_name.account_id format
+	// the namespace
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
 }
 
 func (m *GetNamespaceRequest) Reset()      { *m = GetNamespaceRequest{} }
 func (*GetNamespaceRequest) ProtoMessage() {}
 func (*GetNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{4}
+	return fileDescriptor_667e39c23eb47b7c, []int{6}
 }
 func (m *GetNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -291,7 +408,7 @@ type GetNamespaceResponse struct {
 func (m *GetNamespaceResponse) Reset()      { *m = GetNamespaceResponse{} }
 func (*GetNamespaceResponse) ProtoMessage() {}
 func (*GetNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{5}
+	return fileDescriptor_667e39c23eb47b7c, []int{7}
 }
 func (m *GetNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -328,7 +445,7 @@ func (m *GetNamespaceResponse) GetNamespace() *v1.Namespace {
 }
 
 type UpdateNamespaceRequest struct {
-	// the namespace in namespace_name.account_id format
+	// the namespace
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	// the new namespace specification
 	Spec *v1.NamespaceSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
@@ -342,7 +459,7 @@ type UpdateNamespaceRequest struct {
 func (m *UpdateNamespaceRequest) Reset()      { *m = UpdateNamespaceRequest{} }
 func (*UpdateNamespaceRequest) ProtoMessage() {}
 func (*UpdateNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{6}
+	return fileDescriptor_667e39c23eb47b7c, []int{8}
 }
 func (m *UpdateNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -401,13 +518,13 @@ func (m *UpdateNamespaceRequest) GetRequestId() string {
 
 type UpdateNamespaceResponse struct {
 	// the request status of the update operation
-	RequestStatus *v11.RequestStatus `protobuf:"bytes,1,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
+	RequestStatus *v12.RequestStatus `protobuf:"bytes,1,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
 }
 
 func (m *UpdateNamespaceResponse) Reset()      { *m = UpdateNamespaceResponse{} }
 func (*UpdateNamespaceResponse) ProtoMessage() {}
 func (*UpdateNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{7}
+	return fileDescriptor_667e39c23eb47b7c, []int{9}
 }
 func (m *UpdateNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -436,7 +553,7 @@ func (m *UpdateNamespaceResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_UpdateNamespaceResponse proto.InternalMessageInfo
 
-func (m *UpdateNamespaceResponse) GetRequestStatus() *v11.RequestStatus {
+func (m *UpdateNamespaceResponse) GetRequestStatus() *v12.RequestStatus {
 	if m != nil {
 		return m.RequestStatus
 	}
@@ -444,7 +561,7 @@ func (m *UpdateNamespaceResponse) GetRequestStatus() *v11.RequestStatus {
 }
 
 type RenameCustomSearchAttributeRequest struct {
-	// the namespace in namespace_name.account_id format
+	// the namespace
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	// the existing name of the custom search attribute to be renamed
 	ExistingCustomSearchAttributeName string `protobuf:"bytes,2,opt,name=existing_custom_search_attribute_name,json=existingCustomSearchAttributeName,proto3" json:"existing_custom_search_attribute_name,omitempty"`
@@ -460,7 +577,7 @@ type RenameCustomSearchAttributeRequest struct {
 func (m *RenameCustomSearchAttributeRequest) Reset()      { *m = RenameCustomSearchAttributeRequest{} }
 func (*RenameCustomSearchAttributeRequest) ProtoMessage() {}
 func (*RenameCustomSearchAttributeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{8}
+	return fileDescriptor_667e39c23eb47b7c, []int{10}
 }
 func (m *RenameCustomSearchAttributeRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -526,13 +643,13 @@ func (m *RenameCustomSearchAttributeRequest) GetRequestId() string {
 
 type RenameCustomSearchAttributeResponse struct {
 	// the request status of the rename operation
-	RequestStatus *v11.RequestStatus `protobuf:"bytes,1,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
+	RequestStatus *v12.RequestStatus `protobuf:"bytes,1,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
 }
 
 func (m *RenameCustomSearchAttributeResponse) Reset()      { *m = RenameCustomSearchAttributeResponse{} }
 func (*RenameCustomSearchAttributeResponse) ProtoMessage() {}
 func (*RenameCustomSearchAttributeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{9}
+	return fileDescriptor_667e39c23eb47b7c, []int{11}
 }
 func (m *RenameCustomSearchAttributeResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -561,7 +678,7 @@ func (m *RenameCustomSearchAttributeResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_RenameCustomSearchAttributeResponse proto.InternalMessageInfo
 
-func (m *RenameCustomSearchAttributeResponse) GetRequestStatus() *v11.RequestStatus {
+func (m *RenameCustomSearchAttributeResponse) GetRequestStatus() *v12.RequestStatus {
 	if m != nil {
 		return m.RequestStatus
 	}
@@ -573,6 +690,8 @@ func init() {
 	proto.RegisterType((*CreateNamespaceResponse)(nil), "api.namespaceservice.v1.CreateNamespaceResponse")
 	proto.RegisterType((*ListNamespacesRequest)(nil), "api.namespaceservice.v1.ListNamespacesRequest")
 	proto.RegisterType((*ListNamespacesResponse)(nil), "api.namespaceservice.v1.ListNamespacesResponse")
+	proto.RegisterType((*GetNamespacesRequest)(nil), "api.namespaceservice.v1.GetNamespacesRequest")
+	proto.RegisterType((*GetNamespacesResponse)(nil), "api.namespaceservice.v1.GetNamespacesResponse")
 	proto.RegisterType((*GetNamespaceRequest)(nil), "api.namespaceservice.v1.GetNamespaceRequest")
 	proto.RegisterType((*GetNamespaceResponse)(nil), "api.namespaceservice.v1.GetNamespaceResponse")
 	proto.RegisterType((*UpdateNamespaceRequest)(nil), "api.namespaceservice.v1.UpdateNamespaceRequest")
@@ -586,43 +705,47 @@ func init() {
 }
 
 var fileDescriptor_667e39c23eb47b7c = []byte{
-	// 561 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x94, 0xbd, 0x6e, 0xd3, 0x50,
-	0x14, 0xc7, 0x7d, 0xdb, 0x14, 0x91, 0x13, 0x95, 0x22, 0x03, 0x69, 0xd4, 0xa6, 0x97, 0x60, 0x04,
-	0x0a, 0x8b, 0xa3, 0x24, 0x2c, 0x88, 0x09, 0x8a, 0x40, 0x48, 0x08, 0x15, 0x07, 0x18, 0x58, 0x8c,
-	0xeb, 0x1c, 0x85, 0x4b, 0x1b, 0xdb, 0xdc, 0x7b, 0xed, 0x56, 0x9d, 0x98, 0x99, 0x78, 0x0a, 0xc4,
-	0x0b, 0xf0, 0x0e, 0x8c, 0x19, 0x3b, 0x12, 0x67, 0x61, 0xec, 0x23, 0x20, 0x7f, 0xa5, 0x89, 0x93,
-	0x46, 0x45, 0xaa, 0x3a, 0xfa, 0x7f, 0xcf, 0xf9, 0x9d, 0xff, 0xf9, 0x90, 0x41, 0xb7, 0x3c, 0xd6,
-	0x70, 0xac, 0x3e, 0x0a, 0xcf, 0xb2, 0x51, 0x20, 0x0f, 0x98, 0x8d, 0x8d, 0xa0, 0xd9, 0xe0, 0xf8,
-	0xc5, 0x47, 0x21, 0x4d, 0x8e, 0xc2, 0x73, 0x1d, 0x81, 0xba, 0xc7, 0x5d, 0xe9, 0xaa, 0xeb, 0x96,
-	0xc7, 0xf4, 0x7c, 0xbc, 0x1e, 0x34, 0x37, 0xe8, 0x14, 0x28, 0x22, 0xf4, 0x51, 0x08, 0xab, 0x97,
-	0x26, 0x6e, 0x54, 0xa3, 0xf7, 0x14, 0x3a, 0xf3, 0xaa, 0x7d, 0x23, 0x50, 0xde, 0xe6, 0x68, 0x49,
-	0x7c, 0x9d, 0x21, 0x8c, 0x24, 0x56, 0xad, 0x42, 0x71, 0x8c, 0xad, 0x90, 0x1a, 0xa9, 0x17, 0x8d,
-	0x53, 0x41, 0x6d, 0x43, 0x41, 0x78, 0x68, 0x57, 0x96, 0x6a, 0xa4, 0x5e, 0x6a, 0xdd, 0xd6, 0xa7,
-	0xec, 0xe9, 0x41, 0x53, 0x1f, 0xf3, 0x3a, 0x1e, 0xda, 0x46, 0x1c, 0xac, 0x6e, 0x01, 0x64, 0xed,
-	0xb1, 0x6e, 0x65, 0x39, 0x61, 0xa6, 0xca, 0xcb, 0xae, 0x66, 0xc2, 0xfa, 0x8c, 0x97, 0x64, 0x08,
-	0xea, 0x33, 0xb8, 0x96, 0x65, 0x0a, 0x69, 0x49, 0x5f, 0xc4, 0x8e, 0x4a, 0xad, 0xad, 0xb8, 0x70,
-	0xfa, 0x14, 0x95, 0x4d, 0xdd, 0x77, 0xe2, 0x20, 0x63, 0x95, 0x4f, 0x7e, 0x6a, 0x1d, 0xb8, 0xf5,
-	0x8a, 0x09, 0x39, 0xc6, 0x8b, 0xac, 0xd7, 0x4d, 0x28, 0x7a, 0x56, 0x0f, 0x4d, 0xc1, 0x8e, 0x92,
-	0x5e, 0x57, 0x8c, 0xab, 0x91, 0xd0, 0x61, 0x47, 0x18, 0xb9, 0x8e, 0x1f, 0xa5, 0xbb, 0x87, 0x4e,
-	0xdc, 0x70, 0xd1, 0x88, 0xc3, 0xdf, 0x46, 0x82, 0xf6, 0x11, 0xca, 0x79, 0x68, 0x6a, 0x9a, 0x02,
-	0x9c, 0x6e, 0xac, 0x42, 0x6a, 0xcb, 0xf5, 0xa2, 0x31, 0xa1, 0xa8, 0xf7, 0x61, 0xcd, 0xc1, 0x43,
-	0x69, 0xce, 0xd0, 0x57, 0x23, 0x79, 0x67, 0x5c, 0xa1, 0x0d, 0x37, 0x5e, 0xa0, 0xfc, 0xbf, 0x05,
-	0x69, 0x6f, 0xe0, 0xe6, 0x74, 0x52, 0x6a, 0xea, 0x51, 0x3e, 0xab, 0xd4, 0xda, 0x5c, 0xb0, 0xbd,
-	0x49, 0xe4, 0x2f, 0x02, 0xe5, 0x77, 0x5e, 0xf7, 0x92, 0x8e, 0xe5, 0x01, 0x5c, 0xe7, 0x28, 0x5c,
-	0x9f, 0xdb, 0x68, 0x06, 0xc8, 0x05, 0x73, 0x9d, 0xf4, 0x64, 0xd6, 0x32, 0xfd, 0x7d, 0x22, 0xe7,
-	0xee, 0xaa, 0x30, 0xe7, 0xae, 0x66, 0x6c, 0x5f, 0xe8, 0x5d, 0xfd, 0x58, 0x02, 0xcd, 0xc0, 0xa8,
-	0xa3, 0x6d, 0x5f, 0x48, 0xb7, 0xdf, 0x41, 0x8b, 0xdb, 0x9f, 0x9e, 0x48, 0xc9, 0xd9, 0xae, 0x2f,
-	0xcf, 0x39, 0xa4, 0x1d, 0xb8, 0x87, 0x87, 0x4c, 0x48, 0xe6, 0xf4, 0x4c, 0x3b, 0xc6, 0x98, 0x22,
-	0xe6, 0x98, 0x56, 0x06, 0x32, 0xa3, 0xe8, 0xf4, 0x46, 0xee, 0x64, 0xc1, 0x73, 0x4b, 0x46, 0x9d,
-	0xaa, 0xcf, 0xa1, 0xe6, 0xe0, 0xc1, 0x62, 0x58, 0x32, 0xd1, 0xaa, 0x83, 0x07, 0x67, 0x73, 0xe6,
-	0x6d, 0xa2, 0x70, 0x9e, 0x4d, 0xac, 0xe4, 0x37, 0xb1, 0x07, 0x77, 0x17, 0xce, 0xe9, 0x22, 0xb7,
-	0xf2, 0xf4, 0xf3, 0x60, 0x48, 0x95, 0xe3, 0x21, 0x55, 0x4e, 0x86, 0x94, 0x7c, 0x0d, 0x29, 0xf9,
-	0x19, 0x52, 0xf2, 0x3b, 0xa4, 0x64, 0x10, 0x52, 0xf2, 0x27, 0xa4, 0xe4, 0x6f, 0x48, 0x95, 0x93,
-	0x90, 0x92, 0xef, 0x23, 0xaa, 0x0c, 0x46, 0x54, 0x39, 0x1e, 0x51, 0xe5, 0xc3, 0x43, 0xd9, 0xf7,
-	0xf8, 0xbe, 0x6e, 0xef, 0xbb, 0x7e, 0xb7, 0x71, 0xc6, 0x4f, 0xfa, 0x71, 0x5e, 0xdb, 0xbd, 0x12,
-	0xff, 0x4e, 0xdb, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0xdb, 0x84, 0x11, 0x50, 0xd7, 0x05, 0x00,
-	0x00,
+	// 637 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x55, 0xcf, 0x4e, 0x14, 0x4f,
+	0x10, 0xde, 0x86, 0xe5, 0x97, 0xdf, 0xd6, 0x06, 0x31, 0xa3, 0xc0, 0xca, 0x9f, 0x76, 0x1d, 0x83,
+	0x59, 0x2f, 0xb3, 0x61, 0xf1, 0x62, 0x38, 0x29, 0x46, 0x63, 0x62, 0x0c, 0xce, 0x8a, 0x07, 0x2f,
+	0xe3, 0x30, 0x5b, 0x81, 0x16, 0x76, 0x66, 0xec, 0xee, 0x59, 0x08, 0xf1, 0xe0, 0x23, 0xf8, 0x14,
+	0xc6, 0x17, 0xf0, 0x1d, 0x3c, 0x72, 0xe4, 0x28, 0xc3, 0xc5, 0x9b, 0x3c, 0x82, 0xe9, 0x9e, 0x3f,
+	0x2c, 0x33, 0x80, 0xc4, 0x10, 0x8f, 0x5b, 0x55, 0xfd, 0x7d, 0x5f, 0x7d, 0x55, 0xb5, 0x03, 0x96,
+	0x1b, 0xb2, 0xb6, 0xef, 0xf6, 0x51, 0x84, 0xae, 0x87, 0x02, 0xf9, 0x80, 0x79, 0xd8, 0x1e, 0x2c,
+	0xb6, 0x39, 0x7e, 0x88, 0x50, 0x48, 0x87, 0xa3, 0x08, 0x03, 0x5f, 0xa0, 0x15, 0xf2, 0x40, 0x06,
+	0xc6, 0xb4, 0x1b, 0x32, 0xab, 0x58, 0x6f, 0x0d, 0x16, 0x67, 0x6e, 0x29, 0x20, 0x37, 0x92, 0x9b,
+	0xea, 0x71, 0x1f, 0x85, 0x70, 0x37, 0xd2, 0x37, 0x33, 0xf4, 0x14, 0x47, 0x39, 0x3f, 0xa7, 0xf2,
+	0x29, 0x5f, 0x29, 0x6b, 0xfe, 0x22, 0x30, 0xb5, 0xc2, 0xd1, 0x95, 0xf8, 0x32, 0x83, 0xb0, 0x93,
+	0x5a, 0x63, 0x0e, 0x6a, 0x39, 0x6c, 0x83, 0x34, 0x49, 0xab, 0x66, 0x9f, 0x04, 0x8c, 0x25, 0xa8,
+	0x8a, 0x10, 0xbd, 0xc6, 0x48, 0x93, 0xb4, 0xea, 0x9d, 0xdb, 0xd6, 0x29, 0xe5, 0xd6, 0x60, 0xd1,
+	0xca, 0xf1, 0xba, 0x21, 0x7a, 0xb6, 0x2e, 0x36, 0xe6, 0x01, 0xb2, 0xce, 0x59, 0xaf, 0x31, 0x9a,
+	0x60, 0xa6, 0x91, 0xe7, 0x3d, 0xc3, 0x83, 0x99, 0x48, 0x20, 0x77, 0x72, 0x1c, 0x27, 0x44, 0xde,
+	0x67, 0x42, 0xb0, 0xc0, 0x17, 0x8d, 0x6a, 0x73, 0xb4, 0x55, 0xef, 0x2c, 0x68, 0x26, 0x65, 0x85,
+	0x22, 0x59, 0x13, 0xc8, 0x73, 0xa2, 0xd5, 0x93, 0x62, 0xbb, 0x11, 0x9d, 0x93, 0x31, 0x1d, 0x98,
+	0x2e, 0x35, 0x9c, 0x0c, 0xc1, 0x78, 0x02, 0xd7, 0x32, 0x79, 0x42, 0xba, 0x32, 0x12, 0xba, 0xed,
+	0x7a, 0x67, 0x5e, 0x73, 0xa6, 0x29, 0x45, 0x9b, 0x5a, 0xd4, 0xd5, 0x45, 0xf6, 0x38, 0x1f, 0xfe,
+	0x69, 0x76, 0x61, 0xf2, 0x05, 0x13, 0x32, 0x87, 0x17, 0x99, 0xa1, 0xb3, 0x50, 0x0b, 0xdd, 0x0d,
+	0x74, 0x04, 0xdb, 0x4b, 0x0c, 0x1d, 0xb3, 0xff, 0x57, 0x81, 0x2e, 0xdb, 0x43, 0x65, 0x8d, 0x4e,
+	0xca, 0x60, 0x0b, 0x7d, 0xed, 0x6a, 0xcd, 0xd6, 0xe5, 0xaf, 0x55, 0xc0, 0x7c, 0x07, 0x53, 0x45,
+	0xd0, 0x54, 0x34, 0x05, 0x38, 0xd9, 0x98, 0x06, 0x69, 0x8e, 0xb6, 0x6a, 0xf6, 0x50, 0xc4, 0xb8,
+	0x07, 0x13, 0x3e, 0xee, 0x4a, 0xa7, 0x84, 0x3e, 0xae, 0xc2, 0xab, 0x39, 0x83, 0x0d, 0x37, 0x9f,
+	0xe1, 0x15, 0xab, 0xfe, 0x08, 0x93, 0x05, 0xcc, 0x54, 0xf4, 0x72, 0x49, 0x74, 0xbd, 0x33, 0x7b,
+	0xc1, 0x0e, 0xfd, 0x55, 0x47, 0x4b, 0x70, 0x63, 0x98, 0xfd, 0x52, 0x7b, 0x6d, 0xbe, 0x3a, 0x6d,
+	0x43, 0xae, 0xf8, 0x61, 0xf1, 0xd5, 0x1f, 0x04, 0x0f, 0x41, 0x7e, 0x23, 0x30, 0xb5, 0x16, 0xf6,
+	0xfe, 0xd1, 0x8d, 0xdd, 0x87, 0xeb, 0x1c, 0x45, 0x10, 0x71, 0x0f, 0x9d, 0x01, 0x72, 0xb5, 0xf4,
+	0xe9, 0xa5, 0x4d, 0x64, 0xf1, 0x37, 0x49, 0xb8, 0x70, 0x8e, 0xd5, 0xc2, 0x39, 0xaa, 0x4b, 0x29,
+	0xc9, 0xbe, 0xd2, 0x4b, 0xf9, 0x32, 0x02, 0xa6, 0x8d, 0xaa, 0xa3, 0x95, 0x48, 0xc8, 0xa0, 0xdf,
+	0x45, 0x97, 0x7b, 0x9b, 0x8f, 0xa4, 0xe4, 0x6c, 0x3d, 0x92, 0x97, 0x34, 0x69, 0x15, 0x16, 0x70,
+	0x97, 0x09, 0xc9, 0xfc, 0x0d, 0xc7, 0xd3, 0x30, 0x8e, 0xd0, 0x38, 0x8e, 0x9b, 0x01, 0xe9, 0x3f,
+	0x94, 0x74, 0x47, 0xee, 0x64, 0xc5, 0x67, 0x52, 0xaa, 0x4e, 0x8d, 0xa7, 0xd0, 0xf4, 0x71, 0xe7,
+	0x62, 0xb0, 0xc4, 0xd1, 0x39, 0x1f, 0x77, 0xce, 0xc7, 0x39, 0x6b, 0x12, 0xd5, 0xcb, 0x4c, 0x62,
+	0xac, 0x38, 0x89, 0x2d, 0xb8, 0x7b, 0xa1, 0x4f, 0x57, 0x39, 0x95, 0xc7, 0xef, 0xf7, 0x0f, 0x69,
+	0xe5, 0xe0, 0x90, 0x56, 0x8e, 0x0f, 0x29, 0xf9, 0x14, 0x53, 0xf2, 0x35, 0xa6, 0xe4, 0x7b, 0x4c,
+	0xc9, 0x7e, 0x4c, 0xc9, 0x8f, 0x98, 0x92, 0x9f, 0x31, 0xad, 0x1c, 0xc7, 0x94, 0x7c, 0x3e, 0xa2,
+	0x95, 0xfd, 0x23, 0x5a, 0x39, 0x38, 0xa2, 0x95, 0xb7, 0x0f, 0x64, 0x3f, 0xe4, 0xdb, 0x96, 0xb7,
+	0x1d, 0x44, 0xbd, 0xf6, 0x39, 0x9f, 0xbd, 0xe5, 0x62, 0x6c, 0xfd, 0x3f, 0xfd, 0x15, 0x5a, 0xfa,
+	0x1d, 0x00, 0x00, 0xff, 0xff, 0xe4, 0x67, 0xf8, 0xd5, 0x29, 0x07, 0x00, 0x00,
 }
 
 func (this *CreateNamespaceRequest) Equal(that interface{}) bool {
@@ -652,6 +775,14 @@ func (this *CreateNamespaceRequest) Equal(that interface{}) bool {
 	}
 	if this.RequestId != that1.RequestId {
 		return false
+	}
+	if len(this.UserNamespacePermissions) != len(that1.UserNamespacePermissions) {
+		return false
+	}
+	for i := range this.UserNamespacePermissions {
+		if !this.UserNamespacePermissions[i].Equal(that1.UserNamespacePermissions[i]) {
+			return false
+		}
 	}
 	return true
 }
@@ -730,6 +861,65 @@ func (this *ListNamespacesResponse) Equal(that interface{}) bool {
 	}
 	for i := range this.Namespaces {
 		if this.Namespaces[i] != that1.Namespaces[i] {
+			return false
+		}
+	}
+	if this.NextPageToken != that1.NextPageToken {
+		return false
+	}
+	return true
+}
+func (this *GetNamespacesRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetNamespacesRequest)
+	if !ok {
+		that2, ok := that.(GetNamespacesRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.PageSize != that1.PageSize {
+		return false
+	}
+	if this.PageToken != that1.PageToken {
+		return false
+	}
+	return true
+}
+func (this *GetNamespacesResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetNamespacesResponse)
+	if !ok {
+		that2, ok := that.(GetNamespacesResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Namespaces) != len(that1.Namespaces) {
+		return false
+	}
+	for i := range this.Namespaces {
+		if !this.Namespaces[i].Equal(that1.Namespaces[i]) {
 			return false
 		}
 	}
@@ -907,13 +1097,16 @@ func (this *CreateNamespaceRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 8)
 	s = append(s, "&namespaceservice.CreateNamespaceRequest{")
 	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
 	if this.Spec != nil {
 		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
 	}
 	s = append(s, "RequestId: "+fmt.Sprintf("%#v", this.RequestId)+",\n")
+	if this.UserNamespacePermissions != nil {
+		s = append(s, "UserNamespacePermissions: "+fmt.Sprintf("%#v", this.UserNamespacePermissions)+",\n")
+	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -947,6 +1140,30 @@ func (this *ListNamespacesResponse) GoString() string {
 	s := make([]string, 0, 6)
 	s = append(s, "&namespaceservice.ListNamespacesResponse{")
 	s = append(s, "Namespaces: "+fmt.Sprintf("%#v", this.Namespaces)+",\n")
+	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetNamespacesRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespaceservice.GetNamespacesRequest{")
+	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
+	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetNamespacesResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespaceservice.GetNamespacesResponse{")
+	if this.Namespaces != nil {
+		s = append(s, "Namespaces: "+fmt.Sprintf("%#v", this.Namespaces)+",\n")
+	}
 	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -1054,6 +1271,20 @@ func (m *CreateNamespaceRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	_ = i
 	var l int
 	_ = l
+	if len(m.UserNamespacePermissions) > 0 {
+		for iNdEx := len(m.UserNamespacePermissions) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.UserNamespacePermissions[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
 	if len(m.RequestId) > 0 {
 		i -= len(m.RequestId)
 		copy(dAtA[i:], m.RequestId)
@@ -1185,6 +1416,85 @@ func (m *ListNamespacesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 			i -= len(m.Namespaces[iNdEx])
 			copy(dAtA[i:], m.Namespaces[iNdEx])
 			i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespaces[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetNamespacesRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetNamespacesRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetNamespacesRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.PageToken) > 0 {
+		i -= len(m.PageToken)
+		copy(dAtA[i:], m.PageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.PageSize != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetNamespacesResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetNamespacesResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetNamespacesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextPageToken) > 0 {
+		i -= len(m.NextPageToken)
+		copy(dAtA[i:], m.NextPageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespaces) > 0 {
+		for iNdEx := len(m.Namespaces) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Namespaces[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			}
 			i--
 			dAtA[i] = 0xa
 		}
@@ -1470,6 +1780,12 @@ func (m *CreateNamespaceRequest) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
+	if len(m.UserNamespacePermissions) > 0 {
+		for _, e := range m.UserNamespacePermissions {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -1511,6 +1827,41 @@ func (m *ListNamespacesResponse) Size() (n int) {
 	if len(m.Namespaces) > 0 {
 		for _, s := range m.Namespaces {
 			l = len(s)
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.NextPageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetNamespacesRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PageSize != 0 {
+		n += 1 + sovRequestResponse(uint64(m.PageSize))
+	}
+	l = len(m.PageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetNamespacesResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Namespaces) > 0 {
+		for _, e := range m.Namespaces {
+			l = e.Size()
 			n += 1 + l + sovRequestResponse(uint64(l))
 		}
 	}
@@ -1637,10 +1988,16 @@ func (this *CreateNamespaceRequest) String() string {
 	if this == nil {
 		return "nil"
 	}
+	repeatedStringForUserNamespacePermissions := "[]*UserNamespacePermissions{"
+	for _, f := range this.UserNamespacePermissions {
+		repeatedStringForUserNamespacePermissions += strings.Replace(fmt.Sprintf("%v", f), "UserNamespacePermissions", "v11.UserNamespacePermissions", 1) + ","
+	}
+	repeatedStringForUserNamespacePermissions += "}"
 	s := strings.Join([]string{`&CreateNamespaceRequest{`,
 		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
 		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "NamespaceSpec", "v1.NamespaceSpec", 1) + `,`,
 		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
+		`UserNamespacePermissions:` + repeatedStringForUserNamespacePermissions + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1650,7 +2007,7 @@ func (this *CreateNamespaceResponse) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&CreateNamespaceResponse{`,
-		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v11.RequestStatus", 1) + `,`,
+		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v12.RequestStatus", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1672,6 +2029,33 @@ func (this *ListNamespacesResponse) String() string {
 	}
 	s := strings.Join([]string{`&ListNamespacesResponse{`,
 		`Namespaces:` + fmt.Sprintf("%v", this.Namespaces) + `,`,
+		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetNamespacesRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetNamespacesRequest{`,
+		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
+		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetNamespacesResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForNamespaces := "[]*Namespace{"
+	for _, f := range this.Namespaces {
+		repeatedStringForNamespaces += strings.Replace(fmt.Sprintf("%v", f), "Namespace", "v1.Namespace", 1) + ","
+	}
+	repeatedStringForNamespaces += "}"
+	s := strings.Join([]string{`&GetNamespacesResponse{`,
+		`Namespaces:` + repeatedStringForNamespaces + `,`,
 		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
 		`}`,
 	}, "")
@@ -1715,7 +2099,7 @@ func (this *UpdateNamespaceResponse) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&UpdateNamespaceResponse{`,
-		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v11.RequestStatus", 1) + `,`,
+		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v12.RequestStatus", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1739,7 +2123,7 @@ func (this *RenameCustomSearchAttributeResponse) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&RenameCustomSearchAttributeResponse{`,
-		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v11.RequestStatus", 1) + `,`,
+		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v12.RequestStatus", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1881,6 +2265,40 @@ func (m *CreateNamespaceRequest) Unmarshal(dAtA []byte) error {
 			}
 			m.RequestId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UserNamespacePermissions", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UserNamespacePermissions = append(m.UserNamespacePermissions, &v11.UserNamespacePermissions{})
+			if err := m.UserNamespacePermissions[len(m.UserNamespacePermissions)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipRequestResponse(dAtA[iNdEx:])
@@ -1964,7 +2382,7 @@ func (m *CreateNamespaceResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.RequestStatus == nil {
-				m.RequestStatus = &v11.RequestStatus{}
+				m.RequestStatus = &v12.RequestStatus{}
 			}
 			if err := m.RequestStatus.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -2158,6 +2576,229 @@ func (m *ListNamespacesResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Namespaces = append(m.Namespaces, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextPageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetNamespacesRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetNamespacesRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetNamespacesRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
+			}
+			m.PageSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PageSize |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetNamespacesResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetNamespacesResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetNamespacesResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespaces", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespaces = append(m.Namespaces, &v1.Namespace{})
+			if err := m.Namespaces[len(m.Namespaces)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -2633,7 +3274,7 @@ func (m *UpdateNamespaceResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.RequestStatus == nil {
-				m.RequestStatus = &v11.RequestStatus{}
+				m.RequestStatus = &v12.RequestStatus{}
 			}
 			if err := m.RequestStatus.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -2935,7 +3576,7 @@ func (m *RenameCustomSearchAttributeResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.RequestStatus == nil {
-				m.RequestStatus = &v11.RequestStatus{}
+				m.RequestStatus = &v12.RequestStatus{}
 			}
 			if err := m.RequestStatus.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
