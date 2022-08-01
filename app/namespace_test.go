@@ -70,7 +70,7 @@ func (s *NamespaceTestSuite) TestGet() {
 			Namespace: "ns1",
 			Spec: &namespace.NamespaceSpec{
 				AcceptedClientCa: "cert1",
-				SearchAttributes: map[string]namespace.NamespaceSpec_SearchAttributeType{
+				SearchAttributes: map[string]namespace.SearchAttributeType{
 					"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 				},
 				RetentionDays: 7,
@@ -195,7 +195,7 @@ func (s *NamespaceTestSuite) TestUpdateCA() {
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
 						AcceptedClientCa: "cert1",
-						SearchAttributes: map[string]namespace.NamespaceSpec_SearchAttributeType{
+						SearchAttributes: map[string]namespace.SearchAttributeType{
 							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 						},
 						RetentionDays: 7,
@@ -352,7 +352,7 @@ func (s *NamespaceTestSuite) TestUpdateRemoveCA() {
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
 						AcceptedClientCa: cert12,
-						SearchAttributes: map[string]namespace.NamespaceSpec_SearchAttributeType{
+						SearchAttributes: map[string]namespace.SearchAttributeType{
 							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 						},
 						RetentionDays: 7,
@@ -481,7 +481,7 @@ func (s *NamespaceTestSuite) TestUpdateAddCA() {
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
 						AcceptedClientCa: cert1,
-						SearchAttributes: map[string]namespace.NamespaceSpec_SearchAttributeType{
+						SearchAttributes: map[string]namespace.SearchAttributeType{
 							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 						},
 						RetentionDays: 7,
@@ -554,7 +554,7 @@ func (s *NamespaceTestSuite) TestUpdateAddSearchAttrs() {
 		args:      []string{"n", "sa", "add", "-n", ns, "--sa", "attr1=Text"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) { g.Namespace.Spec.SearchAttributes = nil },
 		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
-			r.Spec.SearchAttributes = map[string]namespace.NamespaceSpec_SearchAttributeType{
+			r.Spec.SearchAttributes = map[string]namespace.SearchAttributeType{
 				"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_TEXT,
 			}
 		},
@@ -563,7 +563,7 @@ func (s *NamespaceTestSuite) TestUpdateAddSearchAttrs() {
 			"--sa", "attr3=Int", "--resource-version", "ver2"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
-			r.Spec.SearchAttributes = map[string]namespace.NamespaceSpec_SearchAttributeType{
+			r.Spec.SearchAttributes = map[string]namespace.SearchAttributeType{
 				"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 				"attr2": namespace.SEARCH_ATTRIBUTE_TYPE_TEXT,
 				"attr3": namespace.SEARCH_ATTRIBUTE_TYPE_INT,
@@ -579,7 +579,7 @@ func (s *NamespaceTestSuite) TestUpdateAddSearchAttrs() {
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
 						AcceptedClientCa: "cert1",
-						SearchAttributes: map[string]namespace.NamespaceSpec_SearchAttributeType{
+						SearchAttributes: map[string]namespace.SearchAttributeType{
 							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 						},
 						RetentionDays: 7,
@@ -669,7 +669,7 @@ func (s *NamespaceTestSuite) TestUpdateRenameSearchAttrs() {
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
 						AcceptedClientCa: "cert1",
-						SearchAttributes: map[string]namespace.NamespaceSpec_SearchAttributeType{
+						SearchAttributes: map[string]namespace.SearchAttributeType{
 							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 							"attr2": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 						},
@@ -772,7 +772,7 @@ func (s *NamespaceTestSuite) TestUpdateCertificateFilters() {
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
 						AcceptedClientCa: "cert1",
-						SearchAttributes: map[string]namespace.NamespaceSpec_SearchAttributeType{
+						SearchAttributes: map[string]namespace.SearchAttributeType{
 							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 						},
 						RetentionDays: 7,
@@ -848,7 +848,7 @@ func (s *NamespaceTestSuite) TestExportCertificateFilters() {
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
 						AcceptedClientCa: "cert1",
-						SearchAttributes: map[string]namespace.NamespaceSpec_SearchAttributeType{
+						SearchAttributes: map[string]namespace.SearchAttributeType{
 							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 						},
 						RetentionDays:      7,
@@ -911,7 +911,7 @@ func (s *NamespaceTestSuite) TestRemoveCertificateFilters() {
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
 						AcceptedClientCa: "cert1",
-						SearchAttributes: map[string]namespace.NamespaceSpec_SearchAttributeType{
+						SearchAttributes: map[string]namespace.SearchAttributeType{
 							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 						},
 						RetentionDays:      7,
