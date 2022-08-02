@@ -10,10 +10,10 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
-	"github.com/temporalio/tcld/api/temporalcloudapi/namespace/v1"
-	"github.com/temporalio/tcld/api/temporalcloudapi/namespaceservice/v1"
-	"github.com/temporalio/tcld/api/temporalcloudapi/namespaceservicemock/v1"
-	"github.com/temporalio/tcld/api/temporalcloudapi/request/v1"
+	"github.com/temporalio/tcld/protogen/api/namespace/v1"
+	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
+	"github.com/temporalio/tcld/protogen/api/request/v1"
+	namespaceservicemock "github.com/temporalio/tcld/protogen/apimock/namespaceservice/v1"
 	"github.com/urfave/cli/v2"
 )
 

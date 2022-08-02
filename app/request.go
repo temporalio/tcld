@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 
-	"github.com/temporalio/tcld/api/temporalcloudapi/requestservice/v1"
+	"github.com/temporalio/tcld/protogen/api/requestservice/v1"
 	"github.com/urfave/cli/v2"
 )
 
