@@ -270,9 +270,6 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 									Name:    "list",
 									Aliases: []string{"l"},
 									Usage:   "List the accepted client ca certificates currently configured for the account metrics endpoint",
-									Flags: []cli.Flag{
-										NamespaceFlag,
-									},
 									Action: func(ctx *cli.Context) error {
 										a, err := c.getAccount()
 										if err != nil {
