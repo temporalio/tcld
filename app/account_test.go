@@ -1,0 +1,447 @@
+package app
+
+import (
+	"context"
+	"encoding/base64"
+	"errors"
+	"os"
+	"strings"
+	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/suite"
+	"github.com/temporalio/tcld/api/temporalcloudapi/account/v1"
+	"github.com/temporalio/tcld/api/temporalcloudapi/accountservice/v1"
+	"github.com/temporalio/tcld/api/temporalcloudapi/accountservicemock/v1"
+	"github.com/temporalio/tcld/api/temporalcloudapi/request/v1"
+	"github.com/urfave/cli/v2"
+)
+
+func TestAccount(t *testing.T) {
+	suite.Run(t, new(AccountTestSuite))
+}
+
+type AccountTestSuite struct {
+	suite.Suite
+	cliApp      *cli.App
+	mockCtrl    *gomock.Controller
+	mockService *accountservicemock.MockAccountServiceClient
+}
+
+func (s *AccountTestSuite) SetupTest() {
+	s.mockCtrl = gomock.NewController(s.T())
+	s.mockService = accountservicemock.NewMockAccountServiceClient(s.mockCtrl)
+	out, err := NewAccountCommand(func(ctx *cli.Context) (*AccountClient, error) {
+		return &AccountClient{
+			ctx:    context.TODO(),
+			client: s.mockService,
+		}, nil
+	})
+	s.Require().NoError(err)
+	AutoConfirmFlag.Value = true
+	s.cliApp = &cli.App{
+		Name:     "test",
+		Commands: []*cli.Command{out.Command},
+		Flags: []cli.Flag{
+			AutoConfirmFlag,
+		},
+	}
+}
+
+func (s *AccountTestSuite) RunCmd(args ...string) error {
+	return s.cliApp.Run(append([]string{"tcld"}, args...))
+}
+
+func (s *AccountTestSuite) AfterTest(suiteName, testName string) {
+	s.mockCtrl.Finish()
+}
+
+func (s *AccountTestSuite) TestGet() {
+	s.Error(s.RunCmd("account", "get"))
+	s.mockService.EXPECT().GetAccount(gomock.Any(), &accountservice.GetAccountRequest{}).Return(nil, errors.New("some error")).Times(1)
+	s.Error(s.RunCmd("account", "get"))
+
+	s.mockService.EXPECT().GetAccount(gomock.Any(), &accountservice.GetAccountRequest{}).Return(&accountservice.GetAccountResponse{
+		Account: &account.Account{
+			State:           account.STATE_UPDATING,
+			ResourceVersion: "ver1",
+		},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("account", "get"))
+}
+
+func (s *AccountTestSuite) TestUpdateCA() {
+
+	ns := "ns1"
+	type morphGetResp func(*accountservice.GetAccountResponse)
+	type morphUpdateReq func(*accountservice.UpdateAccountRequest)
+
+	path := "cafile"
+	s.NoError(os.WriteFile(path, []byte("cert2"), 0644))
+	defer os.Remove(path)
+
+	tests := []struct {
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{{
+		args: []string{"account", "metrics", "accepted-client-ca"},
+	}, {
+		args:      []string{"account", "metrics", "accepted-client-ca", "set"},
+		expectErr: true,
+	}, {
+		args:      []string{"account", "metrics", "accepted-client-ca", "set", "--namespace", ns},
+		expectErr: true,
+	}, {
+		args:      []string{"a", "m", "ca", "set", "--ca-certificate", "cert1"},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectErr: true,
+	}, {
+		args:      []string{"a", "m", "ca", "set", "--ca-certificate", "cert2"},
+		expectGet: func(g *accountservice.GetAccountResponse) { *g = accountservice.GetAccountResponse{} },
+		expectErr: true,
+	}, {
+		args:      []string{"a", "m", "ca", "set", "--ca-certificate", "cert2"},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = "cert2"
+		},
+	}, {
+		args:      []string{"a", "m", "ca", "set", "--ca-certificate", "cert2"},
+		expectGet: func(g *accountservice.GetAccountResponse) { g.Account.Spec.Metrics = &account.MetricsSpec{} },
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = "cert2"
+		},
+	}, {
+		args:      []string{"a", "m", "ca", "set", "--ca-certificate-file", path},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = base64.StdEncoding.EncodeToString([]byte("cert2"))
+		},
+	}, {
+		args:      []string{"a", "m", "ca", "set", "--ca-certificate-file", "nonexistingfile"},
+		expectErr: true,
+	}, {
+		args:      []string{"a", "m", "ca", "set", "-c", "cert2", "--resource-version", "ver2"},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = "cert2"
+			r.ResourceVersion = "ver2"
+		},
+	}}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			getResp := accountservice.GetAccountResponse{
+				Account: &account.Account{
+					Spec: &account.AccountSpec{
+						Metrics: &account.MetricsSpec{
+							AcceptedMetricsClientCa: "cert1",
+						},
+					},
+					State:           account.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetAccount(gomock.Any(), &accountservice.GetAccountRequest{}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Account.Spec)
+				req := accountservice.UpdateAccountRequest{
+					Spec:            &spec,
+					ResourceVersion: getResp.Account.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateAccount(gomock.Any(), &req).
+					Return(&accountservice.UpdateAccountResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *AccountTestSuite) TestUpdateRemoveCA() {
+
+	cert1raw, err := generateRootX509CAForTest()
+	s.NoError(err)
+	cert2raw, err := generateRootX509CAForTest()
+	s.NoError(err)
+	cert3raw, err := generateRootX509CAForTest()
+	s.NoError(err)
+
+	cert1 := base64.StdEncoding.EncodeToString([]byte(cert1raw))
+	cert2 := base64.StdEncoding.EncodeToString([]byte(cert2raw))
+	cert12 := base64.StdEncoding.EncodeToString([]byte(cert1raw + "\n" + cert2raw))
+	cert3 := base64.StdEncoding.EncodeToString([]byte(cert3raw))
+
+	cs, err := parseCertificates(cert2)
+	s.NoError(err)
+	cert2fingerprint := cs[0].Fingerprint
+
+	cs, err = parseCertificates(cert3)
+	s.NoError(err)
+	cert3fingerprint := cs[0].Fingerprint
+
+	ns := "ns1"
+	type morphGetResp func(*accountservice.GetAccountResponse)
+	type morphUpdateReq func(*accountservice.UpdateAccountRequest)
+
+	path := "cafile"
+	s.NoError(os.WriteFile(path, []byte(cert2raw+"\n"), 0644))
+	defer os.Remove(path)
+
+	tests := []struct {
+		name         string
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{{
+		name:      "err no cmd",
+		args:      []string{"account", "metrics", "accepted-client-ca", "remove"},
+		expectErr: true,
+	}, {
+		name:      "err no cert",
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		args:      []string{"account", "metrics", "accepted-client-ca", "remove", "--namespace", ns},
+		expectErr: true,
+	}, {
+		name:      "remove 1st cert",
+		args:      []string{"a", "m", "ca", "remove", "-n", ns, "--ca-certificate", cert1},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = cert2
+		},
+	}, {
+		name:      "remove 2nd cert",
+		args:      []string{"a", "m", "ca", "r", "-n", ns, "--ca-certificate", cert2},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = cert1
+		},
+	}, {
+		name:      "remove unknown cert",
+		args:      []string{"a", "m", "ca", "r", "-n", ns, "--ca-certificate", cert3},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectErr: true,
+	}, {
+		name: "err empty namespace",
+		args: []string{"a", "m", "ca", "remove", "-n", ns, "--ca-certificate", cert2},
+		expectGet: func(g *accountservice.GetAccountResponse) {
+			*g = accountservice.GetAccountResponse{}
+		},
+		expectErr: true,
+	}, {
+		name:      "empty cert - remove 1 cert",
+		args:      []string{"a", "m", "ca", "r", "-n", ns, "--ca-certificate", cert2},
+		expectGet: func(g *accountservice.GetAccountResponse) { g.Account.Spec.Metrics.AcceptedMetricsClientCa = "" },
+		expectErr: true,
+	}, {
+		name:      "remove 1 cert from path",
+		args:      []string{"a", "m", "ca", "r", "-n", ns, "--ca-certificate-file", path},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = cert1
+		},
+	}, {
+		name:      "err remove from nonexistent path",
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		args:      []string{"a", "m", "ca", "r", "-n", ns, "--ca-certificate-file", "nonexistingfile"},
+		expectErr: true,
+	}, {
+		name:      "remove fingerprint",
+		args:      []string{"a", "m", "ca", "r", "-n", ns, "--ca-certificate-fingerprint", cert2fingerprint},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = cert1
+		},
+	}, {
+		name:      "err remove unknown fingerprint",
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		args:      []string{"a", "m", "ca", "r", "-n", ns, "--fp", cert3fingerprint},
+		expectErr: true,
+	}, {
+		name:      "custom resource version",
+		args:      []string{"a", "m", "ca", "r", "-n", ns, "-c", cert2, "--resource-version", "ver2"},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = cert1
+			r.ResourceVersion = "ver2"
+		},
+	}}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			getResp := accountservice.GetAccountResponse{
+				Account: &account.Account{
+					Spec: &account.AccountSpec{
+						Metrics: &account.MetricsSpec{
+							AcceptedMetricsClientCa: cert12,
+						},
+					},
+					State:           account.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetAccount(gomock.Any(), &accountservice.GetAccountRequest{}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Account.Spec)
+				req := accountservice.UpdateAccountRequest{
+					Spec:            &spec,
+					ResourceVersion: getResp.Account.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateAccount(gomock.Any(), &req).
+					Return(&accountservice.UpdateAccountResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *AccountTestSuite) TestUpdateAddCA() {
+
+	cert1raw, err := generateRootX509CAForTest()
+	s.NoError(err)
+	cert2raw, err := generateRootX509CAForTest()
+	s.NoError(err)
+
+	cert1 := base64.StdEncoding.EncodeToString([]byte(cert1raw))
+	cert2 := base64.StdEncoding.EncodeToString([]byte(cert2raw))
+	cert12 := base64.StdEncoding.EncodeToString([]byte(cert1raw + "\n" + cert2raw))
+
+	s.NoError(err)
+
+	ns := "ns1"
+	type morphGetResp func(*accountservice.GetAccountResponse)
+	type morphUpdateReq func(*accountservice.UpdateAccountRequest)
+
+	path := "cafile"
+	s.NoError(os.WriteFile(path, []byte(cert2raw+"\n"), 0644))
+	defer os.Remove(path)
+
+	tests := []struct {
+		name         string
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{{
+		name:      "err no cmd",
+		args:      []string{"account", "metrics", "accepted-client-ca", "add"},
+		expectErr: true,
+	}, {
+		name:      "err no cert",
+		args:      []string{"account", "metrics", "accepted-client-ca", "add", "--namespace", ns},
+		expectErr: true,
+	}, {
+		name:      "err same cert",
+		args:      []string{"a", "m", "ca", "add", "-n", ns, "--ca-certificate", cert1},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectErr: true,
+	}, {
+		name: "err empty namespace",
+		args: []string{"a", "m", "ca", "add", "-n", ns, "--ca-certificate", cert2},
+		expectGet: func(g *accountservice.GetAccountResponse) {
+			*g = accountservice.GetAccountResponse{}
+		},
+		expectErr: true,
+	}, {
+		name:      "add 1 cert",
+		args:      []string{"a", "m", "ca", "add", "-n", ns, "--ca-certificate", cert2},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = cert12
+		},
+	}, {
+		name:      "empty cert - add 1 cert",
+		args:      []string{"a", "m", "ca", "add", "-n", ns, "--ca-certificate", cert2},
+		expectGet: func(g *accountservice.GetAccountResponse) { g.Account.Spec.Metrics.AcceptedMetricsClientCa = "" },
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = cert2
+		},
+	}, {
+		name:      "add 1 cert from path",
+		args:      []string{"a", "m", "ca", "add", "-n", ns, "--ca-certificate-file", path},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = cert12
+		},
+	}, {
+		name:      "err from nonexistent path",
+		args:      []string{"a", "m", "ca", "add", "-n", ns, "--ca-certificate-file", "nonexistingfile"},
+		expectErr: true,
+	}, {
+		name:      "custom resource version",
+		args:      []string{"a", "m", "ca", "add", "-n", ns, "-c", cert2, "--resource-version", "ver2"},
+		expectGet: func(g *accountservice.GetAccountResponse) {},
+		expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+			r.Spec.Metrics.AcceptedMetricsClientCa = cert12
+			r.ResourceVersion = "ver2"
+		},
+	}}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			getResp := accountservice.GetAccountResponse{
+				Account: &account.Account{
+					Spec: &account.AccountSpec{
+						Metrics: &account.MetricsSpec{
+							AcceptedMetricsClientCa: cert1,
+						},
+					},
+					State:           account.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetAccount(gomock.Any(), &accountservice.GetAccountRequest{}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Account.Spec)
+				req := accountservice.UpdateAccountRequest{
+					Spec:            &spec,
+					ResourceVersion: getResp.Account.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateAccount(gomock.Any(), &req).
+					Return(&accountservice.UpdateAccountResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
