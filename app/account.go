@@ -255,7 +255,10 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 											return err
 										}
 
+										fmt.Println("2: " + a.Spec.Metrics.AcceptedMetricsClientCa)
+
 										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedMetricsClientCa == cert {
+											fmt.Printf("%+v vs %+v\r\n", cert, a.Spec.Metrics.AcceptedMetricsClientCa)
 											return errors.New("nothing to change")
 										}
 
