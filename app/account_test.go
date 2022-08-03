@@ -72,6 +72,81 @@ func (s *AccountTestSuite) TestGet() {
 	s.NoError(s.RunCmd("account", "get"))
 }
 
+func (s *AccountTestSuite) TestEnable() {
+	type morphGetResp func(*accountservice.GetAccountResponse)
+	type morphUpdateReq func(*accountservice.UpdateAccountRequest)
+
+	tests := []struct {
+		args         []string
+		expectGet    morphGetResp
+		expectErrMsg string
+		expectUpdate morphUpdateReq
+	}{
+		{
+			args: []string{"account", "metrics", "enable"},
+			expectGet: func(g *accountservice.GetAccountResponse) {
+				g.Account.Spec.Metrics.AcceptedMetricsClientCa = ""
+			},
+			expectErrMsg: "metrics endpoint cannot be enabled until ca certificates have been configured",
+		},
+		{
+			args: []string{"account", "metrics", "enable"},
+			expectGet: func(g *accountservice.GetAccountResponse) {
+				g.Account.Spec.Metrics.EnableMetricsEndpoint = true
+			},
+			expectErrMsg: "metrics endpoint is already enabled",
+		},
+		{
+			args:      []string{"a", "m", "enable"},
+			expectGet: func(g *accountservice.GetAccountResponse) {},
+			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+				r.Spec.Metrics.EnableMetricsEndpoint = true
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			getResp := accountservice.GetAccountResponse{
+				Account: &account.Account{
+					Spec: &account.AccountSpec{
+						Metrics: &account.MetricsSpec{
+							AcceptedMetricsClientCa: "cert1",
+						},
+					},
+					State:           account.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetAccount(gomock.Any(), &accountservice.GetAccountRequest{}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := s.copySpec(getResp.Account.Spec)
+				req := accountservice.UpdateAccountRequest{
+					Spec:            spec,
+					ResourceVersion: getResp.Account.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateAccount(gomock.Any(), &req).
+					Return(&accountservice.UpdateAccountResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErrMsg != "" {
+				s.Error(err)
+				s.ErrorContains(err, tc.expectErrMsg)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
 func (s *AccountTestSuite) TestUpdateCA() {
 	type morphGetResp func(*accountservice.GetAccountResponse)
 	type morphUpdateReq func(*accountservice.UpdateAccountRequest)
