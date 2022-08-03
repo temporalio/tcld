@@ -14,8 +14,8 @@ import (
 	proto "github.com/gogo/protobuf/proto"
 	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 	types "github.com/gogo/protobuf/types"
-	v1 "github.com/temporalio/tcld/api/temporalcloudapi/account/v1"
-	v11 "github.com/temporalio/tcld/api/temporalcloudapi/request/v1"
+	v1 "github.com/temporalio/tcld/protogen/api/account/v1"
+	v11 "github.com/temporalio/tcld/protogen/api/request/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

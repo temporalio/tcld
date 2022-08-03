@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/temporalio/tcld/api/temporalcloudapi/namespace/v1"
-	"github.com/temporalio/tcld/api/temporalcloudapi/namespaceservice/v1"
+	"github.com/temporalio/tcld/protogen/api/namespace/v1"
+	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 	"github.com/urfave/cli/v2"
 )
 
