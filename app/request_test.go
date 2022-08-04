@@ -7,8 +7,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
-	"github.com/temporalio/tcld/api/temporalcloudapi/requestservice/v1"
-	"github.com/temporalio/tcld/api/temporalcloudapi/requestservicemock/v1"
+	"github.com/temporalio/tcld/protogen/api/requestservice/v1"
+	requestservicemock "github.com/temporalio/tcld/protogen/apimock/requestservice/v1"
 	"github.com/urfave/cli/v2"
 )
 

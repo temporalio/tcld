@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/temporalio/tcld/api/temporalcloudapi/namespace/v1"
+	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 )
 
 type certificateFilter struct {
