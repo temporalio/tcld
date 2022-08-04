@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/temporalio/tcld/api/temporalcloudapi/account/v1"
-	"github.com/temporalio/tcld/api/temporalcloudapi/accountservice/v1"
+	"github.com/temporalio/tcld/protogen/api/account/v1"
+	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
 	"github.com/urfave/cli/v2"
 )
 
