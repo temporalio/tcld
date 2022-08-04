@@ -12,7 +12,6 @@ import (
 	strings "strings"
 
 	proto "github.com/gogo/protobuf/proto"
-	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 	types "github.com/gogo/protobuf/types"
 	v1 "github.com/temporalio/tcld/protogen/api/account/v1"
 	v11 "github.com/temporalio/tcld/protogen/api/request/v1"
@@ -29,69 +28,17 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-type NamespaceUsageRecord struct {
-	// the namespace
-	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
-	// the meter records for a namespace. The key is metering type.
-	MeteringRecords map[string]*v1.MeteringRecord `protobuf:"bytes,2,rep,name=metering_records,json=meteringRecords,proto3" json:"metering_records,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-}
-
-func (m *NamespaceUsageRecord) Reset()      { *m = NamespaceUsageRecord{} }
-func (*NamespaceUsageRecord) ProtoMessage() {}
-func (*NamespaceUsageRecord) Descriptor() ([]byte, []int) {
-	return fileDescriptor_e50566fc74ec64cc, []int{0}
-}
-func (m *NamespaceUsageRecord) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *NamespaceUsageRecord) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_NamespaceUsageRecord.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *NamespaceUsageRecord) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_NamespaceUsageRecord.Merge(m, src)
-}
-func (m *NamespaceUsageRecord) XXX_Size() int {
-	return m.Size()
-}
-func (m *NamespaceUsageRecord) XXX_DiscardUnknown() {
-	xxx_messageInfo_NamespaceUsageRecord.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_NamespaceUsageRecord proto.InternalMessageInfo
-
-func (m *NamespaceUsageRecord) GetNamespace() string {
-	if m != nil {
-		return m.Namespace
-	}
-	return ""
-}
-
-func (m *NamespaceUsageRecord) GetMeteringRecords() map[string]*v1.MeteringRecord {
-	if m != nil {
-		return m.MeteringRecords
-	}
-	return nil
-}
-
 type GetNamespaceUsageRequest struct {
-	Namespace string           `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
-	StartTime *types.Timestamp `protobuf:"bytes,2,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	EndTime   *types.Timestamp `protobuf:"bytes,3,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	Namespace        string           `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	StartTime        *types.Timestamp `protobuf:"bytes,2,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime          *types.Timestamp `protobuf:"bytes,3,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	AggregatedPeriod v1.Period        `protobuf:"varint,4,opt,name=aggregated_period,json=aggregatedPeriod,proto3,enum=api.account.v1.Period" json:"aggregated_period,omitempty"`
 }
 
 func (m *GetNamespaceUsageRequest) Reset()      { *m = GetNamespaceUsageRequest{} }
 func (*GetNamespaceUsageRequest) ProtoMessage() {}
 func (*GetNamespaceUsageRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_e50566fc74ec64cc, []int{1}
+	return fileDescriptor_e50566fc74ec64cc, []int{0}
 }
 func (m *GetNamespaceUsageRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -141,14 +88,21 @@ func (m *GetNamespaceUsageRequest) GetEndTime() *types.Timestamp {
 	return nil
 }
 
+func (m *GetNamespaceUsageRequest) GetAggregatedPeriod() v1.Period {
+	if m != nil {
+		return m.AggregatedPeriod
+	}
+	return v1.PERIOD_UNSPECIFIED
+}
+
 type GetNamespaceUsageResponse struct {
-	UsageRecords *NamespaceUsageRecord `protobuf:"bytes,1,opt,name=usage_records,json=usageRecords,proto3" json:"usage_records,omitempty"`
+	Entries []*v1.MeteringEntry `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
 }
 
 func (m *GetNamespaceUsageResponse) Reset()      { *m = GetNamespaceUsageResponse{} }
 func (*GetNamespaceUsageResponse) ProtoMessage() {}
 func (*GetNamespaceUsageResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_e50566fc74ec64cc, []int{2}
+	return fileDescriptor_e50566fc74ec64cc, []int{1}
 }
 func (m *GetNamespaceUsageResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -177,9 +131,9 @@ func (m *GetNamespaceUsageResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetNamespaceUsageResponse proto.InternalMessageInfo
 
-func (m *GetNamespaceUsageResponse) GetUsageRecords() *NamespaceUsageRecord {
+func (m *GetNamespaceUsageResponse) GetEntries() []*v1.MeteringEntry {
 	if m != nil {
-		return m.UsageRecords
+		return m.Entries
 	}
 	return nil
 }
@@ -196,7 +150,7 @@ type GetNamespacesUsageRequest struct {
 func (m *GetNamespacesUsageRequest) Reset()      { *m = GetNamespacesUsageRequest{} }
 func (*GetNamespacesUsageRequest) ProtoMessage() {}
 func (*GetNamespacesUsageRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_e50566fc74ec64cc, []int{3}
+	return fileDescriptor_e50566fc74ec64cc, []int{2}
 }
 func (m *GetNamespacesUsageRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -254,7 +208,7 @@ func (m *GetNamespacesUsageRequest) GetEndTime() *types.Timestamp {
 }
 
 type GetNamespacesUsageResponse struct {
-	UsageRecords []*NamespaceUsageRecord `protobuf:"bytes,1,rep,name=usage_records,json=usageRecords,proto3" json:"usage_records,omitempty"`
+	UsageRecords []*v1.NamespaceUsageRecord `protobuf:"bytes,1,rep,name=usage_records,json=usageRecords,proto3" json:"usage_records,omitempty"`
 	// the next page's token
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 }
@@ -262,7 +216,7 @@ type GetNamespacesUsageResponse struct {
 func (m *GetNamespacesUsageResponse) Reset()      { *m = GetNamespacesUsageResponse{} }
 func (*GetNamespacesUsageResponse) ProtoMessage() {}
 func (*GetNamespacesUsageResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_e50566fc74ec64cc, []int{4}
+	return fileDescriptor_e50566fc74ec64cc, []int{3}
 }
 func (m *GetNamespacesUsageResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -291,7 +245,7 @@ func (m *GetNamespacesUsageResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetNamespacesUsageResponse proto.InternalMessageInfo
 
-func (m *GetNamespacesUsageResponse) GetUsageRecords() []*NamespaceUsageRecord {
+func (m *GetNamespacesUsageResponse) GetUsageRecords() []*v1.NamespaceUsageRecord {
 	if m != nil {
 		return m.UsageRecords
 	}
@@ -306,14 +260,15 @@ func (m *GetNamespacesUsageResponse) GetNextPageToken() string {
 }
 
 type GetAccountUsageRequest struct {
-	StartTime *types.Timestamp `protobuf:"bytes,1,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	EndTime   *types.Timestamp `protobuf:"bytes,2,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	StartTime        *types.Timestamp `protobuf:"bytes,1,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime          *types.Timestamp `protobuf:"bytes,2,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	AggregatedPeriod v1.Period        `protobuf:"varint,3,opt,name=aggregated_period,json=aggregatedPeriod,proto3,enum=api.account.v1.Period" json:"aggregated_period,omitempty"`
 }
 
 func (m *GetAccountUsageRequest) Reset()      { *m = GetAccountUsageRequest{} }
 func (*GetAccountUsageRequest) ProtoMessage() {}
 func (*GetAccountUsageRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_e50566fc74ec64cc, []int{5}
+	return fileDescriptor_e50566fc74ec64cc, []int{4}
 }
 func (m *GetAccountUsageRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -356,15 +311,21 @@ func (m *GetAccountUsageRequest) GetEndTime() *types.Timestamp {
 	return nil
 }
 
+func (m *GetAccountUsageRequest) GetAggregatedPeriod() v1.Period {
+	if m != nil {
+		return m.AggregatedPeriod
+	}
+	return v1.PERIOD_UNSPECIFIED
+}
+
 type GetAccountUsageResponse struct {
-	// the meter records for an account. The key is metering type.
-	MeteringRecords map[string]*v1.MeteringRecord `protobuf:"bytes,1,rep,name=metering_records,json=meteringRecords,proto3" json:"metering_records,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Entries []*v1.MeteringEntry `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
 }
 
 func (m *GetAccountUsageResponse) Reset()      { *m = GetAccountUsageResponse{} }
 func (*GetAccountUsageResponse) ProtoMessage() {}
 func (*GetAccountUsageResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_e50566fc74ec64cc, []int{6}
+	return fileDescriptor_e50566fc74ec64cc, []int{5}
 }
 func (m *GetAccountUsageResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -393,9 +354,9 @@ func (m *GetAccountUsageResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetAccountUsageResponse proto.InternalMessageInfo
 
-func (m *GetAccountUsageResponse) GetMeteringRecords() map[string]*v1.MeteringRecord {
+func (m *GetAccountUsageResponse) GetEntries() []*v1.MeteringEntry {
 	if m != nil {
-		return m.MeteringRecords
+		return m.Entries
 	}
 	return nil
 }
@@ -406,7 +367,7 @@ type GetAccountRequest struct {
 func (m *GetAccountRequest) Reset()      { *m = GetAccountRequest{} }
 func (*GetAccountRequest) ProtoMessage() {}
 func (*GetAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_e50566fc74ec64cc, []int{7}
+	return fileDescriptor_e50566fc74ec64cc, []int{6}
 }
 func (m *GetAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -443,7 +404,7 @@ type GetAccountResponse struct {
 func (m *GetAccountResponse) Reset()      { *m = GetAccountResponse{} }
 func (*GetAccountResponse) ProtoMessage() {}
 func (*GetAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_e50566fc74ec64cc, []int{8}
+	return fileDescriptor_e50566fc74ec64cc, []int{7}
 }
 func (m *GetAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -492,7 +453,7 @@ type UpdateAccountRequest struct {
 func (m *UpdateAccountRequest) Reset()      { *m = UpdateAccountRequest{} }
 func (*UpdateAccountRequest) ProtoMessage() {}
 func (*UpdateAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_e50566fc74ec64cc, []int{9}
+	return fileDescriptor_e50566fc74ec64cc, []int{8}
 }
 func (m *UpdateAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -550,7 +511,7 @@ type UpdateAccountResponse struct {
 func (m *UpdateAccountResponse) Reset()      { *m = UpdateAccountResponse{} }
 func (*UpdateAccountResponse) ProtoMessage() {}
 func (*UpdateAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_e50566fc74ec64cc, []int{10}
+	return fileDescriptor_e50566fc74ec64cc, []int{9}
 }
 func (m *UpdateAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -587,15 +548,12 @@ func (m *UpdateAccountResponse) GetRequestStatus() *v11.RequestStatus {
 }
 
 func init() {
-	proto.RegisterType((*NamespaceUsageRecord)(nil), "api.accountservice.v1.NamespaceUsageRecord")
-	proto.RegisterMapType((map[string]*v1.MeteringRecord)(nil), "api.accountservice.v1.NamespaceUsageRecord.MeteringRecordsEntry")
 	proto.RegisterType((*GetNamespaceUsageRequest)(nil), "api.accountservice.v1.GetNamespaceUsageRequest")
 	proto.RegisterType((*GetNamespaceUsageResponse)(nil), "api.accountservice.v1.GetNamespaceUsageResponse")
 	proto.RegisterType((*GetNamespacesUsageRequest)(nil), "api.accountservice.v1.GetNamespacesUsageRequest")
 	proto.RegisterType((*GetNamespacesUsageResponse)(nil), "api.accountservice.v1.GetNamespacesUsageResponse")
 	proto.RegisterType((*GetAccountUsageRequest)(nil), "api.accountservice.v1.GetAccountUsageRequest")
 	proto.RegisterType((*GetAccountUsageResponse)(nil), "api.accountservice.v1.GetAccountUsageResponse")
-	proto.RegisterMapType((map[string]*v1.MeteringRecord)(nil), "api.accountservice.v1.GetAccountUsageResponse.MeteringRecordsEntry")
 	proto.RegisterType((*GetAccountRequest)(nil), "api.accountservice.v1.GetAccountRequest")
 	proto.RegisterType((*GetAccountResponse)(nil), "api.accountservice.v1.GetAccountResponse")
 	proto.RegisterType((*UpdateAccountRequest)(nil), "api.accountservice.v1.UpdateAccountRequest")
@@ -607,84 +565,50 @@ func init() {
 }
 
 var fileDescriptor_e50566fc74ec64cc = []byte{
-	// 683 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x95, 0x4d, 0x4f, 0xd4, 0x40,
-	0x18, 0xc7, 0x77, 0x76, 0x41, 0xd8, 0x07, 0x11, 0xac, 0x20, 0xeb, 0x02, 0x23, 0xe9, 0xc1, 0x60,
-	0x34, 0x5d, 0x41, 0x4d, 0x7c, 0xb9, 0xf8, 0x1a, 0xe2, 0x41, 0x43, 0x0a, 0x78, 0x30, 0x31, 0x9b,
-	0xd2, 0x3e, 0x6c, 0x1a, 0xb6, 0x2f, 0xce, 0x4c, 0x37, 0xc2, 0xc9, 0x8b, 0x17, 0x4f, 0x7a, 0xf1,
-	0x33, 0x18, 0x3f, 0x89, 0xde, 0x38, 0x72, 0x94, 0x72, 0xf1, 0x62, 0xc2, 0x47, 0x30, 0xd3, 0x4e,
-	0x65, 0xbb, 0x74, 0x03, 0xe2, 0xc5, 0xdb, 0x3e, 0xff, 0x79, 0x5e, 0xfe, 0xf3, 0x9b, 0x99, 0x2d,
-	0x5c, 0xb7, 0x42, 0xb7, 0x61, 0xd9, 0x76, 0x10, 0xf9, 0x82, 0x23, 0xeb, 0xb8, 0x36, 0x36, 0x3a,
-	0x0b, 0x0d, 0x86, 0x6f, 0x22, 0xe4, 0xa2, 0xc9, 0x90, 0x87, 0x81, 0xcf, 0xd1, 0x08, 0x59, 0x20,
-	0x02, 0x6d, 0xd2, 0x0a, 0x5d, 0x23, 0x9f, 0x6d, 0x74, 0x16, 0xea, 0x33, 0x5d, 0x4d, 0x64, 0xb5,
-	0x87, 0x9c, 0x5b, 0x2d, 0x55, 0x94, 0xae, 0xaa, 0x86, 0x47, 0x57, 0x2f, 0xb7, 0x82, 0xa0, 0xd5,
-	0xc6, 0x46, 0x12, 0xad, 0x47, 0x1b, 0x0d, 0xe1, 0x7a, 0xc8, 0x85, 0xe5, 0x85, 0x69, 0x82, 0xfe,
-	0xbe, 0x0c, 0x13, 0x2f, 0x2c, 0x0f, 0x79, 0x68, 0xd9, 0xb8, 0x26, 0x2b, 0x4d, 0xb4, 0x03, 0xe6,
-	0x68, 0x33, 0x50, 0xf5, 0x33, 0xbd, 0x46, 0xe6, 0xc8, 0x7c, 0xd5, 0x3c, 0x14, 0xb4, 0x4d, 0x18,
-	0xf7, 0x50, 0x20, 0x73, 0xfd, 0x56, 0x93, 0x25, 0x05, 0xbc, 0x56, 0x9e, 0xab, 0xcc, 0x8f, 0x2c,
-	0x3e, 0x30, 0x0a, 0x77, 0x61, 0x14, 0x0d, 0x31, 0x9e, 0xab, 0x1e, 0x69, 0xc8, 0x9f, 0xfa, 0x82,
-	0x6d, 0x99, 0x63, 0x5e, 0x5e, 0xad, 0xaf, 0xc3, 0x44, 0x51, 0xa2, 0x36, 0x0e, 0x95, 0x4d, 0xdc,
-	0x52, 0xe6, 0xe4, 0x4f, 0xed, 0x16, 0x0c, 0x76, 0xac, 0x76, 0x84, 0xb5, 0xf2, 0x1c, 0x99, 0x1f,
-	0x59, 0xa4, 0xdd, 0x5e, 0xa4, 0x89, 0x7c, 0x1b, 0x33, 0x4d, 0xbe, 0x57, 0xbe, 0x43, 0xf4, 0xaf,
-	0x04, 0x6a, 0x4b, 0x28, 0x7a, 0x5d, 0x26, 0x58, 0x8f, 0x61, 0x71, 0x17, 0x80, 0x0b, 0x8b, 0x89,
-	0xa6, 0x64, 0xab, 0x26, 0xd7, 0x8d, 0x14, 0xbc, 0x91, 0x81, 0x37, 0x56, 0x33, 0xf0, 0x66, 0x35,
-	0xc9, 0x96, 0xb1, 0x76, 0x1b, 0x86, 0xd1, 0x77, 0xd2, 0xc2, 0xca, 0xb1, 0x85, 0x43, 0xe8, 0x3b,
-	0x32, 0xd2, 0x3d, 0xb8, 0x54, 0xe0, 0x35, 0xbd, 0x4b, 0xda, 0x32, 0x8c, 0x46, 0x52, 0xf8, 0x73,
-	0x2e, 0x24, 0x69, 0x7c, 0xed, 0x2f, 0xce, 0xc5, 0x3c, 0x1b, 0x1d, 0x06, 0x5c, 0xff, 0x4e, 0xf2,
-	0xf3, 0x78, 0x0e, 0xce, 0x34, 0x54, 0x43, 0x39, 0x8e, 0xbb, 0xdb, 0x29, 0x9c, 0x41, 0x73, 0x58,
-	0x0a, 0x2b, 0xee, 0x36, 0x6a, 0xb3, 0x00, 0xc9, 0xa2, 0x08, 0x36, 0xd1, 0x4f, 0xd8, 0x54, 0xcd,
-	0x24, 0x7d, 0x55, 0x0a, 0x3d, 0xe8, 0x2a, 0xa7, 0x45, 0x37, 0x70, 0x72, 0x74, 0x9f, 0x09, 0xd4,
-	0x8b, 0xf6, 0xd2, 0x1f, 0x5e, 0xe5, 0x9f, 0xe0, 0x69, 0x57, 0x60, 0xcc, 0xc7, 0xb7, 0xa2, 0x79,
-	0x04, 0xc3, 0xa8, 0x94, 0x97, 0x33, 0x14, 0xfa, 0x07, 0x02, 0x17, 0x97, 0x50, 0x3c, 0x4c, 0x67,
-	0xe4, 0x08, 0xe7, 0x29, 0x91, 0xd3, 0x52, 0x2a, 0x9f, 0x9c, 0xd2, 0x2f, 0x02, 0x53, 0x47, 0xcc,
-	0x28, 0x44, 0x7e, 0xc1, 0xd3, 0x4f, 0x29, 0x3d, 0xee, 0x43, 0xa9, 0x4f, 0xa7, 0xff, 0xe8, 0xf5,
-	0x5f, 0x80, 0xf3, 0x87, 0x26, 0x15, 0x76, 0x7d, 0x09, 0xb4, 0x6e, 0x51, 0x6d, 0x7f, 0x01, 0x86,
-	0x54, 0x4b, 0x75, 0x12, 0x53, 0xbd, 0x63, 0xb2, 0x8a, 0x2c, 0x4f, 0xff, 0x44, 0x60, 0x62, 0x2d,
-	0x74, 0x2c, 0x81, 0xf9, 0x09, 0x5a, 0x03, 0x06, 0x78, 0x88, 0xb6, 0x6a, 0x34, 0xdd, 0xa7, 0xd1,
-	0x4a, 0x88, 0xb6, 0x99, 0x24, 0x6a, 0x57, 0x61, 0x9c, 0x21, 0x0f, 0x22, 0x66, 0x63, 0xb3, 0x83,
-	0x8c, 0xbb, 0x41, 0x76, 0x9b, 0xc6, 0x32, 0xfd, 0x65, 0x2a, 0xcb, 0x97, 0x97, 0x7d, 0x66, 0x5c,
-	0x27, 0x79, 0x5a, 0x55, 0xb3, 0xaa, 0x94, 0x67, 0x8e, 0xfe, 0x1a, 0x26, 0x7b, 0x2c, 0xa9, 0xfd,
-	0x3d, 0x81, 0x73, 0x59, 0x1d, 0x17, 0x96, 0x88, 0xb2, 0xff, 0x8f, 0xd9, 0xc4, 0x9d, 0x5a, 0x92,
-	0xee, 0xd4, 0x26, 0x56, 0x92, 0x24, 0x73, 0x94, 0x75, 0x87, 0x8f, 0x36, 0x76, 0xf6, 0x68, 0x69,
-	0x77, 0x8f, 0x96, 0x0e, 0xf6, 0x28, 0x79, 0x17, 0x53, 0xf2, 0x25, 0xa6, 0xe4, 0x5b, 0x4c, 0xc9,
-	0x4e, 0x4c, 0xc9, 0x8f, 0x98, 0x92, 0x9f, 0x31, 0x2d, 0x1d, 0xc4, 0x94, 0x7c, 0xdc, 0xa7, 0xa5,
-	0x9d, 0x7d, 0x5a, 0xda, 0xdd, 0xa7, 0xa5, 0x57, 0x37, 0x84, 0x17, 0xb2, 0xb6, 0x61, 0xb7, 0x83,
-	0xc8, 0x69, 0x14, 0x7e, 0x3a, 0xef, 0xe7, 0x95, 0xf5, 0x33, 0xc9, 0x2d, 0xbe, 0xf9, 0x3b, 0x00,
-	0x00, 0xff, 0xff, 0xd8, 0x41, 0x60, 0x72, 0x69, 0x07, 0x00, 0x00,
+	// 644 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x95, 0x4d, 0x4f, 0xd4, 0x5e,
+	0x14, 0xc6, 0xe7, 0x32, 0xfc, 0xff, 0xd0, 0x83, 0xbc, 0x55, 0x81, 0x91, 0x97, 0xeb, 0xa4, 0x31,
+	0x66, 0x4c, 0x4c, 0xeb, 0x60, 0x8c, 0x31, 0xae, 0x7c, 0x0b, 0x61, 0xa1, 0x21, 0x05, 0x5c, 0x98,
+	0x98, 0xe6, 0xd2, 0x1e, 0x9a, 0x46, 0xa6, 0xad, 0xf7, 0xde, 0x4e, 0x94, 0x95, 0xdf, 0x40, 0xfd,
+	0x16, 0x7e, 0x14, 0x5d, 0xc9, 0x92, 0xa5, 0x94, 0x8d, 0x3b, 0xf9, 0x08, 0xa6, 0xed, 0x6d, 0x66,
+	0x5a, 0x30, 0x2a, 0x2c, 0xef, 0x73, 0xce, 0xf3, 0x9c, 0x7b, 0x7e, 0xbd, 0x30, 0x70, 0x8b, 0xc5,
+	0x81, 0xc5, 0x5c, 0x37, 0x4a, 0x42, 0x29, 0x90, 0xf7, 0x03, 0x17, 0xad, 0x7e, 0xd7, 0xe2, 0xf8,
+	0x26, 0x41, 0x21, 0x1d, 0x8e, 0x22, 0x8e, 0x42, 0x81, 0x66, 0xcc, 0x23, 0x19, 0xe9, 0x73, 0x2c,
+	0x0e, 0xcc, 0x6a, 0xb7, 0xd9, 0xef, 0x2e, 0x2e, 0x0f, 0x85, 0x64, 0xee, 0x1e, 0x0a, 0xc1, 0x7c,
+	0x65, 0x2a, 0xaa, 0x2a, 0xf0, 0x74, 0xf5, 0x9a, 0x1f, 0x45, 0xfe, 0x1e, 0x5a, 0xf9, 0x69, 0x27,
+	0xd9, 0xb5, 0x64, 0xd0, 0x43, 0x21, 0x59, 0x2f, 0x2e, 0x1a, 0x8c, 0x9f, 0x04, 0x5a, 0x6b, 0x28,
+	0x9f, 0xb3, 0x1e, 0x8a, 0x98, 0xb9, 0xb8, 0x9d, 0x99, 0xed, 0x22, 0x4e, 0x5f, 0x06, 0x2d, 0x2c,
+	0x0b, 0x2d, 0xd2, 0x26, 0x1d, 0xcd, 0x1e, 0x08, 0xfa, 0x7d, 0x00, 0x21, 0x19, 0x97, 0x4e, 0x96,
+	0xd9, 0x1a, 0x69, 0x93, 0xce, 0xc4, 0xea, 0xa2, 0x59, 0x0c, 0x34, 0xcb, 0x81, 0xe6, 0x56, 0x39,
+	0xd0, 0xd6, 0xf2, 0xee, 0xec, 0xac, 0xdf, 0x85, 0x71, 0x0c, 0xbd, 0xc2, 0xd8, 0xfc, 0xa3, 0x71,
+	0x0c, 0x43, 0x2f, 0xb7, 0x3d, 0x86, 0x59, 0xe6, 0xfb, 0x1c, 0x7d, 0x26, 0xd1, 0x73, 0x62, 0xe4,
+	0x41, 0xe4, 0xb5, 0x46, 0xdb, 0xa4, 0x33, 0xb5, 0x3a, 0x6f, 0x0e, 0xc1, 0x33, 0xfb, 0x5d, 0x73,
+	0x23, 0xaf, 0xda, 0x33, 0x03, 0x43, 0xa1, 0x18, 0x5b, 0x70, 0xf5, 0x8c, 0x85, 0x8b, 0x0f, 0xa1,
+	0xdf, 0x83, 0x31, 0x0c, 0x25, 0x0f, 0x50, 0xb4, 0x48, 0xbb, 0xd9, 0x99, 0x58, 0x5d, 0xa9, 0xe7,
+	0x3e, 0x43, 0x89, 0x3c, 0x08, 0xfd, 0xa7, 0xa1, 0xe4, 0xef, 0xec, 0xb2, 0xdb, 0xf8, 0x4a, 0xaa,
+	0xb1, 0xa2, 0x02, 0x72, 0x09, 0xb4, 0x98, 0xf9, 0xe8, 0x88, 0x60, 0xbf, 0x00, 0xf9, 0x9f, 0x3d,
+	0x9e, 0x09, 0x9b, 0xc1, 0x3e, 0xea, 0x2b, 0x00, 0x79, 0x51, 0x46, 0xaf, 0x31, 0xcc, 0x39, 0x6a,
+	0x76, 0xde, 0xbe, 0x95, 0x09, 0x35, 0xcc, 0xcd, 0xf3, 0x62, 0x1e, 0xfd, 0x6b, 0xcc, 0xc6, 0x07,
+	0x02, 0x8b, 0x67, 0xed, 0xa2, 0x18, 0xad, 0xc3, 0x64, 0x92, 0x09, 0x0e, 0x47, 0x37, 0xe2, 0x5e,
+	0x49, 0xea, 0x7a, 0x9d, 0x54, 0x1d, 0x71, 0xd6, 0x6c, 0x5f, 0x4a, 0x06, 0x07, 0xa1, 0xdf, 0x80,
+	0xe9, 0x10, 0xdf, 0x4a, 0xe7, 0xd4, 0xfe, 0x93, 0x99, 0xbc, 0x51, 0x32, 0x30, 0xbe, 0x11, 0x98,
+	0x5f, 0x43, 0xf9, 0xb0, 0x08, 0xaf, 0xa0, 0xad, 0xe2, 0x21, 0xe7, 0xc5, 0x33, 0x72, 0xc1, 0x57,
+	0xd8, 0xfc, 0xc7, 0x57, 0x68, 0xc3, 0xc2, 0xa9, 0x85, 0x2e, 0xfa, 0x06, 0x2f, 0xc3, 0xec, 0x20,
+	0x53, 0xf1, 0x31, 0xd6, 0x40, 0x1f, 0x16, 0xd5, 0x8c, 0x2e, 0x8c, 0xa9, 0x3c, 0x85, 0x6c, 0xa1,
+	0x3e, 0xa3, 0x74, 0x94, 0x7d, 0xc6, 0x27, 0x02, 0x57, 0xb6, 0x63, 0x8f, 0x49, 0xac, 0x4e, 0xd0,
+	0x2d, 0x18, 0x15, 0x31, 0xba, 0x2a, 0x68, 0xe9, 0x37, 0x41, 0x9b, 0x31, 0xba, 0x76, 0xde, 0xa8,
+	0xdf, 0x84, 0x19, 0x8e, 0x22, 0x4a, 0xb8, 0x8b, 0x4e, 0x1f, 0xb9, 0x08, 0xa2, 0xf2, 0xb3, 0x4f,
+	0x97, 0xfa, 0x8b, 0x42, 0xce, 0xfe, 0x36, 0xca, 0x7f, 0x96, 0x41, 0x01, 0x59, 0xb3, 0x35, 0xa5,
+	0xac, 0x7b, 0xc6, 0x2b, 0x98, 0xab, 0x5d, 0x49, 0xed, 0xf7, 0x04, 0xa6, 0x4a, 0x9f, 0x90, 0x4c,
+	0x26, 0x42, 0xdd, 0xae, 0x40, 0xa9, 0x4a, 0xd9, 0xed, 0xd4, 0x12, 0x9b, 0x79, 0x93, 0x3d, 0xc9,
+	0x87, 0x8f, 0x8f, 0x76, 0x0f, 0x8e, 0x68, 0xe3, 0xf0, 0x88, 0x36, 0x4e, 0x8e, 0x28, 0x79, 0x9f,
+	0x52, 0xf2, 0x39, 0xa5, 0xe4, 0x4b, 0x4a, 0xc9, 0x41, 0x4a, 0xc9, 0xf7, 0x94, 0x92, 0x1f, 0x29,
+	0x6d, 0x9c, 0xa4, 0x94, 0x7c, 0x3c, 0xa6, 0x8d, 0x83, 0x63, 0xda, 0x38, 0x3c, 0xa6, 0x8d, 0x97,
+	0xb7, 0x65, 0x2f, 0xe6, 0x7b, 0xa6, 0xbb, 0x17, 0x25, 0x9e, 0x75, 0xe6, 0x0f, 0xc0, 0x83, 0xaa,
+	0xb2, 0xf3, 0x7f, 0xfe, 0xdc, 0xee, 0xfc, 0x0a, 0x00, 0x00, 0xff, 0xff, 0x78, 0x3f, 0x0a, 0x36,
+	0x2f, 0x06, 0x00, 0x00,
 }
 
-func (this *NamespaceUsageRecord) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*NamespaceUsageRecord)
-	if !ok {
-		that2, ok := that.(NamespaceUsageRecord)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.Namespace != that1.Namespace {
-		return false
-	}
-	if len(this.MeteringRecords) != len(that1.MeteringRecords) {
-		return false
-	}
-	for i := range this.MeteringRecords {
-		if !this.MeteringRecords[i].Equal(that1.MeteringRecords[i]) {
-			return false
-		}
-	}
-	return true
-}
 func (this *GetNamespaceUsageRequest) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -713,6 +637,9 @@ func (this *GetNamespaceUsageRequest) Equal(that interface{}) bool {
 	if !this.EndTime.Equal(that1.EndTime) {
 		return false
 	}
+	if this.AggregatedPeriod != that1.AggregatedPeriod {
+		return false
+	}
 	return true
 }
 func (this *GetNamespaceUsageResponse) Equal(that interface{}) bool {
@@ -734,8 +661,13 @@ func (this *GetNamespaceUsageResponse) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if !this.UsageRecords.Equal(that1.UsageRecords) {
+	if len(this.Entries) != len(that1.Entries) {
 		return false
+	}
+	for i := range this.Entries {
+		if !this.Entries[i].Equal(that1.Entries[i]) {
+			return false
+		}
 	}
 	return true
 }
@@ -829,6 +761,9 @@ func (this *GetAccountUsageRequest) Equal(that interface{}) bool {
 	if !this.EndTime.Equal(that1.EndTime) {
 		return false
 	}
+	if this.AggregatedPeriod != that1.AggregatedPeriod {
+		return false
+	}
 	return true
 }
 func (this *GetAccountUsageResponse) Equal(that interface{}) bool {
@@ -850,11 +785,11 @@ func (this *GetAccountUsageResponse) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if len(this.MeteringRecords) != len(that1.MeteringRecords) {
+	if len(this.Entries) != len(that1.Entries) {
 		return false
 	}
-	for i := range this.MeteringRecords {
-		if !this.MeteringRecords[i].Equal(that1.MeteringRecords[i]) {
+	for i := range this.Entries {
+		if !this.Entries[i].Equal(that1.Entries[i]) {
 			return false
 		}
 	}
@@ -959,34 +894,11 @@ func (this *UpdateAccountResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *NamespaceUsageRecord) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&accountservice.NamespaceUsageRecord{")
-	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
-	keysForMeteringRecords := make([]string, 0, len(this.MeteringRecords))
-	for k, _ := range this.MeteringRecords {
-		keysForMeteringRecords = append(keysForMeteringRecords, k)
-	}
-	github_com_gogo_protobuf_sortkeys.Strings(keysForMeteringRecords)
-	mapStringForMeteringRecords := "map[string]*v1.MeteringRecord{"
-	for _, k := range keysForMeteringRecords {
-		mapStringForMeteringRecords += fmt.Sprintf("%#v: %#v,", k, this.MeteringRecords[k])
-	}
-	mapStringForMeteringRecords += "}"
-	if this.MeteringRecords != nil {
-		s = append(s, "MeteringRecords: "+mapStringForMeteringRecords+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
 func (this *GetNamespaceUsageRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 8)
 	s = append(s, "&accountservice.GetNamespaceUsageRequest{")
 	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
 	if this.StartTime != nil {
@@ -995,6 +907,7 @@ func (this *GetNamespaceUsageRequest) GoString() string {
 	if this.EndTime != nil {
 		s = append(s, "EndTime: "+fmt.Sprintf("%#v", this.EndTime)+",\n")
 	}
+	s = append(s, "AggregatedPeriod: "+fmt.Sprintf("%#v", this.AggregatedPeriod)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -1004,8 +917,8 @@ func (this *GetNamespaceUsageResponse) GoString() string {
 	}
 	s := make([]string, 0, 5)
 	s = append(s, "&accountservice.GetNamespaceUsageResponse{")
-	if this.UsageRecords != nil {
-		s = append(s, "UsageRecords: "+fmt.Sprintf("%#v", this.UsageRecords)+",\n")
+	if this.Entries != nil {
+		s = append(s, "Entries: "+fmt.Sprintf("%#v", this.Entries)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -1044,7 +957,7 @@ func (this *GetAccountUsageRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 6)
+	s := make([]string, 0, 7)
 	s = append(s, "&accountservice.GetAccountUsageRequest{")
 	if this.StartTime != nil {
 		s = append(s, "StartTime: "+fmt.Sprintf("%#v", this.StartTime)+",\n")
@@ -1052,6 +965,7 @@ func (this *GetAccountUsageRequest) GoString() string {
 	if this.EndTime != nil {
 		s = append(s, "EndTime: "+fmt.Sprintf("%#v", this.EndTime)+",\n")
 	}
+	s = append(s, "AggregatedPeriod: "+fmt.Sprintf("%#v", this.AggregatedPeriod)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -1061,18 +975,8 @@ func (this *GetAccountUsageResponse) GoString() string {
 	}
 	s := make([]string, 0, 5)
 	s = append(s, "&accountservice.GetAccountUsageResponse{")
-	keysForMeteringRecords := make([]string, 0, len(this.MeteringRecords))
-	for k, _ := range this.MeteringRecords {
-		keysForMeteringRecords = append(keysForMeteringRecords, k)
-	}
-	github_com_gogo_protobuf_sortkeys.Strings(keysForMeteringRecords)
-	mapStringForMeteringRecords := "map[string]*v1.MeteringRecord{"
-	for _, k := range keysForMeteringRecords {
-		mapStringForMeteringRecords += fmt.Sprintf("%#v: %#v,", k, this.MeteringRecords[k])
-	}
-	mapStringForMeteringRecords += "}"
-	if this.MeteringRecords != nil {
-		s = append(s, "MeteringRecords: "+mapStringForMeteringRecords+",\n")
+	if this.Entries != nil {
+		s = append(s, "Entries: "+fmt.Sprintf("%#v", this.Entries)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -1132,62 +1036,6 @@ func valueToGoStringRequestResponse(v interface{}, typ string) string {
 	pv := reflect.Indirect(rv).Interface()
 	return fmt.Sprintf("func(v %v) *%v { return &v } ( %#v )", typ, typ, pv)
 }
-func (m *NamespaceUsageRecord) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *NamespaceUsageRecord) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *NamespaceUsageRecord) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.MeteringRecords) > 0 {
-		for k := range m.MeteringRecords {
-			v := m.MeteringRecords[k]
-			baseI := i
-			if v != nil {
-				{
-					size, err := v.MarshalToSizedBuffer(dAtA[:i])
-					if err != nil {
-						return 0, err
-					}
-					i -= size
-					i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-				}
-				i--
-				dAtA[i] = 0x12
-			}
-			i -= len(k)
-			copy(dAtA[i:], k)
-			i = encodeVarintRequestResponse(dAtA, i, uint64(len(k)))
-			i--
-			dAtA[i] = 0xa
-			i = encodeVarintRequestResponse(dAtA, i, uint64(baseI-i))
-			i--
-			dAtA[i] = 0x12
-		}
-	}
-	if len(m.Namespace) > 0 {
-		i -= len(m.Namespace)
-		copy(dAtA[i:], m.Namespace)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
 func (m *GetNamespaceUsageRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1208,6 +1056,11 @@ func (m *GetNamespaceUsageRequest) MarshalToSizedBuffer(dAtA []byte) (int, error
 	_ = i
 	var l int
 	_ = l
+	if m.AggregatedPeriod != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.AggregatedPeriod))
+		i--
+		dAtA[i] = 0x20
+	}
 	if m.EndTime != nil {
 		{
 			size, err := m.EndTime.MarshalToSizedBuffer(dAtA[:i])
@@ -1262,17 +1115,19 @@ func (m *GetNamespaceUsageResponse) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	_ = i
 	var l int
 	_ = l
-	if m.UsageRecords != nil {
-		{
-			size, err := m.UsageRecords.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
+	if len(m.Entries) > 0 {
+		for iNdEx := len(m.Entries) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Entries[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
 			}
-			i -= size
-			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			i--
+			dAtA[i] = 0xa
 		}
-		i--
-		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -1400,6 +1255,11 @@ func (m *GetAccountUsageRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	_ = i
 	var l int
 	_ = l
+	if m.AggregatedPeriod != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.AggregatedPeriod))
+		i--
+		dAtA[i] = 0x18
+	}
 	if m.EndTime != nil {
 		{
 			size, err := m.EndTime.MarshalToSizedBuffer(dAtA[:i])
@@ -1447,28 +1307,16 @@ func (m *GetAccountUsageResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	_ = i
 	var l int
 	_ = l
-	if len(m.MeteringRecords) > 0 {
-		for k := range m.MeteringRecords {
-			v := m.MeteringRecords[k]
-			baseI := i
-			if v != nil {
-				{
-					size, err := v.MarshalToSizedBuffer(dAtA[:i])
-					if err != nil {
-						return 0, err
-					}
-					i -= size
-					i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+	if len(m.Entries) > 0 {
+		for iNdEx := len(m.Entries) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Entries[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
 				}
-				i--
-				dAtA[i] = 0x12
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
 			}
-			i -= len(k)
-			copy(dAtA[i:], k)
-			i = encodeVarintRequestResponse(dAtA, i, uint64(len(k)))
-			i--
-			dAtA[i] = 0xa
-			i = encodeVarintRequestResponse(dAtA, i, uint64(baseI-i))
 			i--
 			dAtA[i] = 0xa
 		}
@@ -1629,32 +1477,6 @@ func encodeVarintRequestResponse(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *NamespaceUsageRecord) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Namespace)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	if len(m.MeteringRecords) > 0 {
-		for k, v := range m.MeteringRecords {
-			_ = k
-			_ = v
-			l = 0
-			if v != nil {
-				l = v.Size()
-				l += 1 + sovRequestResponse(uint64(l))
-			}
-			mapEntrySize := 1 + len(k) + sovRequestResponse(uint64(len(k))) + l
-			n += mapEntrySize + 1 + sovRequestResponse(uint64(mapEntrySize))
-		}
-	}
-	return n
-}
-
 func (m *GetNamespaceUsageRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1673,6 +1495,9 @@ func (m *GetNamespaceUsageRequest) Size() (n int) {
 		l = m.EndTime.Size()
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
+	if m.AggregatedPeriod != 0 {
+		n += 1 + sovRequestResponse(uint64(m.AggregatedPeriod))
+	}
 	return n
 }
 
@@ -1682,9 +1507,11 @@ func (m *GetNamespaceUsageResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.UsageRecords != nil {
-		l = m.UsageRecords.Size()
-		n += 1 + l + sovRequestResponse(uint64(l))
+	if len(m.Entries) > 0 {
+		for _, e := range m.Entries {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
 	}
 	return n
 }
@@ -1746,6 +1573,9 @@ func (m *GetAccountUsageRequest) Size() (n int) {
 		l = m.EndTime.Size()
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
+	if m.AggregatedPeriod != 0 {
+		n += 1 + sovRequestResponse(uint64(m.AggregatedPeriod))
+	}
 	return n
 }
 
@@ -1755,17 +1585,10 @@ func (m *GetAccountUsageResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if len(m.MeteringRecords) > 0 {
-		for k, v := range m.MeteringRecords {
-			_ = k
-			_ = v
-			l = 0
-			if v != nil {
-				l = v.Size()
-				l += 1 + sovRequestResponse(uint64(l))
-			}
-			mapEntrySize := 1 + len(k) + sovRequestResponse(uint64(len(k))) + l
-			n += mapEntrySize + 1 + sovRequestResponse(uint64(mapEntrySize))
+	if len(m.Entries) > 0 {
+		for _, e := range m.Entries {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
 		}
 	}
 	return n
@@ -1833,27 +1656,6 @@ func sovRequestResponse(x uint64) (n int) {
 func sozRequestResponse(x uint64) (n int) {
 	return sovRequestResponse(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (this *NamespaceUsageRecord) String() string {
-	if this == nil {
-		return "nil"
-	}
-	keysForMeteringRecords := make([]string, 0, len(this.MeteringRecords))
-	for k, _ := range this.MeteringRecords {
-		keysForMeteringRecords = append(keysForMeteringRecords, k)
-	}
-	github_com_gogo_protobuf_sortkeys.Strings(keysForMeteringRecords)
-	mapStringForMeteringRecords := "map[string]*v1.MeteringRecord{"
-	for _, k := range keysForMeteringRecords {
-		mapStringForMeteringRecords += fmt.Sprintf("%v: %v,", k, this.MeteringRecords[k])
-	}
-	mapStringForMeteringRecords += "}"
-	s := strings.Join([]string{`&NamespaceUsageRecord{`,
-		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
-		`MeteringRecords:` + mapStringForMeteringRecords + `,`,
-		`}`,
-	}, "")
-	return s
-}
 func (this *GetNamespaceUsageRequest) String() string {
 	if this == nil {
 		return "nil"
@@ -1862,6 +1664,7 @@ func (this *GetNamespaceUsageRequest) String() string {
 		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
 		`StartTime:` + strings.Replace(fmt.Sprintf("%v", this.StartTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`EndTime:` + strings.Replace(fmt.Sprintf("%v", this.EndTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`AggregatedPeriod:` + fmt.Sprintf("%v", this.AggregatedPeriod) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1870,8 +1673,13 @@ func (this *GetNamespaceUsageResponse) String() string {
 	if this == nil {
 		return "nil"
 	}
+	repeatedStringForEntries := "[]*MeteringEntry{"
+	for _, f := range this.Entries {
+		repeatedStringForEntries += strings.Replace(fmt.Sprintf("%v", f), "MeteringEntry", "v1.MeteringEntry", 1) + ","
+	}
+	repeatedStringForEntries += "}"
 	s := strings.Join([]string{`&GetNamespaceUsageResponse{`,
-		`UsageRecords:` + strings.Replace(this.UsageRecords.String(), "NamespaceUsageRecord", "NamespaceUsageRecord", 1) + `,`,
+		`Entries:` + repeatedStringForEntries + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1895,7 +1703,7 @@ func (this *GetNamespacesUsageResponse) String() string {
 	}
 	repeatedStringForUsageRecords := "[]*NamespaceUsageRecord{"
 	for _, f := range this.UsageRecords {
-		repeatedStringForUsageRecords += strings.Replace(f.String(), "NamespaceUsageRecord", "NamespaceUsageRecord", 1) + ","
+		repeatedStringForUsageRecords += strings.Replace(fmt.Sprintf("%v", f), "NamespaceUsageRecord", "v1.NamespaceUsageRecord", 1) + ","
 	}
 	repeatedStringForUsageRecords += "}"
 	s := strings.Join([]string{`&GetNamespacesUsageResponse{`,
@@ -1912,6 +1720,7 @@ func (this *GetAccountUsageRequest) String() string {
 	s := strings.Join([]string{`&GetAccountUsageRequest{`,
 		`StartTime:` + strings.Replace(fmt.Sprintf("%v", this.StartTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`EndTime:` + strings.Replace(fmt.Sprintf("%v", this.EndTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`AggregatedPeriod:` + fmt.Sprintf("%v", this.AggregatedPeriod) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1920,18 +1729,13 @@ func (this *GetAccountUsageResponse) String() string {
 	if this == nil {
 		return "nil"
 	}
-	keysForMeteringRecords := make([]string, 0, len(this.MeteringRecords))
-	for k, _ := range this.MeteringRecords {
-		keysForMeteringRecords = append(keysForMeteringRecords, k)
+	repeatedStringForEntries := "[]*MeteringEntry{"
+	for _, f := range this.Entries {
+		repeatedStringForEntries += strings.Replace(fmt.Sprintf("%v", f), "MeteringEntry", "v1.MeteringEntry", 1) + ","
 	}
-	github_com_gogo_protobuf_sortkeys.Strings(keysForMeteringRecords)
-	mapStringForMeteringRecords := "map[string]*v1.MeteringRecord{"
-	for _, k := range keysForMeteringRecords {
-		mapStringForMeteringRecords += fmt.Sprintf("%v: %v,", k, this.MeteringRecords[k])
-	}
-	mapStringForMeteringRecords += "}"
+	repeatedStringForEntries += "}"
 	s := strings.Join([]string{`&GetAccountUsageResponse{`,
-		`MeteringRecords:` + mapStringForMeteringRecords + `,`,
+		`Entries:` + repeatedStringForEntries + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1984,220 +1788,6 @@ func valueToStringRequestResponse(v interface{}) string {
 	}
 	pv := reflect.Indirect(rv).Interface()
 	return fmt.Sprintf("*%v", pv)
-}
-func (m *NamespaceUsageRecord) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: NamespaceUsageRecord: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: NamespaceUsageRecord: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Namespace = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MeteringRecords", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.MeteringRecords == nil {
-				m.MeteringRecords = make(map[string]*v1.MeteringRecord)
-			}
-			var mapkey string
-			var mapvalue *v1.MeteringRecord
-			for iNdEx < postIndex {
-				entryPreIndex := iNdEx
-				var wire uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return ErrIntOverflowRequestResponse
-					}
-					if iNdEx >= l {
-						return io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					wire |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				fieldNum := int32(wire >> 3)
-				if fieldNum == 1 {
-					var stringLenmapkey uint64
-					for shift := uint(0); ; shift += 7 {
-						if shift >= 64 {
-							return ErrIntOverflowRequestResponse
-						}
-						if iNdEx >= l {
-							return io.ErrUnexpectedEOF
-						}
-						b := dAtA[iNdEx]
-						iNdEx++
-						stringLenmapkey |= uint64(b&0x7F) << shift
-						if b < 0x80 {
-							break
-						}
-					}
-					intStringLenmapkey := int(stringLenmapkey)
-					if intStringLenmapkey < 0 {
-						return ErrInvalidLengthRequestResponse
-					}
-					postStringIndexmapkey := iNdEx + intStringLenmapkey
-					if postStringIndexmapkey < 0 {
-						return ErrInvalidLengthRequestResponse
-					}
-					if postStringIndexmapkey > l {
-						return io.ErrUnexpectedEOF
-					}
-					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
-					iNdEx = postStringIndexmapkey
-				} else if fieldNum == 2 {
-					var mapmsglen int
-					for shift := uint(0); ; shift += 7 {
-						if shift >= 64 {
-							return ErrIntOverflowRequestResponse
-						}
-						if iNdEx >= l {
-							return io.ErrUnexpectedEOF
-						}
-						b := dAtA[iNdEx]
-						iNdEx++
-						mapmsglen |= int(b&0x7F) << shift
-						if b < 0x80 {
-							break
-						}
-					}
-					if mapmsglen < 0 {
-						return ErrInvalidLengthRequestResponse
-					}
-					postmsgIndex := iNdEx + mapmsglen
-					if postmsgIndex < 0 {
-						return ErrInvalidLengthRequestResponse
-					}
-					if postmsgIndex > l {
-						return io.ErrUnexpectedEOF
-					}
-					mapvalue = &v1.MeteringRecord{}
-					if err := mapvalue.Unmarshal(dAtA[iNdEx:postmsgIndex]); err != nil {
-						return err
-					}
-					iNdEx = postmsgIndex
-				} else {
-					iNdEx = entryPreIndex
-					skippy, err := skipRequestResponse(dAtA[iNdEx:])
-					if err != nil {
-						return err
-					}
-					if skippy < 0 {
-						return ErrInvalidLengthRequestResponse
-					}
-					if (iNdEx + skippy) > postIndex {
-						return io.ErrUnexpectedEOF
-					}
-					iNdEx += skippy
-				}
-			}
-			m.MeteringRecords[mapkey] = mapvalue
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
 }
 func (m *GetNamespaceUsageRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
@@ -2332,6 +1922,25 @@ func (m *GetNamespaceUsageRequest) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AggregatedPeriod", wireType)
+			}
+			m.AggregatedPeriod = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.AggregatedPeriod |= v1.Period(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipRequestResponse(dAtA[iNdEx:])
@@ -2387,7 +1996,7 @@ func (m *GetNamespaceUsageResponse) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field UsageRecords", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Entries", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2414,10 +2023,8 @@ func (m *GetNamespaceUsageResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.UsageRecords == nil {
-				m.UsageRecords = &NamespaceUsageRecord{}
-			}
-			if err := m.UsageRecords.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.Entries = append(m.Entries, &v1.MeteringEntry{})
+			if err := m.Entries[len(m.Entries)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2679,7 +2286,7 @@ func (m *GetNamespacesUsageResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.UsageRecords = append(m.UsageRecords, &NamespaceUsageRecord{})
+			m.UsageRecords = append(m.UsageRecords, &v1.NamespaceUsageRecord{})
 			if err := m.UsageRecords[len(m.UsageRecords)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -2841,6 +2448,25 @@ func (m *GetAccountUsageRequest) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AggregatedPeriod", wireType)
+			}
+			m.AggregatedPeriod = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.AggregatedPeriod |= v1.Period(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipRequestResponse(dAtA[iNdEx:])
@@ -2896,7 +2522,7 @@ func (m *GetAccountUsageResponse) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MeteringRecords", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Entries", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2923,105 +2549,10 @@ func (m *GetAccountUsageResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.MeteringRecords == nil {
-				m.MeteringRecords = make(map[string]*v1.MeteringRecord)
+			m.Entries = append(m.Entries, &v1.MeteringEntry{})
+			if err := m.Entries[len(m.Entries)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
 			}
-			var mapkey string
-			var mapvalue *v1.MeteringRecord
-			for iNdEx < postIndex {
-				entryPreIndex := iNdEx
-				var wire uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return ErrIntOverflowRequestResponse
-					}
-					if iNdEx >= l {
-						return io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					wire |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				fieldNum := int32(wire >> 3)
-				if fieldNum == 1 {
-					var stringLenmapkey uint64
-					for shift := uint(0); ; shift += 7 {
-						if shift >= 64 {
-							return ErrIntOverflowRequestResponse
-						}
-						if iNdEx >= l {
-							return io.ErrUnexpectedEOF
-						}
-						b := dAtA[iNdEx]
-						iNdEx++
-						stringLenmapkey |= uint64(b&0x7F) << shift
-						if b < 0x80 {
-							break
-						}
-					}
-					intStringLenmapkey := int(stringLenmapkey)
-					if intStringLenmapkey < 0 {
-						return ErrInvalidLengthRequestResponse
-					}
-					postStringIndexmapkey := iNdEx + intStringLenmapkey
-					if postStringIndexmapkey < 0 {
-						return ErrInvalidLengthRequestResponse
-					}
-					if postStringIndexmapkey > l {
-						return io.ErrUnexpectedEOF
-					}
-					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
-					iNdEx = postStringIndexmapkey
-				} else if fieldNum == 2 {
-					var mapmsglen int
-					for shift := uint(0); ; shift += 7 {
-						if shift >= 64 {
-							return ErrIntOverflowRequestResponse
-						}
-						if iNdEx >= l {
-							return io.ErrUnexpectedEOF
-						}
-						b := dAtA[iNdEx]
-						iNdEx++
-						mapmsglen |= int(b&0x7F) << shift
-						if b < 0x80 {
-							break
-						}
-					}
-					if mapmsglen < 0 {
-						return ErrInvalidLengthRequestResponse
-					}
-					postmsgIndex := iNdEx + mapmsglen
-					if postmsgIndex < 0 {
-						return ErrInvalidLengthRequestResponse
-					}
-					if postmsgIndex > l {
-						return io.ErrUnexpectedEOF
-					}
-					mapvalue = &v1.MeteringRecord{}
-					if err := mapvalue.Unmarshal(dAtA[iNdEx:postmsgIndex]); err != nil {
-						return err
-					}
-					iNdEx = postmsgIndex
-				} else {
-					iNdEx = entryPreIndex
-					skippy, err := skipRequestResponse(dAtA[iNdEx:])
-					if err != nil {
-						return err
-					}
-					if skippy < 0 {
-						return ErrInvalidLengthRequestResponse
-					}
-					if (iNdEx + skippy) > postIndex {
-						return io.ErrUnexpectedEOF
-					}
-					iNdEx += skippy
-				}
-			}
-			m.MeteringRecords[mapkey] = mapvalue
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
