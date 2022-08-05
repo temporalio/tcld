@@ -67,8 +67,8 @@ func (c *AccountClient) parseExistingMetricsCerts(ctx *cli.Context) (account *ac
 	}
 
 	var existingCerts caCerts
-	if a.GetSpec().GetMetrics() != nil && a.GetSpec().GetMetrics().GetAcceptedMetricsClientCa() != "" {
-		existingCerts, err = parseCertificates(a.GetSpec().GetMetrics().GetAcceptedMetricsClientCa())
+	if a.GetSpec().GetMetrics() != nil && a.GetSpec().GetMetrics().GetAcceptedClientCa() != "" {
+		existingCerts, err = parseCertificates(a.GetSpec().GetMetrics().GetAcceptedClientCa())
 		if err != nil {
 			return nil, nil, err
 		}
@@ -116,15 +116,32 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 									return err
 								}
 
-								if a.Spec.Metrics != nil && a.Spec.Metrics.EnableMetricsEndpoint {
+								if a.Spec.Metrics != nil && a.Spec.Metrics.Enabled {
 									return errors.New("metrics endpoint is already enabled")
 								}
 
-								if a.Spec.Metrics == nil || a.Spec.Metrics.AcceptedMetricsClientCa == "" {
+								if a.Spec.Metrics == nil || a.Spec.Metrics.AcceptedClientCa == "" {
 									return errors.New("metrics endpoint cannot be enabled until ca certificates have been configured")
 								}
 
-								a.Spec.Metrics.EnableMetricsEndpoint = true
+								a.Spec.Metrics.Enabled = true
+								return c.updateAccount(ctx, a)
+							},
+						},
+						{
+							Name:  "disable",
+							Usage: "Disables the metrics endpoint",
+							Action: func(ctx *cli.Context) error {
+								a, err := c.getAccount()
+								if err != nil {
+									return err
+								}
+
+								if a.Spec.Metrics == nil || !a.Spec.Metrics.Enabled {
+									return errors.New("metrics endpoint is already disabled")
+								}
+
+								a.Spec.Metrics.Enabled = false
 								return c.updateAccount(ctx, a)
 							},
 						},
@@ -164,7 +181,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 											return err
 										}
 
-										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedMetricsClientCa == bundle {
+										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedClientCa == bundle {
 											return errors.New("nothing to change")
 										}
 
@@ -172,7 +189,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 											a.Spec.Metrics = &account.MetricsSpec{}
 										}
 
-										a.Spec.Metrics.AcceptedMetricsClientCa = bundle
+										a.Spec.Metrics.AcceptedClientCa = bundle
 										return c.updateAccount(ctx, a)
 									},
 								},
@@ -218,7 +235,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 											return err
 										}
 
-										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedMetricsClientCa == bundle {
+										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedClientCa == bundle {
 											return errors.New("nothing to change")
 										}
 
@@ -226,7 +243,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 											a.Spec.Metrics = &account.MetricsSpec{}
 										}
 
-										a.Spec.Metrics.AcceptedMetricsClientCa = bundle
+										a.Spec.Metrics.AcceptedClientCa = bundle
 										y, err := ConfirmPrompt(ctx, "removing ca certificates can cause connectivity disruption if there are any clients using certificates that cannot be verified. confirm remove?")
 										if err != nil || !y {
 											return err
@@ -255,17 +272,17 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 											return err
 										}
 
-										fmt.Println("2: " + a.Spec.Metrics.AcceptedMetricsClientCa)
+										fmt.Println("2: " + a.Spec.Metrics.AcceptedClientCa)
 
-										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedMetricsClientCa == cert {
-											fmt.Printf("%+v vs %+v\r\n", cert, a.Spec.Metrics.AcceptedMetricsClientCa)
+										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedClientCa == cert {
+											fmt.Printf("%+v vs %+v\r\n", cert, a.Spec.Metrics.AcceptedClientCa)
 											return errors.New("nothing to change")
 										}
 
 										if a.Spec.Metrics == nil {
 											a.Spec.Metrics = &account.MetricsSpec{}
 										}
-										a.Spec.Metrics.AcceptedMetricsClientCa = cert
+										a.Spec.Metrics.AcceptedClientCa = cert
 										return c.updateAccount(ctx, a)
 									},
 								},
@@ -279,8 +296,8 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 											return err
 										}
 
-										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedMetricsClientCa != "" {
-											out, err := parseCertificates(a.Spec.Metrics.AcceptedMetricsClientCa)
+										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedClientCa != "" {
+											out, err := parseCertificates(a.Spec.Metrics.AcceptedClientCa)
 											if err != nil {
 												return err
 											}

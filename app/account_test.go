@@ -85,14 +85,14 @@ func (s *AccountTestSuite) TestEnable() {
 		{
 			args: []string{"account", "metrics", "enable"},
 			expectGet: func(g *accountservice.GetAccountResponse) {
-				g.Account.Spec.Metrics.AcceptedMetricsClientCa = ""
+				g.Account.Spec.Metrics.AcceptedClientCa = ""
 			},
 			expectErrMsg: "metrics endpoint cannot be enabled until ca certificates have been configured",
 		},
 		{
 			args: []string{"account", "metrics", "enable"},
 			expectGet: func(g *accountservice.GetAccountResponse) {
-				g.Account.Spec.Metrics.EnableMetricsEndpoint = true
+				g.Account.Spec.Metrics.Enabled = true
 			},
 			expectErrMsg: "metrics endpoint is already enabled",
 		},
@@ -100,7 +100,7 @@ func (s *AccountTestSuite) TestEnable() {
 			args:      []string{"a", "m", "enable"},
 			expectGet: func(g *accountservice.GetAccountResponse) {},
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.EnableMetricsEndpoint = true
+				r.Spec.Metrics.Enabled = true
 			},
 		},
 	}
@@ -111,7 +111,75 @@ func (s *AccountTestSuite) TestEnable() {
 				Account: &account.Account{
 					Spec: &account.AccountSpec{
 						Metrics: &account.MetricsSpec{
-							AcceptedMetricsClientCa: "cert1",
+							AcceptedClientCa: "cert1",
+						},
+					},
+					State:           account.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetAccount(gomock.Any(), &accountservice.GetAccountRequest{}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := s.copySpec(getResp.Account.Spec)
+				req := accountservice.UpdateAccountRequest{
+					Spec:            spec,
+					ResourceVersion: getResp.Account.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateAccount(gomock.Any(), &req).
+					Return(&accountservice.UpdateAccountResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErrMsg != "" {
+				s.Error(err)
+				s.ErrorContains(err, tc.expectErrMsg)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *AccountTestSuite) TestDisable() {
+	type morphGetResp func(*accountservice.GetAccountResponse)
+	type morphUpdateReq func(*accountservice.UpdateAccountRequest)
+
+	tests := []struct {
+		args         []string
+		expectGet    morphGetResp
+		expectErrMsg string
+		expectUpdate morphUpdateReq
+	}{
+		{
+			args:         []string{"account", "metrics", "disable"},
+			expectGet:    func(g *accountservice.GetAccountResponse) {},
+			expectErrMsg: "metrics endpoint is already disabled",
+		},
+		{
+			args: []string{"a", "m", "disable"},
+			expectGet: func(g *accountservice.GetAccountResponse) {
+				g.Account.Spec.Metrics.Enabled = true
+			},
+			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+				r.Spec.Metrics.Enabled = false
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			getResp := accountservice.GetAccountResponse{
+				Account: &account.Account{
+					Spec: &account.AccountSpec{
+						Metrics: &account.MetricsSpec{
+							AcceptedClientCa: "cert1",
 						},
 					},
 					State:           account.STATE_ACTIVE,
@@ -186,21 +254,21 @@ func (s *AccountTestSuite) TestUpdateCA() {
 			args:      []string{"a", "m", "ca", "set", "--ca-certificate", "cert2"},
 			expectGet: func(g *accountservice.GetAccountResponse) {},
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = "cert2"
+				r.Spec.Metrics.AcceptedClientCa = "cert2"
 			},
 		},
 		{
 			args:      []string{"a", "m", "ca", "set", "--ca-certificate", "cert2"},
 			expectGet: func(g *accountservice.GetAccountResponse) { g.Account.Spec.Metrics = &account.MetricsSpec{} },
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = "cert2"
+				r.Spec.Metrics.AcceptedClientCa = "cert2"
 			},
 		},
 		{
 			args:      []string{"a", "m", "ca", "set", "--ca-certificate-file", path},
 			expectGet: func(g *accountservice.GetAccountResponse) {},
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = base64.StdEncoding.EncodeToString([]byte("cert2"))
+				r.Spec.Metrics.AcceptedClientCa = base64.StdEncoding.EncodeToString([]byte("cert2"))
 			},
 		},
 		{
@@ -210,10 +278,10 @@ func (s *AccountTestSuite) TestUpdateCA() {
 		{
 			args: []string{"a", "m", "ca", "set", "-c", "cert2", "--resource-version", "ver2"},
 			expectGet: func(g *accountservice.GetAccountResponse) {
-				fmt.Println("1: " + g.Account.GetSpec().GetMetrics().AcceptedMetricsClientCa)
+				fmt.Println("1: " + g.Account.GetSpec().GetMetrics().AcceptedClientCa)
 			},
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = "cert2"
+				r.Spec.Metrics.AcceptedClientCa = "cert2"
 				r.ResourceVersion = "ver2"
 			},
 		},
@@ -225,7 +293,7 @@ func (s *AccountTestSuite) TestUpdateCA() {
 				Account: &account.Account{
 					Spec: &account.AccountSpec{
 						Metrics: &account.MetricsSpec{
-							AcceptedMetricsClientCa: "cert1",
+							AcceptedClientCa: "cert1",
 						},
 					},
 					State:           account.STATE_ACTIVE,
@@ -306,7 +374,7 @@ func (s *AccountTestSuite) TestUpdateRemoveCA() {
 			args:      []string{"a", "m", "ca", "remove", "--ca-certificate", cert1},
 			expectGet: func(g *accountservice.GetAccountResponse) {},
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = cert2
+				r.Spec.Metrics.AcceptedClientCa = cert2
 			},
 		},
 		{
@@ -314,7 +382,7 @@ func (s *AccountTestSuite) TestUpdateRemoveCA() {
 			args:      []string{"a", "m", "ca", "r", "--ca-certificate", cert2},
 			expectGet: func(g *accountservice.GetAccountResponse) {},
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = cert1
+				r.Spec.Metrics.AcceptedClientCa = cert1
 			},
 		},
 		{
@@ -334,7 +402,7 @@ func (s *AccountTestSuite) TestUpdateRemoveCA() {
 		{
 			name:      "empty cert - remove 1 cert",
 			args:      []string{"a", "m", "ca", "r", "--ca-certificate", cert2},
-			expectGet: func(g *accountservice.GetAccountResponse) { g.Account.Spec.Metrics.AcceptedMetricsClientCa = "" },
+			expectGet: func(g *accountservice.GetAccountResponse) { g.Account.Spec.Metrics.AcceptedClientCa = "" },
 			expectErr: true,
 		},
 		{
@@ -342,7 +410,7 @@ func (s *AccountTestSuite) TestUpdateRemoveCA() {
 			args:      []string{"a", "m", "ca", "r", "--ca-certificate-file", path},
 			expectGet: func(g *accountservice.GetAccountResponse) {},
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = cert1
+				r.Spec.Metrics.AcceptedClientCa = cert1
 			},
 		},
 		{
@@ -356,7 +424,7 @@ func (s *AccountTestSuite) TestUpdateRemoveCA() {
 			args:      []string{"a", "m", "ca", "r", "--ca-certificate-fingerprint", cert2fingerprint},
 			expectGet: func(g *accountservice.GetAccountResponse) {},
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = cert1
+				r.Spec.Metrics.AcceptedClientCa = cert1
 			},
 		},
 		{
@@ -370,7 +438,7 @@ func (s *AccountTestSuite) TestUpdateRemoveCA() {
 			args:      []string{"a", "m", "ca", "r", "-c", cert2, "--resource-version", "ver2"},
 			expectGet: func(g *accountservice.GetAccountResponse) {},
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = cert1
+				r.Spec.Metrics.AcceptedClientCa = cert1
 				r.ResourceVersion = "ver2"
 			},
 		},
@@ -382,7 +450,7 @@ func (s *AccountTestSuite) TestUpdateRemoveCA() {
 				Account: &account.Account{
 					Spec: &account.AccountSpec{
 						Metrics: &account.MetricsSpec{
-							AcceptedMetricsClientCa: cert12,
+							AcceptedClientCa: cert12,
 						},
 					},
 					State:           account.STATE_ACTIVE,
@@ -467,15 +535,15 @@ func (s *AccountTestSuite) TestUpdateAddCA() {
 			args:      []string{"a", "m", "ca", "add", "--ca-certificate", cert2},
 			expectGet: func(g *accountservice.GetAccountResponse) {},
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = cert12
+				r.Spec.Metrics.AcceptedClientCa = cert12
 			},
 		},
 		{
 			name:      "empty cert - add 1 cert",
 			args:      []string{"a", "m", "ca", "add", "--ca-certificate", cert2},
-			expectGet: func(g *accountservice.GetAccountResponse) { g.Account.Spec.Metrics.AcceptedMetricsClientCa = "" },
+			expectGet: func(g *accountservice.GetAccountResponse) { g.Account.Spec.Metrics.AcceptedClientCa = "" },
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = cert2
+				r.Spec.Metrics.AcceptedClientCa = cert2
 			},
 		},
 		{
@@ -483,7 +551,7 @@ func (s *AccountTestSuite) TestUpdateAddCA() {
 			args:      []string{"a", "m", "ca", "add", "--ca-certificate-file", path},
 			expectGet: func(g *accountservice.GetAccountResponse) {},
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = cert12
+				r.Spec.Metrics.AcceptedClientCa = cert12
 			},
 		},
 		{
@@ -496,7 +564,7 @@ func (s *AccountTestSuite) TestUpdateAddCA() {
 			args:      []string{"a", "m", "ca", "add", "-c", cert2, "--resource-version", "ver2"},
 			expectGet: func(g *accountservice.GetAccountResponse) {},
 			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
-				r.Spec.Metrics.AcceptedMetricsClientCa = cert12
+				r.Spec.Metrics.AcceptedClientCa = cert12
 				r.ResourceVersion = "ver2"
 			},
 		},
@@ -508,7 +576,7 @@ func (s *AccountTestSuite) TestUpdateAddCA() {
 				Account: &account.Account{
 					Spec: &account.AccountSpec{
 						Metrics: &account.MetricsSpec{
-							AcceptedMetricsClientCa: cert1,
+							AcceptedClientCa: cert1,
 						},
 					},
 					State:           account.STATE_ACTIVE,
