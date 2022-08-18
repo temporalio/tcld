@@ -12,8 +12,8 @@ import (
 	strings "strings"
 
 	proto "github.com/gogo/protobuf/proto"
-	v1 "github.com/temporalio/tcld/protogen/api/auth/v1"
-	v11 "github.com/temporalio/tcld/protogen/api/request/v1"
+	v1 "github.com/temporalio/temporal-cloud-api-go/api/auth/v1"
+	v11 "github.com/temporalio/temporal-cloud-api-go/api/request/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -28,7 +28,7 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type GetRolesRequest struct {
-	// the requested size of the page to retrive, defaults to 30, max 90
+	// the requested size of the page to retrive
 	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// the page token
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
@@ -238,7 +238,7 @@ func (m *GetRolesByPermissionsResponse) GetRoles() []*v1.Role {
 }
 
 type GetUsersRequest struct {
-	// the requested size of the page to retrive, defaults to 30, max 90
+	// the requested size of the page to retrive
 	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// the page token
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
