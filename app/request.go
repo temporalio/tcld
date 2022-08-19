@@ -5,11 +5,19 @@ import (
 
 	"github.com/temporalio/tcld/protogen/api/requestservice/v1"
 	"github.com/urfave/cli/v2"
+	"google.golang.org/grpc"
 )
 
 type RequestClient struct {
 	client requestservice.RequestServiceClient
 	ctx    context.Context
+}
+
+func NewRequestClient(ctx context.Context, conn *grpc.ClientConn) *RequestClient {
+	return &RequestClient{
+		client: requestservice.NewRequestServiceClient(conn),
+		ctx:    ctx,
+	}
 }
 
 type GetRequestClientFn func(ctx *cli.Context) (*RequestClient, error)
@@ -19,15 +27,11 @@ func GetRequestClient(ctx *cli.Context) (*RequestClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &RequestClient{
-		client: requestservice.NewRequestServiceClient(conn),
-		ctx:    ct,
-	}, nil
+	return NewRequestClient(ct, conn), nil
 }
 
-func (c *RequestClient) getRequestStatus(namespace string, requestID string) error {
+func (c *RequestClient) getRequestStatus(requestID string) error {
 	res, err := c.client.GetRequestStatus(c.ctx, &requestservice.GetRequestStatusRequest{
-		Namespace: namespace,
 		RequestId: requestID,
 	})
 	if err != nil {
@@ -54,7 +58,6 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 			Usage:   "Get the request status",
 			Aliases: []string{"g"},
 			Flags: []cli.Flag{
-				NamespaceFlag,
 				&cli.StringFlag{
 					Name:     "request-id",
 					Usage:    "The request-id of the asynchronous request",
@@ -63,7 +66,7 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 				},
 			},
 			Action: func(ctx *cli.Context) error {
-				return c.getRequestStatus(ctx.String(NamespaceFlagName), ctx.String("request-id"))
+				return c.getRequestStatus(ctx.String("request-id"))
 			},
 		}},
 	}}, nil

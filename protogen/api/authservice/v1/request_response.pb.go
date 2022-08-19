@@ -28,7 +28,7 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type GetRolesRequest struct {
-	// the requested size of the page to retrive, defaults to 30, max 90
+	// the requested size of the page to retrive
 	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// the page token
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
@@ -238,7 +238,7 @@ func (m *GetRolesByPermissionsResponse) GetRoles() []*v1.Role {
 }
 
 type GetUsersRequest struct {
-	// the requested size of the page to retrive, defaults to 30, max 90
+	// the requested size of the page to retrive
 	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// the page token
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`

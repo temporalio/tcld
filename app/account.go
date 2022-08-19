@@ -8,11 +8,19 @@ import (
 	"github.com/temporalio/tcld/protogen/api/account/v1"
 	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
 	"github.com/urfave/cli/v2"
+	"google.golang.org/grpc"
 )
 
 type AccountClient struct {
 	client accountservice.AccountServiceClient
 	ctx    context.Context
+}
+
+func NewAccountClient(ctx context.Context, conn *grpc.ClientConn) *AccountClient {
+	return &AccountClient{
+		client: accountservice.NewAccountServiceClient(conn),
+		ctx:    ctx,
+	}
 }
 
 type GetAccountClientFn func(ctx *cli.Context) (*AccountClient, error)
@@ -22,10 +30,7 @@ func GetAccountClient(ctx *cli.Context) (*AccountClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &AccountClient{
-		client: accountservice.NewAccountServiceClient(conn),
-		ctx:    ct,
-	}, nil
+	return NewAccountClient(ct, conn), nil
 }
 
 func (c *AccountClient) getAccount() (*account.Account, error) {

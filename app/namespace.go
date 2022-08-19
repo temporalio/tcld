@@ -11,6 +11,7 @@ import (
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 	"github.com/urfave/cli/v2"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -44,6 +45,13 @@ type NamespaceClient struct {
 	ctx    context.Context
 }
 
+func NewNamespaceClient(ctx context.Context, conn *grpc.ClientConn) *NamespaceClient {
+	return &NamespaceClient{
+		client: namespaceservice.NewNamespaceServiceClient(conn),
+		ctx:    ctx,
+	}
+}
+
 type GetNamespaceClientFn func(ctx *cli.Context) (*NamespaceClient, error)
 
 func GetNamespaceClient(ctx *cli.Context) (*NamespaceClient, error) {
@@ -51,10 +59,7 @@ func GetNamespaceClient(ctx *cli.Context) (*NamespaceClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &NamespaceClient{
-		client: namespaceservice.NewNamespaceServiceClient(conn),
-		ctx:    ct,
-	}, nil
+	return NewNamespaceClient(ct, conn), nil
 }
 
 func (c *NamespaceClient) listNamespaces() error {
