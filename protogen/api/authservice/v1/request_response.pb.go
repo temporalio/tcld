@@ -12,8 +12,8 @@ import (
 	strings "strings"
 
 	proto "github.com/gogo/protobuf/proto"
-	v1 "github.com/temporalio/temporal-cloud-api-go/api/auth/v1"
-	v11 "github.com/temporalio/temporal-cloud-api-go/api/request/v1"
+	v1 "github.com/temporalio/tcld/protogen/api/auth/v1"
+	v11 "github.com/temporalio/tcld/protogen/api/request/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
