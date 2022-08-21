@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/kylelemons/godebug/pretty"
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 	"github.com/urfave/cli/v2"
@@ -352,7 +353,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Subcommands: []*cli.Command{
 						{
 							Name:    "import",
-							Usage:   "Sets the certificate filters on the namespace",
+							Usage:   "Sets the certificate filters on the namespace. Existing filters will be replaced.",
 							Aliases: []string{"imp"},
 							Flags: []cli.Flag{
 								NamespaceFlag,
@@ -391,7 +392,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									jsonBytes = []byte(ctx.String("certificate-filter-input"))
 								}
 
-								filters, err := parseCertificateFilters(jsonBytes)
+								replacementFilters, err := parseCertificateFilters(jsonBytes)
 								if err != nil {
 									return err
 								}
@@ -401,27 +402,20 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 
-								fmt.Println("certificate filters before change:")
-								if err := PrintObj(fromSpec(n.Spec.CertificateFilters)); err != nil {
-									return err
-								}
+								fmt.Println("this import will result in the following changes to certificate filters:")
+								fmt.Println(pretty.Compare(fromSpec(n.Spec.CertificateFilters), replacementFilters))
 
-								n.Spec.CertificateFilters = filters.toSpec()
-
-								fmt.Println("certificate filters after change:")
-								if err := PrintObj(fromSpec(n.Spec.CertificateFilters)); err != nil {
-									return err
-								}
-
-								confirmed, err := ConfirmPrompt(ctx, "confirm certificate filter update operation?")
+								confirmed, err := ConfirmPrompt(ctx, "confirm certificate filter update operation")
 								if err != nil {
 									return err
 								}
 
 								if confirmed {
+									n.Spec.CertificateFilters = replacementFilters.toSpec()
 									return c.updateNamespace(ctx, n)
 								}
 
+								fmt.Println("operation canceled")
 								return nil
 							},
 						},
@@ -480,12 +474,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 
-								fmt.Println("certificate filters to be cleared:")
+								fmt.Println("all certificate filters will be removed:")
 								if err := PrintObj(fromSpec(n.Spec.CertificateFilters)); err != nil {
 									return err
 								}
 
-								confirmed, err := ConfirmPrompt(ctx, "This will allow any client certificate that chains up to a configured CA in the bundle to connect to the namespace. confirm clear operation?")
+								confirmed, err := ConfirmPrompt(ctx, "this will allow any client certificate that chains up to a configured CA in the bundle to connect to the namespace. confirm clear operation")
 								if err != nil {
 									return err
 								}
@@ -495,6 +489,81 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return c.updateNamespace(ctx, n)
 								}
 
+								fmt.Println("operation canceled")
+								return nil
+							},
+						},
+						{
+							Name:    "add",
+							Usage:   "Adds additional certificate filters to the namespace",
+							Aliases: []string{"a"},
+							Flags: []cli.Flag{
+								NamespaceFlag,
+								RequestIDFlag,
+								ResourceVersionFlag,
+								&cli.PathFlag{
+									Name:    "certificate-filter-file",
+									Usage:   `Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
+									Aliases: []string{"file", "f"},
+								},
+								&cli.StringFlag{
+									Name:    "certificate-filter-input",
+									Usage:   `JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
+									Aliases: []string{"input", "i"},
+								},
+							},
+							Action: func(ctx *cli.Context) error {
+								fileFlagSet := ctx.Path("certificate-filter-file") != ""
+								inputFlagSet := ctx.String("certificate-filter-input") != ""
+
+								if fileFlagSet == inputFlagSet {
+									return errors.New("exactly one of the certificate-filter-file or certificate-filter-input flags must be specified")
+								}
+
+								var jsonBytes []byte
+								var err error
+
+								if fileFlagSet {
+									jsonBytes, err = ioutil.ReadFile(ctx.Path("certificate-filter-file"))
+									if err != nil {
+										return err
+									}
+								}
+
+								if inputFlagSet {
+									jsonBytes = []byte(ctx.String("certificate-filter-input"))
+								}
+
+								newFilters, err := parseCertificateFilters(jsonBytes)
+								if err != nil {
+									return err
+								}
+
+								n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+								if err != nil {
+									return err
+								}
+
+								if len(newFilters.toSpec()) == 0 {
+									return errors.New("no new filters to add")
+								}
+
+								fmt.Println("the following certificate filters will be added to the namespace:")
+								if err := PrintObj(newFilters); err != nil {
+									return err
+								}
+
+								confirmed, err := ConfirmPrompt(ctx, "confirm that you want to add the above additional certificate filters to the namespace")
+								if err != nil {
+									return err
+								}
+
+								if confirmed {
+									n.Spec.CertificateFilters = append(n.Spec.CertificateFilters, newFilters.toSpec()...)
+									return c.updateNamespace(ctx, n)
+								}
+
+								fmt.Println("operation canceled")
 								return nil
 							},
 						},
