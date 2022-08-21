@@ -405,7 +405,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								fmt.Println("this import will result in the following changes to certificate filters:")
 								fmt.Println(pretty.Compare(fromSpec(n.Spec.CertificateFilters), replacementFilters))
 
-								confirmed, err := ConfirmPrompt(ctx, "confirm certificate filter update operation")
+								confirmed, err := ConfirmPrompt(ctx, "confirm certificate filter import operation")
 								if err != nil {
 									return err
 								}
@@ -539,11 +539,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 
-								n, err := c.getNamespace(ctx.String(NamespaceFlagName))
-								if err != nil {
-									return err
-								}
-
 								if len(newFilters.toSpec()) == 0 {
 									return errors.New("no new filters to add")
 								}
@@ -553,12 +548,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 
-								confirmed, err := ConfirmPrompt(ctx, "confirm that you want to add the above additional certificate filters to the namespace")
+								confirmed, err := ConfirmPrompt(ctx, "confirm add operation")
 								if err != nil {
 									return err
 								}
 
 								if confirmed {
+									n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+									if err != nil {
+										return err
+									}
+
 									n.Spec.CertificateFilters = append(n.Spec.CertificateFilters, newFilters.toSpec()...)
 									return c.updateNamespace(ctx, n)
 								}
