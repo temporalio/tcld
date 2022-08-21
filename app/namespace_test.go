@@ -983,7 +983,6 @@ func (s *NamespaceTestSuite) TestAddCertificateFilters() {
 }
 
 func (s *NamespaceTestSuite) TestClearCertificateFilters() {
-
 	ns := "ns1"
 	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
 	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)

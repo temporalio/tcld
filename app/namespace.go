@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/kylelemons/godebug/pretty"
+	"github.com/kylelemons/godebug/diff"
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 	"github.com/urfave/cli/v2"
@@ -402,8 +402,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 
+								difference, err := compareCertificateFilters(fromSpec(n.Spec.CertificateFilters), replacementFilters)
+								if err != nil {
+									return err
+								}
+
 								fmt.Println("this import will result in the following changes to certificate filters:")
-								fmt.Println(pretty.Compare(fromSpec(n.Spec.CertificateFilters), replacementFilters))
+								fmt.Println(difference)
 
 								confirmed, err := ConfirmPrompt(ctx, "confirm certificate filter import operation")
 								if err != nil {
@@ -690,4 +695,18 @@ func toSearchAttributes(keyValues []string) (map[string]namespace.SearchAttribut
 		res[parts[0]] = namespace.SearchAttributeType(val)
 	}
 	return res, nil
+}
+
+func compareCertificateFilters(existing, replacement certificateFiltersConfig) (string, error) {
+	existingBytes, err := FormatJson(existing)
+	if err != nil {
+		return "", err
+	}
+
+	replacementBytes, err := FormatJson(replacement)
+	if err != nil {
+		return "", err
+	}
+
+	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
 }
