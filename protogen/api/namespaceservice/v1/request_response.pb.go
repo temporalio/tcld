@@ -145,7 +145,7 @@ func (m *CreateNamespaceResponse) GetRequestStatus() *v12.RequestStatus {
 }
 
 type ListNamespacesRequest struct {
-	// the requested size of the page to retrive, defaults to 30, max 90
+	// the requested size of the page to retrive
 	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// the page token
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
@@ -251,7 +251,7 @@ func (m *ListNamespacesResponse) GetNextPageToken() string {
 }
 
 type GetNamespacesRequest struct {
-	// the requested size of the page to retrive, defaults to 30, max 90
+	// the requested size of the page to retrive
 	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// the page token
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`

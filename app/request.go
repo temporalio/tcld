@@ -25,10 +25,27 @@ func GetRequestClient(ctx *cli.Context) (*RequestClient, error) {
 	}, nil
 }
 
-func (c *RequestClient) getRequestStatus(namespace string, requestID string) error {
+func (c *RequestClient) getRequestStatus(requestID string) error {
 	res, err := c.client.GetRequestStatus(c.ctx, &requestservice.GetRequestStatusRequest{
-		Namespace: namespace,
 		RequestId: requestID,
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res)
+}
+
+func (c *RequestClient) getRequestStatuses() error {
+	res, err := c.client.GetRequestStatuses(c.ctx, &requestservice.GetRequestStatusesRequest{})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res)
+}
+
+func (c *RequestClient) getRequestStatusesForNamespace(namespace string) error {
+	res, err := c.client.GetRequestStatusesForNamespace(c.ctx, &requestservice.GetRequestStatusesForNamespaceRequest{
+		Namespace: namespace,
 	})
 	if err != nil {
 		return err
@@ -54,7 +71,6 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 			Usage:   "Get the request status",
 			Aliases: []string{"g"},
 			Flags: []cli.Flag{
-				NamespaceFlag,
 				&cli.StringFlag{
 					Name:     "request-id",
 					Usage:    "The request-id of the asynchronous request",
@@ -63,7 +79,25 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 				},
 			},
 			Action: func(ctx *cli.Context) error {
-				return c.getRequestStatus(ctx.String(NamespaceFlagName), ctx.String("request-id"))
+				return c.getRequestStatus(ctx.String("request-id"))
+			},
+		}, {
+			Name:    "list",
+			Usage:   "List the request statuses",
+			Aliases: []string{"l"},
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    NamespaceFlagName,
+					Usage:   "The namespace hosted on temporal cloud",
+					Aliases: []string{"n"},
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				if ctx.String(NamespaceFlagName) != "" {
+					return c.getRequestStatusesForNamespace(ctx.String(NamespaceFlagName))
+				} else {
+					return c.getRequestStatuses()
+				}
 			},
 		}},
 	}}, nil

@@ -30,21 +30,24 @@ func init() {
 }
 
 var fileDescriptor_a6f283241a216f38 = []byte{
-	// 209 bytes of a gzipped FileDescriptorProto
+	// 263 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x52, 0x4e, 0x2c, 0xc8, 0xd4,
 	0x2f, 0x4a, 0x2d, 0x2c, 0x4d, 0x2d, 0x2e, 0x29, 0x4e, 0x2d, 0x2a, 0xcb, 0x4c, 0x4e, 0xd5, 0x2f,
 	0x33, 0xd4, 0x87, 0x32, 0xf5, 0x0a, 0x8a, 0xf2, 0x4b, 0xf2, 0x85, 0x44, 0x13, 0x0b, 0x32, 0xf5,
 	0x50, 0x15, 0xe9, 0x95, 0x19, 0x4a, 0xe9, 0x60, 0xd7, 0x0b, 0x15, 0x89, 0x2f, 0x4a, 0x2d, 0x2e,
-	0xc8, 0xcf, 0x2b, 0x86, 0x1a, 0x62, 0xd4, 0xce, 0xc8, 0xc5, 0x17, 0x04, 0x91, 0x0a, 0x86, 0x28,
-	0x16, 0x2a, 0xe5, 0x12, 0x70, 0x4f, 0x2d, 0x81, 0x09, 0x96, 0x24, 0x96, 0x94, 0x16, 0x0b, 0xe9,
-	0xe9, 0x61, 0xb5, 0x4c, 0x0f, 0x5d, 0x21, 0x94, 0x23, 0xa5, 0x4f, 0xb4, 0x7a, 0x88, 0x6b, 0x94,
-	0x18, 0x9c, 0xd2, 0x2e, 0x3c, 0x94, 0x63, 0xb8, 0xf1, 0x50, 0x8e, 0xe1, 0xc3, 0x43, 0x39, 0xc6,
-	0x86, 0x47, 0x72, 0x8c, 0x2b, 0x1e, 0xc9, 0x31, 0x9e, 0x78, 0x24, 0xc7, 0x78, 0xe1, 0x91, 0x1c,
-	0xe3, 0x83, 0x47, 0x72, 0x8c, 0x2f, 0x1e, 0xc9, 0x31, 0x7c, 0x78, 0x24, 0xc7, 0x38, 0xe1, 0xb1,
-	0x1c, 0xc3, 0x85, 0xc7, 0x72, 0x0c, 0x37, 0x1e, 0xcb, 0x31, 0x44, 0x19, 0x94, 0xe4, 0x16, 0x14,
-	0xe5, 0xe8, 0x25, 0xe7, 0xe4, 0x97, 0xa6, 0xe8, 0x63, 0xf5, 0xb9, 0x35, 0xaa, 0x48, 0x12, 0x1b,
-	0xd8, 0xe3, 0xc6, 0x80, 0x00, 0x00, 0x00, 0xff, 0xff, 0x2b, 0x9d, 0xf4, 0x8d, 0x64, 0x01, 0x00,
-	0x00,
+	0xc8, 0xcf, 0x2b, 0x86, 0x1a, 0x62, 0xb4, 0x8c, 0x99, 0x8b, 0x2f, 0x08, 0x22, 0x15, 0x0c, 0x51,
+	0x2c, 0x54, 0xca, 0x25, 0xe0, 0x9e, 0x5a, 0x02, 0x13, 0x2c, 0x49, 0x2c, 0x29, 0x2d, 0x16, 0xd2,
+	0xd3, 0xc3, 0x6a, 0x99, 0x1e, 0xba, 0x42, 0x28, 0x47, 0x4a, 0x9f, 0x68, 0xf5, 0x10, 0xd7, 0x28,
+	0x31, 0x08, 0x55, 0x73, 0x09, 0xa1, 0xcb, 0xa6, 0x16, 0x0b, 0x19, 0x10, 0x69, 0x50, 0x2a, 0xdc,
+	0x6a, 0x43, 0x12, 0x74, 0xc0, 0x2d, 0x9f, 0xcf, 0xc8, 0x25, 0x87, 0xa9, 0xc0, 0x2d, 0xbf, 0xc8,
+	0x2f, 0x31, 0x37, 0xb5, 0xb8, 0x20, 0x31, 0x39, 0x55, 0xc8, 0x86, 0x68, 0x73, 0x91, 0xb5, 0xc1,
+	0x5c, 0x65, 0x4b, 0xa6, 0x6e, 0x98, 0x0b, 0x9d, 0xd2, 0x2e, 0x3c, 0x94, 0x63, 0xb8, 0xf1, 0x50,
+	0x8e, 0xe1, 0xc3, 0x43, 0x39, 0xc6, 0x86, 0x47, 0x72, 0x8c, 0x2b, 0x1e, 0xc9, 0x31, 0x9e, 0x78,
+	0x24, 0xc7, 0x78, 0xe1, 0x91, 0x1c, 0xe3, 0x83, 0x47, 0x72, 0x8c, 0x2f, 0x1e, 0xc9, 0x31, 0x7c,
+	0x78, 0x24, 0xc7, 0x38, 0xe1, 0xb1, 0x1c, 0xc3, 0x85, 0xc7, 0x72, 0x0c, 0x37, 0x1e, 0xcb, 0x31,
+	0x44, 0x19, 0x94, 0xe4, 0x16, 0x14, 0xe5, 0xe8, 0x25, 0xe7, 0xe4, 0x97, 0xa6, 0xe8, 0x63, 0x4d,
+	0x18, 0xd6, 0xa8, 0x22, 0x49, 0x6c, 0xe0, 0x74, 0x61, 0x0c, 0x08, 0x00, 0x00, 0xff, 0xff, 0x2a,
+	0xe1, 0x55, 0x9e, 0x83, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -61,6 +64,10 @@ const _ = grpc.SupportPackageIsVersion4
 type RequestServiceClient interface {
 	// GetRequestStatus get the status of a request.
 	GetRequestStatus(ctx context.Context, in *GetRequestStatusRequest, opts ...grpc.CallOption) (*GetRequestStatusResponse, error)
+	// GetRequestStatuses lists the statuses of all known requests.
+	GetRequestStatuses(ctx context.Context, in *GetRequestStatusesRequest, opts ...grpc.CallOption) (*GetRequestStatusesResponse, error)
+	// GetRequestStatuses lists the statuses of all known requests.
+	GetRequestStatusesForNamespace(ctx context.Context, in *GetRequestStatusesForNamespaceRequest, opts ...grpc.CallOption) (*GetRequestStatusesForNamespaceResponse, error)
 }
 
 type requestServiceClient struct {
@@ -80,10 +87,32 @@ func (c *requestServiceClient) GetRequestStatus(ctx context.Context, in *GetRequ
 	return out, nil
 }
 
+func (c *requestServiceClient) GetRequestStatuses(ctx context.Context, in *GetRequestStatusesRequest, opts ...grpc.CallOption) (*GetRequestStatusesResponse, error) {
+	out := new(GetRequestStatusesResponse)
+	err := c.cc.Invoke(ctx, "/api.requestservice.v1.RequestService/GetRequestStatuses", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *requestServiceClient) GetRequestStatusesForNamespace(ctx context.Context, in *GetRequestStatusesForNamespaceRequest, opts ...grpc.CallOption) (*GetRequestStatusesForNamespaceResponse, error) {
+	out := new(GetRequestStatusesForNamespaceResponse)
+	err := c.cc.Invoke(ctx, "/api.requestservice.v1.RequestService/GetRequestStatusesForNamespace", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RequestServiceServer is the server API for RequestService service.
 type RequestServiceServer interface {
 	// GetRequestStatus get the status of a request.
 	GetRequestStatus(context.Context, *GetRequestStatusRequest) (*GetRequestStatusResponse, error)
+	// GetRequestStatuses lists the statuses of all known requests.
+	GetRequestStatuses(context.Context, *GetRequestStatusesRequest) (*GetRequestStatusesResponse, error)
+	// GetRequestStatuses lists the statuses of all known requests.
+	GetRequestStatusesForNamespace(context.Context, *GetRequestStatusesForNamespaceRequest) (*GetRequestStatusesForNamespaceResponse, error)
 }
 
 // UnimplementedRequestServiceServer can be embedded to have forward compatible implementations.
@@ -92,6 +121,12 @@ type UnimplementedRequestServiceServer struct {
 
 func (*UnimplementedRequestServiceServer) GetRequestStatus(ctx context.Context, req *GetRequestStatusRequest) (*GetRequestStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRequestStatus not implemented")
+}
+func (*UnimplementedRequestServiceServer) GetRequestStatuses(ctx context.Context, req *GetRequestStatusesRequest) (*GetRequestStatusesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRequestStatuses not implemented")
+}
+func (*UnimplementedRequestServiceServer) GetRequestStatusesForNamespace(ctx context.Context, req *GetRequestStatusesForNamespaceRequest) (*GetRequestStatusesForNamespaceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRequestStatusesForNamespace not implemented")
 }
 
 func RegisterRequestServiceServer(s *grpc.Server, srv RequestServiceServer) {
@@ -116,6 +151,42 @@ func _RequestService_GetRequestStatus_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RequestService_GetRequestStatuses_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequestStatusesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RequestServiceServer).GetRequestStatuses(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.requestservice.v1.RequestService/GetRequestStatuses",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RequestServiceServer).GetRequestStatuses(ctx, req.(*GetRequestStatusesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RequestService_GetRequestStatusesForNamespace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequestStatusesForNamespaceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RequestServiceServer).GetRequestStatusesForNamespace(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.requestservice.v1.RequestService/GetRequestStatusesForNamespace",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RequestServiceServer).GetRequestStatusesForNamespace(ctx, req.(*GetRequestStatusesForNamespaceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _RequestService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "api.requestservice.v1.RequestService",
 	HandlerType: (*RequestServiceServer)(nil),
@@ -123,6 +194,14 @@ var _RequestService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRequestStatus",
 			Handler:    _RequestService_GetRequestStatus_Handler,
+		},
+		{
+			MethodName: "GetRequestStatuses",
+			Handler:    _RequestService_GetRequestStatuses_Handler,
+		},
+		{
+			MethodName: "GetRequestStatusesForNamespace",
+			Handler:    _RequestService_GetRequestStatusesForNamespace_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

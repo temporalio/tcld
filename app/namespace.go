@@ -76,6 +76,25 @@ func (c *NamespaceClient) listNamespaces() error {
 	}
 }
 
+func (c *NamespaceClient) listNamespacesWithDetails() error {
+	totalRes := &namespaceservice.GetNamespacesResponse{}
+	pageToken := ""
+	for {
+		res, err := c.client.GetNamespaces(c.ctx, &namespaceservice.GetNamespacesRequest{
+			PageToken: pageToken,
+		})
+		if err != nil {
+			return err
+		}
+		totalRes.Namespaces = append(totalRes.Namespaces, res.Namespaces...)
+		// Check if we should continue paging
+		pageToken = res.NextPageToken
+		if len(pageToken) == 0 {
+			return PrintProto(totalRes)
+		}
+	}
+}
+
 func (c *NamespaceClient) getNamespace(namespace string) (*namespace.Namespace, error) {
 	res, err := c.client.GetNamespace(c.ctx, &namespaceservice.GetNamespaceRequest{
 		Namespace: namespace,
@@ -182,8 +201,15 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Name:    "list",
 					Usage:   "List all known namespaces",
 					Aliases: []string{"l"},
-					Flags:   []cli.Flag{},
+					Flags: []cli.Flag{
+						&cli.BoolFlag{
+							Name: "details",
+						},
+					},
 					Action: func(ctx *cli.Context) error {
+						if ctx.Bool("details") {
+							return c.listNamespacesWithDetails()
+						}
 						return c.listNamespaces()
 					},
 				},
