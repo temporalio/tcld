@@ -33,6 +33,7 @@ func fxOptions() fx.Option {
 			err := app.Run(os.Args)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+				os.Exit(1)
 			}
 			return shutdowner.Shutdown()
 		}),
