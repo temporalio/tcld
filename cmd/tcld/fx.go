@@ -34,7 +34,10 @@ func fxOptions() fx.Option {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 			}
-			return shutdowner.Shutdown()
+			if shutdownErr := shutdowner.Shutdown(); shutdownErr != nil {
+				fmt.Fprintf(os.Stderr, "failed to shutdown app: %s\n", shutdownErr.Error())
+			}
+			return err
 		}),
 		fx.NopLogger,
 	)
