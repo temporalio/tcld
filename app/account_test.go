@@ -16,6 +16,7 @@ import (
 	"github.com/temporalio/tcld/protogen/api/account/v1"
 	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
+	requestservicemock "github.com/temporalio/tcld/protogen/apimock/requestservice/v1"
 	"github.com/urfave/cli/v2"
 )
 
@@ -25,20 +26,31 @@ func TestAccount(t *testing.T) {
 
 type AccountTestSuite struct {
 	suite.Suite
-	cliApp      *cli.App
-	mockCtrl    *gomock.Controller
-	mockService *accountservicemock.MockAccountServiceClient
+	cliApp         *cli.App
+	mockCtrl       *gomock.Controller
+	mockService    *accountservicemock.MockAccountServiceClient
+	mockReqService *requestservicemock.MockRequestServiceClient
 }
 
 func (s *AccountTestSuite) SetupTest() {
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = accountservicemock.NewMockAccountServiceClient(s.mockCtrl)
-	out, err := NewAccountCommand(func(ctx *cli.Context) (*AccountClient, error) {
+	s.mockReqService = requestservicemock.NewMockRequestServiceClient(s.mockCtrl)
+
+	getAccountClientFn := func(ctx *cli.Context) (*AccountClient, error) {
 		return &AccountClient{
 			ctx:    context.TODO(),
 			client: s.mockService,
 		}, nil
-	})
+	}
+	getRequestClientFn := func(ctx *cli.Context) (*RequestClient, error) {
+		return &RequestClient{
+			ctx:    context.TODO(),
+			client: s.mockReqService,
+		}, nil
+	}
+
+	out, err := NewAccountCommand(getAccountClientFn, getRequestClientFn)
 	s.Require().NoError(err)
 	AutoConfirmFlag.Value = true
 	s.cliApp = &cli.App{

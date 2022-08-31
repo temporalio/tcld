@@ -11,6 +11,7 @@ import (
 	"github.com/kylelemons/godebug/diff"
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
+	"github.com/temporalio/tcld/protogen/api/request/v1"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 )
@@ -96,7 +97,7 @@ func (c *NamespaceClient) getNamespace(namespace string) (*namespace.Namespace, 
 	return res.Namespace, nil
 }
 
-func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespace) error {
+func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespace) (*request.RequestStatus, error) {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
 		resourceVersion = v
@@ -109,13 +110,13 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 		Spec:            n.Spec,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return PrintProto(res)
+	return res.RequestStatus, nil
 }
 
-func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *namespace.Namespace, existingName string, newName string) error {
+func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *namespace.Namespace, existingName string, newName string) (*request.RequestStatus, error) {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
 		resourceVersion = v
@@ -128,9 +129,9 @@ func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *namespace.N
 		NewCustomSearchAttributeName:      newName,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return PrintProto(res)
+	return res.RequestStatus, nil
 }
 
 func (c *NamespaceClient) parseExistingCerts(ctx *cli.Context) (namespace *namespace.Namespace, existing caCerts, err error) {
@@ -171,8 +172,9 @@ func ReadCACerts(ctx *cli.Context) (string, error) {
 	return cert, nil
 }
 
-func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut, error) {
+func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestClientFn GetRequestClientFn) (CommandOut, error) {
 	var c *NamespaceClient
+	var r *RequestClient
 	return CommandOut{
 		Command: &cli.Command{
 			Name:    "namespace",
@@ -181,6 +183,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Before: func(ctx *cli.Context) error {
 				var err error
 				c, err = getNamespaceClientFn(ctx)
+				if err != nil {
+					return err
+				}
+				r, err = getRequestClientFn(ctx)
 				return err
 			},
 			Subcommands: []*cli.Command{
@@ -263,7 +269,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return errors.New("nothing to change")
 								}
 								n.Spec.AcceptedClientCa = bundle
-								return c.updateNamespace(ctx, n)
+								status, err := c.updateNamespace(ctx, n)
+								if err != nil {
+									return err
+								}
+								return r.HandleRequestStatus(ctx, "add certificate", status)
 							},
 						},
 						{
@@ -314,7 +324,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								if err != nil || !y {
 									return err
 								}
-								return c.updateNamespace(ctx, n)
+								status, err := c.updateNamespace(ctx, n)
+								if err != nil {
+									return err
+								}
+								return r.HandleRequestStatus(ctx, "remove certificate", status)
 							},
 						},
 						{
@@ -341,7 +355,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return errors.New("nothing to change")
 								}
 								n.Spec.AcceptedClientCa = cert
-								return c.updateNamespace(ctx, n)
+								status, err := c.updateNamespace(ctx, n)
+								if err != nil {
+									return err
+								}
+								return r.HandleRequestStatus(ctx, "set certificates", status)
 							},
 						},
 					},
@@ -417,7 +435,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 								if confirmed {
 									n.Spec.CertificateFilters = replacementFilters.toSpec()
-									return c.updateNamespace(ctx, n)
+									status, err := c.updateNamespace(ctx, n)
+									if err != nil {
+										return err
+									}
+									return r.HandleRequestStatus(ctx, "import certificate filters", status)
 								}
 
 								fmt.Println("operation canceled")
@@ -491,7 +513,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 								if confirmed {
 									n.Spec.CertificateFilters = nil
-									return c.updateNamespace(ctx, n)
+									status, err := c.updateNamespace(ctx, n)
+									if err != nil {
+										return err
+									}
+									return r.HandleRequestStatus(ctx, "clear certificate filters", status)
+
 								}
 
 								fmt.Println("operation canceled")
@@ -565,7 +592,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									}
 
 									n.Spec.CertificateFilters = append(n.Spec.CertificateFilters, newFilters.toSpec()...)
-									return c.updateNamespace(ctx, n)
+
+									status, err := c.updateNamespace(ctx, n)
+									if err != nil {
+										return err
+									}
+									return r.HandleRequestStatus(ctx, "add certificate filters", status)
+
 								}
 
 								fmt.Println("operation canceled")
@@ -613,8 +646,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 										n.Spec.SearchAttributes[attrName] = attrType
 									}
 								}
+								status, err := c.updateNamespace(ctx, n)
+								if err != nil {
+									return err
+								}
+								return r.HandleRequestStatus(ctx, "add search attribute", status)
 
-								return c.updateNamespace(ctx, n)
 							},
 						},
 						{
@@ -657,7 +694,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								if err != nil || !y {
 									return err
 								}
-								return c.renameSearchAttribute(ctx, n, existingName, newName)
+								status, err := c.renameSearchAttribute(ctx, n, existingName, newName)
+								if err != nil {
+									return err
+								}
+								return r.HandleRequestStatus(ctx, "rename search attribute", status)
 							},
 						},
 					},

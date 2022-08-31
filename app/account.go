@@ -7,6 +7,7 @@ import (
 
 	"github.com/temporalio/tcld/protogen/api/account/v1"
 	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
+	"github.com/temporalio/tcld/protogen/api/request/v1"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 )
@@ -47,7 +48,7 @@ func (c *AccountClient) getAccount() (*account.Account, error) {
 	return res.Account, nil
 }
 
-func (c *AccountClient) updateAccount(ctx *cli.Context, a *account.Account) error {
+func (c *AccountClient) updateAccount(ctx *cli.Context, a *account.Account) (*request.RequestStatus, error) {
 	resourceVersion := a.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
 		resourceVersion = v
@@ -59,10 +60,9 @@ func (c *AccountClient) updateAccount(ctx *cli.Context, a *account.Account) erro
 		Spec:            a.Spec,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	return PrintProto(res)
+	return res.RequestStatus, nil
 }
 
 func (c *AccountClient) parseExistingMetricsCerts(ctx *cli.Context) (account *account.Account, existing caCerts, err error) {
@@ -82,8 +82,9 @@ func (c *AccountClient) parseExistingMetricsCerts(ctx *cli.Context) (account *ac
 	return a, existingCerts, nil
 }
 
-func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error) {
+func NewAccountCommand(getAccountClientFn GetAccountClientFn, getRequestClientFn GetRequestClientFn) (CommandOut, error) {
 	var c *AccountClient
+	var r *RequestClient
 	return CommandOut{
 		Command: &cli.Command{
 			Name:    "account",
@@ -92,6 +93,10 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 			Before: func(ctx *cli.Context) error {
 				var err error
 				c, err = getAccountClientFn(ctx)
+				if err != nil {
+					return err
+				}
+				r, err = getRequestClientFn(ctx)
 				return err
 			},
 			Subcommands: []*cli.Command{
@@ -130,7 +135,11 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 								}
 
 								a.Spec.Metrics.Enabled = true
-								return c.updateAccount(ctx, a)
+								status, err := c.updateAccount(ctx, a)
+								if err != nil {
+									return err
+								}
+								return r.HandleRequestStatus(ctx, "enable metrics", status)
 							},
 						},
 						{
@@ -147,7 +156,12 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 								}
 
 								a.Spec.Metrics.Enabled = false
-								return c.updateAccount(ctx, a)
+								status, err := c.updateAccount(ctx, a)
+								if err != nil {
+									return err
+								}
+								return r.HandleRequestStatus(ctx, "disable metrics", status)
+
 							},
 						},
 						{
@@ -195,7 +209,11 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 										}
 
 										a.Spec.Metrics.AcceptedClientCa = bundle
-										return c.updateAccount(ctx, a)
+										status, err := c.updateAccount(ctx, a)
+										if err != nil {
+											return err
+										}
+										return r.HandleRequestStatus(ctx, "add metrics ca certificate", status)
 									},
 								},
 								{
@@ -253,7 +271,11 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 										if err != nil || !y {
 											return err
 										}
-										return c.updateAccount(ctx, a)
+										status, err := c.updateAccount(ctx, a)
+										if err != nil {
+											return err
+										}
+										return r.HandleRequestStatus(ctx, "remove metrics ca certificate", status)
 									},
 								},
 								{
@@ -288,7 +310,11 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 											a.Spec.Metrics = &account.MetricsSpec{}
 										}
 										a.Spec.Metrics.AcceptedClientCa = cert
-										return c.updateAccount(ctx, a)
+										status, err := c.updateAccount(ctx, a)
+										if err != nil {
+											return err
+										}
+										return r.HandleRequestStatus(ctx, "set metrics ca certificates", status)
 									},
 								},
 								{

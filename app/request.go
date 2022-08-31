@@ -2,10 +2,35 @@ package app
 
 import (
 	"context"
+	"fmt"
+	"time"
 
+	"github.com/gosuri/uilive"
+	"github.com/temporalio/tcld/protogen/api/request/v1"
 	"github.com/temporalio/tcld/protogen/api/requestservice/v1"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
+)
+
+const (
+	SyncRequestFlagName    = "synchronous-request"
+	RequestTimeoutFlagName = "request-timeout"
+)
+
+var (
+	RequestTimeoutFlag = &cli.DurationFlag{
+		Name:    RequestTimeoutFlagName,
+		Usage:   "Time to wait for asynchronous requests to finish",
+		EnvVars: []string{"REQUEST_TIMEOUT"},
+		Aliases: []string{"rt"},
+		Value:   time.Hour,
+	}
+	SyncRequestFlag = &cli.BoolFlag{
+		Name:    SyncRequestFlagName,
+		Usage:   "Block on request to complete",
+		Aliases: []string{"sync"},
+		EnvVars: []string{"SYNCHRONOUS_REQUEST"},
+	}
 )
 
 type RequestClient struct {
@@ -30,14 +55,14 @@ func GetRequestClient(ctx *cli.Context) (*RequestClient, error) {
 	return NewRequestClient(ct, conn), nil
 }
 
-func (c *RequestClient) getRequestStatus(requestID string) error {
+func (c *RequestClient) getRequestStatus(ctx *cli.Context, requestID string) (*request.RequestStatus, error) {
 	res, err := c.client.GetRequestStatus(c.ctx, &requestservice.GetRequestStatusRequest{
 		RequestId: requestID,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return PrintProto(res)
+	return res.RequestStatus, nil
 }
 
 func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error) {
@@ -66,8 +91,102 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 				},
 			},
 			Action: func(ctx *cli.Context) error {
-				return c.getRequestStatus(ctx.String("request-id"))
+				res, err := c.getRequestStatus(ctx, ctx.String("request-id"))
+				if err != nil {
+					return err
+				}
+				return PrintProto(res)
+			},
+		}, {
+			Name:    "wait",
+			Usage:   "wait till the request completes",
+			Aliases: []string{"w"},
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     "request-id",
+					Usage:    "the request-id of the asynchronous request",
+					Aliases:  []string{"r"},
+					Required: true,
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				return c.waitOnRequest(ctx, "", ctx.String("request-id"))
 			},
 		}},
 	}}, nil
+}
+
+func (c *RequestClient) waitOnRequest(ctx *cli.Context, operation string, requestID string) error {
+
+	ticker := time.NewTicker(time.Millisecond)
+	timer := time.NewTimer(ctx.Duration(RequestTimeoutFlagName))
+
+	writer := uilive.New()
+	writer.Start()
+	defer writer.Stop()
+
+	var status *request.RequestStatus
+	defer func() {
+		if status != nil {
+			PrintProto(status)
+		}
+	}()
+loop:
+	for {
+		select {
+		case <-timer.C:
+			return fmt.Errorf("timed out waiting for request to complete, namespace=%s, requestID=%s, timeout=%s",
+				ctx.String(NamespaceFlagName),
+				requestID,
+				ctx.Duration(RequestTimeoutFlagName),
+			)
+		case <-ticker.C:
+			var err error
+			status, err = c.getRequestStatus(ctx, requestID)
+			if err != nil {
+				return err
+			}
+			switch status.State {
+			case request.STATE_FULFILLED:
+				break loop
+			case request.STATE_FAILED:
+				fmt.Fprintf(writer, "operation failed \n")
+				return fmt.Errorf("request failed: %s", status.FailureReason)
+			case request.STATE_CANCELLED:
+				fmt.Fprintf(writer, "operation failed \n")
+				return fmt.Errorf("request was cancelled: %s", status.FailureReason)
+			}
+			if operation != "" {
+				fmt.Fprintf(writer, "waiting for %s operation (requestId='%s') to finish, current state: %s\n",
+					operation, requestID, request.State_name[int32(status.State)])
+			} else {
+				fmt.Fprintf(writer, "waiting for request with id='%s' to finish, current state: %s\n",
+					requestID, request.State_name[int32(status.State)])
+			}
+			ticker.Reset(time.Second * time.Duration(status.CheckDuration.Seconds))
+		}
+	}
+	if operation != "" {
+		fmt.Fprintf(writer, "%s operation completed successfully\n", operation)
+	} else {
+		fmt.Fprintf(writer, "request with id='%s' finished successfully\n", requestID)
+	}
+	return nil
+}
+
+func (c *RequestClient) HandleRequestStatus(
+	ctx *cli.Context,
+	operation string,
+	status *request.RequestStatus,
+) error {
+
+	if ctx.Bool(SyncRequestFlagName) {
+		return c.waitOnRequest(ctx, operation, status.RequestId)
+	}
+
+	if err := PrintProto(status); err != nil {
+		return err
+	}
+	fmt.Sprintf("started %s operation with requestId='%s', to monitor its progress use command: `%s request get -r '%s'`", operation, status.RequestId, AppName, status.RequestId)
+	return nil
 }

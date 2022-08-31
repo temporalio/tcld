@@ -5,6 +5,10 @@ import (
 	"go.uber.org/fx"
 )
 
+const (
+	AppName = "tcld"
+)
+
 type AppParams struct {
 	fx.In
 	Commands []*cli.Command `group:"commands"`
@@ -17,12 +21,14 @@ type CommandOut struct {
 
 func NewApp(params AppParams) (*cli.App, error) {
 	app := &cli.App{
-		Name:  "tcld",
+		Name:  AppName,
 		Usage: "Temporal Cloud cli",
 		Flags: []cli.Flag{
 			ServerFlag,
 			ConfigDirFlag,
 			AutoConfirmFlag,
+			RequestTimeoutFlag,
+			SyncRequestFlag,
 		},
 	}
 	app.Commands = params.Commands
