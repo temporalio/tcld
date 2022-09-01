@@ -120,6 +120,10 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn, getRequestClientFn
 						{
 							Name:  "enable",
 							Usage: "Enables the metrics endpoint. CA Certificates *must* be configured prior to enabling the endpoint",
+							Flags: []cli.Flag{
+								RequestTimeoutFlag,
+								WaitForRequestFlag,
+							},
 							Action: func(ctx *cli.Context) error {
 								a, err := c.getAccount()
 								if err != nil {
@@ -145,6 +149,10 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn, getRequestClientFn
 						{
 							Name:  "disable",
 							Usage: "Disables the metrics endpoint",
+							Flags: []cli.Flag{
+								RequestTimeoutFlag,
+								WaitForRequestFlag,
+							},
 							Action: func(ctx *cli.Context) error {
 								a, err := c.getAccount()
 								if err != nil {
@@ -178,6 +186,8 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn, getRequestClientFn
 										ResourceVersionFlag,
 										CaCertificateFlag,
 										CaCertificateFileFlag,
+										RequestTimeoutFlag,
+										WaitForRequestFlag,
 									},
 									Action: func(ctx *cli.Context) error {
 										newCerts, err := readAndParseCACerts(ctx)
@@ -226,6 +236,8 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn, getRequestClientFn
 										CaCertificateFlag,
 										CaCertificateFileFlag,
 										caCertificateFingerprintFlag,
+										RequestTimeoutFlag,
+										WaitForRequestFlag,
 									},
 									Action: func(ctx *cli.Context) error {
 										a, existingCerts, err := c.parseExistingMetricsCerts(ctx)
@@ -287,6 +299,8 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn, getRequestClientFn
 										ResourceVersionFlag,
 										CaCertificateFlag,
 										CaCertificateFileFlag,
+										RequestTimeoutFlag,
+										WaitForRequestFlag,
 									},
 									Action: func(ctx *cli.Context) error {
 										cert, err := ReadCACerts(ctx)

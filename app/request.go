@@ -13,23 +13,23 @@ import (
 )
 
 const (
-	SyncRequestFlagName    = "synchronous-request"
+	WaitForRequestFlagName = "wait-for-request"
 	RequestTimeoutFlagName = "request-timeout"
 )
 
 var (
 	RequestTimeoutFlag = &cli.DurationFlag{
 		Name:    RequestTimeoutFlagName,
-		Usage:   "Time to wait for asynchronous requests to finish",
+		Usage:   "Time to wait for requests to complete",
 		EnvVars: []string{"REQUEST_TIMEOUT"},
 		Aliases: []string{"rt"},
 		Value:   time.Hour,
 	}
-	SyncRequestFlag = &cli.BoolFlag{
-		Name:    SyncRequestFlagName,
-		Usage:   "Block on request to complete",
-		Aliases: []string{"sync"},
-		EnvVars: []string{"SYNCHRONOUS_REQUEST"},
+	WaitForRequestFlag = &cli.BoolFlag{
+		Name:    WaitForRequestFlagName,
+		Usage:   "Wait for request to complete",
+		Aliases: []string{"wait"},
+		EnvVars: []string{"WAIT_FOR_REQUEST"},
 	}
 )
 
@@ -70,7 +70,7 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 	var c *RequestClient
 	return CommandOut{Command: &cli.Command{
 		Name:    "request",
-		Usage:   "Manage asynchronous requests",
+		Usage:   "Manage requests",
 		Aliases: []string{"r"},
 		Before: func(ctx *cli.Context) error {
 			var err error
@@ -85,7 +85,7 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:     "request-id",
-					Usage:    "The request-id of the asynchronous request",
+					Usage:    "The request-id of the request",
 					Aliases:  []string{"r"},
 					Required: true,
 				},
@@ -99,12 +99,12 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 			},
 		}, {
 			Name:    "wait",
-			Usage:   "wait till the request completes",
+			Usage:   "wait for the request complete",
 			Aliases: []string{"w"},
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:     "request-id",
-					Usage:    "the request-id of the asynchronous request",
+					Usage:    "the request-id of the request",
 					Aliases:  []string{"r"},
 					Required: true,
 				},
@@ -153,7 +153,7 @@ loop:
 				fmt.Fprintf(writer, "operation failed \n")
 				return fmt.Errorf("request failed: %s", status.FailureReason)
 			case request.STATE_CANCELLED:
-				fmt.Fprintf(writer, "operation failed \n")
+				fmt.Fprintf(writer, "operation cancelled\n")
 				return fmt.Errorf("request was cancelled: %s", status.FailureReason)
 			}
 			if operation != "" {
@@ -180,7 +180,7 @@ func (c *RequestClient) HandleRequestStatus(
 	status *request.RequestStatus,
 ) error {
 
-	if ctx.Bool(SyncRequestFlagName) {
+	if ctx.Bool(WaitForRequestFlagName) {
 		return c.waitOnRequest(ctx, operation, status.RequestId)
 	}
 

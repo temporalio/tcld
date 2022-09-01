@@ -247,6 +247,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 								ResourceVersionFlag,
 								CaCertificateFlag,
 								CaCertificateFileFlag,
+								RequestTimeoutFlag,
+								WaitForRequestFlag,
 							},
 							Action: func(ctx *cli.Context) error {
 								newCerts, err := readAndParseCACerts(ctx)
@@ -287,6 +289,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 								CaCertificateFlag,
 								CaCertificateFileFlag,
 								caCertificateFingerprintFlag,
+								RequestTimeoutFlag,
+								WaitForRequestFlag,
 							},
 							Action: func(ctx *cli.Context) error {
 								n, existingCerts, err := c.parseExistingCerts(ctx)
@@ -341,6 +345,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 								ResourceVersionFlag,
 								CaCertificateFlag,
 								CaCertificateFileFlag,
+								RequestTimeoutFlag,
+								WaitForRequestFlag,
 							},
 							Action: func(ctx *cli.Context) error {
 								cert, err := ReadCACerts(ctx)
@@ -387,6 +393,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 									Usage:   `JSON that defines the certificate filters that will be configured on the namespace. This will replace the existing filter configuration. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
 									Aliases: []string{"input", "i"},
 								},
+								RequestTimeoutFlag,
+								WaitForRequestFlag,
 							},
 							Action: func(ctx *cli.Context) error {
 								fileFlagSet := ctx.Path("certificate-filter-file") != ""
@@ -494,6 +502,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 								NamespaceFlag,
 								RequestIDFlag,
 								ResourceVersionFlag,
+								RequestTimeoutFlag,
+								WaitForRequestFlag,
 							},
 							Action: func(ctx *cli.Context) error {
 								n, err := c.getNamespace(ctx.String(NamespaceFlagName))
@@ -543,6 +553,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 									Usage:   `JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
 									Aliases: []string{"input", "i"},
 								},
+								RequestTimeoutFlag,
+								WaitForRequestFlag,
 							},
 							Action: func(ctx *cli.Context) error {
 								fileFlagSet := ctx.Path("certificate-filter-file") != ""
@@ -626,6 +638,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 									Aliases:  []string{"sa"},
 									Required: true,
 								},
+								RequestTimeoutFlag,
+								WaitForRequestFlag,
 							},
 							Action: func(ctx *cli.Context) error {
 								csa, err := toSearchAttributes(ctx.StringSlice("search-attribute"))
@@ -674,6 +688,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 									Aliases:  []string{"nn"},
 									Required: true,
 								},
+								RequestTimeoutFlag,
+								WaitForRequestFlag,
 							},
 							Action: func(ctx *cli.Context) error {
 								n, err := c.getNamespace(

@@ -27,8 +27,6 @@ func NewApp(params AppParams) (*cli.App, error) {
 			ServerFlag,
 			ConfigDirFlag,
 			AutoConfirmFlag,
-			RequestTimeoutFlag,
-			SyncRequestFlag,
 		},
 	}
 	app.Commands = params.Commands
