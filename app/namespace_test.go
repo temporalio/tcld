@@ -709,8 +709,7 @@ func (s *NamespaceTestSuite) TestUpdateRenameSearchAttrs() {
 	}
 }
 
-func (s *NamespaceTestSuite) TestUpdateCertificateFilters() {
-
+func (s *NamespaceTestSuite) TestImportCertificateFilters() {
 	ns := "ns1"
 	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
 	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)
@@ -776,6 +775,11 @@ func (s *NamespaceTestSuite) TestUpdateCertificateFilters() {
 							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 						},
 						RetentionDays: 7,
+						CertificateFilters: []*namespace.CertificateFilterSpec{
+							{
+								CommonName: "test0",
+							},
+						},
 					},
 					State:           namespace.STATE_ACTIVE,
 					ResourceVersion: "ver1",
@@ -876,8 +880,109 @@ func (s *NamespaceTestSuite) TestExportCertificateFilters() {
 	}
 }
 
-func (s *NamespaceTestSuite) TestRemoveCertificateFilters() {
+func (s *NamespaceTestSuite) TestAddCertificateFilters() {
+	ns := "ns1"
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)
 
+	path := "certificatefilter"
+	s.NoError(os.WriteFile(path, []byte(`{ "filters": [ { "commonName": "test1" } ] }`), 0644))
+	defer os.Remove(path)
+
+	tests := []struct {
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{
+		{
+
+			args: []string{"namespace", "certificate-filters"},
+		},
+		{
+			args:      []string{"namespace", "certificate-filters", "add"},
+			expectErr: true,
+		},
+		{
+			args:      []string{"namespace", "certificate-filters", "add", "--namespace", ns},
+			expectErr: true,
+		},
+		{
+			args:      []string{"n", "cf", "a", "-n", ns, "--certificate-filter-file", path},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.CertificateFilters = []*namespace.CertificateFilterSpec{{CommonName: "test1"}}
+			},
+		},
+		{
+			args:      []string{"n", "cf", "a", "-n", ns, "--certificate-filter-input", `{ "filters": [ { "commonName": "test1" } ] }`},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.CertificateFilters = []*namespace.CertificateFilterSpec{{CommonName: "test1"}}
+			},
+		},
+		{
+			args:      []string{"n", "cf", "a", "-n", ns, "--certificate-filter-file", "nonexistentfile"},
+			expectErr: true,
+		},
+		{
+			args:      []string{"n", "cf", "a", "-n", ns, "--file", "certificatefilter", "--resource-version", "ver2"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.CertificateFilters = []*namespace.CertificateFilterSpec{{CommonName: "test1"}}
+				r.ResourceVersion = "ver2"
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						AcceptedClientCa: "cert1",
+						SearchAttributes: map[string]namespace.SearchAttributeType{
+							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
+						},
+						RetentionDays: 7,
+					},
+					State:           namespace.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Namespace.Spec)
+				req := namespaceservice.UpdateNamespaceRequest{
+					Namespace:       ns,
+					Spec:            &spec,
+					ResourceVersion: getResp.Namespace.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.UpdateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestClearCertificateFilters() {
 	ns := "ns1"
 	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
 	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)

@@ -50,17 +50,14 @@ func (s *RequestTestSuite) RunCmd(args ...string) error {
 func (s *RequestTestSuite) TestGet() {
 
 	s.Error(s.RunCmd("request", "get"))
-	s.Error(s.RunCmd("request", "get", "--namespace", "ns1"))
 
 	s.mockService.EXPECT().GetRequestStatus(gomock.Any(), &requestservice.GetRequestStatusRequest{
-		Namespace: "ns1",
 		RequestId: "req1",
 	}).Return(nil, errors.New("some error")).Times(1)
-	s.Error(s.RunCmd("request", "get", "--namespace", "ns1", "--request-id", "req1"))
+	s.Error(s.RunCmd("request", "get", "--request-id", "req1"))
 
 	s.mockService.EXPECT().GetRequestStatus(gomock.Any(), &requestservice.GetRequestStatusRequest{
-		Namespace: "ns1",
 		RequestId: "req1",
 	}).Return(&requestservice.GetRequestStatusResponse{}, nil).Times(1)
-	s.NoError(s.RunCmd("request", "get", "--namespace", "ns1", "--request-id", "req1"))
+	s.NoError(s.RunCmd("request", "get", "--request-id", "req1"))
 }

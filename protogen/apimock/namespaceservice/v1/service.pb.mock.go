@@ -56,6 +56,26 @@ func (mr *MockNamespaceServiceClientMockRecorder) CreateNamespace(ctx, in interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNamespace", reflect.TypeOf((*MockNamespaceServiceClient)(nil).CreateNamespace), varargs...)
 }
 
+// DeleteNamespace mocks base method.
+func (m *MockNamespaceServiceClient) DeleteNamespace(ctx context.Context, in *namespaceservice.DeleteNamespaceRequest, opts ...grpc.CallOption) (*namespaceservice.DeleteNamespaceResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteNamespace", varargs...)
+	ret0, _ := ret[0].(*namespaceservice.DeleteNamespaceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteNamespace indicates an expected call of DeleteNamespace.
+func (mr *MockNamespaceServiceClientMockRecorder) DeleteNamespace(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNamespace", reflect.TypeOf((*MockNamespaceServiceClient)(nil).DeleteNamespace), varargs...)
+}
+
 // GetNamespace mocks base method.
 func (m *MockNamespaceServiceClient) GetNamespace(ctx context.Context, in *namespaceservice.GetNamespaceRequest, opts ...grpc.CallOption) (*namespaceservice.GetNamespaceResponse, error) {
 	m.ctrl.T.Helper()
@@ -192,6 +212,21 @@ func (m *MockNamespaceServiceServer) CreateNamespace(arg0 context.Context, arg1 
 func (mr *MockNamespaceServiceServerMockRecorder) CreateNamespace(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNamespace", reflect.TypeOf((*MockNamespaceServiceServer)(nil).CreateNamespace), arg0, arg1)
+}
+
+// DeleteNamespace mocks base method.
+func (m *MockNamespaceServiceServer) DeleteNamespace(arg0 context.Context, arg1 *namespaceservice.DeleteNamespaceRequest) (*namespaceservice.DeleteNamespaceResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteNamespace", arg0, arg1)
+	ret0, _ := ret[0].(*namespaceservice.DeleteNamespaceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteNamespace indicates an expected call of DeleteNamespace.
+func (mr *MockNamespaceServiceServerMockRecorder) DeleteNamespace(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNamespace", reflect.TypeOf((*MockNamespaceServiceServer)(nil).DeleteNamespace), arg0, arg1)
 }
 
 // GetNamespace mocks base method.

@@ -5,11 +5,19 @@ import (
 
 	"github.com/temporalio/tcld/protogen/api/requestservice/v1"
 	"github.com/urfave/cli/v2"
+	"google.golang.org/grpc"
 )
 
 type RequestClient struct {
 	client requestservice.RequestServiceClient
 	ctx    context.Context
+}
+
+func NewRequestClient(ctx context.Context, conn *grpc.ClientConn) *RequestClient {
+	return &RequestClient{
+		client: requestservice.NewRequestServiceClient(conn),
+		ctx:    ctx,
+	}
 }
 
 type GetRequestClientFn func(ctx *cli.Context) (*RequestClient, error)
@@ -19,10 +27,7 @@ func GetRequestClient(ctx *cli.Context) (*RequestClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &RequestClient{
-		client: requestservice.NewRequestServiceClient(conn),
-		ctx:    ct,
-	}, nil
+	return NewRequestClient(ct, conn), nil
 }
 
 func (c *RequestClient) getRequestStatus(requestID string) error {
@@ -54,7 +59,6 @@ func (c *RequestClient) getRequestStatusesForNamespace(namespace string) error {
 }
 
 func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error) {
-
 	var c *RequestClient
 	return CommandOut{Command: &cli.Command{
 		Name:    "request",
@@ -64,7 +68,6 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 			var err error
 			c, err = getRequestClientFn(ctx)
 			return err
-
 		},
 		Subcommands: []*cli.Command{{
 			Name:    "get",

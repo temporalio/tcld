@@ -116,6 +116,26 @@ func (mr *MockAccountServiceClientMockRecorder) GetNamespacesUsage(ctx, in inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespacesUsage", reflect.TypeOf((*MockAccountServiceClient)(nil).GetNamespacesUsage), varargs...)
 }
 
+// GetRegions mocks base method.
+func (m *MockAccountServiceClient) GetRegions(ctx context.Context, in *accountservice.GetRegionsRequest, opts ...grpc.CallOption) (*accountservice.GetRegionsResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetRegions", varargs...)
+	ret0, _ := ret[0].(*accountservice.GetRegionsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRegions indicates an expected call of GetRegions.
+func (mr *MockAccountServiceClientMockRecorder) GetRegions(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRegions", reflect.TypeOf((*MockAccountServiceClient)(nil).GetRegions), varargs...)
+}
+
 // UpdateAccount mocks base method.
 func (m *MockAccountServiceClient) UpdateAccount(ctx context.Context, in *accountservice.UpdateAccountRequest, opts ...grpc.CallOption) (*accountservice.UpdateAccountResponse, error) {
 	m.ctrl.T.Helper()
@@ -217,6 +237,21 @@ func (m *MockAccountServiceServer) GetNamespacesUsage(arg0 context.Context, arg1
 func (mr *MockAccountServiceServerMockRecorder) GetNamespacesUsage(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespacesUsage", reflect.TypeOf((*MockAccountServiceServer)(nil).GetNamespacesUsage), arg0, arg1)
+}
+
+// GetRegions mocks base method.
+func (m *MockAccountServiceServer) GetRegions(arg0 context.Context, arg1 *accountservice.GetRegionsRequest) (*accountservice.GetRegionsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRegions", arg0, arg1)
+	ret0, _ := ret[0].(*accountservice.GetRegionsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRegions indicates an expected call of GetRegions.
+func (mr *MockAccountServiceServerMockRecorder) GetRegions(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRegions", reflect.TypeOf((*MockAccountServiceServer)(nil).GetRegions), arg0, arg1)
 }
 
 // UpdateAccount mocks base method.
