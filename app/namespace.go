@@ -578,6 +578,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Name:    "retention",
 					Usage:   "Update retention for a namespace",
 					Aliases: []string{"r"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RetentionFlag,
+						RequestIDFlag,
+					},
 					Action: func(ctx *cli.Context) error {
 						retention := ctx.Int(RetentionFlagName)
 						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
