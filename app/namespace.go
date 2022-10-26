@@ -575,6 +575,23 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					},
 				},
 				{
+					Name:    "retention",
+					Usage:   "Update retention for a namespace",
+					Aliases: []string{"r"},
+					Action: func(ctx *cli.Context) error {
+						retention := ctx.Int(RetentionFlagName)
+						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						if err != nil {
+							return err
+						}
+						if int32(retention) == n.Spec.RetentionDays {
+							return fmt.Errorf("retention for namespace is already set at %d days", ctx.Int(RetentionFlagName))
+						}
+						n.Spec.RetentionDays = int32(retention)
+						return c.updateNamespace(ctx, n)
+					},
+				},
+				{
 					Name:    "search-attributes",
 					Usage:   "Manage search attributes used by namespace",
 					Aliases: []string{"sa"},
