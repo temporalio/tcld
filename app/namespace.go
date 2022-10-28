@@ -576,25 +576,30 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 				{
 					Name:    "retention",
-					Usage:   "Update retention for a namespace",
+					Usage:   "The length of time a closed workflow will be preserved before deletion",
 					Aliases: []string{"r"},
-					Flags: []cli.Flag{
-						NamespaceFlag,
-						RetentionFlag,
-						RequestIDFlag,
-					},
-					Action: func(ctx *cli.Context) error {
-						retention := ctx.Int(RetentionFlagName)
-						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
-						if err != nil {
-							return err
-						}
-						if int32(retention) == n.Spec.RetentionDays {
-							return fmt.Errorf("retention for namespace is already set at %d days", ctx.Int(RetentionFlagName))
-						}
-						n.Spec.RetentionDays = int32(retention)
-						return c.updateNamespace(ctx, n)
-					},
+					Subcommands: []*cli.Command{{
+						Name:    "set",
+						Aliases: []string{"s"},
+						Usage:   "Set the length of time a closed workflow will be preserved before deletion per namespace",
+						Flags: []cli.Flag{
+							NamespaceFlag,
+							RetentionFlag,
+							RequestIDFlag,
+						},
+						Action: func(ctx *cli.Context) error {
+							retention := ctx.Int(RetentionFlagName)
+							n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+							if err != nil {
+								return err
+							}
+							if int32(retention) == n.Spec.RetentionDays {
+								return fmt.Errorf("retention for namespace is already set at %d days", ctx.Int(RetentionFlagName))
+							}
+							n.Spec.RetentionDays = int32(retention)
+							return c.updateNamespace(ctx, n)
+						},
+					}},
 				},
 				{
 					Name:    "search-attributes",
