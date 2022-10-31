@@ -576,7 +576,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 				{
 					Name:    "retention",
-					Usage:   "The length of time (in days) a closed workflow will be preserved before deletion",
+					Usage:   "Manages configuration of the length of time (in days) a closed workflow will be preserved before deletion",
 					Aliases: []string{"r"},
 					Subcommands: []*cli.Command{{
 						Name:    "set",
@@ -584,7 +584,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						Usage:   "Set the length of time (in days) a closed workflow will be preserved before deletion per namespace",
 						Flags: []cli.Flag{
 							NamespaceFlag,
-							RetentionFlag,
+							RetentionDaysFlag,
 							RequestIDFlag,
 						},
 						Action: func(ctx *cli.Context) error {
