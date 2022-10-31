@@ -590,7 +590,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								RequestIDFlag,
 							},
 							Action: func(ctx *cli.Context) error {
-								retention := ctx.Int(RetentionDaysFlagName)
+								retention := ctx.Uint(RetentionDaysFlagName)
 								n, err := c.getNamespace(ctx.String(NamespaceFlagName))
 								if err != nil {
 									return err
