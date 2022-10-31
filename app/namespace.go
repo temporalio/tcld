@@ -576,12 +576,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 				{
 					Name:    "retention",
-					Usage:   "The length of time a closed workflow will be preserved before deletion",
+					Usage:   "The length of time (in days) a closed workflow will be preserved before deletion",
 					Aliases: []string{"r"},
 					Subcommands: []*cli.Command{{
 						Name:    "set",
 						Aliases: []string{"s"},
-						Usage:   "Set the length of time a closed workflow will be preserved before deletion per namespace",
+						Usage:   "Set the length of time (in days) a closed workflow will be preserved before deletion per namespace",
 						Flags: []cli.Flag{
 							NamespaceFlag,
 							RetentionFlag,
