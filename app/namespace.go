@@ -614,7 +614,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							Usage:   "Retrieve the length of time (in days) a closed workflow will be preserved before deletion for a given namespace",
 							Flags: []cli.Flag{
 								NamespaceFlag,
-								RequestIDFlag,
 							},
 							Action: func(ctx *cli.Context) error {
 								n, err := c.getNamespace(ctx.String(NamespaceFlagName))
