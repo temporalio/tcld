@@ -588,13 +588,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							RequestIDFlag,
 						},
 						Action: func(ctx *cli.Context) error {
-							retention := ctx.Int(RetentionFlagName)
+							retention := ctx.Int(RetentionDaysFlagName)
 							n, err := c.getNamespace(ctx.String(NamespaceFlagName))
 							if err != nil {
 								return err
 							}
 							if int32(retention) == n.Spec.RetentionDays {
-								return fmt.Errorf("retention for namespace is already set at %d days", ctx.Int(RetentionFlagName))
+								return fmt.Errorf("retention for namespace is already set at %d days", ctx.Int(RetentionDaysFlagName))
 							}
 							n.Spec.RetentionDays = int32(retention)
 							return c.updateNamespace(ctx, n)
