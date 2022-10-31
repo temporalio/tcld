@@ -1056,3 +1056,196 @@ func (s *NamespaceTestSuite) TestClearCertificateFilters() {
 		})
 	}
 }
+
+func (s *NamespaceTestSuite) TestUpdateNamespaceRetention() {
+
+	ns := "ns1"
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)
+
+	tests := []struct {
+		name         string
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{
+		{
+			name: "displays help",
+			args: []string{"namespace", "retention"},
+		},
+		{
+			name:      "missing flags",
+			args:      []string{"namespace", "retention", "set"},
+			expectErr: true,
+		},
+		{
+			name:      "missing retention-days flag",
+			args:      []string{"namespace", "retention", "set", "--namespace", ns},
+			expectErr: true,
+		},
+		{
+			name:      "happy path",
+			args:      []string{"namespace", "retention", "set", "-namespace", ns, "-retention-days", "7"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.RetentionDays = 7
+			},
+			expectErr: false,
+		},
+		{
+			name:      "aliases",
+			args:      []string{"n", "r", "s", "-n", ns, "-rd", "7"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.RetentionDays = 7
+			},
+			expectErr: false,
+		},
+		{
+			name:      "invalid day negative",
+			args:      []string{"namespace", "retention", "set", "-namespace", ns, "-retention-days", "-7"},
+			expectErr: true,
+		},
+		{
+			name:      "invalid day 0",
+			args:      []string{"namespace", "retention", "set", "-namespace", ns, "-retention-days", "0"},
+			expectErr: true,
+		},
+		{
+			name: "no namespace found",
+			args: []string{"namespace", "retention", "set", "-namespace", ns, "-retention-days", "7"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace = nil
+			},
+			expectErr: true,
+		},
+		{
+			name:      "retention unchanged",
+			args:      []string{"namespace", "retention", "set", "-namespace", ns, "-retention-days", "10"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						AcceptedClientCa: "cert1",
+						SearchAttributes: map[string]namespace.SearchAttributeType{
+							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
+						},
+						RetentionDays: 10,
+					},
+					State:           namespace.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Namespace.Spec)
+				req := namespaceservice.UpdateNamespaceRequest{
+					Namespace:       ns,
+					Spec:            &spec,
+					ResourceVersion: getResp.Namespace.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.UpdateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestGetNamespaceRetention() {
+
+	ns := "ns1"
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+
+	tests := []struct {
+		name      string
+		args      []string
+		expectGet morphGetResp
+		expectErr bool
+	}{
+		{
+			name: "displays help",
+			args: []string{"namespace", "retention"},
+		},
+		{
+			name:      "missing flags",
+			args:      []string{"namespace", "retention", "get"},
+			expectErr: true,
+		},
+		{
+			name:      "happy path",
+			args:      []string{"namespace", "retention", "get", "-namespace", ns},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectErr: false,
+		},
+		{
+			name:      "aliases",
+			args:      []string{"n", "r", "g", "-n", ns},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectErr: false,
+		},
+		{
+			name: "no namespace found",
+			args: []string{"namespace", "retention", "set", "-namespace", ns, "-retention-days", "7"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace = nil
+			},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						AcceptedClientCa: "cert1",
+						SearchAttributes: map[string]namespace.SearchAttributeType{
+							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
+						},
+						RetentionDays: 10,
+					},
+					State:           namespace.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
