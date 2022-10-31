@@ -36,7 +36,7 @@ var (
 	RetentionFlag = &cli.StringFlag{
 		Name:     RetentionDaysFlagName,
 		Usage:    "The retention of the namespace",
-		Aliases:  []string{"ret"},
+		Aliases:  []string{"rd"},
 		EnvVars:  []string{"NAMESPACE_RETENTION"},
 		Required: true,
 	}
