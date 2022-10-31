@@ -585,6 +585,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							Usage:   "Set the length of time (in days) a closed workflow will be preserved before deletion for a given namespace",
 							Flags: []cli.Flag{
 								NamespaceFlag,
+								ResourceVersionFlag,
 								RetentionDaysFlag,
 								RequestIDFlag,
 							},
