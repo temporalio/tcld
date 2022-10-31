@@ -33,7 +33,7 @@ var (
 		Hidden:   true,
 		Required: false,
 	}
-	RetentionFlag = &cli.StringFlag{
+	RetentionFlag = &cli.IntFlag{
 		Name:     RetentionDaysFlagName,
 		Usage:    "The retention of the namespace in days",
 		Aliases:  []string{"rd"},
