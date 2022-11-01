@@ -101,7 +101,7 @@ func getURLFromDomain(domain string) (string, error) {
 	return domain, nil
 }
 
-func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, clientID string) error {
+func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, clientID string, disablePopUp bool) error {
 	// Get device code
 	oauthDeviceCodeResponse := OauthDeviceCodeResponse{}
 	domain, err := getURLFromDomain(domain)
@@ -118,8 +118,10 @@ func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, cl
 
 	fmt.Printf("Login via this url: %s\n", oauthDeviceCodeResponse.VerificationURIComplete)
 
-	if err := c.loginService.OpenBrowser(oauthDeviceCodeResponse.VerificationURIComplete); err != nil {
-		fmt.Println("Unable to open browser, please open url manually.")
+	if !disablePopUp {
+		if err := c.loginService.OpenBrowser(oauthDeviceCodeResponse.VerificationURIComplete); err != nil {
+			fmt.Println("Unable to open browser, please open url manually.")
+		}
 	}
 
 	// Get access token
@@ -183,9 +185,14 @@ func NewLoginCommand(c *LoginClient) (CommandOut, error) {
 				Required: false,
 				Hidden:   true,
 			},
+			&cli.BoolFlag{
+				Name:     "disable-pop-up",
+				Usage:    "disable browser pop-up",
+				Required: false,
+			},
 		},
 		Action: func(ctx *cli.Context) error {
-			return c.login(ctx, ctx.String("domain"), ctx.String("audience"), ctx.String("client-id"))
+			return c.login(ctx, ctx.String("domain"), ctx.String("audience"), ctx.String("client-id"), ctx.Bool("disable-pop-up"))
 		},
 	}}, nil
 }
