@@ -11,18 +11,8 @@ func NewLogoutCommand(c *LoginClient) (CommandOut, error) {
 		Usage:   "Logout current user",
 		Aliases: []string{"lo"},
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:     "domain",
-				Value:    "login.tmprl.cloud",
-				Aliases:  []string{"d"},
-				Required: false,
-				Hidden:   true,
-			},
-			&cli.BoolFlag{
-				Name:     "disable-pop-up",
-				Usage:    "disable browser pop-up",
-				Required: false,
-			},
+			domainFlag,
+			disablePopUpFlag,
 		},
 		Action: func(ctx *cli.Context) error {
 			logoutURL := fmt.Sprintf("https://%s/v2/logout", ctx.String("domain"))

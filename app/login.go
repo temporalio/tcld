@@ -23,6 +23,32 @@ const (
 
 var (
 	tokenFileName = "tokens.json"
+	domainFlag    = &cli.StringFlag{
+		Name:     "domain",
+		Value:    "login.tmprl.cloud",
+		Aliases:  []string{"d"},
+		Required: false,
+		Hidden:   true,
+	}
+	audienceFlag = &cli.StringFlag{
+		Name:     "audience",
+		Value:    "https://saas-api.tmprl.cloud",
+		Aliases:  []string{"a"},
+		Required: false,
+		Hidden:   true,
+	}
+	clientIDFlag = &cli.StringFlag{
+		Name:     "client-id",
+		Value:    "d7V5bZMLCbRLfRVpqC567AqjAERaWHhl",
+		Aliases:  []string{"id"},
+		Required: false,
+		Hidden:   true,
+	}
+	disablePopUpFlag = &cli.BoolFlag{
+		Name:     "disable-pop-up",
+		Usage:    "disable browser pop-up",
+		Required: false,
+	}
 )
 
 func GetLoginClient() *LoginClient {
@@ -164,32 +190,10 @@ func NewLoginCommand(c *LoginClient) (CommandOut, error) {
 			return err
 		},
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:     "domain",
-				Value:    "login.tmprl.cloud",
-				Aliases:  []string{"d"},
-				Required: false,
-				Hidden:   true,
-			},
-			&cli.StringFlag{
-				Name:     "audience",
-				Value:    "https://saas-api.tmprl.cloud",
-				Aliases:  []string{"a"},
-				Required: false,
-				Hidden:   true,
-			},
-			&cli.StringFlag{
-				Name:     "client-id",
-				Value:    "d7V5bZMLCbRLfRVpqC567AqjAERaWHhl",
-				Aliases:  []string{"id"},
-				Required: false,
-				Hidden:   true,
-			},
-			&cli.BoolFlag{
-				Name:     "disable-pop-up",
-				Usage:    "disable browser pop-up",
-				Required: false,
-			},
+			domainFlag,
+			audienceFlag,
+			clientIDFlag,
+			disablePopUpFlag,
 		},
 		Action: func(ctx *cli.Context) error {
 			return c.login(ctx, ctx.String("domain"), ctx.String("audience"), ctx.String("client-id"), ctx.Bool("disable-pop-up"))
