@@ -11,9 +11,9 @@ import (
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
-	v11 "github.com/temporalio/saas-proto/protogen/api/auth/v1"
-	v1 "github.com/temporalio/saas-proto/protogen/api/namespace/v1"
-	v12 "github.com/temporalio/saas-proto/protogen/api/request/v1"
+	v11 "github.com/temporalio/tcld/protogen/api/auth/v1"
+	v1 "github.com/temporalio/tcld/protogen/api/namespace/v1"
+	v12 "github.com/temporalio/tcld/protogen/api/request/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
