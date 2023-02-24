@@ -49,6 +49,33 @@ func (c *RoleClient) listRoles(userID string, namespace string) error {
 	}
 }
 
+func (c *RoleClient) getAccountRoleByPermission(permission string) error {
+
+	p := strings.ToLower(strings.TrimSpace(permission))
+	var ag auth.AccountActionGroup
+	for n, v := range auth.AccountActionGroup_value {
+		if strings.ToLower(n) == p {
+			ag = auth.AccountActionGroup(v)
+			break
+		}
+	}
+	if ag == auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
+		return fmt.Errorf("invalid permission")
+	}
+
+	res, err := c.client.GetRolesByPermissions(c.ctx, &authservice.GetRolesByPermissionsRequest{
+		Specs: []*auth.RoleSpec{{
+			AccountRole: &auth.AccountRoleSpec{
+				ActionGroup: ag,
+			},
+		}},
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res)
+}
+
 func (c *RoleClient) getNamespaceRoleByPermission(namespace string, permission string) error {
 
 	p := strings.ToLower(strings.TrimSpace(permission))
@@ -95,10 +122,14 @@ func NewRoleCommand(getRoleClientFn GetRoleClientFn) (CommandOut, error) {
 					Usage:   "List Roles",
 					Aliases: []string{"l"},
 					Flags: []cli.Flag{
-						userIDFlag,
+						&cli.StringFlag{
+							Name:    userIDFlagName,
+							Usage:   "List roles that are currently assigned to the user",
+							Aliases: []string{"i"},
+						},
 						&cli.StringFlag{
 							Name:    NamespaceFlagName,
-							Usage:   "The namespace hosted on temporal cloud",
+							Usage:   "List roles that give access to the namespace.",
 							Aliases: []string{"n"},
 						},
 					},
@@ -107,9 +138,27 @@ func NewRoleCommand(getRoleClientFn GetRoleClientFn) (CommandOut, error) {
 					},
 				},
 				{
-					Name:    "get",
-					Usage:   "Get Roles by permissions",
-					Aliases: []string{"g"},
+					Name:    "get-account-role",
+					Usage:   "Get an account role by permissions",
+					Aliases: []string{"gar"},
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:     "permission",
+							Usage:    "The permission the role grants. one of: admin, developer, read",
+							Aliases:  []string{"p"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						return c.getAccountRoleByPermission(
+							ctx.String("permission"),
+						)
+					},
+				},
+				{
+					Name:    "get-namespace-role",
+					Usage:   "Get a namespace role by permissions",
+					Aliases: []string{"gnr"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
 							Name:     NamespaceFlagName,
