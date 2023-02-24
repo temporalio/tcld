@@ -5,17 +5,16 @@ package accountservice
 
 import (
 	fmt "fmt"
+	proto "github.com/gogo/protobuf/proto"
+	types "github.com/gogo/protobuf/types"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
-
-	proto "github.com/gogo/protobuf/proto"
-	types "github.com/gogo/protobuf/types"
-	v1 "github.com/temporalio/tcld/protogen/api/account/v1"
-	v12 "github.com/temporalio/tcld/protogen/api/common/v1"
-	v11 "github.com/temporalio/tcld/protogen/api/request/v1"
+	v1 "github.com/temporalio/saas-proto/protogen/api/account/v1"
+	v12 "github.com/temporalio/saas-proto/protogen/api/common/v1"
+	v11 "github.com/temporalio/saas-proto/protogen/api/request/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

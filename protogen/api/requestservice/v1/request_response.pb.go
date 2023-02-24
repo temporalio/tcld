@@ -5,14 +5,13 @@ package requestservice
 
 import (
 	fmt "fmt"
+	proto "github.com/gogo/protobuf/proto"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
-
-	proto "github.com/gogo/protobuf/proto"
-	v1 "github.com/temporalio/tcld/protogen/api/request/v1"
+	v1 "github.com/temporalio/saas-proto/protogen/api/request/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
