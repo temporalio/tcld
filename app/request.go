@@ -40,25 +40,8 @@ func (c *RequestClient) getRequestStatus(requestID string) error {
 	return PrintProto(res)
 }
 
-func (c *RequestClient) getRequestStatuses() error {
-	res, err := c.client.GetRequestStatuses(c.ctx, &requestservice.GetRequestStatusesRequest{})
-	if err != nil {
-		return err
-	}
-	return PrintProto(res)
-}
-
-func (c *RequestClient) getRequestStatusesForNamespace(namespace string) error {
-	res, err := c.client.GetRequestStatusesForNamespace(c.ctx, &requestservice.GetRequestStatusesForNamespaceRequest{
-		Namespace: namespace,
-	})
-	if err != nil {
-		return err
-	}
-	return PrintProto(res)
-}
-
 func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error) {
+
 	var c *RequestClient
 	return CommandOut{Command: &cli.Command{
 		Name:    "request",
@@ -68,6 +51,7 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 			var err error
 			c, err = getRequestClientFn(ctx)
 			return err
+
 		},
 		Subcommands: []*cli.Command{{
 			Name:    "get",
@@ -83,24 +67,6 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 			},
 			Action: func(ctx *cli.Context) error {
 				return c.getRequestStatus(ctx.String("request-id"))
-			},
-		}, {
-			Name:    "list",
-			Usage:   "List the request statuses",
-			Aliases: []string{"l"},
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:    NamespaceFlagName,
-					Usage:   "The namespace hosted on temporal cloud",
-					Aliases: []string{"n"},
-				},
-			},
-			Action: func(ctx *cli.Context) error {
-				if ctx.String(NamespaceFlagName) != "" {
-					return c.getRequestStatusesForNamespace(ctx.String(NamespaceFlagName))
-				} else {
-					return c.getRequestStatuses()
-				}
 			},
 		}},
 	}}, nil

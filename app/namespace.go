@@ -82,25 +82,6 @@ func (c *NamespaceClient) listNamespaces() error {
 	}
 }
 
-func (c *NamespaceClient) listNamespacesWithDetails() error {
-	totalRes := &namespaceservice.GetNamespacesResponse{}
-	pageToken := ""
-	for {
-		res, err := c.client.GetNamespaces(c.ctx, &namespaceservice.GetNamespacesRequest{
-			PageToken: pageToken,
-		})
-		if err != nil {
-			return err
-		}
-		totalRes.Namespaces = append(totalRes.Namespaces, res.Namespaces...)
-		// Check if we should continue paging
-		pageToken = res.NextPageToken
-		if len(pageToken) == 0 {
-			return PrintProto(totalRes)
-		}
-	}
-}
-
 func (c *NamespaceClient) getNamespace(namespace string) (*namespace.Namespace, error) {
 	res, err := c.client.GetNamespace(c.ctx, &namespaceservice.GetNamespaceRequest{
 		Namespace: namespace,
@@ -113,17 +94,6 @@ func (c *NamespaceClient) getNamespace(namespace string) (*namespace.Namespace, 
 		return nil, fmt.Errorf("invalid namespace returned by server")
 	}
 	return res.Namespace, nil
-}
-
-func (c *NamespaceClient) createNamespace(ctx *cli.Context, name string, spec *namespace.NamespaceSpec) error {
-	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
-		Namespace: name,
-		Spec:      spec,
-	})
-	if err != nil {
-		return err
-	}
-	return PrintProto(res)
 }
 
 func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespace) error {
@@ -218,15 +188,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Name:    "list",
 					Usage:   "List all known namespaces",
 					Aliases: []string{"l"},
-					Flags: []cli.Flag{
-						&cli.BoolFlag{
-							Name: "details",
-						},
-					},
+					Flags:   []cli.Flag{},
 					Action: func(ctx *cli.Context) error {
-						if ctx.Bool("details") {
-							return c.listNamespacesWithDetails()
-						}
 						return c.listNamespaces()
 					},
 				},
@@ -246,113 +209,28 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					},
 				},
 				{
-					Name:    "create",
-					Usage:   "Create a new namespace",
-					Aliases: []string{"c"},
-					Flags: []cli.Flag{
-						NamespaceFlag,
-						RequestIDFlag,
-						CaCertificateFlag,
-						CaCertificateFileFlag,
-						&cli.PathFlag{
-							Name:    "certificate-filter-file",
-							Usage:   `Path to a JSON file that defines the certificate filters that will be configured on the namespace. This will replace the existing filter configuration. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
-							Aliases: []string{"cff"},
-						},
-						&cli.StringFlag{
-							Name:    "certificate-filter-input",
-							Usage:   `JSON that defines the certificate filters that will be configured on the namespace. This will replace the existing filter configuration. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
-							Aliases: []string{"cf"},
-						},
-						&cli.StringSliceFlag{
-							Name:    "search-attribute",
-							Usage:   fmt.Sprintf("The search attributes to register for the namespace. Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
-							Aliases: []string{"sa"},
-						},
-						&cli.StringFlag{
-							Name:     "region",
-							Required: true,
-							Usage:    fmt.Sprintf("The region to provision the namespace in"),
-							Aliases:  []string{"re"},
-						},
-						&cli.IntFlag{
-							Name:     "retention",
-							Required: true,
-							Usage:    fmt.Sprintf("The retention in days"),
-							Aliases:  []string{"rt"},
-						},
-					},
-					Action: func(ctx *cli.Context) error {
-						spec := &namespace.NamespaceSpec{
-							SearchAttributes: make(map[string]namespace.SearchAttributeType),
-							Region:           ctx.String("region"),
-							RetentionDays:    int32(ctx.Int("retention")),
-						}
-						cert, err := ReadCACerts(ctx)
-						if err != nil {
-							return err
-						}
-						spec.AcceptedClientCa = cert
-
-						fileFlagSet := ctx.Path("certificate-filter-file") != ""
-						inputFlagSet := ctx.String("certificate-filter-input") != ""
-						if fileFlagSet || inputFlagSet {
-							if fileFlagSet == inputFlagSet {
-								return errors.New("exactly one of the certificate-filter-file or certificate-filter-input flags must be specified")
-							}
-							var jsonBytes []byte
-							if fileFlagSet {
-								jsonBytes, err = ioutil.ReadFile(ctx.Path("certificate-filter-file"))
-								if err != nil {
-									return err
-								}
-							}
-
-							if inputFlagSet {
-								jsonBytes = []byte(ctx.String("certificate-filter-input"))
-							}
-
-							filters, err := parseCertificateFilters(jsonBytes)
-							if err != nil {
-								return err
-							}
-							spec.CertificateFilters = filters.toSpec()
-						}
-
-						csa, err := toSearchAttributes(ctx.StringSlice("search-attribute"))
-						if err != nil {
-							return err
-						}
-						for attrName, attrType := range csa {
-							spec.SearchAttributes[attrName] = attrType
-						}
-						return c.createNamespace(ctx, ctx.String(NamespaceFlagName), spec)
-					},
-				},
-				{
 					Name:    "accepted-client-ca",
 					Usage:   "Manage client ca certificate used to verify client connections",
 					Aliases: []string{"ca"},
-					Subcommands: []*cli.Command{
-						{
-							Name:    "list",
-							Aliases: []string{"l"},
-							Usage:   "List the accepted client ca certificates currently configured for the namespace",
-							Flags: []cli.Flag{
-								NamespaceFlag,
-							},
-							Action: func(ctx *cli.Context) error {
-								n, err := c.getNamespace(ctx.String(NamespaceFlagName))
-								if err != nil {
-									return err
-								}
-								out, err := parseCertificates(n.Spec.AcceptedClientCa)
-								if err != nil {
-									return err
-								}
-								return PrintObj(out)
-							},
+					Subcommands: []*cli.Command{{
+						Name:    "list",
+						Aliases: []string{"l"},
+						Usage:   "List the accepted client ca certificates currently configured for the namespace",
+						Flags: []cli.Flag{
+							NamespaceFlag,
 						},
+						Action: func(ctx *cli.Context) error {
+							n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+							if err != nil {
+								return err
+							}
+							out, err := parseCertificates(n.Spec.AcceptedClientCa)
+							if err != nil {
+								return err
+							}
+							return PrintObj(out)
+						},
+					},
 						{
 							Name:    "add",
 							Aliases: []string{"a"},
@@ -578,7 +456,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 								exportFile := ctx.Path("certificate-filter-file")
 								if exportFile != "" {
-									if err := ioutil.WriteFile(exportFile, []byte(jsonString), 0o644); err != nil {
+									if err := ioutil.WriteFile(exportFile, []byte(jsonString), 0644); err != nil {
 										return err
 									}
 								}
