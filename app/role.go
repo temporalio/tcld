@@ -163,7 +163,7 @@ func NewRoleCommand(getRoleClientFn GetRoleClientFn) (CommandOut, error) {
 			Subcommands: []*cli.Command{
 				{
 					Name:    "list",
-					Usage:   "List Roles",
+					Usage:   "List roles in the account",
 					Aliases: []string{"l"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
