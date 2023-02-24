@@ -49,6 +49,32 @@ func (c *RoleClient) listRoles(userID string, namespace string) error {
 	}
 }
 
+func getAccountActionGroups() []string {
+	var rv []string
+	for n, v := range auth.AccountActionGroup_value {
+		if v != int32(auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED) {
+			rv = append(rv, n)
+		}
+	}
+	return rv
+}
+
+func toAccountActionGroup(permission string) (auth.AccountActionGroup, error) {
+	p := strings.ToLower(strings.TrimSpace(permission))
+	var ag auth.AccountActionGroup
+	for n, v := range auth.AccountActionGroup_value {
+		if strings.ToLower(n) == p {
+			ag = auth.AccountActionGroup(v)
+			break
+		}
+	}
+	if ag == auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
+		return auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED,
+			fmt.Errorf("invalid permission: should be one of: %s", getAccountActionGroups())
+	}
+	return ag, nil
+}
+
 func (c *RoleClient) getAccountRoleByPermission(permission string) error {
 
 	p := strings.ToLower(strings.TrimSpace(permission))
@@ -76,8 +102,17 @@ func (c *RoleClient) getAccountRoleByPermission(permission string) error {
 	return PrintProto(res)
 }
 
-func (c *RoleClient) getNamespaceRoleByPermission(namespace string, permission string) error {
+func getNamespaceActionGroups() []string {
+	var rv []string
+	for n, v := range auth.NamespaceActionGroup_value {
+		if v != int32(auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED) {
+			rv = append(rv, n)
+		}
+	}
+	return rv
+}
 
+func toNamespaceActionGroup(permission string) (auth.NamespaceActionGroup, error) {
 	p := strings.ToLower(strings.TrimSpace(permission))
 	var ag auth.NamespaceActionGroup
 	for n, v := range auth.NamespaceActionGroup_value {
@@ -87,9 +122,18 @@ func (c *RoleClient) getNamespaceRoleByPermission(namespace string, permission s
 		}
 	}
 	if ag == auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED {
-		return fmt.Errorf("invalid permission")
+		return auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED,
+			fmt.Errorf("invalid permission: should be one of '%s'", strings.Join(getNamespaceActionGroups(), ","))
 	}
+	return ag, nil
+}
 
+func (c *RoleClient) getNamespaceRoleByPermission(namespace string, permission string) error {
+
+	ag, err := toNamespaceActionGroup(permission)
+	if err != nil {
+		return err
+	}
 	res, err := c.client.GetRolesByPermissions(c.ctx, &authservice.GetRolesByPermissionsRequest{
 		Specs: []*auth.RoleSpec{{
 			NamespaceRoles: []*auth.NamespaceRoleSpec{{
@@ -144,7 +188,7 @@ func NewRoleCommand(getRoleClientFn GetRoleClientFn) (CommandOut, error) {
 					Flags: []cli.Flag{
 						&cli.StringFlag{
 							Name:     "permission",
-							Usage:    "The permission the role grants. one of: admin, developer, read",
+							Usage:    fmt.Sprintf("The permission the role grants. one of: %s", getAccountActionGroups()),
 							Aliases:  []string{"p"},
 							Required: true,
 						},
@@ -168,7 +212,7 @@ func NewRoleCommand(getRoleClientFn GetRoleClientFn) (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:     "permission",
-							Usage:    "The permission the role grants. one of: admin, write, read",
+							Usage:    fmt.Sprintf("The permission the role grants. one of: %s", getNamespaceActionGroups()),
 							Aliases:  []string{"p"},
 							Required: true,
 						},

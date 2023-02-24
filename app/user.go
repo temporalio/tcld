@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
@@ -208,20 +207,13 @@ func (c *UserClient) assignNamespacePermission(
 	namespace string,
 	permission string,
 ) error {
-	user, err := c.getUser(userID, userEmail)
+	ag, err := toNamespaceActionGroup(permission)
 	if err != nil {
 		return err
 	}
-	p := strings.ToLower(strings.TrimSpace(permission))
-	var ag auth.NamespaceActionGroup
-	for n, v := range auth.NamespaceActionGroup_value {
-		if strings.ToLower(n) == p {
-			ag = auth.NamespaceActionGroup(v)
-			break
-		}
-	}
-	if ag == auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED {
-		return fmt.Errorf("invalid permission")
+	user, err := c.getUser(userID, userEmail)
+	if err != nil {
+		return err
 	}
 	req := &authservice.UpdateUserNamespacePermissionsRequest{
 		Namespace: namespace,
@@ -340,7 +332,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 				{
 					Name:    "update",
 					Usage:   "Update users",
-					Aliases: []string{"r"},
+					Aliases: []string{"u"},
 					Subcommands: []*cli.Command{
 						{
 							Name:    "set-roles",
@@ -378,8 +370,9 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 									Aliases:  []string{"n"},
 								},
 								&cli.StringFlag{
-									Name:     "permission",
-									Usage:    "the permission to assign",
+									Name: "permission",
+									Usage: fmt.Sprintf("the permission to assign, should be one of: %s",
+										getNamespaceActionGroups()),
 									Required: true,
 									Aliases:  []string{"p"},
 								},
