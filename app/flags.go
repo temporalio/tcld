@@ -10,6 +10,7 @@ import (
 const (
 	ServerFlagName          = "server"
 	ConfigDirFlagName       = "config-dir"
+	RetentionDaysFlagName   = "retention-days"
 	NamespaceFlagName       = "namespace"
 	RequestIDFlagName       = "request-id"
 	ResourceVersionFlagName = "resource-version"
@@ -31,6 +32,13 @@ var (
 		Usage:    "The config directory to use",
 		Hidden:   true,
 		Required: false,
+	}
+	RetentionDaysFlag = &cli.IntFlag{
+		Name:     RetentionDaysFlagName,
+		Usage:    "The retention of the namespace in days",
+		Aliases:  []string{"rd"},
+		EnvVars:  []string{"NAMESPACE_RETENTION"},
+		Required: true,
 	}
 	NamespaceFlag = &cli.StringFlag{
 		Name:     NamespaceFlagName,

@@ -697,6 +697,58 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					},
 				},
 				{
+					Name:    "retention",
+					Usage:   "Manages configuration of the length of time (in days) a closed workflow will be preserved before deletion",
+					Aliases: []string{"r"},
+					Subcommands: []*cli.Command{
+						{
+							Name:    "set",
+							Aliases: []string{"s"},
+							Usage:   "Set the length of time (in days) a closed workflow will be preserved before deletion for a given namespace",
+							Flags: []cli.Flag{
+								NamespaceFlag,
+								ResourceVersionFlag,
+								RetentionDaysFlag,
+								RequestIDFlag,
+							},
+							Action: func(ctx *cli.Context) error {
+								retention := ctx.Int(RetentionDaysFlagName)
+								if retention == 0 {
+									return fmt.Errorf("retention must be at least 1 day in duration")
+								}
+								if retention < 0 {
+									return fmt.Errorf("retention cannot be negative")
+								}
+								n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+								if err != nil {
+									return err
+								}
+								if int32(retention) == n.Spec.RetentionDays {
+									return fmt.Errorf("retention for namespace is already set at %d days", ctx.Int(RetentionDaysFlagName))
+								}
+								n.Spec.RetentionDays = int32(retention)
+								return c.updateNamespace(ctx, n)
+							},
+						},
+						{
+							Name:    "get",
+							Aliases: []string{"g"},
+							Usage:   "Retrieve the length of time (in days) a closed workflow will be preserved before deletion for a given namespace",
+							Flags: []cli.Flag{
+								NamespaceFlag,
+							},
+							Action: func(ctx *cli.Context) error {
+								n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+								if err != nil {
+									return err
+								}
+								fmt.Println(n.Spec.RetentionDays)
+								return nil
+							},
+						},
+					},
+				},
+				{
 					Name:    "search-attributes",
 					Usage:   "Manage search attributes used by namespace",
 					Aliases: []string{"sa"},
