@@ -75,8 +75,7 @@ func toAccountActionGroup(permission string) (auth.AccountActionGroup, error) {
 	return ag, nil
 }
 
-func (c *RoleClient) getAccountRoleByPermission(permission string) error {
-
+func getAccountRoles(ctx context.Context, client authservice.AuthServiceClient, permission string) (*authservice.GetRolesByPermissionsResponse, error) {
 	p := strings.ToLower(strings.TrimSpace(permission))
 	var ag auth.AccountActionGroup
 	for n, v := range auth.AccountActionGroup_value {
@@ -86,16 +85,25 @@ func (c *RoleClient) getAccountRoleByPermission(permission string) error {
 		}
 	}
 	if ag == auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
-		return fmt.Errorf("invalid permission")
+		return nil, fmt.Errorf("invalid permission")
 	}
 
-	res, err := c.client.GetRolesByPermissions(c.ctx, &authservice.GetRolesByPermissionsRequest{
+	res, err := client.GetRolesByPermissions(ctx, &authservice.GetRolesByPermissionsRequest{
 		Specs: []*auth.RoleSpec{{
 			AccountRole: &auth.AccountRoleSpec{
 				ActionGroup: ag,
 			},
 		}},
 	})
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+
+}
+
+func (c *RoleClient) getAccountRoleByPermission(permission string) error {
+	res, err := getAccountRoles(c.ctx, c.client, permission)
 	if err != nil {
 		return err
 	}
@@ -204,12 +212,7 @@ func NewRoleCommand(getRoleClientFn GetRoleClientFn) (CommandOut, error) {
 					Usage:   "Get a namespace role by permissions",
 					Aliases: []string{"gnr"},
 					Flags: []cli.Flag{
-						&cli.StringFlag{
-							Name:     NamespaceFlagName,
-							Usage:    "The namespace hosted on temporal cloud",
-							Aliases:  []string{"n"},
-							Required: true,
-						},
+						NamespaceFlag,
 						&cli.StringFlag{
 							Name:     "permission",
 							Usage:    fmt.Sprintf("The permission the role grants. one of: %s", getNamespaceActionGroups()),

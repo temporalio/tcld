@@ -26,12 +26,6 @@ var (
 		Usage:   "The user email address of the user to be invited",
 		Aliases: []string{"e"},
 	}
-	multipleUserEmailFlag = &cli.StringSliceFlag{
-		Name:     userEmailFlagName,
-		Usage:    "The user email address of the user to be invited, you can supply this flag multiple times to invite multiple users in a single request",
-		Required: true,
-		Aliases:  []string{"e"},
-	}
 	multipleRoleFlag = &cli.StringSliceFlag{
 		Name:     rolesFlagName,
 		Usage:    "The role that should be added to each invited use, you can supply this flag multiple times to add multiple roles to each user in a single request",
@@ -82,6 +76,10 @@ func (c *UserClient) listUsers(
 }
 
 func (c *UserClient) getUser(userID, userEmail string) (*auth.User, error) {
+	if userID == "" && userEmail == "" {
+		return nil, fmt.Errorf("both user-id and user-email not set")
+	}
+
 	if userID != "" && userEmail != "" {
 		return nil, fmt.Errorf("both user-id and user-email set")
 	}
@@ -103,7 +101,24 @@ func (c *UserClient) inviteUsers(
 	ctx *cli.Context,
 	emails []string,
 	roleIDs []string,
+	permission string,
 ) error {
+	if len(roleIDs) == 0 && permission == "" {
+		return fmt.Errorf("atleast one of role-ids or permission needs to be set")
+	}
+	if len(roleIDs) > 0 && permission != "" {
+		return fmt.Errorf("cannot set both role-ids and permission")
+	}
+	if permission != "" {
+		res, err := getAccountRoles(c.ctx, c.client, permission)
+		if err != nil {
+			return err
+		}
+		if len(res.Roles) != 1 {
+			return fmt.Errorf("failed to get account permissions, roles found: %s", res.Roles)
+		}
+		roleIDs = append(roleIDs, res.Roles[0].Id)
+	}
 	req := &authservice.InviteUsersRequest{
 		Specs:     make([]*auth.UserSpec, len(emails)),
 		RequestId: ctx.String(RequestIDFlagName),
@@ -149,6 +164,10 @@ func (c *UserClient) deleteUser(
 	if userID != "" && userEmail != "" {
 		return fmt.Errorf("both user-id and user-email set")
 	}
+	if userID == "" && userEmail == "" {
+		return fmt.Errorf("both user-id and user-email cannot be empty")
+	}
+
 	res, err := c.client.GetUser(c.ctx, &authservice.GetUserRequest{
 		UserEmail: userEmail,
 		UserId:    userID,
@@ -251,10 +270,9 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 					Aliases: []string{"l"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
-							Name:     "namespace",
-							Usage:    "List users that have access to the namespace",
-							Required: true,
-							Aliases:  []string{"n"},
+							Name:    "namespace",
+							Usage:   "List users that have access to the namespace",
+							Aliases: []string{"n"},
 						},
 					},
 					Action: func(ctx *cli.Context) error {
@@ -279,11 +297,25 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 				},
 				{
 					Name:    "invite",
-					Usage:   "Invites users to Temporal Cloud",
+					Usage:   "Invite users to Temporal Cloud",
 					Aliases: []string{"i"},
 					Flags: []cli.Flag{
-						multipleUserEmailFlag,
-						multipleRoleFlag,
+						&cli.StringSliceFlag{
+							Name:     userEmailFlagName,
+							Usage:    "The user email address of the user to be invited, you can supply this flag multiple times to invite multiple users in a single request",
+							Required: true,
+							Aliases:  []string{"e"},
+						},
+						&cli.StringSliceFlag{
+							Name:    rolesFlagName,
+							Usage:   "The roles to assign to each user. (cannot be used with account permissions)",
+							Aliases: []string{"ro"},
+						},
+						&cli.StringFlag{
+							Name:    "permission",
+							Usage:   fmt.Sprintf("The account permission to assign to the user. (cannot be used with user roles) one of: %s", getAccountActionGroups()),
+							Aliases: []string{"p"},
+						},
 						RequestIDFlag,
 					},
 					Action: func(ctx *cli.Context) error {
@@ -291,6 +323,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 							ctx,
 							ctx.StringSlice(userEmailFlagName),
 							ctx.StringSlice(rolesFlagName),
+							ctx.String("permission"),
 						)
 					},
 				},
