@@ -5,10 +5,36 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gogo/protobuf/proto"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/urfave/cli/v2"
 )
+
+var (
+	accountActionGroups   = getAccountActionGroups()
+	namespaceActionGroups = getNamespaceActionGroups()
+)
+
+func getAccountActionGroups() []string {
+	var rv []string
+	for n, v := range auth.AccountActionGroup_value {
+		if v != int32(auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED) {
+			rv = append(rv, n)
+		}
+	}
+	return rv
+}
+
+func getNamespaceActionGroups() []string {
+	var rv []string
+	for n, v := range auth.NamespaceActionGroup_value {
+		if v != int32(auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED) {
+			rv = append(rv, n)
+		}
+	}
+	return rv
+}
 
 type RoleClient struct {
 	client authservice.AuthServiceClient
@@ -28,37 +54,6 @@ func GetRoleClient(ctx *cli.Context) (*RoleClient, error) {
 	}, nil
 }
 
-func (c *RoleClient) listRoles(userID string, namespace string) error {
-	totalRes := &authservice.GetRolesResponse{}
-	pageToken := ""
-	for {
-		res, err := c.client.GetRoles(c.ctx, &authservice.GetRolesRequest{
-			PageToken: pageToken,
-			UserId:    userID,
-			Namespace: namespace,
-		})
-		if err != nil {
-			return err
-		}
-		totalRes.Roles = append(totalRes.Roles, res.Roles...)
-		// Check if we should continue paging
-		pageToken = res.NextPageToken
-		if len(pageToken) == 0 {
-			return PrintProto(totalRes)
-		}
-	}
-}
-
-func getAccountActionGroups() []string {
-	var rv []string
-	for n, v := range auth.AccountActionGroup_value {
-		if v != int32(auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED) {
-			rv = append(rv, n)
-		}
-	}
-	return rv
-}
-
 func toAccountActionGroup(permission string) (auth.AccountActionGroup, error) {
 	p := strings.ToLower(strings.TrimSpace(permission))
 	var ag auth.AccountActionGroup
@@ -70,7 +65,7 @@ func toAccountActionGroup(permission string) (auth.AccountActionGroup, error) {
 	}
 	if ag == auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
 		return auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED,
-			fmt.Errorf("invalid permission: should be one of: %s", getAccountActionGroups())
+			fmt.Errorf("invalid permission: should be one of: %s", accountActionGroups)
 	}
 	return ag, nil
 }
@@ -99,25 +94,6 @@ func getAccountRoles(ctx context.Context, client authservice.AuthServiceClient, 
 		return nil, err
 	}
 	return res, nil
-
-}
-
-func (c *RoleClient) getAccountRoleByPermission(permission string) error {
-	res, err := getAccountRoles(c.ctx, c.client, permission)
-	if err != nil {
-		return err
-	}
-	return PrintProto(res)
-}
-
-func getNamespaceActionGroups() []string {
-	var rv []string
-	for n, v := range auth.NamespaceActionGroup_value {
-		if v != int32(auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED) {
-			rv = append(rv, n)
-		}
-	}
-	return rv
 }
 
 func toNamespaceActionGroup(permission string) (auth.NamespaceActionGroup, error) {
@@ -131,18 +107,18 @@ func toNamespaceActionGroup(permission string) (auth.NamespaceActionGroup, error
 	}
 	if ag == auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED {
 		return auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED,
-			fmt.Errorf("invalid permission: should be one of '%s'", strings.Join(getNamespaceActionGroups(), ","))
+			fmt.Errorf("invalid permission: should be one of: %s", namespaceActionGroups)
 	}
 	return ag, nil
 }
 
-func (c *RoleClient) getNamespaceRoleByPermission(namespace string, permission string) error {
+func getNamespaceRolesForPermission(ctx context.Context, client authservice.AuthServiceClient, namespace string, permission string) (*authservice.GetRolesByPermissionsResponse, error) {
 
 	ag, err := toNamespaceActionGroup(permission)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	res, err := c.client.GetRolesByPermissions(c.ctx, &authservice.GetRolesByPermissionsRequest{
+	res, err := client.GetRolesByPermissions(ctx, &authservice.GetRolesByPermissionsRequest{
 		Specs: []*auth.RoleSpec{{
 			NamespaceRoles: []*auth.NamespaceRoleSpec{{
 				Namespace:   namespace,
@@ -151,16 +127,91 @@ func (c *RoleClient) getNamespaceRoleByPermission(namespace string, permission s
 		}},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return PrintProto(res)
+	return res, nil
+}
+
+func getNamespaceRoles(ctx context.Context, client authservice.AuthServiceClient, namespace string) (*authservice.GetRolesByPermissionsResponse, error) {
+
+	specs := []*auth.RoleSpec{}
+	for i := range auth.NamespaceActionGroup_name {
+		if i != int32(auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED) {
+			specs = append(specs, &auth.RoleSpec{
+				NamespaceRoles: []*auth.NamespaceRoleSpec{{
+					Namespace:   namespace,
+					ActionGroup: auth.NamespaceActionGroup(i),
+				}},
+			})
+		}
+	}
+	res, err := client.GetRolesByPermissions(ctx, &authservice.GetRolesByPermissionsRequest{Specs: specs})
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (c *RoleClient) listRoles(accountAccess string, namespace string, namespaceAccess string) error {
+	totalRes := []proto.Message{}
+
+	if accountAccess == "" && namespace == "" && namespaceAccess == "" {
+		pageToken := ""
+		for {
+			res, err := c.client.GetRoles(c.ctx, &authservice.GetRolesRequest{
+				PageToken: pageToken,
+				Namespace: namespace,
+			})
+			if err != nil {
+				return err
+			}
+			for i := range res.Roles {
+				totalRes = append(totalRes, res.Roles[i])
+			}
+			// Check if we should continue paging
+			pageToken = res.NextPageToken
+			if len(pageToken) == 0 {
+				break
+			}
+		}
+	} else {
+		if accountAccess != "" {
+			res, err := getAccountRoles(c.ctx, c.client, accountAccess)
+			if err != nil {
+				return err
+			}
+			for i := range res.Roles {
+				totalRes = append(totalRes, res.Roles[i])
+			}
+		}
+		if namespace != "" {
+			if namespaceAccess == "" {
+				res, err := getNamespaceRoles(c.ctx, c.client, namespace)
+				if err != nil {
+					return err
+				}
+				for i := range res.Roles {
+					totalRes = append(totalRes, res.Roles[i])
+				}
+			} else {
+				res, err := getNamespaceRolesForPermission(c.ctx, c.client, namespace, namespaceAccess)
+				if err != nil {
+					return err
+				}
+				for i := range res.Roles {
+					totalRes = append(totalRes, res.Roles[i])
+				}
+			}
+		}
+	}
+	return PrintProtoSlice("Roles", totalRes)
 }
 
 func NewRoleCommand(getRoleClientFn GetRoleClientFn) (CommandOut, error) {
 	var c *RoleClient
 	return CommandOut{
 		Command: &cli.Command{
-			Name:    "Role",
+			Name:    "role",
 			Aliases: []string{"ro"},
 			Usage:   "Role operations",
 			Before: func(ctx *cli.Context) error {
@@ -175,55 +226,26 @@ func NewRoleCommand(getRoleClientFn GetRoleClientFn) (CommandOut, error) {
 					Aliases: []string{"l"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
-							Name:    userIDFlagName,
-							Usage:   "List roles that are currently assigned to the user",
-							Aliases: []string{"i"},
+							Name:    "account-access",
+							Usage:   fmt.Sprintf("List roles that give global %s access.", accountActionGroups),
+							Aliases: []string{"aa"},
 						},
 						&cli.StringFlag{
 							Name:    NamespaceFlagName,
-							Usage:   "List roles that give access to the namespace.",
+							Usage:   "List roles that give access to namespace.",
 							Aliases: []string{"n"},
 						},
-					},
-					Action: func(ctx *cli.Context) error {
-						return c.listRoles(ctx.String(userIDFlagName), ctx.String(NamespaceFlagName))
-					},
-				},
-				{
-					Name:    "get-account-role",
-					Usage:   "Get an account role by permissions",
-					Aliases: []string{"gar"},
-					Flags: []cli.Flag{
 						&cli.StringFlag{
-							Name:     "permission",
-							Usage:    fmt.Sprintf("The permission the role grants. one of: %s", getAccountActionGroups()),
-							Aliases:  []string{"p"},
-							Required: true,
+							Name:    "namespace-access",
+							Usage:   fmt.Sprintf("List roles that give %s access to the namespace", namespaceActionGroups),
+							Aliases: []string{"na"},
 						},
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.getAccountRoleByPermission(
-							ctx.String("permission"),
-						)
-					},
-				},
-				{
-					Name:    "get-namespace-role",
-					Usage:   "Get a namespace role by permissions",
-					Aliases: []string{"gnr"},
-					Flags: []cli.Flag{
-						NamespaceFlag,
-						&cli.StringFlag{
-							Name:     "permission",
-							Usage:    fmt.Sprintf("The permission the role grants. one of: %s", getNamespaceActionGroups()),
-							Aliases:  []string{"p"},
-							Required: true,
-						},
-					},
-					Action: func(ctx *cli.Context) error {
-						return c.getNamespaceRoleByPermission(
+						return c.listRoles(
+							ctx.String("account-access"),
 							ctx.String(NamespaceFlagName),
-							ctx.String("permission"),
+							ctx.String("namespace-access"),
 						)
 					},
 				},
