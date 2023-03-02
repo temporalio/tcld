@@ -153,14 +153,11 @@ func (c *UserClient) inviteUsers(
 		return fmt.Errorf("cannot set both role-ids and access")
 	}
 	if access != "" {
-		res, err := getAccountRoles(c.ctx, c.client, access)
+		role, err := getAccountRole(c.ctx, c.client, access)
 		if err != nil {
 			return err
 		}
-		if len(res.Roles) != 1 {
-			return fmt.Errorf("failed to get the account role for given access, roles found: %s", res.Roles)
-		}
-		roleIDs = append(roleIDs, res.Roles[0].Id)
+		roleIDs = append(roleIDs, role.Id)
 	}
 	req := &authservice.InviteUsersRequest{
 		Specs:     make([]*auth.UserSpec, len(emails)),
