@@ -264,35 +264,44 @@ func (c *UserClient) updateUser(
 	return c.performUpdate(ctx, user)
 }
 
-func (c *UserClient) addRole(
+func (c *UserClient) setAccountAccess(
 	ctx *cli.Context,
 	userID string,
 	userEmail string,
 	accountAccess string,
-	namespaceAccess string,
-	namespace string,
 ) error {
 	user, userRoles, err := c.getUserAndRoles(userID, userEmail)
 	if err != nil {
 		return err
 	}
-	role, err := computeRole(c.ctx, c.client, accountAccess, namespaceAccess, namespace)
+	role, err := getAccountRole(c.ctx, c.client, accountAccess)
 	if err != nil {
 		return err
 	}
 	for i := range userRoles {
 		if userRoles[i].Id == role.Id {
-			return fmt.Errorf("user already has access to '%s' role", role.Id)
+			return fmt.Errorf("user already assigned '%s' account role", role.Id)
 		}
 	}
-	if role.Spec.AccountRole != nil && role.Spec.AccountRole.ActionGroup != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
-		for i := range userRoles {
-			if userRoles[i].Spec.AccountRole != nil && role.Spec.AccountRole.ActionGroup != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
+	for i := range userRoles {
+		if userRoles[i].Spec.AccountRole != nil && userRoles[i].Spec.AccountRole.ActionGroup != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
+			if role.Spec.AccountRole.ActionGroup == auth.ACCOUNT_ACTION_GROUP_ADMIN {
+				// assignign the user account admin role
+				y, err := ConfirmPrompt(ctx, "Assigning admin role to user, please confirm")
+				if err != nil || !y {
+					return err
+				}
+				userRoles = []*auth.Role{role}
+			} else {
 				userRoles[i] = role
 			}
 		}
 	}
-
+	roleNames := make([]string, len(userRoles))
+	for i := range userRoles {
+		roleNames[i] = userRoles[i].Id
+	}
+	user.Spec.Roles = roleNames
 	return c.performUpdate(ctx, user)
 }
 

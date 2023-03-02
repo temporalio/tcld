@@ -70,7 +70,7 @@ func toAccountActionGroup(permission string) (auth.AccountActionGroup, error) {
 	return ag, nil
 }
 
-func getAccountRoles(ctx context.Context, client authservice.AuthServiceClient, permission string) (*authservice.GetRolesByPermissionsResponse, error) {
+func getAccountRole(ctx context.Context, client authservice.AuthServiceClient, permission string) (*auth.Role, error) {
 	p := strings.ToLower(strings.TrimSpace(permission))
 	var ag auth.AccountActionGroup
 	for n, v := range auth.AccountActionGroup_value {
@@ -93,7 +93,13 @@ func getAccountRoles(ctx context.Context, client authservice.AuthServiceClient, 
 	if err != nil {
 		return nil, err
 	}
-	return res, nil
+	if len(res.Roles) == 0 {
+		return nil, fmt.Errorf("no roles found")
+	}
+	if len(res.Roles) > 1 {
+		return nil, fmt.Errorf("more than 1 account role found: %s", res.Roles)
+	}
+	return res.Roles[0], nil
 }
 
 func toNamespaceActionGroup(permission string) (auth.NamespaceActionGroup, error) {
@@ -152,48 +158,6 @@ func getNamespaceRoles(ctx context.Context, client authservice.AuthServiceClient
 	return res, nil
 }
 
-func computeRole(
-	ctx context.Context,
-	client authservice.AuthServiceClient,
-	accountAccess string,
-	namespaceAccess string,
-	namespace string,
-) (*auth.Role, error) {
-
-	var roles []*auth.Role
-	if accountAccess == "" && namespaceAccess == "" {
-		return nil, fmt.Errorf("both account-access and namespace-access are not set")
-	}
-	if accountAccess != "" {
-		if namespace != "" || namespaceAccess != "" {
-			return nil, fmt.Errorf("both account-access and namespace-access are set")
-		}
-		res, err := getAccountRoles(ctx, client, accountAccess)
-		if err != nil {
-			return nil, err
-		}
-		roles = res.Roles
-	} else {
-		if namespace == "" {
-			return nil, fmt.Errorf("namespace not provided")
-
-		}
-		res, err := getNamespaceRolesForPermission(ctx, client, namespace, namespaceAccess)
-		if err != nil {
-			return nil, err
-		}
-		roles = res.Roles
-	}
-
-	if len(roles) == 0 {
-		return nil, fmt.Errorf("no roles found")
-	}
-	if len(roles) > 0 {
-		return nil, fmt.Errorf("more then one role found: %s", roles)
-	}
-	return roles[0], nil
-}
-
 func (c *RoleClient) listRoles(accountAccess string, namespace string, namespaceAccess string) error {
 	totalRes := []proto.Message{}
 
@@ -218,13 +182,11 @@ func (c *RoleClient) listRoles(accountAccess string, namespace string, namespace
 		}
 	} else {
 		if accountAccess != "" {
-			res, err := getAccountRoles(c.ctx, c.client, accountAccess)
+			role, err := getAccountRole(c.ctx, c.client, accountAccess)
 			if err != nil {
 				return err
 			}
-			for i := range res.Roles {
-				totalRes = append(totalRes, res.Roles[i])
-			}
+			totalRes = append(totalRes, role)
 		}
 		if namespace != "" {
 			if namespaceAccess == "" {
