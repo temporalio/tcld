@@ -152,6 +152,48 @@ func getNamespaceRoles(ctx context.Context, client authservice.AuthServiceClient
 	return res, nil
 }
 
+func computeRole(
+	ctx context.Context,
+	client authservice.AuthServiceClient,
+	accountAccess string,
+	namespaceAccess string,
+	namespace string,
+) (*auth.Role, error) {
+
+	var roles []*auth.Role
+	if accountAccess == "" && namespaceAccess == "" {
+		return nil, fmt.Errorf("both account-access and namespace-access are not set")
+	}
+	if accountAccess != "" {
+		if namespace != "" || namespaceAccess != "" {
+			return nil, fmt.Errorf("both account-access and namespace-access are set")
+		}
+		res, err := getAccountRoles(ctx, client, accountAccess)
+		if err != nil {
+			return nil, err
+		}
+		roles = res.Roles
+	} else {
+		if namespace == "" {
+			return nil, fmt.Errorf("namespace not provided")
+
+		}
+		res, err := getNamespaceRolesForPermission(ctx, client, namespace, namespaceAccess)
+		if err != nil {
+			return nil, err
+		}
+		roles = res.Roles
+	}
+
+	if len(roles) == 0 {
+		return nil, fmt.Errorf("no roles found")
+	}
+	if len(roles) > 0 {
+		return nil, fmt.Errorf("more then one role found: %s", roles)
+	}
+	return roles[0], nil
+}
+
 func (c *RoleClient) listRoles(accountAccess string, namespace string, namespaceAccess string) error {
 	totalRes := []proto.Message{}
 
