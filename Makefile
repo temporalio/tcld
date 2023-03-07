@@ -43,7 +43,7 @@ release:
 	$(call build,tcld,windows,amd64,.exe)
 
 tools:
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.45.2
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
 	@GO111MODULE=off go get -u github.com/golang/mock/mockgen
 
 lint:
