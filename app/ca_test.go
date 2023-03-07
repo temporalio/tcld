@@ -143,22 +143,22 @@ func TestCABundleParser(t *testing.T) {
 
 	// partial cert
 	encodedBundle = base64.StdEncoding.EncodeToString([]byte(cert1[:len(cert1)-20]))
-	out, err = parseCertificates(encodedBundle)
+	_, err = parseCertificates(encodedBundle)
 	assert.Error(t, err)
 
 	// partial cert
 	encodedBundle = base64.StdEncoding.EncodeToString(append([]byte(cert1[:40]), []byte(cert1[45:])...))
-	out, err = parseCertificates(encodedBundle)
+	_, err = parseCertificates(encodedBundle)
 	assert.Error(t, err)
 
 	// bad bundle
 	encodedBundle = base64.StdEncoding.EncodeToString([]byte(cert1 + "\n " + cert2))
-	out, err = parseCertificates(encodedBundle)
+	_, err = parseCertificates(encodedBundle)
 	assert.Error(t, err)
 
 	// ignore trailing whitespaces
 	encodedBundle = base64.StdEncoding.EncodeToString([]byte(cert1 + "\n" + cert2 + "\n "))
-	out, err = parseCertificates(encodedBundle)
+	_, err = parseCertificates(encodedBundle)
 	assert.NoError(t, err)
 }
 
