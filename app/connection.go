@@ -14,7 +14,10 @@ import (
 )
 
 func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Context, *grpc.ClientConn, error) {
-
+	serviceName := c.String(ServiceNameFlagName)
+	apiKeyID := c.String(APIKeyIDFlagName)
+	apiSecretKey := c.String(APISecretKeyFlagName)
+	enableDebugLogs := c.Bool(EnableDebugLogsFlagName)
 	serverAddr := c.String(ServerFlagName)
 	var credentialOption grpc.DialOption
 	parts := strings.Split(serverAddr, ":")
@@ -35,7 +38,18 @@ func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Conte
 	}
 	conn, err := grpc.Dial(
 		serverAddr,
-		append(opts, credentialOption)...,
+		append(
+			opts,
+			credentialOption,
+			grpc.WithUnaryInterceptor(
+				getRequestSignatureInterceptor(
+					serviceName,
+					apiKeyID,
+					apiSecretKey,
+					enableDebugLogs,
+				),
+			),
+		)...,
 	)
 	if err != nil {
 		return nil, nil, err
