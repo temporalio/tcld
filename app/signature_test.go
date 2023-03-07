@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/test/bufconn"
 	"net"
@@ -51,7 +52,7 @@ func (s *RequestSignatureTestSuite) TestRequestSignature() {
 		grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
 			return s.lis.Dial()
 		}),
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUnaryInterceptor(
 			getRequestSignatureInterceptor(
 				testServiceName,
