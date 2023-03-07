@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -25,7 +26,7 @@ func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Conte
 	hostname := parts[0]
 	switch hostname {
 	case "localhost":
-		credentialOption = grpc.WithInsecure()
+		credentialOption = grpc.WithTransportCredentials(insecure.NewCredentials())
 	default:
 		credentialOption = grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 			MinVersion: tls.VersionTLS12,
