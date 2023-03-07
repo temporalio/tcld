@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"io/ioutil"
 	"strings"
 
@@ -61,6 +62,22 @@ func GetNamespaceClient(ctx *cli.Context) (*NamespaceClient, error) {
 		return nil, err
 	}
 	return NewNamespaceClient(ct, conn), nil
+}
+
+func (c *NamespaceClient) createNamespace(ctx *cli.Context, n *namespace.Namespace) error {
+	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
+		// TODO: how does this request id work?
+		RequestId: ctx.String(RequestIDFlagName),
+		Namespace: n.Namespace,
+		Spec:      n.Spec,
+		// TODO: need to take in user namespace permissions
+		// TODO: do we need to pass in the current user as well?
+		UserNamespacePermissions: []*auth.UserNamespacePermissions{},
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res)
 }
 
 func (c *NamespaceClient) listNamespaces() error {
@@ -184,6 +201,122 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				return err
 			},
 			Subcommands: []*cli.Command{
+				{
+					Name:    "create",
+					Usage:   "Create a temporal namespace",
+					Aliases: []string{"c"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RequestIDFlag,
+						ResourceVersionFlag,
+						CaCertificateFlag,
+						CaCertificateFileFlag,
+						&cli.PathFlag{
+							Name:    "certificate-filter-file",
+							Usage:   `Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
+							Aliases: []string{"file", "f"},
+						},
+						&cli.StringFlag{
+							Name:    "certificate-filter-input",
+							Usage:   `JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
+							Aliases: []string{"input", "i"},
+						},
+						RetentionDaysFlag,
+						&cli.StringSliceFlag{
+							Name:     "search-attribute",
+							Usage:    fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
+							Aliases:  []string{"sa"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						n := &namespace.Namespace{}
+						// certs
+						cert, err := ReadCACerts(ctx)
+						if err != nil {
+							return err
+						}
+						if n.Spec.AcceptedClientCa == cert {
+							return errors.New("nothing to change")
+						}
+						n.Spec.AcceptedClientCa = cert
+
+						// cert filters
+						fileFlagSet := ctx.Path("certificate-filter-file") != ""
+						inputFlagSet := ctx.String("certificate-filter-input") != ""
+
+						if fileFlagSet == inputFlagSet {
+							return errors.New("exactly one of the certificate-filter-file or certificate-filter-input flags must be specified")
+						}
+
+						var jsonBytes []byte
+
+						if fileFlagSet {
+							jsonBytes, err = ioutil.ReadFile(ctx.Path("certificate-filter-file"))
+							if err != nil {
+								return err
+							}
+						}
+
+						if inputFlagSet {
+							jsonBytes = []byte(ctx.String("certificate-filter-input"))
+						}
+
+						newFilters, err := parseCertificateFilters(jsonBytes)
+						if err != nil {
+							return err
+						}
+
+						if len(newFilters.toSpec()) == 0 {
+							return errors.New("no new filters to add")
+						}
+
+						fmt.Println("the following certificate filters will be added to the namespace:")
+						if err := PrintObj(newFilters); err != nil {
+							return err
+						}
+
+						confirmed, err := ConfirmPrompt(ctx, "confirm add operation")
+						if err != nil {
+							return err
+						}
+
+						if confirmed {
+							n.Spec.CertificateFilters = append(n.Spec.CertificateFilters, newFilters.toSpec()...)
+						}
+
+						// retention
+						retention := ctx.Int(RetentionDaysFlagName)
+						if retention == 0 {
+							return fmt.Errorf("retention must be at least 1 day in duration")
+						}
+						if retention < 0 {
+							return fmt.Errorf("retention cannot be negative")
+						}
+						if int32(retention) == n.Spec.RetentionDays {
+							return fmt.Errorf("retention for namespace is already set at %d days", ctx.Int(RetentionDaysFlagName))
+						}
+						n.Spec.RetentionDays = int32(retention)
+
+						// search attribute
+						csa, err := toSearchAttributes(ctx.StringSlice("search-attribute"))
+						if err != nil {
+							return err
+						}
+						if n.Spec.SearchAttributes == nil {
+							n.Spec.SearchAttributes = make(map[string]namespace.SearchAttributeType)
+						}
+						for attrName, attrType := range csa {
+							if _, ok := n.Spec.SearchAttributes[attrName]; ok {
+								return fmt.Errorf("attribute with name '%s' already exists", attrName)
+							} else {
+								n.Spec.SearchAttributes[attrName] = attrType
+							}
+						}
+
+						return c.createNamespace(ctx, n)
+					},
+				},
 				{
 					Name:    "list",
 					Usage:   "List all known namespaces",
