@@ -17,10 +17,12 @@ import (
 )
 
 const (
-	CaCertificateFlagName     = "ca-certificate"
-	CaCertificateFileFlagName = "ca-certificate-file"
-
+	CaCertificateFlagName            = "ca-certificate"
+	CaCertificateFileFlagName        = "ca-certificate-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
+	certificateFilterFileFlagName    = "certificate-filter-file"
+	certificateFilterInputFlagName   = "certificate-filter-input"
+	searchAttributeFlagName          = "search-attribute"
 )
 
 var (
@@ -34,11 +36,16 @@ var (
 		Usage:   "The path to the ca pem file",
 		Aliases: []string{"f"},
 	}
-
 	caCertificateFingerprintFlag = &cli.StringFlag{
 		Name:    caCertificateFingerprintFlagName,
 		Usage:   "The fingerprint of to the ca certificate",
 		Aliases: []string{"fp"},
+	}
+	searchAttributeFlag = &cli.StringSliceFlag{
+		Name:     searchAttributeFlagName,
+		Usage:    fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
+		Aliases:  []string{"sa"},
+		Required: true,
 	}
 )
 
@@ -209,83 +216,64 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
-						CaCertificateFlag,
-						CaCertificateFileFlag,
-						&cli.PathFlag{
-							Name:    "certificate-filter-file",
-							Usage:   `Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
-							Aliases: []string{"file", "f"},
+						RetentionDaysFlag,
+						&cli.StringFlag{
+							Name:     "region",
+							Usage:    `Create namespace in this region`,
+							Aliases:  []string{"re"},
+							Required: true,
 						},
 						&cli.StringFlag{
-							Name:    "certificate-filter-input",
-							Usage:   `JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
-							Aliases: []string{"input", "i"},
+							Name:    "environment",
+							Usage:   `Create namespace in this environment`,
+							Aliases: []string{"e"},
+							Value:   "Prod",
+							Hidden:  true,
 						},
-						RetentionDaysFlag,
+						&cli.StringFlag{
+							Name:    CaCertificateFlagName,
+							Usage:   "The base64 encoded ca certificate",
+							Aliases: []string{"c"},
+						},
+						&cli.PathFlag{
+							Name:    CaCertificateFileFlagName,
+							Usage:   "The path to the ca pem file",
+							Aliases: []string{"cf"},
+						},
+						&cli.PathFlag{
+							Name:    certificateFilterFileFlagName,
+							Usage:   `Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
+							Aliases: []string{"cff"},
+						},
+						&cli.StringFlag{
+							Name:    certificateFilterInputFlagName,
+							Usage:   `JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
+							Aliases: []string{"cfi"},
+						},
 						&cli.StringSliceFlag{
-							Name:     "search-attribute",
-							Usage:    fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
-							Aliases:  []string{"sa"},
-							Required: true,
+							Name:    searchAttributeFlagName,
+							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
+							Aliases: []string{"sa"},
 						},
 					},
 					Action: func(ctx *cli.Context) error {
-						n := &namespace.Namespace{}
-						// certs
+						n := &namespace.Namespace{
+							//TODO: should i use requestID here?
+							Namespace: ctx.String(NamespaceFlagName),
+							Spec: &namespace.NamespaceSpec{
+								// TODO: use const
+								Region:      ctx.String("region"),
+								Environment: namespace.Environment(namespace.Environment_value[ctx.String("environment")]),
+							},
+						}
+						// certs (required)
 						cert, err := ReadCACerts(ctx)
 						if err != nil {
 							return err
 						}
-						if n.Spec.AcceptedClientCa == cert {
-							return errors.New("nothing to change")
-						}
 						n.Spec.AcceptedClientCa = cert
 
-						// cert filters
-						fileFlagSet := ctx.Path("certificate-filter-file") != ""
-						inputFlagSet := ctx.String("certificate-filter-input") != ""
-
-						if fileFlagSet == inputFlagSet {
-							return errors.New("exactly one of the certificate-filter-file or certificate-filter-input flags must be specified")
-						}
-
-						var jsonBytes []byte
-
-						if fileFlagSet {
-							jsonBytes, err = ioutil.ReadFile(ctx.Path("certificate-filter-file"))
-							if err != nil {
-								return err
-							}
-						}
-
-						if inputFlagSet {
-							jsonBytes = []byte(ctx.String("certificate-filter-input"))
-						}
-
-						newFilters, err := parseCertificateFilters(jsonBytes)
-						if err != nil {
-							return err
-						}
-
-						if len(newFilters.toSpec()) == 0 {
-							return errors.New("no new filters to add")
-						}
-
-						fmt.Println("the following certificate filters will be added to the namespace:")
-						if err := PrintObj(newFilters); err != nil {
-							return err
-						}
-
-						confirmed, err := ConfirmPrompt(ctx, "confirm add operation")
-						if err != nil {
-							return err
-						}
-
-						if confirmed {
-							n.Spec.CertificateFilters = append(n.Spec.CertificateFilters, newFilters.toSpec()...)
-						}
-
-						// retention
+						// retention (required)
 						retention := ctx.Int(RetentionDaysFlagName)
 						if retention == 0 {
 							return fmt.Errorf("retention must be at least 1 day in duration")
@@ -298,8 +286,32 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						}
 						n.Spec.RetentionDays = int32(retention)
 
-						// search attribute
-						csa, err := toSearchAttributes(ctx.StringSlice("search-attribute"))
+						// cert filters (optional)
+						fileFlagSet := ctx.Path(certificateFilterFileFlagName) != ""
+						inputFlagSet := ctx.String(certificateFilterInputFlagName) != ""
+						if fileFlagSet && inputFlagSet {
+							return errors.New("only one of the certificate-filter-file or certificate-filter-input flags can be specified")
+						}
+						var jsonBytes []byte
+						if fileFlagSet {
+							jsonBytes, err = ioutil.ReadFile(ctx.Path(certificateFilterFileFlagName))
+							if err != nil {
+								return err
+							}
+						}
+						if inputFlagSet {
+							jsonBytes = []byte(ctx.String(certificateFilterInputFlagName))
+						}
+						if len(jsonBytes) > 0 {
+							newFilters, err := parseCertificateFilters(jsonBytes)
+							if err != nil {
+								return err
+							}
+							n.Spec.CertificateFilters = append(n.Spec.CertificateFilters, newFilters.toSpec()...)
+						}
+
+						// search attribute (optional)
+						csa, err := toSearchAttributes(ctx.StringSlice(searchAttributeFlagName))
 						if err != nil {
 							return err
 						}
@@ -313,7 +325,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								n.Spec.SearchAttributes[attrName] = attrType
 							}
 						}
-
 						return c.createNamespace(ctx, n)
 					},
 				},
@@ -493,19 +504,19 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								RequestIDFlag,
 								ResourceVersionFlag,
 								&cli.PathFlag{
-									Name:    "certificate-filter-file",
+									Name:    certificateFilterFileFlagName,
 									Usage:   `Path to a JSON file that defines the certificate filters that will be configured on the namespace. This will replace the existing filter configuration. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
 									Aliases: []string{"file", "f"},
 								},
 								&cli.StringFlag{
-									Name:    "certificate-filter-input",
+									Name:    certificateFilterInputFlagName,
 									Usage:   `JSON that defines the certificate filters that will be configured on the namespace. This will replace the existing filter configuration. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
 									Aliases: []string{"input", "i"},
 								},
 							},
 							Action: func(ctx *cli.Context) error {
-								fileFlagSet := ctx.Path("certificate-filter-file") != ""
-								inputFlagSet := ctx.String("certificate-filter-input") != ""
+								fileFlagSet := ctx.Path(certificateFilterFileFlagName) != ""
+								inputFlagSet := ctx.String(certificateFilterInputFlagName) != ""
 
 								if fileFlagSet == inputFlagSet {
 									return errors.New("exactly one of the certificate-filter-file or certificate-filter-input flags must be specified")
@@ -515,14 +526,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								var err error
 
 								if fileFlagSet {
-									jsonBytes, err = ioutil.ReadFile(ctx.Path("certificate-filter-file"))
+									jsonBytes, err = ioutil.ReadFile(ctx.Path(certificateFilterFileFlagName))
 									if err != nil {
 										return err
 									}
 								}
 
 								if inputFlagSet {
-									jsonBytes = []byte(ctx.String("certificate-filter-input"))
+									jsonBytes = []byte(ctx.String(certificateFilterInputFlagName))
 								}
 
 								replacementFilters, err := parseCertificateFilters(jsonBytes)
@@ -566,7 +577,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								RequestIDFlag,
 								ResourceVersionFlag,
 								&cli.PathFlag{
-									Name:    "certificate-filter-file",
+									Name:    certificateFilterFileFlagName,
 									Usage:   "Path to a JSON file where tcld will export the certificate filter configuration to",
 									Aliases: []string{"file", "f"},
 								},
@@ -587,7 +598,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 
-								exportFile := ctx.Path("certificate-filter-file")
+								exportFile := ctx.Path(certificateFilterFileFlagName)
 								if exportFile != "" {
 									if err := ioutil.WriteFile(exportFile, []byte(jsonString), 0644); err != nil {
 										return err
@@ -640,19 +651,19 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								RequestIDFlag,
 								ResourceVersionFlag,
 								&cli.PathFlag{
-									Name:    "certificate-filter-file",
+									Name:    certificateFilterFileFlagName,
 									Usage:   `Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
 									Aliases: []string{"file", "f"},
 								},
 								&cli.StringFlag{
-									Name:    "certificate-filter-input",
+									Name:    certificateFilterInputFlagName,
 									Usage:   `JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
 									Aliases: []string{"input", "i"},
 								},
 							},
 							Action: func(ctx *cli.Context) error {
-								fileFlagSet := ctx.Path("certificate-filter-file") != ""
-								inputFlagSet := ctx.String("certificate-filter-input") != ""
+								fileFlagSet := ctx.Path(certificateFilterFileFlagName) != ""
+								inputFlagSet := ctx.String(certificateFilterInputFlagName) != ""
 
 								if fileFlagSet == inputFlagSet {
 									return errors.New("exactly one of the certificate-filter-file or certificate-filter-input flags must be specified")
@@ -662,14 +673,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								var err error
 
 								if fileFlagSet {
-									jsonBytes, err = ioutil.ReadFile(ctx.Path("certificate-filter-file"))
+									jsonBytes, err = ioutil.ReadFile(ctx.Path(certificateFilterFileFlagName))
 									if err != nil {
 										return err
 									}
 								}
 
 								if inputFlagSet {
-									jsonBytes = []byte(ctx.String("certificate-filter-input"))
+									jsonBytes = []byte(ctx.String(certificateFilterInputFlagName))
 								}
 
 								newFilters, err := parseCertificateFilters(jsonBytes)
@@ -772,15 +783,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								NamespaceFlag,
 								RequestIDFlag,
 								ResourceVersionFlag,
-								&cli.StringSliceFlag{
-									Name:     "search-attribute",
-									Usage:    fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
-									Aliases:  []string{"sa"},
-									Required: true,
-								},
+								searchAttributeFlag,
 							},
 							Action: func(ctx *cli.Context) error {
-								csa, err := toSearchAttributes(ctx.StringSlice("search-attribute"))
+								csa, err := toSearchAttributes(ctx.StringSlice(searchAttributeFlagName))
 								if err != nil {
 									return err
 								}
