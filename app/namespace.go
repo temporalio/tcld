@@ -17,6 +17,8 @@ import (
 )
 
 const (
+	namespaceRegionFlagName          = "region"
+	namespaceEnvironmentFlagName     = "environment"
 	CaCertificateFlagName            = "ca-certificate"
 	CaCertificateFileFlagName        = "ca-certificate-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
@@ -26,6 +28,20 @@ const (
 )
 
 var (
+	namespaceRegionFlag = &cli.StringFlag{
+		Name:     namespaceRegionFlagName,
+		Usage:    "Create namespace in this region",
+		Aliases:  []string{"re"},
+		Required: true,
+	}
+	namespaceEnvironmentFlag = &cli.StringFlag{
+		Name:     namespaceEnvironmentFlagName,
+		Usage:    fmt.Sprintf("Create namespace in this environment. Value must be one of %v", namespace.Environment_value),
+		Aliases:  []string{"e"},
+		Value:    "Prod",
+		Hidden:   true,
+		Required: true,
+	}
 	CaCertificateFlag = &cli.StringFlag{
 		Name:    CaCertificateFlagName,
 		Usage:   "The base64 encoded ca certificate",
@@ -74,7 +90,7 @@ func GetNamespaceClient(ctx *cli.Context) (*NamespaceClient, error) {
 func (c *NamespaceClient) createNamespace(ctx *cli.Context, n *namespace.Namespace) error {
 	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
 		// TODO: how does this request id work?
-		RequestId: ctx.String(RequestIDFlagName),
+		RequestId: n.RequestId,
 		Namespace: n.Namespace,
 		Spec:      n.Spec,
 		// TODO: need to take in user namespace permissions
@@ -195,6 +211,26 @@ func ReadCACerts(ctx *cli.Context) (string, error) {
 	return cert, nil
 }
 
+func ReadCertFilters(ctx *cli.Context) ([]byte, error) {
+	certFilterFilepath := ctx.Path(certificateFilterFileFlagName)
+	certFilterInput := ctx.String(certificateFilterInputFlagName)
+	if len(certFilterFilepath) > 0 && len(certFilterInput) > 0 {
+		return nil, fmt.Errorf("only one of the %s or %s flags can be specified", certificateFilterFileFlagName, certificateFilterInputFlagName)
+	}
+	var certFilterBytes []byte
+	var err error
+	if len(certFilterFilepath) > 0 {
+		certFilterBytes, err = ioutil.ReadFile(certFilterFilepath)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if len(certFilterInput) > 0 {
+		certFilterBytes = []byte(certFilterInput)
+	}
+	return certFilterBytes, nil
+}
+
 func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut, error) {
 	var c *NamespaceClient
 	return CommandOut{
@@ -217,19 +253,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						RequestIDFlag,
 						ResourceVersionFlag,
 						RetentionDaysFlag,
-						&cli.StringFlag{
-							Name:     "region",
-							Usage:    `Create namespace in this region`,
-							Aliases:  []string{"re"},
-							Required: true,
-						},
-						&cli.StringFlag{
-							Name:    "environment",
-							Usage:   `Create namespace in this environment`,
-							Aliases: []string{"e"},
-							Value:   "Prod",
-							Hidden:  true,
-						},
+						namespaceRegionFlag,
+						namespaceEnvironmentFlag,
 						&cli.StringFlag{
 							Name:    CaCertificateFlagName,
 							Usage:   "The base64 encoded ca certificate",
@@ -258,12 +283,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					},
 					Action: func(ctx *cli.Context) error {
 						n := &namespace.Namespace{
-							//TODO: should i use requestID here?
+							RequestId: ctx.String(RequestIDFlagName),
 							Namespace: ctx.String(NamespaceFlagName),
 							Spec: &namespace.NamespaceSpec{
-								// TODO: use const
-								Region:      ctx.String("region"),
-								Environment: namespace.Environment(namespace.Environment_value[ctx.String("environment")]),
+								Region:      ctx.String(namespaceRegionFlagName),
+								Environment: namespace.Environment(namespace.Environment_value[ctx.String(namespaceEnvironmentFlagName)]),
 							},
 						}
 						// certs (required)
@@ -281,29 +305,15 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if retention < 0 {
 							return fmt.Errorf("retention cannot be negative")
 						}
-						if int32(retention) == n.Spec.RetentionDays {
-							return fmt.Errorf("retention for namespace is already set at %d days", ctx.Int(RetentionDaysFlagName))
-						}
 						n.Spec.RetentionDays = int32(retention)
 
 						// cert filters (optional)
-						fileFlagSet := ctx.Path(certificateFilterFileFlagName) != ""
-						inputFlagSet := ctx.String(certificateFilterInputFlagName) != ""
-						if fileFlagSet && inputFlagSet {
-							return errors.New("only one of the certificate-filter-file or certificate-filter-input flags can be specified")
+						certFilterBytes, err := ReadCertFilters(ctx)
+						if err != nil {
+							return err
 						}
-						var jsonBytes []byte
-						if fileFlagSet {
-							jsonBytes, err = ioutil.ReadFile(ctx.Path(certificateFilterFileFlagName))
-							if err != nil {
-								return err
-							}
-						}
-						if inputFlagSet {
-							jsonBytes = []byte(ctx.String(certificateFilterInputFlagName))
-						}
-						if len(jsonBytes) > 0 {
-							newFilters, err := parseCertificateFilters(jsonBytes)
+						if len(certFilterBytes) > 0 {
+							newFilters, err := parseCertificateFilters(certFilterBytes)
 							if err != nil {
 								return err
 							}
@@ -311,20 +321,24 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						}
 
 						// search attribute (optional)
-						csa, err := toSearchAttributes(ctx.StringSlice(searchAttributeFlagName))
-						if err != nil {
-							return err
-						}
-						if n.Spec.SearchAttributes == nil {
-							n.Spec.SearchAttributes = make(map[string]namespace.SearchAttributeType)
-						}
-						for attrName, attrType := range csa {
-							if _, ok := n.Spec.SearchAttributes[attrName]; ok {
-								return fmt.Errorf("attribute with name '%s' already exists", attrName)
-							} else {
-								n.Spec.SearchAttributes[attrName] = attrType
+						searchAttributes := ctx.StringSlice(searchAttributeFlagName)
+						if len(searchAttributes) > 0 {
+							csa, err := toSearchAttributes(searchAttributes)
+							if err != nil {
+								return err
+							}
+							if n.Spec.SearchAttributes == nil {
+								n.Spec.SearchAttributes = make(map[string]namespace.SearchAttributeType)
+							}
+							for attrName, attrType := range csa {
+								if _, ok := n.Spec.SearchAttributes[attrName]; ok {
+									return fmt.Errorf("attribute with name '%s' already exists", attrName)
+								} else {
+									n.Spec.SearchAttributes[attrName] = attrType
+								}
 							}
 						}
+
 						return c.createNamespace(ctx, n)
 					},
 				},
