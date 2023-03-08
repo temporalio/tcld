@@ -15,6 +15,9 @@ func NewLogoutCommand(c *LoginClient) (CommandOut, error) {
 			disablePopUpFlag,
 		},
 		Action: func(ctx *cli.Context) error {
+			if err := c.loginService.DeleteConfigFile(getTokenConfigPath(ctx)); err != nil {
+				return fmt.Errorf("unable to remove config file: %w", err)
+			}
 			logoutURL := fmt.Sprintf("https://%s/v2/logout", ctx.String("domain"))
 			fmt.Printf("Logout via this url: %s\n", logoutURL)
 			if !ctx.Bool("disable-pop-up") {

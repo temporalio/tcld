@@ -96,10 +96,6 @@ func (c caCerts) bundle() (string, error) {
 	return base64.StdEncoding.EncodeToString(out), nil
 }
 
-func (c caCerts) remove(i int) caCerts {
-	return append(c[:i], c[i+1:]...)
-}
-
 func addCerts(existingCerts, newCerts caCerts) (caCerts, error) {
 
 	for i := range newCerts {
