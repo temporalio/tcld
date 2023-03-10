@@ -89,12 +89,9 @@ func GetNamespaceClient(ctx *cli.Context) (*NamespaceClient, error) {
 
 func (c *NamespaceClient) createNamespace(ctx *cli.Context, n *namespace.Namespace) error {
 	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
-		// TODO: how does this request id work?
-		RequestId: n.RequestId,
-		Namespace: n.Namespace,
-		Spec:      n.Spec,
-		// TODO: need to take in user namespace permissions
-		// TODO: do we need to pass in the current user as well?
+		RequestId:                n.RequestId,
+		Namespace:                n.Namespace,
+		Spec:                     n.Spec,
 		UserNamespacePermissions: []*auth.UserNamespacePermissions{},
 	})
 	if err != nil {
