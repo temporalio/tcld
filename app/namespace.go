@@ -38,12 +38,11 @@ var (
 		Required: true,
 	}
 	namespaceEnvironmentFlag = &cli.StringFlag{
-		Name:     namespaceEnvironmentFlagName,
-		Usage:    fmt.Sprintf("Create namespace in this environment. Value must be one of %v", namespace.Environment_value),
-		Aliases:  []string{"e"},
-		Value:    "Prod",
-		Hidden:   true,
-		Required: true,
+		Name:    namespaceEnvironmentFlagName,
+		Usage:   fmt.Sprintf("Create namespace in this environment. Value must be one of %v", namespace.Environment_value),
+		Aliases: []string{"e"},
+		Value:   "Prod",
+		Hidden:  true,
 	}
 	namespaceNameFlag = &cli.StringFlag{
 		Name:     namespaceNameFlagName,
@@ -257,9 +256,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Flags: []cli.Flag{
 						RequestIDFlag,
 						namespaceNameFlag,
-						RetentionDaysFlag,
 						namespaceRegionFlag,
 						namespaceEnvironmentFlag,
+						&cli.IntFlag{
+							Name:    RetentionDaysFlagName,
+							Usage:   "The retention of the namespace in days",
+							Aliases: []string{"rd"},
+							Value:   30,
+						},
 						&cli.StringFlag{
 							Name:    CaCertificateFlagName,
 							Usage:   "The base64 encoded ca certificate",
@@ -294,7 +298,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Action: func(ctx *cli.Context) error {
 						n := &namespace.Namespace{
 							RequestId: ctx.String(RequestIDFlagName),
-							Namespace: ctx.String(NamespaceFlagName),
+							Namespace: ctx.String(namespaceNameFlagName),
 							Spec: &namespace.NamespaceSpec{
 								Region:      ctx.String(namespaceRegionFlagName),
 								Environment: namespace.Environment(namespace.Environment_value[ctx.String(namespaceEnvironmentFlagName)]),
@@ -309,11 +313,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 						// retention (required)
 						retention := ctx.Int(RetentionDaysFlagName)
-						if retention == 0 {
-							return fmt.Errorf("retention must be at least 1 day in duration")
-						}
-						if retention < 0 {
-							return fmt.Errorf("retention cannot be negative")
+						if retention < 1 {
+							return fmt.Errorf("retention cannot be 0 or negative")
 						}
 						n.Spec.RetentionDays = int32(retention)
 
