@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"io/ioutil"
+	"net/mail"
 	"strings"
 
 	"github.com/kylelemons/godebug/diff"
@@ -17,6 +18,7 @@ import (
 )
 
 const (
+	namespaceNameFlagName            = "namespace-name"
 	namespaceRegionFlagName          = "region"
 	namespaceEnvironmentFlagName     = "environment"
 	CaCertificateFlagName            = "ca-certificate"
@@ -25,6 +27,7 @@ const (
 	certificateFilterFileFlagName    = "certificate-filter-file"
 	certificateFilterInputFlagName   = "certificate-filter-input"
 	searchAttributeFlagName          = "search-attribute"
+	userNamespacePermissionFlagName  = "user-namespace-permission"
 )
 
 var (
@@ -40,6 +43,12 @@ var (
 		Aliases:  []string{"e"},
 		Value:    "Prod",
 		Hidden:   true,
+		Required: true,
+	}
+	namespaceNameFlag = &cli.StringFlag{
+		Name:     namespaceNameFlagName,
+		Usage:    "The name for your namespace",
+		Aliases:  []string{"n"},
 		Required: true,
 	}
 	CaCertificateFlag = &cli.StringFlag{
@@ -87,12 +96,12 @@ func GetNamespaceClient(ctx *cli.Context) (*NamespaceClient, error) {
 	return NewNamespaceClient(ct, conn), nil
 }
 
-func (c *NamespaceClient) createNamespace(ctx *cli.Context, n *namespace.Namespace) error {
+func (c *NamespaceClient) createNamespace(ctx *cli.Context, n *namespace.Namespace, p []*auth.UserNamespacePermissions) error {
 	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
 		RequestId:                n.RequestId,
 		Namespace:                n.Namespace,
 		Spec:                     n.Spec,
-		UserNamespacePermissions: []*auth.UserNamespacePermissions{},
+		UserNamespacePermissions: p,
 	})
 	if err != nil {
 		return err
@@ -246,9 +255,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Usage:   "Create a temporal namespace",
 					Aliases: []string{"c"},
 					Flags: []cli.Flag{
-						NamespaceFlag,
 						RequestIDFlag,
-						ResourceVersionFlag,
+						namespaceNameFlag,
 						RetentionDaysFlag,
 						namespaceRegionFlag,
 						namespaceEnvironmentFlag,
@@ -261,6 +269,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							Name:    CaCertificateFileFlagName,
 							Usage:   "The path to the ca pem file",
 							Aliases: []string{"cf"},
+						},
+						&cli.StringSliceFlag{
+							Name:    userNamespacePermissionFlagName,
+							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
+							Aliases: []string{"p"},
 						},
 						&cli.PathFlag{
 							Name:    certificateFilterFileFlagName,
@@ -304,6 +317,16 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						}
 						n.Spec.RetentionDays = int32(retention)
 
+						// user namespace permissions (required)
+						var unp []*auth.UserNamespacePermissions
+						userNamespacePermissionFlags := ctx.StringSlice(userNamespacePermissionFlagName)
+						if len(userNamespacePermissionFlags) > 0 {
+							unp, err = toUserNamespacePermissions(userNamespacePermissionFlags)
+							if err != nil {
+								return err
+							}
+						}
+
 						// cert filters (optional)
 						certFilterBytes, err := ReadCertFilters(ctx)
 						if err != nil {
@@ -336,7 +359,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							}
 						}
 
-						return c.createNamespace(ctx, n)
+						return c.createNamespace(ctx, n, unp)
 					},
 				},
 				{
@@ -895,6 +918,48 @@ func toSearchAttributes(keyValues []string) (map[string]namespace.SearchAttribut
 		}
 
 		res[parts[0]] = namespace.SearchAttributeType(val)
+	}
+	return res, nil
+}
+
+func getNamespacePermissionTypes() []string {
+	validTypes := []string{}
+	for i := 1; i < len(auth.NamespaceActionGroup_name); i++ {
+		validTypes = append(validTypes, auth.NamespaceActionGroup_name[int32(i)])
+	}
+	return validTypes
+}
+
+func toUserNamespacePermissions(keyValues []string) ([]*auth.UserNamespacePermissions, error) {
+	var res []*auth.UserNamespacePermissions
+	for _, kv := range keyValues {
+		parts := strings.Split(kv, "=")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid user namespace permission \"%s\" must be of format: \"email=permission\"", kv)
+		}
+
+		email := parts[0]
+		actionGroupValue := parts[1]
+
+		if len(email) == 0 {
+			return nil, errors.New("email address must not be empty in user namespace permission")
+		}
+		if _, err := mail.ParseAddress(email); err != nil {
+			return nil, fmt.Errorf("unable to parse email address in user namespace permission: %w", err)
+		}
+
+		actionGroupID, ok := auth.NamespaceActionGroup_value[actionGroupValue]
+		if !ok {
+			return nil, fmt.Errorf(
+				"namespace permission type \"%s\" does not exist, acceptable types are: %s",
+				actionGroupValue,
+				getNamespacePermissionTypes(),
+			)
+		}
+		res = append(res, &auth.UserNamespacePermissions{
+			UserId:      email,
+			ActionGroup: auth.NamespaceActionGroup(actionGroupID),
+		})
 	}
 	return res, nil
 }
