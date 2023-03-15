@@ -127,6 +127,101 @@ func (s *NamespaceTestSuite) TestList() {
 	s.NoError(s.RunCmd("namespace", "list"))
 }
 
+func (s *NamespaceTestSuite) TestCreate() {
+
+	type morphCreateReq func(*namespaceservice.CreateNamespaceRequest)
+
+	path := "cafile"
+	s.NoError(os.WriteFile(path, []byte("cert2"), 0644))
+	defer os.Remove(path)
+
+	tests := []struct {
+		name         string
+		args         []string
+		expectErr    bool
+		expectCreate morphCreateReq
+	}{{
+		name:      "displays help",
+		args:      []string{"namespace", "create"},
+		expectErr: true,
+	}, {
+		name:      "missing flags ca, rg, rd",
+		args:      []string{"namespace", "create", "set", "--namespace", "ns1"},
+		expectErr: true,
+	}, {
+		name:      "missing flags rg, rd",
+		args:      []string{"n", "c", "-n", "ns1", "--ca-certificate", "cert1"},
+		expectErr: true,
+	}, {
+		name:      "missing flags ca, rd",
+		args:      []string{"n", "c", "-n", "ns1", "--region", "reg1"},
+		expectErr: true,
+	}, {
+		name:      "missing flag rd",
+		args:      []string{"n", "c", "-n", "ns1", "--ca-certificate", "cert1", "--region", "reg1"},
+		expectErr: true,
+	}, {
+		name:         "create ns1 reg1 rd7 cert1",
+		args:         []string{"namespace", "create", "--namespace", "ns1", "--ca-certificate", "cert1", "--region", "reg1", "--retention-days", "7"},
+		expectCreate: func(r *namespaceservice.CreateNamespaceRequest) {},
+	}, {
+		name: "create ns1 reg2 rd14 cert2",
+		args: []string{"n", "c", "-n", "ns1", "--ca-certificate", "cert2", "--region", "reg2", "--retention-days", "14"},
+		expectCreate: func(r *namespaceservice.CreateNamespaceRequest) {
+			r.Spec.AcceptedClientCa = "cert2"
+			r.Spec.Region = "reg2"
+			r.Spec.RetentionDays = int32(14)
+		},
+	}, {
+		name: "create ns2 reg2 rd14 cert2",
+		args: []string{"n", "c", "-n", "ns2", "-c", "cert2", "-rg", "reg2", "-rd", "14"},
+		expectCreate: func(r *namespaceservice.CreateNamespaceRequest) {
+			r.Namespace = "ns2"
+			r.Spec.AcceptedClientCa = "cert2"
+			r.Spec.Region = "reg2"
+			r.Spec.RetentionDays = int32(14)
+		},
+	}, {
+		name: "create ns2 reg2 rd7 cert2fromfile",
+		args: []string{"n", "c", "-n", "ns1", "--ca-certificate-file", path, "-rg", "reg2", "-rd", "7"},
+		expectCreate: func(r *namespaceservice.CreateNamespaceRequest) {
+			r.Spec.AcceptedClientCa = base64.StdEncoding.EncodeToString([]byte("cert2"))
+			r.Spec.Region = "reg2"
+		},
+	}, {
+		name:      "non-existing file",
+		args:      []string{"n", "c", "-n", "ns1", "--ca-certificate-file", "nonexistingfile", "--region", "reg1", "-rd", "7"},
+		expectErr: true,
+	}}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.expectCreate != nil {
+				req := namespaceservice.CreateNamespaceRequest{
+					Namespace: "ns1",
+					Spec: &namespace.NamespaceSpec{
+						AcceptedClientCa: "cert1",
+						Region:           "reg1",
+						RetentionDays:    int32(7),
+					},
+				}
+				tc.expectCreate(&req)
+				s.mockService.EXPECT().CreateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.CreateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
 func (s *NamespaceTestSuite) TestUpdateCA() {
 
 	ns := "ns1"

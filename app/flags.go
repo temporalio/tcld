@@ -12,6 +12,7 @@ const (
 	ConfigDirFlagName       = "config-dir"
 	RetentionDaysFlagName   = "retention-days"
 	NamespaceFlagName       = "namespace"
+	RegionFlagName          = "region"
 	RequestIDFlagName       = "request-id"
 	ResourceVersionFlagName = "resource-version"
 )
@@ -45,6 +46,13 @@ var (
 		Usage:    "The namespace hosted on temporal cloud",
 		Aliases:  []string{"n"},
 		EnvVars:  []string{"TEMPORAL_CLOUD_NAMESPACE"},
+		Required: true,
+	}
+	RegionFlag = &cli.StringFlag{
+		Name:     RegionFlagName,
+		Usage:    "The region where the namespace will be located",
+		Aliases:  []string{"rg"},
+		EnvVars:  []string{"TEMPORAL_CLOUD_REGION"},
 		Required: true,
 	}
 	RequestIDFlag = &cli.StringFlag{

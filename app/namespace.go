@@ -115,6 +115,19 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 	return PrintProto(res)
 }
 
+func (c *NamespaceClient) createNamespace(ctx *cli.Context, n *namespace.Namespace) error {
+	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
+		RequestId: ctx.String(RequestIDFlagName),
+		Namespace: n.Namespace,
+		Spec:      n.Spec,
+	})
+	if err != nil {
+		return err
+	}
+
+	return PrintProto(res)
+}
+
 func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *namespace.Namespace, existingName string, newName string) error {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
@@ -206,6 +219,36 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 						return PrintProto(n)
+					},
+				},
+				{
+					Name:    "create",
+					Usage:   "Create a new namespace",
+					Aliases: []string{"c"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RegionFlag,
+						RetentionDaysFlag,
+						RequestIDFlag,
+						CaCertificateFlag,
+						CaCertificateFileFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						cert, err := ReadCACerts(ctx)
+						if err != nil {
+							return err
+						}
+						n := &namespace.Namespace{
+							Namespace: ctx.String(NamespaceFlagName),
+							Spec: &namespace.NamespaceSpec{
+								Region:             ctx.String(RegionFlagName),
+								RetentionDays:      int32(ctx.Int(RetentionDaysFlagName)),
+								AcceptedClientCa:   cert,
+								SearchAttributes:   map[string]namespace.SearchAttributeType{},
+								CertificateFilters: []*namespace.CertificateFilterSpec{},
+							},
+						}
+						return c.createNamespace(ctx, n)
 					},
 				},
 				{
