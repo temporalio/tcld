@@ -63,6 +63,35 @@ func GetNamespaceClient(ctx *cli.Context) (*NamespaceClient, error) {
 	return NewNamespaceClient(ct, conn), nil
 }
 
+<<<<<<< Updated upstream
+=======
+func (c *NamespaceClient) createNamespace(ctx *cli.Context, n *namespace.Namespace, p []*auth.UserNamespacePermissions) error {
+	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
+		RequestId:                n.RequestId,
+		Namespace:                n.Namespace,
+		Spec:                     n.Spec,
+		UserNamespacePermissions: p,
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res)
+}
+
+func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespace, p []*auth.UserNamespacePermissions) error {
+	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
+		RequestId:                n.RequestId,
+		Namespace:                n.Namespace,
+		Spec:                     n.Spec,
+		UserNamespacePermissions: p,
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res)
+}
+
+>>>>>>> Stashed changes
 func (c *NamespaceClient) listNamespaces() error {
 	totalRes := &namespaceservice.ListNamespacesResponse{}
 	pageToken := ""
@@ -185,6 +214,136 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			},
 			Subcommands: []*cli.Command{
 				{
+<<<<<<< Updated upstream
+=======
+					Name:    "delete",
+					Usage:   "Delete a temporal namespace",
+					Aliases: []string{"d"},
+					Flags: []cli.Flag{
+						RequestIDFlag,
+						namespaceNameFlag,
+						namespaceEnvironmentFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						return nil
+					},
+				},
+				{
+					Name:    "create",
+					Usage:   "Create a temporal namespace",
+					Aliases: []string{"c"},
+					Flags: []cli.Flag{
+						RequestIDFlag,
+						namespaceNameFlag,
+						namespaceRegionFlag,
+						namespaceEnvironmentFlag,
+						&cli.IntFlag{
+							Name:    RetentionDaysFlagName,
+							Usage:   "The retention of the namespace in days",
+							Aliases: []string{"rd"},
+							Value:   30,
+						},
+						&cli.StringFlag{
+							Name:    CaCertificateFlagName,
+							Usage:   "The base64 encoded ca certificate",
+							Aliases: []string{"c"},
+						},
+						&cli.PathFlag{
+							Name:    CaCertificateFileFlagName,
+							Usage:   "The path to the ca pem file",
+							Aliases: []string{"cf"},
+						},
+						&cli.StringSliceFlag{
+							Name:    userNamespacePermissionFlagName,
+							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
+							Aliases: []string{"p"},
+						},
+						&cli.PathFlag{
+							Name:    certificateFilterFileFlagName,
+							Usage:   `Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
+							Aliases: []string{"cff"},
+						},
+						&cli.StringFlag{
+							Name:    certificateFilterInputFlagName,
+							Usage:   `JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
+							Aliases: []string{"cfi"},
+						},
+						&cli.StringSliceFlag{
+							Name:    searchAttributeFlagName,
+							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
+							Aliases: []string{"sa"},
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						n := &namespace.Namespace{
+							RequestId: ctx.String(RequestIDFlagName),
+							Namespace: ctx.String(namespaceNameFlagName),
+							Spec: &namespace.NamespaceSpec{
+								Region:      ctx.String(namespaceRegionFlagName),
+								Environment: namespace.Environment(namespace.Environment_value[ctx.String(namespaceEnvironmentFlagName)]),
+							},
+						}
+						// certs (required)
+						cert, err := ReadCACerts(ctx)
+						if err != nil {
+							return err
+						}
+						n.Spec.AcceptedClientCa = cert
+
+						// retention (required)
+						retention := ctx.Int(RetentionDaysFlagName)
+						if retention < 1 {
+							return fmt.Errorf("retention cannot be 0 or negative")
+						}
+						n.Spec.RetentionDays = int32(retention)
+
+						// user namespace permissions (required)
+						var unp []*auth.UserNamespacePermissions
+						userNamespacePermissionFlags := ctx.StringSlice(userNamespacePermissionFlagName)
+						if len(userNamespacePermissionFlags) > 0 {
+							unp, err = toUserNamespacePermissions(userNamespacePermissionFlags)
+							if err != nil {
+								return err
+							}
+						}
+
+						// cert filters (optional)
+						certFilterBytes, err := ReadCertFilters(ctx)
+						if err != nil {
+							return err
+						}
+						if len(certFilterBytes) > 0 {
+							newFilters, err := parseCertificateFilters(certFilterBytes)
+							if err != nil {
+								return err
+							}
+							n.Spec.CertificateFilters = append(n.Spec.CertificateFilters, newFilters.toSpec()...)
+						}
+
+						// search attribute (optional)
+						searchAttributes := ctx.StringSlice(searchAttributeFlagName)
+						if len(searchAttributes) > 0 {
+							csa, err := toSearchAttributes(searchAttributes)
+							if err != nil {
+								return err
+							}
+							if n.Spec.SearchAttributes == nil {
+								n.Spec.SearchAttributes = make(map[string]namespace.SearchAttributeType)
+							}
+							for attrName, attrType := range csa {
+								if _, ok := n.Spec.SearchAttributes[attrName]; ok {
+									return fmt.Errorf("attribute with name '%s' already exists", attrName)
+								} else {
+									n.Spec.SearchAttributes[attrName] = attrType
+								}
+							}
+						}
+
+						return c.createNamespace(ctx, n, unp)
+					},
+				},
+				{
+>>>>>>> Stashed changes
 					Name:    "list",
 					Usage:   "List all known namespaces",
 					Aliases: []string{"l"},
