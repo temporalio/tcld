@@ -18,7 +18,6 @@ import (
 )
 
 const (
-	namespaceNameFlagName            = "namespace-name"
 	namespaceRegionFlagName          = "region"
 	namespaceEnvironmentFlagName     = "environment"
 	CaCertificateFlagName            = "ca-certificate"
@@ -43,12 +42,6 @@ var (
 		Aliases: []string{"e"},
 		Value:   "Prod",
 		Hidden:  true,
-	}
-	namespaceNameFlag = &cli.StringFlag{
-		Name:     namespaceNameFlagName,
-		Usage:    "The name for your namespace",
-		Aliases:  []string{"n"},
-		Required: true,
 	}
 	CaCertificateFlag = &cli.StringFlag{
 		Name:    CaCertificateFlagName,
@@ -255,7 +248,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Aliases: []string{"c"},
 					Flags: []cli.Flag{
 						RequestIDFlag,
-						namespaceNameFlag,
+						NamespaceFlag,
 						namespaceRegionFlag,
 						namespaceEnvironmentFlag,
 						&cli.IntFlag{
@@ -298,7 +291,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Action: func(ctx *cli.Context) error {
 						n := &namespace.Namespace{
 							RequestId: ctx.String(RequestIDFlagName),
-							Namespace: ctx.String(namespaceNameFlagName),
+							Namespace: ctx.String(NamespaceFlagName),
 							Spec: &namespace.NamespaceSpec{
 								Region:      ctx.String(namespaceRegionFlagName),
 								Environment: namespace.Environment(namespace.Environment_value[ctx.String(namespaceEnvironmentFlagName)]),

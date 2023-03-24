@@ -1249,3 +1249,15 @@ func (s *NamespaceTestSuite) TestGetNamespaceRetention() {
 		})
 	}
 }
+
+func (s *NamespaceTestSuite) TestCreate() {
+	s.Error(s.RunCmd("namespace", "create"))
+	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1"))
+	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2"))
+	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(nil, errors.New("create namespace error")).Times(1)
+	s.EqualError(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--ca-certificate", "cert1"), "create namespace error")
+	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.CreateNamespaceResponse{
+		RequestStatus: &request.RequestStatus{},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--ca-certificate", "cert1"))
+}
