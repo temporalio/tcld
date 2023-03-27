@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/kylelemons/godebug/diff"
+	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 	"github.com/urfave/cli/v2"
@@ -67,14 +68,16 @@ var (
 )
 
 type NamespaceClient struct {
-	client namespaceservice.NamespaceServiceClient
-	ctx    context.Context
+	client     namespaceservice.NamespaceServiceClient
+	authClient authservice.AuthServiceClient
+	ctx        context.Context
 }
 
 func NewNamespaceClient(ctx context.Context, conn *grpc.ClientConn) *NamespaceClient {
 	return &NamespaceClient{
-		client: namespaceservice.NewNamespaceServiceClient(conn),
-		ctx:    ctx,
+		client:     namespaceservice.NewNamespaceServiceClient(conn),
+		authClient: authservice.NewAuthServiceClient(conn),
+		ctx:        ctx,
 	}
 }
 
@@ -183,6 +186,33 @@ func (c *NamespaceClient) parseExistingCerts(ctx *cli.Context) (namespace *names
 	return n, existingCerts, nil
 }
 
+func (c *NamespaceClient) toUserNamespacePermissions(userPermissionsInput map[string]string) ([]*auth.UserNamespacePermissions, error) {
+	var res []*auth.UserNamespacePermissions
+	for email, actionGroup := range userPermissionsInput {
+		u, err := c.authClient.GetUser(c.ctx, &authservice.GetUserRequest{
+			UserEmail: email,
+		})
+		if err != nil {
+			return nil, err
+		}
+		if len(u.GetUser().GetId()) == 0 {
+			return nil, fmt.Errorf("user not found for: %s", email)
+		}
+		actionGroupID, ok := auth.NamespaceActionGroup_value[actionGroup]
+		if !ok {
+			return nil, fmt.Errorf(
+				"namespace permission type \"%s\" does not exist, acceptable types are: %s",
+				actionGroup,
+				getNamespacePermissionTypes(),
+			)
+		}
+		res = append(res, &auth.UserNamespacePermissions{
+			UserId:      u.GetUser().GetId(),
+			ActionGroup: auth.NamespaceActionGroup(actionGroupID),
+		})
+	}
+	return res, nil
+}
 func readAndParseCACerts(ctx *cli.Context) (read caCerts, err error) {
 	cert, err := ReadCACerts(ctx)
 	if err != nil {
@@ -248,9 +278,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Aliases: []string{"c"},
 					Flags: []cli.Flag{
 						RequestIDFlag,
-						NamespaceFlag,
 						namespaceRegionFlag,
 						namespaceEnvironmentFlag,
+						&cli.StringFlag{
+							Name:     NamespaceFlagName,
+							Usage:    "The namespace hosted on temporal cloud",
+							Aliases:  []string{"n"},
+							Required: true,
+						},
 						&cli.IntFlag{
 							Name:    RetentionDaysFlagName,
 							Usage:   "The retention of the namespace in days",
@@ -311,11 +346,15 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						}
 						n.Spec.RetentionDays = int32(retention)
 
-						// user namespace permissions (required)
+						// user namespace permissions (optional)
 						var unp []*auth.UserNamespacePermissions
 						userNamespacePermissionFlags := ctx.StringSlice(userNamespacePermissionFlagName)
 						if len(userNamespacePermissionFlags) > 0 {
-							unp, err = toUserNamespacePermissions(userNamespacePermissionFlags)
+							unpMap, err := toUserNamespacePermissionsMap(userNamespacePermissionFlags)
+							if err != nil {
+								return err
+							}
+							unp, err = c.toUserNamespacePermissions(unpMap)
 							if err != nil {
 								return err
 							}
@@ -924,8 +963,8 @@ func getNamespacePermissionTypes() []string {
 	return validTypes
 }
 
-func toUserNamespacePermissions(keyValues []string) ([]*auth.UserNamespacePermissions, error) {
-	var res []*auth.UserNamespacePermissions
+func toUserNamespacePermissionsMap(keyValues []string) (map[string]string, error) {
+	res := map[string]string{}
 	for _, kv := range keyValues {
 		parts := strings.Split(kv, "=")
 		if len(parts) != 2 {
@@ -942,18 +981,7 @@ func toUserNamespacePermissions(keyValues []string) ([]*auth.UserNamespacePermis
 			return nil, fmt.Errorf("unable to parse email address in user namespace permission: %w", err)
 		}
 
-		actionGroupID, ok := auth.NamespaceActionGroup_value[actionGroupValue]
-		if !ok {
-			return nil, fmt.Errorf(
-				"namespace permission type \"%s\" does not exist, acceptable types are: %s",
-				actionGroupValue,
-				getNamespacePermissionTypes(),
-			)
-		}
-		res = append(res, &auth.UserNamespacePermissions{
-			UserId:      email,
-			ActionGroup: auth.NamespaceActionGroup(actionGroupID),
-		})
+		res[email] = actionGroupValue
 	}
 	return res, nil
 }
