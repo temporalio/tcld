@@ -1258,6 +1258,13 @@ func (s *NamespaceTestSuite) TestCreate() {
 	s.EqualError(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--ca-certificate", "cert1"), "create namespace error")
 	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.CreateNamespaceResponse{
 		RequestStatus: &request.RequestStatus{},
-	}, nil).Times(1)
-	s.NoError(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--ca-certificate", "cert1"))
+	}, nil).AnyTimes()
+	s.NoError(s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+	))
 }
