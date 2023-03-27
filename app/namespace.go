@@ -205,9 +205,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Usage:   "Delete a temporal namespace",
 					Aliases: []string{"d"},
 					Flags: []cli.Flag{
-						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						&cli.StringFlag{
+							Name:     NamespaceFlagName,
+							Usage:    "The namespace hosted on temporal cloud",
+							Aliases:  []string{"n"},
+							Required: true,
+						},
 					},
 					Action: func(ctx *cli.Context) error {
 						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
