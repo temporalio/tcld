@@ -218,7 +218,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						namespaceName := ctx.String(NamespaceFlagName)
 						n, err := c.getNamespace(namespaceName)
 						if err != nil {
-							return nil
+							return err
 						}
 						if len(n.GetNamespace()) == 0 {
 							return fmt.Errorf("namespace: %s not found", namespaceName)
