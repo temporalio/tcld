@@ -220,9 +220,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if err != nil {
 							return err
 						}
-						if len(n.GetNamespace()) == 0 {
-							return fmt.Errorf("namespace: %s not found", namespaceName)
-						}
 						return c.deleteNamespace(ctx, n)
 					},
 				},
