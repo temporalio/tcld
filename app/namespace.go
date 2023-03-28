@@ -216,6 +216,18 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					},
 					Action: func(ctx *cli.Context) error {
 						namespaceName := ctx.String(NamespaceFlagName)
+						yes, err := ConfirmPrompt(ctx,
+							fmt.Sprintf(
+								"Deleting a namespace will remove it completely, and is not reversible.\nDo you still want to delete namespace %s?",
+								namespaceName,
+							),
+						)
+						if err != nil {
+							return err
+						}
+						if !yes {
+							return nil
+						}
 						n, err := c.getNamespace(namespaceName)
 						if err != nil {
 							return err
