@@ -21,7 +21,6 @@ import (
 
 const (
 	namespaceRegionFlagName          = "region"
-	namespaceEnvironmentFlagName     = "environment"
 	CaCertificateFlagName            = "ca-certificate"
 	CaCertificateFileFlagName        = "ca-certificate-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
@@ -32,19 +31,6 @@ const (
 )
 
 var (
-	namespaceRegionFlag = &cli.StringFlag{
-		Name:     namespaceRegionFlagName,
-		Usage:    "Create namespace in this region",
-		Aliases:  []string{"re"},
-		Required: true,
-	}
-	namespaceEnvironmentFlag = &cli.StringFlag{
-		Name:    namespaceEnvironmentFlagName,
-		Usage:   fmt.Sprintf("Create namespace in this environment. Value must be one of %v", namespace.Environment_value),
-		Aliases: []string{"e"},
-		Value:   "Prod",
-		Hidden:  true,
-	}
 	CaCertificateFlag = &cli.StringFlag{
 		Name:    CaCertificateFlagName,
 		Usage:   "The base64 encoded ca certificate",
@@ -59,12 +45,6 @@ var (
 		Name:    caCertificateFingerprintFlagName,
 		Usage:   "The fingerprint of to the ca certificate",
 		Aliases: []string{"fp"},
-	}
-	searchAttributeFlag = &cli.StringSliceFlag{
-		Name:     searchAttributeFlagName,
-		Usage:    fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
-		Aliases:  []string{"sa"},
-		Required: true,
 	}
 )
 
@@ -283,8 +263,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Aliases: []string{"c"},
 					Flags: []cli.Flag{
 						RequestIDFlag,
-						namespaceRegionFlag,
 						CaCertificateFlag,
+						&cli.StringFlag{
+							Name:     namespaceRegionFlagName,
+							Usage:    "Create namespace in this region",
+							Aliases:  []string{"re"},
+							Required: true,
+						}
 						&cli.StringFlag{
 							Name:     NamespaceFlagName,
 							Usage:    "The namespace hosted on temporal cloud",
@@ -849,7 +834,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								NamespaceFlag,
 								RequestIDFlag,
 								ResourceVersionFlag,
-								searchAttributeFlag,
+								&cli.StringSliceFlag{
+									Name:     "search-attribute",
+									Usage:    fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
+									Aliases:  []string{"sa"},
+									Required: true,
+								},
 							},
 							Action: func(ctx *cli.Context) error {
 								csa, err := toSearchAttributes(ctx.StringSlice(searchAttributeFlagName))
