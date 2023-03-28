@@ -275,7 +275,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							Usage:    "Create namespace in this region",
 							Aliases:  []string{"re"},
 							Required: true,
-						}
+						},
 						&cli.IntFlag{
 							Name:    RetentionDaysFlagName,
 							Usage:   "The retention of the namespace in days",
