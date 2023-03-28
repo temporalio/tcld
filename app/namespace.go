@@ -46,6 +46,17 @@ var (
 		Usage:   "The fingerprint of to the ca certificate",
 		Aliases: []string{"fp"},
 	}
+	namespaceRegions = []string{
+		"ap-northeast-1",
+		"ap-southeast-1",
+		"ap-southeast-2",
+		"ca-central-1",
+		"eu-central-1",
+		"eu-west-1",
+		"eu-west-2",
+		"us-east-1",
+		"us-west-2",
+	}
 )
 
 type NamespaceClient struct {
@@ -272,7 +283,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						},
 						&cli.StringFlag{
 							Name:     namespaceRegionFlagName,
-							Usage:    "Create namespace in this region",
+							Usage:    fmt.Sprintf("Create namespace in this region; valid regions are: %v", namespaceRegions),
 							Aliases:  []string{"re"},
 							Required: true,
 						},
@@ -312,10 +323,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						n := &namespace.Namespace{
 							RequestId: ctx.String(RequestIDFlagName),
 							Namespace: ctx.String(NamespaceFlagName),
-							Spec: &namespace.NamespaceSpec{
-								Region: ctx.String(namespaceRegionFlagName),
-							},
 						}
+
+						// region (required)
+						region := ctx.String(namespaceRegionFlagName)
+						if err := validdateNamespaceRegion(region); err != nil {
+							return err
+						}
+						n.Spec = &namespace.NamespaceSpec{
+							Region: region,
+						}
+
 						// certs (required)
 						cert, err := ReadCACerts(ctx)
 						if err != nil {
@@ -987,4 +1005,13 @@ func compareCertificateFilters(existing, replacement certificateFiltersConfig) (
 	}
 
 	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
+}
+
+func validdateNamespaceRegion(region string) error {
+	for _, r := range namespaceRegions {
+		if r == region {
+			return nil
+		}
+	}
+	return fmt.Errorf("namespace region: %s not allowed", region)
 }
