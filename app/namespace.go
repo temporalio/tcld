@@ -265,17 +265,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						RequestIDFlag,
 						CaCertificateFlag,
 						&cli.StringFlag{
-							Name:     namespaceRegionFlagName,
-							Usage:    "Create namespace in this region",
-							Aliases:  []string{"re"},
-							Required: true,
-						}
-						&cli.StringFlag{
 							Name:     NamespaceFlagName,
 							Usage:    "The namespace hosted on temporal cloud",
 							Aliases:  []string{"n"},
 							Required: true,
 						},
+						&cli.StringFlag{
+							Name:     namespaceRegionFlagName,
+							Usage:    "Create namespace in this region",
+							Aliases:  []string{"re"},
+							Required: true,
+						}
 						&cli.IntFlag{
 							Name:    RetentionDaysFlagName,
 							Usage:   "The retention of the namespace in days",
@@ -286,11 +286,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							Name:    CaCertificateFileFlagName,
 							Usage:   "The path to the ca pem file",
 							Aliases: []string{"cf"},
-						},
-						&cli.StringSliceFlag{
-							Name:    userNamespacePermissionFlagName,
-							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
-							Aliases: []string{"p"},
 						},
 						&cli.PathFlag{
 							Name:    certificateFilterFileFlagName,
@@ -306,6 +301,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							Name:    searchAttributeFlagName,
 							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
 							Aliases: []string{"sa"},
+						},
+						&cli.StringSliceFlag{
+							Name:    userNamespacePermissionFlagName,
+							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
+							Aliases: []string{"p"},
 						},
 					},
 					Action: func(ctx *cli.Context) error {
