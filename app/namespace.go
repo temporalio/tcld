@@ -327,7 +327,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 						// region (required)
 						region := ctx.String(namespaceRegionFlagName)
-						if err := validdateNamespaceRegion(region); err != nil {
+						if err := validateNamespaceRegion(region); err != nil {
 							return err
 						}
 						n.Spec = &namespace.NamespaceSpec{
@@ -1007,7 +1007,7 @@ func compareCertificateFilters(existing, replacement certificateFiltersConfig) (
 	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
 }
 
-func validdateNamespaceRegion(region string) error {
+func validateNamespaceRegion(region string) error {
 	for _, r := range namespaceRegions {
 		if r == region {
 			return nil
