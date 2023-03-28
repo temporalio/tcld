@@ -280,7 +280,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							Name:    RetentionDaysFlagName,
 							Usage:   "The retention of the namespace in days",
 							Aliases: []string{"rd"},
-							Value:   7,
+							Value:   30,
 						},
 						&cli.PathFlag{
 							Name:    CaCertificateFileFlagName,
