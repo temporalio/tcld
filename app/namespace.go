@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
+	"go.uber.org/multierr"
 	"io/ioutil"
 	"net/mail"
 	"strings"
@@ -188,30 +189,34 @@ func (c *NamespaceClient) parseExistingCerts(ctx *cli.Context) (namespace *names
 
 func (c *NamespaceClient) toUserNamespacePermissions(userPermissionsInput map[string]string) ([]*auth.UserNamespacePermissions, error) {
 	var res []*auth.UserNamespacePermissions
+	var errs error
 	for email, actionGroup := range userPermissionsInput {
 		u, err := c.authClient.GetUser(c.ctx, &authservice.GetUserRequest{
 			UserEmail: email,
 		})
 		if err != nil {
-			return nil, err
+			errs = multierr.Append(errs, err)
+			continue
 		}
 		if len(u.GetUser().GetId()) == 0 {
-			return nil, fmt.Errorf("user not found for: %s", email)
+			errs = multierr.Append(errs, fmt.Errorf("user not found for: %s", email))
+			continue
 		}
 		actionGroupID, ok := auth.NamespaceActionGroup_value[actionGroup]
 		if !ok {
-			return nil, fmt.Errorf(
+			errs = multierr.Append(errs, fmt.Errorf(
 				"namespace permission type \"%s\" does not exist, acceptable types are: %s",
 				actionGroup,
 				getNamespacePermissionTypes(),
-			)
+			))
+			continue
 		}
 		res = append(res, &auth.UserNamespacePermissions{
 			UserId:      u.GetUser().GetId(),
 			ActionGroup: auth.NamespaceActionGroup(actionGroupID),
 		})
 	}
-	return res, nil
+	return res, errs
 }
 func readAndParseCACerts(ctx *cli.Context) (read caCerts, err error) {
 	cert, err := ReadCACerts(ctx)
@@ -369,7 +374,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							n.Spec.CertificateFilters = append(n.Spec.CertificateFilters, newFilters.toSpec()...)
 						}
 
-						// search attribute (optional)
+						// search attributes (optional)
 						searchAttributes := ctx.StringSlice(searchAttributeFlagName)
 						if len(searchAttributes) > 0 {
 							csa, err := toSearchAttributes(searchAttributes)
