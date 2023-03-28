@@ -218,7 +218,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						namespaceName := ctx.String(NamespaceFlagName)
 						yes, err := ConfirmPrompt(ctx,
 							fmt.Sprintf(
-								"Deleting a namespace will remove it completely, and is not reversible.\nDo you still want to delete namespace %s?",
+								"Deleting a namespace will remove it completely and is not reversible.\nDo you still want to delete namespace \"%s\"?",
 								namespaceName,
 							),
 						)
