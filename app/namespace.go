@@ -92,7 +92,7 @@ func GetNamespaceClient(ctx *cli.Context) (*NamespaceClient, error) {
 	return NewNamespaceClient(ct, conn), nil
 }
 
-func (c *NamespaceClient) createNamespace(ctx *cli.Context, n *namespace.Namespace, p []*auth.UserNamespacePermissions) error {
+func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.UserNamespacePermissions) error {
 	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
 		RequestId:                n.RequestId,
 		Namespace:                n.Namespace,
@@ -284,7 +284,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Flags: []cli.Flag{
 						RequestIDFlag,
 						namespaceRegionFlag,
-						namespaceEnvironmentFlag,
 						CaCertificateFlag,
 						&cli.StringFlag{
 							Name:     NamespaceFlagName,
@@ -329,8 +328,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							RequestId: ctx.String(RequestIDFlagName),
 							Namespace: ctx.String(NamespaceFlagName),
 							Spec: &namespace.NamespaceSpec{
-								Region:      ctx.String(namespaceRegionFlagName),
-								Environment: namespace.Environment(namespace.Environment_value[ctx.String(namespaceEnvironmentFlagName)]),
+								Region: ctx.String(namespaceRegionFlagName),
 							},
 						}
 						// certs (required)
@@ -393,7 +391,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							}
 						}
 
-						return c.createNamespace(ctx, n, unp)
+						return c.createNamespace(n, unp)
 					},
 				},
 				{
