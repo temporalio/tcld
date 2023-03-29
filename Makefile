@@ -15,6 +15,8 @@ LINKER_FLAGS := -X $(APPPKG).BuildDate=$(DATE) -X $(APPPKG).Commit=$(COMMIT) -X 
 ALL_SRC := $(shell find . -name "*.go")
 TEST_DIRS := $(sort $(dir $(filter %_test.go,$(ALL_SRC))))
 TEST_ARG ?= -race -timeout=5m -cover -count=1
+COVER_ROOT := ./.coverage
+SUMMARY_COVER_PROFILE := $(COVER_ROOT)/summary_coverprofile.out
 
 tcld:
 	@go build -ldflags "$(LINKER_FLAGS)" -o tcld ./cmd/tcld/*.go
@@ -51,3 +53,15 @@ lint:
 
 mocks:
 	@mockgen -source services/loginservice.go -destination services/loginservicemock.go -package services
+
+$(COVER_ROOT):
+	@mkdir -p $(COVER_ROOT)
+
+cover: $(COVER_ROOT)
+	@echo "mode: atomic" > $(SUMMARY_COVER_PROFILE);\
+	$(foreach TEST_DIR,$(TEST_DIRS),\
+		mkdir -p $(COVER_ROOT)/$(TEST_DIR);\
+		go test $(TEST_ARG) -coverprofile=$(COVER_ROOT)/$(TEST_DIR)/coverprofile.out $(TEST_DIR);\
+		grep -v -e "^mode: \w\+" $(COVER_ROOT)/$(TEST_DIR)/coverprofile.out >> $(SUMMARY_COVER_PROFILE);\
+		$(NEWLINE))\
+	go tool cover -html=$(SUMMARY_COVER_PROFILE) -o $(SUMMARY_COVER_PROFILE).html

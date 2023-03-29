@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"github.com/temporalio/tcld/protogen/api/auth/v1"
+	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"os"
 	"strings"
 	"testing"
@@ -13,6 +15,7 @@ import (
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
+	authservicemock "github.com/temporalio/tcld/protogen/apimock/authservice/v1"
 	namespaceservicemock "github.com/temporalio/tcld/protogen/apimock/namespaceservice/v1"
 	"github.com/urfave/cli/v2"
 )
@@ -23,18 +26,21 @@ func TestNamespace(t *testing.T) {
 
 type NamespaceTestSuite struct {
 	suite.Suite
-	cliApp      *cli.App
-	mockCtrl    *gomock.Controller
-	mockService *namespaceservicemock.MockNamespaceServiceClient
+	cliApp          *cli.App
+	mockCtrl        *gomock.Controller
+	mockService     *namespaceservicemock.MockNamespaceServiceClient
+	mockAuthService *authservicemock.MockAuthServiceClient
 }
 
 func (s *NamespaceTestSuite) SetupTest() {
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = namespaceservicemock.NewMockNamespaceServiceClient(s.mockCtrl)
+	s.mockAuthService = authservicemock.NewMockAuthServiceClient(s.mockCtrl)
 	out, err := NewNamespaceCommand(func(ctx *cli.Context) (*NamespaceClient, error) {
 		return &NamespaceClient{
-			ctx:    context.TODO(),
-			client: s.mockService,
+			ctx:        context.TODO(),
+			client:     s.mockService,
+			authClient: s.mockAuthService,
 		}, nil
 	})
 	s.Require().NoError(err)
@@ -1248,4 +1254,32 @@ func (s *NamespaceTestSuite) TestGetNamespaceRetention() {
 			}
 		})
 	}
+}
+
+func (s *NamespaceTestSuite) TestCreate() {
+	s.Error(s.RunCmd("namespace", "create"))
+	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1"))
+	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2"))
+	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(nil, errors.New("create namespace error")).Times(1)
+	s.EqualError(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--ca-certificate", "cert1"), "create namespace error")
+	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.CreateNamespaceResponse{
+		RequestStatus: &request.RequestStatus{},
+	}, nil).AnyTimes()
+	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
+		User: &auth.User{
+			Id: "test-user-id",
+			Spec: &auth.UserSpec{
+				Email: "testuser@testcompany.com",
+			},
+		},
+	}, nil)
+	s.NoError(s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+	))
 }
