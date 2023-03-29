@@ -420,6 +420,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Flags: []cli.Flag{
 						RequestIDFlag,
 						ResourceVersionFlag,
+						&cli.StringFlag{
+							Name:     NamespaceFlagName,
+							Usage:    "The namespace hosted on temporal cloud",
+							Aliases:  []string{"n"},
+							Required: true,
+						},
 					},
 					Action: func(ctx *cli.Context) error {
 						namespaceName := ctx.String(NamespaceFlagName)
