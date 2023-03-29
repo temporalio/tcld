@@ -1283,3 +1283,16 @@ func (s *NamespaceTestSuite) TestCreate() {
 		"--user-namespace-permission", "testuser@testcompany.com=Read",
 	))
 }
+
+func (s *NamespaceTestSuite) TestDelete() {
+	s.Error(s.RunCmd("namespace", "delete"))
+	s.mockService.EXPECT().GetNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.GetNamespaceResponse{
+		Namespace: &namespace.Namespace{
+			Namespace: "ns1",
+		},
+	}, nil).Times(1)
+	s.mockService.EXPECT().DeleteNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.DeleteNamespaceResponse{
+		RequestStatus: &request.RequestStatus{},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("namespace", "delete", "--namespace", "ns1"))
+}

@@ -83,6 +83,22 @@ func GetNamespaceClient(ctx *cli.Context) (*NamespaceClient, error) {
 	return NewNamespaceClient(ct, conn), nil
 }
 
+func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespace) error {
+	resourceVersion := n.ResourceVersion
+	if v := ctx.String(ResourceVersionFlagName); v != "" {
+		resourceVersion = v
+	}
+	res, err := c.client.DeleteNamespace(c.ctx, &namespaceservice.DeleteNamespaceRequest{
+		RequestId:       ctx.String(RequestIDFlagName),
+		Namespace:       n.Namespace,
+		ResourceVersion: resourceVersion,
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res)
+}
+
 func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.UserNamespacePermissions) error {
 	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
 		RequestId:                n.RequestId,
@@ -395,6 +411,41 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						}
 
 						return c.createNamespace(n, unp)
+					},
+				},
+				{
+					Name:    "delete",
+					Usage:   "Delete a temporal namespace",
+					Aliases: []string{"d"},
+					Flags: []cli.Flag{
+						RequestIDFlag,
+						ResourceVersionFlag,
+						&cli.StringFlag{
+							Name:     NamespaceFlagName,
+							Usage:    "The namespace hosted on temporal cloud",
+							Aliases:  []string{"n"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						namespaceName := ctx.String(NamespaceFlagName)
+						yes, err := ConfirmPrompt(ctx,
+							fmt.Sprintf(
+								"Deleting a namespace will remove it completely and is not reversible.\nDo you still want to delete namespace \"%s\"?",
+								namespaceName,
+							),
+						)
+						if err != nil {
+							return err
+						}
+						if !yes {
+							return nil
+						}
+						n, err := c.getNamespace(namespaceName)
+						if err != nil {
+							return err
+						}
+						return c.deleteNamespace(ctx, n)
 					},
 				},
 				{
