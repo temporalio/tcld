@@ -34,11 +34,11 @@ func getNamespaceActionGroups() []string {
 	return rv
 }
 
-func getAccountRole(ctx context.Context, client authservice.AuthServiceClient, permission string) (*auth.Role, error) {
-	p := strings.ToLower(strings.TrimSpace(permission))
+func getAccountRole(ctx context.Context, client authservice.AuthServiceClient, actionGroup string) (*auth.Role, error) {
+	g := strings.ToLower(strings.TrimSpace(actionGroup))
 	var ag auth.AccountActionGroup
 	for n, v := range auth.AccountActionGroup_value {
-		if strings.ToLower(n) == p {
+		if strings.ToLower(n) == g {
 			ag = auth.AccountActionGroup(v)
 			break
 		}

@@ -2,17 +2,20 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/gogo/protobuf/proto"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/urfave/cli/v2"
+	"strings"
 )
 
 const (
-	userIDFlagName    = "user-id"
-	userEmailFlagName = "user-email"
-	rolesFlagName     = "roles"
+	userIDFlagName              = "user-id"
+	userEmailFlagName           = "user-email"
+	accountRoleFlagName         = "account-role"
+	namespacePermissionFlagName = "namespace-permission"
 )
 
 var (
@@ -119,22 +122,52 @@ func (c *UserClient) getUserAndRoles(userID, userEmail string) (*auth.User, []*a
 func (c *UserClient) inviteUsers(
 	ctx *cli.Context,
 	emails []string,
-	roleIDs []string,
-	access string,
+	namespacePermissions []string,
+	accountRole string,
 ) error {
-	if len(roleIDs) == 0 && access == "" {
-		return fmt.Errorf("atleast one of role-ids or access needs to be set")
+	if len(accountRole) == 0 {
+		return errors.New("account role required for inviting new users")
 	}
-	if len(roleIDs) > 0 && access != "" {
-		return fmt.Errorf("cannot set both role-ids and access")
+
+	// the role ids to invite the users for
+	var roleIDs []string
+
+	// first get the required account role
+	role, err := getAccountRole(c.ctx, c.client, accountRole)
+	if err != nil {
+		return err
 	}
-	if access != "" {
-		role, err := getAccountRole(c.ctx, c.client, access)
+	roleIDs = append(roleIDs, role.Id)
+
+	// get any optional namespace permissions
+	if len(namespacePermissions) > 0 {
+		npm, err := toUserNamespacePermissionsMap(namespacePermissions)
 		if err != nil {
 			return err
 		}
-		roleIDs = append(roleIDs, role.Id)
+		var roleSpecs []*auth.RoleSpec
+		for namespace, permission := range npm {
+			roleSpecs = append(roleSpecs, &auth.RoleSpec{
+				NamespaceRoles: []*auth.NamespaceRoleSpec{
+					{
+						Namespace:   namespace,
+						ActionGroup: auth.NamespaceActionGroup(auth.NamespaceActionGroup_value[permission]),
+					},
+				},
+			})
+		}
+		npRoles, err := c.client.GetRolesByPermissions(c.ctx, &authservice.GetRolesByPermissionsRequest{
+			Specs: roleSpecs,
+		})
+		if err != nil {
+			return err
+		}
+		for _, npRole := range npRoles.GetRoles() {
+			roleIDs = append(roleIDs, npRole.GetId())
+		}
 	}
+
+	// Invite users to given roles
 	req := &authservice.InviteUsersRequest{
 		Specs:     make([]*auth.UserSpec, len(emails)),
 		RequestId: ctx.String(RequestIDFlagName),
@@ -239,14 +272,14 @@ func (c *UserClient) setAccountRole(
 	}
 	for i := range userRoles {
 		if userRoles[i].Id == role.Id {
-			return fmt.Errorf("user already assigned '%s' account role", role.Id)
+			return fmt.Errorf("user already has '%s' account role", role.Id)
 		}
 	}
 	for i := range userRoles {
 		if userRoles[i].Spec.AccountRole != nil && userRoles[i].Spec.AccountRole.ActionGroup != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
 			if role.Spec.AccountRole.ActionGroup == auth.ACCOUNT_ACTION_GROUP_ADMIN {
-				// assign the user account admin role
-				y, err := ConfirmPrompt(ctx, "Assigning admin role to user, please confirm")
+				// set the user account admin role
+				y, err := ConfirmPrompt(ctx, "Setting admin role on user, please confirm")
 				if err != nil || !y {
 					return err
 				}
@@ -287,23 +320,31 @@ func (c *UserClient) updateUserNamespacePermissions(
 	}
 	resp, err := c.client.UpdateUserNamespacePermissions(c.ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to update user's namespace access: %w", err)
+		return fmt.Errorf("unable to update user's namespace permission: %w", err)
 	}
 	return PrintProto(resp.GetRequestStatus())
 }
 
-func (c *UserClient) setNamespacePermission(
+func (c *UserClient) setNamespacePermissions(
 	ctx *cli.Context,
 	userID string,
 	userEmail string,
-	namespace string,
-	access string,
+	namespacePermissions []string,
 ) error {
-	ag, err := toNamespaceActionGroup(access)
+	npm, err := toNamespacePermissionsMap(namespacePermissions)
 	if err != nil {
 		return err
 	}
-	return c.updateUserNamespacePermissions(ctx, userID, userEmail, namespace, ag)
+	for namespace, permission := range npm {
+		ag, err := toNamespaceActionGroup(permission)
+		if err != nil {
+			return err
+		}
+		if err := c.updateUserNamespacePermissions(ctx, userID, userEmail, namespace, ag); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *UserClient) deleteNamespacePermission(
@@ -315,13 +356,33 @@ func (c *UserClient) deleteNamespacePermission(
 	return c.updateUserNamespacePermissions(ctx, userID, userEmail, namespace, auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED)
 }
 
+func toNamespacePermissionsMap(keyValues []string) (map[string]string, error) {
+	res := map[string]string{}
+	for _, kv := range keyValues {
+		parts := strings.Split(kv, "=")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid namespace permission \"%s\" must be of format: \"namespace=permission\"", kv)
+		}
+
+		namespace := parts[0]
+		actionGroupValue := parts[1]
+
+		if len(namespace) == 0 {
+			return nil, errors.New("namespace must not be empty in namespace permission")
+		}
+
+		res[namespace] = actionGroupValue
+	}
+	return res, nil
+}
+
 func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 	var c *UserClient
 	return CommandOut{
 		Command: &cli.Command{
 			Name:    "user",
 			Aliases: []string{"u"},
-			Usage:   "User operations",
+			Usage:   "User management operations",
 			Before: func(ctx *cli.Context) error {
 				var err error
 				c, err = getUserClientFn(ctx)
@@ -334,13 +395,13 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 					Aliases: []string{"l"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
-							Name:    "namespace",
-							Usage:   "List users that have access to the namespace",
+							Name:    NamespaceFlagName,
+							Usage:   "List users that have permissions to the namespace",
 							Aliases: []string{"n"},
 						},
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.listUsers(ctx.String("namespace"))
+						return c.listUsers(ctx.String(NamespaceFlagName))
 					},
 				},
 				{
@@ -367,20 +428,19 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						&cli.StringSliceFlag{
 							Name:     userEmailFlagName,
 							Usage:    "The email address of the user, you can supply this flag multiple times to invite multiple users in a single request",
-							Required: true,
 							Aliases:  []string{"e"},
+							Required: true,
 						},
-						// TODO: needs to be namespace permissions
-						&cli.StringSliceFlag{
-							Name:    rolesFlagName,
-							Usage:   "The roles to assign to each user. (cannot be used with access)",
-							Aliases: []string{"ro"},
-						},
-						// TODO: needs to be a account role
 						&cli.StringFlag{
-							Name:    "access",
-							Usage:   fmt.Sprintf("The account access to assign to the user. (cannot be used with user roles) one of: %s", getAccountActionGroups()),
-							Aliases: []string{"a"},
+							Name:     accountRoleFlagName,
+							Usage:    fmt.Sprintf("The account role to set on the user; valid types are: %v", accountActionGroups),
+							Aliases:  []string{"ar"},
+							Required: true,
+						},
+						&cli.StringSliceFlag{
+							Name:    namespacePermissionFlagName,
+							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"namespace=permission\"; valid types are: %v", namespaceActionGroups),
+							Aliases: []string{"p"},
 						},
 						RequestIDFlag,
 					},
@@ -388,8 +448,8 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						return c.inviteUsers(
 							ctx,
 							ctx.StringSlice(userEmailFlagName),
-							ctx.StringSlice(rolesFlagName),
-							ctx.String("access"),
+							ctx.StringSlice(namespacePermissionFlagName),
+							ctx.String(accountRoleFlagName),
 						)
 					},
 				},
@@ -463,10 +523,10 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 								RequestIDFlag,
 								ResourceVersionFlag,
 								&cli.StringFlag{
-									Name:     "role",
-									Usage:    fmt.Sprintf("The role, should be one of: %s", accountActionGroups),
+									Name:     accountRoleFlagName,
+									Usage:    fmt.Sprintf("The account role to set on the user; valid types are: %v", accountActionGroups),
 									Required: true,
-									Aliases:  []string{"ro"},
+									Aliases:  []string{"ar"},
 								},
 							},
 							Action: func(ctx *cli.Context) error {
@@ -474,7 +534,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 									ctx,
 									ctx.String(userIDFlagName),
 									ctx.String(userEmailFlagName),
-									ctx.String("role"),
+									ctx.String(accountRoleFlagName),
 								)
 							},
 						},
@@ -488,32 +548,25 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 								userEmailFlag,
 								RequestIDFlag,
 								ResourceVersionFlag,
-								&cli.StringFlag{
-									Name:     "namespace",
-									Usage:    "The namespace to assign permissions to",
-									Required: true,
-									Aliases:  []string{"n"},
-								},
-								&cli.StringFlag{
-									Name:     "permission",
-									Usage:    fmt.Sprintf("The permission should be one of: %s", namespaceActionGroups),
-									Required: true,
+								&cli.StringSliceFlag{
+									Name:     namespacePermissionFlagName,
+									Usage:    fmt.Sprintf("Flag can be used multiple times; value must be \"namespace=permission\"; valid types are: %v", namespaceActionGroups),
 									Aliases:  []string{"p"},
+									Required: true,
 								},
 							},
 							Action: func(ctx *cli.Context) error {
-								return c.setNamespacePermission(
+								return c.setNamespacePermissions(
 									ctx,
 									ctx.String(userIDFlagName),
 									ctx.String(userEmailFlagName),
-									ctx.String("namespace"),
-									ctx.String("permission"),
+									ctx.StringSlice(namespacePermissionFlagName),
 								)
 							},
 						},
 						{
 							Name:    "delete-namespace-permission",
-							Usage:   "Delete user's namespace permission",
+							Usage:   "Delete namespace permissions for a user",
 							Aliases: []string{"dnp"},
 							Flags: []cli.Flag{
 								userIDFlag,
@@ -521,8 +574,8 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 								RequestIDFlag,
 								ResourceVersionFlag,
 								&cli.StringFlag{
-									Name:     "namespace",
-									Usage:    "Delete permissions from this namespace",
+									Name:     NamespaceFlagName,
+									Usage:    "The namespace to delete user permissions from",
 									Required: true,
 									Aliases:  []string{"n"},
 								},
@@ -532,7 +585,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 									ctx,
 									ctx.String(userIDFlagName),
 									ctx.String(userEmailFlagName),
-									ctx.String("namespace"),
+									ctx.String(NamespaceFlagName),
 								)
 							},
 						},

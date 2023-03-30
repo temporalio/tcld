@@ -225,6 +225,7 @@ func (c *NamespaceClient) toUserNamespacePermissions(userPermissionsInput map[st
 	}
 	return res, errs
 }
+
 func readAndParseCACerts(ctx *cli.Context) (read caCerts, err error) {
 	cert, err := ReadCACerts(ctx)
 	if err != nil {
