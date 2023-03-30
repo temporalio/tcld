@@ -346,9 +346,14 @@ func (c *UserClient) deleteNamespacePermission(
 	ctx *cli.Context,
 	userID string,
 	userEmail string,
-	namespace string,
+	namespaces []string,
 ) error {
-	return c.updateUserNamespacePermissions(ctx, userID, userEmail, namespace, auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED)
+	for _, ns := range namespaces {
+		if err := c.updateUserNamespacePermissions(ctx, userID, userEmail, ns, auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func toNamespacePermissionsMap(keyValues []string) (map[string]string, error) {
@@ -568,7 +573,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 								userEmailFlag,
 								RequestIDFlag,
 								ResourceVersionFlag,
-								&cli.StringFlag{
+								&cli.StringSliceFlag{
 									Name:     NamespaceFlagName,
 									Usage:    "The namespace to delete user permissions from",
 									Required: true,
@@ -580,7 +585,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 									ctx,
 									ctx.String(userIDFlagName),
 									ctx.String(userEmailFlagName),
-									ctx.String(NamespaceFlagName),
+									ctx.StringSlice(NamespaceFlagName),
 								)
 							},
 						},
