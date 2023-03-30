@@ -137,7 +137,7 @@ func (c *UserClient) inviteUsers(
 	if err != nil {
 		return err
 	}
-	roleIDs = append(roleIDs, role.Id)
+	roleIDs = append(roleIDs, role.GetId())
 
 	// get any optional namespace permissions
 	if len(namespacePermissions) > 0 {
@@ -145,25 +145,12 @@ func (c *UserClient) inviteUsers(
 		if err != nil {
 			return err
 		}
-		var roleSpecs []*auth.RoleSpec
-		for namespace, permission := range npm {
-			roleSpecs = append(roleSpecs, &auth.RoleSpec{
-				NamespaceRoles: []*auth.NamespaceRoleSpec{
-					{
-						Namespace:   namespace,
-						ActionGroup: auth.NamespaceActionGroup(auth.NamespaceActionGroup_value[permission]),
-					},
-				},
-			})
-		}
-		npRoles, err := c.client.GetRolesByPermissions(c.ctx, &authservice.GetRolesByPermissionsRequest{
-			Specs: roleSpecs,
-		})
+		nsRoles, err := getNamespaceRolesFromMap(c.ctx, c.client, npm)
 		if err != nil {
 			return err
 		}
-		for _, npRole := range npRoles.GetRoles() {
-			roleIDs = append(roleIDs, npRole.GetId())
+		for _, nsRole := range nsRoles {
+			roleIDs = append(roleIDs, nsRole.GetId())
 		}
 	}
 
@@ -266,26 +253,34 @@ func (c *UserClient) setAccountRole(
 	if err != nil {
 		return err
 	}
-	role, err := getAccountRole(c.ctx, c.client, accountRole)
+	accountRoleToSet, err := getAccountRole(c.ctx, c.client, accountRole)
 	if err != nil {
 		return err
 	}
 	for i := range userRoles {
-		if userRoles[i].Id == role.Id {
-			return fmt.Errorf("user already has '%s' account role", role.Id)
+		if userRoles[i].Id == accountRoleToSet.Id {
+			return fmt.Errorf("user already has '%s' account role", accountRoleToSet.Id)
 		}
 	}
-	for i := range userRoles {
-		if userRoles[i].Spec.AccountRole != nil && userRoles[i].Spec.AccountRole.ActionGroup != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
-			if role.Spec.AccountRole.ActionGroup == auth.ACCOUNT_ACTION_GROUP_ADMIN {
-				// set the user account admin role
-				y, err := ConfirmPrompt(ctx, "Setting admin role on user, please confirm")
-				if err != nil || !y {
-					return err
-				}
-				userRoles = []*auth.Role{role}
-			} else {
-				userRoles[i] = role
+	// check if this is the global admin role, and replace all existing roles
+	if accountRoleToSet.Spec.AccountRole.ActionGroup == auth.ACCOUNT_ACTION_GROUP_ADMIN {
+		// set the user account admin role
+		y, err := ConfirmPrompt(ctx, "Setting admin role on user, please confirm")
+		if err != nil || !y {
+			return err
+		}
+		userRoles = []*auth.Role{accountRoleToSet}
+	} else {
+		for i := range userRoles {
+			ur := userRoles[i]
+			if ur.Type != auth.ROLE_TYPE_PREDEFINED {
+				continue
+			}
+			// find the current admin role to replace
+			ar := ur.Spec.AccountRole
+			if ar != nil && ar.ActionGroup != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
+				// only swap the current admin role
+				userRoles[i] = accountRoleToSet
 			}
 		}
 	}
