@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
-
+	"github.com/gogo/protobuf/proto"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/urfave/cli/v2"
@@ -302,6 +302,35 @@ func (c *UserClient) setAccountAccess(
 	return c.performUpdate(ctx, user)
 }
 
+func (c *UserClient) getUserRoles(
+	userID string,
+	userEmail string,
+) error {
+	user, err := c.getUser(userID, userEmail)
+	if err != nil {
+		return err
+	}
+	var resRoles []proto.Message
+	pageToken := ""
+	for {
+		res, err := c.client.GetRoles(c.ctx, &authservice.GetRolesRequest{
+			UserId:    user.Id,
+			PageSize:  100,
+			PageToken: pageToken,
+		})
+		if err != nil {
+			return err
+		}
+		for _, r := range res.GetRoles() {
+			resRoles = append(resRoles, r)
+		}
+		pageToken = res.GetNextPageToken()
+		if pageToken == "" {
+			return PrintProtoSlice("Roles", resRoles)
+		}
+	}
+}
+
 func (c *UserClient) updateUserNamespacePermissions(
 	ctx *cli.Context,
 	userID string,
@@ -465,75 +494,41 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 					},
 				},
 				{
-					Name:    "update",
-					Usage:   "Update users settings",
-					Aliases: []string{"u"},
+					Name:    "roles",
+					Usage:   "User role and permission settings",
+					Aliases: []string{"r"},
 					Subcommands: []*cli.Command{
 						{
-							Name:    "set-roles",
-							Usage:   "Set user roles",
-							Aliases: []string{"s"},
+							Name:    "list",
+							Usage:   "list roles and permissions for a user",
+							Aliases: []string{"l"},
 							Flags: []cli.Flag{
 								userIDFlag,
 								userEmailFlag,
-								multipleRoleFlag,
-								RequestIDFlag,
-								ResourceVersionFlag,
 							},
 							Action: func(ctx *cli.Context) error {
-								return c.updateUser(
-									ctx,
-									ctx.String(userIDFlagName),
-									ctx.String(userEmailFlagName),
-									ctx.StringSlice(rolesFlagName),
-								)
+								return c.getUserRoles(ctx.String(userIDFlagName), ctx.String(userEmailFlagName))
 							},
 						},
 						{
-							Name:    "add-role",
-							Usage:   "Add role to a user",
-							Aliases: []string{"a"},
-							Flags: []cli.Flag{
-								userIDFlag,
-								userEmailFlag,
-								RequestIDFlag,
-								ResourceVersionFlag,
-							},
-							Action: func(ctx *cli.Context) error {
-								return nil
-							},
-						},
-						{
-							Name:    "remove-role",
-							Usage:   "Remove a role from user",
-							Aliases: []string{"r"},
-							Flags: []cli.Flag{
-								userIDFlag,
-								userEmailFlag,
-								RequestIDFlag,
-								ResourceVersionFlag,
-							},
-							Action: func(ctx *cli.Context) error {
-								return nil
-							},
-						},
-						{
-							Name:    "set-account-access",
-							Usage:   "Set user's account access",
-							Aliases: []string{"sna"},
+							Name:    "set-account-role",
+							Usage:   "Set user's account role",
+							Aliases: []string{"sar"},
 							Flags: []cli.Flag{
 								userIDFlag,
 								userEmailFlag,
 								RequestIDFlag,
 								ResourceVersionFlag,
 								&cli.StringFlag{
-									Name:     "access",
-									Usage:    fmt.Sprintf("The access, should be one of: %s", accountActionGroups),
+									Name:     "role",
+									Usage:    fmt.Sprintf("The role, should be one of: %s", accountActionGroups),
 									Required: true,
-									Aliases:  []string{"a"},
+									Aliases:  []string{"ro"},
 								},
 							},
 							Action: func(ctx *cli.Context) error {
+								fmt.Println("inside set account role?")
+								// TODO: this looks like the wrong api?
 								return c.assignNamespacePermission(
 									ctx,
 									ctx.String(userIDFlagName),
@@ -545,9 +540,9 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						},
 
 						{
-							Name:    "set-namespace-access",
-							Usage:   "Set user's namespace access",
-							Aliases: []string{"sna"},
+							Name:    "set-namespace-permissions",
+							Usage:   "Set user's namespace permissions",
+							Aliases: []string{"snp"},
 							Flags: []cli.Flag{
 								userIDFlag,
 								userEmailFlag,
@@ -560,10 +555,10 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 									Aliases:  []string{"n"},
 								},
 								&cli.StringFlag{
-									Name:     "access",
+									Name:     "permission",
 									Usage:    fmt.Sprintf("The access, should be one of: %s", namespaceActionGroups),
 									Required: true,
-									Aliases:  []string{"a"},
+									Aliases:  []string{"p"},
 								},
 							},
 							Action: func(ctx *cli.Context) error {
@@ -577,9 +572,9 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 							},
 						},
 						{
-							Name:    "remove-namespace-access",
-							Usage:   "Remove user's namespace accesss",
-							Aliases: []string{"rna"},
+							Name:    "remove-namespace-permission",
+							Usage:   "Remove user's namespace permission",
+							Aliases: []string{"rnp"},
 							Flags: []cli.Flag{
 								userIDFlag,
 								userEmailFlag,
