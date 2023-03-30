@@ -306,7 +306,7 @@ func (c *UserClient) setNamespacePermission(
 	return c.updateUserNamespacePermissions(ctx, userID, userEmail, namespace, ag)
 }
 
-func (c *UserClient) removeNamespacePermission(
+func (c *UserClient) deleteNamespacePermission(
 	ctx *cli.Context,
 	userID string,
 	userEmail string,
@@ -412,7 +412,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 					},
 				},
 				{
-					Name:    "resend-invitation",
+					Name:    "resend-invite",
 					Usage:   "Resend invitation to a user on Temporal Cloud",
 					Aliases: []string{"ri"},
 					Flags: []cli.Flag{
@@ -435,7 +435,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 					Subcommands: []*cli.Command{
 						{
 							Name:    "list",
-							Usage:   "list roles and permissions for a user",
+							Usage:   "List roles and permissions for a user",
 							Aliases: []string{"l"},
 							Flags: []cli.Flag{
 								userIDFlag,
@@ -512,9 +512,9 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 							},
 						},
 						{
-							Name:    "remove-namespace-permission",
-							Usage:   "Remove user's namespace permission",
-							Aliases: []string{"rnp"},
+							Name:    "delete-namespace-permission",
+							Usage:   "Delete user's namespace permission",
+							Aliases: []string{"dnp"},
 							Flags: []cli.Flag{
 								userIDFlag,
 								userEmailFlag,
@@ -522,13 +522,13 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 								ResourceVersionFlag,
 								&cli.StringFlag{
 									Name:     "namespace",
-									Usage:    "Remove permissions from this namespace",
+									Usage:    "Delete permissions from this namespace",
 									Required: true,
 									Aliases:  []string{"n"},
 								},
 							},
 							Action: func(ctx *cli.Context) error {
-								return c.removeNamespacePermission(
+								return c.deleteNamespacePermission(
 									ctx,
 									ctx.String(userIDFlagName),
 									ctx.String(userEmailFlagName),
