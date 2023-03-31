@@ -253,43 +253,110 @@ func (c *UserClient) setAccountRole(
 	if err != nil {
 		return err
 	}
+	var newRoleIDs []string
 	accountRoleToSet, err := getAccountRole(c.ctx, c.client, accountRole)
 	if err != nil {
 		return err
 	}
-	for i := range userRoles {
-		if userRoles[i].Id == accountRoleToSet.Id {
-			return fmt.Errorf("user already has '%s' account role", accountRoleToSet.Id)
-		}
-	}
-	// check if this is the global admin role, and replace all existing roles
 	if accountRoleToSet.Spec.AccountRole.ActionGroup == auth.ACCOUNT_ACTION_GROUP_ADMIN {
 		// set the user account admin role
 		y, err := ConfirmPrompt(ctx, "Setting admin role on user, please confirm")
 		if err != nil || !y {
 			return err
 		}
-		userRoles = []*auth.Role{accountRoleToSet}
+		// ensure we overwrite all existing roles since the global admin role has permissions to everything
+		newRoleIDs = []string{accountRoleToSet.Id}
 	} else {
-		for i := range userRoles {
-			ur := userRoles[i]
-			if ur.Type != auth.ROLE_TYPE_PREDEFINED {
+		for _, r := range userRoles {
+			// skip over existing predefined account role
+			if r.Type == auth.ROLE_TYPE_PREDEFINED && r.Spec.AccountRole != nil && r.Spec.AccountRole.ActionGroup != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
 				continue
-			}
-			// find the current admin role to replace
-			ar := ur.Spec.AccountRole
-			if ar != nil && ar.ActionGroup != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
-				// only swap the current admin role
-				userRoles[i] = accountRoleToSet
+			} else {
+				newRoleIDs = append(newRoleIDs, r.Id)
 			}
 		}
+		newRoleIDs = append(newRoleIDs, accountRoleToSet.Id)
 	}
-	roleNames := make([]string, len(userRoles))
-	for i := range userRoles {
-		roleNames[i] = userRoles[i].Id
-	}
-	user.Spec.Roles = roleNames
+	user.Spec.Roles = newRoleIDs
 	return c.performUpdate(ctx, user)
+}
+
+func (c *UserClient) setNamespacePermissions(
+	ctx *cli.Context,
+	userID string,
+	userEmail string,
+	namespacePermissions []string,
+) error {
+	user, userRoles, err := c.getUserAndRoles(userID, userEmail)
+	if err != nil {
+		return err
+	}
+	var newRoleIDs []string
+	for _, r := range userRoles {
+		// skip over existing predefined namespace roles
+		if r.Type == auth.ROLE_TYPE_PREDEFINED && len(r.Spec.NamespaceRoles) > 0 {
+			continue
+		} else {
+			newRoleIDs = append(newRoleIDs, r.Id)
+		}
+	}
+	// collect the namespace roles and update user
+	npm, err := toNamespacePermissionsMap(namespacePermissions)
+	if err != nil {
+		return err
+	}
+	if len(npm) == 0 {
+		y, err := ConfirmPrompt(ctx, "Looks like you are about to remove all namespace permissions, please confirm")
+		if err != nil || !y {
+			return err
+		}
+	}
+	for namespace, permission := range npm {
+		nsRole, err := getNamespaceRole(c.ctx, c.client, namespace, permission)
+		if err != nil {
+			return err
+		}
+		newRoleIDs = append(newRoleIDs, nsRole.Id)
+	}
+	user.Spec.Roles = newRoleIDs
+	return c.performUpdate(ctx, user)
+}
+
+func (c *UserClient) updateNamespacePermissions(
+	ctx *cli.Context,
+	userID string,
+	userEmail string,
+	namespacePermissions []string,
+) error {
+	npm, err := toNamespacePermissionsMap(namespacePermissions)
+	if err != nil {
+		return err
+	}
+	// collect the roles and update user
+	for namespace, permission := range npm {
+		ag, err := toNamespaceActionGroup(permission)
+		if err != nil {
+			return err
+		}
+		if err := c.updateUserNamespacePermissions(ctx, userID, userEmail, namespace, ag); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *UserClient) deleteNamespacePermission(
+	ctx *cli.Context,
+	userID string,
+	userEmail string,
+	namespaces []string,
+) error {
+	for _, ns := range namespaces {
+		if err := c.updateUserNamespacePermissions(ctx, userID, userEmail, ns, auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *UserClient) updateUserNamespacePermissions(
@@ -318,42 +385,6 @@ func (c *UserClient) updateUserNamespacePermissions(
 		return fmt.Errorf("unable to update user's namespace permission: %w", err)
 	}
 	return PrintProto(resp.GetRequestStatus())
-}
-
-func (c *UserClient) setNamespacePermissions(
-	ctx *cli.Context,
-	userID string,
-	userEmail string,
-	namespacePermissions []string,
-) error {
-	npm, err := toNamespacePermissionsMap(namespacePermissions)
-	if err != nil {
-		return err
-	}
-	for namespace, permission := range npm {
-		ag, err := toNamespaceActionGroup(permission)
-		if err != nil {
-			return err
-		}
-		if err := c.updateUserNamespacePermissions(ctx, userID, userEmail, namespace, ag); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (c *UserClient) deleteNamespacePermission(
-	ctx *cli.Context,
-	userID string,
-	userEmail string,
-	namespaces []string,
-) error {
-	for _, ns := range namespaces {
-		if err := c.updateUserNamespacePermissions(ctx, userID, userEmail, ns, auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func toNamespacePermissionsMap(keyValues []string) (map[string]string, error) {
@@ -538,10 +569,9 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 								)
 							},
 						},
-
 						{
 							Name:    "set-namespace-permissions",
-							Usage:   "Set namespace permissions for a user",
+							Usage:   "Set entirely new set of namespace permissions for a user",
 							Aliases: []string{"snp"},
 							Flags: []cli.Flag{
 								userIDFlag,
@@ -557,6 +587,31 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 							},
 							Action: func(ctx *cli.Context) error {
 								return c.setNamespacePermissions(
+									ctx,
+									ctx.String(userIDFlagName),
+									ctx.String(userEmailFlagName),
+									ctx.StringSlice(namespacePermissionFlagName),
+								)
+							},
+						},
+						{
+							Name:    "update-namespace-permissions",
+							Usage:   "Update new or existing namespace permissions for a user",
+							Aliases: []string{"snp"},
+							Flags: []cli.Flag{
+								userIDFlag,
+								userEmailFlag,
+								RequestIDFlag,
+								ResourceVersionFlag,
+								&cli.StringSliceFlag{
+									Name:     namespacePermissionFlagName,
+									Usage:    fmt.Sprintf("Flag can be used multiple times; value must be \"namespace=permission\"; valid types are: %v", namespaceActionGroups),
+									Aliases:  []string{"p"},
+									Required: true,
+								},
+							},
+							Action: func(ctx *cli.Context) error {
+								return c.updateNamespacePermissions(
 									ctx,
 									ctx.String(userIDFlagName),
 									ctx.String(userEmailFlagName),
