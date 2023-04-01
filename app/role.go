@@ -34,30 +34,22 @@ func getNamespaceActionGroups() []string {
 	return rv
 }
 
-func getNamespaceRolesFromMap(ctx context.Context, client authservice.AuthServiceClient, namespaceActionGroups map[string]string) ([]*auth.Role, error) {
-	var res []*auth.Role
+func getNamespaceRolesBatch(ctx context.Context, client authservice.AuthServiceClient, namespaceActionGroups map[string]string) ([]*auth.Role, error) {
+	var roleSpecs []*auth.RoleSpec
 	for namespace, actionGroup := range namespaceActionGroups {
-		r, err := getNamespaceRole(ctx, client, namespace, actionGroup)
+		ag, err := toNamespaceActionGroup(actionGroup)
 		if err != nil {
 			return nil, err
 		}
-		res = append(res, r)
-	}
-	return res, nil
-}
-
-func getNamespaceRole(ctx context.Context, client authservice.AuthServiceClient, namespace string, actionGroup string) (*auth.Role, error) {
-	ag, err := toNamespaceActionGroup(actionGroup)
-	if err != nil {
-		return nil, err
-	}
-	res, err := client.GetRolesByPermissions(ctx, &authservice.GetRolesByPermissionsRequest{
-		Specs: []*auth.RoleSpec{{
+		roleSpecs = append(roleSpecs, &auth.RoleSpec{
 			NamespaceRoles: []*auth.NamespaceRoleSpec{{
 				Namespace:   namespace,
 				ActionGroup: ag,
 			}},
-		}},
+		})
+	}
+	res, err := client.GetRolesByPermissions(ctx, &authservice.GetRolesByPermissionsRequest{
+		Specs: roleSpecs,
 	})
 	if err != nil {
 		return nil, err
@@ -65,10 +57,7 @@ func getNamespaceRole(ctx context.Context, client authservice.AuthServiceClient,
 	if len(res.Roles) == 0 {
 		return nil, fmt.Errorf("no roles found")
 	}
-	if len(res.Roles) > 1 {
-		return nil, fmt.Errorf("more than 1 account role found: %s", res.Roles)
-	}
-	return res.Roles[0], nil
+	return res.Roles, nil
 }
 
 func getAccountRole(ctx context.Context, client authservice.AuthServiceClient, actionGroup string) (*auth.Role, error) {
