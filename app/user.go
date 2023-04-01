@@ -540,7 +540,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 				{
 					Name:    "get-roles-and-permissions",
 					Usage:   "Get roles and permissions for a user",
-					Aliases: []string{"rp"},
+					Aliases: []string{"grp"},
 					Flags: []cli.Flag{
 						userIDFlag,
 						userEmailFlag,
