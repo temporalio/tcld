@@ -31,12 +31,21 @@ var (
 	}
 )
 
-type UserClient struct {
-	client authservice.AuthServiceClient
-	ctx    context.Context
-}
-
-type GetUserClientFn func(ctx *cli.Context) (*UserClient, error)
+type (
+	NamespacePermission struct {
+		Namespace  string `json:"namespace"`
+		Permission string `json:"permission"`
+	}
+	UserPermissions struct {
+		AccountRole          string                `json:"accountRole"`
+		NamespacePermissions []NamespacePermission `json:"namespacePermissions"`
+	}
+	UserClient struct {
+		client authservice.AuthServiceClient
+		ctx    context.Context
+	}
+	GetUserClientFn func(ctx *cli.Context) (*UserClient, error)
+)
 
 func GetUserClient(ctx *cli.Context) (*UserClient, error) {
 	ct, conn, err := GetServerConnection(ctx)
@@ -393,6 +402,29 @@ func toNamespacePermissionsMap(keyValues []string) (map[string]string, error) {
 	return res, nil
 }
 
+func toUserPermissions(roles []*auth.Role) UserPermissions {
+	var res UserPermissions
+	for _, role := range roles {
+		if role.Type == auth.ROLE_TYPE_PREDEFINED {
+			if role.Spec.AccountRole != nil && role.Spec.AccountRole.ActionGroup != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
+				res.AccountRole = auth.AccountActionGroup_name[int32(role.Spec.AccountRole.ActionGroup)]
+			}
+			if len(role.Spec.NamespaceRoles) > 0 {
+				for _, nr := range role.Spec.NamespaceRoles {
+					res.NamespacePermissions = append(
+						res.NamespacePermissions,
+						NamespacePermission{
+							Namespace:  nr.Namespace,
+							Permission: auth.NamespaceActionGroup_name[int32(nr.ActionGroup)],
+						},
+					)
+				}
+			}
+		}
+	}
+	return res
+}
+
 func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 	var c *UserClient
 	return CommandOut{
@@ -506,9 +538,9 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 					},
 				},
 				{
-					Name:    "get-user-permissions",
+					Name:    "get-roles-and-permissions",
 					Usage:   "Get roles and permissions for a user",
-					Aliases: []string{"p"},
+					Aliases: []string{"rp"},
 					Flags: []cli.Flag{
 						userIDFlag,
 						userEmailFlag,
@@ -518,33 +550,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						if err != nil {
 							return err
 						}
-						type NamespacePermission struct {
-							Namespace  string `json:"namespace"`
-							Permission string `json:"permission"`
-						}
-						type UserPermissions struct {
-							AccountRole          string                `json:"accountRole"`
-							NamespacePermissions []NamespacePermission `json:"namespacePermissions"`
-						}
-						var res UserPermissions
-						for _, role := range roles {
-							if role.Type == auth.ROLE_TYPE_PREDEFINED {
-								if role.Spec.AccountRole != nil && role.Spec.AccountRole.ActionGroup != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
-									res.AccountRole = auth.AccountActionGroup_name[int32(role.Spec.AccountRole.ActionGroup)]
-								}
-								if len(role.Spec.NamespaceRoles) > 0 {
-									for _, nr := range role.Spec.NamespaceRoles {
-										res.NamespacePermissions = append(
-											res.NamespacePermissions,
-											NamespacePermission{
-												Namespace:  nr.Namespace,
-												Permission: auth.NamespaceActionGroup_name[int32(nr.ActionGroup)],
-											},
-										)
-									}
-								}
-							}
-						}
+						res := toUserPermissions(roles)
 						return PrintObj(res)
 					},
 				},
