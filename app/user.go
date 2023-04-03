@@ -22,11 +22,11 @@ var (
 	userIDFlag = &cli.StringFlag{
 		Name:    userIDFlagName,
 		Usage:   "The user id",
-		Aliases: []string{"i"},
+		Aliases: []string{"id"},
 	}
 	userEmailFlag = &cli.StringFlag{
 		Name:    userEmailFlagName,
-		Usage:   "The user email address of the user to be invited",
+		Usage:   "The user email address of the user",
 		Aliases: []string{"e"},
 	}
 )
@@ -69,7 +69,7 @@ func (c *UserClient) listUsers(
 			Namespace: namespace,
 		})
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to get users: %v", err)
 		}
 		totalRes.Users = append(totalRes.Users, res.Users...)
 		// Check if we should continue paging
@@ -82,18 +82,18 @@ func (c *UserClient) listUsers(
 
 func (c *UserClient) getUser(userID, userEmail string) (*auth.User, error) {
 	if userID == "" && userEmail == "" {
-		return nil, fmt.Errorf("both user-id and user-email not set")
+		return nil, fmt.Errorf("exactly one of user-id or user-email must be set")
 	}
 
 	if userID != "" && userEmail != "" {
-		return nil, fmt.Errorf("both user-id and user-email set")
+		return nil, fmt.Errorf("exactly one of user-id or user-email must be set")
 	}
 	res, err := c.client.GetUser(c.ctx, &authservice.GetUserRequest{
 		UserId:    userID,
 		UserEmail: userEmail,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to get user: %v", err)
 	}
 	if res.User == nil || res.User.Id == "" {
 		// this should never happen, the server should return an error when the user is not found
@@ -115,7 +115,7 @@ func (c *UserClient) getUserAndRoles(userID, userEmail string) (*auth.User, []*a
 			UserId:    user.Id,
 		})
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, fmt.Errorf("unable to get roles: %v", err)
 		}
 		roles = append(roles, res.Roles...)
 		// Check if we should continue paging
@@ -206,31 +206,24 @@ func (c *UserClient) deleteUser(
 	userID string,
 	userEmail string,
 ) error {
-	if userID != "" && userEmail != "" {
-		return fmt.Errorf("both user-id and user-email set")
+	u, err := c.getUser(userID, userEmail)
+	if err != nil {
+		return err
 	}
-	if userID == "" && userEmail == "" {
-		return fmt.Errorf("both user-id and user-email cannot be empty")
-	}
-
-	res, err := c.client.GetUser(c.ctx, &authservice.GetUserRequest{
-		UserEmail: userEmail,
-		UserId:    userID,
-	})
 	if err != nil {
 		return err
 	}
 	req := &authservice.DeleteUserRequest{
-		UserId:          res.User.Id,
+		UserId:          u.Id,
 		ResourceVersion: ctx.String(ResourceVersionFlagName),
 		RequestId:       ctx.String(RequestIDFlagName),
 	}
 	if req.ResourceVersion == "" {
-		req.ResourceVersion = res.User.ResourceVersion
+		req.ResourceVersion = u.ResourceVersion
 	}
 	resp, err := c.client.DeleteUser(c.ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to update user: %w", err)
+		return fmt.Errorf("unable to delete user: %w", err)
 	}
 	return PrintProto(resp.GetRequestStatus())
 }
@@ -269,9 +262,13 @@ func (c *UserClient) setAccountRole(
 	}
 	if accountRoleToSet.Spec.AccountRole.ActionGroup == auth.ACCOUNT_ACTION_GROUP_ADMIN {
 		// set the user account admin role
-		y, err := ConfirmPrompt(ctx, "Setting admin role on user, please confirm")
-		if err != nil || !y {
+		y, err := ConfirmPrompt(ctx, "Setting admin role on user. All existing namespace permissions will be replaced, please confirm")
+		if err != nil {
 			return err
+		}
+		if !y {
+			fmt.Println("operation canceled")
+			return nil
 		}
 		// ensure we overwrite all existing roles since the global admin role has permissions to everything
 		newRoleIDs = []string{accountRoleToSet.Id}
@@ -316,8 +313,12 @@ func (c *UserClient) setNamespacePermissions(
 	}
 	if len(npm) == 0 {
 		y, err := ConfirmPrompt(ctx, "Looks like you are about to remove all namespace permissions, please confirm")
-		if err != nil || !y {
+		if err != nil {
 			return err
+		}
+		if !y {
+			fmt.Println("operation canceled")
+			return nil
 		}
 	}
 	nsRoles, err := getNamespaceRolesBatch(c.ctx, c.client, npm)
@@ -395,6 +396,9 @@ func toNamespacePermissionsMap(keyValues []string) (map[string]string, error) {
 
 		if len(namespace) == 0 {
 			return nil, errors.New("namespace must not be empty in namespace permission")
+		}
+		if len(actionGroupValue) == 0 {
+			return nil, errors.New("permission must not be empty in namespace permission")
 		}
 
 		res[namespace] = actionGroupValue

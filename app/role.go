@@ -52,7 +52,7 @@ func getNamespaceRolesBatch(ctx context.Context, client authservice.AuthServiceC
 		Specs: roleSpecs,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable get namespace roles: %v", err)
 	}
 	if len(res.Roles) == 0 {
 		return nil, fmt.Errorf("no roles found")
@@ -73,7 +73,7 @@ func getAccountRole(ctx context.Context, client authservice.AuthServiceClient, a
 		}},
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to get account role: %v", err)
 	}
 	if len(res.Roles) == 0 {
 		return nil, fmt.Errorf("no roles found")
