@@ -8,16 +8,17 @@ import (
 )
 
 const (
-	ServerFlagName          = "server"
-	ConfigDirFlagName       = "config-dir"
-	RetentionDaysFlagName   = "retention-days"
-	NamespaceFlagName       = "namespace"
-	RequestIDFlagName       = "request-id"
-	ResourceVersionFlagName = "resource-version"
-	ServiceNameFlagName     = "service-name"
-	APIKeyIDFlagName        = "api-key-id"
-	APISecretKeyFlagName    = "api-secret-key"
-	EnableDebugLogsFlagName = "enable-debug-logs"
+	ServerFlagName             = "server"
+	ConfigDirFlagName          = "config-dir"
+	RetentionDaysFlagName      = "retention-days"
+	NamespaceFlagName          = "namespace"
+	RequestIDFlagName          = "request-id"
+	ResourceVersionFlagName    = "resource-version"
+	APIKeyFlagName             = "api-key"
+	EnableHMACFlagName         = "enable-hmac"
+	InsecureConnectionFlagName = "insecure"
+	EnableDebugLogsFlagName    = "enable-debug-logs"
+	AuthenticationFlagCategory = "Authentication:"
 )
 
 var (
@@ -61,22 +62,27 @@ var (
 		Usage:   "The resource-version (etag) to update from, if not set the cli will use the latest (optional)",
 		Aliases: []string{"v"},
 	}
-	ServiceNameFlag = &cli.StringFlag{
-		Name:    ServiceNameFlagName,
-		Usage:   "The service name of the server",
-		Value:   "saas-api",
-		Hidden:  true,
-		EnvVars: []string{"TEMPORAL_CLOUD_SERVICE_NAME"},
+	APIKeyFlag = &cli.StringFlag{
+		Name:     APIKeyFlagName,
+		Usage:    "The API Key used for authentication (experimental)",
+		EnvVars:  []string{"TEMPORAL_CLOUD_API_KEY"},
+		Category: AuthenticationFlagCategory,
 	}
-	APIKeyIDFlag = &cli.StringFlag{
-		Name:    APIKeyIDFlagName,
-		Usage:   "The API Key ID used for authentication",
-		EnvVars: []string{"TEMPORAL_CLOUD_API_KEY_ID"},
+	EnableHMACFlag = &cli.BoolFlag{
+		Name:     EnableHMACFlagName,
+		Usage:    "Enable the use of HMAC request signatures, requires setting an API key as well (experimental)",
+		EnvVars:  []string{"TEMPORAL_CLOUD_ENABLE_HMAC"},
+		Category: AuthenticationFlagCategory,
 	}
-	APISecretKeyFlag = &cli.StringFlag{
-		Name:    APISecretKeyFlagName,
-		Usage:   "The API Secret Key used for authentication",
-		EnvVars: []string{"TEMPORAL_CLOUD_API_SECRET_KEY"},
+	InsecureConnectionFlag = &cli.BoolFlag{
+		Name:     InsecureConnectionFlagName,
+		Usage:    "Use an insecure transport for connection, recommended to avoid this option unless necessary",
+		EnvVars:  []string{"TEMPORAL_CLOUD_INSECURE_CONNECTION"},
+		Category: AuthenticationFlagCategory,
+		// Hide the insecure flag because credentials should not be sent over an insecure connections. However some
+		// users may be using a service mesh or local proxy, which is insecure locally but uses TLS off the host,
+		// and thus may require the use of this.
+		Hidden: true,
 	}
 	EnableDebugLogsFlag = &cli.BoolFlag{
 		Name:    EnableDebugLogsFlagName,
