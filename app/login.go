@@ -91,7 +91,7 @@ func loadLoginConfig(ctx *cli.Context) (OauthTokenResponse, error) {
 	tokens := OauthTokenResponse{}
 	configDir := ctx.Path(ConfigDirFlagName)
 	// Create config dir if it does not exist
-	if err := os.MkdirAll(configDir, 0755); err != nil {
+	if err := os.MkdirAll(configDir, 0700); err != nil {
 		return tokens, err
 	}
 
