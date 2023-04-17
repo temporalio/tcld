@@ -33,6 +33,20 @@ func (m *MockLoginService) EXPECT() *MockLoginServiceMockRecorder {
 	return m.recorder
 }
 
+// DeleteConfigFile mocks base method.
+func (m *MockLoginService) DeleteConfigFile(configPath string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteConfigFile", configPath)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteConfigFile indicates an expected call of DeleteConfigFile.
+func (mr *MockLoginServiceMockRecorder) DeleteConfigFile(configPath interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteConfigFile", reflect.TypeOf((*MockLoginService)(nil).DeleteConfigFile), configPath)
+}
+
 // OpenBrowser mocks base method.
 func (m *MockLoginService) OpenBrowser(URL string) error {
 	m.ctrl.T.Helper()
