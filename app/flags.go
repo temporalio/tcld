@@ -73,6 +73,9 @@ var (
 		Usage:    "Enable the use of HMAC request signatures, requires setting an API key as well (experimental)",
 		EnvVars:  []string{"TEMPORAL_CLOUD_ENABLE_HMAC"},
 		Category: AuthenticationFlagCategory,
+		// Hide the enable HMAC flag as this is an artifact of experimenting with authentication methods, and will
+		// likely be removed in the next few weeks.
+		Hidden: true,
 	}
 	InsecureConnectionFlag = &cli.BoolFlag{
 		Name:     InsecureConnectionFlagName,
