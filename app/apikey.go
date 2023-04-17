@@ -111,7 +111,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 	return CommandOut{
 		Command: &cli.Command{
 			Name:    "apikey",
-			Aliases: []string{"a"},
+			Aliases: []string{"ak"},
 			Usage:   "APIKey operations",
 			Before: func(ctx *cli.Context) error {
 				var err error
@@ -142,9 +142,9 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 						},
 						&cli.TimestampFlag{
 							Name:    "expiry",
-							Usage:   "the absolute timestamp when the apikey will expire, example: 2023-04-12T15:14:05",
+							Usage:   fmt.Sprintf("the absolute timestamp when the apikey will expire, example: '%s'", time.Now().Format(time.RFC1123)),
 							Aliases: []string{"e"},
-							Layout:  "2023-04-12T15:14:05",
+							Layout:  "Mon, 17 Apr 2023 13:22:15 PDT",
 						},
 						RequestIDFlag,
 					},
