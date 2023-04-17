@@ -50,7 +50,7 @@ func defaultDialOptions(c *cli.Context, addr *url.URL) ([]grpc.DialOption, error
 
 	creds, err := newRPCCredential(c)
 	if err != nil {
-		return []grpc.DialOption{}, nil
+		return []grpc.DialOption{}, err
 	} else if creds != nil {
 		opts = append(opts, grpc.WithPerRPCCredentials(creds))
 	}

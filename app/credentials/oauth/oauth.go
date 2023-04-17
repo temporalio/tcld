@@ -17,13 +17,13 @@ type Option = func(c *Credential)
 
 func WithInsecure(insecure bool) Option {
 	return func(c *Credential) {
-		c.insecure = insecure
+		c.allowInsecureTransport = insecure
 	}
 }
 
 type Credential struct {
-	accessToken string // keep unexported to prevent accidental leakage of the token.
-	insecure    bool
+	accessToken            string // keep unexported to prevent accidental leakage of the token.
+	allowInsecureTransport bool
 }
 
 func NewCredential(accessToken string, opts ...Option) (Credential, error) {
@@ -47,7 +47,7 @@ func (c Credential) GetRequestMetadata(ctx context.Context, uri ...string) (map[
 		return nil, fmt.Errorf("failed to retrieve request info from context")
 	}
 
-	if !c.insecure {
+	if !c.allowInsecureTransport {
 		// Ensure the bearer token is sent over a secure connection - meaning TLS.
 		if err := credentials.CheckSecurityLevel(ri.AuthInfo, credentials.PrivacyAndIntegrity); err != nil {
 			return nil, fmt.Errorf("the connection's transport security level is too low for OAuth: %v", err)
@@ -60,7 +60,7 @@ func (c Credential) GetRequestMetadata(ctx context.Context, uri ...string) (map[
 }
 
 func (c Credential) RequireTransportSecurity() bool {
-	return !c.insecure
+	return !c.allowInsecureTransport
 }
 
 func (c Credential) token() string {

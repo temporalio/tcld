@@ -184,7 +184,7 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 					args = append(args, v)
 				}
 			}
-			fs.Parse(args)
+			require.NoError(s.T(), fs.Parse(args))
 
 			opts := []grpc.DialOption{
 				grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {

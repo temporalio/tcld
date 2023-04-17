@@ -33,10 +33,10 @@ const (
 )
 
 type Credential struct {
-	ID         string
-	secret     string // secret kept private to prevent accidental access.
-	enableHMAC bool
-	insecure   bool
+	ID                     string
+	secret                 string // secret kept private to prevent accidental access.
+	enableHMAC             bool
+	allowInsecureTransport bool
 }
 
 type Option = func(c *Credential)
@@ -49,7 +49,7 @@ func WithHMAC(enable bool) Option {
 
 func WithInsecure(insecure bool) Option {
 	return func(c *Credential) {
-		c.insecure = insecure
+		c.allowInsecureTransport = insecure
 	}
 }
 
@@ -80,7 +80,7 @@ func (c Credential) GetRequestMetadata(ctx context.Context, uri ...string) (map[
 		return nil, fmt.Errorf("failed to retrieve request info from context")
 	}
 
-	if !c.insecure {
+	if !c.allowInsecureTransport {
 		// Ensure the API key, AKA bearer token, is sent over a secure connection - meaning TLS.
 		if err := credentials.CheckSecurityLevel(ri.AuthInfo, credentials.PrivacyAndIntegrity); err != nil {
 			return nil, fmt.Errorf("the connection's transport security level is too low for API keys: %v", err)
@@ -123,7 +123,7 @@ func (c Credential) GetRequestMetadata(ctx context.Context, uri ...string) (map[
 }
 
 func (c Credential) RequireTransportSecurity() bool {
-	return !c.insecure
+	return !c.allowInsecureTransport
 }
 
 func action(rawURL, method string) (string, error) {
