@@ -34,6 +34,8 @@ const (
 )
 
 type testServer struct {
+	requestservice.UnimplementedRequestServiceServer
+
 	receivedMD metadata.MD
 }
 
