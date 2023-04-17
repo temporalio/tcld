@@ -128,7 +128,7 @@ func removeCertWithFingerprint(existingCerts caCerts, fingerprint string) (caCer
 			break
 		}
 		if j == len(existingCerts)-1 {
-			return nil, fmt.Errorf("certificate with fingerprint '%s' does not exists", fingerprint)
+			return nil, fmt.Errorf("certificate with fingerprint '%s' does not exist", fingerprint)
 		}
 	}
 	return existingCerts, nil
