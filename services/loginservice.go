@@ -50,10 +50,3 @@ func (c *loginService) DeleteConfigFile(configPath string) error {
 	}
 	return nil
 }
-
-func (c *loginService) DeleteConfigFile(configPath string) error {
-	if _, err := os.Stat(configPath); err == nil {
-		return os.RemoveAll(configPath)
-	}
-	return nil
-}
