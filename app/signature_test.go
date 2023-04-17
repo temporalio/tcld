@@ -4,14 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/temporalio/tcld/protogen/api/request/v1"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/test/bufconn"
 	"net"
 	"testing"
 	"time"
+
+	"github.com/temporalio/tcld/protogen/api/request/v1"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/test/bufconn"
 
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/requestservice/v1"
@@ -97,6 +100,17 @@ func (s *testServer) GetRequestStatus(ctx context.Context, req *requestservice.G
 			State:     request.STATE_FULFILLED,
 		},
 	}, nil
+}
+
+func (s *testServer) GetRequestStatuses(context.Context, *requestservice.GetRequestStatusesRequest) (*requestservice.GetRequestStatusesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "Unimplemented")
+}
+
+func (s *testServer) GetRequestStatusesForUser(context.Context, *requestservice.GetRequestStatusesForUserRequest) (*requestservice.GetRequestStatusesForUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "Unimplemented")
+}
+func (s *testServer) GetRequestStatusesForNamespace(context.Context, *requestservice.GetRequestStatusesForNamespaceRequest) (*requestservice.GetRequestStatusesForNamespaceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "Unimplemented")
 }
 
 func getHeaderValue(md metadata.MD, key string) string {
