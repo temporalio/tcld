@@ -75,7 +75,7 @@ func newRPCCredential(c *cli.Context) (credentials.PerRPCCredentials, error) {
 		return apikey.NewCredential(
 			apiKey,
 			apikey.WithHMAC(c.Bool(EnableHMACFlagName)),
-			apikey.WithInsecure(insecure),
+			apikey.WithInsecureTransport(insecure),
 		)
 	}
 
@@ -87,7 +87,7 @@ func newRPCCredential(c *cli.Context) (credentials.PerRPCCredentials, error) {
 	if len(tokens.AccessToken) > 0 {
 		return oauth.NewCredential(
 			tokens.AccessToken,
-			oauth.WithInsecure(insecure),
+			oauth.WithInsecureTransport(insecure),
 		)
 	}
 

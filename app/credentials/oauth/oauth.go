@@ -15,7 +15,7 @@ var _ credentials.PerRPCCredentials = (*Credential)(nil)
 
 type Option = func(c *Credential)
 
-func WithInsecure(insecure bool) Option {
+func WithInsecureTransport(insecure bool) Option {
 	return func(c *Credential) {
 		c.allowInsecureTransport = insecure
 	}

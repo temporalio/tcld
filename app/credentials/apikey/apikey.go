@@ -47,7 +47,7 @@ func WithHMAC(enable bool) Option {
 	}
 }
 
-func WithInsecure(insecure bool) Option {
+func WithInsecureTransport(insecure bool) Option {
 	return func(c *Credential) {
 		c.allowInsecureTransport = insecure
 	}
