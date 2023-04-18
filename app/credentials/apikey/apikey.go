@@ -17,7 +17,6 @@ import (
 const (
 	IDHeader     = "tmprl-api-key-id"
 	SecretHeader = "tmprl-api-secret-key"
-	Separator    = "_"
 
 	RequestSignatureHeader           = "tmprl-request-signature"
 	RequestSignatureAlgorithmHeader  = "tmprl-request-signature-algorithm"
@@ -53,19 +52,14 @@ func WithInsecureTransport(insecure bool) Option {
 	}
 }
 
-func NewCredential(key string, opts ...Option) (Credential, error) {
-	if len(key) == 0 {
-		return Credential{}, fmt.Errorf("an empty API key was provided")
-	}
-
-	s := strings.Split(key, Separator)
-	if len(s) < 2 {
-		return Credential{}, fmt.Errorf("an API key must be in the format of `{prefix}_{base62}_{base62]}`")
+func NewCredential(keyID string, secret string, opts ...Option) (Credential, error) {
+	if len(keyID) == 0 || len(secret) == 0 {
+		return Credential{}, fmt.Errorf("both an API key ID and secret must be provided")
 	}
 
 	c := Credential{
-		ID:     s[len(s)-2],
-		secret: s[len(s)-1],
+		ID:     keyID,
+		secret: secret,
 	}
 	for _, opt := range opts {
 		opt(&c)
