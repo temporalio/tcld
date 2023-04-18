@@ -40,7 +40,8 @@ func (c *loginService) OpenBrowser(url string) error {
 }
 
 func (c *loginService) WriteToConfigFile(configPath string, data string) error {
-	return ioutil.WriteFile(configPath, []byte(data), 0644)
+	// Write file as 0600 since it contains private keys.
+	return ioutil.WriteFile(configPath, []byte(data), 0600)
 }
 
 func (c *loginService) DeleteConfigFile(configPath string) error {
