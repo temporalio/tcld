@@ -29,7 +29,6 @@ import (
 const (
 	testAPIKeyID     = "testid"
 	testAPIKeySecret = "testsecret"
-	testAPIKey       = "testprefix_" + testAPIKeyID + "_" + testAPIKeySecret
 	testAccessToken  = "test-token"
 )
 
@@ -96,7 +95,7 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 		expectedErr     error
 	}{
 		{
-			name: "InvalidHostname",
+			name: "ErrorInvalidHostname",
 			args: map[string]string{
 				ServerFlagName: "localhost%%0",
 			},
@@ -110,9 +109,24 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			expectedErr: fmt.Errorf("the credentials require transport level security"),
 		},
 		{
+			name: "ErrorAPIKeyIDProvidedButNotSecret",
+			args: map[string]string{
+				APIKeyIDFlagName: testAPIKeyID,
+			},
+			expectedErr: fmt.Errorf("when using an API key you must specify both the key ID and secret"),
+		},
+		{
+			name: "ErrorAPIKeySecretProvidedButNotID",
+			args: map[string]string{
+				APIKeySecretFlagName: testAPIKeySecret,
+			},
+			expectedErr: fmt.Errorf("when using an API key you must specify both the key ID and secret"),
+		},
+		{
 			name: "ErrorAPIKeyInsecureConnection",
 			args: map[string]string{
-				APIKeyFlagName: testAPIKey,
+				APIKeyIDFlagName:     testAPIKeyID,
+				APIKeySecretFlagName: testAPIKeySecret,
 				// don't include insecure flag, as this is an accidental insecure connection.
 			},
 			expectedErr: fmt.Errorf("the credentials require transport level security"),
@@ -120,8 +134,9 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 		{
 			name: "ErrorHMACInsecureConnection",
 			args: map[string]string{
-				APIKeyFlagName:     testAPIKey,
-				EnableHMACFlagName: "",
+				APIKeyIDFlagName:     testAPIKeyID,
+				APIKeySecretFlagName: testAPIKeySecret,
+				EnableHMACFlagName:   "",
 				// don't include insecure flag, as this is an accidental insecure connection.
 			},
 			expectedErr: fmt.Errorf("the credentials require transport level security"),
@@ -139,7 +154,8 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			name: "APIKeySucess",
 			args: map[string]string{
 				InsecureConnectionFlagName: "", // required for bufconn
-				APIKeyFlagName:             testAPIKey,
+				APIKeyIDFlagName:           testAPIKeyID,
+				APIKeySecretFlagName:       testAPIKeySecret,
 			},
 			expectedHeaders: map[string]string{
 				apikey.IDHeader:     testAPIKeyID,
@@ -150,7 +166,8 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			name: "HMACSuccess",
 			args: map[string]string{
 				InsecureConnectionFlagName: "", // required for bufconn
-				APIKeyFlagName:             testAPIKey,
+				APIKeyIDFlagName:           testAPIKeyID,
+				APIKeySecretFlagName:       testAPIKeySecret,
 				EnableHMACFlagName:         "",
 			},
 			expectedHeaders: map[string]string{
@@ -166,7 +183,8 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			flags := []cli.Flag{
 				ServerFlag,
 				ConfigDirFlag,
-				APIKeyFlag,
+				APIKeyIDFlag,
+				APIKeySecretFlag,
 				EnableHMACFlag,
 				InsecureConnectionFlag,
 			}
@@ -216,8 +234,9 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			commit := getHeaderValue(md, CommitHeader)
 			s.Equal(Commit, commit)
 
-			_, usingAPIKeys := tc.args[APIKeyFlagName]
-			if usingAPIKeys {
+			_, providedAPIKeyID := tc.args[APIKeyIDFlagName]
+			_, providedAPIKeySecret := tc.args[APIKeySecretFlagName]
+			if providedAPIKeyID && providedAPIKeySecret {
 				keyID := getHeaderValue(md, apikey.IDHeader)
 				s.Equal(testAPIKeyID, keyID)
 
