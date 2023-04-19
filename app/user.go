@@ -303,12 +303,7 @@ func (c *UserClient) setNamespacePermissions(
 			newRoleIDs = append(newRoleIDs, r.Id)
 		}
 	}
-	// collect the namespace roles and update user
-	npm, err := toNamespacePermissionsMap(namespacePermissions)
-	if err != nil {
-		return err
-	}
-	if len(npm) == 0 {
+	if len(namespacePermissions) == 0 {
 		y, err := ConfirmPrompt(ctx, "Looks like you are about to remove all namespace permissions, please confirm")
 		if err != nil {
 			return err
@@ -317,67 +312,22 @@ func (c *UserClient) setNamespacePermissions(
 			fmt.Println("operation canceled")
 			return nil
 		}
-	}
-	nsRoles, err := getNamespaceRolesBatch(c.ctx, c.client, npm)
-	if err != nil {
-		return err
-	}
-	for _, nsRole := range nsRoles {
-		newRoleIDs = append(newRoleIDs, nsRole.Id)
+	} else {
+		// collect the namespace roles and update user
+		npm, err := toNamespacePermissionsMap(namespacePermissions)
+		if err != nil {
+			return err
+		}
+		nsRoles, err := getNamespaceRolesBatch(c.ctx, c.client, npm)
+		if err != nil {
+			return err
+		}
+		for _, nsRole := range nsRoles {
+			newRoleIDs = append(newRoleIDs, nsRole.Id)
+		}
 	}
 	user.Spec.Roles = newRoleIDs
 	return c.performUpdate(ctx, user)
-}
-
-func (c *UserClient) updateNamespacePermission(
-	ctx *cli.Context,
-	userID string,
-	userEmail string,
-	namespace string,
-	permission string,
-) error {
-	ag, err := toNamespaceActionGroup(permission)
-	if err != nil {
-		return err
-	}
-	return c.updateUserNamespacePermissions(ctx, userID, userEmail, namespace, ag)
-}
-
-func (c *UserClient) deleteNamespacePermission(
-	ctx *cli.Context,
-	userID string,
-	userEmail string,
-	namespace string,
-) error {
-	return c.updateUserNamespacePermissions(ctx, userID, userEmail, namespace, auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED)
-}
-
-func (c *UserClient) updateUserNamespacePermissions(
-	ctx *cli.Context,
-	userID string,
-	userEmail string,
-	namespace string,
-	actionGroup auth.NamespaceActionGroup,
-) error {
-	user, err := c.getUser(userID, userEmail)
-	if err != nil {
-		return err
-	}
-	req := &authservice.UpdateUserNamespacePermissionsRequest{
-		Namespace: namespace,
-		UserNamespacePermissions: []*auth.UserNamespacePermissions{
-			{
-				UserId:      user.Id,
-				ActionGroup: actionGroup,
-			},
-		},
-		RequestId: ctx.String(RequestIDFlagName),
-	}
-	resp, err := c.client.UpdateUserNamespacePermissions(c.ctx, req)
-	if err != nil {
-		return fmt.Errorf("unable to update user's namespace permission: %w", err)
-	}
-	return PrintProto(resp.GetRequestStatus())
 }
 
 func toNamespacePermissionsMap(keyValues []string) (map[string]string, error) {
@@ -590,10 +540,9 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						RequestIDFlag,
 						ResourceVersionFlag,
 						&cli.StringSliceFlag{
-							Name:     namespacePermissionFlagName,
-							Usage:    fmt.Sprintf("Flag can be used multiple times; value must be \"namespace=permission\"; valid types are: %v", namespaceActionGroups),
-							Aliases:  []string{"p"},
-							Required: true,
+							Name:    namespacePermissionFlagName,
+							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"namespace=permission\"; valid types are: %v", namespaceActionGroups),
+							Aliases: []string{"p"},
 						},
 					},
 					Action: func(ctx *cli.Context) error {
@@ -602,63 +551,6 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 							ctx.String(userIDFlagName),
 							ctx.String(userEmailFlagName),
 							ctx.StringSlice(namespacePermissionFlagName),
-						)
-					},
-				},
-				{
-					Name:    "update-namespace-permission",
-					Usage:   "Add new or update existing namespace permission for a user",
-					Aliases: []string{"unp"},
-					Flags: []cli.Flag{
-						userIDFlag,
-						userEmailFlag,
-						RequestIDFlag,
-						ResourceVersionFlag,
-						&cli.StringFlag{
-							Name:     NamespaceFlagName,
-							Usage:    "The namespace to add user permissions for",
-							Required: true,
-							Aliases:  []string{"n"},
-						},
-						&cli.StringFlag{
-							Name:     permissionFlagName,
-							Usage:    fmt.Sprintf("Namespace permission; valid types are: %v", namespaceActionGroups),
-							Aliases:  []string{"p"},
-							Required: true,
-						},
-					},
-					Action: func(ctx *cli.Context) error {
-						return c.updateNamespacePermission(
-							ctx,
-							ctx.String(userIDFlagName),
-							ctx.String(userEmailFlagName),
-							ctx.String(NamespaceFlagName),
-							ctx.String(permissionFlagName),
-						)
-					},
-				},
-				{
-					Name:    "delete-namespace-permission",
-					Usage:   "Delete namespace permissions for a user",
-					Aliases: []string{"dnp"},
-					Flags: []cli.Flag{
-						userIDFlag,
-						userEmailFlag,
-						RequestIDFlag,
-						ResourceVersionFlag,
-						&cli.StringFlag{
-							Name:     NamespaceFlagName,
-							Usage:    "The namespace to delete user permissions from",
-							Required: true,
-							Aliases:  []string{"n"},
-						},
-					},
-					Action: func(ctx *cli.Context) error {
-						return c.deleteNamespacePermission(
-							ctx,
-							ctx.String(userIDFlagName),
-							ctx.String(userEmailFlagName),
-							ctx.String(NamespaceFlagName),
 						)
 					},
 				},
