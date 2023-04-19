@@ -14,7 +14,8 @@ const (
 	NamespaceFlagName          = "namespace"
 	RequestIDFlagName          = "request-id"
 	ResourceVersionFlagName    = "resource-version"
-	APIKeyFlagName             = "api-key"
+	APIKeyIDFlagName           = "api-key-id"
+	APIKeySecretFlagName       = "api-key-secret"
 	EnableHMACFlagName         = "enable-hmac"
 	InsecureConnectionFlagName = "insecure"
 	EnableDebugLogsFlagName    = "enable-debug-logs"
@@ -62,10 +63,16 @@ var (
 		Usage:   "The resource-version (etag) to update from, if not set the cli will use the latest (optional)",
 		Aliases: []string{"v"},
 	}
-	APIKeyFlag = &cli.StringFlag{
-		Name:     APIKeyFlagName,
-		Usage:    "The API Key used for authentication (experimental)",
-		EnvVars:  []string{"TEMPORAL_CLOUD_API_KEY"},
+	APIKeyIDFlag = &cli.StringFlag{
+		Name:     APIKeyIDFlagName,
+		Usage:    "The API key ID used for authentication (experimental)",
+		EnvVars:  []string{"TEMPORAL_CLOUD_API_KEY_ID"},
+		Category: AuthenticationFlagCategory,
+	}
+	APIKeySecretFlag = &cli.StringFlag{
+		Name:     APIKeySecretFlagName,
+		Usage:    "The API key secret used for authentication (experimental)",
+		EnvVars:  []string{"TEMPORAL_CLOUD_API_KEY_SECRET"},
 		Category: AuthenticationFlagCategory,
 	}
 	EnableHMACFlag = &cli.BoolFlag{
