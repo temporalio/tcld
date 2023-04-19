@@ -150,7 +150,7 @@ func (c *UserClient) inviteUsers(
 
 	// get any optional namespace permissions
 	if len(namespacePermissions) > 0 {
-		npm, err := toUserNamespacePermissionsMap(namespacePermissions)
+		npm, err := toNamespacePermissionsMap(namespacePermissions)
 		if err != nil {
 			return err
 		}
@@ -207,9 +207,6 @@ func (c *UserClient) deleteUser(
 	userEmail string,
 ) error {
 	u, err := c.getUser(userID, userEmail)
-	if err != nil {
-		return err
-	}
 	if err != nil {
 		return err
 	}
