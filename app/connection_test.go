@@ -118,7 +118,7 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 		{
 			name: "ErrorAPIKeySecretProvidedButNotID",
 			args: map[string]string{
-				APIKeySecretFlagName: testAPIKeySecret,
+				APISecretKeyFlagName: testAPIKeySecret,
 			},
 			expectedErr: fmt.Errorf("when using an API key you must specify both the key ID and secret"),
 		},
@@ -126,7 +126,7 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			name: "ErrorAPIKeyInsecureConnection",
 			args: map[string]string{
 				APIKeyIDFlagName:     testAPIKeyID,
-				APIKeySecretFlagName: testAPIKeySecret,
+				APISecretKeyFlagName: testAPIKeySecret,
 				// don't include insecure flag, as this is an accidental insecure connection.
 			},
 			expectedErr: fmt.Errorf("the credentials require transport level security"),
@@ -135,7 +135,7 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			name: "ErrorHMACInsecureConnection",
 			args: map[string]string{
 				APIKeyIDFlagName:     testAPIKeyID,
-				APIKeySecretFlagName: testAPIKeySecret,
+				APISecretKeyFlagName: testAPIKeySecret,
 				EnableHMACFlagName:   "",
 				// don't include insecure flag, as this is an accidental insecure connection.
 			},
@@ -155,7 +155,7 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			args: map[string]string{
 				InsecureConnectionFlagName: "", // required for bufconn
 				APIKeyIDFlagName:           testAPIKeyID,
-				APIKeySecretFlagName:       testAPIKeySecret,
+				APISecretKeyFlagName:       testAPIKeySecret,
 			},
 			expectedHeaders: map[string]string{
 				apikey.IDHeader:     testAPIKeyID,
@@ -167,7 +167,7 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			args: map[string]string{
 				InsecureConnectionFlagName: "", // required for bufconn
 				APIKeyIDFlagName:           testAPIKeyID,
-				APIKeySecretFlagName:       testAPIKeySecret,
+				APISecretKeyFlagName:       testAPIKeySecret,
 				EnableHMACFlagName:         "",
 			},
 			expectedHeaders: map[string]string{
@@ -235,7 +235,7 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			s.Equal(Commit, commit)
 
 			_, providedAPIKeyID := tc.args[APIKeyIDFlagName]
-			_, providedAPIKeySecret := tc.args[APIKeySecretFlagName]
+			_, providedAPIKeySecret := tc.args[APISecretKeyFlagName]
 			if providedAPIKeyID && providedAPIKeySecret {
 				keyID := getHeaderValue(md, apikey.IDHeader)
 				s.Equal(testAPIKeyID, keyID)
