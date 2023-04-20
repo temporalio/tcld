@@ -15,7 +15,7 @@ const (
 	RequestIDFlagName          = "request-id"
 	ResourceVersionFlagName    = "resource-version"
 	APIKeyIDFlagName           = "api-key-id"
-	APIKeySecretFlagName       = "api-key-secret"
+	APISecretKeyFlagName       = "api-secret-key"
 	EnableHMACFlagName         = "enable-hmac"
 	InsecureConnectionFlagName = "insecure"
 	EnableDebugLogsFlagName    = "enable-debug-logs"
@@ -70,9 +70,9 @@ var (
 		Category: AuthenticationFlagCategory,
 	}
 	APIKeySecretFlag = &cli.StringFlag{
-		Name:     APIKeySecretFlagName,
-		Usage:    "The API key secret used for authentication (experimental)",
-		EnvVars:  []string{"TEMPORAL_CLOUD_API_KEY_SECRET"},
+		Name:     APISecretKeyFlagName,
+		Usage:    "The API secret key used for authentication (experimental)",
+		EnvVars:  []string{"TEMPORAL_CLOUD_API_SECRET_KEY"},
 		Category: AuthenticationFlagCategory,
 	}
 	EnableHMACFlag = &cli.BoolFlag{
