@@ -71,7 +71,7 @@ func newRPCCredential(c *cli.Context) (credentials.PerRPCCredentials, error) {
 	insecure := c.Bool(InsecureConnectionFlagName)
 
 	apiKeyID := c.String(APIKeyIDFlagName)
-	apiKeySecret := c.String(APIKeySecretFlagName)
+	apiKeySecret := c.String(APISecretKeyFlagName)
 	if (len(apiKeyID) > 0 && len(apiKeySecret) == 0) || (len(apiKeySecret) > 0 && len(apiKeyID) == 0) {
 		return nil, fmt.Errorf("when using an API key you must specify both the key ID and secret")
 	} else if len(apiKeyID) > 0 && len(apiKeySecret) > 0 {
