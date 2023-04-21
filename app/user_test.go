@@ -82,6 +82,29 @@ func (s *UserTestSuite) TestGet() {
 			},
 		},
 	}, nil).Times(2)
+	s.mockAuthService.EXPECT().GetRoles(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesResponse{
+		Roles: []*auth.Role{
+			{
+				Id:   "test-account-dev-role",
+				Type: auth.ROLE_TYPE_PREDEFINED,
+				Spec: &auth.RoleSpec{
+					AccountRole: &auth.AccountRoleSpec{
+						ActionGroup: auth.ACCOUNT_ACTION_GROUP_DEVELOPER,
+					},
+				},
+			},
+			{
+				Id:   "test-ns1-admin-role",
+				Type: auth.ROLE_TYPE_PREDEFINED,
+				Spec: &auth.RoleSpec{
+					NamespaceRoles: []*auth.NamespaceRoleSpec{{
+						Namespace:   "test-ns1",
+						ActionGroup: auth.NAMESPACE_ACTION_GROUP_ADMIN,
+					}},
+				},
+			},
+		},
+	}, nil).Times(2)
 	s.NoError(s.RunCmd("user", "get", "--user-email", "test@example.com"))
 	s.NoError(s.RunCmd("user", "get", "--user-id", "test-user-id"))
 }
@@ -96,6 +119,29 @@ func (s *UserTestSuite) TestList() {
 				Email: "test@example.com",
 			},
 		}},
+	}, nil).Times(1)
+	s.mockAuthService.EXPECT().GetRoles(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesResponse{
+		Roles: []*auth.Role{
+			{
+				Id:   "test-account-dev-role",
+				Type: auth.ROLE_TYPE_PREDEFINED,
+				Spec: &auth.RoleSpec{
+					AccountRole: &auth.AccountRoleSpec{
+						ActionGroup: auth.ACCOUNT_ACTION_GROUP_DEVELOPER,
+					},
+				},
+			},
+			{
+				Id:   "test-ns1-admin-role",
+				Type: auth.ROLE_TYPE_PREDEFINED,
+				Spec: &auth.RoleSpec{
+					NamespaceRoles: []*auth.NamespaceRoleSpec{{
+						Namespace:   "test-ns1",
+						ActionGroup: auth.NAMESPACE_ACTION_GROUP_ADMIN,
+					}},
+				},
+			},
+		},
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("user", "list"))
 }
@@ -228,56 +274,6 @@ func (s *UserTestSuite) TestDeleteUser() {
 		},
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("user", "delete", "--user-email", "test@example.com"))
-}
-
-func (s *UserTestSuite) TestGetRolesAndPermissions() {
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
-		User: &auth.User{
-			Id: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
-			},
-		},
-	}, nil).Times(1)
-	s.mockAuthService.EXPECT().GetRoles(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesResponse{
-		Roles: []*auth.Role{
-			{
-				Id:   "test-account-admin-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					AccountRole: &auth.AccountRoleSpec{
-						ActionGroup: auth.ACCOUNT_ACTION_GROUP_ADMIN,
-					},
-				},
-			},
-			{
-				Id:   "test-namespace-admin-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					NamespaceRoles: []*auth.NamespaceRoleSpec{{
-						Namespace:   "ns1",
-						ActionGroup: auth.NAMESPACE_ACTION_GROUP_ADMIN,
-					}},
-				},
-			},
-		},
-	}, nil).Times(1)
-	s.NoError(s.RunCmd("user", "get-roles-and-permissions", "--user-email", "test@example.com"))
-}
-
-func (s *UserTestSuite) TestGetRolesAndPermissionsErrors() {
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(nil, errors.New("get user error")).Times(1)
-	s.EqualError(s.RunCmd("user", "get-roles-and-permissions", "--user-email", "test@example.com"), "unable to get user: get user error")
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
-		User: &auth.User{
-			Id: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
-			},
-		},
-	}, nil).Times(1)
-	s.mockAuthService.EXPECT().GetRoles(gomock.Any(), gomock.Any()).Return(nil, errors.New("get roles error")).Times(1)
-	s.EqualError(s.RunCmd("user", "get-roles-and-permissions", "--user-email", "test@example.com"), "unable to get roles: get roles error")
 }
 
 func (s *UserTestSuite) TestSetAccountRole() {

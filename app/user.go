@@ -55,7 +55,7 @@ func (c *UserClient) listUsers(
 	pageToken string,
 	pageSize int,
 ) error {
-	totalRes, err := c.client.GetUsers(c.ctx, &authservice.GetUsersRequest{
+	getUsersRes, err := c.client.GetUsers(c.ctx, &authservice.GetUsersRequest{
 		PageToken: pageToken,
 		PageSize:  int32(pageSize),
 		Namespace: namespace,
@@ -64,7 +64,7 @@ func (c *UserClient) listUsers(
 		return fmt.Errorf("unable to get users: %v", err)
 	}
 	var res []*auth.UserWrapper
-	for _, u := range totalRes.Users {
+	for _, u := range getUsersRes.Users {
 		roles, err := c.getUserRoles(u.Id)
 		if err != nil {
 			return fmt.Errorf("unable to get users: %v", err)
@@ -73,7 +73,7 @@ func (c *UserClient) listUsers(
 	}
 	return PrintProto(&auth.GetUsersResponseWrapper{
 		Users:         res,
-		NextPageToken: totalRes.NextPageToken,
+		NextPageToken: getUsersRes.NextPageToken,
 	})
 }
 
@@ -390,9 +390,6 @@ func toUserWrapper(u *auth.User, roles []*auth.Role) *auth.UserWrapper {
 	}
 	return p
 }
-func printProtoUser(u *auth.User, roles []*auth.Role) error {
-	return PrintProto(toUserWrapper(u, roles))
-}
 
 func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 	var c *UserClient
@@ -446,7 +443,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						if err != nil {
 							return err
 						}
-						return printProtoUser(u, roles)
+						return PrintProto(toUserWrapper(u, roles))
 					},
 				},
 				{
