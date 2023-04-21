@@ -16,6 +16,8 @@ const (
 	userEmailFlagName           = "user-email"
 	accountRoleFlagName         = "account-role"
 	namespacePermissionFlagName = "namespace-permission"
+	pageTokenFlagName           = "page-token"
+	pageSizeFlagName            = "page-size"
 )
 
 var (
@@ -415,19 +417,19 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 							Aliases: []string{"n"},
 						},
 						&cli.StringFlag{
-							Name:    "page-token",
+							Name:    pageTokenFlagName,
 							Usage:   "Page token for paging list users request",
 							Aliases: []string{"p"},
 						},
 						&cli.IntFlag{
-							Name:    "page-size",
+							Name:    pageSizeFlagName,
 							Usage:   "Page size for paging list users request",
 							Value:   10,
 							Aliases: []string{"s"},
 						},
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.listUsers(ctx.String(NamespaceFlagName), ctx.String("page-token"), ctx.Int("page-size"))
+						return c.listUsers(ctx.String(NamespaceFlagName), ctx.String(pageTokenFlagName), ctx.Int(pageSizeFlagName))
 					},
 				},
 				{
