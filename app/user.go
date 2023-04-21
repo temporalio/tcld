@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/urfave/cli/v2"
@@ -15,7 +16,6 @@ const (
 	userEmailFlagName           = "user-email"
 	accountRoleFlagName         = "account-role"
 	namespacePermissionFlagName = "namespace-permission"
-	permissionFlagName          = "permission"
 )
 
 var (
@@ -32,14 +32,6 @@ var (
 )
 
 type (
-	NamespacePermission struct {
-		Namespace  string `json:"namespace"`
-		Permission string `json:"permission"`
-	}
-	UserPermissions struct {
-		AccountRole          string                `json:"accountRole"`
-		NamespacePermissions []NamespacePermission `json:"namespacePermissions"`
-	}
 	UserClient struct {
 		client authservice.AuthServiceClient
 		ctx    context.Context
@@ -60,24 +52,29 @@ func GetUserClient(ctx *cli.Context) (*UserClient, error) {
 
 func (c *UserClient) listUsers(
 	namespace string,
+	pageToken string,
+	pageSize int,
 ) error {
-	totalRes := &authservice.GetUsersResponse{}
-	pageToken := ""
-	for {
-		res, err := c.client.GetUsers(c.ctx, &authservice.GetUsersRequest{
-			PageToken: pageToken,
-			Namespace: namespace,
-		})
+	totalRes, err := c.client.GetUsers(c.ctx, &authservice.GetUsersRequest{
+		PageToken: pageToken,
+		PageSize:  int32(pageSize),
+		Namespace: namespace,
+	})
+	if err != nil {
+		return fmt.Errorf("unable to get users: %v", err)
+	}
+	var res []*auth.UserWrapper
+	for _, u := range totalRes.Users {
+		roles, err := c.getUserRoles(u.Id)
 		if err != nil {
 			return fmt.Errorf("unable to get users: %v", err)
 		}
-		totalRes.Users = append(totalRes.Users, res.Users...)
-		// Check if we should continue paging
-		pageToken = res.NextPageToken
-		if len(pageToken) == 0 {
-			return PrintProto(totalRes)
-		}
+		res = append(res, toUserWrapper(u, roles))
 	}
+	return PrintProto(&auth.GetUsersResponseWrapper{
+		Users:         res,
+		NextPageToken: totalRes.NextPageToken,
+	})
 }
 
 func (c *UserClient) getUser(userID, userEmail string) (*auth.User, error) {
@@ -107,15 +104,20 @@ func (c *UserClient) getUserAndRoles(userID, userEmail string) (*auth.User, []*a
 	if err != nil {
 		return nil, nil, err
 	}
+	roles, err := c.getUserRoles(user.Id)
+	return user, roles, err
+}
+
+func (c *UserClient) getUserRoles(userID string) ([]*auth.Role, error) {
 	var pageToken string
 	var roles []*auth.Role
 	for {
 		res, err := c.client.GetRoles(c.ctx, &authservice.GetRolesRequest{
 			PageToken: pageToken,
-			UserId:    user.Id,
+			UserId:    userID,
 		})
 		if err != nil {
-			return nil, nil, fmt.Errorf("unable to get roles: %v", err)
+			return nil, fmt.Errorf("unable to get roles: %v", err)
 		}
 		roles = append(roles, res.Roles...)
 		// Check if we should continue paging
@@ -125,7 +127,7 @@ func (c *UserClient) getUserAndRoles(userID, userEmail string) (*auth.User, []*a
 		}
 	}
 
-	return user, roles, nil
+	return roles, nil
 }
 
 func (c *UserClient) inviteUsers(
@@ -353,27 +355,43 @@ func toNamespacePermissionsMap(keyValues []string) (map[string]string, error) {
 	return res, nil
 }
 
-func toUserPermissions(roles []*auth.Role) UserPermissions {
-	var res UserPermissions
-	for _, role := range roles {
-		if role.Type == auth.ROLE_TYPE_PREDEFINED {
-			if role.Spec.AccountRole != nil && role.Spec.AccountRole.ActionGroup != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
-				res.AccountRole = auth.AccountActionGroup_name[int32(role.Spec.AccountRole.ActionGroup)]
+func toUserWrapper(u *auth.User, roles []*auth.Role) *auth.UserWrapper {
+	p := &auth.UserWrapper{
+		Id:              u.Id,
+		ResourceVersion: u.ResourceVersion,
+		Spec: &auth.UserSpecWrapper{
+			Email: u.Spec.Email,
+		},
+		State:            u.State,
+		RequestId:        u.RequestId,
+		Invitation:       u.Invitation,
+		CreatedTime:      u.CreatedTime,
+		LastModifiedTime: u.LastModifiedTime,
+	}
+	for _, r := range roles {
+		if r.Type == auth.ROLE_TYPE_PREDEFINED &&
+			r.Spec.AccountRole != nil &&
+			r.Spec.AccountRole.ActionGroup != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
+			p.Spec.AccountRole = auth.AccountRole{
+				Id:   r.Id,
+				Role: r.Spec.AccountRole.ActionGroup.String(),
 			}
-			if len(role.Spec.NamespaceRoles) > 0 {
-				for _, nr := range role.Spec.NamespaceRoles {
-					res.NamespacePermissions = append(
-						res.NamespacePermissions,
-						NamespacePermission{
-							Namespace:  nr.Namespace,
-							Permission: auth.NamespaceActionGroup_name[int32(nr.ActionGroup)],
-						},
-					)
-				}
+		} else if r.Type == auth.ROLE_TYPE_PREDEFINED &&
+			r.Spec.NamespaceRoles != nil &&
+			len(r.Spec.NamespaceRoles) > 0 {
+			for _, nr := range r.Spec.NamespaceRoles {
+				p.Spec.NamespacePermissions = append(p.Spec.NamespacePermissions, auth.NamespacePermission{
+					Id:         r.Id,
+					Namespace:  nr.Namespace,
+					Permission: nr.ActionGroup.String(),
+				})
 			}
 		}
 	}
-	return res
+	return p
+}
+func printProtoUser(u *auth.User, roles []*auth.Role) error {
+	return PrintProto(toUserWrapper(u, roles))
 }
 
 func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
@@ -399,9 +417,20 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 							Usage:   "List users that have permissions to the namespace",
 							Aliases: []string{"n"},
 						},
+						&cli.StringFlag{
+							Name:    "page-token",
+							Usage:   "Page token for paging list users request",
+							Aliases: []string{"p"},
+						},
+						&cli.IntFlag{
+							Name:    "page-size",
+							Usage:   "Page size for paging list users request",
+							Value:   10,
+							Aliases: []string{"s"},
+						},
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.listUsers(ctx.String(NamespaceFlagName))
+						return c.listUsers(ctx.String(NamespaceFlagName), ctx.String("page-token"), ctx.Int("page-size"))
 					},
 				},
 				{
@@ -413,11 +442,11 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						userEmailFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						n, err := c.getUser(ctx.String(userIDFlagName), ctx.String(userEmailFlagName))
+						u, roles, err := c.getUserAndRoles(ctx.String(userIDFlagName), ctx.String(userEmailFlagName))
 						if err != nil {
 							return err
 						}
-						return PrintProto(n)
+						return printProtoUser(u, roles)
 					},
 				},
 				{
@@ -454,24 +483,6 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 					},
 				},
 				{
-					Name:    "delete",
-					Usage:   "Delete user from Temporal Cloud",
-					Aliases: []string{"d"},
-					Flags: []cli.Flag{
-						userIDFlag,
-						userEmailFlag,
-						ResourceVersionFlag,
-						RequestIDFlag,
-					},
-					Action: func(ctx *cli.Context) error {
-						return c.deleteUser(
-							ctx,
-							ctx.String(userIDFlagName),
-							ctx.String(userEmailFlagName),
-						)
-					},
-				},
-				{
 					Name:    "resend-invite",
 					Usage:   "Resend invitation to a user on Temporal Cloud",
 					Aliases: []string{"ri"},
@@ -489,20 +500,21 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 					},
 				},
 				{
-					Name:    "get-roles-and-permissions",
-					Usage:   "Get roles and permissions for a user",
-					Aliases: []string{"grp"},
+					Name:    "delete",
+					Usage:   "Delete user from Temporal Cloud",
+					Aliases: []string{"d"},
 					Flags: []cli.Flag{
 						userIDFlag,
 						userEmailFlag,
+						ResourceVersionFlag,
+						RequestIDFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						_, roles, err := c.getUserAndRoles(ctx.String(userIDFlagName), ctx.String(userEmailFlagName))
-						if err != nil {
-							return err
-						}
-						res := toUserPermissions(roles)
-						return PrintObj(res)
+						return c.deleteUser(
+							ctx,
+							ctx.String(userIDFlagName),
+							ctx.String(userEmailFlagName),
+						)
 					},
 				},
 				{

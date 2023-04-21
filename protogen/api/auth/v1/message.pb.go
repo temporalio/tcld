@@ -163,7 +163,7 @@ type UserSpec struct {
 	// the email address associated to the user
 	Email string `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	// the roles assigned to the user
-	Roles []string `protobuf:"bytes,2,rep,name=roles,proto3" json:"roles,omitempty"`
+	Roles []string `protobuf:"bytes,2,rep,name=roles,omitempty,proto3" json:"roles,omitempty"`
 }
 
 func (m *UserSpec) Reset()      { *m = UserSpec{} }
