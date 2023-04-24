@@ -5,15 +5,14 @@ package auth
 
 import (
 	fmt "fmt"
+	proto "github.com/gogo/protobuf/proto"
+	types "github.com/gogo/protobuf/types"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strconv "strconv"
 	strings "strings"
-
-	proto "github.com/gogo/protobuf/proto"
-	types "github.com/gogo/protobuf/types"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -157,6 +156,82 @@ var AccountActionGroup_value = map[string]int32{
 
 func (AccountActionGroup) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_bea184b0c3eae56b, []int{3}
+}
+
+type APIKeyOwnerType int32
+
+const (
+	APIKEY_OWNER_TYPE_UNSPECIFIED APIKeyOwnerType = 0
+	// the owner is an user
+	APIKEY_OWNER_TYPE_USER APIKeyOwnerType = 1
+)
+
+var APIKeyOwnerType_name = map[int32]string{
+	0: "ApikeyOwnerTypeUnspecified",
+	1: "ApikeyOwnerTypeUser",
+}
+
+var APIKeyOwnerType_value = map[string]int32{
+	"ApikeyOwnerTypeUnspecified": 0,
+	"ApikeyOwnerTypeUser":        1,
+}
+
+func (APIKeyOwnerType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_bea184b0c3eae56b, []int{4}
+}
+
+type APIKeyState int32
+
+const (
+	APIKEY_STATE_UNSPECIFIED APIKeyState = 0
+	// apikey is being created by the system
+	APIKEY_STATE_CREATING APIKeyState = 1
+	// apikey create operation failed
+	APIKEY_STATE_CREATE_FAILED APIKeyState = 2
+	// the apikey exists in the system
+	APIKEY_STATE_ACTIVE APIKeyState = 3
+	// apikey is being updated
+	APIKEY_STATE_UPDATING APIKeyState = 4
+	// the last apikey update failed
+	APIKEY_STATE_UPDATE_FAILED APIKeyState = 5
+	// the apikey has expired
+	APIKEY_STATE_EXPIRED APIKeyState = 6
+	// the apikey is being deleted
+	APIKEY_STATE_DELETING APIKeyState = 7
+	// the apikey delete operation failed
+	APIKEY_STATE_DELETE_FAILED APIKeyState = 8
+	// the apikey was successfully deleted
+	APIKEY_STATE_DELETED APIKeyState = 9
+)
+
+var APIKeyState_name = map[int32]string{
+	0: "ApikeyStateUnspecified",
+	1: "ApikeyStateCreating",
+	2: "ApikeyStateCreateFailed",
+	3: "ApikeyStateActive",
+	4: "ApikeyStateUpdating",
+	5: "ApikeyStateUpdateFailed",
+	6: "ApikeyStateExpired",
+	7: "ApikeyStateDeleting",
+	8: "ApikeyStateDeleteFailed",
+	9: "ApikeyStateDeleted",
+}
+
+var APIKeyState_value = map[string]int32{
+	"ApikeyStateUnspecified":  0,
+	"ApikeyStateCreating":     1,
+	"ApikeyStateCreateFailed": 2,
+	"ApikeyStateActive":       3,
+	"ApikeyStateUpdating":     4,
+	"ApikeyStateUpdateFailed": 5,
+	"ApikeyStateExpired":      6,
+	"ApikeyStateDeleting":     7,
+	"ApikeyStateDeleteFailed": 8,
+	"ApikeyStateDeleted":      9,
+}
+
+func (APIKeyState) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_bea184b0c3eae56b, []int{5}
 }
 
 type UserSpec struct {
@@ -648,11 +723,237 @@ func (m *Role) GetSpec() *RoleSpec {
 	return nil
 }
 
+type APIKeySpec struct {
+	// the user friendly name for the apikey
+	DisplayName string `protobuf:"bytes,1,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// the more comprehensive description for the apikey
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	// expiry timestamp of the apikey
+	ExpiryTime *types.Timestamp `protobuf:"bytes,3,opt,name=expiry_time,json=expiryTime,proto3" json:"expiry_time,omitempty"`
+}
+
+func (m *APIKeySpec) Reset()      { *m = APIKeySpec{} }
+func (*APIKeySpec) ProtoMessage() {}
+func (*APIKeySpec) Descriptor() ([]byte, []int) {
+	return fileDescriptor_bea184b0c3eae56b, []int{8}
+}
+func (m *APIKeySpec) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *APIKeySpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_APIKeySpec.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *APIKeySpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_APIKeySpec.Merge(m, src)
+}
+func (m *APIKeySpec) XXX_Size() int {
+	return m.Size()
+}
+func (m *APIKeySpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_APIKeySpec.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_APIKeySpec proto.InternalMessageInfo
+
+func (m *APIKeySpec) GetDisplayName() string {
+	if m != nil {
+		return m.DisplayName
+	}
+	return ""
+}
+
+func (m *APIKeySpec) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *APIKeySpec) GetExpiryTime() *types.Timestamp {
+	if m != nil {
+		return m.ExpiryTime
+	}
+	return nil
+}
+
+type Owner struct {
+	// the id of the owner
+	// if the owner is an user, this is the id of the user.
+	OwnerId string `protobuf:"bytes,1,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	// the type of the owner.
+	OwnerType APIKeyOwnerType `protobuf:"varint,2,opt,name=owner_type,json=ownerType,proto3,enum=api.auth.v1.APIKeyOwnerType" json:"owner_type,omitempty"`
+}
+
+func (m *Owner) Reset()      { *m = Owner{} }
+func (*Owner) ProtoMessage() {}
+func (*Owner) Descriptor() ([]byte, []int) {
+	return fileDescriptor_bea184b0c3eae56b, []int{9}
+}
+func (m *Owner) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Owner) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Owner.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Owner) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Owner.Merge(m, src)
+}
+func (m *Owner) XXX_Size() int {
+	return m.Size()
+}
+func (m *Owner) XXX_DiscardUnknown() {
+	xxx_messageInfo_Owner.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Owner proto.InternalMessageInfo
+
+func (m *Owner) GetOwnerId() string {
+	if m != nil {
+		return m.OwnerId
+	}
+	return ""
+}
+
+func (m *Owner) GetOwnerType() APIKeyOwnerType {
+	if m != nil {
+		return m.OwnerType
+	}
+	return APIKEY_OWNER_TYPE_UNSPECIFIED
+}
+
+type APIKey struct {
+	// the id of the apikey
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// the owner of the apikey
+	Owner *Owner `protobuf:"bytes,2,opt,name=owner,proto3" json:"owner,omitempty"`
+	// the apikey specification
+	Spec *APIKeySpec `protobuf:"bytes,3,opt,name=spec,proto3" json:"spec,omitempty"`
+	// the current version of the apikey specification
+	// the next update request will have to include this version
+	ResourceVersion string `protobuf:"bytes,4,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	// the current state of the apikey
+	State APIKeyState `protobuf:"varint,5,opt,name=state,proto3,enum=api.auth.v1.APIKeyState" json:"state,omitempty"`
+	// the id of the request that is creating/updating/deleting the apikey, if any
+	RequestId string `protobuf:"bytes,6,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	// the date and time when the apikey was created
+	CreatedTime *types.Timestamp `protobuf:"bytes,7,opt,name=created_time,json=createdTime,proto3" json:"created_time,omitempty"`
+	// the date and time when the apikey was last modified
+	LastModifiedTime *types.Timestamp `protobuf:"bytes,8,opt,name=last_modified_time,json=lastModifiedTime,proto3" json:"last_modified_time,omitempty"`
+}
+
+func (m *APIKey) Reset()      { *m = APIKey{} }
+func (*APIKey) ProtoMessage() {}
+func (*APIKey) Descriptor() ([]byte, []int) {
+	return fileDescriptor_bea184b0c3eae56b, []int{10}
+}
+func (m *APIKey) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *APIKey) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_APIKey.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *APIKey) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_APIKey.Merge(m, src)
+}
+func (m *APIKey) XXX_Size() int {
+	return m.Size()
+}
+func (m *APIKey) XXX_DiscardUnknown() {
+	xxx_messageInfo_APIKey.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_APIKey proto.InternalMessageInfo
+
+func (m *APIKey) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *APIKey) GetOwner() *Owner {
+	if m != nil {
+		return m.Owner
+	}
+	return nil
+}
+
+func (m *APIKey) GetSpec() *APIKeySpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *APIKey) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *APIKey) GetState() APIKeyState {
+	if m != nil {
+		return m.State
+	}
+	return APIKEY_STATE_UNSPECIFIED
+}
+
+func (m *APIKey) GetRequestId() string {
+	if m != nil {
+		return m.RequestId
+	}
+	return ""
+}
+
+func (m *APIKey) GetCreatedTime() *types.Timestamp {
+	if m != nil {
+		return m.CreatedTime
+	}
+	return nil
+}
+
+func (m *APIKey) GetLastModifiedTime() *types.Timestamp {
+	if m != nil {
+		return m.LastModifiedTime
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterEnum("api.auth.v1.UserState", UserState_name, UserState_value)
 	proto.RegisterEnum("api.auth.v1.RoleType", RoleType_name, RoleType_value)
 	proto.RegisterEnum("api.auth.v1.NamespaceActionGroup", NamespaceActionGroup_name, NamespaceActionGroup_value)
 	proto.RegisterEnum("api.auth.v1.AccountActionGroup", AccountActionGroup_name, AccountActionGroup_value)
+	proto.RegisterEnum("api.auth.v1.APIKeyOwnerType", APIKeyOwnerType_name, APIKeyOwnerType_value)
+	proto.RegisterEnum("api.auth.v1.APIKeyState", APIKeyState_name, APIKeyState_value)
 	proto.RegisterType((*UserSpec)(nil), "api.auth.v1.UserSpec")
 	proto.RegisterType((*UserNamespacePermissions)(nil), "api.auth.v1.UserNamespacePermissions")
 	proto.RegisterType((*Invitation)(nil), "api.auth.v1.Invitation")
@@ -661,68 +962,86 @@ func init() {
 	proto.RegisterType((*AccountRoleSpec)(nil), "api.auth.v1.AccountRoleSpec")
 	proto.RegisterType((*RoleSpec)(nil), "api.auth.v1.RoleSpec")
 	proto.RegisterType((*Role)(nil), "api.auth.v1.Role")
+	proto.RegisterType((*APIKeySpec)(nil), "api.auth.v1.APIKeySpec")
+	proto.RegisterType((*Owner)(nil), "api.auth.v1.Owner")
+	proto.RegisterType((*APIKey)(nil), "api.auth.v1.APIKey")
 }
 
 func init() { proto.RegisterFile("api/auth/v1/message.proto", fileDescriptor_bea184b0c3eae56b) }
 
 var fileDescriptor_bea184b0c3eae56b = []byte{
-	// 886 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x55, 0x4d, 0x6f, 0xe2, 0x56,
-	0x14, 0xe5, 0x01, 0xf9, 0xe0, 0x32, 0x4a, 0x3c, 0xaf, 0xf9, 0x20, 0x29, 0xe3, 0x50, 0x54, 0x55,
-	0x33, 0x51, 0x65, 0x34, 0xa9, 0xd4, 0x2e, 0x46, 0xd5, 0xc8, 0x83, 0x5f, 0x52, 0x4b, 0x09, 0xa0,
-	0x87, 0x49, 0xd5, 0x6e, 0x2c, 0x8f, 0x79, 0x93, 0x5a, 0x02, 0xec, 0xfa, 0x23, 0x6d, 0x76, 0xfd,
-	0x09, 0x5d, 0x74, 0x55, 0xa9, 0xab, 0x6e, 0xfa, 0x53, 0xba, 0xcc, 0x72, 0x96, 0x0d, 0xd9, 0x74,
-	0x39, 0xfb, 0xd9, 0x54, 0xef, 0xd9, 0x18, 0x30, 0x24, 0x51, 0xa5, 0x59, 0xc1, 0x3b, 0xf7, 0x9c,
-	0x73, 0xdf, 0x3d, 0xbe, 0x06, 0xd8, 0xb3, 0x3c, 0xa7, 0x61, 0x45, 0xe1, 0x0f, 0x8d, 0xcb, 0xe7,
-	0x8d, 0x21, 0x0b, 0x02, 0xeb, 0x82, 0x29, 0x9e, 0xef, 0x86, 0x2e, 0x2e, 0x5b, 0x9e, 0xa3, 0xf0,
-	0x92, 0x72, 0xf9, 0x7c, 0xff, 0xe0, 0xc2, 0x75, 0x2f, 0x06, 0xac, 0x21, 0x4a, 0xaf, 0xa3, 0x37,
-	0x8d, 0xd0, 0x19, 0xb2, 0x20, 0xb4, 0x86, 0x5e, 0xcc, 0xae, 0x7f, 0x09, 0xeb, 0xbd, 0x80, 0xf9,
-	0x5d, 0x8f, 0xd9, 0x78, 0x0b, 0x56, 0xd8, 0xd0, 0x72, 0x06, 0x15, 0x54, 0x43, 0x4f, 0x4b, 0x34,
-	0x3e, 0x70, 0xd4, 0x77, 0x07, 0x2c, 0xa8, 0xe4, 0x6b, 0x05, 0x8e, 0x8a, 0x43, 0xfd, 0x0a, 0x2a,
-	0x5c, 0xd7, 0xb2, 0x86, 0x2c, 0xf0, 0x2c, 0x9b, 0x75, 0x98, 0x3f, 0x74, 0x82, 0xc0, 0x71, 0x47,
-	0x01, 0xde, 0x85, 0xb5, 0x28, 0x60, 0xbe, 0xe9, 0xf4, 0x13, 0xa7, 0x55, 0x7e, 0xd4, 0xfb, 0x58,
-	0x83, 0x47, 0x96, 0x1d, 0x3a, 0xee, 0xc8, 0xbc, 0xf0, 0xdd, 0xc8, 0xab, 0xe4, 0x6b, 0xe8, 0xe9,
-	0xc6, 0xd1, 0x27, 0xca, 0xcc, 0x8d, 0x95, 0xd4, 0x51, 0x15, 0xcc, 0x13, 0x4e, 0xa4, 0x65, 0x6b,
-	0x7a, 0xa8, 0xff, 0x8e, 0x00, 0xf4, 0xd1, 0xa5, 0x13, 0x5a, 0x1c, 0xc3, 0x12, 0x14, 0x22, 0xdf,
-	0x49, 0x3a, 0xf1, 0xaf, 0xf8, 0x6b, 0x78, 0x64, 0xfb, 0xcc, 0x0a, 0x59, 0xdf, 0xe4, 0xe3, 0x8a,
-	0x36, 0xe5, 0xa3, 0x7d, 0x25, 0xce, 0x42, 0x99, 0x64, 0xa1, 0x18, 0x93, 0x2c, 0x68, 0x39, 0xe1,
-	0x73, 0x04, 0xbf, 0x80, 0x32, 0xfb, 0xd9, 0x73, 0xfc, 0xab, 0x58, 0x5d, 0x78, 0x50, 0x0d, 0x31,
-	0x9d, 0x03, 0xf5, 0xf7, 0x79, 0x28, 0xf2, 0x60, 0xf0, 0x06, 0xe4, 0xd3, 0xf9, 0xf3, 0x4e, 0x1f,
-	0x3f, 0x03, 0xc9, 0x67, 0x81, 0x1b, 0xf9, 0x36, 0x33, 0x2f, 0x99, 0xcf, 0x93, 0x12, 0x17, 0x2b,
-	0xd1, 0xcd, 0x09, 0x7e, 0x1e, 0xc3, 0xf8, 0x19, 0x14, 0x03, 0x8f, 0xd9, 0x49, 0xe7, 0xed, 0xb9,
-	0x78, 0x26, 0x0f, 0x8b, 0x0a, 0x0a, 0xfe, 0x1c, 0x56, 0x82, 0xd0, 0x0a, 0x59, 0xa5, 0x28, 0xa2,
-	0xdc, 0x59, 0xe4, 0xf2, 0x2a, 0x8d, 0x49, 0xf8, 0x09, 0x80, 0xcf, 0x7e, 0x8c, 0x58, 0x10, 0xf2,
-	0x67, 0xb3, 0x22, 0xba, 0x97, 0x12, 0x44, 0xef, 0xe3, 0xaf, 0x00, 0x9c, 0x34, 0xd7, 0xca, 0xaa,
-	0xe8, 0xbe, 0x3b, 0xe7, 0x38, 0x8d, 0x9d, 0xce, 0x50, 0x17, 0x02, 0x5f, 0xfb, 0x7f, 0x81, 0x7f,
-	0x03, 0x78, 0x60, 0x05, 0xa1, 0x39, 0x74, 0xfb, 0xce, 0x1b, 0x67, 0x62, 0xb2, 0xfe, 0xa0, 0x89,
-	0xc4, 0x55, 0x67, 0x89, 0x48, 0xa4, 0xff, 0x13, 0x3c, 0x4e, 0xf7, 0x87, 0xba, 0x03, 0x26, 0xd6,
-	0xba, 0x0a, 0xa5, 0xd1, 0x04, 0x4c, 0x1e, 0xc8, 0x14, 0xf8, 0x40, 0x3b, 0xd9, 0x83, 0x4d, 0xd5,
-	0xb6, 0xdd, 0x68, 0x14, 0xa6, 0x6d, 0x5f, 0x65, 0x8c, 0x91, 0x30, 0x3e, 0x98, 0x33, 0x4e, 0x34,
-	0x77, 0xda, 0xfe, 0x86, 0x60, 0x3d, 0x35, 0x7c, 0xc9, 0x0d, 0x05, 0xdf, 0xe4, 0xef, 0xa0, 0x30,
-	0x2c, 0x1f, 0x55, 0x97, 0x19, 0x4e, 0x34, 0xdc, 0x2d, 0x05, 0xf0, 0x09, 0x6c, 0xa6, 0x73, 0x9b,
-	0xd3, 0x77, 0xba, 0x7c, 0x24, 0x2f, 0x9f, 0x36, 0x75, 0xd9, 0x18, 0xcd, 0x42, 0x41, 0x7d, 0x00,
-	0x45, 0x61, 0xb8, 0xb8, 0xe3, 0xc5, 0xf0, 0xca, 0x63, 0x49, 0x86, 0xf3, 0x8b, 0xcb, 0x05, 0xc6,
-	0x95, 0xc7, 0xa8, 0xa0, 0xdc, 0xbb, 0xe3, 0x69, 0x5f, 0x41, 0x39, 0x7c, 0x8f, 0xa0, 0x94, 0xae,
-	0x32, 0xde, 0x87, 0x9d, 0x5e, 0x97, 0x50, 0xb3, 0x6b, 0xa8, 0x06, 0x31, 0x7b, 0xad, 0x6e, 0x87,
-	0x34, 0xf5, 0x63, 0x9d, 0x68, 0x52, 0x0e, 0xef, 0xc2, 0x47, 0x33, 0xb5, 0x26, 0x25, 0xaa, 0xa1,
-	0xb7, 0x4e, 0x24, 0x84, 0xab, 0x50, 0xc9, 0x16, 0x88, 0x79, 0xac, 0xea, 0xa7, 0x44, 0x93, 0xf2,
-	0x78, 0x1b, 0x1e, 0xcf, 0x54, 0xd5, 0xa6, 0xa1, 0x9f, 0x13, 0xa9, 0x90, 0x71, 0xeb, 0x75, 0xb4,
-	0xd8, 0xad, 0x98, 0x71, 0x13, 0x85, 0xd4, 0x6d, 0x25, 0x23, 0xd3, 0xc8, 0x29, 0x11, 0xb2, 0xd5,
-	0x8c, 0x4c, 0x14, 0x52, 0xd9, 0x1a, 0xde, 0x01, 0xbc, 0x50, 0xd5, 0xa4, 0xf5, 0xc3, 0x97, 0xf1,
-	0x06, 0xf0, 0xe8, 0xf0, 0x1e, 0x6c, 0xd3, 0xf6, 0x29, 0x31, 0x8d, 0xef, 0x3a, 0xd9, 0xd1, 0x2b,
-	0xb0, 0x35, 0x2d, 0x75, 0x28, 0xd1, 0xc8, 0xb1, 0xde, 0x22, 0x9a, 0x84, 0x0e, 0xff, 0x44, 0xb0,
-	0xb5, 0x6c, 0x81, 0xf1, 0x67, 0x50, 0x6f, 0xa9, 0x67, 0xa4, 0xdb, 0x51, 0x9b, 0xf1, 0xd4, 0xed,
-	0x96, 0x79, 0x42, 0xdb, 0xbd, 0x4e, 0xc6, 0xba, 0x06, 0xd5, 0x3b, 0x78, 0xaa, 0x76, 0xa6, 0xb7,
-	0x24, 0x74, 0x0f, 0xe3, 0x5b, 0xaa, 0x1b, 0x44, 0xca, 0xe3, 0x03, 0xf8, 0xf8, 0x0e, 0x06, 0x25,
-	0xaa, 0x26, 0x15, 0x0e, 0xff, 0x40, 0x80, 0x17, 0xdf, 0x06, 0xfc, 0x29, 0xd4, 0xd4, 0x66, 0xb3,
-	0xdd, 0x6b, 0x19, 0xf7, 0xdd, 0x50, 0x86, 0xfd, 0xa5, 0xac, 0xc9, 0xfd, 0xea, 0x20, 0x2f, 0xad,
-	0x6b, 0xe4, 0x9c, 0x9c, 0xb6, 0x3b, 0x84, 0x4a, 0x79, 0xfc, 0x04, 0xf6, 0x96, 0x72, 0xe2, 0xfb,
-	0xbd, 0xa2, 0xd7, 0x37, 0x72, 0xee, 0xed, 0x8d, 0x9c, 0x7b, 0x77, 0x23, 0xa3, 0x5f, 0xc6, 0x32,
-	0xfa, 0x6b, 0x2c, 0xa3, 0xbf, 0xc7, 0x32, 0xba, 0x1e, 0xcb, 0xe8, 0x9f, 0xb1, 0x8c, 0xfe, 0x1d,
-	0xcb, 0xb9, 0x77, 0x63, 0x19, 0xfd, 0x7a, 0x2b, 0xe7, 0xae, 0x6f, 0xe5, 0xdc, 0xdb, 0x5b, 0x39,
-	0xf7, 0x7d, 0x35, 0x1c, 0x7a, 0xfe, 0x40, 0xb1, 0x07, 0x6e, 0xd4, 0x6f, 0xcc, 0xfc, 0x65, 0xbf,
-	0xe0, 0x9f, 0xaf, 0x57, 0xc5, 0x6f, 0xda, 0x17, 0xff, 0x05, 0x00, 0x00, 0xff, 0xff, 0xc4, 0xd8,
-	0x43, 0xb8, 0xcd, 0x07, 0x00, 0x00,
+	// 1126 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x56, 0xcf, 0x6f, 0xe3, 0x44,
+	0x14, 0x8e, 0xd3, 0x24, 0x4d, 0x5e, 0x56, 0x5b, 0xef, 0x6c, 0x7f, 0xa4, 0xa5, 0x75, 0xd3, 0x08,
+	0xa1, 0x6e, 0x41, 0x89, 0xb6, 0x48, 0x70, 0xa8, 0xd0, 0xca, 0x1b, 0x4f, 0x8b, 0x45, 0x9b, 0x44,
+	0x93, 0xa4, 0xcb, 0x72, 0xb1, 0xbc, 0xc9, 0x6c, 0xb1, 0x94, 0xc4, 0xc6, 0x76, 0xba, 0xe4, 0xc6,
+	0x5f, 0x80, 0x38, 0x70, 0x42, 0xe2, 0xc4, 0x05, 0xfe, 0x13, 0x8e, 0x3d, 0xee, 0x91, 0xa6, 0x17,
+	0x8e, 0x2b, 0xae, 0x7b, 0x41, 0x33, 0xfe, 0x11, 0xc7, 0x71, 0xbb, 0x42, 0x70, 0xe0, 0x14, 0xcf,
+	0xfb, 0xbe, 0xf7, 0xcd, 0xbc, 0x6f, 0xde, 0x3c, 0x05, 0x36, 0x75, 0xcb, 0xa8, 0xe9, 0x63, 0xf7,
+	0xeb, 0xda, 0xe5, 0xe3, 0xda, 0x90, 0x3a, 0x8e, 0x7e, 0x41, 0xab, 0x96, 0x6d, 0xba, 0x26, 0x2a,
+	0xea, 0x96, 0x51, 0x65, 0x50, 0xf5, 0xf2, 0xf1, 0xd6, 0xee, 0x85, 0x69, 0x5e, 0x0c, 0x68, 0x8d,
+	0x43, 0x2f, 0xc6, 0x2f, 0x6b, 0xae, 0x31, 0xa4, 0x8e, 0xab, 0x0f, 0x2d, 0x8f, 0x5d, 0xf9, 0x04,
+	0xf2, 0x5d, 0x87, 0xda, 0x6d, 0x8b, 0xf6, 0xd0, 0x2a, 0x64, 0xe9, 0x50, 0x37, 0x06, 0x25, 0xa1,
+	0x2c, 0xec, 0x17, 0x88, 0xb7, 0x60, 0x51, 0xdb, 0x1c, 0x50, 0xa7, 0x94, 0x2e, 0x2f, 0xb1, 0x28,
+	0x5f, 0x54, 0x26, 0x50, 0x62, 0x79, 0x0d, 0x7d, 0x48, 0x1d, 0x4b, 0xef, 0xd1, 0x16, 0xb5, 0x87,
+	0x86, 0xe3, 0x18, 0xe6, 0xc8, 0x41, 0x1b, 0xb0, 0x3c, 0x76, 0xa8, 0xad, 0x19, 0x7d, 0x5f, 0x29,
+	0xc7, 0x96, 0x6a, 0x1f, 0x29, 0x70, 0x4f, 0xef, 0xb9, 0x86, 0x39, 0xd2, 0x2e, 0x6c, 0x73, 0x6c,
+	0x95, 0xd2, 0x65, 0x61, 0xff, 0xfe, 0xe1, 0x5e, 0x35, 0x72, 0xe2, 0x6a, 0xa8, 0x28, 0x73, 0xe6,
+	0x09, 0x23, 0x92, 0xa2, 0x3e, 0x5b, 0x54, 0x7e, 0x12, 0x00, 0xd4, 0xd1, 0xa5, 0xe1, 0xea, 0x2c,
+	0x86, 0x44, 0x58, 0x1a, 0xdb, 0x86, 0xbf, 0x13, 0xfb, 0x44, 0x9f, 0xc1, 0xbd, 0x9e, 0x4d, 0x75,
+	0x97, 0xf6, 0x35, 0x56, 0x2e, 0xdf, 0xa6, 0x78, 0xb8, 0x55, 0xf5, 0xbc, 0xa8, 0x06, 0x5e, 0x54,
+	0x3b, 0x81, 0x17, 0xa4, 0xe8, 0xf3, 0x59, 0x04, 0x1d, 0x41, 0x91, 0x7e, 0x6b, 0x19, 0xf6, 0xc4,
+	0xcb, 0x5e, 0x7a, 0x67, 0x36, 0x78, 0x74, 0x16, 0xa8, 0xbc, 0x4d, 0x43, 0x86, 0x19, 0x83, 0xee,
+	0x43, 0x3a, 0xac, 0x3f, 0x6d, 0xf4, 0xd1, 0x23, 0x10, 0x6d, 0xea, 0x98, 0x63, 0xbb, 0x47, 0xb5,
+	0x4b, 0x6a, 0x33, 0xa7, 0xf8, 0xc1, 0x0a, 0x64, 0x25, 0x88, 0x9f, 0x7b, 0x61, 0xf4, 0x08, 0x32,
+	0x8e, 0x45, 0x7b, 0xfe, 0xce, 0x6b, 0x73, 0xf6, 0x04, 0x97, 0x45, 0x38, 0x05, 0x7d, 0x04, 0x59,
+	0xc7, 0xd5, 0x5d, 0x5a, 0xca, 0x70, 0x2b, 0xd7, 0x17, 0xb9, 0x0c, 0x25, 0x1e, 0x09, 0xed, 0x00,
+	0xd8, 0xf4, 0x9b, 0x31, 0x75, 0x5c, 0x76, 0x37, 0x59, 0xbe, 0x7b, 0xc1, 0x8f, 0xa8, 0x7d, 0xf4,
+	0x29, 0x80, 0x11, 0xfa, 0x5a, 0xca, 0xf1, 0xdd, 0x37, 0xe6, 0x14, 0x67, 0xb6, 0x93, 0x08, 0x75,
+	0xc1, 0xf0, 0xe5, 0x7f, 0x66, 0xf8, 0xe7, 0x80, 0x06, 0xba, 0xe3, 0x6a, 0x43, 0xb3, 0x6f, 0xbc,
+	0x34, 0x02, 0x91, 0xfc, 0x3b, 0x45, 0x44, 0x96, 0x75, 0xe6, 0x27, 0x71, 0xf7, 0x5f, 0xc1, 0x83,
+	0xb0, 0x7f, 0x88, 0x39, 0xa0, 0xbc, 0xad, 0xb7, 0xa1, 0x30, 0x0a, 0x82, 0xfe, 0x85, 0xcc, 0x02,
+	0xff, 0x51, 0x4f, 0x76, 0x61, 0x45, 0xee, 0xf5, 0xcc, 0xf1, 0xc8, 0x0d, 0xb7, 0x7d, 0x1a, 0x13,
+	0x16, 0xb8, 0xf0, 0xee, 0x9c, 0xb0, 0x9f, 0x73, 0xab, 0xec, 0x8f, 0x02, 0xe4, 0x43, 0xc1, 0x27,
+	0x4c, 0x90, 0xf3, 0x35, 0xf6, 0x06, 0xb9, 0x60, 0xf1, 0x70, 0x3b, 0x49, 0x30, 0xc8, 0x61, 0x6a,
+	0x61, 0x00, 0x9d, 0xc0, 0x4a, 0x58, 0xb7, 0x36, 0x7b, 0xd3, 0xc5, 0x43, 0x29, 0xb9, 0xda, 0x50,
+	0xe5, 0xfe, 0x28, 0x1a, 0x72, 0x2a, 0x03, 0xc8, 0x70, 0xc1, 0xc5, 0x1e, 0xcf, 0xb8, 0x13, 0x8b,
+	0xfa, 0x1e, 0xce, 0x37, 0x2e, 0x4b, 0xe8, 0x4c, 0x2c, 0x4a, 0x38, 0xe5, 0xce, 0x1e, 0x0f, 0xf7,
+	0xe5, 0x94, 0xca, 0xf7, 0x02, 0x80, 0xdc, 0x52, 0xbf, 0xa0, 0x13, 0x6e, 0xc3, 0x1e, 0xdc, 0xeb,
+	0x1b, 0x8e, 0x35, 0xd0, 0x27, 0x1a, 0x3b, 0x96, 0xbf, 0x7d, 0xd1, 0x8f, 0xb1, 0xc3, 0xa3, 0x32,
+	0x14, 0xfb, 0xd4, 0xe9, 0xd9, 0x86, 0xe5, 0xce, 0x9e, 0x59, 0x34, 0xf4, 0xef, 0xde, 0xb8, 0x06,
+	0xd9, 0xe6, 0xab, 0x11, 0xb5, 0xd1, 0x26, 0xe4, 0x4d, 0xf6, 0x31, 0x9b, 0x74, 0xcb, 0x7c, 0xad,
+	0xf6, 0xd1, 0x11, 0x80, 0x07, 0x45, 0x0c, 0x89, 0x5d, 0x15, 0x2f, 0x89, 0x0b, 0x71, 0x5f, 0x0a,
+	0x66, 0xf0, 0x59, 0xf9, 0x2b, 0x0d, 0x39, 0x0f, 0x5e, 0xb0, 0x78, 0x1f, 0xb2, 0x9c, 0xe7, 0x0f,
+	0x35, 0x34, 0x27, 0xc9, 0xc5, 0x88, 0x47, 0x40, 0x1f, 0xce, 0x39, 0xbc, 0x91, 0xb0, 0x77, 0x64,
+	0x8e, 0x24, 0x4d, 0xa7, 0x4c, 0xf2, 0x74, 0xaa, 0x06, 0x23, 0x27, 0xcb, 0x8b, 0x2a, 0x25, 0x09,
+	0xdf, 0x3e, 0x74, 0x72, 0xf1, 0xa1, 0xf3, 0x7f, 0x99, 0x1d, 0x07, 0x6f, 0x05, 0x28, 0x84, 0x13,
+	0x13, 0x6d, 0xc1, 0x7a, 0xb7, 0x8d, 0x89, 0xd6, 0xee, 0xc8, 0x1d, 0xac, 0x75, 0x1b, 0xed, 0x16,
+	0xae, 0xab, 0xc7, 0x2a, 0x56, 0xc4, 0x14, 0xda, 0x80, 0x87, 0x11, 0xac, 0x4e, 0xb0, 0xdc, 0x51,
+	0x1b, 0x27, 0xa2, 0x80, 0xb6, 0xa1, 0x14, 0x07, 0xb0, 0x76, 0x2c, 0xab, 0xa7, 0x58, 0x11, 0xd3,
+	0x68, 0x0d, 0x1e, 0x44, 0x50, 0xb9, 0xde, 0x51, 0xcf, 0xb1, 0xb8, 0x14, 0x53, 0xeb, 0xb6, 0x14,
+	0x4f, 0x2d, 0x13, 0x53, 0xe3, 0x40, 0xa8, 0x96, 0x8d, 0xa5, 0x29, 0xf8, 0x14, 0xf3, 0xb4, 0x5c,
+	0x2c, 0x8d, 0x03, 0x61, 0xda, 0x32, 0x5a, 0x07, 0xb4, 0x80, 0x2a, 0x62, 0xfe, 0xe0, 0x89, 0x37,
+	0x68, 0x58, 0xfb, 0xa1, 0x4d, 0x58, 0x23, 0xcd, 0x53, 0xac, 0x75, 0x9e, 0xb7, 0xe2, 0xa5, 0x97,
+	0x60, 0x75, 0x06, 0xb5, 0x08, 0x56, 0xf0, 0xb1, 0xda, 0xc0, 0x8a, 0x28, 0x1c, 0xfc, 0x22, 0xc0,
+	0x6a, 0xd2, 0x9c, 0x44, 0x1f, 0x40, 0xa5, 0x21, 0x9f, 0xe1, 0x76, 0x4b, 0xae, 0x7b, 0x55, 0x37,
+	0x1b, 0xda, 0x09, 0x69, 0x76, 0x5b, 0x31, 0xe9, 0x32, 0x6c, 0xdf, 0xc2, 0x93, 0x95, 0x33, 0xb5,
+	0x21, 0x0a, 0x77, 0x30, 0x9e, 0x11, 0xb5, 0x83, 0xc5, 0x34, 0xda, 0x85, 0xf7, 0x6e, 0x61, 0x10,
+	0x2c, 0x2b, 0xe2, 0xd2, 0xc1, 0xcf, 0x02, 0xa0, 0xc5, 0xa1, 0x8b, 0xde, 0x87, 0xb2, 0x5c, 0xaf,
+	0x37, 0xbb, 0x8d, 0xce, 0x5d, 0x27, 0x94, 0x60, 0x2b, 0x91, 0x15, 0x9c, 0xaf, 0x02, 0x52, 0x22,
+	0xae, 0xe0, 0x73, 0x7c, 0xda, 0x6c, 0x61, 0x22, 0xa6, 0xd1, 0x0e, 0x6c, 0x26, 0x72, 0xfc, 0xf3,
+	0xb5, 0x60, 0x25, 0x36, 0x17, 0xd0, 0x1e, 0xec, 0xb0, 0x10, 0x7e, 0xae, 0x35, 0x9f, 0x35, 0x30,
+	0x49, 0xba, 0x95, 0x2d, 0x58, 0x4f, 0xa0, 0xb4, 0x31, 0x11, 0x85, 0x83, 0xdf, 0xd2, 0x50, 0x8c,
+	0xbc, 0x4a, 0xd6, 0x1e, 0x3e, 0x37, 0xa9, 0xb5, 0x37, 0x61, 0x6d, 0x0e, 0x8d, 0x34, 0x37, 0xab,
+	0x7e, 0x01, 0x8a, 0xb4, 0xf7, 0x06, 0x3c, 0x9c, 0xc3, 0xc3, 0x06, 0x8f, 0x6b, 0x46, 0x5a, 0x3c,
+	0xae, 0x19, 0x6f, 0xf2, 0x12, 0xac, 0xce, 0xe1, 0xf8, 0xcb, 0x96, 0x4a, 0xb0, 0x22, 0xe6, 0x16,
+	0x44, 0xc3, 0x07, 0xb0, 0xbc, 0x20, 0x3a, 0xff, 0x04, 0xf2, 0x0b, 0xa2, 0xc1, 0x23, 0x28, 0x3c,
+	0x25, 0x57, 0xd7, 0x52, 0xea, 0xf5, 0xb5, 0x94, 0x7a, 0x73, 0x2d, 0x09, 0xdf, 0x4d, 0x25, 0xe1,
+	0xd7, 0xa9, 0x24, 0xfc, 0x3e, 0x95, 0x84, 0xab, 0xa9, 0x24, 0xfc, 0x31, 0x95, 0x84, 0x3f, 0xa7,
+	0x52, 0xea, 0xcd, 0x54, 0x12, 0x7e, 0xb8, 0x91, 0x52, 0x57, 0x37, 0x52, 0xea, 0xf5, 0x8d, 0x94,
+	0xfa, 0x6a, 0xdb, 0x1d, 0x5a, 0xf6, 0xa0, 0xda, 0x1b, 0x98, 0xe3, 0x7e, 0x2d, 0xf2, 0xbf, 0xfc,
+	0x88, 0xfd, 0xbe, 0xc8, 0xf1, 0xe1, 0xf3, 0xf1, 0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x30, 0x83,
+	0x56, 0x03, 0xb2, 0x0b, 0x00, 0x00,
 }
 
 func (x UserState) String() string {
@@ -748,6 +1067,20 @@ func (x NamespaceActionGroup) String() string {
 }
 func (x AccountActionGroup) String() string {
 	s, ok := AccountActionGroup_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x APIKeyOwnerType) String() string {
+	s, ok := APIKeyOwnerType_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x APIKeyState) String() string {
+	s, ok := APIKeyState_name[int32(x)]
 	if ok {
 		return s
 	}
@@ -1000,6 +1333,108 @@ func (this *Role) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *APIKeySpec) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*APIKeySpec)
+	if !ok {
+		that2, ok := that.(APIKeySpec)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.DisplayName != that1.DisplayName {
+		return false
+	}
+	if this.Description != that1.Description {
+		return false
+	}
+	if !this.ExpiryTime.Equal(that1.ExpiryTime) {
+		return false
+	}
+	return true
+}
+func (this *Owner) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Owner)
+	if !ok {
+		that2, ok := that.(Owner)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.OwnerId != that1.OwnerId {
+		return false
+	}
+	if this.OwnerType != that1.OwnerType {
+		return false
+	}
+	return true
+}
+func (this *APIKey) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*APIKey)
+	if !ok {
+		that2, ok := that.(APIKey)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Id != that1.Id {
+		return false
+	}
+	if !this.Owner.Equal(that1.Owner) {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	if this.State != that1.State {
+		return false
+	}
+	if this.RequestId != that1.RequestId {
+		return false
+	}
+	if !this.CreatedTime.Equal(that1.CreatedTime) {
+		return false
+	}
+	if !this.LastModifiedTime.Equal(that1.LastModifiedTime) {
+		return false
+	}
+	return true
+}
 func (this *UserSpec) GoString() string {
 	if this == nil {
 		return "nil"
@@ -1109,6 +1544,56 @@ func (this *Role) GoString() string {
 	s = append(s, "Type: "+fmt.Sprintf("%#v", this.Type)+",\n")
 	if this.Spec != nil {
 		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *APIKeySpec) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&auth.APIKeySpec{")
+	s = append(s, "DisplayName: "+fmt.Sprintf("%#v", this.DisplayName)+",\n")
+	s = append(s, "Description: "+fmt.Sprintf("%#v", this.Description)+",\n")
+	if this.ExpiryTime != nil {
+		s = append(s, "ExpiryTime: "+fmt.Sprintf("%#v", this.ExpiryTime)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *Owner) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&auth.Owner{")
+	s = append(s, "OwnerId: "+fmt.Sprintf("%#v", this.OwnerId)+",\n")
+	s = append(s, "OwnerType: "+fmt.Sprintf("%#v", this.OwnerType)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *APIKey) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 12)
+	s = append(s, "&auth.APIKey{")
+	s = append(s, "Id: "+fmt.Sprintf("%#v", this.Id)+",\n")
+	if this.Owner != nil {
+		s = append(s, "Owner: "+fmt.Sprintf("%#v", this.Owner)+",\n")
+	}
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
+	s = append(s, "RequestId: "+fmt.Sprintf("%#v", this.RequestId)+",\n")
+	if this.CreatedTime != nil {
+		s = append(s, "CreatedTime: "+fmt.Sprintf("%#v", this.CreatedTime)+",\n")
+	}
+	if this.LastModifiedTime != nil {
+		s = append(s, "LastModifiedTime: "+fmt.Sprintf("%#v", this.LastModifiedTime)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -1505,6 +1990,187 @@ func (m *Role) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *APIKeySpec) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *APIKeySpec) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *APIKeySpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ExpiryTime != nil {
+		{
+			size, err := m.ExpiryTime.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Description) > 0 {
+		i -= len(m.Description)
+		copy(dAtA[i:], m.Description)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Description)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.DisplayName) > 0 {
+		i -= len(m.DisplayName)
+		copy(dAtA[i:], m.DisplayName)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.DisplayName)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Owner) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Owner) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Owner) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.OwnerType != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.OwnerType))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.OwnerId) > 0 {
+		i -= len(m.OwnerId)
+		copy(dAtA[i:], m.OwnerId)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.OwnerId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *APIKey) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *APIKey) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *APIKey) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.LastModifiedTime != nil {
+		{
+			size, err := m.LastModifiedTime.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x42
+	}
+	if m.CreatedTime != nil {
+		{
+			size, err := m.CreatedTime.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3a
+	}
+	if len(m.RequestId) > 0 {
+		i -= len(m.RequestId)
+		copy(dAtA[i:], m.RequestId)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.RequestId)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x28
+	}
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Owner != nil {
+		{
+			size, err := m.Owner.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Id)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintMessage(dAtA []byte, offset int, v uint64) int {
 	offset -= sovMessage(v)
 	base := offset
@@ -1679,6 +2345,83 @@ func (m *Role) Size() (n int) {
 	return n
 }
 
+func (m *APIKeySpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.DisplayName)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.ExpiryTime != nil {
+		l = m.ExpiryTime.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+
+func (m *Owner) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.OwnerId)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.OwnerType != 0 {
+		n += 1 + sovMessage(uint64(m.OwnerType))
+	}
+	return n
+}
+
+func (m *APIKey) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Id)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Owner != nil {
+		l = m.Owner.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
+	l = len(m.RequestId)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.CreatedTime != nil {
+		l = m.CreatedTime.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.LastModifiedTime != nil {
+		l = m.LastModifiedTime.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+
 func sovMessage(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
@@ -1781,6 +2524,46 @@ func (this *Role) String() string {
 		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
 		`Type:` + fmt.Sprintf("%v", this.Type) + `,`,
 		`Spec:` + strings.Replace(this.Spec.String(), "RoleSpec", "RoleSpec", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *APIKeySpec) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&APIKeySpec{`,
+		`DisplayName:` + fmt.Sprintf("%v", this.DisplayName) + `,`,
+		`Description:` + fmt.Sprintf("%v", this.Description) + `,`,
+		`ExpiryTime:` + strings.Replace(fmt.Sprintf("%v", this.ExpiryTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Owner) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Owner{`,
+		`OwnerId:` + fmt.Sprintf("%v", this.OwnerId) + `,`,
+		`OwnerType:` + fmt.Sprintf("%v", this.OwnerType) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *APIKey) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&APIKey{`,
+		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
+		`Owner:` + strings.Replace(this.Owner.String(), "Owner", "Owner", 1) + `,`,
+		`Spec:` + strings.Replace(this.Spec.String(), "APIKeySpec", "APIKeySpec", 1) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
+		`CreatedTime:` + strings.Replace(fmt.Sprintf("%v", this.CreatedTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`LastModifiedTime:` + strings.Replace(fmt.Sprintf("%v", this.LastModifiedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2895,6 +3678,575 @@ func (m *Role) Unmarshal(dAtA []byte) error {
 				m.Spec = &RoleSpec{}
 			}
 			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *APIKeySpec) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: APIKeySpec: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: APIKeySpec: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DisplayName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DisplayName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ExpiryTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ExpiryTime == nil {
+				m.ExpiryTime = &types.Timestamp{}
+			}
+			if err := m.ExpiryTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Owner) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Owner: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Owner: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OwnerId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.OwnerId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OwnerType", wireType)
+			}
+			m.OwnerType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.OwnerType |= APIKeyOwnerType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *APIKey) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: APIKey: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: APIKey: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Id = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Owner", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Owner == nil {
+				m.Owner = &Owner{}
+			}
+			if err := m.Owner.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &APIKeySpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= APIKeyState(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RequestId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CreatedTime == nil {
+				m.CreatedTime = &types.Timestamp{}
+			}
+			if err := m.CreatedTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastModifiedTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.LastModifiedTime == nil {
+				m.LastModifiedTime = &types.Timestamp{}
+			}
+			if err := m.LastModifiedTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

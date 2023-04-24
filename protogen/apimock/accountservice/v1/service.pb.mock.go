@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	accountservice "github.com/temporalio/tcld/protogen/api/accountservice/v1"
+	v1 "github.com/temporalio/tcld/protogen/api/accountservice/v1"
 	grpc "google.golang.org/grpc"
 )
 
@@ -37,14 +37,14 @@ func (m *MockAccountServiceClient) EXPECT() *MockAccountServiceClientMockRecorde
 }
 
 // GetAccount mocks base method.
-func (m *MockAccountServiceClient) GetAccount(ctx context.Context, in *accountservice.GetAccountRequest, opts ...grpc.CallOption) (*accountservice.GetAccountResponse, error) {
+func (m *MockAccountServiceClient) GetAccount(ctx context.Context, in *v1.GetAccountRequest, opts ...grpc.CallOption) (*v1.GetAccountResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetAccount", varargs...)
-	ret0, _ := ret[0].(*accountservice.GetAccountResponse)
+	ret0, _ := ret[0].(*v1.GetAccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -57,14 +57,14 @@ func (mr *MockAccountServiceClientMockRecorder) GetAccount(ctx, in interface{}, 
 }
 
 // GetAccountUsage mocks base method.
-func (m *MockAccountServiceClient) GetAccountUsage(ctx context.Context, in *accountservice.GetAccountUsageRequest, opts ...grpc.CallOption) (*accountservice.GetAccountUsageResponse, error) {
+func (m *MockAccountServiceClient) GetAccountUsage(ctx context.Context, in *v1.GetAccountUsageRequest, opts ...grpc.CallOption) (*v1.GetAccountUsageResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetAccountUsage", varargs...)
-	ret0, _ := ret[0].(*accountservice.GetAccountUsageResponse)
+	ret0, _ := ret[0].(*v1.GetAccountUsageResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -77,14 +77,14 @@ func (mr *MockAccountServiceClientMockRecorder) GetAccountUsage(ctx, in interfac
 }
 
 // GetNamespaceUsage mocks base method.
-func (m *MockAccountServiceClient) GetNamespaceUsage(ctx context.Context, in *accountservice.GetNamespaceUsageRequest, opts ...grpc.CallOption) (*accountservice.GetNamespaceUsageResponse, error) {
+func (m *MockAccountServiceClient) GetNamespaceUsage(ctx context.Context, in *v1.GetNamespaceUsageRequest, opts ...grpc.CallOption) (*v1.GetNamespaceUsageResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetNamespaceUsage", varargs...)
-	ret0, _ := ret[0].(*accountservice.GetNamespaceUsageResponse)
+	ret0, _ := ret[0].(*v1.GetNamespaceUsageResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -97,14 +97,14 @@ func (mr *MockAccountServiceClientMockRecorder) GetNamespaceUsage(ctx, in interf
 }
 
 // GetNamespacesUsage mocks base method.
-func (m *MockAccountServiceClient) GetNamespacesUsage(ctx context.Context, in *accountservice.GetNamespacesUsageRequest, opts ...grpc.CallOption) (*accountservice.GetNamespacesUsageResponse, error) {
+func (m *MockAccountServiceClient) GetNamespacesUsage(ctx context.Context, in *v1.GetNamespacesUsageRequest, opts ...grpc.CallOption) (*v1.GetNamespacesUsageResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetNamespacesUsage", varargs...)
-	ret0, _ := ret[0].(*accountservice.GetNamespacesUsageResponse)
+	ret0, _ := ret[0].(*v1.GetNamespacesUsageResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -116,15 +116,35 @@ func (mr *MockAccountServiceClientMockRecorder) GetNamespacesUsage(ctx, in inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespacesUsage", reflect.TypeOf((*MockAccountServiceClient)(nil).GetNamespacesUsage), varargs...)
 }
 
+// GetRegions mocks base method.
+func (m *MockAccountServiceClient) GetRegions(ctx context.Context, in *v1.GetRegionsRequest, opts ...grpc.CallOption) (*v1.GetRegionsResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetRegions", varargs...)
+	ret0, _ := ret[0].(*v1.GetRegionsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRegions indicates an expected call of GetRegions.
+func (mr *MockAccountServiceClientMockRecorder) GetRegions(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRegions", reflect.TypeOf((*MockAccountServiceClient)(nil).GetRegions), varargs...)
+}
+
 // UpdateAccount mocks base method.
-func (m *MockAccountServiceClient) UpdateAccount(ctx context.Context, in *accountservice.UpdateAccountRequest, opts ...grpc.CallOption) (*accountservice.UpdateAccountResponse, error) {
+func (m *MockAccountServiceClient) UpdateAccount(ctx context.Context, in *v1.UpdateAccountRequest, opts ...grpc.CallOption) (*v1.UpdateAccountResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "UpdateAccount", varargs...)
-	ret0, _ := ret[0].(*accountservice.UpdateAccountResponse)
+	ret0, _ := ret[0].(*v1.UpdateAccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -160,10 +180,10 @@ func (m *MockAccountServiceServer) EXPECT() *MockAccountServiceServerMockRecorde
 }
 
 // GetAccount mocks base method.
-func (m *MockAccountServiceServer) GetAccount(arg0 context.Context, arg1 *accountservice.GetAccountRequest) (*accountservice.GetAccountResponse, error) {
+func (m *MockAccountServiceServer) GetAccount(arg0 context.Context, arg1 *v1.GetAccountRequest) (*v1.GetAccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccount", arg0, arg1)
-	ret0, _ := ret[0].(*accountservice.GetAccountResponse)
+	ret0, _ := ret[0].(*v1.GetAccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -175,10 +195,10 @@ func (mr *MockAccountServiceServerMockRecorder) GetAccount(arg0, arg1 interface{
 }
 
 // GetAccountUsage mocks base method.
-func (m *MockAccountServiceServer) GetAccountUsage(arg0 context.Context, arg1 *accountservice.GetAccountUsageRequest) (*accountservice.GetAccountUsageResponse, error) {
+func (m *MockAccountServiceServer) GetAccountUsage(arg0 context.Context, arg1 *v1.GetAccountUsageRequest) (*v1.GetAccountUsageResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccountUsage", arg0, arg1)
-	ret0, _ := ret[0].(*accountservice.GetAccountUsageResponse)
+	ret0, _ := ret[0].(*v1.GetAccountUsageResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -190,10 +210,10 @@ func (mr *MockAccountServiceServerMockRecorder) GetAccountUsage(arg0, arg1 inter
 }
 
 // GetNamespaceUsage mocks base method.
-func (m *MockAccountServiceServer) GetNamespaceUsage(arg0 context.Context, arg1 *accountservice.GetNamespaceUsageRequest) (*accountservice.GetNamespaceUsageResponse, error) {
+func (m *MockAccountServiceServer) GetNamespaceUsage(arg0 context.Context, arg1 *v1.GetNamespaceUsageRequest) (*v1.GetNamespaceUsageResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNamespaceUsage", arg0, arg1)
-	ret0, _ := ret[0].(*accountservice.GetNamespaceUsageResponse)
+	ret0, _ := ret[0].(*v1.GetNamespaceUsageResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -205,10 +225,10 @@ func (mr *MockAccountServiceServerMockRecorder) GetNamespaceUsage(arg0, arg1 int
 }
 
 // GetNamespacesUsage mocks base method.
-func (m *MockAccountServiceServer) GetNamespacesUsage(arg0 context.Context, arg1 *accountservice.GetNamespacesUsageRequest) (*accountservice.GetNamespacesUsageResponse, error) {
+func (m *MockAccountServiceServer) GetNamespacesUsage(arg0 context.Context, arg1 *v1.GetNamespacesUsageRequest) (*v1.GetNamespacesUsageResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNamespacesUsage", arg0, arg1)
-	ret0, _ := ret[0].(*accountservice.GetNamespacesUsageResponse)
+	ret0, _ := ret[0].(*v1.GetNamespacesUsageResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -219,11 +239,26 @@ func (mr *MockAccountServiceServerMockRecorder) GetNamespacesUsage(arg0, arg1 in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespacesUsage", reflect.TypeOf((*MockAccountServiceServer)(nil).GetNamespacesUsage), arg0, arg1)
 }
 
+// GetRegions mocks base method.
+func (m *MockAccountServiceServer) GetRegions(arg0 context.Context, arg1 *v1.GetRegionsRequest) (*v1.GetRegionsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRegions", arg0, arg1)
+	ret0, _ := ret[0].(*v1.GetRegionsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRegions indicates an expected call of GetRegions.
+func (mr *MockAccountServiceServerMockRecorder) GetRegions(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRegions", reflect.TypeOf((*MockAccountServiceServer)(nil).GetRegions), arg0, arg1)
+}
+
 // UpdateAccount mocks base method.
-func (m *MockAccountServiceServer) UpdateAccount(arg0 context.Context, arg1 *accountservice.UpdateAccountRequest) (*accountservice.UpdateAccountResponse, error) {
+func (m *MockAccountServiceServer) UpdateAccount(arg0 context.Context, arg1 *v1.UpdateAccountRequest) (*v1.UpdateAccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateAccount", arg0, arg1)
-	ret0, _ := ret[0].(*accountservice.UpdateAccountResponse)
+	ret0, _ := ret[0].(*v1.UpdateAccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
