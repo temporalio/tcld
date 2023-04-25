@@ -5,11 +5,12 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/temporalio/tcld/protogen/api/auth/v1"
-	"go.uber.org/multierr"
 	"io/ioutil"
 	"net/mail"
 	"strings"
+
+	"github.com/temporalio/tcld/protogen/api/auth/v1"
+	"go.uber.org/multierr"
 
 	"github.com/kylelemons/godebug/diff"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
@@ -225,6 +226,7 @@ func (c *NamespaceClient) toUserNamespacePermissions(userPermissionsInput map[st
 	}
 	return res, errs
 }
+
 func readAndParseCACerts(ctx *cli.Context) (read caCerts, err error) {
 	cert, err := ReadCACerts(ctx)
 	if err != nil {
