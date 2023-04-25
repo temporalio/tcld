@@ -33,6 +33,7 @@ func fxOptions() fx.Option {
 			},
 			func() app.GetUserClientFn {
 				return app.GetUserClient
+			},
 			func() app.GetAPIKeyClientFn {
 				return app.GetAPIKeyClient
 			},
