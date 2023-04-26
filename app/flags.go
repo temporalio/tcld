@@ -68,7 +68,7 @@ var (
 	}
 	APIKeyIDFlag = &cli.StringFlag{
 		Name:     APIKeyIDFlagName,
-		Usage:    "The API key ID used for authentication (alpha)",
+		Usage:    "The API key ID used for authentication (" + APIKeyVersionTag + ")",
 		EnvVars:  []string{"TEMPORAL_CLOUD_API_KEY_ID"},
 		Category: AuthenticationFlagCategory,
 	}
