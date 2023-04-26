@@ -404,7 +404,7 @@ func (s *UserClient) createAPIKey(
 ) error {
 	expiryts, err := types.TimestampProto(expiry)
 	if err != nil {
-		return fmt.Errorf("failed to convert timestamp to proto: %s", err)
+		return fmt.Errorf("failed to convert timestamp to proto: %w", err)
 	}
 	resp, err := s.client.CreateAPIKey(s.ctx, &authservice.CreateAPIKeyRequest{
 		Spec: &auth.APIKeySpec{
@@ -668,9 +668,9 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 								},
 								&cli.TimestampFlag{
 									Name:    "expiry",
-									Usage:   fmt.Sprintf("the absolute timestamp when the apikey will expire, example: '%s'", time.Now().Format(time.RFC1123)),
+									Usage:   fmt.Sprintf("the absolute timestamp (RFC3339) when the apikey will expire, example: '%s'", time.Now().Format(time.RFC3339)),
 									Aliases: []string{"e"},
-									Layout:  "Mon, 17 Apr 2023 13:22:15 PDT",
+									Layout:  time.RFC3339,
 								},
 								RequestIDFlag,
 							},
