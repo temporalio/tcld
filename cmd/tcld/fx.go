@@ -16,6 +16,7 @@ func fxOptions() fx.Option {
 			app.NewVersionCommand,
 			app.NewAccountCommand,
 			app.NewNamespaceCommand,
+			app.NewUserCommand,
 			app.NewRequestCommand,
 			app.GetLoginClient,
 			app.NewLoginCommand,
@@ -32,6 +33,9 @@ func fxOptions() fx.Option {
 			},
 			func() app.GetAPIKeyClientFn {
 				return app.GetAPIKeyClient
+      },
+			func() app.GetUserClientFn {
+				return app.GetUserClient
 			},
 		),
 		fx.Invoke(func(app *cli.App, shutdowner fx.Shutdowner) error {
