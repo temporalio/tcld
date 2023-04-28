@@ -26,6 +26,7 @@ func NewApp(params AppParams) (*cli.App, error) {
 			APIKeyIDFlag,
 			APIKeySecretFlag,
 			EnableHMACFlag,
+			InsecureConnectionFlag,
 			EnableDebugLogsFlag,
 		},
 	}
