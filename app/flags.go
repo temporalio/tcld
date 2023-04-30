@@ -22,7 +22,7 @@ const (
 	AuthenticationFlagCategory = "Authentication:"
 
 	// APIKeyVersionTag indicates the state of API keys. This should be removed when fully released.
-	APIKeyVersionTag = "alpha"
+	APIKeyVersionTag = "preview"
 )
 
 var (
