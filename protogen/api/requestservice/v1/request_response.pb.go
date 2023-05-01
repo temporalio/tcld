@@ -5,13 +5,12 @@ package requestservice
 
 import (
 	fmt "fmt"
+	proto "github.com/gogo/protobuf/proto"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
-
-	proto "github.com/gogo/protobuf/proto"
 	v1 "github.com/temporalio/tcld/protogen/api/request/v1"
 )
 
@@ -114,9 +113,398 @@ func (m *GetRequestStatusResponse) GetRequestStatus() *v1.RequestStatus {
 	return nil
 }
 
+type GetRequestStatusesRequest struct {
+	// the requested size of the page to retrive, defaults to 10
+	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// the page token
+	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// whether to list only open requests
+	// if set, will only return requests in pending and in-progress states
+	// if not set, will return all known requests
+	Open bool `protobuf:"varint,3,opt,name=open,proto3" json:"open,omitempty"`
+}
+
+func (m *GetRequestStatusesRequest) Reset()      { *m = GetRequestStatusesRequest{} }
+func (*GetRequestStatusesRequest) ProtoMessage() {}
+func (*GetRequestStatusesRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9fd9a82732f91270, []int{2}
+}
+func (m *GetRequestStatusesRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetRequestStatusesRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetRequestStatusesRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetRequestStatusesRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRequestStatusesRequest.Merge(m, src)
+}
+func (m *GetRequestStatusesRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetRequestStatusesRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRequestStatusesRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetRequestStatusesRequest proto.InternalMessageInfo
+
+func (m *GetRequestStatusesRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *GetRequestStatusesRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
+func (m *GetRequestStatusesRequest) GetOpen() bool {
+	if m != nil {
+		return m.Open
+	}
+	return false
+}
+
+type GetRequestStatusesResponse struct {
+	// the request statuses
+	// the requests will be ordered by the start_time, newest first
+	RequestStatuses []*v1.RequestStatus `protobuf:"bytes,1,rep,name=request_statuses,json=requestStatuses,proto3" json:"request_statuses,omitempty"`
+	// the next page's token
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (m *GetRequestStatusesResponse) Reset()      { *m = GetRequestStatusesResponse{} }
+func (*GetRequestStatusesResponse) ProtoMessage() {}
+func (*GetRequestStatusesResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9fd9a82732f91270, []int{3}
+}
+func (m *GetRequestStatusesResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetRequestStatusesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetRequestStatusesResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetRequestStatusesResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRequestStatusesResponse.Merge(m, src)
+}
+func (m *GetRequestStatusesResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetRequestStatusesResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRequestStatusesResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetRequestStatusesResponse proto.InternalMessageInfo
+
+func (m *GetRequestStatusesResponse) GetRequestStatuses() []*v1.RequestStatus {
+	if m != nil {
+		return m.RequestStatuses
+	}
+	return nil
+}
+
+func (m *GetRequestStatusesResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
+
+type GetRequestStatusesForUserRequest struct {
+	// the requested size of the page to retrive, defaults to 10
+	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// the page token
+	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// the id of the user
+	UserId string `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// or the email address of the user
+	UserEmail string `protobuf:"bytes,4,opt,name=user_email,json=userEmail,proto3" json:"user_email,omitempty"`
+	// whether to list only open requests
+	// if set, will only return requests in pending and in-progress states started by the user
+	// if not set, will return all known requests started by the user
+	Open bool `protobuf:"varint,5,opt,name=open,proto3" json:"open,omitempty"`
+}
+
+func (m *GetRequestStatusesForUserRequest) Reset()      { *m = GetRequestStatusesForUserRequest{} }
+func (*GetRequestStatusesForUserRequest) ProtoMessage() {}
+func (*GetRequestStatusesForUserRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9fd9a82732f91270, []int{4}
+}
+func (m *GetRequestStatusesForUserRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetRequestStatusesForUserRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetRequestStatusesForUserRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetRequestStatusesForUserRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRequestStatusesForUserRequest.Merge(m, src)
+}
+func (m *GetRequestStatusesForUserRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetRequestStatusesForUserRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRequestStatusesForUserRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetRequestStatusesForUserRequest proto.InternalMessageInfo
+
+func (m *GetRequestStatusesForUserRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *GetRequestStatusesForUserRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
+func (m *GetRequestStatusesForUserRequest) GetUserId() string {
+	if m != nil {
+		return m.UserId
+	}
+	return ""
+}
+
+func (m *GetRequestStatusesForUserRequest) GetUserEmail() string {
+	if m != nil {
+		return m.UserEmail
+	}
+	return ""
+}
+
+func (m *GetRequestStatusesForUserRequest) GetOpen() bool {
+	if m != nil {
+		return m.Open
+	}
+	return false
+}
+
+type GetRequestStatusesForUserResponse struct {
+	// the request statuses
+	// the requests will be ordered by the start_time, newest first
+	RequestStatuses []*v1.RequestStatus `protobuf:"bytes,1,rep,name=request_statuses,json=requestStatuses,proto3" json:"request_statuses,omitempty"`
+	// the next page's token
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (m *GetRequestStatusesForUserResponse) Reset()      { *m = GetRequestStatusesForUserResponse{} }
+func (*GetRequestStatusesForUserResponse) ProtoMessage() {}
+func (*GetRequestStatusesForUserResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9fd9a82732f91270, []int{5}
+}
+func (m *GetRequestStatusesForUserResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetRequestStatusesForUserResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetRequestStatusesForUserResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetRequestStatusesForUserResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRequestStatusesForUserResponse.Merge(m, src)
+}
+func (m *GetRequestStatusesForUserResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetRequestStatusesForUserResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRequestStatusesForUserResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetRequestStatusesForUserResponse proto.InternalMessageInfo
+
+func (m *GetRequestStatusesForUserResponse) GetRequestStatuses() []*v1.RequestStatus {
+	if m != nil {
+		return m.RequestStatuses
+	}
+	return nil
+}
+
+func (m *GetRequestStatusesForUserResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
+
+type GetRequestStatusesForNamespaceRequest struct {
+	// the requested size of the page to retrive, defaults to 10
+	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// the page token
+	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// the namespace
+	Namespace string `protobuf:"bytes,3,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// whether to list only open requests
+	// if set, will only return requests in pending and in-progress states for the namespace
+	// if not set, will return all known requests for the namespace
+	Open bool `protobuf:"varint,4,opt,name=open,proto3" json:"open,omitempty"`
+}
+
+func (m *GetRequestStatusesForNamespaceRequest) Reset()      { *m = GetRequestStatusesForNamespaceRequest{} }
+func (*GetRequestStatusesForNamespaceRequest) ProtoMessage() {}
+func (*GetRequestStatusesForNamespaceRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9fd9a82732f91270, []int{6}
+}
+func (m *GetRequestStatusesForNamespaceRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetRequestStatusesForNamespaceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetRequestStatusesForNamespaceRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetRequestStatusesForNamespaceRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRequestStatusesForNamespaceRequest.Merge(m, src)
+}
+func (m *GetRequestStatusesForNamespaceRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetRequestStatusesForNamespaceRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRequestStatusesForNamespaceRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetRequestStatusesForNamespaceRequest proto.InternalMessageInfo
+
+func (m *GetRequestStatusesForNamespaceRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *GetRequestStatusesForNamespaceRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
+func (m *GetRequestStatusesForNamespaceRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *GetRequestStatusesForNamespaceRequest) GetOpen() bool {
+	if m != nil {
+		return m.Open
+	}
+	return false
+}
+
+type GetRequestStatusesForNamespaceResponse struct {
+	// the request statuses
+	// the requests will be ordered by the start_time, newest first
+	RequestStatuses []*v1.RequestStatus `protobuf:"bytes,1,rep,name=request_statuses,json=requestStatuses,proto3" json:"request_statuses,omitempty"`
+	// the next page's token
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (m *GetRequestStatusesForNamespaceResponse) Reset() {
+	*m = GetRequestStatusesForNamespaceResponse{}
+}
+func (*GetRequestStatusesForNamespaceResponse) ProtoMessage() {}
+func (*GetRequestStatusesForNamespaceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9fd9a82732f91270, []int{7}
+}
+func (m *GetRequestStatusesForNamespaceResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetRequestStatusesForNamespaceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetRequestStatusesForNamespaceResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetRequestStatusesForNamespaceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRequestStatusesForNamespaceResponse.Merge(m, src)
+}
+func (m *GetRequestStatusesForNamespaceResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetRequestStatusesForNamespaceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRequestStatusesForNamespaceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetRequestStatusesForNamespaceResponse proto.InternalMessageInfo
+
+func (m *GetRequestStatusesForNamespaceResponse) GetRequestStatuses() []*v1.RequestStatus {
+	if m != nil {
+		return m.RequestStatuses
+	}
+	return nil
+}
+
+func (m *GetRequestStatusesForNamespaceResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
+
 func init() {
 	proto.RegisterType((*GetRequestStatusRequest)(nil), "api.requestservice.v1.GetRequestStatusRequest")
 	proto.RegisterType((*GetRequestStatusResponse)(nil), "api.requestservice.v1.GetRequestStatusResponse")
+	proto.RegisterType((*GetRequestStatusesRequest)(nil), "api.requestservice.v1.GetRequestStatusesRequest")
+	proto.RegisterType((*GetRequestStatusesResponse)(nil), "api.requestservice.v1.GetRequestStatusesResponse")
+	proto.RegisterType((*GetRequestStatusesForUserRequest)(nil), "api.requestservice.v1.GetRequestStatusesForUserRequest")
+	proto.RegisterType((*GetRequestStatusesForUserResponse)(nil), "api.requestservice.v1.GetRequestStatusesForUserResponse")
+	proto.RegisterType((*GetRequestStatusesForNamespaceRequest)(nil), "api.requestservice.v1.GetRequestStatusesForNamespaceRequest")
+	proto.RegisterType((*GetRequestStatusesForNamespaceResponse)(nil), "api.requestservice.v1.GetRequestStatusesForNamespaceResponse")
 }
 
 func init() {
@@ -124,23 +512,37 @@ func init() {
 }
 
 var fileDescriptor_9fd9a82732f91270 = []byte{
-	// 254 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xd2, 0x49, 0x2c, 0xc8, 0xd4,
-	0x2f, 0x4a, 0x2d, 0x2c, 0x4d, 0x2d, 0x2e, 0x29, 0x4e, 0x2d, 0x2a, 0xcb, 0x4c, 0x4e, 0xd5, 0x2f,
-	0x33, 0x84, 0x89, 0xc4, 0x17, 0xa5, 0x16, 0x17, 0xe4, 0xe7, 0x15, 0xa7, 0xea, 0x15, 0x14, 0xe5,
-	0x97, 0xe4, 0x0b, 0x89, 0x26, 0x16, 0x64, 0xea, 0xa1, 0xaa, 0xd6, 0x2b, 0x33, 0x94, 0x92, 0x41,
-	0x32, 0x04, 0xa4, 0x3b, 0x37, 0xb5, 0xb8, 0x38, 0x31, 0x1d, 0xaa, 0x49, 0xc9, 0x8e, 0x4b, 0xdc,
-	0x3d, 0xb5, 0x24, 0x08, 0x22, 0x1d, 0x5c, 0x92, 0x58, 0x52, 0x5a, 0x0c, 0xe5, 0x08, 0xc9, 0x72,
-	0x71, 0xc1, 0x6c, 0xca, 0x4c, 0x91, 0x60, 0x52, 0x60, 0xd4, 0xe0, 0x0c, 0xe2, 0x84, 0x8a, 0x78,
-	0xa6, 0x78, 0xb1, 0x70, 0x30, 0x0a, 0x30, 0x29, 0x25, 0x70, 0x49, 0x60, 0xea, 0x87, 0x38, 0x4b,
-	0xc8, 0x85, 0x8b, 0x0f, 0x66, 0x40, 0x31, 0x58, 0x46, 0x82, 0x51, 0x81, 0x51, 0x83, 0xdb, 0x48,
-	0x56, 0x0f, 0xc9, 0xa5, 0x7a, 0x65, 0x86, 0x7a, 0xa8, 0xda, 0x79, 0x8b, 0x90, 0xb9, 0x4e, 0x69,
-	0x17, 0x1e, 0xca, 0x31, 0xdc, 0x78, 0x28, 0xc7, 0xf0, 0xe1, 0xa1, 0x1c, 0x63, 0xc3, 0x23, 0x39,
-	0xc6, 0x15, 0x8f, 0xe4, 0x18, 0x4f, 0x3c, 0x92, 0x63, 0xbc, 0xf0, 0x48, 0x8e, 0xf1, 0xc1, 0x23,
-	0x39, 0xc6, 0x17, 0x8f, 0xe4, 0x18, 0x3e, 0x3c, 0x92, 0x63, 0x9c, 0xf0, 0x58, 0x8e, 0xe1, 0xc2,
-	0x63, 0x39, 0x86, 0x1b, 0x8f, 0xe5, 0x18, 0xa2, 0x0c, 0x4a, 0x72, 0x0b, 0x8a, 0x72, 0xf4, 0x92,
-	0x73, 0xf2, 0x4b, 0x53, 0xf4, 0xb1, 0x06, 0xa3, 0x35, 0xaa, 0x48, 0x12, 0x1b, 0x38, 0x40, 0x8c,
-	0x01, 0x01, 0x00, 0x00, 0xff, 0xff, 0x41, 0xeb, 0xf5, 0x3c, 0x75, 0x01, 0x00, 0x00,
+	// 468 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x54, 0x3d, 0x6f, 0xd3, 0x50,
+	0x14, 0xf5, 0x6d, 0xd2, 0x92, 0x5c, 0x54, 0x5a, 0x59, 0x42, 0x35, 0xa5, 0x7d, 0x0a, 0x96, 0xa8,
+	0x32, 0x20, 0x87, 0xc0, 0x88, 0xc4, 0x80, 0xf8, 0x2a, 0x03, 0x42, 0x29, 0x2c, 0x2c, 0xe1, 0x91,
+	0x5c, 0x2a, 0xab, 0xb1, 0xfd, 0x78, 0xef, 0xd9, 0x42, 0x9d, 0xf8, 0x05, 0x88, 0xa5, 0x0b, 0xbf,
+	0x00, 0xf1, 0x4b, 0x18, 0x33, 0x76, 0x24, 0xce, 0xc2, 0xd8, 0x9f, 0x80, 0x9e, 0x63, 0x07, 0x9b,
+	0x44, 0x74, 0xa9, 0xd4, 0x2d, 0xf7, 0xdc, 0x9c, 0x73, 0xcf, 0x39, 0x96, 0x1e, 0xde, 0xe1, 0xc2,
+	0xef, 0x48, 0xfa, 0x18, 0x93, 0xd2, 0x8a, 0x64, 0xe2, 0x0f, 0xa8, 0x93, 0x74, 0x0b, 0xa4, 0x2f,
+	0x49, 0x89, 0x28, 0x54, 0xe4, 0x09, 0x19, 0xe9, 0xc8, 0xbe, 0xce, 0x85, 0xef, 0x55, 0xff, 0xed,
+	0x25, 0xdd, 0xed, 0x9d, 0x92, 0x88, 0x61, 0x07, 0xa4, 0x14, 0x3f, 0xcc, 0x49, 0xee, 0x43, 0xdc,
+	0x7a, 0x46, 0xba, 0x37, 0x5b, 0x1f, 0x68, 0xae, 0x63, 0x95, 0x0f, 0xf6, 0x2e, 0x62, 0x71, 0xc9,
+	0x1f, 0x3a, 0x2b, 0x2d, 0x68, 0x37, 0x7b, 0xcd, 0x1c, 0xd9, 0x1f, 0xbe, 0xa8, 0x37, 0x60, 0x73,
+	0xc5, 0x7d, 0x87, 0xce, 0x22, 0x7f, 0x66, 0xcb, 0x7e, 0x8c, 0xd7, 0x0a, 0x01, 0x95, 0x6d, 0x1c,
+	0x68, 0x41, 0xfb, 0xea, 0xbd, 0x5d, 0xaf, 0xe4, 0xd4, 0x4b, 0xba, 0x5e, 0x95, 0xbe, 0x2e, 0xcb,
+	0xa3, 0x7b, 0x84, 0x37, 0xfe, 0xbd, 0x40, 0x73, 0x8f, 0x37, 0xb1, 0x29, 0xf8, 0x21, 0xf5, 0x95,
+	0x7f, 0x4c, 0x99, 0xfa, 0x6a, 0xaf, 0x61, 0x80, 0x03, 0xff, 0x98, 0x4c, 0x80, 0x6c, 0xa9, 0xa3,
+	0x23, 0x0a, 0x8b, 0x00, 0x06, 0x79, 0x6d, 0x00, 0xdb, 0xc6, 0x7a, 0x24, 0x28, 0x74, 0x6a, 0x2d,
+	0x68, 0x37, 0x7a, 0xd9, 0x6f, 0xf7, 0x0b, 0xe0, 0xf6, 0xb2, 0x6b, 0x79, 0xa2, 0xe7, 0xb8, 0x59,
+	0x4d, 0x44, 0x26, 0x53, 0xed, 0xfc, 0x4c, 0x1b, 0xb2, 0xaa, 0x68, 0xef, 0xe1, 0x46, 0x48, 0x9f,
+	0x74, 0x7f, 0xc1, 0xe0, 0xba, 0x81, 0x5f, 0x15, 0x26, 0xdd, 0x1f, 0x80, 0xad, 0x45, 0x43, 0x4f,
+	0x23, 0xf9, 0x46, 0x91, 0xbc, 0x88, 0x16, 0xb6, 0xf0, 0x4a, 0xac, 0x48, 0x9a, 0x4f, 0x5c, 0xcb,
+	0x76, 0x6b, 0x66, 0xdc, 0x1f, 0x1a, 0x5e, 0xb6, 0xa0, 0x80, 0xfb, 0x23, 0xa7, 0x3e, 0xe3, 0x19,
+	0xe4, 0x89, 0x01, 0xe6, 0xed, 0xad, 0x96, 0xda, 0x3b, 0x01, 0xbc, 0xf5, 0x1f, 0xb3, 0x97, 0x56,
+	0xe2, 0x09, 0xe0, 0xed, 0xa5, 0xbe, 0x5e, 0xf2, 0x80, 0x94, 0xe0, 0x03, 0xba, 0x88, 0x26, 0x77,
+	0xb0, 0x19, 0x16, 0x7a, 0x79, 0x97, 0x7f, 0x81, 0x79, 0x5f, 0xf5, 0x52, 0x5f, 0xdf, 0x00, 0xf7,
+	0xce, 0xf3, 0x75, 0x59, 0xa5, 0x3d, 0xfa, 0x30, 0x9e, 0x30, 0xeb, 0x74, 0xc2, 0xac, 0xb3, 0x09,
+	0x83, 0xcf, 0x29, 0x83, 0xef, 0x29, 0x83, 0x9f, 0x29, 0x83, 0x71, 0xca, 0xe0, 0x57, 0xca, 0xe0,
+	0x77, 0xca, 0xac, 0xb3, 0x94, 0xc1, 0xd7, 0x29, 0xb3, 0xc6, 0x53, 0x66, 0x9d, 0x4e, 0x99, 0xf5,
+	0xf6, 0xae, 0x0e, 0x84, 0x1c, 0x79, 0x83, 0x51, 0x14, 0x0f, 0x3b, 0x4b, 0x9f, 0xaf, 0x07, 0x55,
+	0xe4, 0xfd, 0x5a, 0xf6, 0x10, 0xdd, 0xff, 0x13, 0x00, 0x00, 0xff, 0xff, 0xf6, 0x99, 0xd2, 0x0a,
+	0xed, 0x04, 0x00, 0x00,
 }
 
 func (this *GetRequestStatusRequest) Equal(that interface{}) bool {
@@ -191,6 +593,201 @@ func (this *GetRequestStatusResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *GetRequestStatusesRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetRequestStatusesRequest)
+	if !ok {
+		that2, ok := that.(GetRequestStatusesRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.PageSize != that1.PageSize {
+		return false
+	}
+	if this.PageToken != that1.PageToken {
+		return false
+	}
+	if this.Open != that1.Open {
+		return false
+	}
+	return true
+}
+func (this *GetRequestStatusesResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetRequestStatusesResponse)
+	if !ok {
+		that2, ok := that.(GetRequestStatusesResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.RequestStatuses) != len(that1.RequestStatuses) {
+		return false
+	}
+	for i := range this.RequestStatuses {
+		if !this.RequestStatuses[i].Equal(that1.RequestStatuses[i]) {
+			return false
+		}
+	}
+	if this.NextPageToken != that1.NextPageToken {
+		return false
+	}
+	return true
+}
+func (this *GetRequestStatusesForUserRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetRequestStatusesForUserRequest)
+	if !ok {
+		that2, ok := that.(GetRequestStatusesForUserRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.PageSize != that1.PageSize {
+		return false
+	}
+	if this.PageToken != that1.PageToken {
+		return false
+	}
+	if this.UserId != that1.UserId {
+		return false
+	}
+	if this.UserEmail != that1.UserEmail {
+		return false
+	}
+	if this.Open != that1.Open {
+		return false
+	}
+	return true
+}
+func (this *GetRequestStatusesForUserResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetRequestStatusesForUserResponse)
+	if !ok {
+		that2, ok := that.(GetRequestStatusesForUserResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.RequestStatuses) != len(that1.RequestStatuses) {
+		return false
+	}
+	for i := range this.RequestStatuses {
+		if !this.RequestStatuses[i].Equal(that1.RequestStatuses[i]) {
+			return false
+		}
+	}
+	if this.NextPageToken != that1.NextPageToken {
+		return false
+	}
+	return true
+}
+func (this *GetRequestStatusesForNamespaceRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetRequestStatusesForNamespaceRequest)
+	if !ok {
+		that2, ok := that.(GetRequestStatusesForNamespaceRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.PageSize != that1.PageSize {
+		return false
+	}
+	if this.PageToken != that1.PageToken {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.Open != that1.Open {
+		return false
+	}
+	return true
+}
+func (this *GetRequestStatusesForNamespaceResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetRequestStatusesForNamespaceResponse)
+	if !ok {
+		that2, ok := that.(GetRequestStatusesForNamespaceResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.RequestStatuses) != len(that1.RequestStatuses) {
+		return false
+	}
+	for i := range this.RequestStatuses {
+		if !this.RequestStatuses[i].Equal(that1.RequestStatuses[i]) {
+			return false
+		}
+	}
+	if this.NextPageToken != that1.NextPageToken {
+		return false
+	}
+	return true
+}
 func (this *GetRequestStatusRequest) GoString() string {
 	if this == nil {
 		return "nil"
@@ -210,6 +807,84 @@ func (this *GetRequestStatusResponse) GoString() string {
 	if this.RequestStatus != nil {
 		s = append(s, "RequestStatus: "+fmt.Sprintf("%#v", this.RequestStatus)+",\n")
 	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetRequestStatusesRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&requestservice.GetRequestStatusesRequest{")
+	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
+	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	s = append(s, "Open: "+fmt.Sprintf("%#v", this.Open)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetRequestStatusesResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&requestservice.GetRequestStatusesResponse{")
+	if this.RequestStatuses != nil {
+		s = append(s, "RequestStatuses: "+fmt.Sprintf("%#v", this.RequestStatuses)+",\n")
+	}
+	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetRequestStatusesForUserRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 9)
+	s = append(s, "&requestservice.GetRequestStatusesForUserRequest{")
+	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
+	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	s = append(s, "UserId: "+fmt.Sprintf("%#v", this.UserId)+",\n")
+	s = append(s, "UserEmail: "+fmt.Sprintf("%#v", this.UserEmail)+",\n")
+	s = append(s, "Open: "+fmt.Sprintf("%#v", this.Open)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetRequestStatusesForUserResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&requestservice.GetRequestStatusesForUserResponse{")
+	if this.RequestStatuses != nil {
+		s = append(s, "RequestStatuses: "+fmt.Sprintf("%#v", this.RequestStatuses)+",\n")
+	}
+	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetRequestStatusesForNamespaceRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&requestservice.GetRequestStatusesForNamespaceRequest{")
+	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
+	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "Open: "+fmt.Sprintf("%#v", this.Open)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetRequestStatusesForNamespaceResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&requestservice.GetRequestStatusesForNamespaceResponse{")
+	if this.RequestStatuses != nil {
+		s = append(s, "RequestStatuses: "+fmt.Sprintf("%#v", this.RequestStatuses)+",\n")
+	}
+	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -286,6 +961,294 @@ func (m *GetRequestStatusResponse) MarshalToSizedBuffer(dAtA []byte) (int, error
 	return len(dAtA) - i, nil
 }
 
+func (m *GetRequestStatusesRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetRequestStatusesRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetRequestStatusesRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Open {
+		i--
+		if m.Open {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.PageToken) > 0 {
+		i -= len(m.PageToken)
+		copy(dAtA[i:], m.PageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.PageSize != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetRequestStatusesResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetRequestStatusesResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetRequestStatusesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextPageToken) > 0 {
+		i -= len(m.NextPageToken)
+		copy(dAtA[i:], m.NextPageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.RequestStatuses) > 0 {
+		for iNdEx := len(m.RequestStatuses) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.RequestStatuses[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetRequestStatusesForUserRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetRequestStatusesForUserRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetRequestStatusesForUserRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Open {
+		i--
+		if m.Open {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x28
+	}
+	if len(m.UserEmail) > 0 {
+		i -= len(m.UserEmail)
+		copy(dAtA[i:], m.UserEmail)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.UserEmail)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.UserId) > 0 {
+		i -= len(m.UserId)
+		copy(dAtA[i:], m.UserId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.UserId)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.PageToken) > 0 {
+		i -= len(m.PageToken)
+		copy(dAtA[i:], m.PageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.PageSize != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetRequestStatusesForUserResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetRequestStatusesForUserResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetRequestStatusesForUserResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextPageToken) > 0 {
+		i -= len(m.NextPageToken)
+		copy(dAtA[i:], m.NextPageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.RequestStatuses) > 0 {
+		for iNdEx := len(m.RequestStatuses) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.RequestStatuses[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetRequestStatusesForNamespaceRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetRequestStatusesForNamespaceRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetRequestStatusesForNamespaceRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Open {
+		i--
+		if m.Open {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.PageToken) > 0 {
+		i -= len(m.PageToken)
+		copy(dAtA[i:], m.PageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.PageSize != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetRequestStatusesForNamespaceResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetRequestStatusesForNamespaceResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetRequestStatusesForNamespaceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextPageToken) > 0 {
+		i -= len(m.NextPageToken)
+		copy(dAtA[i:], m.NextPageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.RequestStatuses) > 0 {
+		for iNdEx := len(m.RequestStatuses) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.RequestStatuses[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintRequestResponse(dAtA []byte, offset int, v uint64) int {
 	offset -= sovRequestResponse(v)
 	base := offset
@@ -323,6 +1286,132 @@ func (m *GetRequestStatusResponse) Size() (n int) {
 	return n
 }
 
+func (m *GetRequestStatusesRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PageSize != 0 {
+		n += 1 + sovRequestResponse(uint64(m.PageSize))
+	}
+	l = len(m.PageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.Open {
+		n += 2
+	}
+	return n
+}
+
+func (m *GetRequestStatusesResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.RequestStatuses) > 0 {
+		for _, e := range m.RequestStatuses {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.NextPageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetRequestStatusesForUserRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PageSize != 0 {
+		n += 1 + sovRequestResponse(uint64(m.PageSize))
+	}
+	l = len(m.PageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.UserId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.UserEmail)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.Open {
+		n += 2
+	}
+	return n
+}
+
+func (m *GetRequestStatusesForUserResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.RequestStatuses) > 0 {
+		for _, e := range m.RequestStatuses {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.NextPageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetRequestStatusesForNamespaceRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PageSize != 0 {
+		n += 1 + sovRequestResponse(uint64(m.PageSize))
+	}
+	l = len(m.PageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.Open {
+		n += 2
+	}
+	return n
+}
+
+func (m *GetRequestStatusesForNamespaceResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.RequestStatuses) > 0 {
+		for _, e := range m.RequestStatuses {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.NextPageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
 func sovRequestResponse(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
@@ -345,6 +1434,93 @@ func (this *GetRequestStatusResponse) String() string {
 	}
 	s := strings.Join([]string{`&GetRequestStatusResponse{`,
 		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v1.RequestStatus", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetRequestStatusesRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetRequestStatusesRequest{`,
+		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
+		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`Open:` + fmt.Sprintf("%v", this.Open) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetRequestStatusesResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForRequestStatuses := "[]*RequestStatus{"
+	for _, f := range this.RequestStatuses {
+		repeatedStringForRequestStatuses += strings.Replace(fmt.Sprintf("%v", f), "RequestStatus", "v1.RequestStatus", 1) + ","
+	}
+	repeatedStringForRequestStatuses += "}"
+	s := strings.Join([]string{`&GetRequestStatusesResponse{`,
+		`RequestStatuses:` + repeatedStringForRequestStatuses + `,`,
+		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetRequestStatusesForUserRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetRequestStatusesForUserRequest{`,
+		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
+		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`UserId:` + fmt.Sprintf("%v", this.UserId) + `,`,
+		`UserEmail:` + fmt.Sprintf("%v", this.UserEmail) + `,`,
+		`Open:` + fmt.Sprintf("%v", this.Open) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetRequestStatusesForUserResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForRequestStatuses := "[]*RequestStatus{"
+	for _, f := range this.RequestStatuses {
+		repeatedStringForRequestStatuses += strings.Replace(fmt.Sprintf("%v", f), "RequestStatus", "v1.RequestStatus", 1) + ","
+	}
+	repeatedStringForRequestStatuses += "}"
+	s := strings.Join([]string{`&GetRequestStatusesForUserResponse{`,
+		`RequestStatuses:` + repeatedStringForRequestStatuses + `,`,
+		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetRequestStatusesForNamespaceRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetRequestStatusesForNamespaceRequest{`,
+		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
+		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`Open:` + fmt.Sprintf("%v", this.Open) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetRequestStatusesForNamespaceResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForRequestStatuses := "[]*RequestStatus{"
+	for _, f := range this.RequestStatuses {
+		repeatedStringForRequestStatuses += strings.Replace(fmt.Sprintf("%v", f), "RequestStatus", "v1.RequestStatus", 1) + ","
+	}
+	repeatedStringForRequestStatuses += "}"
+	s := strings.Join([]string{`&GetRequestStatusesForNamespaceResponse{`,
+		`RequestStatuses:` + repeatedStringForRequestStatuses + `,`,
+		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -506,6 +1682,831 @@ func (m *GetRequestStatusResponse) Unmarshal(dAtA []byte) error {
 			if err := m.RequestStatus.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetRequestStatusesRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetRequestStatusesRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetRequestStatusesRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
+			}
+			m.PageSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PageSize |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Open", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Open = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetRequestStatusesResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetRequestStatusesResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetRequestStatusesResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestStatuses", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RequestStatuses = append(m.RequestStatuses, &v1.RequestStatus{})
+			if err := m.RequestStatuses[len(m.RequestStatuses)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextPageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetRequestStatusesForUserRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetRequestStatusesForUserRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetRequestStatusesForUserRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
+			}
+			m.PageSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PageSize |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UserId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UserId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UserEmail", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UserEmail = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Open", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Open = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetRequestStatusesForUserResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetRequestStatusesForUserResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetRequestStatusesForUserResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestStatuses", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RequestStatuses = append(m.RequestStatuses, &v1.RequestStatus{})
+			if err := m.RequestStatuses[len(m.RequestStatuses)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextPageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetRequestStatusesForNamespaceRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetRequestStatusesForNamespaceRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetRequestStatusesForNamespaceRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
+			}
+			m.PageSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PageSize |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Open", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Open = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetRequestStatusesForNamespaceResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetRequestStatusesForNamespaceResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetRequestStatusesForNamespaceResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestStatuses", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RequestStatuses = append(m.RequestStatuses, &v1.RequestStatus{})
+			if err := m.RequestStatuses[len(m.RequestStatuses)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextPageToken = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

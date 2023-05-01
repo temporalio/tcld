@@ -6,12 +6,11 @@ package authservice
 import (
 	context "context"
 	fmt "fmt"
-	math "math"
-
 	proto "github.com/gogo/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -28,37 +27,42 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 func init() { proto.RegisterFile("api/authservice/v1/service.proto", fileDescriptor_80c42cd25eb3e22a) }
 
 var fileDescriptor_80c42cd25eb3e22a = []byte{
-	// 397 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x94, 0xcf, 0x4a, 0xeb, 0x40,
-	0x14, 0xc6, 0x33, 0x9b, 0xdb, 0xcb, 0x74, 0x73, 0x19, 0xb8, 0x9b, 0x2e, 0x0e, 0xd2, 0x6a, 0xc5,
-	0x3f, 0x24, 0x56, 0x57, 0xea, 0xca, 0x22, 0x88, 0x1b, 0x91, 0x6a, 0x11, 0x04, 0xb1, 0xb1, 0x3d,
-	0xd0, 0x40, 0x9a, 0xc4, 0x4c, 0x12, 0x70, 0x23, 0x3e, 0x82, 0x5b, 0xdf, 0xc0, 0xe7, 0x70, 0xe5,
-	0xb2, 0xcb, 0x2e, 0x6d, 0xba, 0x71, 0xd9, 0x47, 0x10, 0x3b, 0x99, 0x34, 0xda, 0x38, 0x55, 0x77,
-	0xed, 0x9c, 0xdf, 0xf7, 0xfb, 0xce, 0x40, 0x18, 0xba, 0x60, 0x7a, 0x96, 0x61, 0x86, 0x41, 0x97,
-	0xa3, 0x1f, 0x59, 0x6d, 0x34, 0xa2, 0x9a, 0x91, 0xfc, 0xd4, 0x3d, 0xdf, 0x0d, 0x5c, 0xc6, 0x4c,
-	0xcf, 0xd2, 0x33, 0x84, 0x1e, 0xd5, 0x4a, 0x2b, 0x39, 0x29, 0x1f, 0xaf, 0x43, 0xe4, 0xc1, 0xa5,
-	0x8f, 0xdc, 0x73, 0x1d, 0x9e, 0xc4, 0x37, 0x9f, 0x0a, 0xb4, 0xb8, 0x17, 0x06, 0xdd, 0x13, 0x41,
-	0xb2, 0x33, 0xfa, 0xf7, 0x00, 0x83, 0x86, 0x6b, 0x23, 0x67, 0x15, 0x7d, 0xd6, 0xad, 0xcb, 0x69,
-	0x43, 0xf8, 0x4a, 0x8b, 0x6a, 0x48, 0x94, 0x95, 0x35, 0x76, 0x4b, 0xff, 0xcb, 0xd3, 0xfa, 0xcd,
-	0x31, 0xfa, 0x3d, 0x8b, 0x73, 0xcb, 0x75, 0x38, 0xdb, 0x50, 0x09, 0x3e, 0xa0, 0xb2, 0xb2, 0xf6,
-	0x83, 0x44, 0xda, 0x2f, 0x2e, 0xd6, 0xe4, 0xe8, 0x7f, 0x7d, 0xb1, 0xc9, 0x74, 0xde, 0xc5, 0x12,
-	0x28, 0x15, 0x9f, 0xd2, 0x42, 0x72, 0xca, 0xca, 0x8a, 0x88, 0xd4, 0x56, 0x94, 0x4c, 0x6a, 0x6d,
-	0xd1, 0xe2, 0xa1, 0x13, 0x59, 0x01, 0x8a, 0x8d, 0xab, 0x79, 0xa9, 0x0c, 0x20, 0xed, 0xcb, 0x73,
-	0xb9, 0xb4, 0xc1, 0xa5, 0xff, 0x1a, 0xc8, 0xd1, 0xe9, 0xbc, 0x0f, 0x04, 0xc2, 0xd6, 0xf2, 0xe2,
-	0x9f, 0x29, 0xd9, 0xb5, 0xfe, 0x3d, 0x38, 0x2d, 0xbc, 0xa0, 0xb4, 0xe9, 0x75, 0x4c, 0xb1, 0x09,
-	0x5b, 0xca, 0x4b, 0x4f, 0xe7, 0xb2, 0xa4, 0x3a, 0x0f, 0xcb, 0xea, 0xf7, 0xd1, 0x46, 0x95, 0x7e,
-	0x3a, 0x57, 0xea, 0xb3, 0x58, 0xaa, 0x7f, 0x20, 0x14, 0xa6, 0xbd, 0x47, 0x66, 0x0f, 0xb9, 0x67,
-	0xb6, 0x31, 0xfb, 0x25, 0x6f, 0xab, 0x77, 0xcd, 0xcb, 0xc8, 0x3d, 0x76, 0x7e, 0x13, 0x95, 0xbb,
-	0xd5, 0x5b, 0xfd, 0x21, 0x68, 0x83, 0x21, 0x68, 0xe3, 0x21, 0x90, 0xbb, 0x18, 0xc8, 0x63, 0x0c,
-	0xe4, 0x39, 0x06, 0xd2, 0x8f, 0x81, 0xbc, 0xc4, 0x40, 0x5e, 0x63, 0xd0, 0xc6, 0x31, 0x90, 0xfb,
-	0x11, 0x68, 0xfd, 0x11, 0x68, 0x83, 0x11, 0x68, 0xe7, 0xab, 0x41, 0xcf, 0xf3, 0x6d, 0xbd, 0x6d,
-	0xbb, 0x61, 0xc7, 0x98, 0x7d, 0x31, 0x76, 0x33, 0x7f, 0xaf, 0xfe, 0x4c, 0x5e, 0x8b, 0xad, 0xb7,
-	0x00, 0x00, 0x00, 0xff, 0xff, 0x28, 0x10, 0xfd, 0xb7, 0x90, 0x04, 0x00, 0x00,
+	// 478 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x95, 0x3f, 0x8f, 0xd3, 0x30,
+	0x18, 0xc6, 0xe3, 0x85, 0x3f, 0x2e, 0x03, 0xb2, 0xc4, 0x72, 0x83, 0x85, 0x8e, 0xbb, 0xe3, 0xaf,
+	0x12, 0x0a, 0x13, 0x30, 0xdd, 0x81, 0x74, 0x3a, 0x21, 0xa1, 0xaa, 0x50, 0x21, 0x55, 0x42, 0x34,
+	0xa4, 0xaf, 0xd4, 0x48, 0x69, 0x12, 0x6c, 0x27, 0x52, 0x17, 0xc4, 0x47, 0x60, 0x65, 0x60, 0xe7,
+	0xa3, 0x30, 0x76, 0xec, 0x48, 0xd3, 0x85, 0xb1, 0x1f, 0x01, 0xb5, 0x8e, 0x1d, 0xb7, 0x4d, 0x1d,
+	0xb8, 0xad, 0x7d, 0xdf, 0xdf, 0xf3, 0x3c, 0xaf, 0x5f, 0x47, 0x32, 0xbe, 0xed, 0xa7, 0xa1, 0xe7,
+	0x67, 0x62, 0xc4, 0x81, 0xe5, 0x61, 0x00, 0x5e, 0xde, 0xf6, 0xca, 0x9f, 0x6e, 0xca, 0x12, 0x91,
+	0x10, 0xe2, 0xa7, 0xa1, 0x6b, 0x10, 0x6e, 0xde, 0x3e, 0xb8, 0x5f, 0xa3, 0x62, 0xf0, 0x39, 0x03,
+	0x2e, 0x3e, 0x32, 0xe0, 0x69, 0x12, 0xf3, 0x52, 0xfe, 0xe4, 0x47, 0x0b, 0xb7, 0x4e, 0x33, 0x31,
+	0x7a, 0x2b, 0x49, 0xf2, 0x0e, 0x5f, 0x3d, 0x07, 0xd1, 0x4d, 0x22, 0x20, 0x87, 0xee, 0xae, 0xb5,
+	0x5b, 0x36, 0xbb, 0xd2, 0xed, 0xe0, 0x8e, 0x95, 0x91, 0x49, 0x87, 0x0e, 0x79, 0x8f, 0xaf, 0x95,
+	0x45, 0x4e, 0x6c, 0x12, 0xae, 0x7c, 0x8f, 0xec, 0x90, 0x36, 0xfe, 0x82, 0x6f, 0xa9, 0xea, 0xd9,
+	0xa4, 0x03, 0x6c, 0x1c, 0x72, 0x1e, 0x26, 0x31, 0x27, 0x8f, 0x6d, 0x06, 0x1b, 0xa8, 0x8a, 0x6c,
+	0xff, 0x87, 0x62, 0xeb, 0x60, 0x3d, 0x0e, 0x6c, 0xff, 0xc1, 0xd6, 0xdd, 0xa6, 0x83, 0x95, 0x90,
+	0x36, 0x96, 0xf7, 0xb0, 0xaa, 0xee, 0xbd, 0x87, 0x55, 0xb3, 0xe9, 0x1e, 0x24, 0xa3, 0x5d, 0x07,
+	0xb8, 0x75, 0x11, 0xe7, 0xa1, 0x00, 0x39, 0xf1, 0x49, 0x9d, 0xca, 0x00, 0x94, 0xfb, 0xdd, 0x46,
+	0x4e, 0x27, 0x24, 0xf8, 0x66, 0x17, 0x38, 0xc4, 0xc3, 0x55, 0x43, 0x22, 0xe4, 0x61, 0x9d, 0x7c,
+	0x9b, 0x52, 0x59, 0x8f, 0xfe, 0x0d, 0xd6, 0x81, 0x1f, 0x30, 0xee, 0xa5, 0x43, 0x5f, 0x4e, 0x42,
+	0x8e, 0xeb, 0xd4, 0x55, 0x5f, 0x85, 0x9c, 0x34, 0x61, 0xa6, 0xfd, 0x2b, 0x88, 0xc0, 0x66, 0x5f,
+	0xf5, 0xad, 0xf6, 0x26, 0xa6, 0xed, 0xbf, 0x23, 0x4c, 0xab, 0xdc, 0x37, 0xfe, 0x18, 0x78, 0xea,
+	0x07, 0x60, 0x7e, 0xc9, 0xcf, 0xec, 0xb3, 0xd6, 0x69, 0xd4, 0x1c, 0xcf, 0x2f, 0x23, 0xd5, 0xb3,
+	0x05, 0xf8, 0xc6, 0x4b, 0x06, 0xbe, 0x80, 0xd3, 0xce, 0xc5, 0x6b, 0x98, 0x90, 0xda, 0xaf, 0xc0,
+	0x24, 0x54, 0xec, 0xbd, 0x66, 0xd0, 0xdc, 0xef, 0x39, 0x08, 0x59, 0xe6, 0xf5, 0xfb, 0xad, 0xfa,
+	0xd6, 0xfd, 0x9a, 0x98, 0xb6, 0xef, 0xe3, 0xeb, 0xba, 0x4e, 0x8e, 0xac, 0x32, 0x65, 0x7e, 0xdc,
+	0x40, 0x99, 0xfb, 0x91, 0x77, 0x6a, 0xdb, 0x8f, 0x49, 0x58, 0xf7, 0xb3, 0x09, 0xaa, 0x90, 0xb3,
+	0xc1, 0x74, 0x4e, 0x9d, 0xd9, 0x9c, 0x3a, 0xcb, 0x39, 0x45, 0x5f, 0x0b, 0x8a, 0x7e, 0x16, 0x14,
+	0xfd, 0x2a, 0x28, 0x9a, 0x16, 0x14, 0xfd, 0x2e, 0x28, 0xfa, 0x53, 0x50, 0x67, 0x59, 0x50, 0xf4,
+	0x6d, 0x41, 0x9d, 0xe9, 0x82, 0x3a, 0xb3, 0x05, 0x75, 0xfa, 0x0f, 0xc4, 0x38, 0x65, 0x91, 0x1b,
+	0x44, 0x49, 0x36, 0xf4, 0x76, 0x1f, 0x83, 0x17, 0xc6, 0xdf, 0x4f, 0x57, 0xd6, 0x0f, 0xc1, 0xd3,
+	0xbf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x74, 0x67, 0x50, 0x60, 0x6b, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
@@ -68,6 +72,7 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type AuthServiceClient interface {
+	GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*GetRoleResponse, error)
 	GetRoles(ctx context.Context, in *GetRolesRequest, opts ...grpc.CallOption) (*GetRolesResponse, error)
 	GetRolesByPermissions(ctx context.Context, in *GetRolesByPermissionsRequest, opts ...grpc.CallOption) (*GetRolesByPermissionsResponse, error)
 	GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersResponse, error)
@@ -77,14 +82,27 @@ type AuthServiceClient interface {
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
 	UpdateUserNamespacePermissions(ctx context.Context, in *UpdateUserNamespacePermissionsRequest, opts ...grpc.CallOption) (*UpdateUserNamespacePermissionsResponse, error)
+	CreateAPIKey(ctx context.Context, in *CreateAPIKeyRequest, opts ...grpc.CallOption) (*CreateAPIKeyResponse, error)
+	GetAPIKeys(ctx context.Context, in *GetAPIKeysRequest, opts ...grpc.CallOption) (*GetAPIKeysResponse, error)
+	GetAPIKey(ctx context.Context, in *GetAPIKeyRequest, opts ...grpc.CallOption) (*GetAPIKeyResponse, error)
+	DeleteAPIKey(ctx context.Context, in *DeleteAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAPIKeyResponse, error)
 }
 
 type authServiceClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewAuthServiceClient(cc *grpc.ClientConn) AuthServiceClient {
+func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
 	return &authServiceClient{cc}
+}
+
+func (c *authServiceClient) GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*GetRoleResponse, error) {
+	out := new(GetRoleResponse)
+	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/GetRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *authServiceClient) GetRoles(ctx context.Context, in *GetRolesRequest, opts ...grpc.CallOption) (*GetRolesResponse, error) {
@@ -168,8 +186,45 @@ func (c *authServiceClient) UpdateUserNamespacePermissions(ctx context.Context, 
 	return out, nil
 }
 
+func (c *authServiceClient) CreateAPIKey(ctx context.Context, in *CreateAPIKeyRequest, opts ...grpc.CallOption) (*CreateAPIKeyResponse, error) {
+	out := new(CreateAPIKeyResponse)
+	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/CreateAPIKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) GetAPIKeys(ctx context.Context, in *GetAPIKeysRequest, opts ...grpc.CallOption) (*GetAPIKeysResponse, error) {
+	out := new(GetAPIKeysResponse)
+	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/GetAPIKeys", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) GetAPIKey(ctx context.Context, in *GetAPIKeyRequest, opts ...grpc.CallOption) (*GetAPIKeyResponse, error) {
+	out := new(GetAPIKeyResponse)
+	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/GetAPIKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) DeleteAPIKey(ctx context.Context, in *DeleteAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAPIKeyResponse, error) {
+	out := new(DeleteAPIKeyResponse)
+	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/DeleteAPIKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 type AuthServiceServer interface {
+	GetRole(context.Context, *GetRoleRequest) (*GetRoleResponse, error)
 	GetRoles(context.Context, *GetRolesRequest) (*GetRolesResponse, error)
 	GetRolesByPermissions(context.Context, *GetRolesByPermissionsRequest) (*GetRolesByPermissionsResponse, error)
 	GetUsers(context.Context, *GetUsersRequest) (*GetUsersResponse, error)
@@ -179,12 +234,19 @@ type AuthServiceServer interface {
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
 	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
 	UpdateUserNamespacePermissions(context.Context, *UpdateUserNamespacePermissionsRequest) (*UpdateUserNamespacePermissionsResponse, error)
+	CreateAPIKey(context.Context, *CreateAPIKeyRequest) (*CreateAPIKeyResponse, error)
+	GetAPIKeys(context.Context, *GetAPIKeysRequest) (*GetAPIKeysResponse, error)
+	GetAPIKey(context.Context, *GetAPIKeyRequest) (*GetAPIKeyResponse, error)
+	DeleteAPIKey(context.Context, *DeleteAPIKeyRequest) (*DeleteAPIKeyResponse, error)
 }
 
 // UnimplementedAuthServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedAuthServiceServer struct {
 }
 
+func (*UnimplementedAuthServiceServer) GetRole(ctx context.Context, req *GetRoleRequest) (*GetRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRole not implemented")
+}
 func (*UnimplementedAuthServiceServer) GetRoles(ctx context.Context, req *GetRolesRequest) (*GetRolesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRoles not implemented")
 }
@@ -212,9 +274,39 @@ func (*UnimplementedAuthServiceServer) DeleteUser(ctx context.Context, req *Dele
 func (*UnimplementedAuthServiceServer) UpdateUserNamespacePermissions(ctx context.Context, req *UpdateUserNamespacePermissionsRequest) (*UpdateUserNamespacePermissionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserNamespacePermissions not implemented")
 }
+func (*UnimplementedAuthServiceServer) CreateAPIKey(ctx context.Context, req *CreateAPIKeyRequest) (*CreateAPIKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAPIKey not implemented")
+}
+func (*UnimplementedAuthServiceServer) GetAPIKeys(ctx context.Context, req *GetAPIKeysRequest) (*GetAPIKeysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAPIKeys not implemented")
+}
+func (*UnimplementedAuthServiceServer) GetAPIKey(ctx context.Context, req *GetAPIKeyRequest) (*GetAPIKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAPIKey not implemented")
+}
+func (*UnimplementedAuthServiceServer) DeleteAPIKey(ctx context.Context, req *DeleteAPIKeyRequest) (*DeleteAPIKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAPIKey not implemented")
+}
 
 func RegisterAuthServiceServer(s *grpc.Server, srv AuthServiceServer) {
 	s.RegisterService(&_AuthService_serviceDesc, srv)
+}
+
+func _AuthService_GetRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GetRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.authservice.v1.AuthService/GetRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GetRole(ctx, req.(*GetRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _AuthService_GetRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -379,10 +471,86 @@ func _AuthService_UpdateUserNamespacePermissions_Handler(srv interface{}, ctx co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_CreateAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAPIKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).CreateAPIKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.authservice.v1.AuthService/CreateAPIKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).CreateAPIKey(ctx, req.(*CreateAPIKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_GetAPIKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAPIKeysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GetAPIKeys(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.authservice.v1.AuthService/GetAPIKeys",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GetAPIKeys(ctx, req.(*GetAPIKeysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_GetAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAPIKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GetAPIKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.authservice.v1.AuthService/GetAPIKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GetAPIKey(ctx, req.(*GetAPIKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_DeleteAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAPIKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).DeleteAPIKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.authservice.v1.AuthService/DeleteAPIKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).DeleteAPIKey(ctx, req.(*DeleteAPIKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _AuthService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "api.authservice.v1.AuthService",
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetRole",
+			Handler:    _AuthService_GetRole_Handler,
+		},
 		{
 			MethodName: "GetRoles",
 			Handler:    _AuthService_GetRoles_Handler,
@@ -418,6 +586,22 @@ var _AuthService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUserNamespacePermissions",
 			Handler:    _AuthService_UpdateUserNamespacePermissions_Handler,
+		},
+		{
+			MethodName: "CreateAPIKey",
+			Handler:    _AuthService_CreateAPIKey_Handler,
+		},
+		{
+			MethodName: "GetAPIKeys",
+			Handler:    _AuthService_GetAPIKeys_Handler,
+		},
+		{
+			MethodName: "GetAPIKey",
+			Handler:    _AuthService_GetAPIKey_Handler,
+		},
+		{
+			MethodName: "DeleteAPIKey",
+			Handler:    _AuthService_DeleteAPIKey_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

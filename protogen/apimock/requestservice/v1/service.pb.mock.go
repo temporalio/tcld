@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	requestservice "github.com/temporalio/tcld/protogen/api/requestservice/v1"
+	v1 "github.com/temporalio/tcld/protogen/api/requestservice/v1"
 	grpc "google.golang.org/grpc"
 )
 
@@ -37,14 +37,14 @@ func (m *MockRequestServiceClient) EXPECT() *MockRequestServiceClientMockRecorde
 }
 
 // GetRequestStatus mocks base method.
-func (m *MockRequestServiceClient) GetRequestStatus(ctx context.Context, in *requestservice.GetRequestStatusRequest, opts ...grpc.CallOption) (*requestservice.GetRequestStatusResponse, error) {
+func (m *MockRequestServiceClient) GetRequestStatus(ctx context.Context, in *v1.GetRequestStatusRequest, opts ...grpc.CallOption) (*v1.GetRequestStatusResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetRequestStatus", varargs...)
-	ret0, _ := ret[0].(*requestservice.GetRequestStatusResponse)
+	ret0, _ := ret[0].(*v1.GetRequestStatusResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -54,6 +54,66 @@ func (mr *MockRequestServiceClientMockRecorder) GetRequestStatus(ctx, in interfa
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRequestStatus", reflect.TypeOf((*MockRequestServiceClient)(nil).GetRequestStatus), varargs...)
+}
+
+// GetRequestStatuses mocks base method.
+func (m *MockRequestServiceClient) GetRequestStatuses(ctx context.Context, in *v1.GetRequestStatusesRequest, opts ...grpc.CallOption) (*v1.GetRequestStatusesResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetRequestStatuses", varargs...)
+	ret0, _ := ret[0].(*v1.GetRequestStatusesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRequestStatuses indicates an expected call of GetRequestStatuses.
+func (mr *MockRequestServiceClientMockRecorder) GetRequestStatuses(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRequestStatuses", reflect.TypeOf((*MockRequestServiceClient)(nil).GetRequestStatuses), varargs...)
+}
+
+// GetRequestStatusesForNamespace mocks base method.
+func (m *MockRequestServiceClient) GetRequestStatusesForNamespace(ctx context.Context, in *v1.GetRequestStatusesForNamespaceRequest, opts ...grpc.CallOption) (*v1.GetRequestStatusesForNamespaceResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetRequestStatusesForNamespace", varargs...)
+	ret0, _ := ret[0].(*v1.GetRequestStatusesForNamespaceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRequestStatusesForNamespace indicates an expected call of GetRequestStatusesForNamespace.
+func (mr *MockRequestServiceClientMockRecorder) GetRequestStatusesForNamespace(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRequestStatusesForNamespace", reflect.TypeOf((*MockRequestServiceClient)(nil).GetRequestStatusesForNamespace), varargs...)
+}
+
+// GetRequestStatusesForUser mocks base method.
+func (m *MockRequestServiceClient) GetRequestStatusesForUser(ctx context.Context, in *v1.GetRequestStatusesForUserRequest, opts ...grpc.CallOption) (*v1.GetRequestStatusesForUserResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetRequestStatusesForUser", varargs...)
+	ret0, _ := ret[0].(*v1.GetRequestStatusesForUserResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRequestStatusesForUser indicates an expected call of GetRequestStatusesForUser.
+func (mr *MockRequestServiceClientMockRecorder) GetRequestStatusesForUser(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRequestStatusesForUser", reflect.TypeOf((*MockRequestServiceClient)(nil).GetRequestStatusesForUser), varargs...)
 }
 
 // MockRequestServiceServer is a mock of RequestServiceServer interface.
@@ -80,10 +140,10 @@ func (m *MockRequestServiceServer) EXPECT() *MockRequestServiceServerMockRecorde
 }
 
 // GetRequestStatus mocks base method.
-func (m *MockRequestServiceServer) GetRequestStatus(arg0 context.Context, arg1 *requestservice.GetRequestStatusRequest) (*requestservice.GetRequestStatusResponse, error) {
+func (m *MockRequestServiceServer) GetRequestStatus(arg0 context.Context, arg1 *v1.GetRequestStatusRequest) (*v1.GetRequestStatusResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRequestStatus", arg0, arg1)
-	ret0, _ := ret[0].(*requestservice.GetRequestStatusResponse)
+	ret0, _ := ret[0].(*v1.GetRequestStatusResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -92,4 +152,49 @@ func (m *MockRequestServiceServer) GetRequestStatus(arg0 context.Context, arg1 *
 func (mr *MockRequestServiceServerMockRecorder) GetRequestStatus(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRequestStatus", reflect.TypeOf((*MockRequestServiceServer)(nil).GetRequestStatus), arg0, arg1)
+}
+
+// GetRequestStatuses mocks base method.
+func (m *MockRequestServiceServer) GetRequestStatuses(arg0 context.Context, arg1 *v1.GetRequestStatusesRequest) (*v1.GetRequestStatusesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRequestStatuses", arg0, arg1)
+	ret0, _ := ret[0].(*v1.GetRequestStatusesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRequestStatuses indicates an expected call of GetRequestStatuses.
+func (mr *MockRequestServiceServerMockRecorder) GetRequestStatuses(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRequestStatuses", reflect.TypeOf((*MockRequestServiceServer)(nil).GetRequestStatuses), arg0, arg1)
+}
+
+// GetRequestStatusesForNamespace mocks base method.
+func (m *MockRequestServiceServer) GetRequestStatusesForNamespace(arg0 context.Context, arg1 *v1.GetRequestStatusesForNamespaceRequest) (*v1.GetRequestStatusesForNamespaceResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRequestStatusesForNamespace", arg0, arg1)
+	ret0, _ := ret[0].(*v1.GetRequestStatusesForNamespaceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRequestStatusesForNamespace indicates an expected call of GetRequestStatusesForNamespace.
+func (mr *MockRequestServiceServerMockRecorder) GetRequestStatusesForNamespace(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRequestStatusesForNamespace", reflect.TypeOf((*MockRequestServiceServer)(nil).GetRequestStatusesForNamespace), arg0, arg1)
+}
+
+// GetRequestStatusesForUser mocks base method.
+func (m *MockRequestServiceServer) GetRequestStatusesForUser(arg0 context.Context, arg1 *v1.GetRequestStatusesForUserRequest) (*v1.GetRequestStatusesForUserResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRequestStatusesForUser", arg0, arg1)
+	ret0, _ := ret[0].(*v1.GetRequestStatusesForUserResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRequestStatusesForUser indicates an expected call of GetRequestStatusesForUser.
+func (mr *MockRequestServiceServerMockRecorder) GetRequestStatusesForUser(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRequestStatusesForUser", reflect.TypeOf((*MockRequestServiceServer)(nil).GetRequestStatusesForUser), arg0, arg1)
 }
