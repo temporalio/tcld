@@ -137,7 +137,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 			Subcommands: []*cli.Command{
 				{
 					Name:    "create",
-					Usage:   "Create a user apikey",
+					Usage:   "Create an apikey",
 					Aliases: []string{"c"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
@@ -184,7 +184,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 				},
 				{
 					Name:    "get",
-					Usage:   "Get an user apikey",
+					Usage:   "Get an apikey",
 					Aliases: []string{"g"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
@@ -204,7 +204,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 				},
 				{
 					Name:    "list",
-					Usage:   "List user apikeys",
+					Usage:   "List apikeys",
 					Aliases: []string{"l"},
 					Flags:   []cli.Flag{},
 					Action: func(ctx *cli.Context) error {
@@ -213,7 +213,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 				},
 				{
 					Name:    "delete",
-					Usage:   "Delete an user apikey",
+					Usage:   "Delete an apikey",
 					Aliases: []string{"d"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
@@ -243,7 +243,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 				},
 				{
 					Name:    "disable",
-					Usage:   "Disable an user apikey",
+					Usage:   "Disable an apikey",
 					Aliases: []string{"da"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
@@ -279,7 +279,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 				},
 				{
 					Name:    "enable",
-					Usage:   "Enable a disabled user apikey",
+					Usage:   "Enable a disabled apikey",
 					Aliases: []string{"ea"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
