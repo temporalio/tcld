@@ -23,9 +23,7 @@ func NewApp(params AppParams) (*cli.App, error) {
 			ServerFlag,
 			ConfigDirFlag,
 			AutoConfirmFlag,
-			APIKeyIDFlag,
-			APIKeySecretFlag,
-			EnableHMACFlag,
+			APIKeyFlag,
 			EnableDebugLogsFlag,
 		},
 	}

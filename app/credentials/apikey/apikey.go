@@ -2,49 +2,23 @@ package apikey
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
-	"net/url"
-	"path"
-	"strings"
-	"time"
 
 	"google.golang.org/grpc/credentials"
 )
 
 const (
-	IDHeader     = "tmprl-api-key-id"
-	SecretHeader = "tmprl-api-secret-key"
-
-	RequestSignatureHeader           = "tmprl-request-signature"
-	RequestSignatureAlgorithmHeader  = "tmprl-request-signature-algorithm"
-	RequestDatetimeHeader            = "tmprl-request-datetime"
-	DefaultRequestSignatureAlgorithm = "tmprl-hmac-sha256"
-
-	// requestSignatureFormat requires each of the following data on a newline
-	// KeyID
-	// RequestSignatureAlgorithm
-	// RequestDatetime
-	// ActionName
-	requestSignatureFormat = "%s\n%s\n%s\n%s"
+	AuthorizationHeader       = "authorization"
+	AuthorizationHeaderPrefix = "Bearer"
+	Separator                 = "_"
 )
 
 type Credential struct {
-	ID                     string
-	secret                 string // secret kept private to prevent accidental access.
-	enableHMAC             bool
+	Key                    string
 	allowInsecureTransport bool
 }
 
 type Option = func(c *Credential)
-
-func WithHMAC(enable bool) Option {
-	return func(c *Credential) {
-		c.enableHMAC = enable
-	}
-}
 
 func WithInsecureTransport(insecure bool) Option {
 	return func(c *Credential) {
@@ -52,14 +26,13 @@ func WithInsecureTransport(insecure bool) Option {
 	}
 }
 
-func NewCredential(keyID string, secret string, opts ...Option) (Credential, error) {
-	if len(keyID) == 0 || len(secret) == 0 {
-		return Credential{}, fmt.Errorf("both an API key ID and secret must be provided")
+func NewCredential(key string, opts ...Option) (Credential, error) {
+	if len(key) == 0 {
+		return Credential{}, fmt.Errorf("an empty API key was provided")
 	}
 
 	c := Credential{
-		ID:     keyID,
-		secret: secret,
+		Key: key,
 	}
 	for _, opt := range opts {
 		opt(&c)
@@ -81,54 +54,13 @@ func (c Credential) GetRequestMetadata(ctx context.Context, uri ...string) (map[
 		}
 	}
 
-	if c.enableHMAC {
-		action, err := action(uri[0], ri.Method)
-		if err != nil {
-			return map[string]string{}, fmt.Errorf("failed to generate action for hmac: %v", err)
-		}
-
-		requestDatetime := time.Now().Format(time.RFC3339)
-		msg := fmt.Sprintf(
-			requestSignatureFormat,
-			c.ID,
-			DefaultRequestSignatureAlgorithm,
-			requestDatetime,
-			action,
-		)
-
-		h := hmac.New(sha256.New, []byte(c.secret))
-		_, err = h.Write([]byte(msg))
-		if err != nil {
-			return map[string]string{}, fmt.Errorf("failed to generate hmac: %v", err)
-		}
-
-		return map[string]string{
-			IDHeader:                        c.ID,
-			RequestDatetimeHeader:           requestDatetime,
-			RequestSignatureAlgorithmHeader: DefaultRequestSignatureAlgorithm,
-			RequestSignatureHeader:          hex.EncodeToString(h.Sum(nil)),
-		}, nil
-	}
-
 	return map[string]string{
-		IDHeader:     c.ID,
-		SecretHeader: c.secret,
+		AuthorizationHeader: fmt.Sprintf("%s %s", AuthorizationHeaderPrefix, c.Key),
 	}, nil
 }
 
 func (c Credential) RequireTransportSecurity() bool {
 	return !c.allowInsecureTransport
-}
-
-func action(rawURL, method string) (string, error) {
-	url, err := url.Parse(rawURL)
-	if err != nil {
-		return "", err
-	}
-
-	parts := strings.Split(url.Hostname(), ".")
-
-	return fmt.Sprintf("%s:%s", parts[0], path.Base(method)), nil
 }
 
 var _ credentials.PerRPCCredentials = (*Credential)(nil)

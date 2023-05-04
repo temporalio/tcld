@@ -10,7 +10,6 @@ import (
 	"net"
 	"path"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -27,9 +26,8 @@ import (
 )
 
 const (
-	testAPIKeyID     = "testid"
-	testAPIKeySecret = "testsecret"
-	testAccessToken  = "test-token"
+	testAPIKey      = "testprefix_testid_testsecret"
+	testAccessToken = "test-token"
 )
 
 type testServer struct {
@@ -109,34 +107,9 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			expectedErr: fmt.Errorf("the credentials require transport level security"),
 		},
 		{
-			name: "ErrorAPIKeyIDProvidedButNotSecret",
-			args: map[string]string{
-				APIKeyIDFlagName: testAPIKeyID,
-			},
-			expectedErr: fmt.Errorf("when using an API key you must specify both the key ID and secret"),
-		},
-		{
-			name: "ErrorAPIKeySecretProvidedButNotID",
-			args: map[string]string{
-				APISecretKeyFlagName: testAPIKeySecret,
-			},
-			expectedErr: fmt.Errorf("when using an API key you must specify both the key ID and secret"),
-		},
-		{
 			name: "ErrorAPIKeyInsecureConnection",
 			args: map[string]string{
-				APIKeyIDFlagName:     testAPIKeyID,
-				APISecretKeyFlagName: testAPIKeySecret,
-				// don't include insecure flag, as this is an accidental insecure connection.
-			},
-			expectedErr: fmt.Errorf("the credentials require transport level security"),
-		},
-		{
-			name: "ErrorHMACInsecureConnection",
-			args: map[string]string{
-				APIKeyIDFlagName:     testAPIKeyID,
-				APISecretKeyFlagName: testAPIKeySecret,
-				EnableHMACFlagName:   "",
+				APIKeyFlagName: testAPIKey,
 				// don't include insecure flag, as this is an accidental insecure connection.
 			},
 			expectedErr: fmt.Errorf("the credentials require transport level security"),
@@ -154,25 +127,10 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			name: "APIKeySucess",
 			args: map[string]string{
 				InsecureConnectionFlagName: "", // required for bufconn
-				APIKeyIDFlagName:           testAPIKeyID,
-				APISecretKeyFlagName:       testAPIKeySecret,
+				APIKeyFlagName:             testAPIKey,
 			},
 			expectedHeaders: map[string]string{
-				apikey.IDHeader:     testAPIKeyID,
-				apikey.SecretHeader: testAPIKeySecret,
-			},
-		},
-		{
-			name: "HMACSuccess",
-			args: map[string]string{
-				InsecureConnectionFlagName: "", // required for bufconn
-				APIKeyIDFlagName:           testAPIKeyID,
-				APISecretKeyFlagName:       testAPIKeySecret,
-				EnableHMACFlagName:         "",
-			},
-			expectedHeaders: map[string]string{
-				apikey.IDHeader:                        testAPIKeyID,
-				apikey.RequestSignatureAlgorithmHeader: apikey.DefaultRequestSignatureAlgorithm,
+				apikey.AuthorizationHeader: "Bearer " + testAPIKey,
 			},
 		},
 	}
@@ -183,9 +141,7 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			flags := []cli.Flag{
 				ServerFlag,
 				ConfigDirFlag,
-				APIKeyIDFlag,
-				APIKeySecretFlag,
-				EnableHMACFlag,
+				APIKeyFlag,
 				InsecureConnectionFlag,
 			}
 			for _, f := range flags {
@@ -234,27 +190,10 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			commit := getHeaderValue(md, CommitHeader)
 			s.Equal(Commit, commit)
 
-			_, providedAPIKeyID := tc.args[APIKeyIDFlagName]
-			_, providedAPIKeySecret := tc.args[APISecretKeyFlagName]
-			if providedAPIKeyID && providedAPIKeySecret {
-				keyID := getHeaderValue(md, apikey.IDHeader)
-				s.Equal(testAPIKeyID, keyID)
-
-				_, usingHMAC := tc.args[EnableHMACFlagName]
-				if usingHMAC {
-					algo := getHeaderValue(md, apikey.RequestSignatureAlgorithmHeader)
-					s.Equal(apikey.DefaultRequestSignatureAlgorithm, algo)
-
-					requestDateTime := getHeaderValue(md, apikey.RequestDatetimeHeader)
-					_, err := time.Parse(time.RFC3339, requestDateTime)
-					s.NoError(err)
-
-					sig := getHeaderValue(md, apikey.RequestSignatureHeader)
-					s.NotEmpty(sig)
-				} else {
-					secret := getHeaderValue(md, apikey.SecretHeader)
-					s.Equal(testAPIKeySecret, secret)
-				}
+			_, usingAPIKeys := tc.args[APIKeyFlagName]
+			if usingAPIKeys {
+				authHeader := getHeaderValue(md, apikey.AuthorizationHeader)
+				s.Equal("Bearer "+testAPIKey, authHeader)
 			} else {
 				token := getHeaderValue(md, oauth.Header)
 				s.Equal("Bearer "+testAccessToken, token)
