@@ -20,6 +20,9 @@ const (
 	InsecureConnectionFlagName = "insecure"
 	EnableDebugLogsFlagName    = "enable-debug-logs"
 	AuthenticationFlagCategory = "Authentication:"
+
+	// APIKeyVersionTag indicates the state of API keys. This should be removed when fully released.
+	APIKeyVersionTag = "preview"
 )
 
 var (
@@ -65,19 +68,19 @@ var (
 	}
 	APIKeyIDFlag = &cli.StringFlag{
 		Name:     APIKeyIDFlagName,
-		Usage:    "The API key ID used for authentication (experimental)",
+		Usage:    "The API key ID used for authentication (" + APIKeyVersionTag + ")",
 		EnvVars:  []string{"TEMPORAL_CLOUD_API_KEY_ID"},
 		Category: AuthenticationFlagCategory,
 	}
 	APIKeySecretFlag = &cli.StringFlag{
 		Name:     APISecretKeyFlagName,
-		Usage:    "The API secret key used for authentication (experimental)",
+		Usage:    "The API secret key used for authentication (" + APIKeyVersionTag + ")",
 		EnvVars:  []string{"TEMPORAL_CLOUD_API_SECRET_KEY"},
 		Category: AuthenticationFlagCategory,
 	}
 	EnableHMACFlag = &cli.BoolFlag{
 		Name:     EnableHMACFlagName,
-		Usage:    "Enable the use of HMAC request signatures, requires setting an API key as well (experimental)",
+		Usage:    "Enable the use of HMAC request signatures, requires setting an API key as well (" + APIKeyVersionTag + ")",
 		EnvVars:  []string{"TEMPORAL_CLOUD_ENABLE_HMAC"},
 		Category: AuthenticationFlagCategory,
 		// Hide the enable HMAC flag as this is an artifact of experimenting with authentication methods, and will
