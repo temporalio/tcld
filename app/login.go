@@ -23,6 +23,32 @@ const (
 
 var (
 	tokenFileName = "tokens.json"
+	domainFlag    = &cli.StringFlag{
+		Name:     "domain",
+		Value:    "login.tmprl.cloud",
+		Aliases:  []string{"d"},
+		Required: false,
+		Hidden:   true,
+	}
+	audienceFlag = &cli.StringFlag{
+		Name:     "audience",
+		Value:    "https://saas-api.tmprl.cloud",
+		Aliases:  []string{"a"},
+		Required: false,
+		Hidden:   true,
+	}
+	clientIDFlag = &cli.StringFlag{
+		Name:     "client-id",
+		Value:    "d7V5bZMLCbRLfRVpqC567AqjAERaWHhl",
+		Aliases:  []string{"id"},
+		Required: false,
+		Hidden:   true,
+	}
+	disablePopUpFlag = &cli.BoolFlag{
+		Name:     "disable-pop-up",
+		Usage:    "disable browser pop-up",
+		Required: false,
+	}
 )
 
 func GetLoginClient() *LoginClient {
@@ -65,7 +91,7 @@ func loadLoginConfig(ctx *cli.Context) (OauthTokenResponse, error) {
 	tokens := OauthTokenResponse{}
 	configDir := ctx.Path(ConfigDirFlagName)
 	// Create config dir if it does not exist
-	if err := os.MkdirAll(configDir, 0755); err != nil {
+	if err := os.MkdirAll(configDir, 0700); err != nil {
 		return tokens, err
 	}
 
@@ -101,7 +127,7 @@ func getURLFromDomain(domain string) (string, error) {
 	return domain, nil
 }
 
-func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, clientID string) error {
+func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, clientID string, disablePopUp bool) error {
 	// Get device code
 	oauthDeviceCodeResponse := OauthDeviceCodeResponse{}
 	domain, err := getURLFromDomain(domain)
@@ -118,8 +144,10 @@ func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, cl
 
 	fmt.Printf("Login via this url: %s\n", oauthDeviceCodeResponse.VerificationURIComplete)
 
-	if err := c.loginService.OpenBrowser(oauthDeviceCodeResponse.VerificationURIComplete); err != nil {
-		fmt.Println("Unable to open browser, please open url manually.")
+	if !disablePopUp {
+		if err := c.loginService.OpenBrowser(oauthDeviceCodeResponse.VerificationURIComplete); err != nil {
+			fmt.Println("Unable to open browser, please open url manually.")
+		}
 	}
 
 	// Get access token
@@ -162,30 +190,13 @@ func NewLoginCommand(c *LoginClient) (CommandOut, error) {
 			return err
 		},
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:     "domain",
-				Value:    "login.tmprl.cloud",
-				Aliases:  []string{"d"},
-				Required: false,
-				Hidden:   true,
-			},
-			&cli.StringFlag{
-				Name:     "audience",
-				Value:    "https://saas-api.tmprl.cloud",
-				Aliases:  []string{"a"},
-				Required: false,
-				Hidden:   true,
-			},
-			&cli.StringFlag{
-				Name:     "client-id",
-				Value:    "d7V5bZMLCbRLfRVpqC567AqjAERaWHhl",
-				Aliases:  []string{"id"},
-				Required: false,
-				Hidden:   true,
-			},
+			domainFlag,
+			audienceFlag,
+			clientIDFlag,
+			disablePopUpFlag,
 		},
 		Action: func(ctx *cli.Context) error {
-			return c.login(ctx, ctx.String("domain"), ctx.String("audience"), ctx.String("client-id"))
+			return c.login(ctx, ctx.String("domain"), ctx.String("audience"), ctx.String("client-id"), ctx.Bool("disable-pop-up"))
 		},
 	}}, nil
 }

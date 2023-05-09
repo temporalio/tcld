@@ -9,13 +9,14 @@ import (
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 )
 
-func GetServerConnection(c *cli.Context) (context.Context, *grpc.ClientConn, error) {
+func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Context, *grpc.ClientConn, error) {
 
 	serverAddr := c.String(ServerFlagName)
-	var option grpc.DialOption
+	var credentialOption grpc.DialOption
 	parts := strings.Split(serverAddr, ":")
 
 	if len(parts) != 2 {
@@ -25,16 +26,16 @@ func GetServerConnection(c *cli.Context) (context.Context, *grpc.ClientConn, err
 	hostname := parts[0]
 	switch hostname {
 	case "localhost":
-		option = grpc.WithInsecure()
+		credentialOption = grpc.WithTransportCredentials(insecure.NewCredentials())
 	default:
-		option = grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+		credentialOption = grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 			MinVersion: tls.VersionTLS12,
 			ServerName: hostname,
 		}))
 	}
 	conn, err := grpc.Dial(
 		serverAddr,
-		option,
+		append(opts, credentialOption)...,
 	)
 	if err != nil {
 		return nil, nil, err

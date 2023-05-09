@@ -96,10 +96,6 @@ func (c caCerts) bundle() (string, error) {
 	return base64.StdEncoding.EncodeToString(out), nil
 }
 
-func (c caCerts) remove(i int) caCerts {
-	return append(c[:i], c[i+1:]...)
-}
-
 func addCerts(existingCerts, newCerts caCerts) (caCerts, error) {
 
 	for i := range newCerts {
@@ -132,7 +128,7 @@ func removeCertWithFingerprint(existingCerts caCerts, fingerprint string) (caCer
 			break
 		}
 		if j == len(existingCerts)-1 {
-			return nil, fmt.Errorf("certificate with fingerprint '%s' does not exists", fingerprint)
+			return nil, fmt.Errorf("certificate with fingerprint '%s' does not exist", fingerprint)
 		}
 	}
 	return existingCerts, nil
