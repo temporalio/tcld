@@ -276,6 +276,26 @@ func (mr *MockAuthServiceClientMockRecorder) ResendUserInvite(ctx, in interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResendUserInvite", reflect.TypeOf((*MockAuthServiceClient)(nil).ResendUserInvite), varargs...)
 }
 
+// UpdateAPIKey mocks base method.
+func (m *MockAuthServiceClient) UpdateAPIKey(ctx context.Context, in *v1.UpdateAPIKeyRequest, opts ...grpc.CallOption) (*v1.UpdateAPIKeyResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateAPIKey", varargs...)
+	ret0, _ := ret[0].(*v1.UpdateAPIKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAPIKey indicates an expected call of UpdateAPIKey.
+func (mr *MockAuthServiceClientMockRecorder) UpdateAPIKey(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAPIKey", reflect.TypeOf((*MockAuthServiceClient)(nil).UpdateAPIKey), varargs...)
+}
+
 // UpdateUser mocks base method.
 func (m *MockAuthServiceClient) UpdateUser(ctx context.Context, in *v1.UpdateUserRequest, opts ...grpc.CallOption) (*v1.UpdateUserResponse, error) {
 	m.ctrl.T.Helper()
@@ -517,6 +537,21 @@ func (m *MockAuthServiceServer) ResendUserInvite(arg0 context.Context, arg1 *v1.
 func (mr *MockAuthServiceServerMockRecorder) ResendUserInvite(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResendUserInvite", reflect.TypeOf((*MockAuthServiceServer)(nil).ResendUserInvite), arg0, arg1)
+}
+
+// UpdateAPIKey mocks base method.
+func (m *MockAuthServiceServer) UpdateAPIKey(arg0 context.Context, arg1 *v1.UpdateAPIKeyRequest) (*v1.UpdateAPIKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAPIKey", arg0, arg1)
+	ret0, _ := ret[0].(*v1.UpdateAPIKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAPIKey indicates an expected call of UpdateAPIKey.
+func (mr *MockAuthServiceServerMockRecorder) UpdateAPIKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAPIKey", reflect.TypeOf((*MockAuthServiceServer)(nil).UpdateAPIKey), arg0, arg1)
 }
 
 // UpdateUser mocks base method.
