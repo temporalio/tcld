@@ -8,7 +8,7 @@ require (
 	github.com/kylelemons/godebug v1.1.0
 	github.com/stretchr/testify v1.8.2
 	github.com/urfave/cli/v2 v2.25.1
-	go.uber.org/fx v1.19.2
+	go.uber.org/fx v1.19.3
 	go.uber.org/multierr v1.6.0
 	google.golang.org/grpc v1.54.0
 )
