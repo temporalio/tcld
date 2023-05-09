@@ -284,7 +284,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 					Flags: []cli.Flag{
 						&cli.StringFlag{
 							Name:     "id",
-							Usage:    "The id of the apikey to disable",
+							Usage:    "The id of the apikey to enable",
 							Required: true,
 							Aliases:  []string{"i"},
 						},
