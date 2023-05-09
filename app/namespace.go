@@ -5,11 +5,13 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/temporalio/tcld/protogen/api/auth/v1"
-	"go.uber.org/multierr"
 	"io/ioutil"
+	"net"
 	"net/mail"
 	"strings"
+
+	"github.com/temporalio/tcld/protogen/api/auth/v1"
+	"go.uber.org/multierr"
 
 	"github.com/kylelemons/godebug/diff"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
@@ -23,6 +25,7 @@ const (
 	namespaceRegionFlagName          = "region"
 	CaCertificateFlagName            = "ca-certificate"
 	CaCertificateFileFlagName        = "ca-certificate-file"
+	CaPrivateKeyFileFlagName         = "ca-private-key-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
 	certificateFilterFileFlagName    = "certificate-filter-file"
 	certificateFilterInputFlagName   = "certificate-filter-input"
@@ -477,25 +480,222 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Name:    "accepted-client-ca",
 					Usage:   "Manage client ca certificate used to verify client connections",
 					Aliases: []string{"ca"},
-					Subcommands: []*cli.Command{{
-						Name:    "list",
-						Aliases: []string{"l"},
-						Usage:   "List the accepted client ca certificates currently configured for the namespace",
-						Flags: []cli.Flag{
-							NamespaceFlag,
+					Subcommands: []*cli.Command{
+						{
+							Name:    "generate",
+							Aliases: []string{"gen"},
+							Usage:   "Generate ca and client certificates",
+							Subcommands: []*cli.Command{
+								{
+									Name:    "certificate-authority",
+									Usage:   "generate a certificate authority",
+									Aliases: []string{"ca"},
+									Flags: []cli.Flag{
+										&cli.StringFlag{
+											Name:     "organization",
+											Usage:    "The name of the organization",
+											Aliases:  []string{"org"},
+											Required: true,
+										},
+										&cli.DurationFlag{
+											Name:     "duration",
+											Usage:    "The duration of the ca cert",
+											Aliases:  []string{"d"},
+											Required: true,
+										},
+										&cli.PathFlag{
+											Name:     CaCertificateFileFlagName,
+											Usage:    "The file path to generate the ca certificate in (pem encoded)",
+											Aliases:  []string{"ca-cert"},
+											Required: true,
+										},
+										&cli.PathFlag{
+											Name:     CaPrivateKeyFileFlagName,
+											Usage:    "The file path to generate the ca private key in (pem encoded)",
+											Aliases:  []string{"ca-key"},
+											Required: true,
+										},
+									},
+									Action: func(ctx *cli.Context) error {
+										caPem, caPrivKey, err := generateCACertificate(generateCACertificateInput{
+											Organization: ctx.String("organization"),
+											Duration:     ctx.Duration("duration"),
+										})
+										if err != nil {
+											return fmt.Errorf("failed to generate ca certificate: %s", err)
+										}
+										yes, err := ConfirmPrompt(
+											ctx,
+											fmt.Sprintf("storing ca's private key at %s, do not share this key with anyone. confirm: ",
+												ctx.Path(CaPrivateKeyFileFlagName),
+											),
+										)
+										if err != nil || !yes {
+											return nil
+										}
+										err = ioutil.WriteFile(
+											ctx.Path(CaCertificateFileFlagName),
+											caPem,
+											0600,
+										)
+										if err != nil {
+											return fmt.Errorf("failed to write ca certificate: %s", err)
+
+										}
+										err = ioutil.WriteFile(
+											ctx.Path(CaPrivateKeyFileFlagName),
+											caPrivKey,
+											0600,
+										)
+										if err != nil {
+											return fmt.Errorf("failed to write ca private key: %s", err)
+										}
+
+										return nil
+									},
+								},
+								{
+									Name:    "client-certificate",
+									Aliases: []string{"cert"},
+									Flags: []cli.Flag{
+										&cli.StringFlag{
+											Name:     "organization",
+											Usage:    "The name of the organization",
+											Aliases:  []string{"org"},
+											Required: true,
+										},
+										&cli.StringFlag{
+											Name:  "organization-unit",
+											Usage: "The name of the organization unit",
+										},
+										&cli.StringFlag{
+											Name:  "common-name",
+											Usage: "The comman name",
+										},
+										&cli.StringSliceFlag{
+											Name:  "ip-addresses",
+											Usage: "The ip addresses",
+										},
+										&cli.StringSliceFlag{
+											Name:  "email-addresses",
+											Usage: "The email addresses",
+										},
+										&cli.DurationFlag{
+											Name:     "duration",
+											Usage:    "The duration of the ca cert",
+											Aliases:  []string{"d"},
+											Required: true,
+										},
+										&cli.PathFlag{
+											Name:     CaCertificateFileFlagName,
+											Usage:    "The file path to the ca certificate (pem encoded)",
+											Aliases:  []string{"ca-cert"},
+											Required: true,
+										},
+										&cli.PathFlag{
+											Name:     CaPrivateKeyFileFlagName,
+											Usage:    "The file path to the ca private key (pem encoded)",
+											Aliases:  []string{"ca-key"},
+											Required: true,
+										},
+										&cli.PathFlag{
+											Name:     "certificate-file",
+											Usage:    "The file path to the generated certificate (pem encoded)",
+											Aliases:  []string{"cert"},
+											Required: true,
+										},
+										&cli.PathFlag{
+											Name:     "private-key-file",
+											Usage:    "The file path to the generated private key (pem encoded)",
+											Aliases:  []string{"key"},
+											Required: true,
+										},
+									},
+									Action: func(ctx *cli.Context) error {
+
+										caPem, err := ioutil.ReadFile(ctx.Path(CaCertificateFileFlagName))
+										if err != nil {
+											return fmt.Errorf("failed to read ca-cert-file: %s", err)
+										}
+										caPrivKey, err := ioutil.ReadFile(ctx.Path(CaPrivateKeyFileFlagName))
+										if err != nil {
+											return fmt.Errorf("failed to read ca-private-key-file: %s", err)
+										}
+
+										var ips []net.IP
+										for _, i := range ctx.StringSlice("ip-addresses") {
+											ip := net.ParseIP(i)
+											if ip == nil {
+												return fmt.Errorf("failed to parse ip: %s", i)
+											}
+											ips = append(ips, ip)
+										}
+
+										certPem, certPrivKey, err := generateCertificate(generateCertificateInput{
+											Organization:     ctx.String("organization"),
+											OrganizationUnit: ctx.String("organization-unit"),
+											CommonName:       ctx.String("common-name"),
+											IPAddresses:      ips,
+											EmailAddresses:   ctx.StringSlice("email-addresses"),
+
+											Duration:        ctx.Duration("duration"),
+											CaPem:           caPem,
+											CaPrivateKeyPEM: caPrivKey,
+										})
+										if err != nil {
+											return fmt.Errorf("failed to generate certificate: %s", err)
+										}
+										yes, err := ConfirmPrompt(
+											ctx,
+											fmt.Sprintf("storing the private key at %s, do not share this key with anyone. confirm:",
+												ctx.Path("private-key-file"),
+											),
+										)
+										if err != nil || !yes {
+											return nil
+										}
+										err = ioutil.WriteFile(
+											ctx.Path("certificate-file"),
+											certPem,
+											0600,
+										)
+										if err != nil {
+											return fmt.Errorf("failed to write ca certificate: %s", err)
+
+										}
+										err = ioutil.WriteFile(
+											ctx.Path("private-key-file"),
+											certPrivKey,
+											0600,
+										)
+										if err != nil {
+											return fmt.Errorf("failed to write ca private key: %s", err)
+										}
+
+										return nil
+									},
+								},
+							},
 						},
-						Action: func(ctx *cli.Context) error {
-							n, err := c.getNamespace(ctx.String(NamespaceFlagName))
-							if err != nil {
-								return err
-							}
-							out, err := parseCertificates(n.Spec.AcceptedClientCa)
-							if err != nil {
-								return err
-							}
-							return PrintObj(out)
+						{
+							Name:    "list",
+							Aliases: []string{"l"},
+							Usage:   "List the accepted client ca certificates currently configured for the namespace",
+							Flags: []cli.Flag{
+								NamespaceFlag,
+							},
+							Action: func(ctx *cli.Context) error {
+								n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+								if err != nil {
+									return err
+								}
+								out, err := parseCertificates(n.Spec.AcceptedClientCa)
+								if err != nil {
+									return err
+								}
+								return PrintObj(out)
+							},
 						},
-					},
 						{
 							Name:    "add",
 							Aliases: []string{"a"},
