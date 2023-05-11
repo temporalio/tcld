@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	AuthorizationHeader       = "authorization"
+	AuthorizationHeader       = "Authorization"
 	AuthorizationHeaderPrefix = "Bearer"
 	Separator                 = "_"
 )
