@@ -136,6 +136,26 @@ func (mr *MockInternalServiceClientMockRecorder) BackfillRoles(ctx, in interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BackfillRoles", reflect.TypeOf((*MockInternalServiceClient)(nil).BackfillRoles), varargs...)
 }
 
+// BatchMigrateNamespaces mocks base method.
+func (m *MockInternalServiceClient) BatchMigrateNamespaces(ctx context.Context, in *v1.BatchMigrateNamespacesRequest, opts ...grpc.CallOption) (*v1.BatchMigrateNamespacesResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "BatchMigrateNamespaces", varargs...)
+	ret0, _ := ret[0].(*v1.BatchMigrateNamespacesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchMigrateNamespaces indicates an expected call of BatchMigrateNamespaces.
+func (mr *MockInternalServiceClientMockRecorder) BatchMigrateNamespaces(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchMigrateNamespaces", reflect.TypeOf((*MockInternalServiceClient)(nil).BatchMigrateNamespaces), varargs...)
+}
+
 // CreateCell mocks base method.
 func (m *MockInternalServiceClient) CreateCell(ctx context.Context, in *v1.CreateCellRequest, opts ...grpc.CallOption) (*v1.CreateCellResponse, error) {
 	m.ctrl.T.Helper()
@@ -276,6 +296,26 @@ func (mr *MockInternalServiceClientMockRecorder) CreateSAMLConnection(ctx, in in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSAMLConnection", reflect.TypeOf((*MockInternalServiceClient)(nil).CreateSAMLConnection), varargs...)
 }
 
+// DeleteAccount mocks base method.
+func (m *MockInternalServiceClient) DeleteAccount(ctx context.Context, in *v1.DeleteAccountRequest, opts ...grpc.CallOption) (*v1.DeleteAccountResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteAccount", varargs...)
+	ret0, _ := ret[0].(*v1.DeleteAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteAccount indicates an expected call of DeleteAccount.
+func (mr *MockInternalServiceClientMockRecorder) DeleteAccount(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAccount", reflect.TypeOf((*MockInternalServiceClient)(nil).DeleteAccount), varargs...)
+}
+
 // DeleteCell mocks base method.
 func (m *MockInternalServiceClient) DeleteCell(ctx context.Context, in *v1.DeleteCellRequest, opts ...grpc.CallOption) (*v1.DeleteCellResponse, error) {
 	m.ctrl.T.Helper()
@@ -414,6 +454,46 @@ func (mr *MockInternalServiceClientMockRecorder) DeleteRolesFromUser(ctx, in int
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRolesFromUser", reflect.TypeOf((*MockInternalServiceClient)(nil).DeleteRolesFromUser), varargs...)
+}
+
+// DeleteUser mocks base method.
+func (m *MockInternalServiceClient) DeleteUser(ctx context.Context, in *v1.DeleteUserRequest, opts ...grpc.CallOption) (*v1.DeleteUserResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteUser", varargs...)
+	ret0, _ := ret[0].(*v1.DeleteUserResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteUser indicates an expected call of DeleteUser.
+func (mr *MockInternalServiceClientMockRecorder) DeleteUser(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockInternalServiceClient)(nil).DeleteUser), varargs...)
+}
+
+// EnableTieredStorage mocks base method.
+func (m *MockInternalServiceClient) EnableTieredStorage(ctx context.Context, in *v1.EnableTieredStorageRequest, opts ...grpc.CallOption) (*v1.EnableTieredStorageResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnableTieredStorage", varargs...)
+	ret0, _ := ret[0].(*v1.EnableTieredStorageResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnableTieredStorage indicates an expected call of EnableTieredStorage.
+func (mr *MockInternalServiceClientMockRecorder) EnableTieredStorage(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnableTieredStorage", reflect.TypeOf((*MockInternalServiceClient)(nil).EnableTieredStorage), varargs...)
 }
 
 // ExpandAccountPool mocks base method.
@@ -1574,6 +1654,21 @@ func (mr *MockInternalServiceServerMockRecorder) BackfillRoles(arg0, arg1 interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BackfillRoles", reflect.TypeOf((*MockInternalServiceServer)(nil).BackfillRoles), arg0, arg1)
 }
 
+// BatchMigrateNamespaces mocks base method.
+func (m *MockInternalServiceServer) BatchMigrateNamespaces(arg0 context.Context, arg1 *v1.BatchMigrateNamespacesRequest) (*v1.BatchMigrateNamespacesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchMigrateNamespaces", arg0, arg1)
+	ret0, _ := ret[0].(*v1.BatchMigrateNamespacesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchMigrateNamespaces indicates an expected call of BatchMigrateNamespaces.
+func (mr *MockInternalServiceServerMockRecorder) BatchMigrateNamespaces(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchMigrateNamespaces", reflect.TypeOf((*MockInternalServiceServer)(nil).BatchMigrateNamespaces), arg0, arg1)
+}
+
 // CreateCell mocks base method.
 func (m *MockInternalServiceServer) CreateCell(arg0 context.Context, arg1 *v1.CreateCellRequest) (*v1.CreateCellResponse, error) {
 	m.ctrl.T.Helper()
@@ -1679,6 +1774,21 @@ func (mr *MockInternalServiceServerMockRecorder) CreateSAMLConnection(arg0, arg1
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSAMLConnection", reflect.TypeOf((*MockInternalServiceServer)(nil).CreateSAMLConnection), arg0, arg1)
 }
 
+// DeleteAccount mocks base method.
+func (m *MockInternalServiceServer) DeleteAccount(arg0 context.Context, arg1 *v1.DeleteAccountRequest) (*v1.DeleteAccountResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAccount", arg0, arg1)
+	ret0, _ := ret[0].(*v1.DeleteAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteAccount indicates an expected call of DeleteAccount.
+func (mr *MockInternalServiceServerMockRecorder) DeleteAccount(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAccount", reflect.TypeOf((*MockInternalServiceServer)(nil).DeleteAccount), arg0, arg1)
+}
+
 // DeleteCell mocks base method.
 func (m *MockInternalServiceServer) DeleteCell(arg0 context.Context, arg1 *v1.DeleteCellRequest) (*v1.DeleteCellResponse, error) {
 	m.ctrl.T.Helper()
@@ -1782,6 +1892,36 @@ func (m *MockInternalServiceServer) DeleteRolesFromUser(arg0 context.Context, ar
 func (mr *MockInternalServiceServerMockRecorder) DeleteRolesFromUser(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRolesFromUser", reflect.TypeOf((*MockInternalServiceServer)(nil).DeleteRolesFromUser), arg0, arg1)
+}
+
+// DeleteUser mocks base method.
+func (m *MockInternalServiceServer) DeleteUser(arg0 context.Context, arg1 *v1.DeleteUserRequest) (*v1.DeleteUserResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteUser", arg0, arg1)
+	ret0, _ := ret[0].(*v1.DeleteUserResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteUser indicates an expected call of DeleteUser.
+func (mr *MockInternalServiceServerMockRecorder) DeleteUser(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockInternalServiceServer)(nil).DeleteUser), arg0, arg1)
+}
+
+// EnableTieredStorage mocks base method.
+func (m *MockInternalServiceServer) EnableTieredStorage(arg0 context.Context, arg1 *v1.EnableTieredStorageRequest) (*v1.EnableTieredStorageResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnableTieredStorage", arg0, arg1)
+	ret0, _ := ret[0].(*v1.EnableTieredStorageResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnableTieredStorage indicates an expected call of EnableTieredStorage.
+func (mr *MockInternalServiceServerMockRecorder) EnableTieredStorage(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnableTieredStorage", reflect.TypeOf((*MockInternalServiceServer)(nil).EnableTieredStorage), arg0, arg1)
 }
 
 // ExpandAccountPool mocks base method.
