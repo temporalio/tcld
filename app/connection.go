@@ -35,7 +35,11 @@ func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Conte
 	}
 	conn, err := grpc.Dial(
 		serverAddr,
-		append(opts, credentialOption)...,
+		append(
+			opts,
+			credentialOption,
+			grpc.WithAuthority(hostname),
+		)...,
 	)
 	if err != nil {
 		return nil, nil, err
