@@ -14,9 +14,7 @@ const (
 	NamespaceFlagName          = "namespace"
 	RequestIDFlagName          = "request-id"
 	ResourceVersionFlagName    = "resource-version"
-	APIKeyIDFlagName           = "api-key-id"
-	APISecretKeyFlagName       = "api-secret-key"
-	EnableHMACFlagName         = "enable-hmac"
+	APIKeyFlagName             = "api-key"
 	InsecureConnectionFlagName = "insecure"
 	EnableDebugLogsFlagName    = "enable-debug-logs"
 	AuthenticationFlagCategory = "Authentication:"
@@ -66,26 +64,11 @@ var (
 		Usage:   "The resource-version (etag) to update from, if not set the cli will use the latest (optional)",
 		Aliases: []string{"v"},
 	}
-	APIKeyIDFlag = &cli.StringFlag{
-		Name:     APIKeyIDFlagName,
-		Usage:    "The API key ID used for authentication (" + APIKeyVersionTag + ")",
-		EnvVars:  []string{"TEMPORAL_CLOUD_API_KEY_ID"},
+	APIKeyFlag = &cli.StringFlag{
+		Name:     APIKeyFlagName,
+		Usage:    "The API Key used for authentication (" + APIKeyVersionTag + ")",
+		EnvVars:  []string{"TEMPORAL_CLOUD_API_KEY"},
 		Category: AuthenticationFlagCategory,
-	}
-	APIKeySecretFlag = &cli.StringFlag{
-		Name:     APISecretKeyFlagName,
-		Usage:    "The API secret key used for authentication (" + APIKeyVersionTag + ")",
-		EnvVars:  []string{"TEMPORAL_CLOUD_API_SECRET_KEY"},
-		Category: AuthenticationFlagCategory,
-	}
-	EnableHMACFlag = &cli.BoolFlag{
-		Name:     EnableHMACFlagName,
-		Usage:    "Enable the use of HMAC request signatures, requires setting an API key as well (" + APIKeyVersionTag + ")",
-		EnvVars:  []string{"TEMPORAL_CLOUD_ENABLE_HMAC"},
-		Category: AuthenticationFlagCategory,
-		// Hide the enable HMAC flag as this is an artifact of experimenting with authentication methods, and will
-		// likely be removed in the next few weeks.
-		Hidden: true,
 	}
 	InsecureConnectionFlag = &cli.BoolFlag{
 		Name:     InsecureConnectionFlagName,

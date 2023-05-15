@@ -70,15 +70,10 @@ func defaultDialOptions(c *cli.Context, addr *url.URL) ([]grpc.DialOption, error
 func newRPCCredential(c *cli.Context) (credentials.PerRPCCredentials, error) {
 	insecure := c.Bool(InsecureConnectionFlagName)
 
-	apiKeyID := c.String(APIKeyIDFlagName)
-	apiSecretKey := c.String(APISecretKeyFlagName)
-	if (len(apiKeyID) > 0 && len(apiSecretKey) == 0) || (len(apiSecretKey) > 0 && len(apiKeyID) == 0) {
-		return nil, fmt.Errorf("when using an API key you must specify both the key ID and secret")
-	} else if len(apiKeyID) > 0 && len(apiSecretKey) > 0 {
+	apiKey := c.String(APIKeyFlagName)
+	if len(apiKey) > 0 {
 		return apikey.NewCredential(
-			apiKeyID,
-			apiSecretKey,
-			apikey.WithHMAC(c.Bool(EnableHMACFlagName)),
+			apiKey,
 			apikey.WithInsecureTransport(insecure),
 		)
 	}
