@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
-	"github.com/temporalio/tcld/protogen/api/auth/v1"
-	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/temporalio/tcld/protogen/api/auth/v1"
+	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
@@ -31,7 +32,7 @@ type NamespaceTestSuite struct {
 	mockCtrl        *gomock.Controller
 	mockService     *namespaceservicemock.MockNamespaceServiceClient
 	mockAuthService *authservicemock.MockAuthServiceClient
-	mockReqService *requestservicemock.MockRequestServiceClient
+	mockReqService  *requestservicemock.MockRequestServiceClient
 }
 
 func (s *NamespaceTestSuite) SetupTest() {
@@ -45,7 +46,7 @@ func (s *NamespaceTestSuite) SetupTest() {
 			client:     s.mockService,
 			authClient: s.mockAuthService,
 		}, nil
-	}
+	})
 	getRequestClientFn := func(ctx *cli.Context) (*RequestClient, error) {
 		return &RequestClient{
 			ctx:    context.TODO(),
