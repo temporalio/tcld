@@ -54,7 +54,7 @@ API Keys provide machine based authentication for Temporal Control Plane APIs. T
 ### Creating an API Key:
 *Make sure to copy the secret or else you will not be able to retrieve it again.*
 
-Create an API key by running the following command:
+Create an API key by running the following command (duration must be within 1 to 90 days):
 ```
 tcld apikey create --name <api-key-name> --description <api-key-description> --duration <api-key-duration>
 ```
