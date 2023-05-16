@@ -137,7 +137,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 			Subcommands: []*cli.Command{
 				{
 					Name:    "create",
-					Usage:   "Create an apikey",
+					Usage:   "Create an apikey. Make sure to copy the secret or else you will not be able to retrieve it again.",
 					Aliases: []string{"c"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
@@ -153,7 +153,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 						},
 						&cli.DurationFlag{
 							Name:    "duration",
-							Usage:   "the duration from now when the apikey will expire, will be ignored if expiry flag is set",
+							Usage:   "the duration from now when the apikey will expire, will be ignored if expiry flag is set, example: '24h'",
 							Aliases: []string{"d"},
 						},
 						&cli.TimestampFlag{
