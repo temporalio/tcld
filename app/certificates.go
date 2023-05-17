@@ -184,6 +184,7 @@ func generateCertificate(
 		NotAfter:              now.Add(input.Duration),
 		BasicConstraintsValid: true,
 		DNSNames:              []string{dnsRoot},
+		MaxPathLen:            0,
 	}
 	var privateKey any
 	if isRSA {
@@ -259,7 +260,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 								if err != nil {
 									return fmt.Errorf("failed to parse duration: %v", err)
 								}
-								if d >= maxCADuration {
+								if d > maxCADuration {
 									return fmt.Errorf("duration cannot be more than: %s", maxCADuration)
 								}
 								if d <= minCADuration {
