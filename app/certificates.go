@@ -269,8 +269,9 @@ func NewCertificatesCommand() (CommandOut, error) {
 							Required: true,
 						},
 						&cli.BoolFlag{
-							Name:  "rsa",
-							Usage: "Generate the certificate-authority using the RSA algorithm instead of ecdsa",
+							Name:    "rsa-algorithm",
+							Aliases: []string{"rsa"},
+							Usage:   "Generate the certificate-authority using the RSA algorithm instead of ecdsa",
 						},
 					},
 					Action: func(ctx *cli.Context) error {
@@ -281,7 +282,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						caPem, caPrivKey, err := generateCACertificate(generateCACertificateInput{
 							Organization: ctx.String("organization"),
 							Duration:     duration,
-							RSAAlgorithm: ctx.Bool("rsa"),
+							RSAAlgorithm: ctx.Bool("rsa-algorithm"),
 						})
 						if err != nil {
 							return fmt.Errorf("failed to generate ca certificate: %s", err)
