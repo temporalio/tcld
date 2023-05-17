@@ -19,6 +19,11 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+const (
+	maxCADuration = 365 * 24 * time.Hour
+	minCADuration = 7 * 24 * time.Hour
+)
+
 func generateRandomString(n int) (string, error) {
 	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
 	ret := make([]byte, n)
@@ -66,7 +71,7 @@ func generateCACertificate(
 		Subject: pkix.Name{
 			Organization: []string{input.Organization},
 		},
-		NotBefore:             now,
+		NotBefore:             now.Add(-time.Minute), // grace of 1 min
 		NotAfter:              now.Add(input.Duration),
 		IsCA:                  true,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
@@ -175,7 +180,7 @@ func generateCertificate(
 	conf := &x509.Certificate{
 		SerialNumber:          big.NewInt(2019),
 		Subject:               subject,
-		NotBefore:             now,
+		NotBefore:             now.Add(-time.Minute), // grace of 1 min
 		NotAfter:              now.Add(input.Duration),
 		BasicConstraintsValid: true,
 		DNSNames:              []string{dnsRoot},
@@ -250,8 +255,15 @@ func NewCertificatesCommand() (CommandOut, error) {
 							Aliases:  []string{"d"},
 							Required: true,
 							Action: func(_ *cli.Context, v string) error {
-								if _, err := utils.ParseDuration(v); err != nil {
+								d, err := utils.ParseDuration(v)
+								if err != nil {
 									return fmt.Errorf("failed to parse duration: %v", err)
+								}
+								if d >= maxCADuration {
+									return fmt.Errorf("duration cannot be more than: %s", maxCADuration)
+								}
+								if d <= minCADuration {
+									return fmt.Errorf("duration cannot be less than: %s", minCADuration)
 								}
 								return nil
 							},
@@ -271,7 +283,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						&cli.BoolFlag{
 							Name:    "rsa-algorithm",
 							Aliases: []string{"rsa"},
-							Usage:   "Generate the certificate-authority using the RSA algorithm instead of ecdsa",
+							Usage:   "Generate the certificate-authority using the RSA algorithm instead of ecdsa (optional)",
 						},
 					},
 					Action: func(ctx *cli.Context) error {
@@ -330,7 +342,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:  "organization-unit",
-							Usage: "The name of the organization unit",
+							Usage: "The name of the organization unit (optional)",
 						},
 						&cli.StringFlag{
 							Name:     "duration",
