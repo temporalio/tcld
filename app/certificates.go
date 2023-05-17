@@ -8,11 +8,13 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"math/big"
-	"net"
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/temporalio/tcld/utils"
+	"github.com/urfave/cli/v2"
 )
 
 func generateRandomString(n int) (string, error) {
@@ -93,9 +95,6 @@ func generateCACertificate(
 type generateCertificateInput struct {
 	Organization     string `validate:"required"`
 	OrganizationUnit string
-	CommonName       string
-	IPAddresses      []net.IP
-	EmailAddresses   []string
 
 	Duration        time.Duration `validate:"required"`
 	CaPem           []byte        `validate:"required"`
@@ -141,7 +140,6 @@ func generateCertificate(
 	subject := pkix.Name{
 		Organization:       []string{input.Organization},
 		OrganizationalUnit: []string{input.OrganizationUnit},
-		CommonName:         input.CommonName,
 	}
 	dnsRoot := fmt.Sprintf("client.endentity.%s.%s", input.Organization, randomLetters)
 	now := time.Now()
@@ -152,12 +150,6 @@ func generateCertificate(
 		NotAfter:              now.Add(input.Duration),
 		BasicConstraintsValid: true,
 		DNSNames:              []string{dnsRoot},
-	}
-	if len(input.EmailAddresses) > 0 {
-		conf.EmailAddresses = input.EmailAddresses
-	}
-	if len(input.IPAddresses) > 0 {
-		conf.IPAddresses = input.IPAddresses
 	}
 	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
@@ -186,4 +178,197 @@ func generateCertificate(
 		return nil, nil, err
 	}
 	return certPEMBuffer.Bytes(), certPrivateKeyPEMBuffer.Bytes(), nil
+}
+
+func NewCertificatesCommand() (CommandOut, error) {
+	return CommandOut{
+		Command: &cli.Command{
+			Name:    "generate-certificates",
+			Aliases: []string{"certs"},
+			Usage:   "Generate certificates.",
+			Subcommands: []*cli.Command{
+				{
+					Name:    "certificate-authority",
+					Usage:   "generate a certificate authority",
+					Aliases: []string{"ca"},
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:     "organization",
+							Usage:    "The name of the organization",
+							Aliases:  []string{"org"},
+							Required: true,
+						},
+						&cli.StringFlag{
+							Name:     "duration",
+							Usage:    "The duration of the ca certificate, for example: 1y30d (1 year and 30 days)",
+							Aliases:  []string{"d"},
+							Required: true,
+							Action: func(_ *cli.Context, v string) error {
+								// make sure we can parse the duration
+								_, err := utils.ParseDuration(v)
+								return err
+							},
+						},
+						&cli.PathFlag{
+							Name:     CaCertificateFileFlagName,
+							Usage:    "The path of the file to store the generated certificate-authority in",
+							Aliases:  []string{"ca-cert"},
+							Required: true,
+						},
+						&cli.PathFlag{
+							Name:     CaPrivateKeyFileFlagName,
+							Usage:    "The path of the file to store the generated certificate-authority's private key in",
+							Aliases:  []string{"ca-key"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						duration, err := utils.ParseDuration(ctx.String("duration"))
+						if err != nil {
+							return err
+						}
+						caPem, caPrivKey, err := generateCACertificate(generateCACertificateInput{
+							Organization: ctx.String("organization"),
+							Duration:     duration,
+						})
+						if err != nil {
+							return fmt.Errorf("failed to generate ca certificate: %s", err)
+						}
+						yes, err := ConfirmPrompt(
+							ctx,
+							fmt.Sprintf("storing certificate authority's private key at %s, do not share this key with anyone. confirm: ",
+								ctx.Path(CaPrivateKeyFileFlagName),
+							),
+						)
+						if err != nil || !yes {
+							return nil
+						}
+						err = ioutil.WriteFile(
+							ctx.Path(CaCertificateFileFlagName),
+							caPem,
+							0600,
+						)
+						if err != nil {
+							return fmt.Errorf("failed to write ca certificate: %s", err)
+
+						}
+						err = ioutil.WriteFile(
+							ctx.Path(CaPrivateKeyFileFlagName),
+							caPrivKey,
+							0600,
+						)
+						if err != nil {
+							return fmt.Errorf("failed to write ca private key: %s", err)
+						}
+
+						return nil
+					},
+				},
+				{
+					Name:    "client-certificate",
+					Aliases: []string{"cert"},
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:     "organization",
+							Usage:    "The name of the organization",
+							Aliases:  []string{"org"},
+							Required: true,
+						},
+						&cli.StringFlag{
+							Name:  "organization-unit",
+							Usage: "The name of the organization unit",
+						},
+						&cli.StringFlag{
+							Name:     "duration",
+							Usage:    "The duration of the client certificate, for example: 1y30d (1 year and 30 days)",
+							Aliases:  []string{"d"},
+							Required: true,
+							Action: func(_ *cli.Context, v string) error {
+								// make sure we can parse the duration
+								_, err := utils.ParseDuration(v)
+								return err
+							},
+						},
+						&cli.PathFlag{
+							Name:     CaCertificateFileFlagName,
+							Usage:    "The path of the file where the certificate-authority is stored at",
+							Aliases:  []string{"ca-cert"},
+							Required: true,
+						},
+						&cli.PathFlag{
+							Name:     CaPrivateKeyFileFlagName,
+							Usage:    "The path of the file where the certificate-authority's private key is stored at",
+							Aliases:  []string{"ca-key"},
+							Required: true,
+						},
+						&cli.PathFlag{
+							Name:     "certificate-file",
+							Usage:    "The path of the file to store the generated client certificate in",
+							Aliases:  []string{"cert"},
+							Required: true,
+						},
+						&cli.PathFlag{
+							Name:     "private-key-file",
+							Usage:    "The path of the file to store the generated client private key in",
+							Aliases:  []string{"key"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						duration, err := utils.ParseDuration(ctx.String("duration"))
+						if err != nil {
+							return err
+						}
+						caPem, err := ioutil.ReadFile(ctx.Path(CaCertificateFileFlagName))
+						if err != nil {
+							return fmt.Errorf("failed to read ca-cert-file: %s", err)
+						}
+						caPrivKey, err := ioutil.ReadFile(ctx.Path(CaPrivateKeyFileFlagName))
+						if err != nil {
+							return fmt.Errorf("failed to read ca-private-key-file: %s", err)
+						}
+						certPem, certPrivKey, err := generateCertificate(generateCertificateInput{
+							Organization:     ctx.String("organization"),
+							OrganizationUnit: ctx.String("organization-unit"),
+
+							Duration:        duration,
+							CaPem:           caPem,
+							CaPrivateKeyPEM: caPrivKey,
+						})
+						if err != nil {
+							return fmt.Errorf("failed to generate certificate: %s", err)
+						}
+						yes, err := ConfirmPrompt(
+							ctx,
+							fmt.Sprintf("storing the certificate private key at %s, do not share this key with anyone. confirm:",
+								ctx.Path("private-key-file"),
+							),
+						)
+						if err != nil || !yes {
+							return nil
+						}
+						err = ioutil.WriteFile(
+							ctx.Path("certificate-file"),
+							certPem,
+							0600,
+						)
+						if err != nil {
+							return fmt.Errorf("failed to write ca certificate: %s", err)
+
+						}
+						err = ioutil.WriteFile(
+							ctx.Path("private-key-file"),
+							certPrivKey,
+							0600,
+						)
+						if err != nil {
+							return fmt.Errorf("failed to write ca private key: %s", err)
+						}
+
+						return nil
+					},
+				},
+			},
+		},
+	}, nil
 }
