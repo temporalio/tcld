@@ -230,12 +230,12 @@ func NewCertificatesCommand() (CommandOut, error) {
 	return CommandOut{
 		Command: &cli.Command{
 			Name:    "generate-certificates",
-			Aliases: []string{"certs"},
-			Usage:   "Generate certificates.",
+			Aliases: []string{"gen"},
+			Usage:   "Generate tls certificates",
 			Subcommands: []*cli.Command{
 				{
 					Name:    "certificate-authority",
-					Usage:   "generate a certificate authority",
+					Usage:   "Generate a certificate authority",
 					Aliases: []string{"ca"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
@@ -318,7 +318,8 @@ func NewCertificatesCommand() (CommandOut, error) {
 				},
 				{
 					Name:    "client-certificate",
-					Aliases: []string{"cert"},
+					Usage:   "Generate a client certificate",
+					Aliases: []string{"client"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
 							Name:     "organization",
