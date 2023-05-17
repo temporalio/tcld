@@ -2,6 +2,8 @@ package app
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -34,12 +36,12 @@ func generateRandomString(n int) (string, error) {
 type generateCACertificateInput struct {
 	Organization string        `validate:"required"`
 	Duration     time.Duration `validate:"required"`
+	RSAAlgorithm bool
 }
 
 func generateCACertificate(
 	input generateCACertificateInput,
 ) (caPEM, caPrivateKeyPEM []byte, err error) {
-
 	validator := validator.New()
 	if err := validator.Struct(input); err != nil {
 		return nil, nil, err
@@ -48,6 +50,15 @@ func generateCACertificate(
 	if err != nil {
 		return nil, nil, err
 	}
+
+	keyUsage := x509.KeyUsageDigitalSignature | x509.KeyUsageCRLSign | x509.KeyUsageCertSign
+	if input.RSAAlgorithm {
+		// Only RSA subject keys should have the KeyEncipherment KeyUsage bits set. In
+		// the context of TLS this KeyUsage is particular to RSA key exchange and
+		// authentication.
+		keyUsage |= x509.KeyUsageKeyEncipherment
+	}
+
 	dnsRoot := fmt.Sprintf("client.root.%s.%s", input.Organization, randomLetters)
 	now := time.Now()
 	conf := &x509.Certificate{
@@ -59,19 +70,33 @@ func generateCACertificate(
 		NotAfter:              now.Add(input.Duration),
 		IsCA:                  true,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCRLSign | x509.KeyUsageCertSign,
+		KeyUsage:              keyUsage,
 		BasicConstraintsValid: true,
 		DNSNames:              []string{dnsRoot},
 	}
-	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
-	if err != nil {
-		return nil, nil, err
+
+	var privateKey any
+	if input.RSAAlgorithm {
+		privateKey, err = rsa.GenerateKey(rand.Reader, 4096)
+	} else {
+		privateKey, err = ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	}
-	cert, err := x509.CreateCertificate(rand.Reader, conf, conf, privateKey.Public(), privateKey)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("unable to generate private key: %v", err)
 	}
 
+	var publicKey any
+	switch k := privateKey.(type) {
+	case *rsa.PrivateKey:
+		publicKey = &k.PublicKey
+	case *ecdsa.PrivateKey:
+		publicKey = &k.PublicKey
+	}
+
+	cert, err := x509.CreateCertificate(rand.Reader, conf, conf, publicKey, privateKey)
+	if err != nil {
+		return nil, nil, err
+	}
 	caPEMBuffer := new(bytes.Buffer)
 	err = pem.Encode(caPEMBuffer, &pem.Block{
 		Type:  "CERTIFICATE",
@@ -80,11 +105,14 @@ func generateCACertificate(
 	if err != nil {
 		return nil, nil, err
 	}
-
+	privBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to marshal private key: %v", err)
+	}
 	caPrivateKeyPEMBuffer := new(bytes.Buffer)
 	err = pem.Encode(caPrivateKeyPEMBuffer, &pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+		Type:  "PRIVATE KEY",
+		Bytes: privBytes,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -101,25 +129,26 @@ type generateCertificateInput struct {
 	CaPrivateKeyPEM []byte        `validate:"required"`
 }
 
-func parseCACerts(caPem, caPrivKeyPem []byte) (*x509.Certificate, *rsa.PrivateKey, error) {
+func parseCACerts(caPem, caPrivKeyPem []byte) (*x509.Certificate, any, bool, error) {
 
 	pemBlock, _ := pem.Decode(caPem)
 	if pemBlock == nil {
-		return nil, nil, fmt.Errorf("decoding ca cert failed")
+		return nil, nil, false, fmt.Errorf("decoding ca cert failed")
 	}
 	caCert, err := x509.ParseCertificate(pemBlock.Bytes)
 	if err != nil {
-		return nil, nil, fmt.Errorf("decoding ca cert failed: %s", err)
+		return nil, nil, false, fmt.Errorf("decoding ca cert failed: %s", err)
 	}
 	pemBlock, _ = pem.Decode(caPrivKeyPem)
 	if pemBlock == nil {
-		return nil, nil, fmt.Errorf("decoding ca private key failed")
+		return nil, nil, false, fmt.Errorf("decoding ca private key failed")
 	}
-	caPrivateKey, err := x509.ParsePKCS1PrivateKey(pemBlock.Bytes)
+	caPrivateKey, err := x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
 	if err != nil {
-		return nil, nil, fmt.Errorf("parsing ca private key failed: %s", err)
+		return nil, nil, false, fmt.Errorf("parsing ca private key failed: %s", err)
 	}
-	return caCert, caPrivateKey, nil
+	_, isRSA := caPrivateKey.(*rsa.PrivateKey)
+	return caCert, caPrivateKey, isRSA, nil
 }
 
 func generateCertificate(
@@ -129,7 +158,7 @@ func generateCertificate(
 	if err := validator.Struct(input); err != nil {
 		return nil, nil, err
 	}
-	caCert, caPrivateKey, err := parseCACerts(input.CaPem, input.CaPrivateKeyPEM)
+	caCert, caPrivateKey, isRSA, err := parseCACerts(input.CaPem, input.CaPrivateKeyPEM)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -151,11 +180,24 @@ func generateCertificate(
 		BasicConstraintsValid: true,
 		DNSNames:              []string{dnsRoot},
 	}
-	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
-	if err != nil {
-		return nil, nil, err
+	var privateKey any
+	if isRSA {
+		privateKey, err = rsa.GenerateKey(rand.Reader, 4096)
+	} else {
+		privateKey, err = ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	}
-	cert, err := x509.CreateCertificate(rand.Reader, conf, caCert, privateKey.Public(), caPrivateKey)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to generate private key: %v", err)
+	}
+
+	var publicKey any
+	switch k := privateKey.(type) {
+	case *rsa.PrivateKey:
+		publicKey = &k.PublicKey
+	case *ecdsa.PrivateKey:
+		publicKey = &k.PublicKey
+	}
+	cert, err := x509.CreateCertificate(rand.Reader, conf, caCert, publicKey, caPrivateKey)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -169,10 +211,14 @@ func generateCertificate(
 		return nil, nil, err
 	}
 
+	privBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to marshal private key: %v", err)
+	}
 	certPrivateKeyPEMBuffer := new(bytes.Buffer)
 	err = pem.Encode(certPrivateKeyPEMBuffer, &pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+		Type:  "PRIVATE KEY",
+		Bytes: privBytes,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -204,9 +250,10 @@ func NewCertificatesCommand() (CommandOut, error) {
 							Aliases:  []string{"d"},
 							Required: true,
 							Action: func(_ *cli.Context, v string) error {
-								// make sure we can parse the duration
-								_, err := utils.ParseDuration(v)
-								return err
+								if _, err := utils.ParseDuration(v); err != nil {
+									return fmt.Errorf("failed to parse duration: %v", err)
+								}
+								return nil
 							},
 						},
 						&cli.PathFlag{
@@ -221,6 +268,10 @@ func NewCertificatesCommand() (CommandOut, error) {
 							Aliases:  []string{"ca-key"},
 							Required: true,
 						},
+						&cli.BoolFlag{
+							Name:  "rsa",
+							Usage: "Generate the certificate-authority using the RSA algorithm instead of ecdsa",
+						},
 					},
 					Action: func(ctx *cli.Context) error {
 						duration, err := utils.ParseDuration(ctx.String("duration"))
@@ -230,6 +281,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						caPem, caPrivKey, err := generateCACertificate(generateCACertificateInput{
 							Organization: ctx.String("organization"),
 							Duration:     duration,
+							RSAAlgorithm: ctx.Bool("rsa"),
 						})
 						if err != nil {
 							return fmt.Errorf("failed to generate ca certificate: %s", err)
@@ -284,9 +336,10 @@ func NewCertificatesCommand() (CommandOut, error) {
 							Aliases:  []string{"d"},
 							Required: true,
 							Action: func(_ *cli.Context, v string) error {
-								// make sure we can parse the duration
-								_, err := utils.ParseDuration(v)
-								return err
+								if _, err := utils.ParseDuration(v); err != nil {
+									return fmt.Errorf("failed to parse duration: %v", err)
+								}
+								return nil
 							},
 						},
 						&cli.PathFlag{
