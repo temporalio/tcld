@@ -24,10 +24,7 @@ const (
 	namespaceRegionFlagName          = "region"
 	CaCertificateFlagName            = "ca-certificate"
 	CaCertificateFileFlagName        = "ca-certificate-file"
-	CaPrivateKeyFileFlagName         = "ca-private-key-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
-	certificateFilterFileFlagName    = "certificate-filter-file"
-	certificateFilterInputFlagName   = "certificate-filter-input"
 	searchAttributeFlagName          = "search-attribute"
 	userNamespacePermissionFlagName  = "user-namespace-permission"
 )

@@ -22,6 +22,13 @@ import (
 const (
 	maxCADuration = 365 * 24 * time.Hour
 	minCADuration = 7 * 24 * time.Hour
+
+	caPrivateKeyFileFlagName       = "ca-key-file"
+	certificateFilterFileFlagName  = "certificate-filter-file"
+	certificateFilterInputFlagName = "certificate-filter-input"
+
+	pemEncodingCertificateType = "CERTIFICATE"
+	pemEncodingPrivateKeyType  = "PRIVATE KEY"
 )
 
 func generateRandomString(n int) (string, error) {
@@ -51,10 +58,17 @@ func generateCACertificate(
 	if err := validator.Struct(input); err != nil {
 		return nil, nil, err
 	}
+
+	serialNumber, err := generateSerialNumber()
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to generate a random serial number: %w", err)
+	}
+
 	randomLetters, err := generateRandomString(4)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("unable to generate random string for dns name")
 	}
+	dnsRoot := fmt.Sprintf("client.root.%s.%s", input.Organization, randomLetters)
 
 	keyUsage := x509.KeyUsageDigitalSignature | x509.KeyUsageCRLSign | x509.KeyUsageCertSign
 	if input.RSAAlgorithm {
@@ -64,20 +78,19 @@ func generateCACertificate(
 		keyUsage |= x509.KeyUsageKeyEncipherment
 	}
 
-	dnsRoot := fmt.Sprintf("client.root.%s.%s", input.Organization, randomLetters)
-	now := time.Now()
+	now := time.Now().UTC()
 	conf := &x509.Certificate{
-		SerialNumber: big.NewInt(2019),
+		SerialNumber: serialNumber,
 		Subject: pkix.Name{
 			Organization: []string{input.Organization},
 		},
 		NotBefore:             now.Add(-time.Minute), // grace of 1 min
 		NotAfter:              now.Add(input.Duration),
 		IsCA:                  true,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 		KeyUsage:              keyUsage,
 		BasicConstraintsValid: true,
 		DNSNames:              []string{dnsRoot},
+		MaxPathLen:            0,
 	}
 
 	var privateKey any
@@ -87,7 +100,7 @@ func generateCACertificate(
 		privateKey, err = ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	}
 	if err != nil {
-		return nil, nil, fmt.Errorf("unable to generate private key: %v", err)
+		return nil, nil, fmt.Errorf("unable to generate private key: %w", err)
 	}
 
 	var publicKey any
@@ -100,11 +113,11 @@ func generateCACertificate(
 
 	cert, err := x509.CreateCertificate(rand.Reader, conf, conf, publicKey, privateKey)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to generate certificate: %w", err)
 	}
 	caPEMBuffer := new(bytes.Buffer)
 	err = pem.Encode(caPEMBuffer, &pem.Block{
-		Type:  "CERTIFICATE",
+		Type:  pemEncodingCertificateType,
 		Bytes: cert,
 	})
 	if err != nil {
@@ -112,11 +125,11 @@ func generateCACertificate(
 	}
 	privBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
 	if err != nil {
-		return nil, nil, fmt.Errorf("unable to marshal private key: %v", err)
+		return nil, nil, fmt.Errorf("unable to marshal private key: %w", err)
 	}
 	caPrivateKeyPEMBuffer := new(bytes.Buffer)
 	err = pem.Encode(caPrivateKeyPEMBuffer, &pem.Block{
-		Type:  "PRIVATE KEY",
+		Type:  pemEncodingPrivateKeyType,
 		Bytes: privBytes,
 	})
 	if err != nil {
@@ -142,7 +155,7 @@ func parseCACerts(caPem, caPrivKeyPem []byte) (*x509.Certificate, any, bool, err
 	}
 	caCert, err := x509.ParseCertificate(pemBlock.Bytes)
 	if err != nil {
-		return nil, nil, false, fmt.Errorf("decoding ca cert failed: %s", err)
+		return nil, nil, false, fmt.Errorf("decoding ca cert failed: %w", err)
 	}
 	pemBlock, _ = pem.Decode(caPrivKeyPem)
 	if pemBlock == nil {
@@ -150,13 +163,24 @@ func parseCACerts(caPem, caPrivKeyPem []byte) (*x509.Certificate, any, bool, err
 	}
 	caPrivateKey, err := x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
 	if err != nil {
-		return nil, nil, false, fmt.Errorf("parsing ca private key failed: %s", err)
+		return nil, nil, false, fmt.Errorf("parsing ca private key failed: %w", err)
 	}
 	_, isRSA := caPrivateKey.(*rsa.PrivateKey)
 	return caCert, caPrivateKey, isRSA, nil
 }
 
-func generateCertificate(
+func generateSerialNumber() (*big.Int, error) {
+	max := new(big.Int)
+	max.Exp(big.NewInt(2), big.NewInt(130), nil).Sub(max, big.NewInt(1))
+	// Generate cryptographically strong pseudo-random between 0 - max
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		return nil, err
+	}
+	return n, err
+}
+
+func generateClientCertificate(
 	input generateCertificateInput,
 ) (certPEM, certPrivateKeyPEM []byte, err error) {
 	validator := validator.New()
@@ -169,22 +193,25 @@ func generateCertificate(
 	}
 	randomLetters, err := generateRandomString(4)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("unable to generate random string for dns name")
+	}
+	dnsRoot := fmt.Sprintf("client.endentity.%s.%s", input.Organization, randomLetters)
+	serialNumber, err := generateSerialNumber()
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to generate a random serial number: %w", err)
 	}
 	subject := pkix.Name{
 		Organization:       []string{input.Organization},
 		OrganizationalUnit: []string{input.OrganizationUnit},
 	}
-	dnsRoot := fmt.Sprintf("client.endentity.%s.%s", input.Organization, randomLetters)
-	now := time.Now()
+	now := time.Now().UTC()
 	conf := &x509.Certificate{
-		SerialNumber:          big.NewInt(2019),
+		SerialNumber:          serialNumber,
 		Subject:               subject,
 		NotBefore:             now.Add(-time.Minute), // grace of 1 min
 		NotAfter:              now.Add(input.Duration),
 		BasicConstraintsValid: true,
 		DNSNames:              []string{dnsRoot},
-		MaxPathLen:            0,
 	}
 	var privateKey any
 	if isRSA {
@@ -193,7 +220,7 @@ func generateCertificate(
 		privateKey, err = ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	}
 	if err != nil {
-		return nil, nil, fmt.Errorf("unable to generate private key: %v", err)
+		return nil, nil, fmt.Errorf("unable to generate private key: %w", err)
 	}
 
 	var publicKey any
@@ -205,12 +232,12 @@ func generateCertificate(
 	}
 	cert, err := x509.CreateCertificate(rand.Reader, conf, caCert, publicKey, caPrivateKey)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to generate certificate: %w", err)
 	}
 
 	certPEMBuffer := new(bytes.Buffer)
 	err = pem.Encode(certPEMBuffer, &pem.Block{
-		Type:  "CERTIFICATE",
+		Type:  pemEncodingCertificateType,
 		Bytes: cert,
 	})
 	if err != nil {
@@ -219,11 +246,11 @@ func generateCertificate(
 
 	privBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
 	if err != nil {
-		return nil, nil, fmt.Errorf("unable to marshal private key: %v", err)
+		return nil, nil, fmt.Errorf("unable to marshal private key: %w", err)
 	}
 	certPrivateKeyPEMBuffer := new(bytes.Buffer)
 	err = pem.Encode(certPrivateKeyPEMBuffer, &pem.Block{
-		Type:  "PRIVATE KEY",
+		Type:  pemEncodingPrivateKeyType,
 		Bytes: privBytes,
 	})
 	if err != nil {
@@ -252,13 +279,13 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:     "duration",
-							Usage:    "The duration of the ca certificate, for example: 1y30d (1 year and 30 days)",
+							Usage:    "The duration of the ca certificate, for example: 30d10h (30 days and 10 hrs)",
 							Aliases:  []string{"d"},
 							Required: true,
 							Action: func(_ *cli.Context, v string) error {
 								d, err := utils.ParseDuration(v)
 								if err != nil {
-									return fmt.Errorf("failed to parse duration: %v", err)
+									return fmt.Errorf("failed to parse duration: %w", err)
 								}
 								if d > maxCADuration {
 									return fmt.Errorf("duration cannot be more than: %s", maxCADuration)
@@ -276,7 +303,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 							Required: true,
 						},
 						&cli.PathFlag{
-							Name:     CaPrivateKeyFileFlagName,
+							Name:     caPrivateKeyFileFlagName,
 							Usage:    "The path of the file to store the generated certificate-authority's private key in",
 							Aliases:  []string{"ca-key"},
 							Required: true,
@@ -290,7 +317,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 					Action: func(ctx *cli.Context) error {
 						duration, err := utils.ParseDuration(ctx.String("duration"))
 						if err != nil {
-							return err
+							return fmt.Errorf("failed to parse duration: %w", err)
 						}
 						caPem, caPrivKey, err := generateCACertificate(generateCACertificateInput{
 							Organization: ctx.String("organization"),
@@ -298,33 +325,36 @@ func NewCertificatesCommand() (CommandOut, error) {
 							RSAAlgorithm: ctx.Bool("rsa-algorithm"),
 						})
 						if err != nil {
-							return fmt.Errorf("failed to generate ca certificate: %s", err)
+							return fmt.Errorf("failed to generate ca certificate: %w", err)
 						}
 						yes, err := ConfirmPrompt(
 							ctx,
 							fmt.Sprintf("storing certificate authority's private key at %s, do not share this key with anyone. confirm: ",
-								ctx.Path(CaPrivateKeyFileFlagName),
+								ctx.Path(caPrivateKeyFileFlagName),
 							),
 						)
-						if err != nil || !yes {
+						if err != nil {
+							return fmt.Errorf("failed to confirm: %w", err)
+						}
+						if !yes {
 							return nil
 						}
 						err = ioutil.WriteFile(
 							ctx.Path(CaCertificateFileFlagName),
 							caPem,
-							0600,
+							0644,
 						)
 						if err != nil {
-							return fmt.Errorf("failed to write ca certificate: %s", err)
+							return fmt.Errorf("failed to write ca certificate: %w", err)
 
 						}
 						err = ioutil.WriteFile(
-							ctx.Path(CaPrivateKeyFileFlagName),
+							ctx.Path(caPrivateKeyFileFlagName),
 							caPrivKey,
 							0600,
 						)
 						if err != nil {
-							return fmt.Errorf("failed to write ca private key: %s", err)
+							return fmt.Errorf("failed to write ca's private key: %w", err)
 						}
 
 						return nil
@@ -347,12 +377,12 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:     "duration",
-							Usage:    "The duration of the client certificate, for example: 1y30d (1 year and 30 days)",
+							Usage:    "The duration of the client certificate, for example: 30d10h (30 days and 10 hrs)",
 							Aliases:  []string{"d"},
 							Required: true,
 							Action: func(_ *cli.Context, v string) error {
 								if _, err := utils.ParseDuration(v); err != nil {
-									return fmt.Errorf("failed to parse duration: %v", err)
+									return fmt.Errorf("failed to parse duration: %w", err)
 								}
 								return nil
 							},
@@ -364,7 +394,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 							Required: true,
 						},
 						&cli.PathFlag{
-							Name:     CaPrivateKeyFileFlagName,
+							Name:     caPrivateKeyFileFlagName,
 							Usage:    "The path of the file where the certificate-authority's private key is stored at",
 							Aliases:  []string{"ca-key"},
 							Required: true,
@@ -376,7 +406,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 							Required: true,
 						},
 						&cli.PathFlag{
-							Name:     "private-key-file",
+							Name:     "key-file",
 							Usage:    "The path of the file to store the generated client private key in",
 							Aliases:  []string{"key"},
 							Required: true,
@@ -389,13 +419,13 @@ func NewCertificatesCommand() (CommandOut, error) {
 						}
 						caPem, err := ioutil.ReadFile(ctx.Path(CaCertificateFileFlagName))
 						if err != nil {
-							return fmt.Errorf("failed to read ca-cert-file: %s", err)
+							return fmt.Errorf("failed to read ca-cert-file: %w", err)
 						}
-						caPrivKey, err := ioutil.ReadFile(ctx.Path(CaPrivateKeyFileFlagName))
+						caPrivKey, err := ioutil.ReadFile(ctx.Path(caPrivateKeyFileFlagName))
 						if err != nil {
-							return fmt.Errorf("failed to read ca-private-key-file: %s", err)
+							return fmt.Errorf("failed to read ca-private-key-file: %w", err)
 						}
-						certPem, certPrivKey, err := generateCertificate(generateCertificateInput{
+						certPem, certPrivKey, err := generateClientCertificate(generateCertificateInput{
 							Organization:     ctx.String("organization"),
 							OrganizationUnit: ctx.String("organization-unit"),
 
@@ -404,7 +434,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 							CaPrivateKeyPEM: caPrivKey,
 						})
 						if err != nil {
-							return fmt.Errorf("failed to generate certificate: %s", err)
+							return fmt.Errorf("failed to generate certificate: %w", err)
 						}
 						yes, err := ConfirmPrompt(
 							ctx,
@@ -412,25 +442,28 @@ func NewCertificatesCommand() (CommandOut, error) {
 								ctx.Path("private-key-file"),
 							),
 						)
-						if err != nil || !yes {
+						if err != nil {
+							return fmt.Errorf("failed to confirm: %w", err)
+						}
+						if !yes {
 							return nil
 						}
 						err = ioutil.WriteFile(
 							ctx.Path("certificate-file"),
 							certPem,
-							0600,
+							0644,
 						)
 						if err != nil {
-							return fmt.Errorf("failed to write ca certificate: %s", err)
+							return fmt.Errorf("failed to write client certificate: %w", err)
 
 						}
 						err = ioutil.WriteFile(
-							ctx.Path("private-key-file"),
+							ctx.Path("key-file"),
 							certPrivKey,
 							0600,
 						)
 						if err != nil {
-							return fmt.Errorf("failed to write ca private key: %s", err)
+							return fmt.Errorf("failed to write private key: %w", err)
 						}
 
 						return nil
