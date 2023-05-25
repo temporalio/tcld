@@ -9,9 +9,11 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/big"
+	"os"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -93,25 +95,25 @@ func generateCACertificate(
 		MaxPathLen:            0,
 	}
 
-	var privateKey any
+	var key any
 	if input.RSAAlgorithm {
-		privateKey, err = rsa.GenerateKey(rand.Reader, 4096)
+		key, err = rsa.GenerateKey(rand.Reader, 4096)
 	} else {
-		privateKey, err = ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+		key, err = ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	}
 	if err != nil {
-		return nil, nil, fmt.Errorf("unable to generate private key: %w", err)
+		return nil, nil, fmt.Errorf("unable to generate key: %w", err)
 	}
 
 	var publicKey any
-	switch k := privateKey.(type) {
+	switch k := key.(type) {
 	case *rsa.PrivateKey:
 		publicKey = &k.PublicKey
 	case *ecdsa.PrivateKey:
 		publicKey = &k.PublicKey
 	}
 
-	cert, err := x509.CreateCertificate(rand.Reader, conf, conf, publicKey, privateKey)
+	cert, err := x509.CreateCertificate(rand.Reader, conf, conf, publicKey, key)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to generate certificate: %w", err)
 	}
@@ -123,9 +125,9 @@ func generateCACertificate(
 	if err != nil {
 		return nil, nil, err
 	}
-	privBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
+	privBytes, err := x509.MarshalPKCS8PrivateKey(key)
 	if err != nil {
-		return nil, nil, fmt.Errorf("unable to marshal private key: %w", err)
+		return nil, nil, fmt.Errorf("unable to marshal key: %w", err)
 	}
 	caPrivateKeyPEMBuffer := new(bytes.Buffer)
 	err = pem.Encode(caPrivateKeyPEMBuffer, &pem.Block{
@@ -159,11 +161,11 @@ func parseCACerts(caPem, caPrivKeyPem []byte) (*x509.Certificate, any, bool, err
 	}
 	pemBlock, _ = pem.Decode(caPrivKeyPem)
 	if pemBlock == nil {
-		return nil, nil, false, fmt.Errorf("decoding ca private key failed")
+		return nil, nil, false, fmt.Errorf("decoding ca key failed")
 	}
 	caPrivateKey, err := x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
 	if err != nil {
-		return nil, nil, false, fmt.Errorf("parsing ca private key failed: %w", err)
+		return nil, nil, false, fmt.Errorf("parsing ca key failed: %w", err)
 	}
 	_, isRSA := caPrivateKey.(*rsa.PrivateKey)
 	return caCert, caPrivateKey, isRSA, nil
@@ -213,18 +215,18 @@ func generateClientCertificate(
 		BasicConstraintsValid: true,
 		DNSNames:              []string{dnsRoot},
 	}
-	var privateKey any
+	var key any
 	if isRSA {
-		privateKey, err = rsa.GenerateKey(rand.Reader, 4096)
+		key, err = rsa.GenerateKey(rand.Reader, 4096)
 	} else {
-		privateKey, err = ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+		key, err = ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	}
 	if err != nil {
-		return nil, nil, fmt.Errorf("unable to generate private key: %w", err)
+		return nil, nil, fmt.Errorf("unable to generate key: %w", err)
 	}
 
 	var publicKey any
-	switch k := privateKey.(type) {
+	switch k := key.(type) {
 	case *rsa.PrivateKey:
 		publicKey = &k.PublicKey
 	case *ecdsa.PrivateKey:
@@ -244,9 +246,9 @@ func generateClientCertificate(
 		return nil, nil, err
 	}
 
-	privBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
+	privBytes, err := x509.MarshalPKCS8PrivateKey(key)
 	if err != nil {
-		return nil, nil, fmt.Errorf("unable to marshal private key: %w", err)
+		return nil, nil, fmt.Errorf("unable to marshal key: %w", err)
 	}
 	certPrivateKeyPEMBuffer := new(bytes.Buffer)
 	err = pem.Encode(certPrivateKeyPEMBuffer, &pem.Block{
@@ -304,7 +306,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 						&cli.PathFlag{
 							Name:     caPrivateKeyFileFlagName,
-							Usage:    "The path of the file to store the generated certificate-authority's private key in",
+							Usage:    "The path of the file to store the generated certificate-authority's (private) key in",
 							Aliases:  []string{"ca-key"},
 							Required: true,
 						},
@@ -327,37 +329,15 @@ func NewCertificatesCommand() (CommandOut, error) {
 						if err != nil {
 							return fmt.Errorf("failed to generate ca certificate: %w", err)
 						}
-						yes, err := ConfirmPrompt(
+
+						return writeCertificates(
 							ctx,
-							fmt.Sprintf("storing certificate authority's private key at %s, do not share this key with anyone. confirm: ",
-								ctx.Path(caPrivateKeyFileFlagName),
-							),
-						)
-						if err != nil {
-							return fmt.Errorf("failed to confirm: %w", err)
-						}
-						if !yes {
-							return nil
-						}
-						err = ioutil.WriteFile(
-							ctx.Path(CaCertificateFileFlagName),
+							"certificate authority",
 							caPem,
-							0644,
-						)
-						if err != nil {
-							return fmt.Errorf("failed to write ca certificate: %w", err)
-
-						}
-						err = ioutil.WriteFile(
-							ctx.Path(caPrivateKeyFileFlagName),
 							caPrivKey,
-							0600,
+							ctx.Path(CaCertificateFileFlagName),
+							ctx.Path(caPrivateKeyFileFlagName),
 						)
-						if err != nil {
-							return fmt.Errorf("failed to write ca's private key: %w", err)
-						}
-
-						return nil
 					},
 				},
 				{
@@ -395,7 +375,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 						&cli.PathFlag{
 							Name:     caPrivateKeyFileFlagName,
-							Usage:    "The path of the file where the certificate-authority's private key is stored at",
+							Usage:    "The path of the file where the certificate-authority's key is stored at",
 							Aliases:  []string{"ca-key"},
 							Required: true,
 						},
@@ -407,7 +387,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 						&cli.PathFlag{
 							Name:     "key-file",
-							Usage:    "The path of the file to store the generated client private key in",
+							Usage:    "The path of the file to store the generated client key in",
 							Aliases:  []string{"key"},
 							Required: true,
 						},
@@ -423,7 +403,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						}
 						caPrivKey, err := ioutil.ReadFile(ctx.Path(caPrivateKeyFileFlagName))
 						if err != nil {
-							return fmt.Errorf("failed to read ca-private-key-file: %w", err)
+							return fmt.Errorf("failed to read ca-key-file: %w", err)
 						}
 						certPem, certPrivKey, err := generateClientCertificate(generateCertificateInput{
 							Organization:     ctx.String("organization"),
@@ -436,40 +416,71 @@ func NewCertificatesCommand() (CommandOut, error) {
 						if err != nil {
 							return fmt.Errorf("failed to generate certificate: %w", err)
 						}
-						yes, err := ConfirmPrompt(
+						return writeCertificates(
 							ctx,
-							fmt.Sprintf("storing the certificate private key at %s, do not share this key with anyone. confirm:",
-								ctx.Path("private-key-file"),
-							),
-						)
-						if err != nil {
-							return fmt.Errorf("failed to confirm: %w", err)
-						}
-						if !yes {
-							return nil
-						}
-						err = ioutil.WriteFile(
-							ctx.Path("certificate-file"),
+							"client certificate",
 							certPem,
-							0644,
-						)
-						if err != nil {
-							return fmt.Errorf("failed to write client certificate: %w", err)
-
-						}
-						err = ioutil.WriteFile(
-							ctx.Path("key-file"),
 							certPrivKey,
-							0600,
+							ctx.Path("certificate-file"),
+							ctx.Path("key-file"),
 						)
-						if err != nil {
-							return fmt.Errorf("failed to write private key: %w", err)
-						}
-
-						return nil
 					},
 				},
 			},
 		},
 	}, nil
+}
+
+func checkPath(ctx *cli.Context, path string) (bool, error) {
+	if fi, err := os.Stat(path); !errors.Is(err, os.ErrNotExist) {
+		// the file exists,
+		switch mode := fi.Mode(); {
+		case mode.IsRegular():
+			yes, err := ConfirmPrompt(
+				ctx,
+				fmt.Sprintf("file already exists at path %s, do you want to overwrite:", path),
+			)
+			if err != nil {
+				return false, fmt.Errorf("failed to confirm: %w", err)
+			}
+			return yes, nil
+		case mode.IsDir():
+			return false, fmt.Errorf("path cannot be a directory: %s ", path)
+		default:
+			return false, fmt.Errorf("invalid file path: %s (file mode=%s)", path, mode.String())
+		}
+	}
+	return true, nil
+}
+
+func writeCertificates(ctx *cli.Context, typ string, cert, key []byte, certPath, keyPath string) error {
+	if cont, err := checkPath(ctx, certPath); err != nil || !cont {
+		return err
+	}
+	if cont, err := checkPath(ctx, keyPath); err != nil || !cont {
+		return err
+	}
+
+	yes, err := ConfirmPrompt(
+		ctx,
+		fmt.Sprintf("storing the %s (private) key at %s, do not share this key with anyone. confirm:", typ, keyPath),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to confirm: %w", err)
+	}
+	if !yes {
+		return nil
+	}
+	err = ioutil.WriteFile(certPath, cert, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write client certificate: %w", err)
+
+	}
+	err = ioutil.WriteFile(keyPath, key, 0600)
+	if err != nil {
+		return fmt.Errorf("failed to write client key: %w", err)
+	}
+	fmt.Printf("%s generated at: %s\n", typ, certPath)
+	fmt.Printf("%s key generated at: %s\n", typ, keyPath)
+	return nil
 }
