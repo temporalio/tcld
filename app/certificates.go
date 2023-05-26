@@ -144,9 +144,9 @@ type generateCertificateInput struct {
 	Organization     string `validate:"required"`
 	OrganizationUnit string
 
-	Duration        time.Duration `validate:"required"`
-	CaPem           []byte        `validate:"required"`
-	CaPrivateKeyPEM []byte        `validate:"required"`
+	Duration        time.Duration
+	CaPem           []byte `validate:"required"`
+	CaPrivateKeyPEM []byte `validate:"required"`
 }
 
 func parseCACerts(caPem, caPrivKeyPem []byte) (*x509.Certificate, any, bool, error) {
@@ -206,12 +206,25 @@ func generateClientCertificate(
 		Organization:       []string{input.Organization},
 		OrganizationalUnit: []string{input.OrganizationUnit},
 	}
+
 	now := time.Now().UTC()
+	var notAfter time.Time
+	if input.Duration != 0 {
+		// a duration was provided by the user, validate it
+		notAfter = now.Add(input.Duration).UTC()
+		if notAfter.After(caCert.NotAfter.UTC()) {
+			return nil, nil, fmt.Errorf("duration of %s puts certificate's expiry after certificate authority's expiry %s by %s",
+				input.Duration, caCert.NotAfter.UTC().String(), notAfter.Sub(caCert.NotAfter.UTC()))
+		}
+	} else {
+		// set notAfter to ca's notAfter when duration is not set
+		notAfter = caCert.NotAfter.UTC()
+	}
 	conf := &x509.Certificate{
 		SerialNumber:          serialNumber,
 		Subject:               subject,
 		NotBefore:             now.Add(-time.Minute), // grace of 1 min
-		NotAfter:              now.Add(input.Duration),
+		NotAfter:              notAfter,
 		BasicConstraintsValid: true,
 		DNSNames:              []string{dnsRoot},
 	}
@@ -356,10 +369,9 @@ func NewCertificatesCommand() (CommandOut, error) {
 							Usage: "The name of the organization unit (optional)",
 						},
 						&cli.StringFlag{
-							Name:     "duration",
-							Usage:    "The duration of the client certificate, for example: 30d10h (30 days and 10 hrs)",
-							Aliases:  []string{"d"},
-							Required: true,
+							Name:    "duration",
+							Usage:   "The duration of the client certificate, for example: 30d10h (30 days and 10 hrs), by default the generated certificates will expire when the certificate authority expires",
+							Aliases: []string{"d"},
 							Action: func(_ *cli.Context, v string) error {
 								if _, err := utils.ParseDuration(v); err != nil {
 									return fmt.Errorf("failed to parse duration: %w", err)
@@ -393,9 +405,13 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 					},
 					Action: func(ctx *cli.Context) error {
-						duration, err := utils.ParseDuration(ctx.String("duration"))
-						if err != nil {
-							return err
+						var duration time.Duration
+						if s := ctx.String("duration"); s != "" {
+							var err error
+							duration, err = utils.ParseDuration(ctx.String("duration"))
+							if err != nil {
+								return err
+							}
 						}
 						caPem, err := ioutil.ReadFile(ctx.Path(CaCertificateFileFlagName))
 						if err != nil {
