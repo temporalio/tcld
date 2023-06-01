@@ -5,16 +5,19 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/temporalio/tcld/protogen/api/auth/v1"
-	"go.uber.org/multierr"
 	"io/ioutil"
 	"net/mail"
 	"strings"
+
+	"github.com/temporalio/tcld/protogen/api/auth/v1"
+	"github.com/temporalio/tcld/protogen/api/sink/v1"
+	"go.uber.org/multierr"
 
 	"github.com/kylelemons/godebug/diff"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
+
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 )
@@ -56,6 +59,38 @@ var (
 		"eu-west-2",
 		"us-east-1",
 		"us-west-2",
+	}
+	sinkNameFlag = &cli.StringFlag{
+		Name:     "sink-name",
+		Usage:    "sink name",
+		Required: true,
+	}
+	sinkEnabledFlag = &cli.BoolFlag{
+		Name:  "enabled",
+		Usage: "Whether the export sink is enabled",
+	}
+	sinkTypeFlag = &cli.StringFlag{
+		Name:     "type",
+		Usage:    "The type of the export sink",
+		Required: true,
+	}
+	sinkAssumedRoleFlag = &cli.StringFlag{
+		Name:     "assumed-role",
+		Usage:    "The assumed role for the sink",
+		Required: true,
+	}
+	sinkDestinationArnFlag = &cli.StringFlag{
+		Name:     "destination-arn",
+		Usage:    "The destination ARN for the sink",
+		Required: true,
+	}
+	pageSizeFlag = &cli.IntFlag{
+		Name:  "page-size",
+		Usage: "The page size for list operations",
+	}
+	pageTokenFlag = &cli.StringFlag{
+		Name:  "page-token",
+		Usage: "The page token for list operations",
 	}
 )
 
@@ -974,6 +1009,168 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 									return err
 								}
 								return c.renameSearchAttribute(ctx, n, existingName, newName)
+							},
+						},
+					},
+				},
+				{
+					Name:    "export-sinks",
+					Aliases: []string{"es"},
+					Usage:   "Manage namespace's export sinks",
+					Subcommands: []*cli.Command{
+						{
+							Name:    "create",
+							Aliases: []string{"c"},
+							Flags: []cli.Flag{
+								NamespaceFlag,
+								sinkNameFlag,
+								sinkEnabledFlag,
+								sinkTypeFlag,
+								sinkAssumedRoleFlag,
+								sinkDestinationArnFlag,
+								&cli.StringFlag{
+									Name:     "region",
+									Usage:    "the region of the sink",
+									Required: true,
+								},
+								RequestIDFlag,
+							},
+
+							Action: func(ctx *cli.Context) error {
+								request := &namespaceservice.CreateExportSinkRequest{
+									Namespace: ctx.String(NamespaceFlagName),
+									Spec: &sink.ExportSinkSpec{
+										Name:    ctx.String(sinkNameFlag.Name),
+										Enabled: ctx.Bool(sinkEnabledFlag.Name),
+										S3Sink: &sink.S3Spec{
+											AssumedRole:    ctx.String(sinkAssumedRoleFlag.Name),
+											DestinationArn: ctx.String(sinkDestinationArnFlag.Name),
+											Region:         ctx.String("region"),
+										},
+									},
+									RequestId: ctx.String(RequestIDFlagName),
+								}
+
+								res, err := c.client.CreateExportSink(c.ctx, request)
+								if err != nil {
+									return err
+								}
+
+								return PrintProto(res.RequestStatus)
+							},
+						},
+						{
+							Name:    "delete",
+							Aliases: []string{"d"},
+							Flags: []cli.Flag{
+								NamespaceFlag,
+								sinkNameFlag,
+								ResourceVersionFlag,
+								RequestIDFlag,
+							},
+							Action: func(ctx *cli.Context) error {
+								request := &namespaceservice.DeleteExportSinkRequest{
+									Namespace:       ctx.String(NamespaceFlagName),
+									SinkName:        ctx.String(sinkNameFlag.Name),
+									ResourceVersion: ctx.String(ResourceVersionFlagName),
+									RequestId:       ctx.String(RequestIDFlagName),
+								}
+
+								res, err := c.client.DeleteExportSink(c.ctx, request)
+								if err != nil {
+									return err
+								}
+
+								return PrintProto(res.RequestStatus)
+							},
+						},
+						{
+							Name:    "update",
+							Aliases: []string{"u"},
+							Flags: []cli.Flag{
+								NamespaceFlag,
+								sinkNameFlag,
+								sinkEnabledFlag,
+								sinkTypeFlag,
+								sinkAssumedRoleFlag,
+								sinkDestinationArnFlag,
+								&cli.StringFlag{
+									Name:     "region",
+									Usage:    "the region of the sink",
+									Required: true,
+								},
+								ResourceVersionFlag,
+								RequestIDFlag,
+							},
+
+							Action: func(ctx *cli.Context) error {
+								request := &namespaceservice.UpdateExportSinkRequest{
+									Namespace: ctx.String(NamespaceFlagName),
+									Spec: &sink.ExportSinkSpec{
+										Name:    ctx.String(sinkNameFlag.Name),
+										Enabled: ctx.Bool(sinkEnabledFlag.Name),
+										S3Sink: &sink.S3Spec{
+											AssumedRole:    ctx.String(sinkAssumedRoleFlag.Name),
+											DestinationArn: ctx.String(sinkDestinationArnFlag.Name),
+											Region:         ctx.String("region"),
+										},
+									},
+									ResourceVersion: ctx.String(ResourceVersionFlagName),
+									RequestId:       ctx.String(RequestIDFlagName),
+								}
+
+								resp, err := c.client.UpdateExportSink(c.ctx, request)
+								if err != nil {
+									return err
+								}
+
+								return PrintProto(resp.RequestStatus)
+							},
+						},
+						{
+							Name:    "get",
+							Aliases: []string{"g"},
+							Flags: []cli.Flag{
+								NamespaceFlag,
+								sinkNameFlag,
+							},
+
+							Action: func(ctx *cli.Context) error {
+								request := &namespaceservice.GetExportSinkRequest{
+									Namespace: ctx.String(NamespaceFlagName),
+									SinkName:  ctx.String(sinkNameFlag.Name),
+								}
+
+								resp, err := c.client.GetExportSink(c.ctx, request)
+								if err != nil {
+									return err
+								}
+
+								return PrintProto(resp.Sink)
+							},
+						},
+						{
+							Name:    "list",
+							Aliases: []string{"l"},
+							Flags: []cli.Flag{
+								NamespaceFlag,
+								pageSizeFlag,
+								pageTokenFlag,
+							},
+
+							Action: func(ctx *cli.Context) error {
+								request := &namespaceservice.ListExportSinksRequest{
+									Namespace: ctx.String(NamespaceFlagName),
+									PageSize:  int32(pageSizeFlag.Value),
+									PageToken: ctx.String(pageTokenFlag.Name),
+								}
+
+								resp, err := c.client.ListExportSinks(c.ctx, request)
+								if err != nil {
+									return err
+								}
+
+								return PrintProto(resp)
 							},
 						},
 					},
