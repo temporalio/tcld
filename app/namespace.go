@@ -69,11 +69,7 @@ var (
 		Name:  "enabled",
 		Usage: "Whether the export sink is enabled",
 	}
-	sinkTypeFlag = &cli.StringFlag{
-		Name:     "type",
-		Usage:    "The type of the export sink",
-		Required: true,
-	}
+
 	sinkAssumedRoleFlag = &cli.StringFlag{
 		Name:     "assumed-role",
 		Usage:    "The assumed role for the sink",
@@ -514,7 +510,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Subcommands: []*cli.Command{{
 						Name:    "list",
 						Aliases: []string{"l"},
-						Usage:   "List the accepted client ca certificates currently configured for the namespace",
+						Usage:   "List the accepted client ca certificates currently configured",
 						Flags: []cli.Flag{
 							NamespaceFlag,
 						},
@@ -1021,11 +1017,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						{
 							Name:    "create",
 							Aliases: []string{"c"},
+							Usage:   "Create export sink",
 							Flags: []cli.Flag{
 								NamespaceFlag,
 								sinkNameFlag,
-								sinkEnabledFlag,
-								sinkTypeFlag,
 								sinkAssumedRoleFlag,
 								sinkDestinationArnFlag,
 								&cli.StringFlag{
@@ -1040,8 +1035,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								request := &namespaceservice.CreateExportSinkRequest{
 									Namespace: ctx.String(NamespaceFlagName),
 									Spec: &sink.ExportSinkSpec{
-										Name:    ctx.String(sinkNameFlag.Name),
-										Enabled: ctx.Bool(sinkEnabledFlag.Name),
+										Name:            ctx.String(sinkNameFlag.Name),
+										Enabled:         true,
+										DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
 										S3Sink: &sink.S3Spec{
 											AssumedRole:    ctx.String(sinkAssumedRoleFlag.Name),
 											DestinationArn: ctx.String(sinkDestinationArnFlag.Name),
@@ -1062,6 +1058,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						{
 							Name:    "delete",
 							Aliases: []string{"d"},
+							Usage:   "Delete export sink",
 							Flags: []cli.Flag{
 								NamespaceFlag,
 								sinkNameFlag,
@@ -1087,11 +1084,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						{
 							Name:    "update",
 							Aliases: []string{"u"},
+							Usage:   "Update export sink",
 							Flags: []cli.Flag{
 								NamespaceFlag,
 								sinkNameFlag,
 								sinkEnabledFlag,
-								sinkTypeFlag,
 								sinkAssumedRoleFlag,
 								sinkDestinationArnFlag,
 								&cli.StringFlag{
@@ -1130,11 +1127,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						{
 							Name:    "get",
 							Aliases: []string{"g"},
+							Usage:   "Get export sink",
 							Flags: []cli.Flag{
 								NamespaceFlag,
 								sinkNameFlag,
 							},
-
 							Action: func(ctx *cli.Context) error {
 								request := &namespaceservice.GetExportSinkRequest{
 									Namespace: ctx.String(NamespaceFlagName),
@@ -1152,12 +1149,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						{
 							Name:    "list",
 							Aliases: []string{"l"},
+							Usage:   "List export sinks",
 							Flags: []cli.Flag{
 								NamespaceFlag,
 								pageSizeFlag,
 								pageTokenFlag,
 							},
-
 							Action: func(ctx *cli.Context) error {
 								request := &namespaceservice.ListExportSinksRequest{
 									Namespace: ctx.String(NamespaceFlagName),
