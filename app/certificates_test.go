@@ -14,8 +14,8 @@ func TestCAGenerate(t *testing.T) {
 	assert.Error(t, err)
 
 	caPem, caPrivKeyPem, err := generateCACertificate(generateCACertificateInput{
-		Organization: "testtemporal",
-		Duration:     365 * 24 * time.Hour,
+		Organization:   "testtemporal",
+		ValidityPeriod: 365 * 24 * time.Hour,
 	})
 	assert.NoError(t, err)
 

@@ -48,9 +48,9 @@ func generateRandomString(n int) (string, error) {
 }
 
 type generateCACertificateInput struct {
-	Organization string        `validate:"required"`
-	Duration     time.Duration `validate:"required"`
-	RSAAlgorithm bool
+	Organization   string        `validate:"required"`
+	ValidityPeriod time.Duration `validate:"required"`
+	RSAAlgorithm   bool
 }
 
 func generateCACertificate(
@@ -87,7 +87,7 @@ func generateCACertificate(
 			Organization: []string{input.Organization},
 		},
 		NotBefore:             now.Add(-time.Minute), // grace of 1 min
-		NotAfter:              now.Add(input.Duration),
+		NotAfter:              now.Add(input.ValidityPeriod),
 		IsCA:                  true,
 		KeyUsage:              keyUsage,
 		BasicConstraintsValid: true,
@@ -144,7 +144,7 @@ type generateCertificateInput struct {
 	Organization     string `validate:"required"`
 	OrganizationUnit string
 
-	Duration        time.Duration
+	ValidityPeriod  time.Duration
 	CaPem           []byte `validate:"required"`
 	CaPrivateKeyPEM []byte `validate:"required"`
 }
@@ -209,16 +209,16 @@ func generateClientCertificate(
 
 	now := time.Now().UTC()
 	var notAfter time.Time
-	if input.Duration != 0 {
+	if input.ValidityPeriod != 0 {
 		// a duration was provided by the user, validate it
-		notAfter = now.Add(input.Duration).UTC()
+		notAfter = now.Add(input.ValidityPeriod).UTC()
 		if notAfter.After(caCert.NotAfter.UTC()) {
 			return nil, nil, fmt.Errorf("duration of %s puts certificate's expiry after certificate authority's expiry %s by %s",
-				input.Duration, caCert.NotAfter.UTC().String(), notAfter.Sub(caCert.NotAfter.UTC()))
+				input.ValidityPeriod, caCert.NotAfter.UTC().String(), notAfter.Sub(caCert.NotAfter.UTC()))
 		}
 	} else {
-		// set notAfter to ca's notAfter when duration is not set
-		notAfter = caCert.NotAfter.UTC()
+		// set notAfter to ca's notAfter minus one day when duration is not set
+		notAfter = caCert.NotAfter.UTC().Add(-24 * time.Hour)
 	}
 	conf := &x509.Certificate{
 		SerialNumber:          serialNumber,
@@ -279,11 +279,11 @@ func NewCertificatesCommand() (CommandOut, error) {
 		Command: &cli.Command{
 			Name:    "generate-certificates",
 			Aliases: []string{"gen"},
-			Usage:   "Generate tls certificates",
+			Usage:   "Commands for generating certificate authority (ca) and end-entity (client) TLS certificates",
 			Subcommands: []*cli.Command{
 				{
-					Name:    "certificate-authority",
-					Usage:   "Generate a certificate authority",
+					Name:    "certificate-authority-certificate",
+					Usage:   "Generate a certificate authority (ca) certificate",
 					Aliases: []string{"ca"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
@@ -293,9 +293,9 @@ func NewCertificatesCommand() (CommandOut, error) {
 							Required: true,
 						},
 						&cli.StringFlag{
-							Name:     "duration",
-							Usage:    "The duration of the ca certificate, for example: 30d10h (30 days and 10 hrs)",
-							Aliases:  []string{"d"},
+							Name:     "validity-period",
+							Usage:    "The duration for which the ca certificate is valid for. example: 30d10h (30 days and 10 hrs)",
+							Aliases:  []string{"vp"},
 							Required: true,
 							Action: func(_ *cli.Context, v string) error {
 								d, err := utils.ParseDuration(v)
@@ -313,31 +313,31 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 						&cli.PathFlag{
 							Name:     CaCertificateFileFlagName,
-							Usage:    "The path of the file to store the generated certificate-authority in",
+							Usage:    "The path where the generated x509 certificate will be stored",
 							Aliases:  []string{"ca-cert"},
 							Required: true,
 						},
 						&cli.PathFlag{
 							Name:     caPrivateKeyFileFlagName,
-							Usage:    "The path of the file to store the generated certificate-authority's (private) key in",
+							Usage:    "The path where the certificate's private key will be stored",
 							Aliases:  []string{"ca-key"},
 							Required: true,
 						},
 						&cli.BoolFlag{
 							Name:    "rsa-algorithm",
 							Aliases: []string{"rsa"},
-							Usage:   "Generate the certificate-authority using the RSA algorithm instead of ecdsa (optional)",
+							Usage:   "Generates a 4096-bit RSA keypair instead of a ECDSA P-384 keypair (the recommended default) for the certificate",
 						},
 					},
 					Action: func(ctx *cli.Context) error {
-						duration, err := utils.ParseDuration(ctx.String("duration"))
+						validityPeriod, err := utils.ParseDuration(ctx.String("validity-period"))
 						if err != nil {
-							return fmt.Errorf("failed to parse duration: %w", err)
+							return fmt.Errorf("failed to parse validity-period: %w", err)
 						}
 						caPem, caPrivKey, err := generateCACertificate(generateCACertificateInput{
-							Organization: ctx.String("organization"),
-							Duration:     duration,
-							RSAAlgorithm: ctx.Bool("rsa-algorithm"),
+							Organization:   ctx.String("organization"),
+							ValidityPeriod: validityPeriod,
+							RSAAlgorithm:   ctx.Bool("rsa-algorithm"),
 						})
 						if err != nil {
 							return fmt.Errorf("failed to generate ca certificate: %w", err)
@@ -354,9 +354,9 @@ func NewCertificatesCommand() (CommandOut, error) {
 					},
 				},
 				{
-					Name:    "client-certificate",
-					Usage:   "Generate a client certificate",
-					Aliases: []string{"client"},
+					Name:    "end-entity-certificate",
+					Usage:   "Generate an end-entity certificate",
+					Aliases: []string{"leaf"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
 							Name:     "organization",
@@ -369,9 +369,9 @@ func NewCertificatesCommand() (CommandOut, error) {
 							Usage: "The name of the organization unit (optional)",
 						},
 						&cli.StringFlag{
-							Name:    "duration",
-							Usage:   "The duration of the client certificate, for example: 30d10h (30 days and 10 hrs), by default the generated certificates will expire when the certificate authority expires",
-							Aliases: []string{"d"},
+							Name:    "validity-period",
+							Usage:   "The duration for which the end entity certificate is valid for. example: 30d10h (30 days and 10 hrs). By default the generated certificate will expire 24 hours before the certificate authority expires",
+							Aliases: []string{"vp"},
 							Action: func(_ *cli.Context, v string) error {
 								if _, err := utils.ParseDuration(v); err != nil {
 									return fmt.Errorf("failed to parse duration: %w", err)
@@ -381,60 +381,60 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 						&cli.PathFlag{
 							Name:     CaCertificateFileFlagName,
-							Usage:    "The path of the file where the certificate-authority is stored at",
+							Usage:    "The path of the x509 certificate for the certificate authority",
 							Aliases:  []string{"ca-cert"},
 							Required: true,
 						},
 						&cli.PathFlag{
 							Name:     caPrivateKeyFileFlagName,
-							Usage:    "The path of the file where the certificate-authority's key is stored at",
+							Usage:    "The path of the private key for the certificate authority",
 							Aliases:  []string{"ca-key"},
 							Required: true,
 						},
 						&cli.PathFlag{
 							Name:     "certificate-file",
-							Usage:    "The path of the file to store the generated client certificate in",
+							Usage:    "The path where the generated x509 certificate will be stored",
 							Aliases:  []string{"cert"},
 							Required: true,
 						},
 						&cli.PathFlag{
 							Name:     "key-file",
-							Usage:    "The path of the file to store the generated client key in",
+							Usage:    "The path where the certificate's private key will be stored",
 							Aliases:  []string{"key"},
 							Required: true,
 						},
 					},
 					Action: func(ctx *cli.Context) error {
-						var duration time.Duration
-						if s := ctx.String("duration"); s != "" {
+						var validityPeriod time.Duration
+						if s := ctx.String("validity-period"); s != "" {
 							var err error
-							duration, err = utils.ParseDuration(ctx.String("duration"))
+							validityPeriod, err = utils.ParseDuration(ctx.String("validity-period"))
 							if err != nil {
 								return err
 							}
 						}
 						caPem, err := ioutil.ReadFile(ctx.Path(CaCertificateFileFlagName))
 						if err != nil {
-							return fmt.Errorf("failed to read ca-cert-file: %w", err)
+							return fmt.Errorf("failed to read %s: %w", CaCertificateFileFlagName, err)
 						}
 						caPrivKey, err := ioutil.ReadFile(ctx.Path(caPrivateKeyFileFlagName))
 						if err != nil {
-							return fmt.Errorf("failed to read ca-key-file: %w", err)
+							return fmt.Errorf("failed to read %s: %w", caPrivateKeyFileFlagName, err)
 						}
 						certPem, certPrivKey, err := generateClientCertificate(generateCertificateInput{
 							Organization:     ctx.String("organization"),
 							OrganizationUnit: ctx.String("organization-unit"),
 
-							Duration:        duration,
+							ValidityPeriod:  validityPeriod,
 							CaPem:           caPem,
 							CaPrivateKeyPEM: caPrivKey,
 						})
 						if err != nil {
-							return fmt.Errorf("failed to generate certificate: %w", err)
+							return fmt.Errorf("failed to generate end-entity certificate: %w", err)
 						}
 						return writeCertificates(
 							ctx,
-							"client certificate",
+							"end entity certificate",
 							certPem,
 							certPrivKey,
 							ctx.Path("certificate-file"),
