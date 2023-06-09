@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/temporalio/tcld/services"
@@ -134,9 +133,13 @@ func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, cl
 	if err != nil {
 		return err
 	}
-	if err := postRequest(
+	if err := postFormRequest(
 		fmt.Sprintf("%s/oauth/device/code", domain),
-		fmt.Sprintf("client_id=%s&scope=%s&audience=%s", clientID, scope, audience),
+		url.Values{
+			"client_id": {clientID},
+			"scope":     {scope},
+			"audience":  {audience},
+		},
 		&oauthDeviceCodeResponse,
 	); err != nil {
 		return err
@@ -155,14 +158,13 @@ func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, cl
 	for len(oauthTokenResponse.AccessToken) == 0 {
 		time.Sleep(time.Duration(oauthDeviceCodeResponse.Interval) * time.Second)
 
-		if err := postRequest(
+		if err := postFormRequest(
 			fmt.Sprintf("%s/oauth/token", domain),
-			fmt.Sprintf(
-				"grant_type=%s&device_code=%s&client_id=%s",
-				"urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code",
-				oauthDeviceCodeResponse.DeviceCode,
-				clientID,
-			),
+			url.Values{
+				"grant_type":  {"urn:ietf:params:oauth:grant-type:device_code"},
+				"device_code": {oauthDeviceCodeResponse.DeviceCode},
+				"client_id":   {clientID},
+			},
 			&oauthTokenResponse,
 		); err != nil {
 			return err
@@ -201,18 +203,13 @@ func NewLoginCommand(c *LoginClient) (CommandOut, error) {
 	}}, nil
 }
 
-func postRequest(url string, formData string, resStruct interface{}) error {
-	payload := strings.NewReader(formData)
-	req, err := http.NewRequest("POST", url, payload)
-	if err != nil {
-		return err
-	}
-	req.Header.Add("content-type", "application/x-www-form-urlencoded")
-	res, err := http.DefaultClient.Do(req)
+func postFormRequest(url string, values url.Values, resStruct interface{}) error {
+	res, err := http.PostForm(url, values)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
+
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
