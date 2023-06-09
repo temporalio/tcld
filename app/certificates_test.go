@@ -149,6 +149,11 @@ func (s *CertificatesTestSuite) TestGenerateCACertificateCMD() {
 			args:         []string{"gen", "ca", "--org", "testorg", "--vp", "1000d", "--ca-cert", "/tmp/" + uuid.NewString(), "--ca-key", "/tmp/" + uuid.NewString()},
 			expectErrMsg: "validity-period cannot be more than: 8760h0m0s",
 		},
+		{
+			name:         "generate ca failure - validity period malformed",
+			args:         []string{"gen", "ca", "--org", "testorg", "--vp", "malformed", "--ca-cert", "/tmp/" + uuid.NewString(), "--ca-key", "/tmp/" + uuid.NewString()},
+			expectErrMsg: "failed to parse validity-period: time: invalid duration",
+		},
 	}
 
 	for _, tc := range tests {
@@ -162,4 +167,24 @@ func (s *CertificatesTestSuite) TestGenerateCACertificateCMD() {
 			}
 		})
 	}
+}
+
+func (s *CertificatesTestSuite) TestGenerateCertificateCMDEndToEnd() {
+	caCertFile := "/tmp/" + uuid.NewString()
+	caKeyFile := "/tmp/" + uuid.NewString()
+	leafCertFile := "/tmp/" + uuid.NewString()
+	leafKeyFile := "/tmp/" + uuid.NewString()
+
+	s.NoError(s.RunCmd([]string{"gen", "ca", "--org", "testorg", "--vp", "8d", "--ca-cert", caCertFile, "--ca-key", caKeyFile}...))
+	s.NoError(s.RunCmd([]string{"gen", "leaf", "--org", "testorg", "--vp", "1d", "--ca-cert", caCertFile, "--ca-key", caKeyFile, "--cert", leafCertFile, "--key", leafKeyFile}...))
+
+	s.ErrorContains(
+		s.RunCmd([]string{"gen", "leaf", "--org", "testorg", "--vp", "malformed", "--ca-cert", caCertFile, "--ca-key", caKeyFile, "--cert", leafCertFile, "--key", leafKeyFile}...),
+		"failed to parse validity-period: time: invalid duration",
+	)
+
+	s.ErrorContains(
+		s.RunCmd([]string{"gen", "leaf", "--org", "testorg", "--vp", "100d", "--ca-cert", caCertFile, "--ca-key", caKeyFile, "--cert", leafCertFile, "--key", leafKeyFile}...),
+		"failed to generate end-entity certificate: validity period of 2400h0m0s puts certificate's expiry after certificate authority's expiry",
+	)
 }
