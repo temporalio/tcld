@@ -295,7 +295,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						&cli.StringFlag{
 							Name:     "validity-period",
 							Usage:    "The duration for which the certificate is valid for. example: 30d10h (30 days and 10 hrs)",
-							Aliases:  []string{"vp"},
+							Aliases:  []string{"d"},
 							Required: true,
 							Action: func(_ *cli.Context, v string) error {
 								d, err := utils.ParseDuration(v)
@@ -371,7 +371,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						&cli.StringFlag{
 							Name:    "validity-period",
 							Usage:   "The duration for which the end entity certificate is valid for. example: 30d10h (30 days and 10 hrs). By default the generated certificate expires 24 hours before the certificate authority expires (optional)",
-							Aliases: []string{"vp"},
+							Aliases: []string{"d"},
 							Action: func(_ *cli.Context, v string) error {
 								if _, err := utils.ParseDuration(v); err != nil {
 									return fmt.Errorf("failed to parse validity-period: %w", err)
