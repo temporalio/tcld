@@ -182,7 +182,7 @@ func generateSerialNumber() (*big.Int, error) {
 	return n, err
 }
 
-func generateClientCertificate(
+func generateEndEntityCertificate(
 	input generateCertificateInput,
 ) (certPEM, certPrivateKeyPEM []byte, err error) {
 	validator := validator.New()
@@ -210,14 +210,14 @@ func generateClientCertificate(
 	now := time.Now().UTC()
 	var notAfter time.Time
 	if input.ValidityPeriod != 0 {
-		// a duration was provided by the user, validate it
+		// a validity period was provided by the user, validate it
 		notAfter = now.Add(input.ValidityPeriod).UTC()
 		if notAfter.After(caCert.NotAfter.UTC()) {
-			return nil, nil, fmt.Errorf("duration of %s puts certificate's expiry after certificate authority's expiry %s by %s",
+			return nil, nil, fmt.Errorf("validity period of %s puts certificate's expiry after certificate authority's expiry %s by %s",
 				input.ValidityPeriod, caCert.NotAfter.UTC().String(), notAfter.Sub(caCert.NotAfter.UTC()))
 		}
 	} else {
-		// set notAfter to ca's notAfter minus one day when duration is not set
+		// set notAfter to ca's notAfter minus one day when validity period is not explicitly set by the user.
 		notAfter = caCert.NotAfter.UTC().Add(-24 * time.Hour)
 	}
 	conf := &x509.Certificate{
@@ -279,11 +279,11 @@ func NewCertificatesCommand() (CommandOut, error) {
 		Command: &cli.Command{
 			Name:    "generate-certificates",
 			Aliases: []string{"gen"},
-			Usage:   "Commands for generating certificate authority (ca) and end-entity (client) TLS certificates",
+			Usage:   "Commands for generating certificate authority and end-entity TLS certificates",
 			Subcommands: []*cli.Command{
 				{
 					Name:    "certificate-authority-certificate",
-					Usage:   "Generate a certificate authority (ca) certificate",
+					Usage:   "Generate a certificate authority certificate",
 					Aliases: []string{"ca"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
@@ -294,19 +294,19 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:     "validity-period",
-							Usage:    "The duration for which the ca certificate is valid for. example: 30d10h (30 days and 10 hrs)",
+							Usage:    "The duration for which the certificate is valid for. example: 30d10h (30 days and 10 hrs)",
 							Aliases:  []string{"vp"},
 							Required: true,
 							Action: func(_ *cli.Context, v string) error {
 								d, err := utils.ParseDuration(v)
 								if err != nil {
-									return fmt.Errorf("failed to parse duration: %w", err)
+									return fmt.Errorf("failed to parse validity-period: %w", err)
 								}
 								if d > maxCADuration {
-									return fmt.Errorf("duration cannot be more than: %s", maxCADuration)
+									return fmt.Errorf("validity-period cannot be more than: %s", maxCADuration)
 								}
 								if d <= minCADuration {
-									return fmt.Errorf("duration cannot be less than: %s", minCADuration)
+									return fmt.Errorf("validity-period cannot be less than: %s", minCADuration)
 								}
 								return nil
 							},
@@ -326,7 +326,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						&cli.BoolFlag{
 							Name:    "rsa-algorithm",
 							Aliases: []string{"rsa"},
-							Usage:   "Generates a 4096-bit RSA keypair instead of a ECDSA P-384 keypair (the recommended default) for the certificate",
+							Usage:   "Generates a 4096-bit RSA keypair instead of an ECDSA P-384 keypair (the recommended default) for the certificate (optional)",
 						},
 					},
 					Action: func(ctx *cli.Context) error {
@@ -370,11 +370,11 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:    "validity-period",
-							Usage:   "The duration for which the end entity certificate is valid for. example: 30d10h (30 days and 10 hrs). By default the generated certificate will expire 24 hours before the certificate authority expires",
+							Usage:   "The duration for which the end entity certificate is valid for. example: 30d10h (30 days and 10 hrs). By default the generated certificate expires 24 hours before the certificate authority expires (optional)",
 							Aliases: []string{"vp"},
 							Action: func(_ *cli.Context, v string) error {
 								if _, err := utils.ParseDuration(v); err != nil {
-									return fmt.Errorf("failed to parse duration: %w", err)
+									return fmt.Errorf("failed to parse validity-period: %w", err)
 								}
 								return nil
 							},
@@ -421,7 +421,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						if err != nil {
 							return fmt.Errorf("failed to read %s: %w", caPrivateKeyFileFlagName, err)
 						}
-						certPem, certPrivKey, err := generateClientCertificate(generateCertificateInput{
+						certPem, certPrivKey, err := generateEndEntityCertificate(generateCertificateInput{
 							Organization:     ctx.String("organization"),
 							OrganizationUnit: ctx.String("organization-unit"),
 
@@ -489,12 +489,12 @@ func writeCertificates(ctx *cli.Context, typ string, cert, key []byte, certPath,
 	}
 	err = ioutil.WriteFile(certPath, cert, 0644)
 	if err != nil {
-		return fmt.Errorf("failed to write client certificate: %w", err)
+		return fmt.Errorf("failed to write end-entity certificate: %w", err)
 
 	}
 	err = ioutil.WriteFile(keyPath, key, 0600)
 	if err != nil {
-		return fmt.Errorf("failed to write client key: %w", err)
+		return fmt.Errorf("failed to write end-entity key: %w", err)
 	}
 	fmt.Printf("%s generated at: %s\n", typ, certPath)
 	fmt.Printf("%s key generated at: %s\n", typ, keyPath)
