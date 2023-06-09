@@ -111,7 +111,7 @@ func (s *CertificatesTestSuite) TestCertificateGenerateCore() {
 				return
 			}
 
-			_, _, err = generateEndEntityCertificate(generateEndEntityCertificateInput{
+			certBytes, certKeyBytes, err := generateEndEntityCertificate(generateEndEntityCertificateInput{
 				Organization:    tt.args.organization + "-leaf",
 				ValidityPeriod:  tt.args.endEntityValidityPeriod,
 				CaPem:           caPem,
@@ -120,6 +120,15 @@ func (s *CertificatesTestSuite) TestCertificateGenerateCore() {
 
 			if tt.endEntityGenerationErrMsg == "" {
 				s.NoError(err, "end-entity cert generation failed")
+				if err != nil {
+					return
+				}
+
+				// Even though these are not CA certs, we use this function to make sure
+				// the leaf certificates we have generated are actually valid
+				_, _, _, err = parseCACerts(certBytes, certKeyBytes)
+				s.NoError(err)
+
 			} else {
 				s.Error(err, "expected end-entity cert generation to fail")
 				s.ErrorContains(err, tt.endEntityGenerationErrMsg)
