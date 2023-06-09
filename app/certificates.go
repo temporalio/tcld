@@ -140,7 +140,7 @@ func generateCACertificate(
 	return caPEMBuffer.Bytes(), caPrivateKeyPEMBuffer.Bytes(), nil
 }
 
-type generateCertificateInput struct {
+type generateEndEntityCertificateInput struct {
 	Organization     string `validate:"required"`
 	OrganizationUnit string
 
@@ -183,7 +183,7 @@ func generateSerialNumber() (*big.Int, error) {
 }
 
 func generateEndEntityCertificate(
-	input generateCertificateInput,
+	input generateEndEntityCertificateInput,
 ) (certPEM, certPrivateKeyPEM []byte, err error) {
 	validator := validator.New()
 	if err := validator.Struct(input); err != nil {
@@ -421,7 +421,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						if err != nil {
 							return fmt.Errorf("failed to read %s: %w", caPrivateKeyFileFlagName, err)
 						}
-						certPem, certPrivKey, err := generateEndEntityCertificate(generateCertificateInput{
+						certPem, certPrivKey, err := generateEndEntityCertificate(generateEndEntityCertificateInput{
 							Organization:     ctx.String("organization"),
 							OrganizationUnit: ctx.String("organization-unit"),
 

@@ -6,6 +6,7 @@ require (
 	github.com/go-playground/validator/v10 v10.13.0
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/mock v1.6.0
+	github.com/google/uuid v1.3.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/stretchr/testify v1.8.2
 	github.com/urfave/cli/v2 v2.25.3

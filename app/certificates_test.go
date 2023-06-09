@@ -1,24 +1,165 @@
 package app
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/suite"
+	"github.com/urfave/cli/v2"
 )
 
-func TestCAGenerate(t *testing.T) {
+func TestCertificates(t *testing.T) {
+	suite.Run(t, new(CertificatesTestSuite))
+}
 
-	_, _, err := generateCACertificate(generateCACertificateInput{})
-	assert.Error(t, err)
+type CertificatesTestSuite struct {
+	suite.Suite
+	cliApp   *cli.App
+	mockCtrl *gomock.Controller
+}
 
-	caPem, caPrivKeyPem, err := generateCACertificate(generateCACertificateInput{
-		Organization:   "testtemporal",
-		ValidityPeriod: 365 * 24 * time.Hour,
-	})
-	assert.NoError(t, err)
+func (s *CertificatesTestSuite) SetupTest() {
+	s.mockCtrl = gomock.NewController(s.T())
 
-	fmt.Println("caPEM: ", caPem)
-	fmt.Println("caPrivKeyPem: ", caPrivKeyPem)
+	out, err := NewCertificatesCommand()
+	s.Require().NoError(err)
+
+	AutoConfirmFlag.Value = true
+	s.cliApp = &cli.App{
+		Name:     "test",
+		Commands: []*cli.Command{out.Command},
+		Flags: []cli.Flag{
+			AutoConfirmFlag,
+		},
+	}
+}
+
+func (s *CertificatesTestSuite) RunCmd(args ...string) error {
+	return s.cliApp.Run(append([]string{"tcld"}, args...))
+}
+
+func (s *CertificatesTestSuite) AfterTest(suiteName, testName string) {
+	s.mockCtrl.Finish()
+}
+
+func (s *CertificatesTestSuite) TestCertificateGenerateCore() {
+	type args struct {
+		rsa                     bool
+		caValidityPeriod        time.Duration
+		endEntityValidityPeriod time.Duration
+		organization            string
+	}
+	tests := []struct {
+		name                      string
+		args                      args
+		caGenerationErrMsg        string
+		endEntityGenerationErrMsg string
+	}{
+		{
+			"success - defaults",
+			args{
+				organization:     "test-certificate",
+				caValidityPeriod: 365 * 24 * time.Hour,
+			},
+			"",
+			"",
+		},
+		{
+			"success - options",
+			args{
+				rsa:                     true,
+				organization:            "test-certificate",
+				caValidityPeriod:        365 * 24 * time.Hour,
+				endEntityValidityPeriod: 24 * time.Hour,
+			},
+			"",
+			"",
+		},
+		{
+			"failure - missing required fields",
+			args{},
+			"Error:Field validation for 'Organization' failed on the 'required' tag",
+			"",
+		},
+		{
+			"failure - end-entity validity period too big",
+			args{
+				rsa:                     true,
+				organization:            "test-certificate",
+				caValidityPeriod:        365 * 24 * time.Hour,
+				endEntityValidityPeriod: 500 * 24 * time.Hour,
+			},
+			"",
+			"validity period of 12000h0m0s puts certificate's expiry after certificate authority's expiry",
+		},
+	}
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			caPem, caPrivKeyPem, err := generateCACertificate(generateCACertificateInput{
+				Organization:   tt.args.organization,
+				ValidityPeriod: tt.args.caValidityPeriod,
+				RSAAlgorithm:   tt.args.rsa,
+			})
+
+			if tt.caGenerationErrMsg == "" {
+				s.NoError(err, "ca cert generation failed")
+			} else {
+				s.Error(err, "expected ca cert generation to fail")
+				s.ErrorContains(err, tt.caGenerationErrMsg)
+				return
+			}
+
+			_, _, err = generateEndEntityCertificate(generateEndEntityCertificateInput{
+				Organization:    tt.args.organization + "-leaf",
+				ValidityPeriod:  tt.args.endEntityValidityPeriod,
+				CaPem:           caPem,
+				CaPrivateKeyPEM: caPrivKeyPem,
+			})
+
+			if tt.endEntityGenerationErrMsg == "" {
+				s.NoError(err, "end-entity cert generation failed")
+			} else {
+				s.Error(err, "expected end-entity cert generation to fail")
+				s.ErrorContains(err, tt.endEntityGenerationErrMsg)
+			}
+		})
+	}
+}
+
+func (s *CertificatesTestSuite) TestGenerateCACertificateCMD() {
+	tests := []struct {
+		name         string
+		args         []string
+		expectErrMsg string
+	}{
+		{
+			name:         "generate ca success",
+			args:         []string{"gen", "ca", "--org", "testorg", "--vp", "8d", "--ca-cert", "/tmp/" + uuid.NewString(), "--ca-key", "/tmp/" + uuid.NewString()},
+			expectErrMsg: "",
+		},
+		{
+			name:         "generate ca failure - validity period too short",
+			args:         []string{"gen", "ca", "--org", "testorg", "--vp", "3d", "--ca-cert", "/tmp/" + uuid.NewString(), "--ca-key", "/tmp/" + uuid.NewString()},
+			expectErrMsg: "validity-period cannot be less than: 168h0m0s",
+		},
+		{
+			name:         "generate ca failure - validity period too long",
+			args:         []string{"gen", "ca", "--org", "testorg", "--vp", "1000d", "--ca-cert", "/tmp/" + uuid.NewString(), "--ca-key", "/tmp/" + uuid.NewString()},
+			expectErrMsg: "validity-period cannot be more than: 8760h0m0s",
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			err := s.RunCmd(tc.args...)
+			if tc.expectErrMsg != "" {
+				s.Error(err)
+				s.ErrorContains(err, tc.expectErrMsg)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
 }
