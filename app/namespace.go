@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/mail"
-	"os"
 	"strings"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
@@ -56,13 +55,6 @@ var (
 		"eu-west-2",
 		"us-east-1",
 		"us-west-2",
-	}
-	EnableExportFeatureFlag = &cli.BoolFlag{
-		Name:     "enable-export",
-		Value:    false,
-		Usage:    "enable export commands",
-		Required: false,
-		Hidden:   true,
 	}
 )
 
@@ -979,15 +971,20 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 	}
 
-	argsWithoutProg := os.Args[1:]
-	for _, arg := range argsWithoutProg {
-		if arg == "--"+EnableExportFeatureFlag.Name {
-			subCommands = append(subCommands, &cli.Command{
-				Name:    "export",
-				Usage:   "Manage export sinks",
-				Aliases: []string{"es"},
-			})
-		}
+	// ----------- Commands for private review feature, only available when feature flag turns on -----------
+	featureFlagConfigDir := GetFeatureFlagConfigPath()
+	jsonData, err := GetFeatureFlagConfig(featureFlagConfigDir)
+	if err != nil {
+		return CommandOut{}, err
+	}
+
+	// Export Command
+	if jsonData[EnableExportFeatureFlag.Name] {
+		subCommands = append(subCommands, &cli.Command{
+			Name:    "export",
+			Usage:   "Manage export sinks",
+			Aliases: []string{"es"},
+		})
 	}
 
 	command := &cli.Command{
