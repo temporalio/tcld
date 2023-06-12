@@ -63,7 +63,6 @@ func NewFeatureCommand() (CommandOut, error) {
 				if c.Bool(EnableExportFeatureFlag.Name) {
 					jsonData[EnableExportFeatureFlag.Name] = true
 					fmt.Println("Export feature enabled")
-
 				}
 
 				jsonString, err := json.Marshal(jsonData)
