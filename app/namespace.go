@@ -1023,17 +1023,22 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								sinkNameFlag,
 								sinkAssumedRoleFlag,
 								sinkDestinationArnFlag,
-								&cli.StringFlag{
-									Name:     "region",
-									Usage:    "the region of the sink",
-									Required: true,
-								},
 								RequestIDFlag,
 							},
 
 							Action: func(ctx *cli.Context) error {
+								namespace := ctx.String(NamespaceFlagName)
+								ns, err := c.getNamespace(namespace)
+								if err != nil {
+									return fmt.Errorf("unable to get existing namespace: %v", err)
+								}
+
+								if ns.Namespace == "" {
+									return fmt.Errorf("namespace %s does not exist", namespace)
+								}
+
 								request := &namespaceservice.CreateExportSinkRequest{
-									Namespace: ctx.String(NamespaceFlagName),
+									Namespace: namespace,
 									Spec: &sink.ExportSinkSpec{
 										Name:            ctx.String(sinkNameFlag.Name),
 										Enabled:         true,
@@ -1041,7 +1046,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 										S3Sink: &sink.S3Spec{
 											AssumedRole:    ctx.String(sinkAssumedRoleFlag.Name),
 											DestinationArn: ctx.String(sinkDestinationArnFlag.Name),
-											Region:         ctx.String("region"),
+											Region:         ns.Spec.Region,
 										},
 									},
 									RequestId: ctx.String(RequestIDFlagName),
@@ -1091,11 +1096,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								sinkEnabledFlag,
 								sinkAssumedRoleFlag,
 								sinkDestinationArnFlag,
-								&cli.StringFlag{
-									Name:     "region",
-									Usage:    "the region of the sink",
-									Required: true,
-								},
 								ResourceVersionFlag,
 								RequestIDFlag,
 							},
