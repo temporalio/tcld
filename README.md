@@ -119,7 +119,7 @@ Run the following command to update a user's account role. A user is only assign
 ```
 tcld user set-account-role -e <user-email> --ar <account-role>
 ```
-Run the following command to update a user's namespace permissions. This is a set operation, which requires assigning the full set of permissions each time. To get the current set of namespace permissions run the `tcld user get` command. Permissions not specified will effectively be removed. Do not run this command if the user is already an account admin, since they already have access to all namespaces.
+Run the following command to update a user's namespace permissions. This is a set operation, which requires assigning the full set of permissions each time. To get the current set of namespace permissions run the `tcld user get` command. Permissions not specified will be effectively removed. Do not run this command if the user is already an account admin, since they already have access to all namespaces.
 ```
 # get list of current namespace permissions
 tcld user get -e <user-email> | jq -r '.spec.namespacePermissions'
