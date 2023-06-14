@@ -109,7 +109,7 @@ tcld user resend-invite -e <user-email>
 ```
 
 ### Delete user from your account:
-To delete a user from your account, run the following command. User will be removed from your account and have all permissions revoked.
+To delete a user from your account, run the following command. The user will be removed from your account and have all permissions revoked.
 ```
 tcld user delete -e <user-email>
 ```
