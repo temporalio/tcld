@@ -124,7 +124,7 @@ Run the following command to update a user's namespace permissions. This is a se
 # get list of current namespace permissions
 tcld user get -e <user-email> | jq -r '.spec.namespacePermissions'
 
-# set new user namespace permissions
+# set new user namespace permissions, make sure to include any permissions from the previous command
 tcld user set-namespace-permissions -e <user-email> -p <namespace-1=namespace-permission> -p <namespace-2=namespace-permission>
 ```
 
