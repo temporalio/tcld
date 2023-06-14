@@ -97,7 +97,7 @@ tcld user get -e <user-email>
 ```
 
 ### Invite users to your account:
-To invite users to your account, you must specify the email, account role, and the namespace permissions for the user. You can invite multiple emails at once. An invitation email will be sent to the emails specified. Users should accept the invitation from the email to confirm being added to the account. 
+To invite users to your account, you must specify the email and account role. Namespace permissions are optional. You can invite multiple emails at once. An invitation email will be sent to the emails specified. Users should accept the invitation from the email to confirm being added to the account. 
 ```
 tcld user invite -e <user-email> --ar <account-role> -p <namespace-1=namespace-permission> -p <namespace-2=namespace-permission>
 ```
