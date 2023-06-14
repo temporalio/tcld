@@ -103,7 +103,7 @@ tcld user invite -e <user-email> --ar <account-role> -p <namespace-1=namespace-p
 ```
 
 ### Reinvite users to your account:
-If a user has been invited to your account but has not accepted the invite, you can reinvite them using the `user resend-invite` command. This command will send a new invite email to the user. The previous email invitation link will become invalid.
+If a user has been invited to your account but has not accepted the invite, you can reinvite them using the following command. This command will send a new invite email to the user. The previous email invitation link will become invalid.
 ```
 tcld user resend-invite -e <user-email>
 ```
