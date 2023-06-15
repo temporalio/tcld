@@ -75,7 +75,7 @@ func NewFeatureCommand() (CommandOut, error) {
 				{
 					Name:    "get",
 					Aliases: []string{"g"},
-					Usage:   "get all feature flags",
+					Usage:   "get all feature flags value",
 					Action: func(c *cli.Context) error {
 						featureFlagConfigPath := GetFeatureFlagConfigPath()
 						jsonData, err := GetFeatureFlagConfig(featureFlagConfigPath)
