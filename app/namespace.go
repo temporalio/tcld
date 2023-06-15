@@ -979,7 +979,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 	}
 
 	// Export Command
-	if jsonData[EnableExportFeatureFlag.Name] {
+	if jsonData[ExportFeatureFlag] {
 		subCommands = append(subCommands, &cli.Command{
 			Name:    "export",
 			Usage:   "Manage export sinks",
@@ -995,9 +995,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			var err error
 			c, err = getNamespaceClientFn(ctx)
 			return err
-		},
-		Flags: []cli.Flag{
-			EnableExportFeatureFlag,
 		},
 		Subcommands: subCommands,
 	}
