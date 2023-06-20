@@ -25,8 +25,6 @@ const (
 	CaCertificateFlagName            = "ca-certificate"
 	CaCertificateFileFlagName        = "ca-certificate-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
-	certificateFilterFileFlagName    = "certificate-filter-file"
-	certificateFilterInputFlagName   = "certificate-filter-input"
 	searchAttributeFlagName          = "search-attribute"
 	userNamespacePermissionFlagName  = "user-namespace-permission"
 )
@@ -478,25 +476,26 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Name:    "accepted-client-ca",
 					Usage:   "Manage client ca certificate used to verify client connections",
 					Aliases: []string{"ca"},
-					Subcommands: []*cli.Command{{
-						Name:    "list",
-						Aliases: []string{"l"},
-						Usage:   "List the accepted client ca certificates currently configured for the namespace",
-						Flags: []cli.Flag{
-							NamespaceFlag,
+					Subcommands: []*cli.Command{
+						{
+							Name:    "list",
+							Aliases: []string{"l"},
+							Usage:   "List the accepted client ca certificates currently configured for the namespace",
+							Flags: []cli.Flag{
+								NamespaceFlag,
+							},
+							Action: func(ctx *cli.Context) error {
+								n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+								if err != nil {
+									return err
+								}
+								out, err := parseCertificates(n.Spec.AcceptedClientCa)
+								if err != nil {
+									return err
+								}
+								return PrintObj(out)
+							},
 						},
-						Action: func(ctx *cli.Context) error {
-							n, err := c.getNamespace(ctx.String(NamespaceFlagName))
-							if err != nil {
-								return err
-							}
-							out, err := parseCertificates(n.Spec.AcceptedClientCa)
-							if err != nil {
-								return err
-							}
-							return PrintObj(out)
-						},
-					},
 						{
 							Name:    "add",
 							Aliases: []string{"a"},
