@@ -20,6 +20,11 @@ type FeatureFlag struct {
 	Value bool   `json:"Value"`
 }
 
+func getFeatureFlagJSON() ([]FeatureFlag, error) {
+	featureFlagConfigPath := getFeatureFlagConfigPath()
+	return getFeatureFlagConfig(featureFlagConfigPath)
+}
+
 func getFeatureFlagConfigPath() string {
 	return filepath.Join(ConfigDirFlag.Value, featureflagFileName)
 }
@@ -107,8 +112,7 @@ func NewFeatureCommand() (CommandOut, error) {
 					Aliases: []string{"g"},
 					Usage:   "get all feature flags Value",
 					Action: func(c *cli.Context) error {
-						featureFlagConfigPath := getFeatureFlagConfigPath()
-						jsonData, err := getFeatureFlagConfig(featureFlagConfigPath)
+						jsonData, err := getFeatureFlagJSON()
 
 						if err != nil {
 							return err

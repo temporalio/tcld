@@ -1,8 +1,7 @@
 package app
 
 func IsFeatureEnabled(feature string) bool {
-	featureFlagConfigPath := getFeatureFlagConfigPath()
-	jsonData, err := getFeatureFlagConfig(featureFlagConfigPath)
+	jsonData, err := getFeatureFlagJSON()
 
 	if err != nil {
 		return false
