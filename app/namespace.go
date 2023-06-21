@@ -972,14 +972,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 	}
 
 	// ----------- Commands for private review feature, only available when feature flag turns on -----------
-	featureFlagConfigDir := GetFeatureFlagConfigPath()
-	jsonData, err := GetFeatureFlagConfig(featureFlagConfigDir)
-	if err != nil {
-		return CommandOut{}, err
-	}
-
 	// Export Command
-	if jsonData[ExportFeatureFlag] {
+	if IsFeatureEnabled(ExportFeatureFlag) {
 		subCommands = append(subCommands, &cli.Command{
 			Name:    "export",
 			Usage:   "Manage export sinks",

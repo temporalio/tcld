@@ -1,41 +1,56 @@
 package app
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"os"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetFeatureFlagConfig(t *testing.T) {
-	// Create a temporary file.
-	tmpfile, err := ioutil.TempFile("", "example")
+func TestToggleFeatureAndRead(t *testing.T) {
+	testFileName := uuid.NewString() + ".json"
+	_, err := getFeatureFlagConfig(testFileName)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpfile.Name()) // clean up
+	defer os.Remove(testFileName) // clean up
 
-	// Write a JSON object to the temporary file.
-	featureFlag := map[string]bool{"enable-export": true}
-	b, err := json.Marshal(featureFlag)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := tmpfile.Write(b); err != nil {
-		t.Fatal(err)
-	}
-	if err := tmpfile.Close(); err != nil {
-		t.Fatal(err)
-	}
+	// Toggle test feature on
+	test_feature_flag := "test-feature"
 
-	// Call the function under test.
-	result, err := GetFeatureFlagConfig(tmpfile.Name())
+	err = toggle_feature_save_to_path(test_feature_flag, testFileName)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// Assert that the function correctly read the feature flag from the file.
-	assert.Equal(t, featureFlag, result)
+	// Read the file.
+	jsonData, err := getFeatureFlagConfig(testFileName)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, feature := range jsonData {
+		assert.Equal(t, test_feature_flag, feature.Name)
+		assert.Equal(t, true, feature.Value)
+	}
+
+	// Toggle test feature off
+	err = toggle_feature_save_to_path(test_feature_flag, testFileName)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Read the file.
+	jsonData, err = getFeatureFlagConfig(testFileName)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, feature := range jsonData {
+		assert.Equal(t, test_feature_flag, feature.Name)
+		assert.Equal(t, false, feature.Value)
+	}
 }

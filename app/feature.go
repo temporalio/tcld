@@ -4,38 +4,86 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 
 	"github.com/urfave/cli/v2"
 )
 
 var (
-	ExportFeatureFlag = "enable-export"
+	ExportFeatureFlag   = "enable-export"
+	featureflagFileName = "feature.json"
 )
 
-func GetFeatureFlagConfigPath() string {
-	return ConfigDirFlag.Value + "/feature.json"
+type FeatureFlag struct {
+	Name  string `json:"Name"`
+	Value bool   `json:"Value"`
 }
 
-func GetFeatureFlagConfig(featureFlagConfigPath string) (map[string]bool, error) {
+func getFeatureFlagConfigPath() string {
+	return filepath.Join(ConfigDirFlag.Value, featureflagFileName)
+}
+
+func getFeatureFlagConfig(featureFlagConfigPath string) ([]FeatureFlag, error) {
 	// create config file if not exist
-	if _, err := ioutil.ReadFile(featureFlagConfigPath); err != nil {
-		if err := ioutil.WriteFile(featureFlagConfigPath, []byte("{}"), 0644); err != nil {
+	if _, err := os.Stat(featureFlagConfigPath); err != nil {
+		if err := ioutil.WriteFile(featureFlagConfigPath, []byte("[]"), 0644); err != nil {
 			return nil, err
 		}
 	}
-
 	content, err := ioutil.ReadFile(featureFlagConfigPath)
 	if err != nil {
 		return nil, err
 	}
 
-	var jsonData map[string]bool
+	var jsonData []FeatureFlag
 	err = json.Unmarshal(content, &jsonData)
 	if err != nil {
 		return nil, err
 	}
 
 	return jsonData, nil
+}
+
+func toggle_feature(feature string) error {
+	featureFlagConfigPath := getFeatureFlagConfigPath()
+	return toggle_feature_save_to_path(feature, featureFlagConfigPath)
+}
+
+func toggle_feature_save_to_path(feature string, path string) error {
+	jsonData, err := getFeatureFlagConfig(path)
+
+	if err != nil {
+		return err
+	}
+
+	found := false
+	for i, featureflag := range jsonData {
+		if featureflag.Name == feature {
+			jsonData[i].Value = !featureflag.Value
+			found = true
+			println("Feature flag", feature, "is now", jsonData[i].Value)
+		}
+	}
+
+	if !found {
+		jsonData = append(jsonData, FeatureFlag{
+			Name:  feature,
+			Value: true,
+		})
+		println("Feature flag", feature, "is now", true)
+	}
+
+	output, err := json.Marshal(jsonData)
+
+	if err != nil {
+		return err
+	}
+
+	if err := ioutil.WriteFile(path, output, 0644); err != nil {
+		return err
+	}
+	return nil
 }
 
 func NewFeatureCommand() (CommandOut, error) {
@@ -51,42 +99,26 @@ func NewFeatureCommand() (CommandOut, error) {
 					Aliases: []string{"te"},
 					Usage:   "switch export on/off",
 					Action: func(c *cli.Context) error {
-						featureFlagConfigPath := GetFeatureFlagConfigPath()
-						jsonData, err := GetFeatureFlagConfig(featureFlagConfigPath)
-
-						if err != nil {
-							return err
-						}
-
-						jsonData[ExportFeatureFlag] = !jsonData[ExportFeatureFlag]
-						fmt.Println(ExportFeatureFlag, ":", jsonData[ExportFeatureFlag])
-
-						jsonString, err := json.Marshal(jsonData)
-						if err != nil {
-							return err
-						}
-
-						if err := ioutil.WriteFile(featureFlagConfigPath, jsonString, 0644); err != nil {
-							return err
-						}
-						return nil
+						return toggle_feature(ExportFeatureFlag)
 					},
 				},
 				{
 					Name:    "get",
 					Aliases: []string{"g"},
-					Usage:   "get all feature flags value",
+					Usage:   "get all feature flags Value",
 					Action: func(c *cli.Context) error {
-						featureFlagConfigPath := GetFeatureFlagConfigPath()
-						jsonData, err := GetFeatureFlagConfig(featureFlagConfigPath)
+						featureFlagConfigPath := getFeatureFlagConfigPath()
+						jsonData, err := getFeatureFlagConfig(featureFlagConfigPath)
 
 						if err != nil {
 							return err
 						}
-
-						for key, value := range jsonData {
-							fmt.Println(key, ":", value)
+						jsonString, err := json.Marshal(jsonData)
+						if err != nil {
+							return err
 						}
+
+						fmt.Println(string(jsonString))
 
 						return nil
 					},
