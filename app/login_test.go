@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,23 +11,6 @@ import (
 	"github.com/temporalio/tcld/services"
 	"github.com/urfave/cli/v2"
 )
-
-var validOauthDeviceCodeResponse = `{
-	"device_code": "ABCD-EFGH",
-	"user_code": "ABCD-EFGH",
-	"verification_uri": "verification/uri",
-	"verification_uri_complete": "",
-	"interval": 0,
-	"expires_in": 0
-}`
-
-var validOauthTokenResponse = `{
-	"access_token": "EabWErgdh",
-	"refresh_token": "eWKjhgT",
-	"id_token": "iJktYuVk",
-	"token_type": "Bearer",
-	"expires_in": 1234
-}`
 
 func TestLogin(t *testing.T) {
 	suite.Run(t, new(LoginTestSuite))
@@ -76,8 +60,8 @@ func (l *LoginTestSuite) runCmd(args ...string) error {
 func (l *LoginTestSuite) TestLoginSuccessful() {
 	l.mockService.EXPECT().OpenBrowser(gomock.Any()).Return(nil)
 	l.mockService.EXPECT().WriteToConfigFile(gomock.Any(), gomock.Any()).Return(nil)
-	l.registerPath("/oauth/device/code", validOauthDeviceCodeResponse)
-	l.registerPath("/oauth/token", validOauthTokenResponse)
+	l.registerPath("/oauth/device/code", validCodeResponse(l.T(), l.server.URL))
+	l.registerPath("/oauth/token", validTokenResponse(l.T(), l.server.URL))
 	resp := l.runCmd("login", "--domain", l.server.URL)
 	l.NoError(resp)
 }
@@ -89,18 +73,59 @@ func (l *LoginTestSuite) TestLoginFailureAtDeviceVerification() {
 
 func (l *LoginTestSuite) TestLoginFailureAtTokenResponse() {
 	l.mockService.EXPECT().OpenBrowser(gomock.Any()).Return(nil)
-	l.registerPath("/oauth/device/code", validOauthDeviceCodeResponse)
+	l.registerPath("/oauth/device/code", validCodeResponse(l.T(), l.server.URL))
 	l.registerPath("/oauth/token", ``)
 	l.Error(l.runCmd("login", "--domain", l.server.URL))
 }
 
 func (l *LoginTestSuite) TestLoginWithInvalidDomain() {
-	l.registerPath("/oauth/device/code", validOauthDeviceCodeResponse)
-	l.registerPath("/oauth/token", validOauthTokenResponse)
+	l.registerPath("/oauth/device/code", validCodeResponse(l.T(), l.server.URL))
+	l.registerPath("/oauth/token", validTokenResponse(l.T(), l.server.URL))
 	l.Error(l.runCmd("login", "--domain", "test"))
+}
+
+func (l *LoginTestSuite) TestLoginWithInvalidCodeResponseURL() {
+	l.registerPath("/oauth/device/code", validCodeResponse(l.T(), "temporal.io"))
+	l.registerPath("/oauth/token", validTokenResponse(l.T(), "temporal.io"))
+	l.Error(l.runCmd("login", "--domain", l.server.URL))
 }
 
 func (l *LoginTestSuite) AfterTest(_, _ string) {
 	l.mockCtrl.Finish()
 	l.server.Close()
+}
+
+func validCodeResponse(t *testing.T, domain string) string {
+	resp := OAuthDeviceCodeResponse{
+		DeviceCode:              "ABCD-EFGH",
+		UserCode:                "ABCD-EFGH",
+		VerificationURI:         domain,
+		VerificationURIComplete: domain,
+		ExpiresIn:               30,
+		Interval:                1,
+	}
+
+	json, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("failed to marshal device code response: %v", err)
+	}
+
+	return string(json)
+}
+
+func validTokenResponse(t *testing.T, domain string) string {
+	resp := OAuthTokenResponse{
+		AccessToken:  "EabWErgdh",
+		RefreshToken: "eWKjhgT",
+		IDToken:      "iJktYuVk",
+		TokenType:    "Bearer",
+		ExpiresIn:    3600,
+	}
+
+	json, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("failed to marshal device code response: %v", err)
+	}
+
+	return string(json)
 }

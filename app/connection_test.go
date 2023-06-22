@@ -57,7 +57,7 @@ func (s *ServerConnectionTestSuite) TestServerName() {
 			s.Require().NoError(err)
 			defer os.RemoveAll(testConfDir)
 
-			data, err := json.Marshal(OauthTokenResponse{
+			data, err := json.Marshal(OAuthTokenResponse{
 				AccessToken: testToken,
 			})
 			s.Require().NoError(err)
