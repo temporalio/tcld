@@ -22,6 +22,7 @@ func fxOptions() fx.Option {
 			app.NewLoginCommand,
 			app.NewLogoutCommand,
 			app.NewCertificatesCommand,
+			app.NewFeatureCommand,
 			func() app.GetNamespaceClientFn {
 				return app.GetNamespaceClient
 			},
