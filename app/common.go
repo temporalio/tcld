@@ -1,7 +1,7 @@
 package app
 
 func IsFeatureEnabled(feature string) bool {
-	jsonData, err := getFeatureFlagJSON()
+	jsonData, err := getFeatureFlags()
 
 	if err != nil {
 		return false

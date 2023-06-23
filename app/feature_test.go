@@ -10,7 +10,7 @@ import (
 
 func TestToggleFeatureAndRead(t *testing.T) {
 	testFileName := uuid.NewString() + ".json"
-	_, err := getFeatureFlagConfig(testFileName)
+	_, err := getFeatureFlagsFromConfigFile(testFileName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -19,13 +19,13 @@ func TestToggleFeatureAndRead(t *testing.T) {
 	// Toggle test feature on
 	test_feature_flag := "test-feature"
 
-	err = toggle_feature_save_to_path(test_feature_flag, testFileName)
+	err = toggleFeatureSaveToPath(test_feature_flag, testFileName)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Read the file.
-	jsonData, err := getFeatureFlagConfig(testFileName)
+	jsonData, err := getFeatureFlagsFromConfigFile(testFileName)
 
 	if err != nil {
 		t.Fatal(err)
@@ -37,13 +37,13 @@ func TestToggleFeatureAndRead(t *testing.T) {
 	}
 
 	// Toggle test feature off
-	err = toggle_feature_save_to_path(test_feature_flag, testFileName)
+	err = toggleFeatureSaveToPath(test_feature_flag, testFileName)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Read the file.
-	jsonData, err = getFeatureFlagConfig(testFileName)
+	jsonData, err = getFeatureFlagsFromConfigFile(testFileName)
 
 	if err != nil {
 		t.Fatal(err)

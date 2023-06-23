@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -20,16 +21,16 @@ type FeatureFlag struct {
 	Value bool   `json:"Value"`
 }
 
-func getFeatureFlagJSON() ([]FeatureFlag, error) {
-	featureFlagConfigPath := getFeatureFlagConfigPath()
-	return getFeatureFlagConfig(featureFlagConfigPath)
+func getFeatureFlags() ([]FeatureFlag, error) {
+	featureFlagConfigPath := getFeatureFlagConfigFilePath()
+	return getFeatureFlagsFromConfigFile(featureFlagConfigPath)
 }
 
-func getFeatureFlagConfigPath() string {
+func getFeatureFlagConfigFilePath() string {
 	return filepath.Join(ConfigDirFlag.Value, featureflagFileName)
 }
 
-func getFeatureFlagConfig(featureFlagConfigPath string) ([]FeatureFlag, error) {
+func getFeatureFlagsFromConfigFile(featureFlagConfigPath string) ([]FeatureFlag, error) {
 	// create config file if not exist
 	if _, err := os.Stat(featureFlagConfigPath); err != nil {
 		if err := ioutil.WriteFile(featureFlagConfigPath, []byte("[]"), 0644); err != nil {
@@ -41,45 +42,45 @@ func getFeatureFlagConfig(featureFlagConfigPath string) ([]FeatureFlag, error) {
 		return nil, err
 	}
 
-	var jsonData []FeatureFlag
-	err = json.Unmarshal(content, &jsonData)
+	var featureFlags []FeatureFlag
+	err = json.Unmarshal(content, &featureFlags)
 	if err != nil {
 		return nil, err
 	}
 
-	return jsonData, nil
+	return featureFlags, nil
 }
 
-func toggle_feature(feature string) error {
-	featureFlagConfigPath := getFeatureFlagConfigPath()
-	return toggle_feature_save_to_path(feature, featureFlagConfigPath)
+func toggleFeature(feature string) error {
+	featureFlagConfigPath := getFeatureFlagConfigFilePath()
+	return toggleFeatureSaveToPath(feature, featureFlagConfigPath)
 }
 
-func toggle_feature_save_to_path(feature string, path string) error {
-	jsonData, err := getFeatureFlagConfig(path)
+func toggleFeatureSaveToPath(feature string, path string) error {
+	featureFlags, err := getFeatureFlagsFromConfigFile(path)
 
 	if err != nil {
 		return err
 	}
 
 	found := false
-	for i, featureflag := range jsonData {
+	for i, featureflag := range featureFlags {
 		if featureflag.Name == feature {
-			jsonData[i].Value = !featureflag.Value
+			featureFlags[i].Value = !featureflag.Value
 			found = true
-			println("Feature flag", feature, "is now", jsonData[i].Value)
+			println("Feature flag", feature, "is now", featureFlags[i].Value)
 		}
 	}
 
 	if !found {
-		jsonData = append(jsonData, FeatureFlag{
+		featureFlags = append(featureFlags, FeatureFlag{
 			Name:  feature,
 			Value: true,
 		})
 		println("Feature flag", feature, "is now", true)
 	}
 
-	output, err := json.Marshal(jsonData)
+	output, err := json.Marshal(featureFlags)
 
 	if err != nil {
 		return err
@@ -104,7 +105,7 @@ func NewFeatureCommand() (CommandOut, error) {
 					Aliases: []string{"te"},
 					Usage:   "switch export on/off",
 					Action: func(c *cli.Context) error {
-						return toggle_feature(ExportFeatureFlag)
+						return toggleFeature(ExportFeatureFlag)
 					},
 				},
 				{
@@ -112,18 +113,19 @@ func NewFeatureCommand() (CommandOut, error) {
 					Aliases: []string{"g"},
 					Usage:   "get all feature flags Value",
 					Action: func(c *cli.Context) error {
-						jsonData, err := getFeatureFlagJSON()
+						featureFlags, err := getFeatureFlags()
 
 						if err != nil {
 							return err
 						}
-						jsonString, err := json.Marshal(jsonData)
+
+						// MarshalIndent the feature flags into a pretty JSON
+						prettyJSON, err := json.MarshalIndent(featureFlags, "", "    ")
 						if err != nil {
-							return err
+							log.Fatalf("Failed to generate json: %s", err)
 						}
 
-						fmt.Println(string(jsonString))
-
+						fmt.Printf("%s\n", prettyJSON)
 						return nil
 					},
 				},
