@@ -286,6 +286,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 			Flags: []cli.Flag{
 				RequestIDFlag,
 				CaCertificateFlag,
+				WaitForRequestFlag,
+				RequestTimeoutFlag,
 				&cli.StringFlag{
 					Name:     NamespaceFlagName,
 					Usage:    "The namespace hosted on temporal cloud",
@@ -418,6 +420,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 			Flags: []cli.Flag{
 				RequestIDFlag,
 				ResourceVersionFlag,
+				WaitForRequestFlag,
+				RequestTimeoutFlag,
 				&cli.StringFlag{
 					Name:     NamespaceFlagName,
 					Usage:    "The namespace hosted on temporal cloud",
@@ -506,6 +510,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						CaCertificateFlag,
 						CaCertificateFileFlag,
 					},
@@ -545,6 +551,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						CaCertificateFlag,
 						CaCertificateFileFlag,
 						caCertificateFingerprintFlag,
@@ -600,6 +608,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						CaCertificateFlag,
 						CaCertificateFileFlag,
 					},
@@ -638,6 +648,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						&cli.PathFlag{
 							Name:    certificateFilterFileFlagName,
 							Usage:   `Path to a JSON file that defines the certificate filters that will be configured on the namespace. This will replace the existing filter configuration. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
@@ -793,6 +805,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						&cli.PathFlag{
 							Name:    certificateFilterFileFlagName,
 							Usage:   `Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
@@ -877,6 +891,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 					Flags: []cli.Flag{
 						NamespaceFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						RetentionDaysFlag,
 						RequestIDFlag,
 					},
@@ -934,6 +950,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						&cli.StringSliceFlag{
 							Name:     "search-attribute",
 							Usage:    fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
@@ -975,6 +993,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						&cli.StringFlag{
 							Name:     "existing-name",
 							Usage:    "The name of an existing search attribute",

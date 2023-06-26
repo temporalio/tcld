@@ -179,16 +179,14 @@ func (c *RequestClient) HandleRequestStatus(
 	operation string,
 	status *request.RequestStatus,
 ) error {
-
 	if ctx.Bool(WaitForRequestFlagName) {
 		return c.waitOnRequest(ctx, operation, status.RequestId)
 	}
-
 	if err := PrintProto(status); err != nil {
 		return err
 	}
 	fmt.Printf(
-		"started %s operation with requestId='%s', to monitor its progress use command: `%s request get -r '%s'`",
+		"started %s operation with request id='%s', to monitor its progress use command: `%s request get -r '%s'`",
 		operation, status.RequestId, AppName, status.RequestId,
 	)
 	return nil
