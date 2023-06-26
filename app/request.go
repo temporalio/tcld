@@ -187,6 +187,9 @@ func (c *RequestClient) HandleRequestStatus(
 	if err := PrintProto(status); err != nil {
 		return err
 	}
-	fmt.Sprintf("started %s operation with requestId='%s', to monitor its progress use command: `%s request get -r '%s'`", operation, status.RequestId, AppName, status.RequestId)
+	fmt.Printf(
+		"started %s operation with requestId='%s', to monitor its progress use command: `%s request get -r '%s'`",
+		operation, status.RequestId, AppName, status.RequestId,
+	)
 	return nil
 }

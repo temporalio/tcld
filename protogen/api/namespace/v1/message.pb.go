@@ -5,16 +5,15 @@ package namespace
 
 import (
 	fmt "fmt"
+	proto "github.com/gogo/protobuf/proto"
+	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
+	types "github.com/gogo/protobuf/types"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strconv "strconv"
 	strings "strings"
-
-	proto "github.com/gogo/protobuf/proto"
-	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
-	types "github.com/gogo/protobuf/types"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -143,11 +142,11 @@ func (Environment) EnumDescriptor() ([]byte, []int) {
 }
 
 type NamespaceSpec struct {
-	// the region where the namespace is (or will be) located
+	// the region where the namespace is (or will be) active.
 	Region string `protobuf:"bytes,1,opt,name=region,proto3" json:"region,omitempty"`
 	// the base64 encoded ca cert(s) that the clients can use for authentication and authorization
 	AcceptedClientCa string `protobuf:"bytes,2,opt,name=accepted_client_ca,json=acceptedClientCa,proto3" json:"accepted_client_ca,omitempty"`
-	// the num of days the workflows's data will be retained for
+	// the num of days the workflows' data will be retained for
 	RetentionDays int32 `protobuf:"varint,3,opt,name=retention_days,json=retentionDays,proto3" json:"retention_days,omitempty"`
 	// the custom search attributes to use for the namespace
 	SearchAttributes map[string]SearchAttributeType `protobuf:"bytes,4,rep,name=search_attributes,json=searchAttributes,proto3" json:"search_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3,enum=api.namespace.v1.SearchAttributeType"`
@@ -157,6 +156,10 @@ type NamespaceSpec struct {
 	// environment of the namespace.
 	// NOTE: currently there is no additional SLA or functional guarantee implied by the value of this field.
 	Environment Environment `protobuf:"varint,6,opt,name=environment,proto3,enum=api.namespace.v1.Environment" json:"environment,omitempty"`
+	// codec server property spec needed for user to set and retrieve
+	CodecSpec *CodecServerPropertySpec `protobuf:"bytes,8,opt,name=codec_spec,json=codecSpec,proto3" json:"codec_spec,omitempty"`
+	// the regions where the namespace is (or will be) located
+	PassiveRegions []string `protobuf:"bytes,9,rep,name=passive_regions,json=passiveRegions,proto3" json:"passive_regions,omitempty"`
 }
 
 func (m *NamespaceSpec) Reset()      { *m = NamespaceSpec{} }
@@ -233,6 +236,82 @@ func (m *NamespaceSpec) GetEnvironment() Environment {
 	return ENVIRONMENT_UNSPECIFIED
 }
 
+func (m *NamespaceSpec) GetCodecSpec() *CodecServerPropertySpec {
+	if m != nil {
+		return m.CodecSpec
+	}
+	return nil
+}
+
+func (m *NamespaceSpec) GetPassiveRegions() []string {
+	if m != nil {
+		return m.PassiveRegions
+	}
+	return nil
+}
+
+type CodecServerPropertySpec struct {
+	// server endpoints
+	Endpoint string `protobuf:"bytes,1,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
+	// whether to pass access token, i.e. jwt
+	PassAccessToken bool `protobuf:"varint,2,opt,name=pass_access_token,json=passAccessToken,proto3" json:"pass_access_token,omitempty"`
+	// whether to include credentials
+	IncludeCredentials bool `protobuf:"varint,3,opt,name=include_credentials,json=includeCredentials,proto3" json:"include_credentials,omitempty"`
+}
+
+func (m *CodecServerPropertySpec) Reset()      { *m = CodecServerPropertySpec{} }
+func (*CodecServerPropertySpec) ProtoMessage() {}
+func (*CodecServerPropertySpec) Descriptor() ([]byte, []int) {
+	return fileDescriptor_56458b48206aa18d, []int{1}
+}
+func (m *CodecServerPropertySpec) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CodecServerPropertySpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CodecServerPropertySpec.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CodecServerPropertySpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CodecServerPropertySpec.Merge(m, src)
+}
+func (m *CodecServerPropertySpec) XXX_Size() int {
+	return m.Size()
+}
+func (m *CodecServerPropertySpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_CodecServerPropertySpec.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CodecServerPropertySpec proto.InternalMessageInfo
+
+func (m *CodecServerPropertySpec) GetEndpoint() string {
+	if m != nil {
+		return m.Endpoint
+	}
+	return ""
+}
+
+func (m *CodecServerPropertySpec) GetPassAccessToken() bool {
+	if m != nil {
+		return m.PassAccessToken
+	}
+	return false
+}
+
+func (m *CodecServerPropertySpec) GetIncludeCredentials() bool {
+	if m != nil {
+		return m.IncludeCredentials
+	}
+	return false
+}
+
 // a filter matches a certificate if the specified fields on the filter match the corresponding
 // fields on the certificate. A filter with zero specified fields is invalid and will be rejected
 // by the server. A field is either an exact string match, a prefix match (field starts with '*') or a
@@ -249,7 +328,7 @@ type CertificateFilterSpec struct {
 func (m *CertificateFilterSpec) Reset()      { *m = CertificateFilterSpec{} }
 func (*CertificateFilterSpec) ProtoMessage() {}
 func (*CertificateFilterSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_56458b48206aa18d, []int{1}
+	return fileDescriptor_56458b48206aa18d, []int{2}
 }
 func (m *CertificateFilterSpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -311,12 +390,14 @@ type NamespaceURI struct {
 	Web string `protobuf:"bytes,1,opt,name=web,proto3" json:"web,omitempty"`
 	// the grpc address
 	Grpc string `protobuf:"bytes,2,opt,name=grpc,proto3" json:"grpc,omitempty"`
+	// the list of private links
+	VpcEndpointServiceNames []string `protobuf:"bytes,3,rep,name=vpc_endpoint_service_names,json=vpcEndpointServiceNames,proto3" json:"vpc_endpoint_service_names,omitempty"`
 }
 
 func (m *NamespaceURI) Reset()      { *m = NamespaceURI{} }
 func (*NamespaceURI) ProtoMessage() {}
 func (*NamespaceURI) Descriptor() ([]byte, []int) {
-	return fileDescriptor_56458b48206aa18d, []int{2}
+	return fileDescriptor_56458b48206aa18d, []int{3}
 }
 func (m *NamespaceURI) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -359,6 +440,57 @@ func (m *NamespaceURI) GetGrpc() string {
 	return ""
 }
 
+func (m *NamespaceURI) GetVpcEndpointServiceNames() []string {
+	if m != nil {
+		return m.VpcEndpointServiceNames
+	}
+	return nil
+}
+
+type NamespaceEnvelope struct {
+	// the namespace may be throttled if its APS exceeds the limit
+	ActionsPerSecondLimit int32 `protobuf:"varint,1,opt,name=actions_per_second_limit,json=actionsPerSecondLimit,proto3" json:"actions_per_second_limit,omitempty"`
+}
+
+func (m *NamespaceEnvelope) Reset()      { *m = NamespaceEnvelope{} }
+func (*NamespaceEnvelope) ProtoMessage() {}
+func (*NamespaceEnvelope) Descriptor() ([]byte, []int) {
+	return fileDescriptor_56458b48206aa18d, []int{4}
+}
+func (m *NamespaceEnvelope) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *NamespaceEnvelope) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_NamespaceEnvelope.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *NamespaceEnvelope) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_NamespaceEnvelope.Merge(m, src)
+}
+func (m *NamespaceEnvelope) XXX_Size() int {
+	return m.Size()
+}
+func (m *NamespaceEnvelope) XXX_DiscardUnknown() {
+	xxx_messageInfo_NamespaceEnvelope.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_NamespaceEnvelope proto.InternalMessageInfo
+
+func (m *NamespaceEnvelope) GetActionsPerSecondLimit() int32 {
+	if m != nil {
+		return m.ActionsPerSecondLimit
+	}
+	return 0
+}
+
 type Namespace struct {
 	// the namespace
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
@@ -375,12 +507,16 @@ type Namespace struct {
 	LastModifiedTime *types.Timestamp `protobuf:"bytes,6,opt,name=last_modified_time,json=lastModifiedTime,proto3" json:"last_modified_time,omitempty"`
 	// the web uri for the namespace
 	Uri *NamespaceURI `protobuf:"bytes,7,opt,name=uri,proto3" json:"uri,omitempty"`
+	// namespace envelope is a list of service level agreements (SLAs) that can be provided around a given namespace
+	Envelope *NamespaceEnvelope `protobuf:"bytes,9,opt,name=envelope,proto3" json:"envelope,omitempty"`
+	// codec server information saved
+	CodecServerProperty *CodecServerPropertySpec `protobuf:"bytes,10,opt,name=codec_server_property,json=codecServerProperty,proto3" json:"codec_server_property,omitempty"`
 }
 
 func (m *Namespace) Reset()      { *m = Namespace{} }
 func (*Namespace) ProtoMessage() {}
 func (*Namespace) Descriptor() ([]byte, []int) {
-	return fileDescriptor_56458b48206aa18d, []int{3}
+	return fileDescriptor_56458b48206aa18d, []int{5}
 }
 func (m *Namespace) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -458,82 +594,114 @@ func (m *Namespace) GetUri() *NamespaceURI {
 	return nil
 }
 
+func (m *Namespace) GetEnvelope() *NamespaceEnvelope {
+	if m != nil {
+		return m.Envelope
+	}
+	return nil
+}
+
+func (m *Namespace) GetCodecServerProperty() *CodecServerPropertySpec {
+	if m != nil {
+		return m.CodecServerProperty
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterEnum("api.namespace.v1.SearchAttributeType", SearchAttributeType_name, SearchAttributeType_value)
 	proto.RegisterEnum("api.namespace.v1.State", State_name, State_value)
 	proto.RegisterEnum("api.namespace.v1.Environment", Environment_name, Environment_value)
 	proto.RegisterType((*NamespaceSpec)(nil), "api.namespace.v1.NamespaceSpec")
 	proto.RegisterMapType((map[string]SearchAttributeType)(nil), "api.namespace.v1.NamespaceSpec.SearchAttributesEntry")
+	proto.RegisterType((*CodecServerPropertySpec)(nil), "api.namespace.v1.CodecServerPropertySpec")
 	proto.RegisterType((*CertificateFilterSpec)(nil), "api.namespace.v1.CertificateFilterSpec")
 	proto.RegisterType((*NamespaceURI)(nil), "api.namespace.v1.NamespaceURI")
+	proto.RegisterType((*NamespaceEnvelope)(nil), "api.namespace.v1.NamespaceEnvelope")
 	proto.RegisterType((*Namespace)(nil), "api.namespace.v1.Namespace")
 }
 
 func init() { proto.RegisterFile("api/namespace/v1/message.proto", fileDescriptor_56458b48206aa18d) }
 
 var fileDescriptor_56458b48206aa18d = []byte{
-	// 968 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x55, 0x4b, 0x6f, 0x1b, 0x45,
-	0x1c, 0xf7, 0xfa, 0x91, 0x92, 0xbf, 0xf3, 0x98, 0xfc, 0xdd, 0x34, 0x26, 0x34, 0x9b, 0xd4, 0x52,
-	0x20, 0x44, 0x60, 0x53, 0x17, 0xa4, 0x8a, 0x1e, 0x90, 0xe3, 0x9d, 0xd0, 0x15, 0x89, 0x1d, 0xad,
-	0xd7, 0xa1, 0x45, 0x48, 0xab, 0xf1, 0x7a, 0x62, 0xb6, 0xb5, 0x77, 0x97, 0xdd, 0xb1, 0xab, 0x70,
-	0xe2, 0xc0, 0x07, 0xe0, 0xc2, 0x77, 0xe0, 0x9b, 0xc0, 0x31, 0x12, 0x97, 0x1e, 0x89, 0x73, 0x80,
-	0x63, 0x3f, 0x02, 0xda, 0x87, 0x9f, 0x71, 0xe9, 0xcd, 0xf3, 0x7b, 0xfc, 0x9f, 0xb3, 0x63, 0x90,
-	0x99, 0x6b, 0x95, 0x6c, 0xd6, 0xe3, 0xbe, 0xcb, 0x4c, 0x5e, 0x1a, 0x3c, 0x2c, 0xf5, 0xb8, 0xef,
-	0xb3, 0x0e, 0x2f, 0xba, 0x9e, 0x23, 0x1c, 0x24, 0xcc, 0xb5, 0x8a, 0x63, 0xbe, 0x38, 0x78, 0xb8,
-	0xbd, 0xdb, 0x71, 0x9c, 0x4e, 0x97, 0x97, 0x42, 0xbe, 0xd5, 0xbf, 0x28, 0x09, 0xab, 0xc7, 0x7d,
-	0xc1, 0x7a, 0x6e, 0x64, 0x29, 0xfc, 0x93, 0x82, 0xd5, 0xda, 0xc8, 0xd1, 0x70, 0xb9, 0x89, 0xf7,
-	0x60, 0xc9, 0xe3, 0x1d, 0xcb, 0xb1, 0xf3, 0xd2, 0x9e, 0x74, 0xb0, 0xac, 0xc5, 0x27, 0xfc, 0x04,
-	0x90, 0x99, 0x26, 0x77, 0x05, 0x6f, 0x1b, 0x66, 0xd7, 0xe2, 0xb6, 0x30, 0x4c, 0x96, 0x4f, 0x86,
-	0x1a, 0x32, 0x62, 0xaa, 0x21, 0x51, 0x65, 0xb8, 0x0f, 0x6b, 0x1e, 0x17, 0xdc, 0x16, 0x96, 0x63,
-	0x1b, 0x6d, 0x76, 0xe9, 0xe7, 0x53, 0x7b, 0xd2, 0x41, 0x46, 0x5b, 0x1d, 0xa3, 0x0a, 0xbb, 0xf4,
-	0xb1, 0x05, 0x1b, 0x3e, 0x67, 0x9e, 0xf9, 0x83, 0xc1, 0x84, 0xf0, 0xac, 0x56, 0x5f, 0x70, 0x3f,
-	0x9f, 0xde, 0x4b, 0x1d, 0x64, 0xcb, 0x5f, 0x14, 0xe7, 0xbb, 0x29, 0xce, 0x14, 0x5a, 0x6c, 0x84,
-	0xc6, 0xca, 0xd8, 0x47, 0x6d, 0xe1, 0x5d, 0x6a, 0xc4, 0x9f, 0x83, 0xf1, 0x19, 0xe4, 0x4c, 0xee,
-	0x09, 0xeb, 0xc2, 0x32, 0x99, 0xe0, 0xc6, 0x85, 0xd5, 0x15, 0xdc, 0xf3, 0xf3, 0x99, 0x30, 0xcb,
-	0x47, 0xb7, 0xb3, 0x54, 0x27, 0xe2, 0xe3, 0x50, 0x1b, 0x64, 0xd3, 0xd0, 0x9c, 0x87, 0x7d, 0xfc,
-	0x0a, 0xb2, 0xdc, 0x1e, 0x58, 0x9e, 0x63, 0xf7, 0xb8, 0x2d, 0xf2, 0x4b, 0x7b, 0xd2, 0xc1, 0x5a,
-	0x79, 0xe7, 0x76, 0x44, 0x3a, 0x11, 0x69, 0xd3, 0x8e, 0xed, 0x17, 0xb0, 0xb9, 0xb0, 0x0b, 0x24,
-	0x90, 0x7a, 0xc9, 0x2f, 0xe3, 0x0d, 0x04, 0x3f, 0xf1, 0x09, 0x64, 0x06, 0xac, 0xdb, 0xe7, 0xe1,
-	0xc4, 0xd7, 0xca, 0xfb, 0xb7, 0xb3, 0xcc, 0x45, 0xd2, 0x2f, 0x5d, 0xae, 0x45, 0x9e, 0x2f, 0x93,
-	0x8f, 0xa5, 0xc2, 0x1f, 0x12, 0x6c, 0x2e, 0x6c, 0x0d, 0x77, 0x21, 0x6b, 0x3a, 0xbd, 0x9e, 0x63,
-	0x1b, 0x41, 0xbc, 0x38, 0x29, 0x44, 0x50, 0x30, 0x72, 0x2c, 0xc0, 0x8a, 0xe3, 0x75, 0x98, 0x6d,
-	0xfd, 0xc4, 0x82, 0xcd, 0xc5, 0x4b, 0x9f, 0xc1, 0xb0, 0x04, 0xb9, 0xe9, 0x33, 0xeb, 0x1a, 0x7d,
-	0xdb, 0x12, 0xe1, 0xd6, 0x97, 0x35, 0x9c, 0xa5, 0x9a, 0xb6, 0x25, 0xf0, 0x31, 0xe4, 0xfd, 0x7e,
-	0xeb, 0x05, 0x37, 0x85, 0xc1, 0x82, 0x52, 0x6c, 0x26, 0xac, 0x01, 0x8f, 0x4a, 0x48, 0x87, 0xae,
-	0x7b, 0x31, 0x5f, 0x99, 0xd0, 0x41, 0x39, 0x85, 0xcf, 0x61, 0x65, 0x7c, 0x13, 0x9a, 0x9a, 0x1a,
-	0x0c, 0xeb, 0x15, 0x6f, 0x8d, 0x86, 0xf5, 0x8a, 0xb7, 0x10, 0x21, 0xdd, 0xf1, 0x5c, 0x33, 0x2e,
-	0x34, 0xfc, 0x5d, 0xf8, 0x2b, 0x09, 0xcb, 0x63, 0x1b, 0xde, 0x87, 0xe5, 0xf1, 0xf0, 0x62, 0xe7,
-	0x04, 0xc0, 0x8f, 0x81, 0x78, 0xdc, 0x77, 0xfa, 0x9e, 0xc9, 0x8d, 0x01, 0xf7, 0xfc, 0x49, 0xd3,
-	0xeb, 0x23, 0xfc, 0x3c, 0x82, 0xf1, 0x11, 0xa4, 0x7d, 0x97, 0x9b, 0x61, 0xa3, 0xd9, 0xf2, 0xee,
-	0x3b, 0x2e, 0xad, 0x16, 0x8a, 0xf1, 0x53, 0xc8, 0xf8, 0x82, 0x89, 0xa8, 0xd1, 0xb5, 0xf2, 0xd6,
-	0x82, 0x65, 0x06, 0xb4, 0x16, 0xa9, 0x70, 0x07, 0xc0, 0xe3, 0x3f, 0xf6, 0xb9, 0x2f, 0x0c, 0xab,
-	0x9d, 0xcf, 0x44, 0xd5, 0xc6, 0x88, 0xda, 0xc6, 0xa7, 0x80, 0x5d, 0xe6, 0x0b, 0xa3, 0xe7, 0xb4,
-	0xad, 0x0b, 0x8b, 0xb7, 0x8d, 0xe0, 0x23, 0x0f, 0x6f, 0x63, 0xb6, 0xbc, 0x5d, 0x8c, 0x5e, 0x80,
-	0xe2, 0xe8, 0x05, 0x28, 0xea, 0xa3, 0x17, 0x40, 0x23, 0x81, 0xeb, 0x34, 0x36, 0x05, 0x30, 0x7e,
-	0x06, 0xa9, 0xbe, 0x67, 0xe5, 0xef, 0x84, 0x56, 0xf9, 0x7f, 0x7a, 0x69, 0x6a, 0xaa, 0x16, 0x48,
-	0x0f, 0x7f, 0x49, 0x42, 0x6e, 0xc1, 0xc5, 0xc3, 0x7d, 0x78, 0xd0, 0xa0, 0x15, 0xad, 0xfa, 0xd4,
-	0xa8, 0xe8, 0xba, 0xa6, 0x1e, 0x35, 0x75, 0x6a, 0xe8, 0xcf, 0xcf, 0xa8, 0xd1, 0xac, 0x35, 0xce,
-	0x68, 0x55, 0x3d, 0x56, 0xa9, 0x42, 0x12, 0xf8, 0x00, 0x76, 0x16, 0xcb, 0xbe, 0xa1, 0xcf, 0xbf,
-	0xad, 0x6b, 0x0a, 0x91, 0x50, 0x86, 0xed, 0xc5, 0x12, 0x9d, 0x3e, 0xd3, 0x49, 0x12, 0x77, 0xe0,
-	0xfd, 0xc5, 0xbc, 0x5a, 0xd3, 0x49, 0x0a, 0xf7, 0xe0, 0xfe, 0x62, 0x5a, 0xa9, 0x37, 0x8f, 0x4e,
-	0x28, 0x49, 0x63, 0x01, 0xe4, 0xb7, 0x28, 0x2a, 0x3a, 0xd5, 0xd5, 0x53, 0x4a, 0x32, 0x6f, 0x2f,
-	0xe2, 0xa8, 0x5e, 0x3f, 0x21, 0x4b, 0x87, 0xbf, 0x25, 0x21, 0x13, 0xae, 0x0c, 0x37, 0x61, 0xa3,
-	0xa1, 0x57, 0xf4, 0xf9, 0x46, 0xef, 0x02, 0x89, 0xe0, 0x4a, 0x55, 0x57, 0xcf, 0x2b, 0xba, 0x5a,
-	0xfb, 0x9a, 0x48, 0xf8, 0x01, 0x6c, 0xcd, 0xa2, 0xf5, 0x9a, 0x71, 0x5c, 0x51, 0x4f, 0xa8, 0x42,
-	0x92, 0x48, 0x60, 0x65, 0x8a, 0xa4, 0x24, 0x85, 0x08, 0x6b, 0x71, 0xec, 0x33, 0x25, 0x0a, 0x91,
-	0xc6, 0x2d, 0xc8, 0x4d, 0x61, 0x74, 0x64, 0xcf, 0x4c, 0xc4, 0x0a, 0x3d, 0xa1, 0xa1, 0x78, 0x69,
-	0x22, 0x0e, 0xb1, 0xb1, 0xf8, 0x0e, 0x6e, 0xc0, 0xea, 0x34, 0xa1, 0x90, 0xf7, 0x26, 0x15, 0x37,
-	0x9a, 0x8d, 0x33, 0x5a, 0x53, 0x82, 0x08, 0xcb, 0x98, 0x87, 0xbb, 0x33, 0xe8, 0x28, 0x04, 0x60,
-	0x0e, 0xd6, 0x67, 0x18, 0xaa, 0x90, 0xec, 0xe1, 0x4b, 0xc8, 0x4e, 0x3d, 0x7e, 0x41, 0xbf, 0xb4,
-	0x76, 0xae, 0x6a, 0xf5, 0xda, 0x29, 0xad, 0xe9, 0x73, 0x23, 0xca, 0xc1, 0xfa, 0x34, 0xa9, 0xd0,
-	0x73, 0x22, 0x05, 0x55, 0x4c, 0x83, 0x3a, 0x6d, 0x04, 0x3b, 0x9f, 0x43, 0xcf, 0xb4, 0xba, 0x42,
-	0x52, 0x47, 0xdf, 0x5f, 0x5d, 0xcb, 0x89, 0xd7, 0xd7, 0x72, 0xe2, 0xcd, 0xb5, 0x2c, 0xfd, 0x3c,
-	0x94, 0xa5, 0xdf, 0x87, 0xb2, 0xf4, 0xe7, 0x50, 0x96, 0xae, 0x86, 0xb2, 0xf4, 0xf7, 0x50, 0x96,
-	0xfe, 0x1d, 0xca, 0x89, 0x37, 0x43, 0x59, 0xfa, 0xf5, 0x46, 0x4e, 0x5c, 0xdd, 0xc8, 0x89, 0xd7,
-	0x37, 0x72, 0xe2, 0xbb, 0x0f, 0x45, 0xcf, 0xf5, 0xba, 0x45, 0xb3, 0xeb, 0xf4, 0xdb, 0xa5, 0xf9,
-	0x3f, 0xd8, 0x27, 0xe3, 0x43, 0x6b, 0x29, 0xfc, 0x82, 0x1e, 0xfd, 0x17, 0x00, 0x00, 0xff, 0xff,
-	0xf8, 0x37, 0x72, 0x9a, 0x85, 0x07, 0x00, 0x00,
+	// 1229 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x56, 0x4d, 0x73, 0x13, 0xc7,
+	0x16, 0xd5, 0x58, 0x92, 0x91, 0xae, 0xc0, 0x1e, 0xb7, 0x30, 0x9e, 0xe7, 0x87, 0x07, 0xa1, 0x57,
+	0x3c, 0x8c, 0xeb, 0x3d, 0x29, 0x98, 0x4a, 0x85, 0x0a, 0x0b, 0x4a, 0x96, 0x86, 0x20, 0x62, 0x24,
+	0xd5, 0x68, 0xe4, 0x40, 0x2a, 0xa9, 0xae, 0x51, 0xab, 0xed, 0x0c, 0x48, 0x33, 0x43, 0x77, 0x4b,
+	0x94, 0xb3, 0xca, 0x22, 0x3f, 0x20, 0x95, 0xaa, 0xfc, 0x87, 0xfc, 0x93, 0x64, 0xc9, 0x92, 0x25,
+	0x88, 0x4d, 0x96, 0x6c, 0xb3, 0x4b, 0x75, 0xcf, 0xe8, 0xc3, 0xb2, 0x20, 0x95, 0x9d, 0xe6, 0x9c,
+	0x73, 0xbb, 0xcf, 0xed, 0xfb, 0x61, 0x83, 0xe9, 0x86, 0x5e, 0xd9, 0x77, 0x07, 0x94, 0x87, 0x2e,
+	0xa1, 0xe5, 0xd1, 0xed, 0xf2, 0x80, 0x72, 0xee, 0x9e, 0xd0, 0x52, 0xc8, 0x02, 0x11, 0x20, 0xdd,
+	0x0d, 0xbd, 0xd2, 0x94, 0x2f, 0x8d, 0x6e, 0x6f, 0x5f, 0x3b, 0x09, 0x82, 0x93, 0x3e, 0x2d, 0x2b,
+	0xbe, 0x3b, 0x3c, 0x2e, 0x0b, 0x6f, 0x40, 0xb9, 0x70, 0x07, 0x61, 0x14, 0x52, 0x7c, 0x93, 0x82,
+	0x4b, 0x8d, 0x49, 0x44, 0x3b, 0xa4, 0x04, 0x5d, 0x81, 0x55, 0x46, 0x4f, 0xbc, 0xc0, 0x37, 0xb4,
+	0x82, 0xb6, 0x9b, 0xb5, 0xe3, 0x2f, 0xf4, 0x3f, 0x40, 0x2e, 0x21, 0x34, 0x14, 0xb4, 0x87, 0x49,
+	0xdf, 0xa3, 0xbe, 0xc0, 0xc4, 0x35, 0x56, 0x94, 0x46, 0x9f, 0x30, 0x55, 0x45, 0x54, 0x5d, 0x74,
+	0x03, 0xd6, 0x18, 0x15, 0xd4, 0x17, 0x5e, 0xe0, 0xe3, 0x9e, 0x7b, 0xca, 0x8d, 0x64, 0x41, 0xdb,
+	0x4d, 0xdb, 0x97, 0xa6, 0x68, 0xcd, 0x3d, 0xe5, 0xa8, 0x0b, 0x1b, 0x9c, 0xba, 0x8c, 0x7c, 0x87,
+	0x5d, 0x21, 0x98, 0xd7, 0x1d, 0x0a, 0xca, 0x8d, 0x54, 0x21, 0xb9, 0x9b, 0xdb, 0xff, 0xb4, 0xb4,
+	0x98, 0x4d, 0xe9, 0x8c, 0xd1, 0x52, 0x5b, 0x05, 0x56, 0xa6, 0x71, 0x96, 0x2f, 0xd8, 0xa9, 0xad,
+	0xf3, 0x05, 0x18, 0x3d, 0x81, 0x3c, 0xa1, 0x4c, 0x78, 0xc7, 0x1e, 0x71, 0x05, 0xc5, 0xc7, 0x5e,
+	0x5f, 0x50, 0xc6, 0x8d, 0xb4, 0xba, 0xe5, 0xe6, 0xf9, 0x5b, 0xaa, 0x33, 0xf1, 0x03, 0xa5, 0x95,
+	0xb7, 0xd9, 0x88, 0x2c, 0xc2, 0x1c, 0xdd, 0x87, 0x1c, 0xf5, 0x47, 0x1e, 0x0b, 0xfc, 0x01, 0xf5,
+	0x85, 0xb1, 0x5a, 0xd0, 0x76, 0xd7, 0xf6, 0x77, 0xce, 0x9f, 0x68, 0xcd, 0x44, 0xf6, 0x7c, 0x04,
+	0x7a, 0x08, 0x40, 0x82, 0x1e, 0x25, 0x98, 0x87, 0x94, 0x18, 0x99, 0x82, 0xb6, 0x9b, 0xdb, 0xbf,
+	0xb5, 0xc4, 0x91, 0xd4, 0xb4, 0x29, 0x1b, 0x51, 0xd6, 0x62, 0x41, 0x48, 0x99, 0x38, 0x55, 0x9e,
+	0xb2, 0x2a, 0x58, 0x55, 0xed, 0x26, 0xac, 0x87, 0x2e, 0xe7, 0xde, 0x88, 0xe2, 0xa8, 0x5e, 0xdc,
+	0xc8, 0x16, 0x92, 0xbb, 0x59, 0x7b, 0x2d, 0x86, 0xed, 0x08, 0xdd, 0x7e, 0x06, 0x9b, 0x4b, 0x1f,
+	0x0e, 0xe9, 0x90, 0x7c, 0x4e, 0x4f, 0xe3, 0xa2, 0xcb, 0x9f, 0xe8, 0x1e, 0xa4, 0x47, 0x6e, 0x7f,
+	0x48, 0x55, 0x91, 0xd7, 0xf6, 0x6f, 0x9c, 0x37, 0xb6, 0x70, 0x92, 0x73, 0x1a, 0x52, 0x3b, 0x8a,
+	0xf9, 0x7c, 0xe5, 0xae, 0xf6, 0x28, 0x95, 0xb9, 0xa0, 0x67, 0x8a, 0x3f, 0x6b, 0xb0, 0xf5, 0x81,
+	0x0c, 0xd0, 0x36, 0x64, 0xa8, 0xdf, 0x0b, 0x03, 0xcf, 0x17, 0xf1, 0xcd, 0xd3, 0x6f, 0xb4, 0x07,
+	0x1b, 0xd2, 0x3b, 0x96, 0xbd, 0xc5, 0x39, 0x16, 0xc1, 0x73, 0xea, 0x2b, 0x2b, 0x19, 0x5b, 0xe5,
+	0x5a, 0x51, 0xb8, 0x23, 0x61, 0x54, 0x86, 0xbc, 0xe7, 0x93, 0xfe, 0xb0, 0x47, 0x31, 0x61, 0xb4,
+	0x27, 0x3b, 0xcc, 0xed, 0x47, 0x3d, 0x97, 0xb1, 0x51, 0x4c, 0x55, 0x67, 0x4c, 0xf1, 0x37, 0x0d,
+	0x36, 0x97, 0x16, 0x1a, 0x5d, 0x83, 0x1c, 0x09, 0x06, 0x83, 0xc0, 0xc7, 0x32, 0xd5, 0xd8, 0x15,
+	0x44, 0x90, 0x6c, 0x40, 0x54, 0x84, 0x8b, 0x01, 0x3b, 0x71, 0x7d, 0xef, 0x7b, 0x57, 0xf6, 0x71,
+	0x3c, 0x02, 0x67, 0x30, 0xe9, 0x67, 0xfe, 0xdb, 0xed, 0xe3, 0xa1, 0xef, 0x09, 0xe5, 0x27, 0x6b,
+	0xa3, 0xb3, 0x54, 0xc7, 0xf7, 0x04, 0xba, 0x0b, 0x06, 0x1f, 0x76, 0x9f, 0x51, 0x22, 0xb0, 0x2b,
+	0xad, 0xf8, 0xae, 0x90, 0xb5, 0x54, 0x16, 0x52, 0x2a, 0xea, 0x4a, 0xcc, 0x57, 0x66, 0xb4, 0xb4,
+	0x53, 0x7c, 0x01, 0x17, 0xa7, 0x73, 0xd1, 0xb1, 0xeb, 0xb2, 0x8e, 0x2f, 0x69, 0x77, 0x52, 0xc7,
+	0x97, 0xb4, 0x8b, 0x10, 0xa4, 0x4e, 0x58, 0x48, 0x62, 0xa3, 0xea, 0x37, 0xba, 0x07, 0xdb, 0xa3,
+	0x90, 0xe0, 0xc9, 0x63, 0x63, 0x4e, 0xd9, 0xc8, 0x23, 0xd1, 0x85, 0xf2, 0xdd, 0x64, 0xeb, 0x6c,
+	0x8d, 0x42, 0x62, 0xc5, 0x82, 0x76, 0xc4, 0xab, 0x9b, 0x8a, 0x87, 0xb0, 0x31, 0xbd, 0xd2, 0xf2,
+	0x47, 0xb4, 0x1f, 0x84, 0x14, 0x7d, 0x06, 0x86, 0x4b, 0x64, 0x46, 0x1c, 0x87, 0x94, 0x61, 0x4e,
+	0x49, 0xe0, 0xf7, 0x70, 0xdf, 0x1b, 0x78, 0x51, 0x69, 0xd3, 0xf6, 0x66, 0xcc, 0xb7, 0x28, 0x6b,
+	0x2b, 0xf6, 0x50, 0x92, 0xc5, 0x3f, 0x93, 0x90, 0x9d, 0x1e, 0x87, 0xae, 0x42, 0x76, 0xda, 0x62,
+	0x71, 0x12, 0x33, 0x00, 0xdd, 0x02, 0x9d, 0x51, 0x1e, 0x0c, 0x19, 0xa1, 0x78, 0x44, 0x19, 0x9f,
+	0xbd, 0xff, 0xfa, 0x04, 0x3f, 0x8a, 0x60, 0x74, 0x07, 0x52, 0x6a, 0xaa, 0x92, 0x6a, 0xaa, 0xae,
+	0xfd, 0xcd, 0x36, 0xb1, 0x95, 0x18, 0xfd, 0x1f, 0xd2, 0x5c, 0xb8, 0x22, 0x7a, 0xf3, 0xb5, 0xfd,
+	0xad, 0x25, 0x2d, 0x2f, 0x69, 0x3b, 0x52, 0xa1, 0x1d, 0x00, 0x46, 0x5f, 0x0c, 0x29, 0x17, 0xd8,
+	0xeb, 0x19, 0xe9, 0xc8, 0x6d, 0x8c, 0xd4, 0x7b, 0xe8, 0x21, 0xa0, 0xbe, 0xcb, 0x05, 0x1e, 0x04,
+	0x3d, 0xef, 0xd8, 0xa3, 0x3d, 0x2c, 0xb7, 0xaf, 0x5a, 0x13, 0xb9, 0xfd, 0xed, 0x52, 0xb4, 0x9a,
+	0x4b, 0x93, 0xd5, 0x5c, 0x72, 0x26, 0xab, 0xd9, 0xd6, 0x65, 0xd4, 0xe3, 0x38, 0x48, 0xc2, 0xe8,
+	0x13, 0x48, 0x0e, 0x99, 0x67, 0x5c, 0x50, 0xa1, 0xe6, 0x47, 0x72, 0xe9, 0xd8, 0x75, 0x5b, 0x4a,
+	0xd1, 0x7d, 0x39, 0x59, 0x51, 0x69, 0x8c, 0xac, 0x0a, 0xfb, 0xcf, 0x47, 0xc2, 0x26, 0x55, 0xb4,
+	0xa7, 0x41, 0xe8, 0x5b, 0xd8, 0x8c, 0x77, 0x93, 0x1a, 0x5b, 0x1c, 0xc6, 0x73, 0x6b, 0xc0, 0x3f,
+	0x5d, 0x53, 0x79, 0x72, 0x9e, 0x78, 0x94, 0xca, 0x64, 0xf4, 0xec, 0xde, 0x8f, 0x2b, 0x90, 0x5f,
+	0xb2, 0x44, 0xd0, 0x0d, 0xb8, 0xde, 0xb6, 0x2a, 0x76, 0xf5, 0x21, 0xae, 0x38, 0x8e, 0x5d, 0x3f,
+	0xe8, 0x38, 0x16, 0x76, 0x9e, 0xb6, 0x2c, 0xdc, 0x69, 0xb4, 0x5b, 0x56, 0xb5, 0xfe, 0xa0, 0x6e,
+	0xd5, 0xf4, 0x04, 0xba, 0x0e, 0x3b, 0xcb, 0x65, 0x5f, 0x5a, 0x4f, 0xbf, 0x6a, 0xda, 0x35, 0x5d,
+	0x43, 0x26, 0x6c, 0x2f, 0x97, 0x38, 0xd6, 0x13, 0x47, 0x5f, 0x41, 0x3b, 0xf0, 0xaf, 0xe5, 0x7c,
+	0xbd, 0xe1, 0xe8, 0x49, 0x54, 0x80, 0xab, 0xcb, 0xe9, 0x5a, 0xb3, 0x73, 0x70, 0x68, 0xe9, 0x29,
+	0x54, 0x04, 0xf3, 0x03, 0x8a, 0x8a, 0x63, 0x39, 0xf5, 0xc7, 0x96, 0x9e, 0xfe, 0xb0, 0x89, 0x83,
+	0x66, 0xf3, 0x50, 0x5f, 0xdd, 0xfb, 0x65, 0x05, 0xd2, 0xaa, 0xb1, 0xd0, 0x26, 0x6c, 0xb4, 0x9d,
+	0x8a, 0xb3, 0x98, 0xe8, 0x65, 0xd0, 0x23, 0xb8, 0x52, 0x75, 0xea, 0x47, 0x15, 0xa7, 0xde, 0xf8,
+	0x42, 0xd7, 0xd0, 0xbf, 0x61, 0xeb, 0x2c, 0xda, 0x6c, 0xe0, 0x07, 0x95, 0xfa, 0xa1, 0x55, 0xd3,
+	0x57, 0x90, 0x0e, 0x17, 0xe7, 0x48, 0x4b, 0x4f, 0x22, 0x04, 0x6b, 0xf1, 0xd9, 0xad, 0x5a, 0x74,
+	0x44, 0x0a, 0x6d, 0x41, 0x7e, 0x0e, 0xb3, 0x26, 0xe1, 0xe9, 0x99, 0xb8, 0x66, 0x1d, 0x5a, 0x4a,
+	0xbc, 0x3a, 0x13, 0x2b, 0x6c, 0x2a, 0xbe, 0x80, 0x36, 0xe0, 0xd2, 0x3c, 0x51, 0xd3, 0x33, 0x33,
+	0xc7, 0xed, 0x4e, 0xbb, 0x65, 0x35, 0x6a, 0xf2, 0x84, 0x2c, 0x32, 0xe0, 0xf2, 0x19, 0x74, 0x72,
+	0x04, 0xa0, 0x3c, 0xac, 0x9f, 0x61, 0xac, 0x9a, 0x9e, 0xdb, 0x7b, 0x0e, 0xb9, 0xb9, 0xbf, 0x9d,
+	0x32, 0x5f, 0xab, 0x71, 0x54, 0xb7, 0x9b, 0x8d, 0xc7, 0x56, 0xc3, 0x59, 0x78, 0xa2, 0x3c, 0xac,
+	0xcf, 0x93, 0x35, 0xeb, 0x48, 0xd7, 0xa4, 0x8b, 0x79, 0xd0, 0xb1, 0xda, 0xb2, 0xe6, 0x0b, 0x68,
+	0xcb, 0x6e, 0xd6, 0xf4, 0xe4, 0xc1, 0x37, 0xaf, 0xde, 0x9a, 0x89, 0xd7, 0x6f, 0xcd, 0xc4, 0xfb,
+	0xb7, 0xa6, 0xf6, 0xc3, 0xd8, 0xd4, 0x7e, 0x1d, 0x9b, 0xda, 0xef, 0x63, 0x53, 0x7b, 0x35, 0x36,
+	0xb5, 0x37, 0x63, 0x53, 0xfb, 0x63, 0x6c, 0x26, 0xde, 0x8f, 0x4d, 0xed, 0xa7, 0x77, 0x66, 0xe2,
+	0xd5, 0x3b, 0x33, 0xf1, 0xfa, 0x9d, 0x99, 0xf8, 0xfa, 0xbf, 0x62, 0x10, 0xb2, 0x7e, 0x89, 0xf4,
+	0x83, 0x61, 0xaf, 0xbc, 0xf8, 0xff, 0xd9, 0xbd, 0xe9, 0x47, 0x77, 0x55, 0xcd, 0xf9, 0x9d, 0xbf,
+	0x02, 0x00, 0x00, 0xff, 0xff, 0x2a, 0xc7, 0xbd, 0x7a, 0xc4, 0x09, 0x00, 0x00,
 }
 
 func (x SearchAttributeType) String() string {
@@ -604,6 +772,47 @@ func (this *NamespaceSpec) Equal(that interface{}) bool {
 	if this.Environment != that1.Environment {
 		return false
 	}
+	if !this.CodecSpec.Equal(that1.CodecSpec) {
+		return false
+	}
+	if len(this.PassiveRegions) != len(that1.PassiveRegions) {
+		return false
+	}
+	for i := range this.PassiveRegions {
+		if this.PassiveRegions[i] != that1.PassiveRegions[i] {
+			return false
+		}
+	}
+	return true
+}
+func (this *CodecServerPropertySpec) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CodecServerPropertySpec)
+	if !ok {
+		that2, ok := that.(CodecServerPropertySpec)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Endpoint != that1.Endpoint {
+		return false
+	}
+	if this.PassAccessToken != that1.PassAccessToken {
+		return false
+	}
+	if this.IncludeCredentials != that1.IncludeCredentials {
+		return false
+	}
 	return true
 }
 func (this *CertificateFilterSpec) Equal(that interface{}) bool {
@@ -664,6 +873,38 @@ func (this *NamespaceURI) Equal(that interface{}) bool {
 	if this.Grpc != that1.Grpc {
 		return false
 	}
+	if len(this.VpcEndpointServiceNames) != len(that1.VpcEndpointServiceNames) {
+		return false
+	}
+	for i := range this.VpcEndpointServiceNames {
+		if this.VpcEndpointServiceNames[i] != that1.VpcEndpointServiceNames[i] {
+			return false
+		}
+	}
+	return true
+}
+func (this *NamespaceEnvelope) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*NamespaceEnvelope)
+	if !ok {
+		that2, ok := that.(NamespaceEnvelope)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ActionsPerSecondLimit != that1.ActionsPerSecondLimit {
+		return false
+	}
 	return true
 }
 func (this *Namespace) Equal(that interface{}) bool {
@@ -706,13 +947,19 @@ func (this *Namespace) Equal(that interface{}) bool {
 	if !this.Uri.Equal(that1.Uri) {
 		return false
 	}
+	if !this.Envelope.Equal(that1.Envelope) {
+		return false
+	}
+	if !this.CodecServerProperty.Equal(that1.CodecServerProperty) {
+		return false
+	}
 	return true
 }
 func (this *NamespaceSpec) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 10)
+	s := make([]string, 0, 12)
 	s = append(s, "&namespace.NamespaceSpec{")
 	s = append(s, "Region: "+fmt.Sprintf("%#v", this.Region)+",\n")
 	s = append(s, "AcceptedClientCa: "+fmt.Sprintf("%#v", this.AcceptedClientCa)+",\n")
@@ -734,6 +981,22 @@ func (this *NamespaceSpec) GoString() string {
 		s = append(s, "CertificateFilters: "+fmt.Sprintf("%#v", this.CertificateFilters)+",\n")
 	}
 	s = append(s, "Environment: "+fmt.Sprintf("%#v", this.Environment)+",\n")
+	if this.CodecSpec != nil {
+		s = append(s, "CodecSpec: "+fmt.Sprintf("%#v", this.CodecSpec)+",\n")
+	}
+	s = append(s, "PassiveRegions: "+fmt.Sprintf("%#v", this.PassiveRegions)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CodecServerPropertySpec) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&namespace.CodecServerPropertySpec{")
+	s = append(s, "Endpoint: "+fmt.Sprintf("%#v", this.Endpoint)+",\n")
+	s = append(s, "PassAccessToken: "+fmt.Sprintf("%#v", this.PassAccessToken)+",\n")
+	s = append(s, "IncludeCredentials: "+fmt.Sprintf("%#v", this.IncludeCredentials)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -754,10 +1017,21 @@ func (this *NamespaceURI) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 6)
+	s := make([]string, 0, 7)
 	s = append(s, "&namespace.NamespaceURI{")
 	s = append(s, "Web: "+fmt.Sprintf("%#v", this.Web)+",\n")
 	s = append(s, "Grpc: "+fmt.Sprintf("%#v", this.Grpc)+",\n")
+	s = append(s, "VpcEndpointServiceNames: "+fmt.Sprintf("%#v", this.VpcEndpointServiceNames)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *NamespaceEnvelope) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespace.NamespaceEnvelope{")
+	s = append(s, "ActionsPerSecondLimit: "+fmt.Sprintf("%#v", this.ActionsPerSecondLimit)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -765,7 +1039,7 @@ func (this *Namespace) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 11)
+	s := make([]string, 0, 13)
 	s = append(s, "&namespace.Namespace{")
 	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
 	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
@@ -779,6 +1053,12 @@ func (this *Namespace) GoString() string {
 	}
 	if this.Uri != nil {
 		s = append(s, "Uri: "+fmt.Sprintf("%#v", this.Uri)+",\n")
+	}
+	if this.Envelope != nil {
+		s = append(s, "Envelope: "+fmt.Sprintf("%#v", this.Envelope)+",\n")
+	}
+	if this.CodecServerProperty != nil {
+		s = append(s, "CodecServerProperty: "+fmt.Sprintf("%#v", this.CodecServerProperty)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -811,6 +1091,27 @@ func (m *NamespaceSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.PassiveRegions) > 0 {
+		for iNdEx := len(m.PassiveRegions) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.PassiveRegions[iNdEx])
+			copy(dAtA[i:], m.PassiveRegions[iNdEx])
+			i = encodeVarintMessage(dAtA, i, uint64(len(m.PassiveRegions[iNdEx])))
+			i--
+			dAtA[i] = 0x4a
+		}
+	}
+	if m.CodecSpec != nil {
+		{
+			size, err := m.CodecSpec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x42
+	}
 	if m.Environment != 0 {
 		i = encodeVarintMessage(dAtA, i, uint64(m.Environment))
 		i--
@@ -863,6 +1164,56 @@ func (m *NamespaceSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.Region)
 		copy(dAtA[i:], m.Region)
 		i = encodeVarintMessage(dAtA, i, uint64(len(m.Region)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CodecServerPropertySpec) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CodecServerPropertySpec) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CodecServerPropertySpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.IncludeCredentials {
+		i--
+		if m.IncludeCredentials {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.PassAccessToken {
+		i--
+		if m.PassAccessToken {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Endpoint) > 0 {
+		i -= len(m.Endpoint)
+		copy(dAtA[i:], m.Endpoint)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Endpoint)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -940,6 +1291,15 @@ func (m *NamespaceURI) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.VpcEndpointServiceNames) > 0 {
+		for iNdEx := len(m.VpcEndpointServiceNames) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.VpcEndpointServiceNames[iNdEx])
+			copy(dAtA[i:], m.VpcEndpointServiceNames[iNdEx])
+			i = encodeVarintMessage(dAtA, i, uint64(len(m.VpcEndpointServiceNames[iNdEx])))
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
 	if len(m.Grpc) > 0 {
 		i -= len(m.Grpc)
 		copy(dAtA[i:], m.Grpc)
@@ -953,6 +1313,34 @@ func (m *NamespaceURI) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i = encodeVarintMessage(dAtA, i, uint64(len(m.Web)))
 		i--
 		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *NamespaceEnvelope) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *NamespaceEnvelope) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *NamespaceEnvelope) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ActionsPerSecondLimit != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.ActionsPerSecondLimit))
+		i--
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
@@ -977,6 +1365,30 @@ func (m *Namespace) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.CodecServerProperty != nil {
+		{
+			size, err := m.CodecServerProperty.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x52
+	}
+	if m.Envelope != nil {
+		{
+			size, err := m.Envelope.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x4a
+	}
 	if m.Uri != nil {
 		{
 			size, err := m.Uri.MarshalToSizedBuffer(dAtA[:i])
@@ -1087,6 +1499,35 @@ func (m *NamespaceSpec) Size() (n int) {
 	if m.Environment != 0 {
 		n += 1 + sovMessage(uint64(m.Environment))
 	}
+	if m.CodecSpec != nil {
+		l = m.CodecSpec.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if len(m.PassiveRegions) > 0 {
+		for _, s := range m.PassiveRegions {
+			l = len(s)
+			n += 1 + l + sovMessage(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *CodecServerPropertySpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Endpoint)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.PassAccessToken {
+		n += 2
+	}
+	if m.IncludeCredentials {
+		n += 2
+	}
 	return n
 }
 
@@ -1129,6 +1570,24 @@ func (m *NamespaceURI) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
+	if len(m.VpcEndpointServiceNames) > 0 {
+		for _, s := range m.VpcEndpointServiceNames {
+			l = len(s)
+			n += 1 + l + sovMessage(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *NamespaceEnvelope) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ActionsPerSecondLimit != 0 {
+		n += 1 + sovMessage(uint64(m.ActionsPerSecondLimit))
+	}
 	return n
 }
 
@@ -1163,6 +1622,14 @@ func (m *Namespace) Size() (n int) {
 	}
 	if m.Uri != nil {
 		l = m.Uri.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Envelope != nil {
+		l = m.Envelope.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.CodecServerProperty != nil {
+		l = m.CodecServerProperty.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
 	return n
@@ -1200,6 +1667,20 @@ func (this *NamespaceSpec) String() string {
 		`SearchAttributes:` + mapStringForSearchAttributes + `,`,
 		`CertificateFilters:` + repeatedStringForCertificateFilters + `,`,
 		`Environment:` + fmt.Sprintf("%v", this.Environment) + `,`,
+		`CodecSpec:` + strings.Replace(this.CodecSpec.String(), "CodecServerPropertySpec", "CodecServerPropertySpec", 1) + `,`,
+		`PassiveRegions:` + fmt.Sprintf("%v", this.PassiveRegions) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CodecServerPropertySpec) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CodecServerPropertySpec{`,
+		`Endpoint:` + fmt.Sprintf("%v", this.Endpoint) + `,`,
+		`PassAccessToken:` + fmt.Sprintf("%v", this.PassAccessToken) + `,`,
+		`IncludeCredentials:` + fmt.Sprintf("%v", this.IncludeCredentials) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1224,6 +1705,17 @@ func (this *NamespaceURI) String() string {
 	s := strings.Join([]string{`&NamespaceURI{`,
 		`Web:` + fmt.Sprintf("%v", this.Web) + `,`,
 		`Grpc:` + fmt.Sprintf("%v", this.Grpc) + `,`,
+		`VpcEndpointServiceNames:` + fmt.Sprintf("%v", this.VpcEndpointServiceNames) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *NamespaceEnvelope) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&NamespaceEnvelope{`,
+		`ActionsPerSecondLimit:` + fmt.Sprintf("%v", this.ActionsPerSecondLimit) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1240,6 +1732,8 @@ func (this *Namespace) String() string {
 		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
 		`LastModifiedTime:` + strings.Replace(fmt.Sprintf("%v", this.LastModifiedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`Uri:` + strings.Replace(this.Uri.String(), "NamespaceURI", "NamespaceURI", 1) + `,`,
+		`Envelope:` + strings.Replace(this.Envelope.String(), "NamespaceEnvelope", "NamespaceEnvelope", 1) + `,`,
+		`CodecServerProperty:` + strings.Replace(this.CodecServerProperty.String(), "CodecServerPropertySpec", "CodecServerPropertySpec", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1530,6 +2024,199 @@ func (m *NamespaceSpec) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CodecSpec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CodecSpec == nil {
+				m.CodecSpec = &CodecServerPropertySpec{}
+			}
+			if err := m.CodecSpec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PassiveRegions", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PassiveRegions = append(m.PassiveRegions, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CodecServerPropertySpec) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CodecServerPropertySpec: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CodecServerPropertySpec: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Endpoint", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Endpoint = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PassAccessToken", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.PassAccessToken = bool(v != 0)
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IncludeCredentials", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.IncludeCredentials = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -1828,6 +2515,110 @@ func (m *NamespaceURI) Unmarshal(dAtA []byte) error {
 			}
 			m.Grpc = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VpcEndpointServiceNames", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.VpcEndpointServiceNames = append(m.VpcEndpointServiceNames, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *NamespaceEnvelope) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: NamespaceEnvelope: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: NamespaceEnvelope: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ActionsPerSecondLimit", wireType)
+			}
+			m.ActionsPerSecondLimit = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ActionsPerSecondLimit |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -2101,6 +2892,78 @@ func (m *Namespace) Unmarshal(dAtA []byte) error {
 				m.Uri = &NamespaceURI{}
 			}
 			if err := m.Uri.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Envelope", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Envelope == nil {
+				m.Envelope = &NamespaceEnvelope{}
+			}
+			if err := m.Envelope.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CodecServerProperty", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CodecServerProperty == nil {
+				m.CodecServerProperty = &CodecServerPropertySpec{}
+			}
+			if err := m.CodecServerProperty.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
