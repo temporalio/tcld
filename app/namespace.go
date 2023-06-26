@@ -9,10 +9,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gogo/protobuf/jsonpb"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	"go.uber.org/multierr"
 
+	"github.com/cjrd/allocate"
 	"github.com/kylelemons/godebug/diff"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
@@ -26,6 +28,8 @@ const (
 	CaCertificateFlagName            = "ca-certificate"
 	CaCertificateFileFlagName        = "ca-certificate-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
+	SpecFileFlagName                 = "spec-file"
+	SpecFlagName                     = "spec"
 	searchAttributeFlagName          = "search-attribute"
 	userNamespacePermissionFlagName  = "user-namespace-permission"
 )
@@ -272,6 +276,29 @@ func ReadCertFilters(ctx *cli.Context) ([]byte, error) {
 	return certFilterBytes, nil
 }
 
+func ReadNamespaceSpecification(ctx *cli.Context) (*namespace.NamespaceSpec, error) {
+	spec := ctx.String(SpecFlagName)
+	if spec == "" {
+		if ctx.Path(SpecFileFlagName) != "" {
+			data, err := os.ReadFile(ctx.Path(SpecFileFlagName))
+			if err != nil {
+				return nil, err
+			}
+			spec = string(data)
+		}
+	}
+	if spec == "" {
+		return nil, fmt.Errorf("no specification provided")
+	}
+	var specProto namespace.NamespaceSpec
+	unmarshaler := jsonpb.Unmarshaler{}
+	err := unmarshaler.Unmarshal(strings.NewReader(spec), &specProto)
+	if err != nil {
+		return nil, err
+	}
+	return &specProto, nil
+}
+
 func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestClientFn GetRequestClientFn) (CommandOut, error) {
 	var (
 		nc *NamespaceClient
@@ -469,13 +496,76 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 			Aliases: []string{"g"},
 			Flags: []cli.Flag{
 				NamespaceFlag,
+				&cli.BoolFlag{
+					Name:  "spec",
+					Usage: "get only the specification of the namespace",
+				},
 			},
 			Action: func(ctx *cli.Context) error {
 				n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
 				if err != nil {
 					return err
 				}
+				if ctx.Bool("spec") {
+					return PrintProto(n.Spec)
+				}
 				return PrintProto(n)
+			},
+		},
+		{
+			Name:    "apply-specification",
+			Usage:   "Apply specification",
+			Aliases: []string{"a"},
+			Flags: []cli.Flag{
+				NamespaceFlag,
+				&cli.StringFlag{
+					Name:  SpecFlagName,
+					Usage: "the specification in JSON format to update the namespace to",
+				},
+				&cli.PathFlag{
+					Name:  SpecFileFlagName,
+					Usage: "the path to the file containing the specification in JSON format to update the namespace to",
+				},
+				RequestIDFlag,
+				ResourceVersionFlag,
+				WaitForRequestFlag,
+				RequestTimeoutFlag,
+			},
+			Action: func(ctx *cli.Context) error {
+				spec, err := ReadNamespaceSpecification(ctx)
+				if err != nil {
+					return err
+				}
+				n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
+				if err != nil {
+					return err
+				}
+				// allocate the pointers in the specs to get a correct diff
+				allocate.MustZero(n.Spec)
+				allocate.MustZero(spec)
+				diff, err := ProtoDiff(n.Spec, spec)
+				if err != nil {
+					return err
+				}
+				if diff == "" {
+					fmt.Printf("nothing to change\n")
+					return nil
+				}
+				fmt.Printf("Changes: \n%s\n", diff)
+				yes, err := ConfirmPrompt(ctx, fmt.Sprintf("Confirm changes for '%s' namespace?", ctx.String(NamespaceFlagName)))
+				if err != nil {
+					return err
+				}
+				if !yes {
+					fmt.Printf("cancelled\n")
+					return nil
+				}
+				n.Spec = spec
+				status, err := nc.updateNamespace(ctx, n)
+				if err != nil {
+					return err
+				}
+				return rc.HandleRequestStatus(ctx, "update namespace", status)
 			},
 		},
 		{

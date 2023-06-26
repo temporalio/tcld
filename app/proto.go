@@ -7,6 +7,7 @@ import (
 
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/gogo/protobuf/proto"
+	"github.com/kylelemons/godebug/diff"
 )
 
 func FormatJson(i interface{}) (string, error) {
@@ -69,4 +70,16 @@ func PrintProtoSlice(name string, ms []proto.Message) error {
 	}
 	fmt.Printf("%s\n", out.String())
 	return nil
+}
+
+func ProtoDiff(m1, m2 proto.Message) (string, error) {
+	m1json, err := serializeProto(m1)
+	if err != nil {
+		return "", err
+	}
+	m2json, err := serializeProto(m2)
+	if err != nil {
+		return "", err
+	}
+	return diff.Diff(m1json, m2json), nil
 }

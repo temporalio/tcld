@@ -17,6 +17,7 @@ require (
 )
 
 require (
+	github.com/cjrd/allocate v0.0.0-20220510215731-986f24f0fb18 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
