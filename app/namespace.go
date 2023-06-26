@@ -869,7 +869,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					return err
 				}
 
-				fmt.Println("this import will result in the following changes to the codec server config:")
+				fmt.Println("this update will result in the following changes to the codec server config:")
 				fmt.Println(difference)
 
 				confirmed, err := ConfirmPrompt(ctx, "confirm codec server update operation")
