@@ -128,7 +128,9 @@ func (c *RequestClient) waitOnRequest(ctx *cli.Context, operation string, reques
 	var status *request.RequestStatus
 	defer func() {
 		if status != nil {
-			PrintProto(status)
+			if err := PrintProto(status); err != nil {
+				fmt.Fprintf(writer, "failed to print status: %s", err)
+			}
 		}
 	}()
 loop:
