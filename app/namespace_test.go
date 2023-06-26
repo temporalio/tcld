@@ -1112,15 +1112,6 @@ func (s *NamespaceTestSuite) TestUpdateCodecServer() {
 				}
 			},
 		},
-		// {
-		// 	args:      []string{"n", "ucs", "-n", ns, "-e", ""},
-		// 	expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
-		// 	expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
-		// 		r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{
-		// 			Endpoint: "fakehost:9999",
-		// 		}
-		// 	},
-		// },
 	}
 
 	for _, tc := range tests {

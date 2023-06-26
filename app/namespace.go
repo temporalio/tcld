@@ -831,24 +831,24 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 		{
 			Name:    "update-codec-server",
-			Usage:   "Update codec server config used to decode your encoded payloads through remote endpoint.",
+			Usage:   "Update codec server config used to decode encoded payloads through remote endpoint",
 			Aliases: []string{"ucs"},
 			Flags: []cli.Flag{
 				NamespaceFlag,
 				&cli.StringFlag{
 					Name:     "endpoint",
-					Usage:    "The codec server endpoint to decode payloads for all users interacting with this Namespace.",
+					Usage:    "The codec server endpoint to decode payloads for all users interacting with this Namespace",
 					Aliases:  []string{"e"},
 					Required: true,
 				},
 				&cli.BoolFlag{
 					Name:    "pass-access-token",
-					Usage:   "Pass the user access token with your endpoint.",
+					Usage:   "Pass the user access token with the remote endpoint",
 					Aliases: []string{"pat"},
 				},
 				&cli.BoolFlag{
 					Name:    "include-credentials",
-					Usage:   "Include cross-origin credentials.",
+					Usage:   "Include cross-origin credentials",
 					Aliases: []string{"ic"},
 				},
 			},
