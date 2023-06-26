@@ -3,15 +3,17 @@ package app
 import (
 	"context"
 	"errors"
+	"reflect"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	authservicemock "github.com/temporalio/tcld/protogen/apimock/authservice/v1"
+	requestservicemock "github.com/temporalio/tcld/protogen/apimock/requestservice/v1"
 	"github.com/urfave/cli/v2"
-	"reflect"
-	"testing"
 )
 
 func TestUser(t *testing.T) {
@@ -23,17 +25,27 @@ type UserTestSuite struct {
 	cliApp          *cli.App
 	mockCtrl        *gomock.Controller
 	mockAuthService *authservicemock.MockAuthServiceClient
+	mockReqService  *requestservicemock.MockRequestServiceClient
 }
 
 func (s *UserTestSuite) SetupTest() {
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockAuthService = authservicemock.NewMockAuthServiceClient(s.mockCtrl)
-	out, err := NewUserCommand(func(ctx *cli.Context) (*UserClient, error) {
+	s.mockReqService = requestservicemock.NewMockRequestServiceClient(s.mockCtrl)
+
+	getUserClient := func(ctx *cli.Context) (*UserClient, error) {
 		return &UserClient{
 			ctx:    context.TODO(),
 			client: s.mockAuthService,
 		}, nil
-	})
+	}
+	getRequestClient := func(ctx *cli.Context) (*RequestClient, error) {
+		return &RequestClient{
+			ctx:    context.TODO(),
+			client: s.mockReqService,
+		}, nil
+	}
+	out, err := NewUserCommand(getUserClient, getRequestClient)
 	s.Require().NoError(err)
 	AutoConfirmFlag.Value = true
 	s.cliApp = &cli.App{

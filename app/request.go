@@ -179,6 +179,10 @@ func (c *RequestClient) HandleRequestStatus(
 	operation string,
 	status *request.RequestStatus,
 ) error {
+	if status == nil {
+		// status can be empty when the operation is cancelled
+		return nil
+	}
 	if ctx.Bool(WaitForRequestFlagName) {
 		return c.waitOnRequest(ctx, operation, status.RequestId)
 	}

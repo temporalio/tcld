@@ -40,20 +40,19 @@ func (s *NamespaceTestSuite) SetupTest() {
 	s.mockService = namespaceservicemock.NewMockNamespaceServiceClient(s.mockCtrl)
 	s.mockReqService = requestservicemock.NewMockRequestServiceClient(s.mockCtrl)
 	s.mockAuthService = authservicemock.NewMockAuthServiceClient(s.mockCtrl)
-	out, err := NewNamespaceCommand(func(ctx *cli.Context) (*NamespaceClient, error) {
+	getNamespaceClientFn := func(ctx *cli.Context) (*NamespaceClient, error) {
 		return &NamespaceClient{
 			ctx:        context.TODO(),
 			client:     s.mockService,
 			authClient: s.mockAuthService,
 		}, nil
-	})
+	}
 	getRequestClientFn := func(ctx *cli.Context) (*RequestClient, error) {
 		return &RequestClient{
 			ctx:    context.TODO(),
 			client: s.mockReqService,
 		}, nil
 	}
-
 	out, err := NewNamespaceCommand(getNamespaceClientFn, getRequestClientFn)
 	s.Require().NoError(err)
 	AutoConfirmFlag.Value = true
