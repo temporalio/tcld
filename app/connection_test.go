@@ -149,10 +149,6 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			}
 			fs.SetOutput(io.Discard)
 
-<<<<<<< HEAD
-			data, err := json.Marshal(OAuthTokenResponse{
-				AccessToken: testToken,
-=======
 			cCtx := cli.NewContext(nil, fs, nil)
 			args := []string{
 				"--" + ConfigDirFlagName, s.configDir,
@@ -184,7 +180,6 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			client := requestservice.NewRequestServiceClient(conn)
 			_, err = client.GetRequestStatus(connCtx, &requestservice.GetRequestStatusRequest{
 				RequestId: "test-request-id",
->>>>>>> release/apikeys
 			})
 			s.NoError(err)
 			md := s.testService.receivedMD
