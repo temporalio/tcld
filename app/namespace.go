@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
+	"github.com/temporalio/tcld/protogen/api/sink/v1"
 	"go.uber.org/multierr"
 
 	"github.com/kylelemons/godebug/diff"
@@ -56,6 +57,47 @@ var (
 		"us-east-1",
 		"us-west-2",
 	}
+	sinkNameFlag = &cli.StringFlag{
+		Name:     "sink-name",
+		Usage:    "Provide a name for the export sink",
+		Required: true,
+	}
+	sinkAssumedRoleFlagOptional = &cli.StringFlag{
+		Name:  "role-arn",
+		Usage: "Provide role arn for the IAM Role",
+	}
+	sinkAssumedRoleFlagRequired = &cli.StringFlag{
+		Name:     "role-arn",
+		Usage:    "Provide role arn for the IAM Role",
+		Required: true,
+	}
+	s3BucketFlagOptional = &cli.StringFlag{
+		Name:  "s3-bucket-name",
+		Usage: "Provide the name of an AWS S3 bucket that Temporal will send events to",
+	}
+	s3BucketFlagRequired = &cli.StringFlag{
+		Name:     "s3-bucket-name",
+		Usage:    "Provide the name of an AWS S3 bucket that Temporal will send events to",
+		Required: true,
+	}
+	sinkEnabledFlag = &cli.BoolFlag{
+		Name:  "enabled",
+		Usage: "Whether export is enabled",
+	}
+	kmsArnFlag = &cli.StringFlag{
+		Name:  "kms-arn",
+		Usage: "Provide the ARN of the KMS key to use for encryption",
+	}
+
+	pageSizeFlag = &cli.IntFlag{
+		Name:  "page-size",
+		Usage: "The page size for list operations",
+		Value: 100,
+	}
+	pageTokenFlag = &cli.StringFlag{
+		Name:  "page-token",
+		Usage: "The page token for list operations",
+	}
 )
 
 type NamespaceClient struct {
@@ -82,6 +124,43 @@ func GetNamespaceClient(ctx *cli.Context) (*NamespaceClient, error) {
 	return NewNamespaceClient(ct, conn), nil
 }
 
+func (c *NamespaceClient) getExistingExportSink(ctx *cli.Context, nameSpaceName, sinkName string) (*sink.ExportSink, error) {
+	getRequest := &namespaceservice.GetExportSinkRequest{
+		Namespace: nameSpaceName,
+		SinkName:  sinkName,
+	}
+
+	getResp, err := c.client.GetExportSink(c.ctx, getRequest)
+	if err != nil {
+		return nil, err
+	}
+	return getResp.Sink, nil
+}
+
+func (c *NamespaceClient) getExportSinkResourceVersionWithSink(ctx *cli.Context, sink *sink.ExportSink, nameSpaceName, sinkName string) (string, error) {
+	var resourceVersion string
+	if ctx.String(ResourceVersionFlagName) != "" {
+		resourceVersion = ctx.String(ResourceVersionFlagName)
+	} else {
+		resourceVersion = sink.ResourceVersion
+	}
+
+	return resourceVersion, nil
+}
+
+func (c *NamespaceClient) getExportSinkResourceVersion(ctx *cli.Context, nameSpaceName, sinkName string) (string, error) {
+	sink, err := c.getExistingExportSink(ctx, nameSpaceName, sinkName)
+	if err != nil {
+		return "", err
+	}
+
+	resourceVersion, err := c.getExportSinkResourceVersionWithSink(ctx, sink, nameSpaceName, sinkName)
+	if err != nil {
+		return "", err
+	}
+
+	return resourceVersion, nil
+}
 func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespace) error {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
@@ -1035,6 +1114,210 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Name:    "export",
 			Usage:   "Manage export sinks",
 			Aliases: []string{"es"},
+			Subcommands: []*cli.Command{
+				{
+					Name:    "create",
+					Aliases: []string{"c"},
+					Usage:   "Create export sink",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						sinkNameFlag,
+						sinkAssumedRoleFlagRequired,
+						s3BucketFlagRequired,
+						RequestIDFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagRequired.Name))
+						if err != nil {
+							return err
+						}
+
+						namespace := ctx.String(NamespaceFlagName)
+						ns, err := c.getNamespace(namespace)
+						if err != nil {
+							return fmt.Errorf("unable to get existing namespace: %v", err)
+						}
+
+						if ns.Namespace == "" {
+							return fmt.Errorf("namespace %s does not exist", namespace)
+						}
+
+						request := &namespaceservice.CreateExportSinkRequest{
+							Namespace: namespace,
+							Spec: &sink.ExportSinkSpec{
+								Name:            ctx.String(sinkNameFlag.Name),
+								Enabled:         true,
+								DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
+								S3Sink: &sink.S3Spec{
+									RoleName:     roleName,
+									BucketName:   ctx.String(s3BucketFlagRequired.Name),
+									Region:       ns.Spec.Region,
+									KmsArn:       ctx.String(kmsArnFlag.Name),
+									AwsAccountId: awsAccountID,
+								},
+							},
+							RequestId: ctx.String(RequestIDFlagName),
+						}
+
+						res, err := c.client.CreateExportSink(c.ctx, request)
+						if err != nil {
+							return err
+						}
+
+						return PrintProto(res.RequestStatus)
+					},
+				},
+				{
+					Name:    "get",
+					Aliases: []string{"g"},
+					Usage:   "Get export sink",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						sinkNameFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						request := &namespaceservice.GetExportSinkRequest{
+							Namespace: ctx.String(NamespaceFlagName),
+							SinkName:  ctx.String(sinkNameFlag.Name),
+						}
+
+						resp, err := c.client.GetExportSink(c.ctx, request)
+						if err != nil {
+							return err
+						}
+
+						return PrintProto(resp.Sink)
+					},
+				},
+				{
+					Name:    "delete",
+					Aliases: []string{"d"},
+					Usage:   "Delete export sink",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						sinkNameFlag,
+						ResourceVersionFlag,
+						RequestIDFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						nameSpaceName := ctx.String(NamespaceFlagName)
+						sinkName := ctx.String(sinkNameFlag.Name)
+						resourceVersion, err := c.getExportSinkResourceVersion(ctx, nameSpaceName, sinkName)
+						if err != nil {
+							return err
+						}
+
+						deleteRequest := &namespaceservice.DeleteExportSinkRequest{
+							Namespace:       nameSpaceName,
+							SinkName:        sinkName,
+							ResourceVersion: resourceVersion,
+							RequestId:       ctx.String(RequestIDFlagName),
+						}
+
+						detelteResp, err := c.client.DeleteExportSink(c.ctx, deleteRequest)
+						if err != nil {
+							return err
+						}
+
+						return PrintProto(detelteResp.RequestStatus)
+					},
+				},
+				{
+					Name:    "list",
+					Aliases: []string{"l"},
+					Usage:   "List export sinks",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						pageSizeFlag,
+						pageTokenFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						request := &namespaceservice.ListExportSinksRequest{
+							Namespace: ctx.String(NamespaceFlagName),
+							PageSize:  int32(pageSizeFlag.Value),
+							PageToken: ctx.String(pageTokenFlag.Name),
+						}
+
+						resp, err := c.client.ListExportSinks(c.ctx, request)
+						if err != nil {
+							return err
+						}
+
+						return PrintProto(resp)
+					},
+				},
+				{
+					Name:    "update",
+					Aliases: []string{"u"},
+					Usage:   "Update export sink",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						sinkEnabledFlag,
+						sinkAssumedRoleFlagOptional,
+						s3BucketFlagOptional,
+						ResourceVersionFlag,
+						kmsArnFlag,
+						RequestIDFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						nameSpaceName := ctx.String(NamespaceFlagName)
+						sinkName := ctx.String(sinkNameFlag.Name)
+						sink, err := c.getExistingExportSink(ctx, nameSpaceName, sinkName)
+						if err != nil {
+							return err
+						}
+
+						resourceVersion, err := c.getExportSinkResourceVersionWithSink(ctx, sink, nameSpaceName, sinkName)
+						if err != nil {
+							return err
+						}
+
+						if !ctx.IsSet(sinkEnabledFlag.Name) && !ctx.IsSet(sinkAssumedRoleFlagOptional.Name) && !ctx.IsSet(s3BucketFlagOptional.Name) && !ctx.IsSet(kmsArnFlag.Name) {
+							fmt.Println("nothing to update")
+							return nil
+						}
+
+						if ctx.IsSet(sinkEnabledFlag.Name) {
+							sink.Spec.Enabled = sinkEnabledFlag.Value
+						}
+						// println(ctx.IsSet(sinkAssumedRoleFlagOptional.Name))
+						// println(ctx.String(sinkAssumedRoleFlagOptional.Name))
+
+						if ctx.IsSet(sinkAssumedRoleFlagOptional.Name) {
+							awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagOptional.Name))
+							if err != nil {
+								return err
+							}
+							sink.Spec.S3Sink.RoleName = roleName
+							sink.Spec.S3Sink.AwsAccountId = awsAccountID
+						}
+
+						if ctx.IsSet(kmsArnFlag.Name) {
+							sink.Spec.S3Sink.KmsArn = ctx.String(kmsArnFlag.Name)
+						}
+
+						// println(ctx.String(s3BucketFlagOptional.Name))
+
+						if ctx.IsSet(s3BucketFlagOptional.Name) {
+							sink.Spec.S3Sink.BucketName = ctx.String(s3BucketFlagOptional.Name)
+						}
+
+						request := &namespaceservice.UpdateExportSinkRequest{
+							Namespace:       ctx.String(NamespaceFlagName),
+							Spec:            sink.Spec,
+							ResourceVersion: resourceVersion,
+							RequestId:       ctx.String(RequestIDFlagName),
+						}
+
+						resp, err := c.client.UpdateExportSink(c.ctx, request)
+						if err != nil {
+							return err
+						}
+
+						return PrintProto(resp.RequestStatus)
+					},
+				},
+			},
 		})
 	}
 
