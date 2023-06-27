@@ -60,9 +60,7 @@ func (s *NamespaceTestSuite) SetupTest() {
 
 	s.Require().NoError(err)
 	AutoConfirmFlag.Value = true
-	s.cliApp = &cli.App{
-		Commands: []*cli.Command{out.Command},
-	}
+	s.cliApp.Commands = []*cli.Command{out.Command}
 }
 
 func (s *NamespaceTestSuite) RunCmd(args ...string) error {
