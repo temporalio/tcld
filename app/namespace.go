@@ -830,6 +830,63 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			},
 		},
 		{
+			Name:    "update-codec-server",
+			Usage:   "Update codec server config used to decode encoded payloads through remote endpoint",
+			Aliases: []string{"ucs"},
+			Flags: []cli.Flag{
+				NamespaceFlag,
+				&cli.StringFlag{
+					Name:     "endpoint",
+					Usage:    "The codec server endpoint to decode payloads for all users interacting with this Namespace, must be https",
+					Aliases:  []string{"e"},
+					Required: true,
+				},
+				&cli.BoolFlag{
+					Name:    "pass-access-token",
+					Usage:   "Pass the user access token with the remote endpoint",
+					Aliases: []string{"pat"},
+				},
+				&cli.BoolFlag{
+					Name:    "include-credentials",
+					Usage:   "Include cross-origin credentials",
+					Aliases: []string{"ic"},
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+				if err != nil {
+					return err
+				}
+
+				replacement := &namespace.CodecServerPropertySpec{
+					Endpoint:           ctx.String("endpoint"),
+					PassAccessToken:    ctx.Bool("pass-access-token"),
+					IncludeCredentials: ctx.Bool("include-credentials"),
+				}
+
+				difference, err := compareCodecSpec(n.Spec.CodecSpec, replacement)
+				if err != nil {
+					return err
+				}
+
+				fmt.Println("this update will result in the following changes to the codec server config:")
+				fmt.Println(difference)
+
+				confirmed, err := ConfirmPrompt(ctx, "confirm codec server update operation")
+				if err != nil {
+					return err
+				}
+
+				if confirmed {
+					n.Spec.CodecSpec = replacement
+					return c.updateNamespace(ctx, n)
+				}
+
+				fmt.Println("operation canceled")
+				return nil
+			},
+		},
+		{
 			Name:    "retention",
 			Usage:   "Manages configuration of the length of time (in days) a closed workflow will be preserved before deletion",
 			Aliases: []string{"r"},
@@ -1058,6 +1115,20 @@ func toUserNamespacePermissionsMap(keyValues []string) (map[string]string, error
 }
 
 func compareCertificateFilters(existing, replacement certificateFiltersConfig) (string, error) {
+	existingBytes, err := FormatJson(existing)
+	if err != nil {
+		return "", err
+	}
+
+	replacementBytes, err := FormatJson(replacement)
+	if err != nil {
+		return "", err
+	}
+
+	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
+}
+
+func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) (string, error) {
 	existingBytes, err := FormatJson(existing)
 	if err != nil {
 		return "", err
