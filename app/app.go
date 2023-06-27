@@ -27,6 +27,9 @@ func NewApp(params AppParams) (*cli.App, error) {
 			ServerFlag,
 			ConfigDirFlag,
 			AutoConfirmFlag,
+			APIKeyFlag,
+			InsecureConnectionFlag,
+			EnableDebugLogsFlag,
 		},
 	}
 	app.Commands = params.Commands

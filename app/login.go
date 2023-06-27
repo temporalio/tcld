@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/temporalio/tcld/services"
@@ -62,7 +61,7 @@ type (
 		loginService services.LoginService
 	}
 
-	OAuthDeviceCodeResponse struct {
+	OauthDeviceCodeResponse struct {
 		DeviceCode              string `json:"device_code"`
 		UserCode                string `json:"user_code"`
 		VerificationURI         string `json:"verification_uri"`
@@ -71,7 +70,7 @@ type (
 		Interval                int    `json:"interval"`
 	}
 
-	OAuthTokenResponse struct {
+	OauthTokenResponse struct {
 		AccessToken  string `json:"access_token"`
 		RefreshToken string `json:"refresh_token"`
 		IDToken      string `json:"id_token"`
@@ -86,9 +85,9 @@ func getTokenConfigPath(ctx *cli.Context) string {
 }
 
 // TODO: support login config on windows
-func loadLoginConfig(ctx *cli.Context) (OAuthTokenResponse, error) {
+func loadLoginConfig(ctx *cli.Context) (OauthTokenResponse, error) {
 
-	tokens := OAuthTokenResponse{}
+	tokens := OauthTokenResponse{}
 	configDir := ctx.Path(ConfigDirFlagName)
 	// Create config dir if it does not exist
 	if err := os.MkdirAll(configDir, 0700); err != nil {
@@ -116,93 +115,70 @@ func loadLoginConfig(ctx *cli.Context) (OAuthTokenResponse, error) {
 	return tokens, nil
 }
 
-func parseURL(s string) (*url.URL, error) {
-	// Without a scheme, url.Parse would interpret the path as a relative file path.
-	if !strings.HasPrefix(s, "http://") && !strings.HasPrefix(s, "https://") {
-		s = fmt.Sprintf("%s%s", "https://", s)
-	}
-
-	u, err := url.ParseRequestURI(s)
+func getURLFromDomain(domain string) (string, error) {
+	u, err := url.Parse(domain)
 	if err != nil {
-		return nil, err
+		return domain, err
 	}
-
 	if u.Scheme == "" {
-		u.Scheme = "https"
+		return fmt.Sprintf("https://%s", domain), nil
 	}
-
-	return u, err
+	return domain, nil
 }
 
 func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, clientID string, disablePopUp bool) error {
 	// Get device code
-	domainURL, err := parseURL(domain)
+	oauthDeviceCodeResponse := OauthDeviceCodeResponse{}
+	domain, err := getURLFromDomain(domain)
 	if err != nil {
 		return err
 	}
-
-	codeResp := OAuthDeviceCodeResponse{}
 	if err := postFormRequest(
-		domainURL.JoinPath("oauth", "device", "code").String(),
+		fmt.Sprintf("%s/oauth/device/code", domain),
 		url.Values{
 			"client_id": {clientID},
 			"scope":     {scope},
 			"audience":  {audience},
 		},
-		&codeResp,
+		&oauthDeviceCodeResponse,
 	); err != nil {
 		return err
 	}
 
-	verificationURL, err := parseURL(codeResp.VerificationURIComplete)
-	if err != nil {
-		return fmt.Errorf("failed to parse verification URL: %w", err)
-	} else if verificationURL.Hostname() != domainURL.Hostname() {
-		// We expect the verification URL to be the same host as the domain URL.
-		// Otherwise the response could have us POST to any arbitrary URL.
-		return fmt.Errorf("domain URL `%s` does not match verification URL `%s` in response", domainURL.Hostname(), verificationURL.Hostname())
-	}
-
-	fmt.Printf("Login via this url: %s\n", verificationURL.String())
+	fmt.Printf("Login via this url: %s\n", oauthDeviceCodeResponse.VerificationURIComplete)
 
 	if !disablePopUp {
-		if err := c.loginService.OpenBrowser(verificationURL.String()); err != nil {
+		if err := c.loginService.OpenBrowser(oauthDeviceCodeResponse.VerificationURIComplete); err != nil {
 			fmt.Println("Unable to open browser, please open url manually.")
 		}
 	}
 
-	// According to RFC, we should set a default polling interval if not provided.
-	// https://tools.ietf.org/html/draft-ietf-oauth-device-flow-07#section-3.5
-	if codeResp.Interval == 0 {
-		codeResp.Interval = 10
-	}
-
 	// Get access token
-	tokenResp := OAuthTokenResponse{}
-	for len(tokenResp.AccessToken) == 0 {
-		time.Sleep(time.Duration(codeResp.Interval) * time.Second)
+	oauthTokenResponse := OauthTokenResponse{}
+	for len(oauthTokenResponse.AccessToken) == 0 {
+		time.Sleep(time.Duration(oauthDeviceCodeResponse.Interval) * time.Second)
 
 		if err := postFormRequest(
-			domainURL.JoinPath("oauth", "token").String(),
+			fmt.Sprintf("%s/oauth/token", domain),
 			url.Values{
 				"grant_type":  {"urn:ietf:params:oauth:grant-type:device_code"},
-				"device_code": {codeResp.DeviceCode},
+				"device_code": {oauthDeviceCodeResponse.DeviceCode},
 				"client_id":   {clientID},
 			},
-			&tokenResp,
+			&oauthTokenResponse,
 		); err != nil {
 			return err
 		}
 	}
 
-	tokenRespJson, err := FormatJson(tokenResp)
+	oauthTokenResponseJson, err := FormatJson(oauthTokenResponse)
 	if err != nil {
 		return err
 	}
 	fmt.Println("Successfully logged in!")
 
 	// Save token info locally
-	return c.loginService.WriteToConfigFile(getTokenConfigPath(ctx), tokenRespJson)
+	return c.loginService.WriteToConfigFile(getTokenConfigPath(ctx), oauthTokenResponseJson)
 }
 
 func NewLoginCommand(c *LoginClient) (CommandOut, error) {

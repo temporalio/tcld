@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	authservice "github.com/temporalio/tcld/protogen/api/authservice/v1"
+	v1 "github.com/temporalio/tcld/protogen/api/authservice/v1"
 	grpc "google.golang.org/grpc"
 )
 
@@ -36,15 +36,55 @@ func (m *MockAuthServiceClient) EXPECT() *MockAuthServiceClientMockRecorder {
 	return m.recorder
 }
 
+// CreateAPIKey mocks base method.
+func (m *MockAuthServiceClient) CreateAPIKey(ctx context.Context, in *v1.CreateAPIKeyRequest, opts ...grpc.CallOption) (*v1.CreateAPIKeyResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateAPIKey", varargs...)
+	ret0, _ := ret[0].(*v1.CreateAPIKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateAPIKey indicates an expected call of CreateAPIKey.
+func (mr *MockAuthServiceClientMockRecorder) CreateAPIKey(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAPIKey", reflect.TypeOf((*MockAuthServiceClient)(nil).CreateAPIKey), varargs...)
+}
+
+// DeleteAPIKey mocks base method.
+func (m *MockAuthServiceClient) DeleteAPIKey(ctx context.Context, in *v1.DeleteAPIKeyRequest, opts ...grpc.CallOption) (*v1.DeleteAPIKeyResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteAPIKey", varargs...)
+	ret0, _ := ret[0].(*v1.DeleteAPIKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteAPIKey indicates an expected call of DeleteAPIKey.
+func (mr *MockAuthServiceClientMockRecorder) DeleteAPIKey(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAPIKey", reflect.TypeOf((*MockAuthServiceClient)(nil).DeleteAPIKey), varargs...)
+}
+
 // DeleteUser mocks base method.
-func (m *MockAuthServiceClient) DeleteUser(ctx context.Context, in *authservice.DeleteUserRequest, opts ...grpc.CallOption) (*authservice.DeleteUserResponse, error) {
+func (m *MockAuthServiceClient) DeleteUser(ctx context.Context, in *v1.DeleteUserRequest, opts ...grpc.CallOption) (*v1.DeleteUserResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "DeleteUser", varargs...)
-	ret0, _ := ret[0].(*authservice.DeleteUserResponse)
+	ret0, _ := ret[0].(*v1.DeleteUserResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -56,15 +96,75 @@ func (mr *MockAuthServiceClientMockRecorder) DeleteUser(ctx, in interface{}, opt
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockAuthServiceClient)(nil).DeleteUser), varargs...)
 }
 
+// GetAPIKey mocks base method.
+func (m *MockAuthServiceClient) GetAPIKey(ctx context.Context, in *v1.GetAPIKeyRequest, opts ...grpc.CallOption) (*v1.GetAPIKeyResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetAPIKey", varargs...)
+	ret0, _ := ret[0].(*v1.GetAPIKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAPIKey indicates an expected call of GetAPIKey.
+func (mr *MockAuthServiceClientMockRecorder) GetAPIKey(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAPIKey", reflect.TypeOf((*MockAuthServiceClient)(nil).GetAPIKey), varargs...)
+}
+
+// GetAPIKeys mocks base method.
+func (m *MockAuthServiceClient) GetAPIKeys(ctx context.Context, in *v1.GetAPIKeysRequest, opts ...grpc.CallOption) (*v1.GetAPIKeysResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetAPIKeys", varargs...)
+	ret0, _ := ret[0].(*v1.GetAPIKeysResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAPIKeys indicates an expected call of GetAPIKeys.
+func (mr *MockAuthServiceClientMockRecorder) GetAPIKeys(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAPIKeys", reflect.TypeOf((*MockAuthServiceClient)(nil).GetAPIKeys), varargs...)
+}
+
+// GetRole mocks base method.
+func (m *MockAuthServiceClient) GetRole(ctx context.Context, in *v1.GetRoleRequest, opts ...grpc.CallOption) (*v1.GetRoleResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetRole", varargs...)
+	ret0, _ := ret[0].(*v1.GetRoleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRole indicates an expected call of GetRole.
+func (mr *MockAuthServiceClientMockRecorder) GetRole(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRole", reflect.TypeOf((*MockAuthServiceClient)(nil).GetRole), varargs...)
+}
+
 // GetRoles mocks base method.
-func (m *MockAuthServiceClient) GetRoles(ctx context.Context, in *authservice.GetRolesRequest, opts ...grpc.CallOption) (*authservice.GetRolesResponse, error) {
+func (m *MockAuthServiceClient) GetRoles(ctx context.Context, in *v1.GetRolesRequest, opts ...grpc.CallOption) (*v1.GetRolesResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetRoles", varargs...)
-	ret0, _ := ret[0].(*authservice.GetRolesResponse)
+	ret0, _ := ret[0].(*v1.GetRolesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -77,14 +177,14 @@ func (mr *MockAuthServiceClientMockRecorder) GetRoles(ctx, in interface{}, opts 
 }
 
 // GetRolesByPermissions mocks base method.
-func (m *MockAuthServiceClient) GetRolesByPermissions(ctx context.Context, in *authservice.GetRolesByPermissionsRequest, opts ...grpc.CallOption) (*authservice.GetRolesByPermissionsResponse, error) {
+func (m *MockAuthServiceClient) GetRolesByPermissions(ctx context.Context, in *v1.GetRolesByPermissionsRequest, opts ...grpc.CallOption) (*v1.GetRolesByPermissionsResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetRolesByPermissions", varargs...)
-	ret0, _ := ret[0].(*authservice.GetRolesByPermissionsResponse)
+	ret0, _ := ret[0].(*v1.GetRolesByPermissionsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -97,14 +197,14 @@ func (mr *MockAuthServiceClientMockRecorder) GetRolesByPermissions(ctx, in inter
 }
 
 // GetUser mocks base method.
-func (m *MockAuthServiceClient) GetUser(ctx context.Context, in *authservice.GetUserRequest, opts ...grpc.CallOption) (*authservice.GetUserResponse, error) {
+func (m *MockAuthServiceClient) GetUser(ctx context.Context, in *v1.GetUserRequest, opts ...grpc.CallOption) (*v1.GetUserResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetUser", varargs...)
-	ret0, _ := ret[0].(*authservice.GetUserResponse)
+	ret0, _ := ret[0].(*v1.GetUserResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -117,14 +217,14 @@ func (mr *MockAuthServiceClientMockRecorder) GetUser(ctx, in interface{}, opts .
 }
 
 // GetUsers mocks base method.
-func (m *MockAuthServiceClient) GetUsers(ctx context.Context, in *authservice.GetUsersRequest, opts ...grpc.CallOption) (*authservice.GetUsersResponse, error) {
+func (m *MockAuthServiceClient) GetUsers(ctx context.Context, in *v1.GetUsersRequest, opts ...grpc.CallOption) (*v1.GetUsersResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetUsers", varargs...)
-	ret0, _ := ret[0].(*authservice.GetUsersResponse)
+	ret0, _ := ret[0].(*v1.GetUsersResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -137,14 +237,14 @@ func (mr *MockAuthServiceClientMockRecorder) GetUsers(ctx, in interface{}, opts 
 }
 
 // InviteUsers mocks base method.
-func (m *MockAuthServiceClient) InviteUsers(ctx context.Context, in *authservice.InviteUsersRequest, opts ...grpc.CallOption) (*authservice.InviteUsersResponse, error) {
+func (m *MockAuthServiceClient) InviteUsers(ctx context.Context, in *v1.InviteUsersRequest, opts ...grpc.CallOption) (*v1.InviteUsersResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "InviteUsers", varargs...)
-	ret0, _ := ret[0].(*authservice.InviteUsersResponse)
+	ret0, _ := ret[0].(*v1.InviteUsersResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -157,14 +257,14 @@ func (mr *MockAuthServiceClientMockRecorder) InviteUsers(ctx, in interface{}, op
 }
 
 // ResendUserInvite mocks base method.
-func (m *MockAuthServiceClient) ResendUserInvite(ctx context.Context, in *authservice.ResendUserInviteRequest, opts ...grpc.CallOption) (*authservice.ResendUserInviteResponse, error) {
+func (m *MockAuthServiceClient) ResendUserInvite(ctx context.Context, in *v1.ResendUserInviteRequest, opts ...grpc.CallOption) (*v1.ResendUserInviteResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "ResendUserInvite", varargs...)
-	ret0, _ := ret[0].(*authservice.ResendUserInviteResponse)
+	ret0, _ := ret[0].(*v1.ResendUserInviteResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -176,15 +276,35 @@ func (mr *MockAuthServiceClientMockRecorder) ResendUserInvite(ctx, in interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResendUserInvite", reflect.TypeOf((*MockAuthServiceClient)(nil).ResendUserInvite), varargs...)
 }
 
+// UpdateAPIKey mocks base method.
+func (m *MockAuthServiceClient) UpdateAPIKey(ctx context.Context, in *v1.UpdateAPIKeyRequest, opts ...grpc.CallOption) (*v1.UpdateAPIKeyResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateAPIKey", varargs...)
+	ret0, _ := ret[0].(*v1.UpdateAPIKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAPIKey indicates an expected call of UpdateAPIKey.
+func (mr *MockAuthServiceClientMockRecorder) UpdateAPIKey(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAPIKey", reflect.TypeOf((*MockAuthServiceClient)(nil).UpdateAPIKey), varargs...)
+}
+
 // UpdateUser mocks base method.
-func (m *MockAuthServiceClient) UpdateUser(ctx context.Context, in *authservice.UpdateUserRequest, opts ...grpc.CallOption) (*authservice.UpdateUserResponse, error) {
+func (m *MockAuthServiceClient) UpdateUser(ctx context.Context, in *v1.UpdateUserRequest, opts ...grpc.CallOption) (*v1.UpdateUserResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "UpdateUser", varargs...)
-	ret0, _ := ret[0].(*authservice.UpdateUserResponse)
+	ret0, _ := ret[0].(*v1.UpdateUserResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -197,14 +317,14 @@ func (mr *MockAuthServiceClientMockRecorder) UpdateUser(ctx, in interface{}, opt
 }
 
 // UpdateUserNamespacePermissions mocks base method.
-func (m *MockAuthServiceClient) UpdateUserNamespacePermissions(ctx context.Context, in *authservice.UpdateUserNamespacePermissionsRequest, opts ...grpc.CallOption) (*authservice.UpdateUserNamespacePermissionsResponse, error) {
+func (m *MockAuthServiceClient) UpdateUserNamespacePermissions(ctx context.Context, in *v1.UpdateUserNamespacePermissionsRequest, opts ...grpc.CallOption) (*v1.UpdateUserNamespacePermissionsResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "UpdateUserNamespacePermissions", varargs...)
-	ret0, _ := ret[0].(*authservice.UpdateUserNamespacePermissionsResponse)
+	ret0, _ := ret[0].(*v1.UpdateUserNamespacePermissionsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -239,11 +359,41 @@ func (m *MockAuthServiceServer) EXPECT() *MockAuthServiceServerMockRecorder {
 	return m.recorder
 }
 
+// CreateAPIKey mocks base method.
+func (m *MockAuthServiceServer) CreateAPIKey(arg0 context.Context, arg1 *v1.CreateAPIKeyRequest) (*v1.CreateAPIKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateAPIKey", arg0, arg1)
+	ret0, _ := ret[0].(*v1.CreateAPIKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateAPIKey indicates an expected call of CreateAPIKey.
+func (mr *MockAuthServiceServerMockRecorder) CreateAPIKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAPIKey", reflect.TypeOf((*MockAuthServiceServer)(nil).CreateAPIKey), arg0, arg1)
+}
+
+// DeleteAPIKey mocks base method.
+func (m *MockAuthServiceServer) DeleteAPIKey(arg0 context.Context, arg1 *v1.DeleteAPIKeyRequest) (*v1.DeleteAPIKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAPIKey", arg0, arg1)
+	ret0, _ := ret[0].(*v1.DeleteAPIKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteAPIKey indicates an expected call of DeleteAPIKey.
+func (mr *MockAuthServiceServerMockRecorder) DeleteAPIKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAPIKey", reflect.TypeOf((*MockAuthServiceServer)(nil).DeleteAPIKey), arg0, arg1)
+}
+
 // DeleteUser mocks base method.
-func (m *MockAuthServiceServer) DeleteUser(arg0 context.Context, arg1 *authservice.DeleteUserRequest) (*authservice.DeleteUserResponse, error) {
+func (m *MockAuthServiceServer) DeleteUser(arg0 context.Context, arg1 *v1.DeleteUserRequest) (*v1.DeleteUserResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteUser", arg0, arg1)
-	ret0, _ := ret[0].(*authservice.DeleteUserResponse)
+	ret0, _ := ret[0].(*v1.DeleteUserResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -254,11 +404,56 @@ func (mr *MockAuthServiceServerMockRecorder) DeleteUser(arg0, arg1 interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockAuthServiceServer)(nil).DeleteUser), arg0, arg1)
 }
 
+// GetAPIKey mocks base method.
+func (m *MockAuthServiceServer) GetAPIKey(arg0 context.Context, arg1 *v1.GetAPIKeyRequest) (*v1.GetAPIKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAPIKey", arg0, arg1)
+	ret0, _ := ret[0].(*v1.GetAPIKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAPIKey indicates an expected call of GetAPIKey.
+func (mr *MockAuthServiceServerMockRecorder) GetAPIKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAPIKey", reflect.TypeOf((*MockAuthServiceServer)(nil).GetAPIKey), arg0, arg1)
+}
+
+// GetAPIKeys mocks base method.
+func (m *MockAuthServiceServer) GetAPIKeys(arg0 context.Context, arg1 *v1.GetAPIKeysRequest) (*v1.GetAPIKeysResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAPIKeys", arg0, arg1)
+	ret0, _ := ret[0].(*v1.GetAPIKeysResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAPIKeys indicates an expected call of GetAPIKeys.
+func (mr *MockAuthServiceServerMockRecorder) GetAPIKeys(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAPIKeys", reflect.TypeOf((*MockAuthServiceServer)(nil).GetAPIKeys), arg0, arg1)
+}
+
+// GetRole mocks base method.
+func (m *MockAuthServiceServer) GetRole(arg0 context.Context, arg1 *v1.GetRoleRequest) (*v1.GetRoleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRole", arg0, arg1)
+	ret0, _ := ret[0].(*v1.GetRoleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRole indicates an expected call of GetRole.
+func (mr *MockAuthServiceServerMockRecorder) GetRole(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRole", reflect.TypeOf((*MockAuthServiceServer)(nil).GetRole), arg0, arg1)
+}
+
 // GetRoles mocks base method.
-func (m *MockAuthServiceServer) GetRoles(arg0 context.Context, arg1 *authservice.GetRolesRequest) (*authservice.GetRolesResponse, error) {
+func (m *MockAuthServiceServer) GetRoles(arg0 context.Context, arg1 *v1.GetRolesRequest) (*v1.GetRolesResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRoles", arg0, arg1)
-	ret0, _ := ret[0].(*authservice.GetRolesResponse)
+	ret0, _ := ret[0].(*v1.GetRolesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -270,10 +465,10 @@ func (mr *MockAuthServiceServerMockRecorder) GetRoles(arg0, arg1 interface{}) *g
 }
 
 // GetRolesByPermissions mocks base method.
-func (m *MockAuthServiceServer) GetRolesByPermissions(arg0 context.Context, arg1 *authservice.GetRolesByPermissionsRequest) (*authservice.GetRolesByPermissionsResponse, error) {
+func (m *MockAuthServiceServer) GetRolesByPermissions(arg0 context.Context, arg1 *v1.GetRolesByPermissionsRequest) (*v1.GetRolesByPermissionsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRolesByPermissions", arg0, arg1)
-	ret0, _ := ret[0].(*authservice.GetRolesByPermissionsResponse)
+	ret0, _ := ret[0].(*v1.GetRolesByPermissionsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -285,10 +480,10 @@ func (mr *MockAuthServiceServerMockRecorder) GetRolesByPermissions(arg0, arg1 in
 }
 
 // GetUser mocks base method.
-func (m *MockAuthServiceServer) GetUser(arg0 context.Context, arg1 *authservice.GetUserRequest) (*authservice.GetUserResponse, error) {
+func (m *MockAuthServiceServer) GetUser(arg0 context.Context, arg1 *v1.GetUserRequest) (*v1.GetUserResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUser", arg0, arg1)
-	ret0, _ := ret[0].(*authservice.GetUserResponse)
+	ret0, _ := ret[0].(*v1.GetUserResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -300,10 +495,10 @@ func (mr *MockAuthServiceServerMockRecorder) GetUser(arg0, arg1 interface{}) *go
 }
 
 // GetUsers mocks base method.
-func (m *MockAuthServiceServer) GetUsers(arg0 context.Context, arg1 *authservice.GetUsersRequest) (*authservice.GetUsersResponse, error) {
+func (m *MockAuthServiceServer) GetUsers(arg0 context.Context, arg1 *v1.GetUsersRequest) (*v1.GetUsersResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUsers", arg0, arg1)
-	ret0, _ := ret[0].(*authservice.GetUsersResponse)
+	ret0, _ := ret[0].(*v1.GetUsersResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -315,10 +510,10 @@ func (mr *MockAuthServiceServerMockRecorder) GetUsers(arg0, arg1 interface{}) *g
 }
 
 // InviteUsers mocks base method.
-func (m *MockAuthServiceServer) InviteUsers(arg0 context.Context, arg1 *authservice.InviteUsersRequest) (*authservice.InviteUsersResponse, error) {
+func (m *MockAuthServiceServer) InviteUsers(arg0 context.Context, arg1 *v1.InviteUsersRequest) (*v1.InviteUsersResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InviteUsers", arg0, arg1)
-	ret0, _ := ret[0].(*authservice.InviteUsersResponse)
+	ret0, _ := ret[0].(*v1.InviteUsersResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -330,10 +525,10 @@ func (mr *MockAuthServiceServerMockRecorder) InviteUsers(arg0, arg1 interface{})
 }
 
 // ResendUserInvite mocks base method.
-func (m *MockAuthServiceServer) ResendUserInvite(arg0 context.Context, arg1 *authservice.ResendUserInviteRequest) (*authservice.ResendUserInviteResponse, error) {
+func (m *MockAuthServiceServer) ResendUserInvite(arg0 context.Context, arg1 *v1.ResendUserInviteRequest) (*v1.ResendUserInviteResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ResendUserInvite", arg0, arg1)
-	ret0, _ := ret[0].(*authservice.ResendUserInviteResponse)
+	ret0, _ := ret[0].(*v1.ResendUserInviteResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -344,11 +539,26 @@ func (mr *MockAuthServiceServerMockRecorder) ResendUserInvite(arg0, arg1 interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResendUserInvite", reflect.TypeOf((*MockAuthServiceServer)(nil).ResendUserInvite), arg0, arg1)
 }
 
+// UpdateAPIKey mocks base method.
+func (m *MockAuthServiceServer) UpdateAPIKey(arg0 context.Context, arg1 *v1.UpdateAPIKeyRequest) (*v1.UpdateAPIKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAPIKey", arg0, arg1)
+	ret0, _ := ret[0].(*v1.UpdateAPIKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAPIKey indicates an expected call of UpdateAPIKey.
+func (mr *MockAuthServiceServerMockRecorder) UpdateAPIKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAPIKey", reflect.TypeOf((*MockAuthServiceServer)(nil).UpdateAPIKey), arg0, arg1)
+}
+
 // UpdateUser mocks base method.
-func (m *MockAuthServiceServer) UpdateUser(arg0 context.Context, arg1 *authservice.UpdateUserRequest) (*authservice.UpdateUserResponse, error) {
+func (m *MockAuthServiceServer) UpdateUser(arg0 context.Context, arg1 *v1.UpdateUserRequest) (*v1.UpdateUserResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", arg0, arg1)
-	ret0, _ := ret[0].(*authservice.UpdateUserResponse)
+	ret0, _ := ret[0].(*v1.UpdateUserResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -360,10 +570,10 @@ func (mr *MockAuthServiceServerMockRecorder) UpdateUser(arg0, arg1 interface{}) 
 }
 
 // UpdateUserNamespacePermissions mocks base method.
-func (m *MockAuthServiceServer) UpdateUserNamespacePermissions(arg0 context.Context, arg1 *authservice.UpdateUserNamespacePermissionsRequest) (*authservice.UpdateUserNamespacePermissionsResponse, error) {
+func (m *MockAuthServiceServer) UpdateUserNamespacePermissions(arg0 context.Context, arg1 *v1.UpdateUserNamespacePermissionsRequest) (*v1.UpdateUserNamespacePermissionsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUserNamespacePermissions", arg0, arg1)
-	ret0, _ := ret[0].(*authservice.UpdateUserNamespacePermissionsResponse)
+	ret0, _ := ret[0].(*v1.UpdateUserNamespacePermissionsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

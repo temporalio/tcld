@@ -9,17 +9,16 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gogo/protobuf/jsonpb"
-	"github.com/temporalio/tcld/protogen/api/auth/v1"
-	"github.com/temporalio/tcld/protogen/api/request/v1"
-	"go.uber.org/multierr"
-
 	"github.com/cjrd/allocate"
+	"github.com/gogo/protobuf/jsonpb"
 	"github.com/kylelemons/godebug/diff"
+	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
+	"github.com/temporalio/tcld/protogen/api/request/v1"
 	"github.com/urfave/cli/v2"
+	"go.uber.org/multierr"
 	"google.golang.org/grpc"
 )
 
