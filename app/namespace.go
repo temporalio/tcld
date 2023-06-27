@@ -837,7 +837,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				NamespaceFlag,
 				&cli.StringFlag{
 					Name:     "endpoint",
-					Usage:    "The codec server endpoint to decode payloads for all users interacting with this Namespace",
+					Usage:    "The codec server endpoint to decode payloads for all users interacting with this Namespace, must be https",
 					Aliases:  []string{"e"},
 					Required: true,
 				},
