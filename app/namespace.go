@@ -1280,8 +1280,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if ctx.IsSet(sinkEnabledFlag.Name) {
 							sink.Spec.Enabled = sinkEnabledFlag.Value
 						}
-						// println(ctx.IsSet(sinkAssumedRoleFlagOptional.Name))
-						// println(ctx.String(sinkAssumedRoleFlagOptional.Name))
 
 						if ctx.IsSet(sinkAssumedRoleFlagOptional.Name) {
 							awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagOptional.Name))
@@ -1295,8 +1293,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if ctx.IsSet(kmsArnFlag.Name) {
 							sink.Spec.S3Sink.KmsArn = ctx.String(kmsArnFlag.Name)
 						}
-
-						// println(ctx.String(s3BucketFlagOptional.Name))
 
 						if ctx.IsSet(s3BucketFlagOptional.Name) {
 							sink.Spec.S3Sink.BucketName = ctx.String(s3BucketFlagOptional.Name)

@@ -35,6 +35,18 @@ type NamespaceTestSuite struct {
 }
 
 func (s *NamespaceTestSuite) SetupTest() {
+	feature, err := NewFeatureCommand()
+	s.Require().NoError(err)
+
+	s.cliApp = &cli.App{
+		Name:     "test",
+		Commands: []*cli.Command{feature.Command},
+		Flags: []cli.Flag{
+			AutoConfirmFlag,
+		},
+	}
+	s.RunCmd("feature", "toggle-export")
+
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = namespaceservicemock.NewMockNamespaceServiceClient(s.mockCtrl)
 	s.mockAuthService = authservicemock.NewMockAuthServiceClient(s.mockCtrl)
@@ -45,14 +57,11 @@ func (s *NamespaceTestSuite) SetupTest() {
 			authClient: s.mockAuthService,
 		}, nil
 	})
+
 	s.Require().NoError(err)
 	AutoConfirmFlag.Value = true
 	s.cliApp = &cli.App{
-		Name:     "test",
 		Commands: []*cli.Command{out.Command},
-		Flags: []cli.Flag{
-			AutoConfirmFlag,
-		},
 	}
 }
 
@@ -61,6 +70,7 @@ func (s *NamespaceTestSuite) RunCmd(args ...string) error {
 }
 
 func (s *NamespaceTestSuite) AfterTest(suiteName, testName string) {
+	defer os.Remove(getFeatureFlagConfigFilePath())
 	s.mockCtrl.Finish()
 }
 
