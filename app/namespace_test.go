@@ -1410,17 +1410,20 @@ func (s *NamespaceTestSuite) TestDelete() {
 }
 
 func (s *NamespaceTestSuite) TestCreateExportSink() {
-	ns := "namespace"
+	ns := "testNamespace"
 	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
 	type morphCreateSinkReq func(*namespaceservice.CreateExportSinkRequest)
 
 	tests := []struct {
+		name          string
 		args          []string
 		expectGet     morphGetResp
 		expectRequest morphCreateSinkReq
 		expectErr     bool
+		expectErrMsg  string
 	}{
 		{
+			name:      "create export sink",
 			args:      []string{"namespace", "es", "create", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectRequest: func(r *namespaceservice.CreateExportSinkRequest) {
@@ -1439,10 +1442,13 @@ func (s *NamespaceTestSuite) TestCreateExportSink() {
 			},
 		},
 		{
-			args:      []string{"namespace", "es", "create", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "testRole", "--s3-bucket-name", "testBucket"},
-			expectErr: true,
+			name:         "create export sink with invalid role arn",
+			args:         []string{"namespace", "es", "create", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "testRole", "--s3-bucket-name", "testBucket"},
+			expectErr:    true,
+			expectErrMsg: "invalid assumed role: testRole",
 		},
 		{
+			name: "create export sink with invalid namespace",
 			args: []string{"namespace", "es", "create", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
 				g.Namespace = &namespace.Namespace{
@@ -1452,7 +1458,8 @@ func (s *NamespaceTestSuite) TestCreateExportSink() {
 					},
 				}
 			},
-			expectErr: true,
+			expectErr:    true,
+			expectErrMsg: "unable to get namespace: invalid namespace returned by server",
 		},
 	}
 
@@ -1484,6 +1491,7 @@ func (s *NamespaceTestSuite) TestCreateExportSink() {
 			err := s.RunCmd(tc.args...)
 			if tc.expectErr {
 				s.Error(err)
+				s.ErrorContains(err, tc.expectErrMsg)
 			} else {
 				s.NoError(err)
 			}
@@ -1496,11 +1504,13 @@ func (s *NamespaceTestSuite) TestGetExportSink() {
 	type morphGetReq func(*namespaceservice.GetExportSinkRequest)
 
 	tests := []struct {
+		name          string
 		args          []string
 		expectRequest morphGetReq
 		expectErr     bool
 	}{
 		{
+			name: "get export sink succeeds",
 			args: []string{"namespace", "es", "get", "--namespace", ns, "--sink-name", "sink1"},
 			expectRequest: func(r *namespaceservice.GetExportSinkRequest) {
 				r.Namespace = ns
@@ -1534,12 +1544,15 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 	type morphGetSinkResp func(*namespaceservice.GetExportSinkResponse)
 
 	tests := []struct {
+		name                  string
 		args                  []string
 		expectGetSinkResponse morphGetSinkResp
 		expectRequest         morphDeleteReq
 		expectErr             bool
+		expectErrMsg          string
 	}{
 		{
+			name: "delete export sink succeeds without resource version",
 			args: []string{"namespace", "es", "delete", "--namespace", ns, "--sink-name", "sink1"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {
 				r.Sink = &sink.ExportSink{
@@ -1553,6 +1566,7 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 			},
 		},
 		{
+			name: "delete export succeeds sink with resource version",
 			args: []string{"namespace", "es", "delete", "--namespace", ns, "--sink-name", "sink1", "--resource-version", "999999999"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {
 				r.Sink = &sink.ExportSink{}
@@ -1590,16 +1604,19 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 	}
 }
 
-func (s *NamespaceTestSuite) TestListExportSink() {
+func (s *NamespaceTestSuite) TestListExportSinks() {
 	ns := "namespace"
 	type morphGetReq func(*namespaceservice.ListExportSinksRequest)
 
 	tests := []struct {
+		name string
+
 		args          []string
 		expectRequest morphGetReq
 		expectErr     bool
 	}{
 		{
+			name: "list export sinks succeeds",
 			args: []string{"namespace", "es", "list", "--namespace", ns},
 			expectRequest: func(r *namespaceservice.ListExportSinksRequest) {
 				r.Namespace = ns
@@ -1633,16 +1650,32 @@ func (s *NamespaceTestSuite) TestUpdateExportSink() {
 	type morphGetSinkResp func(*namespaceservice.GetExportSinkResponse)
 
 	tests := []struct {
+		name                  string
 		args                  []string
 		expectGetSinkResponse morphGetSinkResp
 		expectRequest         morphGetReq
 		expectErr             bool
+		expectErrMsg          string
 	}{
 		{
+			name:                  "update export sink succeeds with no input",
 			args:                  []string{"namespace", "es", "update", "--namespace", ns},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 		},
 		{
+			name:                  "update export sink succeeds with no updates",
+			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--enabled", "true"},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+		},
+		{
+			name:                  "update export sink succeeds with not valid enabled value",
+			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--enabled", ""},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+			expectErr:             true,
+			expectErrMsg:          "invalid value for enabled flag",
+		},
+		{
+			name:                  "update export sink succeeds with enable flag",
 			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--enabled", "false"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
@@ -1662,7 +1695,8 @@ func (s *NamespaceTestSuite) TestUpdateExportSink() {
 			},
 		},
 		{
-			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::923456789012:role/newTestRole", "--enabled", "false"},
+			name:                  "update export sink succeeds with role arn and enabled flag",
+			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--enabled", "false", "--role-arn", "arn:aws:iam::923456789012:role/newTestRole"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
 				r.Namespace = ns
@@ -1681,6 +1715,7 @@ func (s *NamespaceTestSuite) TestUpdateExportSink() {
 			},
 		},
 		{
+			name:                  "update export sink succeeds with role arn, bucket name and enabled flag",
 			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::923456789012:role/newTestRole", "--s3-bucket-name", "newTestBucket", "--enabled", "false"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
@@ -1700,6 +1735,7 @@ func (s *NamespaceTestSuite) TestUpdateExportSink() {
 			},
 		},
 		{
+			name:                  "update export sink succeeds with role arn, bucket name, kms arn and enabled flag",
 			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::923456789012:role/newTestRole", "--s3-bucket-name", "newTestBucket", "--kms-arn", "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab", "--enabled", "false"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
@@ -1753,6 +1789,7 @@ func (s *NamespaceTestSuite) TestUpdateExportSink() {
 			err := s.RunCmd(tc.args...)
 			if tc.expectErr {
 				s.Error(err)
+				s.ErrorContains(err, tc.expectErrMsg)
 			} else {
 				s.NoError(err)
 			}

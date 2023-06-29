@@ -26,16 +26,20 @@ func IsFeatureEnabled(feature string) bool {
 }
 
 func parseAssumedRole(assumedRole string) (string, string, error) {
-	var accountId, roleName string
+	var accountID, roleName string
 	re := assumedRolePattern
 	submatch := re.FindStringSubmatch(assumedRole)
 
 	if len(submatch) != 3 {
-		return "", "", fmt.Errorf("Invalid assumed role: %s", assumedRole)
+		return "", "", fmt.Errorf("invalid assumed role: %s", assumedRole)
 	}
 
-	accountId = submatch[1]
+	accountID = submatch[1]
 	roleName = submatch[2]
 
-	return accountId, roleName, nil
+	return accountID, roleName, nil
+}
+
+func getAssumedRoleArn(awsAccountId string, awsRoleName string) string {
+	return fmt.Sprintf("arn:aws:iam::%s:role/%s", awsAccountId, awsRoleName)
 }
