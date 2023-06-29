@@ -150,10 +150,7 @@ func (c *NamespaceClient) isS3BucketChange(ctx *cli.Context, sink *sink.ExportSi
 		return false
 	}
 
-	if sink.GetSpec().GetS3Sink().GetBucketName() == ctx.String(s3BucketFlagRequired.Name) {
-		return false
-	}
-	return true
+	return sink.GetSpec().GetS3Sink().GetBucketName() != ctx.String(s3BucketFlagRequired.Name)
 }
 
 func (c *NamespaceClient) isAssumedRoleChange(ctx *cli.Context, sink *sink.ExportSink) bool {
@@ -162,10 +159,8 @@ func (c *NamespaceClient) isAssumedRoleChange(ctx *cli.Context, sink *sink.Expor
 	}
 
 	roleArn := getAssumedRoleArn(sink.GetSpec().GetS3Sink().GetAwsAccountId(), sink.GetSpec().GetS3Sink().GetRoleName())
-	if roleArn == ctx.String(sinkAssumedRoleFlagRequired.Name) {
-		return false
-	}
-	return true
+	return roleArn != ctx.String(sinkAssumedRoleFlagRequired.Name)
+
 }
 
 func (c *NamespaceClient) isKmsArnChange(ctx *cli.Context, sink *sink.ExportSink) bool {
@@ -173,10 +168,7 @@ func (c *NamespaceClient) isKmsArnChange(ctx *cli.Context, sink *sink.ExportSink
 		return false
 	}
 
-	if sink.GetSpec().GetS3Sink().GetKmsArn() == ctx.String(kmsArnFlag.Name) {
-		return false
-	}
-	return true
+	return sink.GetSpec().GetS3Sink().GetKmsArn() != ctx.String(kmsArnFlag.Name)
 }
 
 func (c *NamespaceClient) isSinkEnabledChange(ctx *cli.Context, sink *sink.ExportSink) (bool, error) {
