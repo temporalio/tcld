@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"strings"
 
+	"github.com/cjrd/allocate"
+	"github.com/gogo/protobuf/jsonpb"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
@@ -395,6 +398,64 @@ func toUserWrapper(u *auth.User, roles []*auth.Role) *auth.UserWrapper {
 	return p
 }
 
+func (c *UserClient) fromUserSpecWrapper(wrapper *auth.UserSpecWrapper) (*auth.UserSpec, error) {
+
+	var roleSpec = make([]*auth.RoleSpec, 0)
+	roleSpec = append(roleSpec, &auth.RoleSpec{
+		AccountRole: &auth.AccountRoleSpec{
+			ActionGroup: auth.AccountActionGroup(auth.AccountActionGroup_value[wrapper.AccountRole.Role]),
+		},
+	})
+	for i := range wrapper.NamespacePermissions {
+		roleSpec = append(roleSpec, &auth.RoleSpec{
+			NamespaceRoles: []*auth.NamespaceRoleSpec{
+				&auth.NamespaceRoleSpec{
+					Namespace:   wrapper.NamespacePermissions[i].Namespace,
+					ActionGroup: auth.NamespaceActionGroup(auth.NamespaceActionGroup_value[wrapper.NamespacePermissions[i].Permission]),
+				},
+			},
+		})
+	}
+	res, err := c.client.GetRolesByPermissions(c.ctx, &authservice.GetRolesByPermissionsRequest{
+		Specs: roleSpec,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("unable to get roles by permission: %v", err)
+	}
+	var roles = make([]string, len(res.Roles))
+	for i := range res.Roles {
+		roles[i] = res.Roles[i].Id
+	}
+	return &auth.UserSpec{
+		Email: wrapper.Email,
+		Roles: roles,
+	}, nil
+
+}
+
+func readUserSpecificationWrapper(ctx *cli.Context) (*auth.UserSpecWrapper, error) {
+	spec := ctx.String(SpecFlagName)
+	if spec == "" {
+		if ctx.Path(SpecFileFlagName) != "" {
+			data, err := os.ReadFile(ctx.Path(SpecFileFlagName))
+			if err != nil {
+				return nil, err
+			}
+			spec = string(data)
+		}
+	}
+	if spec == "" {
+		return nil, fmt.Errorf("no specification provided")
+	}
+	var specProto auth.UserSpecWrapper
+	unmarshaler := jsonpb.Unmarshaler{}
+	err := unmarshaler.Unmarshal(strings.NewReader(spec), &specProto)
+	if err != nil {
+		return nil, err
+	}
+	return &specProto, nil
+}
+
 func NewUserCommand(getUserClientFn GetUserClientFn, getRequestClientFn GetRequestClientFn) (CommandOut, error) {
 	var (
 		uc *UserClient
@@ -448,13 +509,21 @@ func NewUserCommand(getUserClientFn GetUserClientFn, getRequestClientFn GetReque
 					Flags: []cli.Flag{
 						userIDFlag,
 						userEmailFlag,
+						&cli.BoolFlag{
+							Name:  "spec",
+							Usage: "Get the spec of the user",
+						},
 					},
 					Action: func(ctx *cli.Context) error {
 						u, roles, err := uc.getUserAndRoles(ctx.String(userIDFlagName), ctx.String(userEmailFlagName))
 						if err != nil {
 							return err
 						}
-						return PrintProto(toUserWrapper(u, roles))
+						user := toUserWrapper(u, roles)
+						if ctx.Bool("spec") {
+							return PrintProto(user.Spec)
+						}
+						return PrintProto(user)
 					},
 				},
 				{
@@ -517,6 +586,68 @@ func NewUserCommand(getUserClientFn GetUserClientFn, getRequestClientFn GetReque
 							return err
 						}
 						return rc.HandleRequestStatus(ctx, "resend user invite", status)
+					},
+				},
+				{
+					Name:    "apply",
+					Usage:   "Apply specification to user",
+					Aliases: []string{"a"},
+					Flags: []cli.Flag{
+						userIDFlag,
+						userEmailFlag,
+						RequestIDFlag,
+						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
+						&cli.StringFlag{
+							Name:  SpecFlagName,
+							Usage: "the specification in JSON format to update the namespace to",
+						},
+						&cli.PathFlag{
+							Name:  SpecFileFlagName,
+							Usage: "the path to the file containing the specification in JSON format to update the namespace to",
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						specWrapper, err := readUserSpecificationWrapper(ctx)
+						if err != nil {
+							return err
+						}
+						u, err := uc.getUser(ctx.String(userIDFlagName), ctx.String(userEmailFlagName))
+						if err != nil {
+							return err
+						}
+
+						spec, err := uc.fromUserSpecWrapper(specWrapper)
+						if err != nil {
+							return err
+						}
+						// allocate the pointers in the specs to get a correct diff
+						allocate.MustZero(u.Spec)
+						allocate.MustZero(spec)
+						diff, err := ProtoDiff(u.Spec, spec)
+						if err != nil {
+							return err
+						}
+						if diff == "" {
+							fmt.Printf("nothing to change\n")
+							return nil
+						}
+						fmt.Printf("Changes: \n%s\n", diff)
+						yes, err := ConfirmPrompt(ctx, fmt.Sprintf("Confirm changes for user with id='%s' and email='%s'", u.Id, u.Spec.Email))
+						if err != nil {
+							return err
+						}
+						if !yes {
+							fmt.Printf("cancelled\n")
+							return nil
+						}
+						u.Spec = spec
+						status, err := uc.performUpdate(ctx, u)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "update namespace", status)
 					},
 				},
 				{

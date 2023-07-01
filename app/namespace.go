@@ -275,7 +275,7 @@ func ReadCertFilters(ctx *cli.Context) ([]byte, error) {
 	return certFilterBytes, nil
 }
 
-func ReadNamespaceSpecification(ctx *cli.Context) (*namespace.NamespaceSpec, error) {
+func readNamespaceSpecification(ctx *cli.Context) (*namespace.NamespaceSpec, error) {
 	spec := ctx.String(SpecFlagName)
 	if spec == "" {
 		if ctx.Path(SpecFileFlagName) != "" {
@@ -512,8 +512,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 			},
 		},
 		{
-			Name:    "apply-specification",
-			Usage:   "Apply specification",
+			Name:    "apply",
+			Usage:   "Apply specification to namespace",
 			Aliases: []string{"a"},
 			Flags: []cli.Flag{
 				NamespaceFlag,
@@ -531,7 +531,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 				RequestTimeoutFlag,
 			},
 			Action: func(ctx *cli.Context) error {
-				spec, err := ReadNamespaceSpecification(ctx)
+				spec, err := readNamespaceSpecification(ctx)
 				if err != nil {
 					return err
 				}
