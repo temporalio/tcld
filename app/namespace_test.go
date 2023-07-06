@@ -1660,24 +1660,30 @@ func (s *NamespaceTestSuite) TestUpdateExportSink() {
 	}{
 		{
 			name:                  "update export sink succeeds with no input",
-			args:                  []string{"namespace", "es", "update", "--namespace", ns},
+			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--sink-name", "testSink"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 		},
 		{
 			name:                  "update export sink succeeds with no updates",
-			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--enabled", "true"},
+			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--enabled", "true", "--sink-name", "testSink"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 		},
 		{
+			name:         "update export sink succeeds with no updates",
+			args:         []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--enabled", "true"},
+			expectErr:    true,
+			expectErrMsg: "Required flag \"sink-name\" not set",
+		},
+		{
 			name:                  "update export sink succeeds with not valid enabled value",
-			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--enabled", ""},
+			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--sink-name", "testSink", "--enabled", ""},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectErr:             true,
 			expectErrMsg:          "invalid value for enabled flag",
 		},
 		{
 			name:                  "update export sink succeeds with enable flag",
-			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--enabled", "false"},
+			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--enabled", "false", "--sink-name", "testSink"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
 				r.Namespace = ns
@@ -1697,7 +1703,7 @@ func (s *NamespaceTestSuite) TestUpdateExportSink() {
 		},
 		{
 			name:                  "update export sink succeeds with role arn and enabled flag",
-			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--enabled", "false", "--role-arn", "arn:aws:iam::923456789012:role/newTestRole"},
+			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--enabled", "false", "--role-arn", "arn:aws:iam::923456789012:role/newTestRole", "--sink-name", "testSink"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
 				r.Namespace = ns
@@ -1717,7 +1723,7 @@ func (s *NamespaceTestSuite) TestUpdateExportSink() {
 		},
 		{
 			name:                  "update export sink succeeds with role arn, bucket name and enabled flag",
-			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::923456789012:role/newTestRole", "--s3-bucket-name", "newTestBucket", "--enabled", "false"},
+			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::923456789012:role/newTestRole", "--s3-bucket-name", "newTestBucket", "--enabled", "false", "--sink-name", "testSink"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
 				r.Namespace = ns
@@ -1737,7 +1743,7 @@ func (s *NamespaceTestSuite) TestUpdateExportSink() {
 		},
 		{
 			name:                  "update export sink succeeds with role arn, bucket name, kms arn and enabled flag",
-			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::923456789012:role/newTestRole", "--s3-bucket-name", "newTestBucket", "--kms-arn", "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab", "--enabled", "false"},
+			args:                  []string{"namespace", "es", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::923456789012:role/newTestRole", "--s3-bucket-name", "newTestBucket", "--kms-arn", "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab", "--enabled", "false", "--sink-name", "testSink"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
 				r.Namespace = ns

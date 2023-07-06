@@ -1280,6 +1280,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Usage:   "Update export sink",
 					Flags: []cli.Flag{
 						NamespaceFlag,
+						sinkNameFlag,
 						sinkEnabledFlag,
 						sinkAssumedRoleFlagOptional,
 						s3BucketFlagOptional,
