@@ -609,6 +609,10 @@ func NewUserCommand(getUserClientFn GetUserClientFn, getRequestClientFn GetReque
 							Name:  SpecFileFlagName,
 							Usage: "the path to the file containing the specification in JSON format to update the namespace to",
 						},
+						&cli.BoolFlag{
+							Name:  "disable-invite",
+							Usage: "when the user exists do not send an invite to the user",
+						},
 					},
 					Action: func(ctx *cli.Context) error {
 						specWrapper, err := readUserSpecificationWrapper(ctx)
@@ -623,7 +627,10 @@ func NewUserCommand(getUserClientFn GetUserClientFn, getRequestClientFn GetReque
 						u, err := uc.getUser(ctx.String(userIDFlagName), ctx.String(userEmailFlagName))
 						if code := status.Code(errors.Unwrap(err)); code == codes.NotFound {
 							// user not found, invite them
-							fmt.Printf("User not found\nSpec:\n")
+							if ctx.Bool("disable-invite") {
+								return fmt.Errorf("user with email=%s not found", spec.Email)
+							}
+							fmt.Println("Spec:")
 							PrintProto(spec)
 							yes, err := ConfirmPrompt(ctx, fmt.Sprintf("Confirm invite user with email='%s'", spec.Email))
 							if err != nil {
