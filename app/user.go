@@ -14,6 +14,8 @@ import (
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	"github.com/urfave/cli/v2"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -97,7 +99,7 @@ func (c *UserClient) getUser(userID, userEmail string) (*auth.User, error) {
 		UserEmail: userEmail,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("unable to get user: %v", err)
+		return nil, fmt.Errorf("unable to get user: %w", err)
 	}
 	if res.User == nil || res.User.Id == "" {
 		// this should never happen, the server should return an error when the user is not found
@@ -409,7 +411,7 @@ func (c *UserClient) fromUserSpecWrapper(wrapper *auth.UserSpecWrapper) (*auth.U
 	for i := range wrapper.NamespacePermissions {
 		roleSpec = append(roleSpec, &auth.RoleSpec{
 			NamespaceRoles: []*auth.NamespaceRoleSpec{
-				&auth.NamespaceRoleSpec{
+				{
 					Namespace:   wrapper.NamespacePermissions[i].Namespace,
 					ActionGroup: auth.NamespaceActionGroup(auth.NamespaceActionGroup_value[wrapper.NamespacePermissions[i].Permission]),
 				},
@@ -420,7 +422,7 @@ func (c *UserClient) fromUserSpecWrapper(wrapper *auth.UserSpecWrapper) (*auth.U
 		Specs: roleSpec,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("unable to get roles by permission: %v", err)
+		return nil, fmt.Errorf("failed to parse user specification, invalid role/permissions: %w", err)
 	}
 	var roles = make([]string, len(res.Roles))
 	for i := range res.Roles {
@@ -613,41 +615,62 @@ func NewUserCommand(getUserClientFn GetUserClientFn, getRequestClientFn GetReque
 						if err != nil {
 							return err
 						}
-						u, err := uc.getUser(ctx.String(userIDFlagName), ctx.String(userEmailFlagName))
-						if err != nil {
-							return err
-						}
-
 						spec, err := uc.fromUserSpecWrapper(specWrapper)
 						if err != nil {
 							return err
 						}
-						// allocate the pointers in the specs to get a correct diff
-						allocate.MustZero(u.Spec)
-						allocate.MustZero(spec)
-						diff, err := ProtoDiff(u.Spec, spec)
-						if err != nil {
+						var requestStatus *request.RequestStatus
+						u, err := uc.getUser(ctx.String(userIDFlagName), ctx.String(userEmailFlagName))
+						if code := status.Code(errors.Unwrap(err)); code == codes.NotFound {
+							// user not found, invite them
+							fmt.Printf("User not found\nSpec:\n")
+							PrintProto(spec)
+							yes, err := ConfirmPrompt(ctx, fmt.Sprintf("Confirm invite user with email='%s'", spec.Email))
+							if err != nil {
+								return err
+							}
+							if !yes {
+								fmt.Printf("cancelled\n")
+								return nil
+							}
+							res, err := uc.client.InviteUsers(uc.ctx, &authservice.InviteUsersRequest{
+								Specs:     []*auth.UserSpec{spec},
+								RequestId: ctx.String(RequestIDFlagName),
+							})
+							if err != nil {
+								return err
+							}
+							requestStatus = res.RequestStatus
+						} else if err != nil {
 							return err
+						} else { // user already exists, update it
+							// allocate the pointers in the specs to get a correct diff
+							allocate.MustZero(u.Spec)
+							allocate.MustZero(spec)
+							diff, err := ProtoDiff(u.Spec, spec)
+							if err != nil {
+								return err
+							}
+							if diff == "" {
+								fmt.Printf("nothing to change\n")
+								return nil
+							}
+							fmt.Printf("Changes: \n%s\n", diff)
+							yes, err := ConfirmPrompt(ctx, fmt.Sprintf("Confirm changes for user with id='%s' and email='%s'", u.Id, u.Spec.Email))
+							if err != nil {
+								return err
+							}
+							if !yes {
+								fmt.Printf("cancelled\n")
+								return nil
+							}
+							u.Spec = spec
+							requestStatus, err = uc.performUpdate(ctx, u)
+							if err != nil {
+								return err
+							}
 						}
-						if diff == "" {
-							fmt.Printf("nothing to change\n")
-							return nil
-						}
-						fmt.Printf("Changes: \n%s\n", diff)
-						yes, err := ConfirmPrompt(ctx, fmt.Sprintf("Confirm changes for user with id='%s' and email='%s'", u.Id, u.Spec.Email))
-						if err != nil {
-							return err
-						}
-						if !yes {
-							fmt.Printf("cancelled\n")
-							return nil
-						}
-						u.Spec = spec
-						status, err := uc.performUpdate(ctx, u)
-						if err != nil {
-							return err
-						}
-						return rc.HandleRequestStatus(ctx, "update namespace", status)
+						return rc.HandleRequestStatus(ctx, "update namespace", requestStatus)
 					},
 				},
 				{
