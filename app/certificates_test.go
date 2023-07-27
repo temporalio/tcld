@@ -116,12 +116,12 @@ func (s *CertificatesTestSuite) TestCertificateGenerateCore() {
 			}
 
 			certBytes, certKeyBytes, err := generateEndEntityCertificate(generateEndEntityCertificateInput{
-				Organization:     tt.args.organization + "-leaf",
-				OrganizationUnit: tt.args.organizationUnit,
-				CommonName:       tt.args.commonName,
-				ValidityPeriod:   tt.args.endEntityValidityPeriod,
-				CaPem:            caPem,
-				CaPrivateKeyPEM:  caPrivKeyPem,
+				Organization:       tt.args.organization + "-leaf",
+				OrganizationalUnit: tt.args.organizationUnit,
+				CommonName:         tt.args.commonName,
+				ValidityPeriod:     tt.args.endEntityValidityPeriod,
+				CaPem:              caPem,
+				CaPrivateKeyPEM:    caPrivKeyPem,
 			})
 
 			if tt.endEntityGenerationErrMsg == "" {

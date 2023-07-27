@@ -141,9 +141,9 @@ func generateCACertificate(
 }
 
 type generateEndEntityCertificateInput struct {
-	Organization     string `validate:"required"`
-	OrganizationUnit string
-	CommonName       string
+	Organization       string `validate:"required"`
+	OrganizationalUnit string
+	CommonName         string
 
 	ValidityPeriod  time.Duration
 	CaPem           []byte `validate:"required"`
@@ -205,7 +205,7 @@ func generateEndEntityCertificate(
 	}
 	subject := pkix.Name{
 		Organization:       []string{input.Organization},
-		OrganizationalUnit: []string{input.OrganizationUnit},
+		OrganizationalUnit: []string{input.OrganizationalUnit},
 		CommonName:         input.CommonName,
 	}
 
@@ -428,9 +428,9 @@ func NewCertificatesCommand() (CommandOut, error) {
 							return fmt.Errorf("failed to read %s: %w", caPrivateKeyFileFlagName, err)
 						}
 						certPem, certPrivKey, err := generateEndEntityCertificate(generateEndEntityCertificateInput{
-							Organization:     ctx.String("organization"),
-							OrganizationUnit: ctx.String("organization-unit"),
-							CommonName:       ctx.String("common-name"),
+							Organization:       ctx.String("organization"),
+							OrganizationalUnit: ctx.String("organization-unit"),
+							CommonName:         ctx.String("common-name"),
 
 							ValidityPeriod:  validityPeriod,
 							CaPem:           caPem,
