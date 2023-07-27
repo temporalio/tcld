@@ -143,6 +143,7 @@ func generateCACertificate(
 type generateEndEntityCertificateInput struct {
 	Organization     string `validate:"required"`
 	OrganizationUnit string
+	CommonName       string
 
 	ValidityPeriod  time.Duration
 	CaPem           []byte `validate:"required"`
@@ -205,6 +206,7 @@ func generateEndEntityCertificate(
 	subject := pkix.Name{
 		Organization:       []string{input.Organization},
 		OrganizationalUnit: []string{input.OrganizationUnit},
+		CommonName:         input.CommonName,
 	}
 
 	now := time.Now().UTC()
@@ -369,6 +371,10 @@ func NewCertificatesCommand() (CommandOut, error) {
 							Usage: "The name of the organization unit (optional)",
 						},
 						&cli.StringFlag{
+							Name:  "common-name",
+							Usage: "The common name (optional)",
+						},
+						&cli.StringFlag{
 							Name:    "validity-period",
 							Usage:   "The duration for which the end entity certificate is valid for. example: 30d10h (30 days and 10 hrs). By default the generated certificate expires 24 hours before the certificate authority expires (optional)",
 							Aliases: []string{"d"},
@@ -424,6 +430,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						certPem, certPrivKey, err := generateEndEntityCertificate(generateEndEntityCertificateInput{
 							Organization:     ctx.String("organization"),
 							OrganizationUnit: ctx.String("organization-unit"),
+							CommonName:       ctx.String("common-name"),
 
 							ValidityPeriod:  validityPeriod,
 							CaPem:           caPem,
