@@ -368,7 +368,7 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:  "organization-unit",
-							Usage: "The name of the organization unit (optional)",
+							Usage: "The name of the organizational unit (optional)",
 						},
 						&cli.StringFlag{
 							Name:  "common-name",
