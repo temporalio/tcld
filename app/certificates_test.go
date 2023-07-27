@@ -50,7 +50,7 @@ func (s *CertificatesTestSuite) TestCertificateGenerateCore() {
 		caValidityPeriod        time.Duration
 		endEntityValidityPeriod time.Duration
 		organization            string
-		organizationUnit        string
+		organizationalUnit      string
 		commonName              string
 	}
 	tests := []struct {
@@ -75,7 +75,7 @@ func (s *CertificatesTestSuite) TestCertificateGenerateCore() {
 				organization:            "test-certificate",
 				caValidityPeriod:        365 * 24 * time.Hour,
 				endEntityValidityPeriod: 24 * time.Hour,
-				organizationUnit:        "test-organizational-unit",
+				organizationalUnit:      "test-organizational-unit",
 				commonName:              "test-common-name.com",
 			},
 			"",
@@ -117,7 +117,7 @@ func (s *CertificatesTestSuite) TestCertificateGenerateCore() {
 
 			certBytes, certKeyBytes, err := generateEndEntityCertificate(generateEndEntityCertificateInput{
 				Organization:       tt.args.organization + "-leaf",
-				OrganizationalUnit: tt.args.organizationUnit,
+				OrganizationalUnit: tt.args.organizationalUnit,
 				CommonName:         tt.args.commonName,
 				ValidityPeriod:     tt.args.endEntityValidityPeriod,
 				CaPem:              caPem,
