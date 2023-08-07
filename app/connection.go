@@ -48,6 +48,7 @@ func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Conte
 
 	ctx = metadata.AppendToOutgoingContext(ctx, "tcld-version", getVersion())
 	ctx = metadata.AppendToOutgoingContext(ctx, "tcld-commit", Commit)
+	ctx = metadata.AppendToOutgoingContext(ctx, "temporal-cloud-api-version", "2023-07-26-01")
 
 	if len(tokens.AccessToken) > 0 {
 		ctx = metadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+tokens.AccessToken)
