@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	AutoConfirmFlagName = "auto-confirm"
+	AutoConfirmFlagName = "auto_confirm"
 )
 
 var (

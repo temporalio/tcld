@@ -5,11 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"strings"
-
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/urfave/cli/v2"
+	"strings"
 )
 
 const (
