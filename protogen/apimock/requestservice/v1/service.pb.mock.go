@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	v1 "github.com/temporalio/tcld/protogen/api/requestservice/v1"
+	requestservice "github.com/temporalio/tcld/protogen/api/requestservice/v1"
 	grpc "google.golang.org/grpc"
 )
 
@@ -37,14 +37,14 @@ func (m *MockRequestServiceClient) EXPECT() *MockRequestServiceClientMockRecorde
 }
 
 // GetRequestStatus mocks base method.
-func (m *MockRequestServiceClient) GetRequestStatus(ctx context.Context, in *v1.GetRequestStatusRequest, opts ...grpc.CallOption) (*v1.GetRequestStatusResponse, error) {
+func (m *MockRequestServiceClient) GetRequestStatus(ctx context.Context, in *requestservice.GetRequestStatusRequest, opts ...grpc.CallOption) (*requestservice.GetRequestStatusResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetRequestStatus", varargs...)
-	ret0, _ := ret[0].(*v1.GetRequestStatusResponse)
+	ret0, _ := ret[0].(*requestservice.GetRequestStatusResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -57,14 +57,14 @@ func (mr *MockRequestServiceClientMockRecorder) GetRequestStatus(ctx, in interfa
 }
 
 // GetRequestStatuses mocks base method.
-func (m *MockRequestServiceClient) GetRequestStatuses(ctx context.Context, in *v1.GetRequestStatusesRequest, opts ...grpc.CallOption) (*v1.GetRequestStatusesResponse, error) {
+func (m *MockRequestServiceClient) GetRequestStatuses(ctx context.Context, in *requestservice.GetRequestStatusesRequest, opts ...grpc.CallOption) (*requestservice.GetRequestStatusesResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetRequestStatuses", varargs...)
-	ret0, _ := ret[0].(*v1.GetRequestStatusesResponse)
+	ret0, _ := ret[0].(*requestservice.GetRequestStatusesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -77,14 +77,14 @@ func (mr *MockRequestServiceClientMockRecorder) GetRequestStatuses(ctx, in inter
 }
 
 // GetRequestStatusesForNamespace mocks base method.
-func (m *MockRequestServiceClient) GetRequestStatusesForNamespace(ctx context.Context, in *v1.GetRequestStatusesForNamespaceRequest, opts ...grpc.CallOption) (*v1.GetRequestStatusesForNamespaceResponse, error) {
+func (m *MockRequestServiceClient) GetRequestStatusesForNamespace(ctx context.Context, in *requestservice.GetRequestStatusesForNamespaceRequest, opts ...grpc.CallOption) (*requestservice.GetRequestStatusesForNamespaceResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetRequestStatusesForNamespace", varargs...)
-	ret0, _ := ret[0].(*v1.GetRequestStatusesForNamespaceResponse)
+	ret0, _ := ret[0].(*requestservice.GetRequestStatusesForNamespaceResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -97,14 +97,14 @@ func (mr *MockRequestServiceClientMockRecorder) GetRequestStatusesForNamespace(c
 }
 
 // GetRequestStatusesForUser mocks base method.
-func (m *MockRequestServiceClient) GetRequestStatusesForUser(ctx context.Context, in *v1.GetRequestStatusesForUserRequest, opts ...grpc.CallOption) (*v1.GetRequestStatusesForUserResponse, error) {
+func (m *MockRequestServiceClient) GetRequestStatusesForUser(ctx context.Context, in *requestservice.GetRequestStatusesForUserRequest, opts ...grpc.CallOption) (*requestservice.GetRequestStatusesForUserResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetRequestStatusesForUser", varargs...)
-	ret0, _ := ret[0].(*v1.GetRequestStatusesForUserResponse)
+	ret0, _ := ret[0].(*requestservice.GetRequestStatusesForUserResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -140,10 +140,10 @@ func (m *MockRequestServiceServer) EXPECT() *MockRequestServiceServerMockRecorde
 }
 
 // GetRequestStatus mocks base method.
-func (m *MockRequestServiceServer) GetRequestStatus(arg0 context.Context, arg1 *v1.GetRequestStatusRequest) (*v1.GetRequestStatusResponse, error) {
+func (m *MockRequestServiceServer) GetRequestStatus(arg0 context.Context, arg1 *requestservice.GetRequestStatusRequest) (*requestservice.GetRequestStatusResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRequestStatus", arg0, arg1)
-	ret0, _ := ret[0].(*v1.GetRequestStatusResponse)
+	ret0, _ := ret[0].(*requestservice.GetRequestStatusResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -155,10 +155,10 @@ func (mr *MockRequestServiceServerMockRecorder) GetRequestStatus(arg0, arg1 inte
 }
 
 // GetRequestStatuses mocks base method.
-func (m *MockRequestServiceServer) GetRequestStatuses(arg0 context.Context, arg1 *v1.GetRequestStatusesRequest) (*v1.GetRequestStatusesResponse, error) {
+func (m *MockRequestServiceServer) GetRequestStatuses(arg0 context.Context, arg1 *requestservice.GetRequestStatusesRequest) (*requestservice.GetRequestStatusesResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRequestStatuses", arg0, arg1)
-	ret0, _ := ret[0].(*v1.GetRequestStatusesResponse)
+	ret0, _ := ret[0].(*requestservice.GetRequestStatusesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -170,10 +170,10 @@ func (mr *MockRequestServiceServerMockRecorder) GetRequestStatuses(arg0, arg1 in
 }
 
 // GetRequestStatusesForNamespace mocks base method.
-func (m *MockRequestServiceServer) GetRequestStatusesForNamespace(arg0 context.Context, arg1 *v1.GetRequestStatusesForNamespaceRequest) (*v1.GetRequestStatusesForNamespaceResponse, error) {
+func (m *MockRequestServiceServer) GetRequestStatusesForNamespace(arg0 context.Context, arg1 *requestservice.GetRequestStatusesForNamespaceRequest) (*requestservice.GetRequestStatusesForNamespaceResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRequestStatusesForNamespace", arg0, arg1)
-	ret0, _ := ret[0].(*v1.GetRequestStatusesForNamespaceResponse)
+	ret0, _ := ret[0].(*requestservice.GetRequestStatusesForNamespaceResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -185,10 +185,10 @@ func (mr *MockRequestServiceServerMockRecorder) GetRequestStatusesForNamespace(a
 }
 
 // GetRequestStatusesForUser mocks base method.
-func (m *MockRequestServiceServer) GetRequestStatusesForUser(arg0 context.Context, arg1 *v1.GetRequestStatusesForUserRequest) (*v1.GetRequestStatusesForUserResponse, error) {
+func (m *MockRequestServiceServer) GetRequestStatusesForUser(arg0 context.Context, arg1 *requestservice.GetRequestStatusesForUserRequest) (*requestservice.GetRequestStatusesForUserResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRequestStatusesForUser", arg0, arg1)
-	ret0, _ := ret[0].(*v1.GetRequestStatusesForUserResponse)
+	ret0, _ := ret[0].(*requestservice.GetRequestStatusesForUserResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -62,7 +62,7 @@ func TestServerConnection(t *testing.T) {
 
 func (s *ServerConnectionTestSuite) SetupTest() {
 	s.configDir = s.T().TempDir()
-	data, err := json.Marshal(OauthTokenResponse{
+	data, err := json.Marshal(OAuthTokenResponse{
 		AccessToken: testAccessToken,
 	})
 	require.NoError(s.T(), err)

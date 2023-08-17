@@ -107,6 +107,93 @@ func (Type) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_ef8b1808dc5a7594, []int{2}
 }
 
+type ExportSinkState int32
+
+const (
+	EXPORT_SINK_STATE_UNSPECIFIED       ExportSinkState = 0
+	EXPORT_SINK_STATE_ACTIVATING        ExportSinkState = 1
+	EXPORT_SINK_STATE_ACTIVE            ExportSinkState = 2
+	EXPORT_SINK_STATE_ACTIVATION_FAILED ExportSinkState = 3
+	EXPORT_SINK_STATE_DELETING          ExportSinkState = 4
+	EXPORT_SINK_STATE_DELETED           ExportSinkState = 5
+	EXPORT_SINK_STATE_UPDATING          ExportSinkState = 6
+	EXPORT_SINK_STATE_UPDATE_FAILED     ExportSinkState = 7
+)
+
+var ExportSinkState_name = map[int32]string{
+	0: "Unspecified",
+	1: "Activating",
+	2: "Active",
+	3: "ActivationFailed",
+	4: "Deleting",
+	5: "Deleted",
+	6: "Updating",
+	7: "UpdateFailed",
+}
+
+var ExportSinkState_value = map[string]int32{
+	"Unspecified":      0,
+	"Activating":       1,
+	"Active":           2,
+	"ActivationFailed": 3,
+	"Deleting":         4,
+	"Deleted":          5,
+	"Updating":         6,
+	"UpdateFailed":     7,
+}
+
+func (ExportSinkState) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_ef8b1808dc5a7594, []int{3}
+}
+
+type ExportSinkHealth int32
+
+const (
+	EXPORT_SINK_HEALTH_UNSPECIFIED              ExportSinkHealth = 0
+	EXPORT_SINK_HEALTH_OK                       ExportSinkHealth = 1
+	EXPORT_SINK_HEALTH_ERROR_INTERNAL           ExportSinkHealth = 2
+	EXPORT_SINK_HEALTH_ERROR_USER_CONFIGURATION ExportSinkHealth = 3
+)
+
+var ExportSinkHealth_name = map[int32]string{
+	0: "Unspecified",
+	1: "Ok",
+	2: "ErrorInternal",
+	3: "ErrorUserConfiguration",
+}
+
+var ExportSinkHealth_value = map[string]int32{
+	"Unspecified":            0,
+	"Ok":                     1,
+	"ErrorInternal":          2,
+	"ErrorUserConfiguration": 3,
+}
+
+func (ExportSinkHealth) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_ef8b1808dc5a7594, []int{4}
+}
+
+type ExportDestinationType int32
+
+const (
+	EXPORT_DESTINATION_TYPE_UNSPECIFIED ExportDestinationType = 0
+	EXPORT_DESTINATION_TYPE_S3          ExportDestinationType = 1
+)
+
+var ExportDestinationType_name = map[int32]string{
+	0: "Unspecified",
+	1: "S3",
+}
+
+var ExportDestinationType_value = map[string]int32{
+	"Unspecified": 0,
+	"S3":          1,
+}
+
+func (ExportDestinationType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_ef8b1808dc5a7594, []int{5}
+}
+
 type KinesisSpec struct {
 	// The role Temporal Cloud assumes when writing records to Kinesis
 	AssumedRole string `protobuf:"bytes,1,opt,name=assumed_role,json=assumedRole,proto3" json:"assumed_role,omitempty"`
@@ -179,7 +266,8 @@ type SinkSpec struct {
 	// The KinesisSpec when destination_type is Kinesis
 	KinesisSink *KinesisSpec `protobuf:"bytes,4,opt,name=kinesis_sink,json=kinesisSink,proto3" json:"kinesis_sink,omitempty"`
 	// The S3spec when destination_type is S3
-	S3Sink *S3Spec `protobuf:"bytes,5,opt,name=s3_sink,json=s3Sink,proto3" json:"s3_sink,omitempty"`
+	S3Sink  *S3Spec `protobuf:"bytes,5,opt,name=s3_sink,json=s3Sink,proto3" json:"s3_sink,omitempty"`
+	Enabled bool    `protobuf:"varint,6,opt,name=enabled,proto3" json:"enabled,omitempty"`
 }
 
 func (m *SinkSpec) Reset()      { *m = SinkSpec{} }
@@ -249,14 +337,20 @@ func (m *SinkSpec) GetS3Sink() *S3Spec {
 	return nil
 }
 
+func (m *SinkSpec) GetEnabled() bool {
+	if m != nil {
+		return m.Enabled
+	}
+	return false
+}
+
 type Sink struct {
 	// Name of the sink e.g. "audit_log_01"
 	Name         string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	State        State  `protobuf:"varint,2,opt,name=state,proto3,enum=api.sink.v1.State" json:"state,omitempty"`
 	ErrorMessage string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
-	// The last succeded timestamp for the internal workflow responsible for adding data to the sink.
+	// The last succeeded timestamp for the internal workflow responsible for adding data to the sink.
 	LastSucceededTime *types.Timestamp `protobuf:"bytes,4,opt,name=last_succeeded_time,json=lastSucceededTime,proto3" json:"last_succeeded_time,omitempty"`
-	Enabled           bool             `protobuf:"varint,5,opt,name=enabled,proto3" json:"enabled,omitempty"`
 }
 
 func (m *Sink) Reset()      { *m = Sink{} }
@@ -319,22 +413,17 @@ func (m *Sink) GetLastSucceededTime() *types.Timestamp {
 	return nil
 }
 
-func (m *Sink) GetEnabled() bool {
-	if m != nil {
-		return m.Enabled
-	}
-	return false
-}
-
 type S3Spec struct {
-	// The role Temporal Cloud assumes when writing records to customer's S3 bucket
-	AssumedRole string `protobuf:"bytes,1,opt,name=assumed_role,json=assumedRole,proto3" json:"assumed_role,omitempty"`
-	// Destination S3 ARN for us to send data to.
-	DestinationArn string `protobuf:"bytes,2,opt,name=destination_arn,json=destinationArn,proto3" json:"destination_arn,omitempty"`
+	// The role to be created that Temporal Cloud assumes for writing records to customer's S3 bucket
+	RoleName string `protobuf:"bytes,1,opt,name=role_name,json=roleName,proto3" json:"role_name,omitempty"`
+	// Destination S3 bucket name for us to send data to.
+	BucketName string `protobuf:"bytes,2,opt,name=bucket_name,json=bucketName,proto3" json:"bucket_name,omitempty"`
 	// The region of the S3 bucket
 	Region string `protobuf:"bytes,3,opt,name=region,proto3" json:"region,omitempty"`
-	// Optional prefix placed in front of all blobs that are written.
-	Prefix string `protobuf:"bytes,4,opt,name=prefix,proto3" json:"prefix,omitempty"`
+	// The kms key ARN used for encryption
+	KmsArn string `protobuf:"bytes,4,opt,name=kms_arn,json=kmsArn,proto3" json:"kms_arn,omitempty"`
+	// The aws account id of s3 bucket and assumed role
+	AwsAccountId string `protobuf:"bytes,5,opt,name=aws_account_id,json=awsAccountId,proto3" json:"aws_account_id,omitempty"`
 }
 
 func (m *S3Spec) Reset()      { *m = S3Spec{} }
@@ -369,16 +458,16 @@ func (m *S3Spec) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_S3Spec proto.InternalMessageInfo
 
-func (m *S3Spec) GetAssumedRole() string {
+func (m *S3Spec) GetRoleName() string {
 	if m != nil {
-		return m.AssumedRole
+		return m.RoleName
 	}
 	return ""
 }
 
-func (m *S3Spec) GetDestinationArn() string {
+func (m *S3Spec) GetBucketName() string {
 	if m != nil {
-		return m.DestinationArn
+		return m.BucketName
 	}
 	return ""
 }
@@ -390,71 +479,275 @@ func (m *S3Spec) GetRegion() string {
 	return ""
 }
 
-func (m *S3Spec) GetPrefix() string {
+func (m *S3Spec) GetKmsArn() string {
 	if m != nil {
-		return m.Prefix
+		return m.KmsArn
 	}
 	return ""
+}
+
+func (m *S3Spec) GetAwsAccountId() string {
+	if m != nil {
+		return m.AwsAccountId
+	}
+	return ""
+}
+
+type ExportSinkSpec struct {
+	Name    string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Enabled bool   `protobuf:"varint,2,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	// The receiving service type.
+	DestinationType ExportDestinationType `protobuf:"varint,3,opt,name=destination_type,json=destinationType,proto3,enum=api.sink.v1.ExportDestinationType" json:"destination_type,omitempty"`
+	// The S3spec when destination_type is S3
+	S3Sink *S3Spec `protobuf:"bytes,4,opt,name=s3_sink,json=s3Sink,proto3" json:"s3_sink,omitempty"`
+}
+
+func (m *ExportSinkSpec) Reset()      { *m = ExportSinkSpec{} }
+func (*ExportSinkSpec) ProtoMessage() {}
+func (*ExportSinkSpec) Descriptor() ([]byte, []int) {
+	return fileDescriptor_ef8b1808dc5a7594, []int{4}
+}
+func (m *ExportSinkSpec) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ExportSinkSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ExportSinkSpec.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ExportSinkSpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExportSinkSpec.Merge(m, src)
+}
+func (m *ExportSinkSpec) XXX_Size() int {
+	return m.Size()
+}
+func (m *ExportSinkSpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExportSinkSpec.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExportSinkSpec proto.InternalMessageInfo
+
+func (m *ExportSinkSpec) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ExportSinkSpec) GetEnabled() bool {
+	if m != nil {
+		return m.Enabled
+	}
+	return false
+}
+
+func (m *ExportSinkSpec) GetDestinationType() ExportDestinationType {
+	if m != nil {
+		return m.DestinationType
+	}
+	return EXPORT_DESTINATION_TYPE_UNSPECIFIED
+}
+
+func (m *ExportSinkSpec) GetS3Sink() *S3Spec {
+	if m != nil {
+		return m.S3Sink
+	}
+	return nil
+}
+
+type ExportSink struct {
+	Name                 string           `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	ResourceVersion      string           `protobuf:"bytes,2,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	State                ExportSinkState  `protobuf:"varint,3,opt,name=state,proto3,enum=api.sink.v1.ExportSinkState" json:"state,omitempty"`
+	Spec                 *ExportSinkSpec  `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
+	Health               ExportSinkHealth `protobuf:"varint,5,opt,name=health,proto3,enum=api.sink.v1.ExportSinkHealth" json:"health,omitempty"`
+	ErrorMessage         string           `protobuf:"bytes,6,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	LatestDataExportTime *types.Timestamp `protobuf:"bytes,7,opt,name=latest_data_export_time,json=latestDataExportTime,proto3" json:"latest_data_export_time,omitempty"`
+	LastHealthCheckTime  *types.Timestamp `protobuf:"bytes,8,opt,name=last_health_check_time,json=lastHealthCheckTime,proto3" json:"last_health_check_time,omitempty"`
+}
+
+func (m *ExportSink) Reset()      { *m = ExportSink{} }
+func (*ExportSink) ProtoMessage() {}
+func (*ExportSink) Descriptor() ([]byte, []int) {
+	return fileDescriptor_ef8b1808dc5a7594, []int{5}
+}
+func (m *ExportSink) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ExportSink) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ExportSink.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ExportSink) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExportSink.Merge(m, src)
+}
+func (m *ExportSink) XXX_Size() int {
+	return m.Size()
+}
+func (m *ExportSink) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExportSink.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExportSink proto.InternalMessageInfo
+
+func (m *ExportSink) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ExportSink) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *ExportSink) GetState() ExportSinkState {
+	if m != nil {
+		return m.State
+	}
+	return EXPORT_SINK_STATE_UNSPECIFIED
+}
+
+func (m *ExportSink) GetSpec() *ExportSinkSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *ExportSink) GetHealth() ExportSinkHealth {
+	if m != nil {
+		return m.Health
+	}
+	return EXPORT_SINK_HEALTH_UNSPECIFIED
+}
+
+func (m *ExportSink) GetErrorMessage() string {
+	if m != nil {
+		return m.ErrorMessage
+	}
+	return ""
+}
+
+func (m *ExportSink) GetLatestDataExportTime() *types.Timestamp {
+	if m != nil {
+		return m.LatestDataExportTime
+	}
+	return nil
+}
+
+func (m *ExportSink) GetLastHealthCheckTime() *types.Timestamp {
+	if m != nil {
+		return m.LastHealthCheckTime
+	}
+	return nil
 }
 
 func init() {
 	proto.RegisterEnum("api.sink.v1.State", State_name, State_value)
 	proto.RegisterEnum("api.sink.v1.DestinationType", DestinationType_name, DestinationType_value)
 	proto.RegisterEnum("api.sink.v1.Type", Type_name, Type_value)
+	proto.RegisterEnum("api.sink.v1.ExportSinkState", ExportSinkState_name, ExportSinkState_value)
+	proto.RegisterEnum("api.sink.v1.ExportSinkHealth", ExportSinkHealth_name, ExportSinkHealth_value)
+	proto.RegisterEnum("api.sink.v1.ExportDestinationType", ExportDestinationType_name, ExportDestinationType_value)
 	proto.RegisterType((*KinesisSpec)(nil), "api.sink.v1.KinesisSpec")
 	proto.RegisterType((*SinkSpec)(nil), "api.sink.v1.SinkSpec")
 	proto.RegisterType((*Sink)(nil), "api.sink.v1.Sink")
 	proto.RegisterType((*S3Spec)(nil), "api.sink.v1.S3Spec")
+	proto.RegisterType((*ExportSinkSpec)(nil), "api.sink.v1.ExportSinkSpec")
+	proto.RegisterType((*ExportSink)(nil), "api.sink.v1.ExportSink")
 }
 
 func init() { proto.RegisterFile("api/sink/v1/message.proto", fileDescriptor_ef8b1808dc5a7594) }
 
 var fileDescriptor_ef8b1808dc5a7594 = []byte{
-	// 694 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x54, 0xc1, 0x4e, 0xdb, 0x4a,
-	0x14, 0xcd, 0x84, 0x24, 0xc0, 0x4d, 0x08, 0xce, 0xc0, 0x7b, 0xcf, 0x0f, 0x45, 0x7e, 0x79, 0xe9,
-	0xa2, 0x08, 0x55, 0x8e, 0x20, 0x4b, 0x56, 0x29, 0x31, 0xd4, 0x25, 0x4d, 0xd0, 0x78, 0x28, 0xa5,
-	0x1b, 0xcb, 0x24, 0x43, 0xe4, 0x92, 0xd8, 0xae, 0xc7, 0x41, 0x65, 0x57, 0x55, 0x95, 0xba, 0xed,
-	0x67, 0xf4, 0x53, 0xba, 0x2b, 0x4b, 0x96, 0x25, 0x6c, 0xba, 0xe4, 0x13, 0xaa, 0x19, 0x3b, 0x6a,
-	0x02, 0x74, 0xd3, 0x55, 0x7c, 0xcf, 0x3d, 0xe7, 0xde, 0x39, 0x57, 0x47, 0x81, 0x7f, 0x9d, 0xc0,
-	0xad, 0x71, 0xd7, 0x3b, 0xab, 0x9d, 0x6f, 0xd6, 0x86, 0x8c, 0x73, 0xa7, 0xcf, 0xf4, 0x20, 0xf4,
-	0x23, 0x1f, 0xe7, 0x9d, 0xc0, 0xd5, 0x45, 0x4b, 0x3f, 0xdf, 0x5c, 0xfb, 0xaf, 0xef, 0xfb, 0xfd,
-	0x01, 0xab, 0xc9, 0xd6, 0xc9, 0xe8, 0xb4, 0x16, 0xb9, 0x43, 0xc6, 0x23, 0x67, 0x18, 0xc4, 0xec,
-	0xea, 0x5b, 0xc8, 0xef, 0xbb, 0x1e, 0xe3, 0x2e, 0xb7, 0x02, 0xd6, 0xc5, 0xff, 0x43, 0xc1, 0xe1,
-	0x7c, 0x34, 0x64, 0x3d, 0x3b, 0xf4, 0x07, 0x4c, 0x45, 0x15, 0xb4, 0xbe, 0x48, 0xf2, 0x09, 0x46,
-	0xfc, 0x01, 0xc3, 0x8f, 0x61, 0xb9, 0xc7, 0x78, 0xe4, 0x7a, 0x4e, 0xe4, 0xfa, 0x9e, 0x3d, 0x0a,
-	0x5d, 0x35, 0x2d, 0x59, 0xc5, 0x29, 0xf8, 0x30, 0x74, 0xf1, 0xdf, 0x90, 0x0b, 0x59, 0xdf, 0xf5,
-	0x3d, 0x75, 0x4e, 0xf6, 0x93, 0xaa, 0xfa, 0x21, 0x0d, 0x0b, 0x96, 0xeb, 0x9d, 0xc9, 0x85, 0x18,
-	0x32, 0x9e, 0x33, 0x9c, 0x2c, 0x92, 0xdf, 0x58, 0x87, 0x45, 0xf1, 0x7e, 0x3b, 0xba, 0x08, 0x98,
-	0x9c, 0x5d, 0xdc, 0x2a, 0xe9, 0x53, 0xae, 0x74, 0x7a, 0x11, 0x30, 0xb2, 0x20, 0x2a, 0xf1, 0x85,
-	0xf7, 0x40, 0x99, 0x7e, 0x91, 0x94, 0xcd, 0x49, 0x59, 0x79, 0x46, 0xd6, 0xfc, 0x45, 0x92, 0x13,
-	0xa6, 0x7d, 0xc8, 0x41, 0xdb, 0x50, 0x38, 0x8b, 0x8f, 0x61, 0x0b, 0x8d, 0x9a, 0xa9, 0xa0, 0xf5,
-	0xfc, 0x96, 0x3a, 0x33, 0x64, 0xea, 0x5a, 0x24, 0x9f, 0xb0, 0x85, 0x1b, 0xfc, 0x04, 0xe6, 0x79,
-	0x3d, 0xd6, 0x65, 0xa5, 0x6e, 0x65, 0x46, 0x67, 0xd5, 0xa5, 0x24, 0xc7, 0xeb, 0x82, 0x5d, 0xfd,
-	0x86, 0x20, 0x23, 0x65, 0x0f, 0x1d, 0x60, 0x1d, 0xb2, 0x3c, 0x72, 0xa2, 0x89, 0x79, 0x3c, 0x3b,
-	0x48, 0x74, 0x48, 0x4c, 0xc0, 0x8f, 0x60, 0x89, 0x85, 0xa1, 0x1f, 0xda, 0x49, 0x06, 0x92, 0x53,
-	0x17, 0x24, 0xf8, 0x22, 0xc6, 0xf0, 0x73, 0x58, 0x19, 0x38, 0x3c, 0xb2, 0xf9, 0xa8, 0xdb, 0x65,
-	0xac, 0xc7, 0x7a, 0xb6, 0x48, 0x41, 0xe2, 0x6e, 0x4d, 0x8f, 0x23, 0xa2, 0x4f, 0x22, 0xa2, 0xd3,
-	0x49, 0x44, 0x48, 0x49, 0xc8, 0xac, 0x89, 0x4a, 0xe0, 0x58, 0x85, 0x79, 0xe6, 0x39, 0x27, 0x03,
-	0xd6, 0x93, 0x2e, 0x17, 0xc8, 0xa4, 0xac, 0x7e, 0x44, 0x90, 0x8b, 0x4d, 0xfe, 0x41, 0x8a, 0x9c,
-	0xd0, 0x7b, 0x20, 0x45, 0x8d, 0xd0, 0xfb, 0x5d, 0x8a, 0x04, 0x1e, 0x84, 0xec, 0xd4, 0x7d, 0x27,
-	0x7d, 0x2c, 0x92, 0xa4, 0xda, 0xf8, 0x84, 0x20, 0x2b, 0x4f, 0x84, 0xff, 0x82, 0x92, 0x45, 0x1b,
-	0xd4, 0xb0, 0x0f, 0xdb, 0xd6, 0x81, 0xb1, 0x63, 0xee, 0x9a, 0x46, 0x53, 0x49, 0x61, 0x0c, 0xc5,
-	0x18, 0xde, 0x21, 0x46, 0x83, 0x9a, 0xed, 0x3d, 0x05, 0x61, 0x05, 0x0a, 0x31, 0xd6, 0xd8, 0xa1,
-	0xe6, 0x4b, 0x43, 0x49, 0xe3, 0x12, 0x2c, 0xc5, 0x48, 0xd3, 0x68, 0x19, 0xd4, 0x68, 0x2a, 0x73,
-	0x58, 0x85, 0xd5, 0x18, 0x32, 0xdb, 0xd4, 0x20, 0xed, 0x46, 0xcb, 0x36, 0x08, 0xe9, 0x10, 0x25,
-	0x83, 0x57, 0x41, 0x49, 0x36, 0x59, 0x06, 0x49, 0xd0, 0xec, 0xc6, 0x1b, 0x58, 0xbe, 0x93, 0x38,
-	0x5c, 0x81, 0x72, 0xd3, 0xb0, 0xa8, 0xd9, 0x6e, 0x50, 0xb3, 0xd3, 0xb6, 0xe9, 0xf1, 0xc1, 0xdd,
-	0xd7, 0x95, 0x41, 0xbd, 0xc7, 0xd8, 0x37, 0xdb, 0x86, 0x65, 0x5a, 0x0a, 0xc2, 0xff, 0xc0, 0xca,
-	0xbd, 0xae, 0x55, 0x57, 0xd2, 0x1b, 0x04, 0x32, 0x72, 0xc1, 0x2a, 0x28, 0x0f, 0x0c, 0xc5, 0x50,
-	0x94, 0x68, 0xe3, 0xb0, 0x69, 0x52, 0xbb, 0xd5, 0x11, 0x96, 0x2b, 0x50, 0x96, 0xd8, 0x51, 0x87,
-	0xec, 0xef, 0xb6, 0x3a, 0x47, 0xf6, 0x33, 0xd3, 0xa2, 0x1d, 0x72, 0x6c, 0x1b, 0xaf, 0x0e, 0x3a,
-	0x84, 0x2a, 0xe9, 0xa7, 0xe4, 0xf2, 0x5a, 0x4b, 0x5d, 0x5d, 0x6b, 0xa9, 0xdb, 0x6b, 0x0d, 0xbd,
-	0x1f, 0x6b, 0xe8, 0xcb, 0x58, 0x43, 0x5f, 0xc7, 0x1a, 0xba, 0x1c, 0x6b, 0xe8, 0xfb, 0x58, 0x43,
-	0x3f, 0xc6, 0x5a, 0xea, 0x76, 0xac, 0xa1, 0xcf, 0x37, 0x5a, 0xea, 0xf2, 0x46, 0x4b, 0x5d, 0xdd,
-	0x68, 0xa9, 0xd7, 0xe5, 0x68, 0x18, 0x84, 0x03, 0xbd, 0x3b, 0xf0, 0x47, 0xbd, 0xda, 0xd4, 0xbf,
-	0xd4, 0xb6, 0xf8, 0x3d, 0xc9, 0xc9, 0x94, 0xd5, 0x7f, 0x06, 0x00, 0x00, 0xff, 0xff, 0x03, 0xfe,
-	0xab, 0x30, 0xc0, 0x04, 0x00, 0x00,
+	// 1084 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x56, 0x31, 0x57, 0xe3, 0x46,
+	0x17, 0xb5, 0x8c, 0x31, 0xf0, 0xcc, 0x1a, 0x31, 0xc0, 0x62, 0x58, 0x23, 0x8c, 0xf9, 0xbe, 0xb3,
+	0xc4, 0xc9, 0xb1, 0xcf, 0xc2, 0x49, 0xb5, 0x95, 0x83, 0x05, 0x28, 0x78, 0x6d, 0x32, 0x12, 0xbb,
+	0xd9, 0x34, 0x13, 0x21, 0x4f, 0x40, 0xb1, 0x2d, 0x39, 0x1a, 0x99, 0xcd, 0x76, 0xe9, 0xd2, 0xe6,
+	0x07, 0x24, 0x45, 0xba, 0xa4, 0x4b, 0x93, 0x2a, 0x7f, 0x20, 0x25, 0xe5, 0x96, 0xc1, 0x34, 0x29,
+	0xf7, 0x27, 0xe4, 0xcc, 0x8c, 0x1d, 0x64, 0x90, 0x43, 0xb5, 0xd6, 0x7d, 0xf7, 0xce, 0xbc, 0x77,
+	0xdf, 0x9d, 0x3d, 0xc0, 0x9a, 0xdd, 0x73, 0x2b, 0xcc, 0xf5, 0xda, 0x95, 0xcb, 0x67, 0x95, 0x2e,
+	0x65, 0xcc, 0x3e, 0xa7, 0xe5, 0x5e, 0xe0, 0x87, 0x3e, 0xca, 0xd8, 0x3d, 0xb7, 0xcc, 0x4b, 0xe5,
+	0xcb, 0x67, 0xeb, 0x9b, 0xe7, 0xbe, 0x7f, 0xde, 0xa1, 0x15, 0x51, 0x3a, 0xeb, 0x7f, 0x55, 0x09,
+	0xdd, 0x2e, 0x65, 0xa1, 0xdd, 0xed, 0x49, 0x76, 0xf1, 0x1b, 0xc8, 0x1c, 0xbb, 0x1e, 0x65, 0x2e,
+	0x33, 0x7b, 0xd4, 0x41, 0x5b, 0x30, 0x6f, 0x33, 0xd6, 0xef, 0xd2, 0x16, 0x09, 0xfc, 0x0e, 0xcd,
+	0x29, 0x05, 0x65, 0x67, 0x0e, 0x67, 0x86, 0x18, 0xf6, 0x3b, 0x14, 0x3d, 0x85, 0x85, 0x16, 0x65,
+	0xa1, 0xeb, 0xd9, 0xa1, 0xeb, 0x7b, 0xa4, 0x1f, 0xb8, 0xb9, 0xa4, 0x60, 0x65, 0x23, 0xf0, 0x69,
+	0xe0, 0xa2, 0xc7, 0x90, 0x0e, 0xe8, 0xb9, 0xeb, 0x7b, 0xb9, 0x29, 0x51, 0x1f, 0x7e, 0x15, 0x7f,
+	0x4c, 0xc2, 0xac, 0xe9, 0x7a, 0x6d, 0x71, 0x21, 0x82, 0x94, 0x67, 0x77, 0x47, 0x17, 0x89, 0xdf,
+	0xa8, 0x0c, 0x73, 0xbc, 0x7f, 0x12, 0xbe, 0xed, 0x51, 0x71, 0x76, 0x76, 0x77, 0xb1, 0x1c, 0x99,
+	0xaa, 0x6c, 0xbd, 0xed, 0x51, 0x3c, 0xcb, 0xbf, 0xf8, 0x2f, 0x74, 0x08, 0x6a, 0xb4, 0x23, 0x21,
+	0x9b, 0x12, 0xb2, 0xfc, 0x98, 0xac, 0x76, 0x4b, 0x12, 0x27, 0x44, 0xe7, 0x10, 0x07, 0x3d, 0x87,
+	0xf9, 0xb6, 0x34, 0x83, 0x70, 0x4d, 0x2e, 0x55, 0x50, 0x76, 0x32, 0xbb, 0xb9, 0xb1, 0x43, 0x22,
+	0x6e, 0xe1, 0xcc, 0x90, 0xcd, 0xa7, 0x41, 0x1f, 0xc1, 0x0c, 0xdb, 0x93, 0xba, 0x69, 0xa1, 0x5b,
+	0x1a, 0xd3, 0x99, 0x7b, 0x42, 0x92, 0x66, 0x7b, 0x82, 0x9d, 0x83, 0x19, 0xea, 0xd9, 0x67, 0x1d,
+	0xda, 0xca, 0xa5, 0x0b, 0xca, 0xce, 0x2c, 0x1e, 0x7d, 0x16, 0x7f, 0x57, 0x20, 0x25, 0x28, 0x71,
+	0xd6, 0xec, 0xc0, 0x34, 0x0b, 0xed, 0x70, 0x64, 0x0b, 0x1a, 0xbf, 0x82, 0x57, 0xb0, 0x24, 0xa0,
+	0x6d, 0x78, 0x44, 0x83, 0xc0, 0x0f, 0xc8, 0x30, 0x1d, 0xc3, 0x25, 0xcc, 0x0b, 0xf0, 0x85, 0xc4,
+	0xd0, 0xa7, 0xb0, 0xd4, 0xb1, 0x59, 0x48, 0x58, 0xdf, 0x71, 0x28, 0x6d, 0xd1, 0x16, 0xe1, 0xf9,
+	0x18, 0xce, 0xbd, 0x5e, 0x96, 0xe1, 0x29, 0x8f, 0xc2, 0x53, 0xb6, 0x46, 0xe1, 0xc1, 0x8b, 0x5c,
+	0x66, 0x8e, 0x54, 0x1c, 0x2f, 0xfe, 0xa4, 0x40, 0x5a, 0x0e, 0x89, 0x9e, 0xc0, 0x1c, 0x4f, 0x0f,
+	0x89, 0xb4, 0x3f, 0xcb, 0x81, 0x06, 0x1f, 0x61, 0x13, 0x32, 0x67, 0x7d, 0xa7, 0x4d, 0x43, 0x59,
+	0x96, 0xd9, 0x01, 0x09, 0x09, 0xc2, 0x84, 0xdc, 0xa0, 0x55, 0x98, 0x69, 0x77, 0x19, 0xb1, 0x03,
+	0x4f, 0x34, 0x38, 0x87, 0xd3, 0xed, 0x2e, 0xab, 0x06, 0x1e, 0xfa, 0x1f, 0x64, 0xed, 0x37, 0x8c,
+	0xd8, 0x8e, 0xe3, 0xf7, 0xbd, 0x90, 0xb8, 0x2d, 0xb1, 0x80, 0x39, 0x3c, 0x6f, 0xbf, 0x61, 0x55,
+	0x09, 0x1a, 0xad, 0xe2, 0x1f, 0x0a, 0x64, 0xf5, 0x6f, 0x7b, 0x7e, 0x10, 0xfe, 0x67, 0xf8, 0x22,
+	0x8b, 0x49, 0x8e, 0x2d, 0x06, 0xbd, 0x98, 0x18, 0xb3, 0xe2, 0xd8, 0x1a, 0xe4, 0x25, 0x0f, 0x86,
+	0x2d, 0x92, 0x97, 0xd4, 0x83, 0x79, 0x29, 0xfe, 0x36, 0x05, 0x70, 0xdb, 0x7d, 0x6c, 0xe7, 0x1f,
+	0x80, 0x1a, 0x50, 0xe6, 0xf7, 0x03, 0x87, 0x92, 0x4b, 0x1a, 0x30, 0xee, 0xa0, 0x74, 0x77, 0x61,
+	0x84, 0xbf, 0x94, 0x30, 0xda, 0x1d, 0xc5, 0x28, 0xee, 0x99, 0x44, 0x4c, 0x8a, 0x06, 0xaa, 0x02,
+	0x29, 0xd6, 0xa3, 0xce, 0xb0, 0xd9, 0x27, 0x93, 0x24, 0xbc, 0x69, 0x41, 0x44, 0x1f, 0x43, 0xfa,
+	0x82, 0xda, 0x9d, 0xf0, 0x42, 0xac, 0x23, 0xbb, 0xbb, 0x31, 0x41, 0x72, 0x24, 0x48, 0x78, 0x48,
+	0xbe, 0x1f, 0xdc, 0x74, 0x4c, 0x70, 0x3f, 0x83, 0xd5, 0x8e, 0x1d, 0x52, 0x16, 0x92, 0x96, 0x1d,
+	0xda, 0x84, 0x8a, 0xc3, 0x64, 0x78, 0x67, 0x1e, 0x0c, 0xef, 0xb2, 0x94, 0xd6, 0xec, 0xd0, 0x96,
+	0x5d, 0xf0, 0x12, 0x6a, 0xc2, 0x63, 0xf1, 0x16, 0x64, 0x1b, 0xc4, 0xb9, 0xa0, 0x4e, 0x5b, 0x9e,
+	0x38, 0xfb, 0xe0, 0x89, 0xe2, 0x15, 0xc9, 0x39, 0xf6, 0xb9, 0x8e, 0x57, 0x4a, 0xdf, 0x2b, 0x30,
+	0x2d, 0x1c, 0x44, 0x2b, 0xb0, 0x68, 0x5a, 0x55, 0x4b, 0x27, 0xa7, 0x0d, 0xf3, 0x44, 0xdf, 0x37,
+	0x0e, 0x0c, 0xbd, 0xa6, 0x26, 0x10, 0x82, 0xac, 0x84, 0xf7, 0xb1, 0x5e, 0xb5, 0x8c, 0xc6, 0xa1,
+	0xaa, 0x20, 0x15, 0xe6, 0x25, 0x56, 0xdd, 0xb7, 0x8c, 0x97, 0xba, 0x9a, 0x44, 0x8b, 0xf0, 0x48,
+	0x22, 0x35, 0xbd, 0xae, 0x5b, 0x7a, 0x4d, 0x9d, 0x42, 0x39, 0x58, 0x96, 0x90, 0xd1, 0xb0, 0x74,
+	0xdc, 0xa8, 0xd6, 0x89, 0x8e, 0x71, 0x13, 0xab, 0x29, 0xb4, 0x0c, 0xea, 0xf0, 0x26, 0x53, 0xc7,
+	0x43, 0x74, 0xba, 0xf4, 0x35, 0x2c, 0xdc, 0x89, 0x23, 0x2a, 0x40, 0xbe, 0xa6, 0x9b, 0x96, 0xd1,
+	0xa8, 0x5a, 0x46, 0xb3, 0x41, 0xac, 0xd7, 0x27, 0x77, 0xbb, 0xcb, 0x43, 0xee, 0x1e, 0xe3, 0xd8,
+	0x68, 0xe8, 0xa6, 0x61, 0xaa, 0x0a, 0x5a, 0x85, 0xa5, 0x7b, 0x55, 0x73, 0x4f, 0x4d, 0x96, 0x30,
+	0xa4, 0xc4, 0x05, 0xcb, 0xa0, 0xc6, 0x1c, 0x8a, 0x20, 0x2b, 0xd0, 0xea, 0x69, 0xcd, 0xb0, 0x48,
+	0xbd, 0xc9, 0x47, 0x2e, 0x40, 0x5e, 0x60, 0xaf, 0x9a, 0xf8, 0xf8, 0xa0, 0xde, 0x7c, 0x45, 0x8e,
+	0x0c, 0xd3, 0x6a, 0xe2, 0xd7, 0x44, 0xff, 0xfc, 0xa4, 0x89, 0x2d, 0x35, 0x59, 0xfa, 0x39, 0x09,
+	0x0b, 0x77, 0x52, 0x89, 0xb6, 0x60, 0x43, 0xd6, 0x89, 0x69, 0x34, 0x8e, 0x49, 0x9c, 0xbf, 0x05,
+	0xc8, 0xdf, 0xa7, 0x08, 0x5f, 0x47, 0x6e, 0xe7, 0x21, 0x37, 0x81, 0xc1, 0x9d, 0x7f, 0x0a, 0xdb,
+	0x93, 0xf5, 0xcd, 0x06, 0x39, 0xa8, 0x1a, 0x75, 0xb1, 0x0f, 0x0d, 0xd6, 0xef, 0x13, 0xc5, 0xba,
+	0xf8, 0x35, 0x29, 0xb4, 0x01, 0x6b, 0x13, 0xea, 0x7a, 0x4d, 0x9d, 0x8e, 0x97, 0x9f, 0x9e, 0xd4,
+	0x64, 0x97, 0x69, 0xb4, 0x0d, 0x9b, 0x13, 0xea, 0xfa, 0xa8, 0x87, 0x99, 0xd2, 0xaf, 0x0a, 0xa8,
+	0x77, 0xdf, 0x14, 0x2a, 0x82, 0x16, 0x55, 0x1e, 0xe9, 0xd5, 0xba, 0x75, 0x74, 0xc7, 0xa5, 0x35,
+	0x58, 0x89, 0xe1, 0x34, 0x8f, 0x55, 0x05, 0xfd, 0x1f, 0xb6, 0x62, 0x4a, 0x22, 0x55, 0xff, 0x46,
+	0x4f, 0x4d, 0xa2, 0x0a, 0x7c, 0x38, 0x91, 0x26, 0x72, 0xb8, 0xdf, 0x6c, 0x1c, 0x18, 0x87, 0xa7,
+	0x58, 0xd8, 0xa6, 0x4e, 0x95, 0xbe, 0x84, 0x95, 0xd8, 0xff, 0x24, 0x23, 0x8e, 0x3f, 0x10, 0xce,
+	0x5b, 0xcb, 0xe2, 0x52, 0xa8, 0x7c, 0x82, 0xaf, 0xae, 0xb5, 0xc4, 0xbb, 0x6b, 0x2d, 0xf1, 0xfe,
+	0x5a, 0x53, 0xbe, 0x1b, 0x68, 0xca, 0x2f, 0x03, 0x4d, 0xf9, 0x73, 0xa0, 0x29, 0x57, 0x03, 0x4d,
+	0xf9, 0x6b, 0xa0, 0x29, 0x7f, 0x0f, 0xb4, 0xc4, 0xfb, 0x81, 0xa6, 0xfc, 0x70, 0xa3, 0x25, 0xae,
+	0x6e, 0xb4, 0xc4, 0xbb, 0x1b, 0x2d, 0xf1, 0x45, 0x3e, 0xec, 0xf6, 0x82, 0x4e, 0xd9, 0xe9, 0xf8,
+	0xfd, 0x56, 0x25, 0xf2, 0x17, 0xd6, 0x73, 0xfe, 0xef, 0x59, 0x5a, 0x3c, 0xfc, 0xbd, 0x7f, 0x02,
+	0x00, 0x00, 0xff, 0xff, 0x47, 0x09, 0x50, 0xc8, 0x7c, 0x09, 0x00, 0x00,
 }
 
 func (x State) String() string {
@@ -473,6 +766,27 @@ func (x DestinationType) String() string {
 }
 func (x Type) String() string {
 	s, ok := Type_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x ExportSinkState) String() string {
+	s, ok := ExportSinkState_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x ExportSinkHealth) String() string {
+	s, ok := ExportSinkHealth_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x ExportDestinationType) String() string {
+	s, ok := ExportDestinationType_name[int32(x)]
 	if ok {
 		return s
 	}
@@ -542,6 +856,9 @@ func (this *SinkSpec) Equal(that interface{}) bool {
 	if !this.S3Sink.Equal(that1.S3Sink) {
 		return false
 	}
+	if this.Enabled != that1.Enabled {
+		return false
+	}
 	return true
 }
 func (this *Sink) Equal(that interface{}) bool {
@@ -575,9 +892,6 @@ func (this *Sink) Equal(that interface{}) bool {
 	if !this.LastSucceededTime.Equal(that1.LastSucceededTime) {
 		return false
 	}
-	if this.Enabled != that1.Enabled {
-		return false
-	}
 	return true
 }
 func (this *S3Spec) Equal(that interface{}) bool {
@@ -599,16 +913,97 @@ func (this *S3Spec) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.AssumedRole != that1.AssumedRole {
+	if this.RoleName != that1.RoleName {
 		return false
 	}
-	if this.DestinationArn != that1.DestinationArn {
+	if this.BucketName != that1.BucketName {
 		return false
 	}
 	if this.Region != that1.Region {
 		return false
 	}
-	if this.Prefix != that1.Prefix {
+	if this.KmsArn != that1.KmsArn {
+		return false
+	}
+	if this.AwsAccountId != that1.AwsAccountId {
+		return false
+	}
+	return true
+}
+func (this *ExportSinkSpec) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ExportSinkSpec)
+	if !ok {
+		that2, ok := that.(ExportSinkSpec)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if this.Enabled != that1.Enabled {
+		return false
+	}
+	if this.DestinationType != that1.DestinationType {
+		return false
+	}
+	if !this.S3Sink.Equal(that1.S3Sink) {
+		return false
+	}
+	return true
+}
+func (this *ExportSink) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ExportSink)
+	if !ok {
+		that2, ok := that.(ExportSink)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	if this.State != that1.State {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.Health != that1.Health {
+		return false
+	}
+	if this.ErrorMessage != that1.ErrorMessage {
+		return false
+	}
+	if !this.LatestDataExportTime.Equal(that1.LatestDataExportTime) {
+		return false
+	}
+	if !this.LastHealthCheckTime.Equal(that1.LastHealthCheckTime) {
 		return false
 	}
 	return true
@@ -629,7 +1024,7 @@ func (this *SinkSpec) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 9)
+	s := make([]string, 0, 10)
 	s = append(s, "&sink.SinkSpec{")
 	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
 	s = append(s, "SinkType: "+fmt.Sprintf("%#v", this.SinkType)+",\n")
@@ -640,6 +1035,7 @@ func (this *SinkSpec) GoString() string {
 	if this.S3Sink != nil {
 		s = append(s, "S3Sink: "+fmt.Sprintf("%#v", this.S3Sink)+",\n")
 	}
+	s = append(s, "Enabled: "+fmt.Sprintf("%#v", this.Enabled)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -647,7 +1043,7 @@ func (this *Sink) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 9)
+	s := make([]string, 0, 8)
 	s = append(s, "&sink.Sink{")
 	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
 	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
@@ -655,7 +1051,6 @@ func (this *Sink) GoString() string {
 	if this.LastSucceededTime != nil {
 		s = append(s, "LastSucceededTime: "+fmt.Sprintf("%#v", this.LastSucceededTime)+",\n")
 	}
-	s = append(s, "Enabled: "+fmt.Sprintf("%#v", this.Enabled)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -663,12 +1058,51 @@ func (this *S3Spec) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 8)
+	s := make([]string, 0, 9)
 	s = append(s, "&sink.S3Spec{")
-	s = append(s, "AssumedRole: "+fmt.Sprintf("%#v", this.AssumedRole)+",\n")
-	s = append(s, "DestinationArn: "+fmt.Sprintf("%#v", this.DestinationArn)+",\n")
+	s = append(s, "RoleName: "+fmt.Sprintf("%#v", this.RoleName)+",\n")
+	s = append(s, "BucketName: "+fmt.Sprintf("%#v", this.BucketName)+",\n")
 	s = append(s, "Region: "+fmt.Sprintf("%#v", this.Region)+",\n")
-	s = append(s, "Prefix: "+fmt.Sprintf("%#v", this.Prefix)+",\n")
+	s = append(s, "KmsArn: "+fmt.Sprintf("%#v", this.KmsArn)+",\n")
+	s = append(s, "AwsAccountId: "+fmt.Sprintf("%#v", this.AwsAccountId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ExportSinkSpec) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&sink.ExportSinkSpec{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "Enabled: "+fmt.Sprintf("%#v", this.Enabled)+",\n")
+	s = append(s, "DestinationType: "+fmt.Sprintf("%#v", this.DestinationType)+",\n")
+	if this.S3Sink != nil {
+		s = append(s, "S3Sink: "+fmt.Sprintf("%#v", this.S3Sink)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ExportSink) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 12)
+	s = append(s, "&sink.ExportSink{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "Health: "+fmt.Sprintf("%#v", this.Health)+",\n")
+	s = append(s, "ErrorMessage: "+fmt.Sprintf("%#v", this.ErrorMessage)+",\n")
+	if this.LatestDataExportTime != nil {
+		s = append(s, "LatestDataExportTime: "+fmt.Sprintf("%#v", this.LatestDataExportTime)+",\n")
+	}
+	if this.LastHealthCheckTime != nil {
+		s = append(s, "LastHealthCheckTime: "+fmt.Sprintf("%#v", this.LastHealthCheckTime)+",\n")
+	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -744,6 +1178,16 @@ func (m *SinkSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.Enabled {
+		i--
+		if m.Enabled {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x30
+	}
 	if m.S3Sink != nil {
 		{
 			size, err := m.S3Sink.MarshalToSizedBuffer(dAtA[:i])
@@ -808,16 +1252,6 @@ func (m *Sink) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.Enabled {
-		i--
-		if m.Enabled {
-			dAtA[i] = 1
-		} else {
-			dAtA[i] = 0
-		}
-		i--
-		dAtA[i] = 0x28
-	}
 	if m.LastSucceededTime != nil {
 		{
 			size, err := m.LastSucceededTime.MarshalToSizedBuffer(dAtA[:i])
@@ -872,10 +1306,17 @@ func (m *S3Spec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Prefix) > 0 {
-		i -= len(m.Prefix)
-		copy(dAtA[i:], m.Prefix)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.Prefix)))
+	if len(m.AwsAccountId) > 0 {
+		i -= len(m.AwsAccountId)
+		copy(dAtA[i:], m.AwsAccountId)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.AwsAccountId)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.KmsArn) > 0 {
+		i -= len(m.KmsArn)
+		copy(dAtA[i:], m.KmsArn)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.KmsArn)))
 		i--
 		dAtA[i] = 0x22
 	}
@@ -886,17 +1327,164 @@ func (m *S3Spec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x1a
 	}
-	if len(m.DestinationArn) > 0 {
-		i -= len(m.DestinationArn)
-		copy(dAtA[i:], m.DestinationArn)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.DestinationArn)))
+	if len(m.BucketName) > 0 {
+		i -= len(m.BucketName)
+		copy(dAtA[i:], m.BucketName)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.BucketName)))
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.AssumedRole) > 0 {
-		i -= len(m.AssumedRole)
-		copy(dAtA[i:], m.AssumedRole)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.AssumedRole)))
+	if len(m.RoleName) > 0 {
+		i -= len(m.RoleName)
+		copy(dAtA[i:], m.RoleName)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.RoleName)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ExportSinkSpec) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ExportSinkSpec) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ExportSinkSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.S3Sink != nil {
+		{
+			size, err := m.S3Sink.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.DestinationType != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.DestinationType))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.Enabled {
+		i--
+		if m.Enabled {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ExportSink) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ExportSink) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ExportSink) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.LastHealthCheckTime != nil {
+		{
+			size, err := m.LastHealthCheckTime.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x42
+	}
+	if m.LatestDataExportTime != nil {
+		{
+			size, err := m.LatestDataExportTime.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3a
+	}
+	if len(m.ErrorMessage) > 0 {
+		i -= len(m.ErrorMessage)
+		copy(dAtA[i:], m.ErrorMessage)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.ErrorMessage)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if m.Health != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.Health))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Name)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -959,6 +1547,9 @@ func (m *SinkSpec) Size() (n int) {
 		l = m.S3Sink.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
+	if m.Enabled {
+		n += 2
+	}
 	return n
 }
 
@@ -983,9 +1574,6 @@ func (m *Sink) Size() (n int) {
 		l = m.LastSucceededTime.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
-	if m.Enabled {
-		n += 2
-	}
 	return n
 }
 
@@ -995,11 +1583,11 @@ func (m *S3Spec) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.AssumedRole)
+	l = len(m.RoleName)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
-	l = len(m.DestinationArn)
+	l = len(m.BucketName)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
@@ -1007,8 +1595,74 @@ func (m *S3Spec) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
-	l = len(m.Prefix)
+	l = len(m.KmsArn)
 	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	l = len(m.AwsAccountId)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+
+func (m *ExportSinkSpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Enabled {
+		n += 2
+	}
+	if m.DestinationType != 0 {
+		n += 1 + sovMessage(uint64(m.DestinationType))
+	}
+	if m.S3Sink != nil {
+		l = m.S3Sink.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+
+func (m *ExportSink) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Health != 0 {
+		n += 1 + sovMessage(uint64(m.Health))
+	}
+	l = len(m.ErrorMessage)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.LatestDataExportTime != nil {
+		l = m.LatestDataExportTime.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.LastHealthCheckTime != nil {
+		l = m.LastHealthCheckTime.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
 	return n
@@ -1042,6 +1696,7 @@ func (this *SinkSpec) String() string {
 		`DestinationType:` + fmt.Sprintf("%v", this.DestinationType) + `,`,
 		`KinesisSink:` + strings.Replace(this.KinesisSink.String(), "KinesisSpec", "KinesisSpec", 1) + `,`,
 		`S3Sink:` + strings.Replace(this.S3Sink.String(), "S3Spec", "S3Spec", 1) + `,`,
+		`Enabled:` + fmt.Sprintf("%v", this.Enabled) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1055,7 +1710,6 @@ func (this *Sink) String() string {
 		`State:` + fmt.Sprintf("%v", this.State) + `,`,
 		`ErrorMessage:` + fmt.Sprintf("%v", this.ErrorMessage) + `,`,
 		`LastSucceededTime:` + strings.Replace(fmt.Sprintf("%v", this.LastSucceededTime), "Timestamp", "types.Timestamp", 1) + `,`,
-		`Enabled:` + fmt.Sprintf("%v", this.Enabled) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1065,10 +1719,41 @@ func (this *S3Spec) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&S3Spec{`,
-		`AssumedRole:` + fmt.Sprintf("%v", this.AssumedRole) + `,`,
-		`DestinationArn:` + fmt.Sprintf("%v", this.DestinationArn) + `,`,
+		`RoleName:` + fmt.Sprintf("%v", this.RoleName) + `,`,
+		`BucketName:` + fmt.Sprintf("%v", this.BucketName) + `,`,
 		`Region:` + fmt.Sprintf("%v", this.Region) + `,`,
-		`Prefix:` + fmt.Sprintf("%v", this.Prefix) + `,`,
+		`KmsArn:` + fmt.Sprintf("%v", this.KmsArn) + `,`,
+		`AwsAccountId:` + fmt.Sprintf("%v", this.AwsAccountId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ExportSinkSpec) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ExportSinkSpec{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`Enabled:` + fmt.Sprintf("%v", this.Enabled) + `,`,
+		`DestinationType:` + fmt.Sprintf("%v", this.DestinationType) + `,`,
+		`S3Sink:` + strings.Replace(this.S3Sink.String(), "S3Spec", "S3Spec", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ExportSink) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ExportSink{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`Spec:` + strings.Replace(this.Spec.String(), "ExportSinkSpec", "ExportSinkSpec", 1) + `,`,
+		`Health:` + fmt.Sprintf("%v", this.Health) + `,`,
+		`ErrorMessage:` + fmt.Sprintf("%v", this.ErrorMessage) + `,`,
+		`LatestDataExportTime:` + strings.Replace(fmt.Sprintf("%v", this.LatestDataExportTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`LastHealthCheckTime:` + strings.Replace(fmt.Sprintf("%v", this.LastHealthCheckTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1401,6 +2086,26 @@ func (m *SinkSpec) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Enabled", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Enabled = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -1573,26 +2278,6 @@ func (m *Sink) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 5:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Enabled", wireType)
-			}
-			var v int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMessage
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				v |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			m.Enabled = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -1648,7 +2333,7 @@ func (m *S3Spec) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AssumedRole", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field RoleName", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1676,11 +2361,11 @@ func (m *S3Spec) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.AssumedRole = string(dAtA[iNdEx:postIndex])
+			m.RoleName = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field DestinationArn", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field BucketName", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1708,7 +2393,7 @@ func (m *S3Spec) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.DestinationArn = string(dAtA[iNdEx:postIndex])
+			m.BucketName = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
@@ -1744,7 +2429,7 @@ func (m *S3Spec) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Prefix", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field KmsArn", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1772,7 +2457,494 @@ func (m *S3Spec) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Prefix = string(dAtA[iNdEx:postIndex])
+			m.KmsArn = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AwsAccountId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AwsAccountId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ExportSinkSpec) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ExportSinkSpec: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ExportSinkSpec: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Enabled", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Enabled = bool(v != 0)
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DestinationType", wireType)
+			}
+			m.DestinationType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.DestinationType |= ExportDestinationType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field S3Sink", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.S3Sink == nil {
+				m.S3Sink = &S3Spec{}
+			}
+			if err := m.S3Sink.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ExportSink) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ExportSink: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ExportSink: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= ExportSinkState(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &ExportSinkSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Health", wireType)
+			}
+			m.Health = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Health |= ExportSinkHealth(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ErrorMessage", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ErrorMessage = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LatestDataExportTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.LatestDataExportTime == nil {
+				m.LatestDataExportTime = &types.Timestamp{}
+			}
+			if err := m.LatestDataExportTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastHealthCheckTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.LastHealthCheckTime == nil {
+				m.LastHealthCheckTime = &types.Timestamp{}
+			}
+			if err := m.LastHealthCheckTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

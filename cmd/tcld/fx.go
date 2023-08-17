@@ -17,12 +17,12 @@ func fxOptions() fx.Option {
 			app.NewAccountCommand,
 			app.NewNamespaceCommand,
 			app.NewUserCommand,
-			app.NewAPIKeyCommand,
 			app.NewRequestCommand,
 			app.GetLoginClient,
 			app.NewLoginCommand,
 			app.NewLogoutCommand,
 			app.NewCertificatesCommand,
+			app.NewFeatureCommand,
 			func() app.GetNamespaceClientFn {
 				return app.GetNamespaceClient
 			},

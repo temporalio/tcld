@@ -16,8 +16,10 @@ import (
 )
 
 const (
-	VersionHeader = "tcld-version"
-	CommitHeader  = "tcld-commit"
+	VersionHeader                 = "tcld-version"
+	CommitHeader                  = "tcld-commit"
+	TemporalCloudAPIVersionHeader = "temporal-cloud-api-version"
+	TemporalCloudAPIVersion       = "2023-07-26-01"
 )
 
 func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Context, *grpc.ClientConn, error) {
@@ -41,6 +43,7 @@ func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Conte
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, VersionHeader, getVersion())
 	ctx = metadata.AppendToOutgoingContext(ctx, CommitHeader, Commit)
+	ctx = metadata.AppendToOutgoingContext(ctx, TemporalCloudAPIVersionHeader, TemporalCloudAPIVersion)
 
 	return ctx, conn, nil
 }
