@@ -67,6 +67,10 @@ func defaultDialOptions(c *cli.Context, addr *url.URL) ([]grpc.DialOption, error
 	}
 	opts = append(opts, grpc.WithTransportCredentials(transport))
 
+	// Set max message size to 50MB. Messages should never be this large, but useful in a pinch.
+	maxMsgSize := 50 * 1000 * 1000
+	opts = append(opts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxMsgSize), grpc.MaxCallSendMsgSize(maxMsgSize)))
+
 	return opts, nil
 }
 
