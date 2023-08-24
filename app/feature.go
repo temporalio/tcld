@@ -13,6 +13,7 @@ import (
 
 var (
 	ExportFeatureFlag   = "enable-export"
+	APIKeyFeatureFlag   = "enable-apikey"
 	featureflagFileName = "feature.json"
 )
 
@@ -106,6 +107,14 @@ func NewFeatureCommand() (CommandOut, error) {
 					Usage:   "switch export on/off",
 					Action: func(c *cli.Context) error {
 						return toggleFeature(ExportFeatureFlag)
+					},
+				},
+				{
+					Name:    "toggle-apikey",
+					Aliases: []string{"tak"},
+					Usage:   "switch api keys on/off",
+					Action: func(c *cli.Context) error {
+						return toggleFeature(APIKeyFeatureFlag)
 					},
 				},
 				{
