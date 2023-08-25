@@ -5,8 +5,8 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/mail"
+	"os"
 	"strconv"
 	"strings"
 
@@ -353,7 +353,7 @@ func ReadCACerts(ctx *cli.Context) (string, error) {
 	cert := ctx.String(CaCertificateFlagName)
 	if cert == "" {
 		if ctx.Path(CaCertificateFileFlagName) != "" {
-			data, err := ioutil.ReadFile(ctx.Path(CaCertificateFileFlagName))
+			data, err := os.ReadFile(ctx.Path(CaCertificateFileFlagName))
 			if err != nil {
 				return "", err
 			}
@@ -375,7 +375,7 @@ func ReadCertFilters(ctx *cli.Context) ([]byte, error) {
 	var certFilterBytes []byte
 	var err error
 	if len(certFilterFilepath) > 0 {
-		certFilterBytes, err = ioutil.ReadFile(certFilterFilepath)
+		certFilterBytes, err = os.ReadFile(certFilterFilepath)
 		if err != nil {
 			return nil, err
 		}
@@ -752,7 +752,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						var err error
 
 						if fileFlagSet {
-							jsonBytes, err = ioutil.ReadFile(ctx.Path(certificateFilterFileFlagName))
+							jsonBytes, err = os.ReadFile(ctx.Path(certificateFilterFileFlagName))
 							if err != nil {
 								return err
 							}
@@ -826,7 +826,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 						exportFile := ctx.Path(certificateFilterFileFlagName)
 						if exportFile != "" {
-							if err := ioutil.WriteFile(exportFile, []byte(jsonString), 0644); err != nil {
+							if err := os.WriteFile(exportFile, []byte(jsonString), 0644); err != nil {
 								return err
 							}
 						}
@@ -899,7 +899,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						var err error
 
 						if fileFlagSet {
-							jsonBytes, err = ioutil.ReadFile(ctx.Path(certificateFilterFileFlagName))
+							jsonBytes, err = os.ReadFile(ctx.Path(certificateFilterFileFlagName))
 							if err != nil {
 								return err
 							}

@@ -493,12 +493,12 @@ func writeCertificates(ctx *cli.Context, typ string, cert, key []byte, certPath,
 	if !yes {
 		return nil
 	}
-	err = ioutil.WriteFile(certPath, cert, 0644)
+	err = os.WriteFile(certPath, cert, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write end-entity certificate: %w", err)
 
 	}
-	err = ioutil.WriteFile(keyPath, key, 0600)
+	err = os.WriteFile(keyPath, key, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to write end-entity key: %w", err)
 	}
