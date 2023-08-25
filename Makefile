@@ -33,7 +33,7 @@ clean:
 define build
 	@echo "building release for $(1) $(2) $(3)..."
 	@mkdir -p releases
-	@GOOS=$(2) GOARCH=$(3) go build -ldflags "-w $(LINKER_FLAGS)" -o releases/$(1)_$(2)_$(3)$(4) ./cmd/tcld/*.go
+	@GOOS=$(2) GOARCH=$(3) go build -ldflags "-w $(LINKER_FLAGS)" -o releases/$(1)_$(2)_$(3)$(4) ./cmd/tcld
 	@tar -cvzf releases/$(1)_$(2)_$(3).tar.gz releases/$(1)_$(2)_$(3)$(4) &>/dev/null
 endef
 
