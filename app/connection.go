@@ -40,9 +40,12 @@ func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Conte
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to dial `%s`: %v", addr.String(), err)
 	}
+
+	buildInfo := NewBuildInfo()
+
 	ctx := context.Background()
-	ctx = metadata.AppendToOutgoingContext(ctx, VersionHeader, getVersion())
-	ctx = metadata.AppendToOutgoingContext(ctx, CommitHeader, Commit)
+	ctx = metadata.AppendToOutgoingContext(ctx, VersionHeader, buildInfo.Version)
+	ctx = metadata.AppendToOutgoingContext(ctx, CommitHeader, buildInfo.Commit)
 	ctx = metadata.AppendToOutgoingContext(ctx, TemporalCloudAPIVersionHeader, TemporalCloudAPIVersion)
 
 	return ctx, conn, nil

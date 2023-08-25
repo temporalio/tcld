@@ -184,11 +184,12 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			s.NoError(err)
 			md := s.testService.receivedMD
 
+			buildInfo := NewBuildInfo()
 			version := getHeaderValue(md, VersionHeader)
-			s.Equal(getVersion(), version)
+			s.Equal(buildInfo.Version, version)
 
 			commit := getHeaderValue(md, CommitHeader)
-			s.Equal(Commit, commit)
+			s.Equal(buildInfo.Commit, commit)
 
 			_, usingAPIKeys := tc.args[APIKeyFlagName]
 			if usingAPIKeys {

@@ -9,7 +9,7 @@ TAG := $(shell git describe --abbrev=0 --tags ${TAG_COMMIT} 2>/dev/null || true)
 COMMIT := $(shell git rev-parse --short HEAD)
 DATE := $(shell git log -1 --format=%cd --date=format:"%Y%m%d")
 APPPKG := $(PROJECT_ROOT)/app
-LINKER_FLAGS := -X $(APPPKG).BuildDate=$(DATE) -X $(APPPKG).Commit=$(COMMIT) -X $(APPPKG).Version=$(TAG)
+LINKER_FLAGS := -X $(APPPKG).MakeVersion=$(TAG)
 
 
 ALL_SRC := $(shell find . -name "*.go")
@@ -19,7 +19,7 @@ COVER_ROOT := ./.coverage
 SUMMARY_COVER_PROFILE := $(COVER_ROOT)/summary_coverprofile.out
 
 tcld:
-	@go build -ldflags "$(LINKER_FLAGS)" -o tcld ./cmd/tcld/*.go
+	@go build -ldflags "$(LINKER_FLAGS)" -o tcld ./cmd/tcld
 
 bins: clean tcld
 
