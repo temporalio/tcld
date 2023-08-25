@@ -11,7 +11,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/big"
 	"os"
 	"time"
@@ -419,11 +418,11 @@ func NewCertificatesCommand() (CommandOut, error) {
 								return err
 							}
 						}
-						caPem, err := ioutil.ReadFile(ctx.Path(CaCertificateFileFlagName))
+						caPem, err := os.ReadFile(ctx.Path(CaCertificateFileFlagName))
 						if err != nil {
 							return fmt.Errorf("failed to read %s: %w", CaCertificateFileFlagName, err)
 						}
-						caPrivKey, err := ioutil.ReadFile(ctx.Path(caPrivateKeyFileFlagName))
+						caPrivKey, err := os.ReadFile(ctx.Path(caPrivateKeyFileFlagName))
 						if err != nil {
 							return fmt.Errorf("failed to read %s: %w", caPrivateKeyFileFlagName, err)
 						}

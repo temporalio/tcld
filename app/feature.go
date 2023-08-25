@@ -3,7 +3,6 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -34,11 +33,11 @@ func getFeatureFlagConfigFilePath() string {
 func getFeatureFlagsFromConfigFile(featureFlagConfigPath string) ([]FeatureFlag, error) {
 	// create config file if not exist
 	if _, err := os.Stat(featureFlagConfigPath); err != nil {
-		if err := ioutil.WriteFile(featureFlagConfigPath, []byte("[]"), 0644); err != nil {
+		if err := os.WriteFile(featureFlagConfigPath, []byte("[]"), 0644); err != nil {
 			return nil, err
 		}
 	}
-	content, err := ioutil.ReadFile(featureFlagConfigPath)
+	content, err := os.ReadFile(featureFlagConfigPath)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +86,7 @@ func toggleFeatureSaveToPath(feature string, path string) error {
 		return err
 	}
 
-	if err := ioutil.WriteFile(path, output, 0644); err != nil {
+	if err := os.WriteFile(path, output, 0644); err != nil {
 		return err
 	}
 	return nil
