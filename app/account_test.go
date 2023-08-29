@@ -12,10 +12,10 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
-	"github.com/temporalio/tcld/api/temporalcloudapi/accountservicemock/v1"
 	"github.com/temporalio/tcld/protogen/api/account/v1"
 	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
+	accountservicemock "github.com/temporalio/tcld/protogen/apimock/accountservice/v1"
 	"github.com/urfave/cli/v2"
 )
 

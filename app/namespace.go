@@ -87,7 +87,7 @@ var (
 	}
 	kmsArnFlag = &cli.StringFlag{
 		Name:  "kms-arn",
-		Usage: "Provide the ARN of the KMS key to use for encryption. Note: If the KMS ARN needs to be updated, user should modify the created IAM Role accordingly.",
+		Usage: "Provide the ARN of the KMS key to use for encryption. Note: If the KMS ARN needs to be added or updated, user should create the IAM Role with KMS or modify the created IAM Role accordingly. Provided it as part of the input won't help",
 	}
 
 	pageSizeFlag = &cli.IntFlag{
@@ -1161,6 +1161,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						sinkAssumedRoleFlagRequired,
 						s3BucketFlagRequired,
 						RequestIDFlag,
+						kmsArnFlag,
 					},
 					Action: func(ctx *cli.Context) error {
 						awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagRequired.Name))
