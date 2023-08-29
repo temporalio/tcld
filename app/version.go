@@ -59,7 +59,7 @@ func NewBuildInfo() BuildInfo {
 		fmt.Printf("Failed to read debug info\n")
 		return BuildInfo{}
 	}
-	info.Version = strings.SplitAfterN(di.Main.Version, ".", 4)[0]
+	info.Version = di.Main.Version
 
 	if len(di.Main.Version) >= pseudoVersionMinLen {
 		// Used when compiled with `go install`.
