@@ -9,7 +9,7 @@ TAG := $(shell git describe --abbrev=0 --tags ${TAG_COMMIT} 2>/dev/null || true)
 COMMIT := $(shell git rev-parse --short HEAD)
 DATE := $(shell git log -1 --format=%cd --date=format:"%Y%m%d")
 APPPKG := $(PROJECT_ROOT)/app
-LINKER_FLAGS := -X $(APPPKG).MakeVersion=$(TAG)
+LINKER_FLAGS := -X $(APPPKG).buildDate=$(DATE) -X $(APPPKG).commit=$(COMMIT) -X $(APPPKG).version=$(TAG)
 
 
 ALL_SRC := $(shell find . -name "*.go")
