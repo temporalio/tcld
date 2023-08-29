@@ -6,10 +6,10 @@ default: clean test bins
 
 TAG_COMMIT := $(shell git rev-list --abbrev-commit --tags --max-count=1)
 TAG := $(shell git describe --abbrev=0 --tags ${TAG_COMMIT} 2>/dev/null || true)
-COMMIT := $(shell git rev-parse --short HEAD)
-DATE := $(shell git log -1 --format=%cd --date=format:"%Y%m%d")
+COMMIT := $(shell git rev-parse --short=12 HEAD)
+DATE := $(shell git log -1 --format=%cd --date=iso-strict)
 APPPKG := $(PROJECT_ROOT)/app
-LINKER_FLAGS := -X $(APPPKG).buildDate=$(DATE) -X $(APPPKG).commit=$(COMMIT) -X $(APPPKG).version=$(TAG)
+LINKER_FLAGS := -X $(APPPKG).date=$(DATE) -X $(APPPKG).commit=$(COMMIT) -X $(APPPKG).version=$(TAG)
 
 
 ALL_SRC := $(shell find . -name "*.go")

@@ -5,10 +5,8 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/urfave/cli/v2"
-	"golang.org/x/mod/semver"
 )
 
 const (
@@ -17,13 +15,15 @@ const (
 )
 
 var (
-	MakeVersion string
+	date    string
+	commit  string
+	version string
 )
 
 type BuildInfo struct {
-	Commit     string
-	CommitTime time.Time
-	Version    string
+	Date    string // build time or commit time.
+	Commit  string
+	Version string
 }
 
 func NewVersionCommand() (CommandOut, error) {
@@ -37,55 +37,55 @@ func NewVersionCommand() (CommandOut, error) {
 	}}, nil
 }
 
+// NewBuildInfo will populate build info, to make debugging API errors easier,
+// in the three scenarios a user can install tcld:
+//  1. Installed via the makefile or via brew.
+//  2. Installed via `go install`.
+//  3. Compiled on a branch via `go build ./cmd/tcld`
 func NewBuildInfo() BuildInfo {
+	if len(version) > 0 {
+		// Used when built with make or installed with brew.
+		return BuildInfo{
+			Date:    date,
+			Commit:  commit,
+			Version: version,
+		}
+	}
+
 	var info BuildInfo
 
 	di, ok := debug.ReadBuildInfo()
 	if !ok {
 		fmt.Printf("Failed to read debug info\n")
-		return info
+		return BuildInfo{}
 	}
+	info.Version = di.Main.Version
 
-	fmt.Printf("di.Main.Version = %s, MakeVersion = %s\n", di.Main.Version, MakeVersion)
-	if semver.IsValid(di.Main.Version) {
-		info.Version = strings.Split(semver.Canonical(di.Main.Version), "-")[0]
-
+	if len(di.Main.Version) >= pseudoVersionMinLen {
+		// Used when compiled with `go install`.
 		// See https://go.dev/ref/mod#pseudo-versions for more info on the expected string format
-		// when the binary is compiled with go install. We always expect to hit this path if
-		// di.Main.Version is a valid semver.
-		if len(di.Main.Version) >= pseudoVersionMinLen {
-			commitInfoStart := len(di.Main.Version) - pseudoVersionCommitInfoLen
-			split := strings.Split(di.Main.Version[commitInfoStart:], "-")
-			info.Commit = split[1]
+		commitInfoStart := len(di.Main.Version) - pseudoVersionCommitInfoLen
+		split := strings.Split(di.Main.Version[commitInfoStart:], "-")
 
-			at, err := time.Parse("20060102150405", split[0])
-			if err == nil {
-				info.CommitTime = at
-			}
-
-			return info
-		}
+		info.Date = split[0]
+		info.Commit = split[1]
 	} else {
-		info.Version = MakeVersion
-	}
-
-	// Developer build, pull extra info from vcs.
-	var hash, modified string
-
-	for _, setting := range di.Settings {
-		switch setting.Key {
-		case "vcs.revision":
-			hash = setting.Value
-		case "vcs.modified":
-			if v, err := strconv.ParseBool(setting.Value); err == nil && v {
-				modified = "-modified"
+		// Used when built directly from a branch with `go build`.
+		var hash, modified string
+		for _, setting := range di.Settings {
+			switch setting.Key {
+			case "vcs.revision":
+				hash = setting.Value
+			case "vcs.modified":
+				if v, err := strconv.ParseBool(setting.Value); err == nil && v {
+					modified = "-modified"
+				}
+			case "vcs.time":
+				info.Date = setting.Value
 			}
-		case "vcs.time":
-			info.CommitTime, _ = time.Parse(time.RFC3339, setting.Value)
 		}
+		info.Commit = fmt.Sprintf("%s%s", hash, modified)
 	}
-
-	info.Commit = fmt.Sprintf("%s%s", hash, modified)
 
 	return info
 }
