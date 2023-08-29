@@ -42,9 +42,11 @@ func NewBuildInfo() BuildInfo {
 
 	di, ok := debug.ReadBuildInfo()
 	if !ok {
+		fmt.Printf("Failed to read debug info\n")
 		return info
 	}
 
+	fmt.Printf("di.Main.Version = %s, MakeVersion = %s\n", di.Main.Version, MakeVersion)
 	if semver.IsValid(di.Main.Version) {
 		info.Version = strings.Split(semver.Canonical(di.Main.Version), "-")[0]
 
