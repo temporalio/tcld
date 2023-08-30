@@ -71,7 +71,7 @@ func NewBuildInfo() BuildInfo {
 		// Make the time human readable.
 		at, err := time.Parse("20060102150405", split[0])
 		if err == nil {
-			info.Date = at.String()
+			info.Date = at.UTC().Format("2006-01-02T15:04:05.000Z")
 		}
 		info.Commit = split[1]
 	} else {
