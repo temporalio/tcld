@@ -5,6 +5,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/urfave/cli/v2"
 )
@@ -67,7 +68,11 @@ func NewBuildInfo() BuildInfo {
 		commitInfoStart := len(di.Main.Version) - pseudoVersionCommitInfoLen
 		split := strings.Split(di.Main.Version[commitInfoStart:], "-")
 
-		info.Date = split[0]
+		// Make the time human readable.
+		at, err := time.Parse("20060102150405", split[0])
+		if err == nil {
+			info.Date = at.String()
+		}
 		info.Commit = split[1]
 	} else {
 		// Used when built directly from a branch with `go build`.
