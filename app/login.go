@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -104,7 +104,7 @@ func loadLoginConfig(ctx *cli.Context) (OAuthTokenResponse, error) {
 		return tokens, err
 	}
 
-	tokenConfigBytes, err := ioutil.ReadFile(tokenConfig)
+	tokenConfigBytes, err := os.ReadFile(tokenConfig)
 	if err != nil {
 		return tokens, err
 	}
@@ -234,7 +234,7 @@ func postFormRequest(url string, values url.Values, resStruct interface{}) error
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}

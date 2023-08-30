@@ -6,8 +6,8 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
+	"os"
 	"path"
 	"testing"
 
@@ -67,7 +67,7 @@ func (s *ServerConnectionTestSuite) SetupTest() {
 	})
 	require.NoError(s.T(), err)
 
-	err = ioutil.WriteFile(path.Join(s.configDir, tokenFileName), data, 0600)
+	err = os.WriteFile(path.Join(s.configDir, tokenFileName), data, 0600)
 	require.NoError(s.T(), err)
 
 	s.listener = bufconn.Listen(1024 * 1024)
@@ -184,11 +184,12 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			s.NoError(err)
 			md := s.testService.receivedMD
 
+			buildInfo := NewBuildInfo()
 			version := getHeaderValue(md, VersionHeader)
-			s.Equal(getVersion(), version)
+			s.Equal(buildInfo.Version, version)
 
 			commit := getHeaderValue(md, CommitHeader)
-			s.Equal(Commit, commit)
+			s.Equal(buildInfo.Commit, commit)
 
 			_, usingAPIKeys := tc.args[APIKeyFlagName]
 			if usingAPIKeys {
