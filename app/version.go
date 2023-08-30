@@ -52,15 +52,15 @@ func NewBuildInfo() BuildInfo {
 		}
 	}
 
-	var info BuildInfo
-
 	di, ok := debug.ReadBuildInfo()
 	if !ok {
 		fmt.Printf("Failed to read debug info\n")
 		return BuildInfo{}
 	}
-	info.Version = di.Main.Version
 
+	info := BuildInfo{
+		Version: di.Main.Version,
+	}
 	if len(di.Main.Version) >= pseudoVersionMinLen {
 		// Used when compiled with `go install`.
 		// See https://go.dev/ref/mod#pseudo-versions for more info on the expected string format
