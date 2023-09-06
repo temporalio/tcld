@@ -11,6 +11,16 @@ import (
 )
 
 const (
+	// MinSupportedVersion is the minimum tcld version supported by our APIs.
+	// This string must be updated when we deprecate older versions, but should be
+	// done carefully as this will likely break user's current usage of tcld.
+	MinSupportedVersion = "v0.1.3"
+
+	// DefaultVersionString is the version which is sent over if no version was available.
+	// This can happen if a user builds the latest main branch, as the version string provided
+	// to us from Go tooling is `(devel)`
+	DefaultVersionString = MinSupportedVersion + "-no-version-available"
+
 	pseudoVersionMinLen        = len("vX.0.0-yyyymmddhhmmss-abcdefabcdef")
 	pseudoVersionCommitInfoLen = len("yyyymmddhhmmss-abcdefabcdef")
 )
@@ -62,6 +72,10 @@ func NewBuildInfo() BuildInfo {
 	info := BuildInfo{
 		Version: di.Main.Version,
 	}
+	if di.Main.Version == "(devel)" {
+		info.Version = DefaultVersionString
+	}
+
 	if len(di.Main.Version) >= pseudoVersionMinLen {
 		// Used when compiled with `go install`.
 		// See https://go.dev/ref/mod#pseudo-versions for more info on the expected string format
