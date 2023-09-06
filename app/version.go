@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/urfave/cli/v2"
+	"golang.org/x/mod/semver"
 )
 
 const (
@@ -72,7 +73,7 @@ func NewBuildInfo() BuildInfo {
 	info := BuildInfo{
 		Version: di.Main.Version,
 	}
-	if di.Main.Version == "(devel)" {
+	if !semver.IsValid(di.Main.Version) {
 		info.Version = DefaultVersionString
 	}
 
