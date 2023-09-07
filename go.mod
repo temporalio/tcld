@@ -13,7 +13,7 @@ require (
 	github.com/urfave/cli/v2 v2.25.3
 	go.uber.org/fx v1.19.2
 	go.uber.org/multierr v1.6.0
-	golang.org/x/mod v0.8.0
+	golang.org/x/mod v0.12.0
 	google.golang.org/grpc v1.54.0
 )
 
