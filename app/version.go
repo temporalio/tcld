@@ -19,8 +19,8 @@ const (
 
 	// DefaultVersionString is the version which is sent over if no version was available.
 	// This can happen if a user builds the latest main branch, as the version string provided
-	// to us from Go tooling is `(devel)`
-	DefaultVersionString = MinSupportedVersion + "-no-version-available"
+	// to us from Go tooling is `(devel)`.
+	DefaultVersionString = MinSupportedVersion + "+no-version-available"
 
 	pseudoVersionMinLen        = len("vX.0.0-yyyymmddhhmmss-abcdefabcdef")
 	pseudoVersionCommitInfoLen = len("yyyymmddhhmmss-abcdefabcdef")
