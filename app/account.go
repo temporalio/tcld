@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 
 	"github.com/temporalio/tcld/protogen/api/account/v1"
 	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
@@ -14,6 +15,11 @@ import (
 type AccountClient struct {
 	client accountservice.AccountServiceClient
 	ctx    context.Context
+}
+
+type regionInfo struct {
+	CloudProviderRegion string
+	CloudProvider       string
 }
 
 func NewAccountClient(ctx context.Context, conn *grpc.ClientConn) *AccountClient {
@@ -45,6 +51,31 @@ func (c *AccountClient) getAccount() (*account.Account, error) {
 	}
 
 	return res.Account, nil
+}
+
+func (c *AccountClient) listRegions() ([]regionInfo, error) {
+	resp, err := c.client.GetRegions(c.ctx, &accountservice.GetRegionsRequest{})
+	if err != nil {
+		return nil, fmt.Errorf("unable to get regions: %w", err)
+	}
+
+	var regions []regionInfo
+	for _, r := range resp.Regions {
+		regions = append(regions, regionInfo{
+			CloudProviderRegion: r.GetName(),
+			CloudProvider:       r.GetCloudProvider(),
+		})
+	}
+
+	sort.SliceStable(regions, func(i, j int) bool {
+		if regions[i].CloudProvider < regions[j].CloudProvider {
+			return true
+		}
+
+		return regions[i].CloudProviderRegion < regions[j].CloudProviderRegion
+	})
+
+	return regions, nil
 }
 
 func (c *AccountClient) updateAccount(ctx *cli.Context, a *account.Account) error {
@@ -105,6 +136,18 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 							return err
 						}
 						return PrintProto(n)
+					},
+				},
+				{
+					Name:    "list-regions",
+					Usage:   "Lists all regions where the account can provision namespaces",
+					Aliases: []string{"l"},
+					Action: func(ctx *cli.Context) error {
+						regionInfos, err := c.listRegions()
+						if err != nil {
+							return err
+						}
+						return PrintObj(regionInfos)
 					},
 				},
 				{
