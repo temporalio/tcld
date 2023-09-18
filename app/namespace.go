@@ -47,20 +47,7 @@ var (
 		Usage:   "The fingerprint of to the ca certificate",
 		Aliases: []string{"fp"},
 	}
-	namespaceRegions = []string{
-		"ap-northeast-1",
-		"ap-south-1",
-		"ap-southeast-1",
-		"ap-southeast-2",
-		"ca-central-1",
-		"eu-central-1",
-		"eu-west-1",
-		"eu-west-2",
-		"sa-east-1",
-		"us-east-1",
-		"us-east-2",
-		"us-west-2",
-	}
+
 	sinkNameFlag = &cli.StringFlag{
 		Name:     "sink-name",
 		Usage:    "Provide a name for the export sink",
@@ -407,7 +394,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 				&cli.StringFlag{
 					Name:     namespaceRegionFlagName,
-					Usage:    fmt.Sprintf("Create namespace in this region; valid regions are: %v", namespaceRegions),
+					Usage:    "Create namespace in specified region; see 'tcld account list-regions' to get a list of available regions for your account",
 					Aliases:  []string{"re"},
 					Required: true,
 				},
@@ -449,13 +436,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Namespace: ctx.String(NamespaceFlagName),
 				}
 
-				// region (required)
-				region := ctx.String(namespaceRegionFlagName)
-				if err := validateNamespaceRegion(region); err != nil {
-					return err
-				}
 				n.Spec = &namespace.NamespaceSpec{
-					Region: region,
+					Region: ctx.String(namespaceRegionFlagName),
 				}
 
 				// certs (required)
@@ -1453,13 +1435,4 @@ func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) 
 	}
 
 	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
-}
-
-func validateNamespaceRegion(region string) error {
-	for _, r := range namespaceRegions {
-		if r == region {
-			return nil
-		}
-	}
-	return fmt.Errorf("namespace region: %s not allowed", region)
 }
