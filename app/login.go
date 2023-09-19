@@ -10,15 +10,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/temporalio/tcld/services"
+	"golang.org/x/oauth2"
 
 	"github.com/urfave/cli/v2"
-)
-
-const (
-	scope = "openid profile user"
 )
 
 var (
@@ -61,23 +57,6 @@ type (
 	LoginClient struct {
 		loginService services.LoginService
 	}
-
-	OAuthDeviceCodeResponse struct {
-		DeviceCode              string `json:"device_code"`
-		UserCode                string `json:"user_code"`
-		VerificationURI         string `json:"verification_uri"`
-		VerificationURIComplete string `json:"verification_uri_complete"`
-		ExpiresIn               int    `json:"expires_in"`
-		Interval                int    `json:"interval"`
-	}
-
-	OAuthTokenResponse struct {
-		AccessToken  string `json:"access_token"`
-		RefreshToken string `json:"refresh_token"`
-		IDToken      string `json:"id_token"`
-		TokenType    string `json:"token_type"`
-		ExpiresIn    int    `json:"expires_in"`
-	}
 )
 
 func getTokenConfigPath(ctx *cli.Context) string {
@@ -86,34 +65,38 @@ func getTokenConfigPath(ctx *cli.Context) string {
 }
 
 // TODO: support login config on windows
-func loadLoginConfig(ctx *cli.Context) (OAuthTokenResponse, error) {
-
-	tokens := OAuthTokenResponse{}
+func loadLoginConfig(ctx *cli.Context) (oauth2.TokenSource, error) {
 	configDir := ctx.Path(ConfigDirFlagName)
 	// Create config dir if it does not exist
 	if err := os.MkdirAll(configDir, 0700); err != nil {
-		return tokens, err
+		return nil, err
 	}
 
 	tokenConfig := getTokenConfigPath(ctx)
 	if _, err := os.Stat(tokenConfig); err != nil {
 		// Skip if file does not exist
 		if errors.Is(err, os.ErrNotExist) {
-			return tokens, nil
+			return nil, nil
 		}
-		return tokens, err
+		return nil, err
 	}
 
 	tokenConfigBytes, err := os.ReadFile(tokenConfig)
 	if err != nil {
-		return tokens, err
+		return nil, err
 	}
 
-	if err := json.Unmarshal(tokenConfigBytes, &tokens); err != nil {
-		return tokens, err
+	var token oauth2.Token
+	if err := json.Unmarshal(tokenConfigBytes, &token); err != nil {
+		return nil, err
 	}
 
-	return tokens, nil
+	oauthConfig, err := oauthConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return oauthConfig.TokenSource(ctx.Context, &token), nil
 }
 
 func parseURL(s string) (*url.URL, error) {
@@ -135,26 +118,26 @@ func parseURL(s string) (*url.URL, error) {
 }
 
 func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, clientID string, disablePopUp bool) error {
-	// Get device code
-	domainURL, err := parseURL(domain)
+	config, err := oauthConfig(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve oauth2 config: %w", err)
+	}
+
+	fmt.Printf("Oauth config is %v\n", config)
+
+	resp, err := config.DeviceAuth(ctx.Context, oauth2.SetAuthURLParam("audience", audience))
+	if err != nil {
+		return fmt.Errorf("failed to perform device auth: %w", err)
+	}
+
+	fmt.Printf("Received device response is %v\n", resp)
+
+	domainURL, err := parseURL(ctx.String("domain"))
 	if err != nil {
 		return err
 	}
 
-	codeResp := OAuthDeviceCodeResponse{}
-	if err := postFormRequest(
-		domainURL.JoinPath("oauth", "device", "code").String(),
-		url.Values{
-			"client_id": {clientID},
-			"scope":     {scope},
-			"audience":  {audience},
-		},
-		&codeResp,
-	); err != nil {
-		return err
-	}
-
-	verificationURL, err := parseURL(codeResp.VerificationURIComplete)
+	verificationURL, err := parseURL(resp.VerificationURIComplete)
 	if err != nil {
 		return fmt.Errorf("failed to parse verification URL: %w", err)
 	} else if verificationURL.Hostname() != domainURL.Hostname() {
@@ -171,35 +154,16 @@ func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, cl
 		}
 	}
 
-	// According to RFC, we should set a default polling interval if not provided.
-	// https://tools.ietf.org/html/draft-ietf-oauth-device-flow-07#section-3.5
-	if codeResp.Interval == 0 {
-		codeResp.Interval = 10
+	token, err := config.DeviceAccessToken(ctx.Context, resp)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve access token: %w", err)
 	}
+	fmt.Println("Successfully logged in!")
 
-	// Get access token
-	tokenResp := OAuthTokenResponse{}
-	for len(tokenResp.AccessToken) == 0 {
-		time.Sleep(time.Duration(codeResp.Interval) * time.Second)
-
-		if err := postFormRequest(
-			domainURL.JoinPath("oauth", "token").String(),
-			url.Values{
-				"grant_type":  {"urn:ietf:params:oauth:grant-type:device_code"},
-				"device_code": {codeResp.DeviceCode},
-				"client_id":   {clientID},
-			},
-			&tokenResp,
-		); err != nil {
-			return err
-		}
-	}
-
-	tokenRespJson, err := FormatJson(tokenResp)
+	tokenRespJson, err := FormatJson(token)
 	if err != nil {
 		return err
 	}
-	fmt.Println("Successfully logged in!")
 
 	// Save token info locally
 	return c.loginService.WriteToConfigFile(getTokenConfigPath(ctx), tokenRespJson)
@@ -239,4 +203,21 @@ func postFormRequest(url string, values url.Values, resStruct interface{}) error
 		return err
 	}
 	return json.Unmarshal(body, &resStruct)
+}
+
+func oauthConfig(ctx *cli.Context) (oauth2.Config, error) {
+	domainURL, err := parseURL(ctx.String("domain"))
+	if err != nil {
+		return oauth2.Config{}, err
+	}
+
+	return oauth2.Config{
+		ClientID: ctx.String("client-id"),
+		Endpoint: oauth2.Endpoint{
+			DeviceAuthURL: domainURL.JoinPath("oauth", "device", "code").String(),
+			TokenURL:      domainURL.JoinPath("oauth", "token").String(),
+			AuthStyle:     oauth2.AuthStyleInParams,
+		},
+		Scopes: []string{"openid", "profile", "user", "offline_access"},
+	}, nil
 }

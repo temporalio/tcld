@@ -2,14 +2,17 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/services"
 	"github.com/urfave/cli/v2"
+	"golang.org/x/oauth2"
 )
 
 func TestLogin(t *testing.T) {
@@ -45,6 +48,7 @@ func (l *LoginTestSuite) SetupTest() {
 
 func (l *LoginTestSuite) registerPath(path string, response string) {
 	l.mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, err := w.Write([]byte(response))
 		if err != nil {
@@ -96,36 +100,39 @@ func (l *LoginTestSuite) AfterTest(_, _ string) {
 }
 
 func validCodeResponse(t *testing.T, domain string) string {
-	resp := OAuthDeviceCodeResponse{
+	resp := oauth2.DeviceAuthResponse{
 		DeviceCode:              "ABCD-EFGH",
 		UserCode:                "ABCD-EFGH",
 		VerificationURI:         domain,
 		VerificationURIComplete: domain,
-		ExpiresIn:               30,
+		Expiry:                  time.Now().Add(24 * time.Hour),
 		Interval:                1,
 	}
 
-	json, err := json.Marshal(resp)
+	data, err := json.Marshal(resp)
 	if err != nil {
 		t.Fatalf("failed to marshal device code response: %v", err)
 	}
 
-	return string(json)
+	fmt.Printf("Returning code response %v\n", string(data))
+
+	return string(data)
 }
 
 func validTokenResponse(t *testing.T, domain string) string {
-	resp := OAuthTokenResponse{
+	resp := oauth2.Token{
 		AccessToken:  "EabWErgdh",
 		RefreshToken: "eWKjhgT",
-		IDToken:      "iJktYuVk",
 		TokenType:    "Bearer",
-		ExpiresIn:    3600,
+		Expiry:       time.Now().Add(24 * time.Hour),
 	}
 
-	json, err := json.Marshal(resp)
+	data, err := json.Marshal(resp)
 	if err != nil {
 		t.Fatalf("failed to marshal device code response: %v", err)
 	}
 
-	return string(json)
+	fmt.Printf("Returning token response %v\n", string(data))
+
+	return string(data)
 }

@@ -88,14 +88,14 @@ func newRPCCredential(c *cli.Context) (credentials.PerRPCCredentials, error) {
 		)
 	}
 
-	tokens, err := loadLoginConfig(c)
+	tokenSource, err := loadLoginConfig(c)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(tokens.AccessToken) > 0 {
+	if tokenSource != nil {
 		return oauth.NewCredential(
-			tokens.AccessToken,
+			tokenSource,
 			oauth.WithInsecureTransport(insecure),
 		)
 	}

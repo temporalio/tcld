@@ -4,14 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/grpc/credentials"
+	"github.com/temporalio/tcld/app/credentials"
+	"golang.org/x/oauth2"
+	grpccreds "google.golang.org/grpc/credentials"
 )
-
-const (
-	Header = "authorization"
-)
-
-var _ credentials.PerRPCCredentials = (*Credential)(nil)
 
 type Option = func(c *Credential)
 
@@ -22,17 +18,17 @@ func WithInsecureTransport(insecure bool) Option {
 }
 
 type Credential struct {
-	accessToken            string // keep unexported to prevent accidental leakage of the token.
+	source                 oauth2.TokenSource
 	allowInsecureTransport bool
 }
 
-func NewCredential(accessToken string, opts ...Option) (Credential, error) {
-	if len(accessToken) == 0 {
-		return Credential{}, fmt.Errorf("an empty access token was provided")
+func NewCredential(source oauth2.TokenSource, opts ...Option) (Credential, error) {
+	if source == nil {
+		return Credential{}, fmt.Errorf("a nil token source was provided")
 	}
 
 	c := Credential{
-		accessToken: accessToken,
+		source: source,
 	}
 	for _, opt := range opts {
 		opt(&c)
@@ -42,20 +38,25 @@ func NewCredential(accessToken string, opts ...Option) (Credential, error) {
 }
 
 func (c Credential) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	ri, ok := credentials.RequestInfoFromContext(ctx)
+	ri, ok := grpccreds.RequestInfoFromContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("failed to retrieve request info from context")
 	}
 
 	if !c.allowInsecureTransport {
 		// Ensure the bearer token is sent over a secure connection - meaning TLS.
-		if err := credentials.CheckSecurityLevel(ri.AuthInfo, credentials.PrivacyAndIntegrity); err != nil {
-			return nil, fmt.Errorf("the connection's transport security level is too low for OAuth: %v", err)
+		if err := grpccreds.CheckSecurityLevel(ri.AuthInfo, grpccreds.PrivacyAndIntegrity); err != nil {
+			return nil, fmt.Errorf("the connection's transport security level is too low for OAuth: %w", err)
 		}
 	}
 
+	token, err := c.source.Token()
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve token from token source: %w", err)
+	}
+
 	return map[string]string{
-		Header: c.token(),
+		credentials.AuthorizationHeader: fmt.Sprintf("%s %s", token.Type(), token.AccessToken),
 	}, nil
 }
 
@@ -63,6 +64,4 @@ func (c Credential) RequireTransportSecurity() bool {
 	return !c.allowInsecureTransport
 }
 
-func (c Credential) token() string {
-	return "Bearer " + c.accessToken
-}
+var _ grpccreds.PerRPCCredentials = (*Credential)(nil)

@@ -9,16 +9,18 @@ import (
 	"net"
 	"os"
 	"path"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"github.com/temporalio/tcld/app/credentials/apikey"
-	"github.com/temporalio/tcld/app/credentials/oauth"
+	"github.com/temporalio/tcld/app/credentials"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	"github.com/temporalio/tcld/protogen/api/requestservice/v1"
 	"github.com/urfave/cli/v2"
 
+	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -39,6 +41,8 @@ type testServer struct {
 func (s *testServer) GetRequestStatus(ctx context.Context, req *requestservice.GetRequestStatusRequest) (*requestservice.GetRequestStatusResponse, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
 	s.receivedMD = md.Copy()
+
+	fmt.Printf("Received md is %#v\n", md)
 
 	return &requestservice.GetRequestStatusResponse{
 		RequestStatus: &request.RequestStatus{
@@ -62,8 +66,9 @@ func TestServerConnection(t *testing.T) {
 
 func (s *ServerConnectionTestSuite) SetupTest() {
 	s.configDir = s.T().TempDir()
-	data, err := json.Marshal(OAuthTokenResponse{
+	data, err := json.Marshal(oauth2.Token{
 		AccessToken: testAccessToken,
+		Expiry:      time.Now().Add(24 * time.Hour),
 	})
 	require.NoError(s.T(), err)
 
@@ -87,10 +92,10 @@ func (s *ServerConnectionTestSuite) TeardownTest() {
 
 func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 	testcases := []struct {
-		name            string
-		args            map[string]string
-		expectedHeaders map[string]string
-		expectedErr     error
+		name          string
+		args          map[string]string
+		expectedToken string
+		expectedErr   error
 	}{
 		{
 			name: "ErrorInvalidHostname",
@@ -119,9 +124,7 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			args: map[string]string{
 				InsecureConnectionFlagName: "", // required for bufconn
 			},
-			expectedHeaders: map[string]string{
-				oauth.Header: "Bearer " + testAccessToken,
-			},
+			expectedToken: testAccessToken,
 		},
 		{
 			name: "APIKeySucess",
@@ -129,9 +132,7 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 				InsecureConnectionFlagName: "", // required for bufconn
 				APIKeyFlagName:             testAPIKey,
 			},
-			expectedHeaders: map[string]string{
-				apikey.AuthorizationHeader: "Bearer " + testAPIKey,
-			},
+			expectedToken: testAPIKey,
 		},
 	}
 	for _, tc := range testcases {
@@ -191,14 +192,11 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			commit := getHeaderValue(md, CommitHeader)
 			s.Equal(buildInfo.Commit, commit)
 
-			_, usingAPIKeys := tc.args[APIKeyFlagName]
-			if usingAPIKeys {
-				authHeader := getHeaderValue(md, apikey.AuthorizationHeader)
-				s.Equal("Bearer "+testAPIKey, authHeader)
-			} else {
-				token := getHeaderValue(md, oauth.Header)
-				s.Equal("Bearer "+testAccessToken, token)
-			}
+			auth := strings.SplitN(getHeaderValue(md, credentials.AuthorizationHeader), " ", 2)
+			require.Len(s.T(), auth, 2)
+
+			s.Equal(strings.ToLower(credentials.AuthorizationBearer), strings.ToLower(auth[0]))
+			s.Equal(auth[1], tc.expectedToken)
 		})
 	}
 }
