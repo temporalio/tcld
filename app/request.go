@@ -141,8 +141,7 @@ loop:
 	for {
 		select {
 		case <-timer.C:
-			return fmt.Errorf("timed out waiting for request to complete, namespace=%s, requestID=%s, timeout=%s",
-				ctx.String(NamespaceFlagName),
+			return fmt.Errorf("timed out waiting for request to complete, requestID=%s, timeout=%s",
 				requestID,
 				ctx.Duration(RequestTimeoutFlagName),
 			)
@@ -163,7 +162,7 @@ loop:
 				return fmt.Errorf("request was cancelled: %s", status.FailureReason)
 			}
 			if operation != "" {
-				fmt.Fprintf(writer, "waiting for %s operation (requestId='%s') to finish, current state: %s\n",
+				fmt.Fprintf(writer, "waiting for %s operation (id='%s') to finish, current state: %s\n",
 					operation, requestID, request.State_name[int32(status.State)])
 			} else {
 				fmt.Fprintf(writer, "waiting for request with id='%s' to finish, current state: %s\n",

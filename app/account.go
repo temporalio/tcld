@@ -212,7 +212,6 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn, getRequestClientFn
 									return err
 								}
 								return r.HandleRequestStatus(ctx, "disable metrics", status)
-
 							},
 						},
 						{
