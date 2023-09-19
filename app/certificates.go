@@ -11,7 +11,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/big"
 	"os"
 	"time"
@@ -141,8 +140,9 @@ func generateCACertificate(
 }
 
 type generateEndEntityCertificateInput struct {
-	Organization     string `validate:"required"`
-	OrganizationUnit string
+	Organization       string `validate:"required"`
+	OrganizationalUnit string
+	CommonName         string
 
 	ValidityPeriod  time.Duration
 	CaPem           []byte `validate:"required"`
@@ -204,7 +204,8 @@ func generateEndEntityCertificate(
 	}
 	subject := pkix.Name{
 		Organization:       []string{input.Organization},
-		OrganizationalUnit: []string{input.OrganizationUnit},
+		OrganizationalUnit: []string{input.OrganizationalUnit},
+		CommonName:         input.CommonName,
 	}
 
 	now := time.Now().UTC()
@@ -366,7 +367,11 @@ func NewCertificatesCommand() (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:  "organization-unit",
-							Usage: "The name of the organization unit (optional)",
+							Usage: "The name of the organizational unit (optional)",
+						},
+						&cli.StringFlag{
+							Name:  "common-name",
+							Usage: "The common name (optional)",
 						},
 						&cli.StringFlag{
 							Name:    "validity-period",
@@ -413,17 +418,18 @@ func NewCertificatesCommand() (CommandOut, error) {
 								return err
 							}
 						}
-						caPem, err := ioutil.ReadFile(ctx.Path(CaCertificateFileFlagName))
+						caPem, err := os.ReadFile(ctx.Path(CaCertificateFileFlagName))
 						if err != nil {
 							return fmt.Errorf("failed to read %s: %w", CaCertificateFileFlagName, err)
 						}
-						caPrivKey, err := ioutil.ReadFile(ctx.Path(caPrivateKeyFileFlagName))
+						caPrivKey, err := os.ReadFile(ctx.Path(caPrivateKeyFileFlagName))
 						if err != nil {
 							return fmt.Errorf("failed to read %s: %w", caPrivateKeyFileFlagName, err)
 						}
 						certPem, certPrivKey, err := generateEndEntityCertificate(generateEndEntityCertificateInput{
-							Organization:     ctx.String("organization"),
-							OrganizationUnit: ctx.String("organization-unit"),
+							Organization:       ctx.String("organization"),
+							OrganizationalUnit: ctx.String("organization-unit"),
+							CommonName:         ctx.String("common-name"),
 
 							ValidityPeriod:  validityPeriod,
 							CaPem:           caPem,
@@ -487,12 +493,12 @@ func writeCertificates(ctx *cli.Context, typ string, cert, key []byte, certPath,
 	if !yes {
 		return nil
 	}
-	err = ioutil.WriteFile(certPath, cert, 0644)
+	err = os.WriteFile(certPath, cert, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write end-entity certificate: %w", err)
 
 	}
-	err = ioutil.WriteFile(keyPath, key, 0600)
+	err = os.WriteFile(keyPath, key, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to write end-entity key: %w", err)
 	}

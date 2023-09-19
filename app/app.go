@@ -27,8 +27,16 @@ func NewApp(params AppParams) (*cli.App, error) {
 			ServerFlag,
 			ConfigDirFlag,
 			AutoConfirmFlag,
+			APIKeyFlag,
+			InsecureConnectionFlag,
+			EnableDebugLogsFlag,
 		},
 	}
-	app.Commands = params.Commands
+	for _, c := range params.Commands {
+		if !IsFeatureEnabled(APIKeyFeatureFlag) && c.Name == "apikey" {
+			continue
+		}
+		app.Commands = append(app.Commands, c)
+	}
 	return app, nil
 }

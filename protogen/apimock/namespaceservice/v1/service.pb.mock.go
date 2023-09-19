@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	v1 "github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
+	namespaceservice "github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 	grpc "google.golang.org/grpc"
 )
 
@@ -36,15 +36,35 @@ func (m *MockNamespaceServiceClient) EXPECT() *MockNamespaceServiceClientMockRec
 	return m.recorder
 }
 
+// CreateExportSink mocks base method.
+func (m *MockNamespaceServiceClient) CreateExportSink(ctx context.Context, in *namespaceservice.CreateExportSinkRequest, opts ...grpc.CallOption) (*namespaceservice.CreateExportSinkResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateExportSink", varargs...)
+	ret0, _ := ret[0].(*namespaceservice.CreateExportSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateExportSink indicates an expected call of CreateExportSink.
+func (mr *MockNamespaceServiceClientMockRecorder) CreateExportSink(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateExportSink", reflect.TypeOf((*MockNamespaceServiceClient)(nil).CreateExportSink), varargs...)
+}
+
 // CreateNamespace mocks base method.
-func (m *MockNamespaceServiceClient) CreateNamespace(ctx context.Context, in *v1.CreateNamespaceRequest, opts ...grpc.CallOption) (*v1.CreateNamespaceResponse, error) {
+func (m *MockNamespaceServiceClient) CreateNamespace(ctx context.Context, in *namespaceservice.CreateNamespaceRequest, opts ...grpc.CallOption) (*namespaceservice.CreateNamespaceResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "CreateNamespace", varargs...)
-	ret0, _ := ret[0].(*v1.CreateNamespaceResponse)
+	ret0, _ := ret[0].(*namespaceservice.CreateNamespaceResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -56,15 +76,35 @@ func (mr *MockNamespaceServiceClientMockRecorder) CreateNamespace(ctx, in interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNamespace", reflect.TypeOf((*MockNamespaceServiceClient)(nil).CreateNamespace), varargs...)
 }
 
+// DeleteExportSink mocks base method.
+func (m *MockNamespaceServiceClient) DeleteExportSink(ctx context.Context, in *namespaceservice.DeleteExportSinkRequest, opts ...grpc.CallOption) (*namespaceservice.DeleteExportSinkResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteExportSink", varargs...)
+	ret0, _ := ret[0].(*namespaceservice.DeleteExportSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteExportSink indicates an expected call of DeleteExportSink.
+func (mr *MockNamespaceServiceClientMockRecorder) DeleteExportSink(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteExportSink", reflect.TypeOf((*MockNamespaceServiceClient)(nil).DeleteExportSink), varargs...)
+}
+
 // DeleteNamespace mocks base method.
-func (m *MockNamespaceServiceClient) DeleteNamespace(ctx context.Context, in *v1.DeleteNamespaceRequest, opts ...grpc.CallOption) (*v1.DeleteNamespaceResponse, error) {
+func (m *MockNamespaceServiceClient) DeleteNamespace(ctx context.Context, in *namespaceservice.DeleteNamespaceRequest, opts ...grpc.CallOption) (*namespaceservice.DeleteNamespaceResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "DeleteNamespace", varargs...)
-	ret0, _ := ret[0].(*v1.DeleteNamespaceResponse)
+	ret0, _ := ret[0].(*namespaceservice.DeleteNamespaceResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -76,15 +116,55 @@ func (mr *MockNamespaceServiceClientMockRecorder) DeleteNamespace(ctx, in interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNamespace", reflect.TypeOf((*MockNamespaceServiceClient)(nil).DeleteNamespace), varargs...)
 }
 
+// GetExportSink mocks base method.
+func (m *MockNamespaceServiceClient) GetExportSink(ctx context.Context, in *namespaceservice.GetExportSinkRequest, opts ...grpc.CallOption) (*namespaceservice.GetExportSinkResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetExportSink", varargs...)
+	ret0, _ := ret[0].(*namespaceservice.GetExportSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetExportSink indicates an expected call of GetExportSink.
+func (mr *MockNamespaceServiceClientMockRecorder) GetExportSink(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExportSink", reflect.TypeOf((*MockNamespaceServiceClient)(nil).GetExportSink), varargs...)
+}
+
+// GetExportSinks mocks base method.
+func (m *MockNamespaceServiceClient) GetExportSinks(ctx context.Context, in *namespaceservice.GetExportSinksRequest, opts ...grpc.CallOption) (*namespaceservice.GetExportSinksResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetExportSinks", varargs...)
+	ret0, _ := ret[0].(*namespaceservice.GetExportSinksResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetExportSinks indicates an expected call of GetExportSinks.
+func (mr *MockNamespaceServiceClientMockRecorder) GetExportSinks(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExportSinks", reflect.TypeOf((*MockNamespaceServiceClient)(nil).GetExportSinks), varargs...)
+}
+
 // GetNamespace mocks base method.
-func (m *MockNamespaceServiceClient) GetNamespace(ctx context.Context, in *v1.GetNamespaceRequest, opts ...grpc.CallOption) (*v1.GetNamespaceResponse, error) {
+func (m *MockNamespaceServiceClient) GetNamespace(ctx context.Context, in *namespaceservice.GetNamespaceRequest, opts ...grpc.CallOption) (*namespaceservice.GetNamespaceResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetNamespace", varargs...)
-	ret0, _ := ret[0].(*v1.GetNamespaceResponse)
+	ret0, _ := ret[0].(*namespaceservice.GetNamespaceResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -97,14 +177,14 @@ func (mr *MockNamespaceServiceClientMockRecorder) GetNamespace(ctx, in interface
 }
 
 // GetNamespaces mocks base method.
-func (m *MockNamespaceServiceClient) GetNamespaces(ctx context.Context, in *v1.GetNamespacesRequest, opts ...grpc.CallOption) (*v1.GetNamespacesResponse, error) {
+func (m *MockNamespaceServiceClient) GetNamespaces(ctx context.Context, in *namespaceservice.GetNamespacesRequest, opts ...grpc.CallOption) (*namespaceservice.GetNamespacesResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetNamespaces", varargs...)
-	ret0, _ := ret[0].(*v1.GetNamespacesResponse)
+	ret0, _ := ret[0].(*namespaceservice.GetNamespacesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -116,15 +196,35 @@ func (mr *MockNamespaceServiceClientMockRecorder) GetNamespaces(ctx, in interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaces", reflect.TypeOf((*MockNamespaceServiceClient)(nil).GetNamespaces), varargs...)
 }
 
+// ListExportSinks mocks base method.
+func (m *MockNamespaceServiceClient) ListExportSinks(ctx context.Context, in *namespaceservice.ListExportSinksRequest, opts ...grpc.CallOption) (*namespaceservice.ListExportSinksResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ListExportSinks", varargs...)
+	ret0, _ := ret[0].(*namespaceservice.ListExportSinksResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListExportSinks indicates an expected call of ListExportSinks.
+func (mr *MockNamespaceServiceClientMockRecorder) ListExportSinks(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListExportSinks", reflect.TypeOf((*MockNamespaceServiceClient)(nil).ListExportSinks), varargs...)
+}
+
 // ListNamespaces mocks base method.
-func (m *MockNamespaceServiceClient) ListNamespaces(ctx context.Context, in *v1.ListNamespacesRequest, opts ...grpc.CallOption) (*v1.ListNamespacesResponse, error) {
+func (m *MockNamespaceServiceClient) ListNamespaces(ctx context.Context, in *namespaceservice.ListNamespacesRequest, opts ...grpc.CallOption) (*namespaceservice.ListNamespacesResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "ListNamespaces", varargs...)
-	ret0, _ := ret[0].(*v1.ListNamespacesResponse)
+	ret0, _ := ret[0].(*namespaceservice.ListNamespacesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -137,14 +237,14 @@ func (mr *MockNamespaceServiceClientMockRecorder) ListNamespaces(ctx, in interfa
 }
 
 // RenameCustomSearchAttribute mocks base method.
-func (m *MockNamespaceServiceClient) RenameCustomSearchAttribute(ctx context.Context, in *v1.RenameCustomSearchAttributeRequest, opts ...grpc.CallOption) (*v1.RenameCustomSearchAttributeResponse, error) {
+func (m *MockNamespaceServiceClient) RenameCustomSearchAttribute(ctx context.Context, in *namespaceservice.RenameCustomSearchAttributeRequest, opts ...grpc.CallOption) (*namespaceservice.RenameCustomSearchAttributeResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "RenameCustomSearchAttribute", varargs...)
-	ret0, _ := ret[0].(*v1.RenameCustomSearchAttributeResponse)
+	ret0, _ := ret[0].(*namespaceservice.RenameCustomSearchAttributeResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -156,15 +256,35 @@ func (mr *MockNamespaceServiceClientMockRecorder) RenameCustomSearchAttribute(ct
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RenameCustomSearchAttribute", reflect.TypeOf((*MockNamespaceServiceClient)(nil).RenameCustomSearchAttribute), varargs...)
 }
 
+// UpdateExportSink mocks base method.
+func (m *MockNamespaceServiceClient) UpdateExportSink(ctx context.Context, in *namespaceservice.UpdateExportSinkRequest, opts ...grpc.CallOption) (*namespaceservice.UpdateExportSinkResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateExportSink", varargs...)
+	ret0, _ := ret[0].(*namespaceservice.UpdateExportSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateExportSink indicates an expected call of UpdateExportSink.
+func (mr *MockNamespaceServiceClientMockRecorder) UpdateExportSink(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateExportSink", reflect.TypeOf((*MockNamespaceServiceClient)(nil).UpdateExportSink), varargs...)
+}
+
 // UpdateNamespace mocks base method.
-func (m *MockNamespaceServiceClient) UpdateNamespace(ctx context.Context, in *v1.UpdateNamespaceRequest, opts ...grpc.CallOption) (*v1.UpdateNamespaceResponse, error) {
+func (m *MockNamespaceServiceClient) UpdateNamespace(ctx context.Context, in *namespaceservice.UpdateNamespaceRequest, opts ...grpc.CallOption) (*namespaceservice.UpdateNamespaceResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "UpdateNamespace", varargs...)
-	ret0, _ := ret[0].(*v1.UpdateNamespaceResponse)
+	ret0, _ := ret[0].(*namespaceservice.UpdateNamespaceResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -199,11 +319,26 @@ func (m *MockNamespaceServiceServer) EXPECT() *MockNamespaceServiceServerMockRec
 	return m.recorder
 }
 
+// CreateExportSink mocks base method.
+func (m *MockNamespaceServiceServer) CreateExportSink(arg0 context.Context, arg1 *namespaceservice.CreateExportSinkRequest) (*namespaceservice.CreateExportSinkResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateExportSink", arg0, arg1)
+	ret0, _ := ret[0].(*namespaceservice.CreateExportSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateExportSink indicates an expected call of CreateExportSink.
+func (mr *MockNamespaceServiceServerMockRecorder) CreateExportSink(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateExportSink", reflect.TypeOf((*MockNamespaceServiceServer)(nil).CreateExportSink), arg0, arg1)
+}
+
 // CreateNamespace mocks base method.
-func (m *MockNamespaceServiceServer) CreateNamespace(arg0 context.Context, arg1 *v1.CreateNamespaceRequest) (*v1.CreateNamespaceResponse, error) {
+func (m *MockNamespaceServiceServer) CreateNamespace(arg0 context.Context, arg1 *namespaceservice.CreateNamespaceRequest) (*namespaceservice.CreateNamespaceResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateNamespace", arg0, arg1)
-	ret0, _ := ret[0].(*v1.CreateNamespaceResponse)
+	ret0, _ := ret[0].(*namespaceservice.CreateNamespaceResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -214,11 +349,26 @@ func (mr *MockNamespaceServiceServerMockRecorder) CreateNamespace(arg0, arg1 int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNamespace", reflect.TypeOf((*MockNamespaceServiceServer)(nil).CreateNamespace), arg0, arg1)
 }
 
+// DeleteExportSink mocks base method.
+func (m *MockNamespaceServiceServer) DeleteExportSink(arg0 context.Context, arg1 *namespaceservice.DeleteExportSinkRequest) (*namespaceservice.DeleteExportSinkResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteExportSink", arg0, arg1)
+	ret0, _ := ret[0].(*namespaceservice.DeleteExportSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteExportSink indicates an expected call of DeleteExportSink.
+func (mr *MockNamespaceServiceServerMockRecorder) DeleteExportSink(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteExportSink", reflect.TypeOf((*MockNamespaceServiceServer)(nil).DeleteExportSink), arg0, arg1)
+}
+
 // DeleteNamespace mocks base method.
-func (m *MockNamespaceServiceServer) DeleteNamespace(arg0 context.Context, arg1 *v1.DeleteNamespaceRequest) (*v1.DeleteNamespaceResponse, error) {
+func (m *MockNamespaceServiceServer) DeleteNamespace(arg0 context.Context, arg1 *namespaceservice.DeleteNamespaceRequest) (*namespaceservice.DeleteNamespaceResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteNamespace", arg0, arg1)
-	ret0, _ := ret[0].(*v1.DeleteNamespaceResponse)
+	ret0, _ := ret[0].(*namespaceservice.DeleteNamespaceResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -229,11 +379,41 @@ func (mr *MockNamespaceServiceServerMockRecorder) DeleteNamespace(arg0, arg1 int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNamespace", reflect.TypeOf((*MockNamespaceServiceServer)(nil).DeleteNamespace), arg0, arg1)
 }
 
+// GetExportSink mocks base method.
+func (m *MockNamespaceServiceServer) GetExportSink(arg0 context.Context, arg1 *namespaceservice.GetExportSinkRequest) (*namespaceservice.GetExportSinkResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetExportSink", arg0, arg1)
+	ret0, _ := ret[0].(*namespaceservice.GetExportSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetExportSink indicates an expected call of GetExportSink.
+func (mr *MockNamespaceServiceServerMockRecorder) GetExportSink(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExportSink", reflect.TypeOf((*MockNamespaceServiceServer)(nil).GetExportSink), arg0, arg1)
+}
+
+// GetExportSinks mocks base method.
+func (m *MockNamespaceServiceServer) GetExportSinks(arg0 context.Context, arg1 *namespaceservice.GetExportSinksRequest) (*namespaceservice.GetExportSinksResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetExportSinks", arg0, arg1)
+	ret0, _ := ret[0].(*namespaceservice.GetExportSinksResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetExportSinks indicates an expected call of GetExportSinks.
+func (mr *MockNamespaceServiceServerMockRecorder) GetExportSinks(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExportSinks", reflect.TypeOf((*MockNamespaceServiceServer)(nil).GetExportSinks), arg0, arg1)
+}
+
 // GetNamespace mocks base method.
-func (m *MockNamespaceServiceServer) GetNamespace(arg0 context.Context, arg1 *v1.GetNamespaceRequest) (*v1.GetNamespaceResponse, error) {
+func (m *MockNamespaceServiceServer) GetNamespace(arg0 context.Context, arg1 *namespaceservice.GetNamespaceRequest) (*namespaceservice.GetNamespaceResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNamespace", arg0, arg1)
-	ret0, _ := ret[0].(*v1.GetNamespaceResponse)
+	ret0, _ := ret[0].(*namespaceservice.GetNamespaceResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -245,10 +425,10 @@ func (mr *MockNamespaceServiceServerMockRecorder) GetNamespace(arg0, arg1 interf
 }
 
 // GetNamespaces mocks base method.
-func (m *MockNamespaceServiceServer) GetNamespaces(arg0 context.Context, arg1 *v1.GetNamespacesRequest) (*v1.GetNamespacesResponse, error) {
+func (m *MockNamespaceServiceServer) GetNamespaces(arg0 context.Context, arg1 *namespaceservice.GetNamespacesRequest) (*namespaceservice.GetNamespacesResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNamespaces", arg0, arg1)
-	ret0, _ := ret[0].(*v1.GetNamespacesResponse)
+	ret0, _ := ret[0].(*namespaceservice.GetNamespacesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -259,11 +439,26 @@ func (mr *MockNamespaceServiceServerMockRecorder) GetNamespaces(arg0, arg1 inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaces", reflect.TypeOf((*MockNamespaceServiceServer)(nil).GetNamespaces), arg0, arg1)
 }
 
+// ListExportSinks mocks base method.
+func (m *MockNamespaceServiceServer) ListExportSinks(arg0 context.Context, arg1 *namespaceservice.ListExportSinksRequest) (*namespaceservice.ListExportSinksResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListExportSinks", arg0, arg1)
+	ret0, _ := ret[0].(*namespaceservice.ListExportSinksResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListExportSinks indicates an expected call of ListExportSinks.
+func (mr *MockNamespaceServiceServerMockRecorder) ListExportSinks(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListExportSinks", reflect.TypeOf((*MockNamespaceServiceServer)(nil).ListExportSinks), arg0, arg1)
+}
+
 // ListNamespaces mocks base method.
-func (m *MockNamespaceServiceServer) ListNamespaces(arg0 context.Context, arg1 *v1.ListNamespacesRequest) (*v1.ListNamespacesResponse, error) {
+func (m *MockNamespaceServiceServer) ListNamespaces(arg0 context.Context, arg1 *namespaceservice.ListNamespacesRequest) (*namespaceservice.ListNamespacesResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListNamespaces", arg0, arg1)
-	ret0, _ := ret[0].(*v1.ListNamespacesResponse)
+	ret0, _ := ret[0].(*namespaceservice.ListNamespacesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -275,10 +470,10 @@ func (mr *MockNamespaceServiceServerMockRecorder) ListNamespaces(arg0, arg1 inte
 }
 
 // RenameCustomSearchAttribute mocks base method.
-func (m *MockNamespaceServiceServer) RenameCustomSearchAttribute(arg0 context.Context, arg1 *v1.RenameCustomSearchAttributeRequest) (*v1.RenameCustomSearchAttributeResponse, error) {
+func (m *MockNamespaceServiceServer) RenameCustomSearchAttribute(arg0 context.Context, arg1 *namespaceservice.RenameCustomSearchAttributeRequest) (*namespaceservice.RenameCustomSearchAttributeResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RenameCustomSearchAttribute", arg0, arg1)
-	ret0, _ := ret[0].(*v1.RenameCustomSearchAttributeResponse)
+	ret0, _ := ret[0].(*namespaceservice.RenameCustomSearchAttributeResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -289,11 +484,26 @@ func (mr *MockNamespaceServiceServerMockRecorder) RenameCustomSearchAttribute(ar
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RenameCustomSearchAttribute", reflect.TypeOf((*MockNamespaceServiceServer)(nil).RenameCustomSearchAttribute), arg0, arg1)
 }
 
+// UpdateExportSink mocks base method.
+func (m *MockNamespaceServiceServer) UpdateExportSink(arg0 context.Context, arg1 *namespaceservice.UpdateExportSinkRequest) (*namespaceservice.UpdateExportSinkResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateExportSink", arg0, arg1)
+	ret0, _ := ret[0].(*namespaceservice.UpdateExportSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateExportSink indicates an expected call of UpdateExportSink.
+func (mr *MockNamespaceServiceServerMockRecorder) UpdateExportSink(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateExportSink", reflect.TypeOf((*MockNamespaceServiceServer)(nil).UpdateExportSink), arg0, arg1)
+}
+
 // UpdateNamespace mocks base method.
-func (m *MockNamespaceServiceServer) UpdateNamespace(arg0 context.Context, arg1 *v1.UpdateNamespaceRequest) (*v1.UpdateNamespaceResponse, error) {
+func (m *MockNamespaceServiceServer) UpdateNamespace(arg0 context.Context, arg1 *namespaceservice.UpdateNamespaceRequest) (*namespaceservice.UpdateNamespaceResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateNamespace", arg0, arg1)
-	ret0, _ := ret[0].(*v1.UpdateNamespaceResponse)
+	ret0, _ := ret[0].(*namespaceservice.UpdateNamespaceResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

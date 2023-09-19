@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"net/mail"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
+	"github.com/temporalio/tcld/protogen/api/sink/v1"
 	"go.uber.org/multierr"
 
 	"github.com/kylelemons/godebug/diff"
@@ -46,16 +48,47 @@ var (
 		Usage:   "The fingerprint of to the ca certificate",
 		Aliases: []string{"fp"},
 	}
-	namespaceRegions = []string{
-		"ap-northeast-1",
-		"ap-southeast-1",
-		"ap-southeast-2",
-		"ca-central-1",
-		"eu-central-1",
-		"eu-west-1",
-		"eu-west-2",
-		"us-east-1",
-		"us-west-2",
+
+	sinkNameFlag = &cli.StringFlag{
+		Name:     "sink-name",
+		Usage:    "Provide a name for the export sink",
+		Required: true,
+	}
+	sinkAssumedRoleFlagOptional = &cli.StringFlag{
+		Name:  "role-arn",
+		Usage: "Provide role arn for the IAM Role",
+	}
+	sinkAssumedRoleFlagRequired = &cli.StringFlag{
+		Name:     "role-arn",
+		Usage:    "Provide role arn for the IAM Role",
+		Required: true,
+	}
+	s3BucketFlagOptional = &cli.StringFlag{
+		Name:  "s3-bucket-name",
+		Usage: "Provide the name of an AWS S3 bucket that Temporal will send closed workflow histories to",
+	}
+	s3BucketFlagRequired = &cli.StringFlag{
+		Name:     "s3-bucket-name",
+		Usage:    "Provide the name of an AWS S3 bucket that Temporal will send closed workflow histories to",
+		Required: true,
+	}
+	sinkEnabledFlag = &cli.StringFlag{
+		Name:  "enabled",
+		Usage: "Whether export is enabled",
+	}
+	kmsArnFlag = &cli.StringFlag{
+		Name:  "kms-arn",
+		Usage: "Provide the ARN of the KMS key to use for encryption. Note: If the KMS ARN needs to be added or updated, user should create the IAM Role with KMS or modify the created IAM Role accordingly. Provided it as part of the input won't help",
+	}
+
+	pageSizeFlag = &cli.IntFlag{
+		Name:  "page-size",
+		Usage: "The page size for list operations",
+		Value: 100,
+	}
+	pageTokenFlag = &cli.StringFlag{
+		Name:  "page-token",
+		Usage: "The page token for list operations",
 	}
 )
 
@@ -81,6 +114,79 @@ func GetNamespaceClient(ctx *cli.Context) (*NamespaceClient, error) {
 		return nil, err
 	}
 	return NewNamespaceClient(ct, conn), nil
+}
+
+func (c *NamespaceClient) getExportSink(ctx *cli.Context, namespaceName, sinkName string) (*sink.ExportSink, error) {
+	getRequest := &namespaceservice.GetExportSinkRequest{
+		Namespace: namespaceName,
+		SinkName:  sinkName,
+	}
+
+	getResp, err := c.client.GetExportSink(c.ctx, getRequest)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get export sink: %w", err)
+	}
+	return getResp.Sink, nil
+}
+
+func (c *NamespaceClient) selectExportSinkResourceVersion(ctx *cli.Context, sink *sink.ExportSink) string {
+	if ctx.String(ResourceVersionFlagName) != "" {
+		return ctx.String(ResourceVersionFlagName)
+	}
+	return sink.ResourceVersion
+}
+
+func (c *NamespaceClient) isS3BucketChange(ctx *cli.Context, sink *sink.ExportSink) bool {
+	if !ctx.IsSet(s3BucketFlagRequired.Name) {
+		return false
+	}
+
+	return sink.GetSpec().GetS3Sink().GetBucketName() != ctx.String(s3BucketFlagRequired.Name)
+}
+
+func (c *NamespaceClient) isAssumedRoleChange(ctx *cli.Context, sink *sink.ExportSink) bool {
+	if !ctx.IsSet(sinkAssumedRoleFlagRequired.Name) {
+		return false
+	}
+
+	roleArn := getAssumedRoleArn(sink.GetSpec().GetS3Sink().GetAwsAccountId(), sink.GetSpec().GetS3Sink().GetRoleName())
+	return roleArn != ctx.String(sinkAssumedRoleFlagRequired.Name)
+
+}
+
+func (c *NamespaceClient) isKmsArnChange(ctx *cli.Context, sink *sink.ExportSink) bool {
+	if !ctx.IsSet(kmsArnFlag.Name) {
+		return false
+	}
+
+	return sink.GetSpec().GetS3Sink().GetKmsArn() != ctx.String(kmsArnFlag.Name)
+}
+
+func (c *NamespaceClient) isSinkEnabledChange(ctx *cli.Context, sink *sink.ExportSink) (bool, error) {
+	if !ctx.IsSet(sinkEnabledFlag.Name) {
+		return false, nil
+	}
+
+	enabledValue, err := strconv.ParseBool(ctx.String(sinkEnabledFlag.Name))
+	if err != nil {
+		return false, fmt.Errorf("invalid value for enabled flag: %w. Only allowed true or false", err)
+	}
+
+	if sink.GetSpec().GetEnabled() == enabledValue {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (c *NamespaceClient) getExportSinkResourceVersion(ctx *cli.Context, namespaceName, sinkName string) (string, error) {
+	sink, err := c.getExportSink(ctx, namespaceName, sinkName)
+	if err != nil {
+		return "", err
+	}
+
+	resourceVersion := c.selectExportSinkResourceVersion(ctx, sink)
+
+	return resourceVersion, nil
 }
 
 func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespace) (*request.RequestStatus, error) {
@@ -296,7 +402,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 				},
 				&cli.StringFlag{
 					Name:     namespaceRegionFlagName,
-					Usage:    fmt.Sprintf("Create namespace in this region; valid regions are: %v", namespaceRegions),
+					Usage:    "Create namespace in specified region; see 'tcld account list-regions' to get a list of available regions for your account",
 					Aliases:  []string{"re"},
 					Required: true,
 				},
@@ -338,13 +444,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 					Namespace: ctx.String(NamespaceFlagName),
 				}
 
-				// region (required)
-				region := ctx.String(namespaceRegionFlagName)
-				if err := validateNamespaceRegion(region); err != nil {
-					return err
-				}
 				n.Spec = &namespace.NamespaceSpec{
-					Region: region,
+					Region: ctx.String(namespaceRegionFlagName),
 				}
 
 				// certs (required)
@@ -880,6 +981,67 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 			},
 		},
 		{
+			Name:    "update-codec-server",
+			Usage:   "Update codec server config used to decode encoded payloads through remote endpoint",
+			Aliases: []string{"ucs"},
+			Flags: []cli.Flag{
+				NamespaceFlag,
+				&cli.StringFlag{
+					Name:     "endpoint",
+					Usage:    "The codec server endpoint to decode payloads for all users interacting with this Namespace, must be https",
+					Aliases:  []string{"e"},
+					Required: true,
+				},
+				&cli.BoolFlag{
+					Name:    "pass-access-token",
+					Usage:   "Pass the user access token with the remote endpoint",
+					Aliases: []string{"pat"},
+				},
+				&cli.BoolFlag{
+					Name:    "include-credentials",
+					Usage:   "Include cross-origin credentials",
+					Aliases: []string{"ic"},
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
+				if err != nil {
+					return err
+				}
+
+				replacement := &namespace.CodecServerPropertySpec{
+					Endpoint:           ctx.String("endpoint"),
+					PassAccessToken:    ctx.Bool("pass-access-token"),
+					IncludeCredentials: ctx.Bool("include-credentials"),
+				}
+
+				difference, err := compareCodecSpec(n.Spec.CodecSpec, replacement)
+				if err != nil {
+					return err
+				}
+
+				fmt.Println("this update will result in the following changes to the codec server config:")
+				fmt.Println(difference)
+
+				confirmed, err := ConfirmPrompt(ctx, "confirm codec server update operation")
+				if err != nil {
+					return err
+				}
+
+				if confirmed {
+					n.Spec.CodecSpec = replacement
+					status, err := nc.updateNamespace(ctx, n)
+					if err != nil {
+						return err
+					}
+					return rc.HandleRequestStatus(ctx, "codec server update", status)
+				}
+
+				fmt.Println("operation canceled")
+				return nil
+			},
+		},
+		{
 			Name:    "retention",
 			Usage:   "Manages configuration of the length of time (in days) a closed workflow will be preserved before deletion",
 			Aliases: []string{"r"},
@@ -1046,6 +1208,201 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 			Name:    "export",
 			Usage:   "Manage export sinks",
 			Aliases: []string{"es"},
+			Subcommands: []*cli.Command{
+				{
+					Name:    "create",
+					Aliases: []string{"c"},
+					Usage:   "Create export sink",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						sinkNameFlag,
+						sinkAssumedRoleFlagRequired,
+						s3BucketFlagRequired,
+						RequestIDFlag,
+						kmsArnFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagRequired.Name))
+						if err != nil {
+							return err
+						}
+
+						namespace := ctx.String(NamespaceFlagName)
+						ns, err := nc.getNamespace(namespace)
+						if err != nil {
+							return fmt.Errorf("unable to get namespace: %v", err)
+						}
+
+						request := &namespaceservice.CreateExportSinkRequest{
+							Namespace: namespace,
+							Spec: &sink.ExportSinkSpec{
+								Name:            ctx.String(sinkNameFlag.Name),
+								Enabled:         true,
+								DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
+								S3Sink: &sink.S3Spec{
+									RoleName:     roleName,
+									BucketName:   ctx.String(s3BucketFlagRequired.Name),
+									Region:       ns.Spec.Region,
+									KmsArn:       ctx.String(kmsArnFlag.Name),
+									AwsAccountId: awsAccountID,
+								},
+							},
+							RequestId: ctx.String(RequestIDFlagName),
+						}
+
+						res, err := nc.client.CreateExportSink(nc.ctx, request)
+						if err != nil {
+							return err
+						}
+
+						return PrintProto(res.RequestStatus)
+					},
+				},
+				{
+					Name:    "get",
+					Aliases: []string{"g"},
+					Usage:   "Get export sink",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						sinkNameFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						sink, err := nc.getExportSink(ctx, ctx.String(NamespaceFlagName), ctx.String(sinkNameFlag.Name))
+
+						if err != nil {
+							return err
+						}
+
+						return PrintProto(sink)
+					},
+				},
+				{
+					Name:    "delete",
+					Aliases: []string{"d"},
+					Usage:   "Delete export sink",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						sinkNameFlag,
+						ResourceVersionFlag,
+						RequestIDFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						namespaceName := ctx.String(NamespaceFlagName)
+						sinkName := ctx.String(sinkNameFlag.Name)
+						resourceVersion, err := nc.getExportSinkResourceVersion(ctx, namespaceName, sinkName)
+						if err != nil {
+							return err
+						}
+
+						deleteRequest := &namespaceservice.DeleteExportSinkRequest{
+							Namespace:       namespaceName,
+							SinkName:        sinkName,
+							ResourceVersion: resourceVersion,
+							RequestId:       ctx.String(RequestIDFlagName),
+						}
+
+						deleteResp, err := nc.client.DeleteExportSink(nc.ctx, deleteRequest)
+						if err != nil {
+							return err
+						}
+
+						return PrintProto(deleteResp.RequestStatus)
+					},
+				},
+				{
+					Name:    "list",
+					Aliases: []string{"l"},
+					Usage:   "List export sinks",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						pageSizeFlag,
+						pageTokenFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						request := &namespaceservice.ListExportSinksRequest{
+							Namespace: ctx.String(NamespaceFlagName),
+							PageSize:  int32(pageSizeFlag.Value),
+							PageToken: ctx.String(pageTokenFlag.Name),
+						}
+
+						resp, err := nc.client.ListExportSinks(nc.ctx, request)
+						if err != nil {
+							return err
+						}
+
+						return PrintProto(resp)
+					},
+				},
+				{
+					Name:    "update",
+					Aliases: []string{"u"},
+					Usage:   "Update export sink",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						sinkNameFlag,
+						sinkEnabledFlag,
+						sinkAssumedRoleFlagOptional,
+						s3BucketFlagOptional,
+						ResourceVersionFlag,
+						kmsArnFlag,
+						RequestIDFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						namespaceName := ctx.String(NamespaceFlagName)
+						sinkName := ctx.String(sinkNameFlag.Name)
+						sink, err := nc.getExportSink(ctx, namespaceName, sinkName)
+						if err != nil {
+							return err
+						}
+						resourceVersion := nc.selectExportSinkResourceVersion(ctx, sink)
+
+						isEnabledChange, err := nc.isSinkEnabledChange(ctx, sink)
+						if err != nil {
+							return err
+						}
+
+						if !isEnabledChange && !nc.isAssumedRoleChange(ctx, sink) && !nc.isKmsArnChange(ctx, sink) && !nc.isS3BucketChange(ctx, sink) {
+							fmt.Println("nothing to update")
+							return nil
+						}
+
+						if isEnabledChange {
+							sink.Spec.Enabled = !sink.Spec.Enabled
+						}
+
+						if nc.isAssumedRoleChange(ctx, sink) {
+							awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagOptional.Name))
+							if err != nil {
+								return err
+							}
+							sink.Spec.S3Sink.RoleName = roleName
+							sink.Spec.S3Sink.AwsAccountId = awsAccountID
+						}
+
+						if nc.isKmsArnChange(ctx, sink) {
+							sink.Spec.S3Sink.KmsArn = ctx.String(kmsArnFlag.Name)
+						}
+
+						if nc.isS3BucketChange(ctx, sink) {
+							sink.Spec.S3Sink.BucketName = ctx.String(s3BucketFlagOptional.Name)
+						}
+
+						request := &namespaceservice.UpdateExportSinkRequest{
+							Namespace:       ctx.String(NamespaceFlagName),
+							Spec:            sink.Spec,
+							ResourceVersion: resourceVersion,
+							RequestId:       ctx.String(RequestIDFlagName),
+						}
+
+						resp, err := nc.client.UpdateExportSink(nc.ctx, request)
+						if err != nil {
+							return err
+						}
+
+						return PrintProto(resp.RequestStatus)
+					},
+				},
+			},
 		})
 	}
 
@@ -1143,11 +1500,16 @@ func compareCertificateFilters(existing, replacement certificateFiltersConfig) (
 	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
 }
 
-func validateNamespaceRegion(region string) error {
-	for _, r := range namespaceRegions {
-		if r == region {
-			return nil
-		}
+func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) (string, error) {
+	existingBytes, err := FormatJson(existing)
+	if err != nil {
+		return "", err
 	}
-	return fmt.Errorf("namespace region: %s not allowed", region)
+
+	replacementBytes, err := FormatJson(replacement)
+	if err != nil {
+		return "", err
+	}
+
+	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
 }
