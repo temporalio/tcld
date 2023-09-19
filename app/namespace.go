@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
+	"github.com/temporalio/tcld/protogen/api/request/v1"
 	"github.com/temporalio/tcld/protogen/api/sink/v1"
 	"go.uber.org/multierr"
 
@@ -187,7 +188,8 @@ func (c *NamespaceClient) getExportSinkResourceVersion(ctx *cli.Context, namespa
 
 	return resourceVersion, nil
 }
-func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespace) error {
+
+func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespace) (*request.RequestStatus, error) {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
 		resourceVersion = v
@@ -198,12 +200,12 @@ func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespa
 		ResourceVersion: resourceVersion,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return PrintProto(res)
+	return res.RequestStatus, nil
 }
 
-func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.UserNamespacePermissions) error {
+func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.UserNamespacePermissions) (*request.RequestStatus, error) {
 	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
 		RequestId:                n.RequestId,
 		Namespace:                n.Namespace,
@@ -211,9 +213,9 @@ func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.User
 		UserNamespacePermissions: p,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return PrintProto(res)
+	return res.RequestStatus, nil
 }
 
 func (c *NamespaceClient) listNamespaces() error {
@@ -249,7 +251,7 @@ func (c *NamespaceClient) getNamespace(namespace string) (*namespace.Namespace, 
 	return res.Namespace, nil
 }
 
-func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespace) error {
+func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespace) (*request.RequestStatus, error) {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
 		resourceVersion = v
@@ -262,13 +264,13 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 		Spec:            n.Spec,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return PrintProto(res)
+	return res.RequestStatus, nil
 }
 
-func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *namespace.Namespace, existingName string, newName string) error {
+func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *namespace.Namespace, existingName string, newName string) (*request.RequestStatus, error) {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
 		resourceVersion = v
@@ -281,9 +283,9 @@ func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *namespace.N
 		NewCustomSearchAttributeName:      newName,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return PrintProto(res)
+	return res.RequestStatus, nil
 }
 
 func (c *NamespaceClient) parseExistingCerts(ctx *cli.Context) (namespace *namespace.Namespace, existing caCerts, err error) {
@@ -376,8 +378,12 @@ func ReadCertFilters(ctx *cli.Context) ([]byte, error) {
 	return certFilterBytes, nil
 }
 
-func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut, error) {
-	var c *NamespaceClient
+func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestClientFn GetRequestClientFn) (CommandOut, error) {
+	var (
+		nc *NamespaceClient
+		rc *RequestClient
+	)
+
 	subCommands := []*cli.Command{
 		{
 			Name:    "create",
@@ -386,6 +392,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Flags: []cli.Flag{
 				RequestIDFlag,
 				CaCertificateFlag,
+				WaitForRequestFlag,
+				RequestTimeoutFlag,
 				&cli.StringFlag{
 					Name:     NamespaceFlagName,
 					Usage:    "The namespace hosted on temporal cloud",
@@ -462,7 +470,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					if err != nil {
 						return err
 					}
-					unp, err = c.toUserNamespacePermissions(unpMap)
+					unp, err = nc.toUserNamespacePermissions(unpMap)
 					if err != nil {
 						return err
 					}
@@ -499,8 +507,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						}
 					}
 				}
-
-				return c.createNamespace(n, unp)
+				status, err := nc.createNamespace(n, unp)
+				if err != nil {
+					return err
+				}
+				return rc.HandleRequestStatus(ctx, "create namespace", status)
 			},
 		},
 		{
@@ -510,6 +521,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Flags: []cli.Flag{
 				RequestIDFlag,
 				ResourceVersionFlag,
+				WaitForRequestFlag,
+				RequestTimeoutFlag,
 				&cli.StringFlag{
 					Name:     NamespaceFlagName,
 					Usage:    "The namespace hosted on temporal cloud",
@@ -531,11 +544,15 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				if !yes {
 					return nil
 				}
-				n, err := c.getNamespace(namespaceName)
+				n, err := nc.getNamespace(namespaceName)
 				if err != nil {
 					return err
 				}
-				return c.deleteNamespace(ctx, n)
+				status, err := nc.deleteNamespace(ctx, n)
+				if err != nil {
+					return err
+				}
+				return rc.HandleRequestStatus(ctx, "delete namespace", status)
 			},
 		},
 		{
@@ -544,7 +561,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Aliases: []string{"l"},
 			Flags:   []cli.Flag{},
 			Action: func(ctx *cli.Context) error {
-				return c.listNamespaces()
+				return nc.listNamespaces()
 			},
 		},
 		{
@@ -555,7 +572,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				NamespaceFlag,
 			},
 			Action: func(ctx *cli.Context) error {
-				n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+				n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
 				if err != nil {
 					return err
 				}
@@ -575,7 +592,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						NamespaceFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
@@ -594,6 +611,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						CaCertificateFlag,
 						CaCertificateFileFlag,
 					},
@@ -602,7 +621,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if err != nil {
 							return err
 						}
-						n, existingCerts, err := c.parseExistingCerts(ctx)
+						n, existingCerts, err := nc.parseExistingCerts(ctx)
 						if err != nil {
 							return err
 						}
@@ -618,7 +637,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return errors.New("nothing to change")
 						}
 						n.Spec.AcceptedClientCa = bundle
-						return c.updateNamespace(ctx, n)
+						status, err := nc.updateNamespace(ctx, n)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "add ca certificate", status)
 					},
 				},
 				{
@@ -629,12 +652,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						CaCertificateFlag,
 						CaCertificateFileFlag,
 						caCertificateFingerprintFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						n, existingCerts, err := c.parseExistingCerts(ctx)
+						n, existingCerts, err := nc.parseExistingCerts(ctx)
 						if err != nil {
 							return err
 						}
@@ -669,7 +694,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if err != nil || !y {
 							return err
 						}
-						return c.updateNamespace(ctx, n)
+						status, err := nc.updateNamespace(ctx, n)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "remove ca certificate", status)
 					},
 				},
 				{
@@ -680,6 +709,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						CaCertificateFlag,
 						CaCertificateFileFlag,
 					},
@@ -688,7 +719,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if err != nil {
 							return err
 						}
-						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
@@ -696,7 +727,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return errors.New("nothing to change")
 						}
 						n.Spec.AcceptedClientCa = cert
-						return c.updateNamespace(ctx, n)
+						status, err := nc.updateNamespace(ctx, n)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "set ca certificates", status)
 					},
 				},
 			},
@@ -714,6 +749,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						&cli.PathFlag{
 							Name:    certificateFilterFileFlagName,
 							Usage:   `Path to a JSON file that defines the certificate filters that will be configured on the namespace. This will replace the existing filter configuration. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
@@ -752,7 +789,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 
-						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
@@ -770,13 +807,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 
-						if confirmed {
-							n.Spec.CertificateFilters = replacementFilters.toSpec()
-							return c.updateNamespace(ctx, n)
+						if !confirmed {
+							fmt.Println("operation canceled")
+							return nil
 						}
 
-						fmt.Println("operation canceled")
-						return nil
+						n.Spec.CertificateFilters = replacementFilters.toSpec()
+						status, err := nc.updateNamespace(ctx, n)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "import certificate filters", status)
 					},
 				},
 				{
@@ -794,7 +835,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						},
 					},
 					Action: func(ctx *cli.Context) error {
-						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
@@ -829,7 +870,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						ResourceVersionFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
@@ -844,13 +885,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 
-						if confirmed {
-							n.Spec.CertificateFilters = nil
-							return c.updateNamespace(ctx, n)
+						if !confirmed {
+							fmt.Println("operation canceled")
+							return nil
 						}
 
-						fmt.Println("operation canceled")
-						return nil
+						n.Spec.CertificateFilters = nil
+						status, err := nc.updateNamespace(ctx, n)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "clear certificate filters", status)
 					},
 				},
 				{
@@ -861,6 +906,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						&cli.PathFlag{
 							Name:    certificateFilterFileFlagName,
 							Usage:   `Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
@@ -913,18 +960,22 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 
-						if confirmed {
-							n, err := c.getNamespace(ctx.String(NamespaceFlagName))
-							if err != nil {
-								return err
-							}
-
-							n.Spec.CertificateFilters = append(n.Spec.CertificateFilters, newFilters.toSpec()...)
-							return c.updateNamespace(ctx, n)
+						if !confirmed {
+							fmt.Println("operation canceled")
+							return nil
+						}
+						n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
+						if err != nil {
+							return err
 						}
 
-						fmt.Println("operation canceled")
-						return nil
+						n.Spec.CertificateFilters = append(n.Spec.CertificateFilters, newFilters.toSpec()...)
+						status, err := nc.updateNamespace(ctx, n)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "add certificate filters", status)
+
 					},
 				},
 			},
@@ -953,7 +1004,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 			},
 			Action: func(ctx *cli.Context) error {
-				n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+				n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
 				if err != nil {
 					return err
 				}
@@ -979,7 +1030,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 				if confirmed {
 					n.Spec.CodecSpec = replacement
-					return c.updateNamespace(ctx, n)
+					status, err := nc.updateNamespace(ctx, n)
+					if err != nil {
+						return err
+					}
+					return rc.HandleRequestStatus(ctx, "codec server update", status)
 				}
 
 				fmt.Println("operation canceled")
@@ -998,6 +1053,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Flags: []cli.Flag{
 						NamespaceFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						RetentionDaysFlag,
 						RequestIDFlag,
 					},
@@ -1009,7 +1066,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if retention < 0 {
 							return fmt.Errorf("retention cannot be negative")
 						}
-						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
@@ -1017,7 +1074,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return fmt.Errorf("retention for namespace is already set at %d days", ctx.Int(RetentionDaysFlagName))
 						}
 						n.Spec.RetentionDays = int32(retention)
-						return c.updateNamespace(ctx, n)
+						status, err := nc.updateNamespace(ctx, n)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "set retention", status)
 					},
 				},
 				{
@@ -1028,7 +1089,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						NamespaceFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
@@ -1051,6 +1112,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						&cli.StringSliceFlag{
 							Name:     "search-attribute",
 							Usage:    fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
@@ -1063,7 +1126,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if err != nil {
 							return err
 						}
-						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						n, err := nc.getNamespace(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
@@ -1077,8 +1140,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								n.Spec.SearchAttributes[attrName] = attrType
 							}
 						}
-
-						return c.updateNamespace(ctx, n)
+						status, err := nc.updateNamespace(ctx, n)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "add search attribute", status)
 					},
 				},
 				{
@@ -1089,6 +1155,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						NamespaceFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						&cli.StringFlag{
 							Name:     "existing-name",
 							Usage:    "The name of an existing search attribute",
@@ -1103,7 +1171,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						},
 					},
 					Action: func(ctx *cli.Context) error {
-						n, err := c.getNamespace(
+						n, err := nc.getNamespace(
 							ctx.String(NamespaceFlagName),
 						)
 						if err != nil {
@@ -1121,7 +1189,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if err != nil || !y {
 							return err
 						}
-						return c.renameSearchAttribute(ctx, n, existingName, newName)
+						status, err := nc.renameSearchAttribute(ctx, n, existingName, newName)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "rename search attribute", status)
+
 					},
 				},
 			},
@@ -1155,7 +1228,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						}
 
 						namespace := ctx.String(NamespaceFlagName)
-						ns, err := c.getNamespace(namespace)
+						ns, err := nc.getNamespace(namespace)
 						if err != nil {
 							return fmt.Errorf("unable to get namespace: %v", err)
 						}
@@ -1177,12 +1250,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							RequestId: ctx.String(RequestIDFlagName),
 						}
 
-						res, err := c.client.CreateExportSink(c.ctx, request)
+						res, err := nc.client.CreateExportSink(nc.ctx, request)
 						if err != nil {
 							return err
 						}
-
-						return PrintProto(res.RequestStatus)
+						return rc.HandleRequestStatus(ctx, "create export sink", res.RequestStatus)
 					},
 				},
 				{
@@ -1194,7 +1266,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						sinkNameFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						sink, err := c.getExportSink(ctx, ctx.String(NamespaceFlagName), ctx.String(sinkNameFlag.Name))
+						sink, err := nc.getExportSink(ctx, ctx.String(NamespaceFlagName), ctx.String(sinkNameFlag.Name))
 
 						if err != nil {
 							return err
@@ -1216,7 +1288,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Action: func(ctx *cli.Context) error {
 						namespaceName := ctx.String(NamespaceFlagName)
 						sinkName := ctx.String(sinkNameFlag.Name)
-						resourceVersion, err := c.getExportSinkResourceVersion(ctx, namespaceName, sinkName)
+						resourceVersion, err := nc.getExportSinkResourceVersion(ctx, namespaceName, sinkName)
 						if err != nil {
 							return err
 						}
@@ -1228,12 +1300,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							RequestId:       ctx.String(RequestIDFlagName),
 						}
 
-						deleteResp, err := c.client.DeleteExportSink(c.ctx, deleteRequest)
+						deleteResp, err := nc.client.DeleteExportSink(nc.ctx, deleteRequest)
 						if err != nil {
 							return err
 						}
+						return rc.HandleRequestStatus(ctx, "create export sink", deleteResp.RequestStatus)
 
-						return PrintProto(deleteResp.RequestStatus)
 					},
 				},
 				{
@@ -1252,7 +1324,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							PageToken: ctx.String(pageTokenFlag.Name),
 						}
 
-						resp, err := c.client.ListExportSinks(c.ctx, request)
+						resp, err := nc.client.ListExportSinks(nc.ctx, request)
 						if err != nil {
 							return err
 						}
@@ -1277,18 +1349,18 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Action: func(ctx *cli.Context) error {
 						namespaceName := ctx.String(NamespaceFlagName)
 						sinkName := ctx.String(sinkNameFlag.Name)
-						sink, err := c.getExportSink(ctx, namespaceName, sinkName)
+						sink, err := nc.getExportSink(ctx, namespaceName, sinkName)
 						if err != nil {
 							return err
 						}
-						resourceVersion := c.selectExportSinkResourceVersion(ctx, sink)
+						resourceVersion := nc.selectExportSinkResourceVersion(ctx, sink)
 
-						isEnabledChange, err := c.isSinkEnabledChange(ctx, sink)
+						isEnabledChange, err := nc.isSinkEnabledChange(ctx, sink)
 						if err != nil {
 							return err
 						}
 
-						if !isEnabledChange && !c.isAssumedRoleChange(ctx, sink) && !c.isKmsArnChange(ctx, sink) && !c.isS3BucketChange(ctx, sink) {
+						if !isEnabledChange && !nc.isAssumedRoleChange(ctx, sink) && !nc.isKmsArnChange(ctx, sink) && !nc.isS3BucketChange(ctx, sink) {
 							fmt.Println("nothing to update")
 							return nil
 						}
@@ -1297,7 +1369,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							sink.Spec.Enabled = !sink.Spec.Enabled
 						}
 
-						if c.isAssumedRoleChange(ctx, sink) {
+						if nc.isAssumedRoleChange(ctx, sink) {
 							awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagOptional.Name))
 							if err != nil {
 								return err
@@ -1306,11 +1378,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							sink.Spec.S3Sink.AwsAccountId = awsAccountID
 						}
 
-						if c.isKmsArnChange(ctx, sink) {
+						if nc.isKmsArnChange(ctx, sink) {
 							sink.Spec.S3Sink.KmsArn = ctx.String(kmsArnFlag.Name)
 						}
 
-						if c.isS3BucketChange(ctx, sink) {
+						if nc.isS3BucketChange(ctx, sink) {
 							sink.Spec.S3Sink.BucketName = ctx.String(s3BucketFlagOptional.Name)
 						}
 
@@ -1321,12 +1393,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							RequestId:       ctx.String(RequestIDFlagName),
 						}
 
-						resp, err := c.client.UpdateExportSink(c.ctx, request)
+						resp, err := nc.client.UpdateExportSink(nc.ctx, request)
 						if err != nil {
 							return err
 						}
-
-						return PrintProto(resp.RequestStatus)
+						return rc.HandleRequestStatus(ctx, "update export sink", resp.RequestStatus)
 					},
 				},
 			},
@@ -1339,7 +1410,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		Usage:   "Namespace operations",
 		Before: func(ctx *cli.Context) error {
 			var err error
-			c, err = getNamespaceClientFn(ctx)
+			nc, err = getNamespaceClientFn(ctx)
+			if err != nil {
+				return err
+			}
+			rc, err = getRequestClientFn(ctx)
 			return err
 		},
 		Subcommands: subCommands,

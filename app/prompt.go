@@ -10,12 +10,13 @@ import (
 )
 
 const (
-	AutoConfirmFlagName = "auto_confirm"
+	AutoConfirmFlagName = "auto-confirm"
 )
 
 var (
 	AutoConfirmFlag = &cli.BoolFlag{
 		Name:    AutoConfirmFlagName,
+		Aliases: []string{"auto_confirm"},
 		Usage:   "Automatically confirm all prompts",
 		EnvVars: []string{"AUTO_CONFIRM"},
 	}

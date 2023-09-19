@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 
+	"strings"
+
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
+	"github.com/temporalio/tcld/protogen/api/request/v1"
 	"github.com/urfave/cli/v2"
-	"strings"
 )
 
 const (
@@ -137,9 +139,9 @@ func (c *UserClient) inviteUsers(
 	emails []string,
 	namespacePermissions []string,
 	accountRole string,
-) error {
+) (*request.RequestStatus, error) {
 	if len(accountRole) == 0 {
-		return errors.New("account role required for inviting new users")
+		return nil, errors.New("account role required for inviting new users")
 	}
 
 	// the role ids to invite the users for
@@ -148,7 +150,7 @@ func (c *UserClient) inviteUsers(
 	// first get the required account role
 	role, err := getAccountRole(c.ctx, c.client, accountRole)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	roleIDs = append(roleIDs, role.GetId())
 
@@ -156,11 +158,11 @@ func (c *UserClient) inviteUsers(
 	if len(namespacePermissions) > 0 {
 		npm, err := toNamespacePermissionsMap(namespacePermissions)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		nsRoles, err := getNamespaceRolesBatch(c.ctx, c.client, npm)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		for _, nsRole := range nsRoles {
 			roleIDs = append(roleIDs, nsRole.GetId())
@@ -180,19 +182,19 @@ func (c *UserClient) inviteUsers(
 	}
 	resp, err := c.client.InviteUsers(c.ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to invite users: %w", err)
+		return nil, fmt.Errorf("unable to invite users: %w", err)
 	}
-	return PrintProto(resp.GetRequestStatus())
+	return resp.GetRequestStatus(), nil
 }
 
 func (c *UserClient) resendInvitation(
 	ctx *cli.Context,
 	userID string,
 	userEmail string,
-) error {
+) (*request.RequestStatus, error) {
 	user, err := c.getUser(userID, userEmail)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req := &authservice.ResendUserInviteRequest{
 		UserId:    user.Id,
@@ -200,19 +202,19 @@ func (c *UserClient) resendInvitation(
 	}
 	resp, err := c.client.ResendUserInvite(c.ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to resend invitation for user: %w", err)
+		return nil, fmt.Errorf("unable to resend invitation for user: %w", err)
 	}
-	return PrintProto(resp.GetRequestStatus())
+	return resp.GetRequestStatus(), nil
 }
 
 func (c *UserClient) deleteUser(
 	ctx *cli.Context,
 	userID string,
 	userEmail string,
-) error {
+) (*request.RequestStatus, error) {
 	u, err := c.getUser(userID, userEmail)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req := &authservice.DeleteUserRequest{
 		UserId:          u.Id,
@@ -224,12 +226,12 @@ func (c *UserClient) deleteUser(
 	}
 	resp, err := c.client.DeleteUser(c.ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to delete user: %w", err)
+		return nil, fmt.Errorf("unable to delete user: %w", err)
 	}
-	return PrintProto(resp.GetRequestStatus())
+	return resp.GetRequestStatus(), nil
 }
 
-func (c *UserClient) performUpdate(ctx *cli.Context, user *auth.User) error {
+func (c *UserClient) performUpdate(ctx *cli.Context, user *auth.User) (*request.RequestStatus, error) {
 	req := &authservice.UpdateUserRequest{
 		UserId:          user.Id,
 		Spec:            user.Spec,
@@ -241,9 +243,9 @@ func (c *UserClient) performUpdate(ctx *cli.Context, user *auth.User) error {
 	}
 	resp, err := c.client.UpdateUser(c.ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to update user: %w", err)
+		return nil, fmt.Errorf("unable to update user: %w", err)
 	}
-	return PrintProto(resp.GetRequestStatus())
+	return resp.GetRequestStatus(), nil
 }
 
 func (c *UserClient) setAccountRole(
@@ -251,25 +253,25 @@ func (c *UserClient) setAccountRole(
 	userID string,
 	userEmail string,
 	accountRole string,
-) error {
+) (*request.RequestStatus, error) {
 	user, userRoles, err := c.getUserAndRoles(userID, userEmail)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var newRoleIDs []string
 	accountRoleToSet, err := getAccountRole(c.ctx, c.client, accountRole)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if accountRoleToSet.Spec.AccountRole.ActionGroup == auth.ACCOUNT_ACTION_GROUP_ADMIN {
 		// set the user account admin role
 		y, err := ConfirmPrompt(ctx, "Setting admin role on user. All existing namespace permissions will be replaced, please confirm")
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !y {
 			fmt.Println("operation canceled")
-			return nil
+			return nil, nil
 		}
 		// ensure we overwrite all existing roles since the global admin role has permissions to everything
 		newRoleIDs = []string{accountRoleToSet.Id}
@@ -293,10 +295,10 @@ func (c *UserClient) setNamespacePermissions(
 	userID string,
 	userEmail string,
 	namespacePermissions []string,
-) error {
+) (*request.RequestStatus, error) {
 	user, userRoles, err := c.getUserAndRoles(userID, userEmail)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var newRoleIDs []string
 	for _, r := range userRoles {
@@ -310,21 +312,21 @@ func (c *UserClient) setNamespacePermissions(
 	if len(namespacePermissions) == 0 {
 		y, err := ConfirmPrompt(ctx, "Looks like you are about to remove all namespace permissions, please confirm")
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !y {
 			fmt.Println("operation canceled")
-			return nil
+			return nil, nil
 		}
 	} else {
 		// collect the namespace roles and update user
 		npm, err := toNamespacePermissionsMap(namespacePermissions)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		nsRoles, err := getNamespaceRolesBatch(c.ctx, c.client, npm)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		for _, nsRole := range nsRoles {
 			newRoleIDs = append(newRoleIDs, nsRole.Id)
@@ -393,8 +395,11 @@ func toUserWrapper(u *auth.User, roles []*auth.Role) *auth.UserWrapper {
 	return p
 }
 
-func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
-	var c *UserClient
+func NewUserCommand(getUserClientFn GetUserClientFn, getRequestClientFn GetRequestClientFn) (CommandOut, error) {
+	var (
+		uc *UserClient
+		rc *RequestClient
+	)
 	return CommandOut{
 		Command: &cli.Command{
 			Name:    "user",
@@ -402,7 +407,11 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 			Usage:   "User management operations",
 			Before: func(ctx *cli.Context) error {
 				var err error
-				c, err = getUserClientFn(ctx)
+				uc, err = getUserClientFn(ctx)
+				if err != nil {
+					return err
+				}
+				rc, err = getRequestClientFn(ctx)
 				return err
 			},
 			Subcommands: []*cli.Command{
@@ -429,7 +438,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						},
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.listUsers(ctx.String(NamespaceFlagName), ctx.String(pageTokenFlagName), ctx.Int(pageSizeFlagName))
+						return uc.listUsers(ctx.String(NamespaceFlagName), ctx.String(pageTokenFlagName), ctx.Int(pageSizeFlagName))
 					},
 				},
 				{
@@ -441,7 +450,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						userEmailFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						u, roles, err := c.getUserAndRoles(ctx.String(userIDFlagName), ctx.String(userEmailFlagName))
+						u, roles, err := uc.getUserAndRoles(ctx.String(userIDFlagName), ctx.String(userEmailFlagName))
 						if err != nil {
 							return err
 						}
@@ -471,14 +480,20 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 							Aliases: []string{"p"},
 						},
 						RequestIDFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.inviteUsers(
+						status, err := uc.inviteUsers(
 							ctx,
 							ctx.StringSlice(userEmailFlagName),
 							ctx.StringSlice(namespacePermissionFlagName),
 							ctx.String(accountRoleFlagName),
 						)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "invite users", status)
 					},
 				},
 				{
@@ -489,13 +504,19 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						userIDFlag,
 						userEmailFlag,
 						RequestIDFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.resendInvitation(
+						status, err := uc.resendInvitation(
 							ctx,
 							ctx.String(userIDFlagName),
 							ctx.String(userEmailFlagName),
 						)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "resend user invite", status)
 					},
 				},
 				{
@@ -507,13 +528,19 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						userEmailFlag,
 						ResourceVersionFlag,
 						RequestIDFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.deleteUser(
+						status, err := uc.deleteUser(
 							ctx,
 							ctx.String(userIDFlagName),
 							ctx.String(userEmailFlagName),
 						)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "delete user", status)
 					},
 				},
 				{
@@ -525,6 +552,8 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						userEmailFlag,
 						RequestIDFlag,
 						ResourceVersionFlag,
+						WaitForRequestFlag,
+						RequestTimeoutFlag,
 						&cli.StringFlag{
 							Name:     accountRoleFlagName,
 							Usage:    fmt.Sprintf("The account role to set on the user; valid types are: %v", accountActionGroups),
@@ -533,12 +562,16 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						},
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.setAccountRole(
+						status, err := uc.setAccountRole(
 							ctx,
 							ctx.String(userIDFlagName),
 							ctx.String(userEmailFlagName),
 							ctx.String(accountRoleFlagName),
 						)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "set account role", status)
 					},
 				},
 				{
@@ -557,12 +590,16 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						},
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.setNamespacePermissions(
+						status, err := uc.setNamespacePermissions(
 							ctx,
 							ctx.String(userIDFlagName),
 							ctx.String(userEmailFlagName),
 							ctx.StringSlice(namespacePermissionFlagName),
 						)
+						if err != nil {
+							return err
+						}
+						return rc.HandleRequestStatus(ctx, "set namespace permissions", status)
 					},
 				},
 			},
