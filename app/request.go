@@ -15,6 +15,8 @@ import (
 const (
 	WaitForRequestFlagName = "wait-for-request"
 	RequestTimeoutFlagName = "request-timeout"
+
+	minCheckDurationTime = time.Second
 )
 
 var (
@@ -84,14 +86,14 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 			Aliases: []string{"g"},
 			Flags: []cli.Flag{
 				&cli.StringFlag{
-					Name:     "request-id",
+					Name:     RequestIDFlagName,
 					Usage:    "The request-id of the request",
 					Aliases:  []string{"r"},
 					Required: true,
 				},
 			},
 			Action: func(ctx *cli.Context) error {
-				res, err := c.getRequestStatus(ctx, ctx.String("request-id"))
+				res, err := c.getRequestStatus(ctx, ctx.String(RequestIDFlagName))
 				if err != nil {
 					return err
 				}
@@ -103,14 +105,14 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 			Aliases: []string{"w"},
 			Flags: []cli.Flag{
 				&cli.StringFlag{
-					Name:     "request-id",
+					Name:     RequestIDFlagName,
 					Usage:    "the request-id of the request",
 					Aliases:  []string{"r"},
 					Required: true,
 				},
 			},
 			Action: func(ctx *cli.Context) error {
-				return c.waitOnRequest(ctx, "", ctx.String("request-id"))
+				return c.waitOnRequest(ctx, "", ctx.String(RequestIDFlagName))
 			},
 		}},
 	}}, nil
@@ -119,7 +121,9 @@ func NewRequestCommand(getRequestClientFn GetRequestClientFn) (CommandOut, error
 func (c *RequestClient) waitOnRequest(ctx *cli.Context, operation string, requestID string) error {
 
 	ticker := time.NewTicker(time.Millisecond)
+	defer ticker.Stop()
 	timer := time.NewTimer(ctx.Duration(RequestTimeoutFlagName))
+	defer timer.Stop()
 
 	writer := uilive.New()
 	writer.Start()
@@ -165,7 +169,11 @@ loop:
 				fmt.Fprintf(writer, "waiting for request with id='%s' to finish, current state: %s\n",
 					requestID, request.State_name[int32(status.State)])
 			}
-			ticker.Reset(time.Second * time.Duration(status.CheckDuration.Seconds))
+			if status.CheckDuration == nil || status.CheckDuration.Seconds == 0 {
+				ticker.Reset(minCheckDurationTime) // min check duration is 1 second
+			} else {
+				ticker.Reset(time.Second * time.Duration(status.CheckDuration.Seconds))
+			}
 		}
 	}
 	if operation != "" {
