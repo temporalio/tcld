@@ -1254,8 +1254,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 						if err != nil {
 							return err
 						}
-
-						return PrintProto(res.RequestStatus)
+						return rc.HandleRequestStatus(ctx, "create export sink", res.RequestStatus)
 					},
 				},
 				{
@@ -1305,8 +1304,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 						if err != nil {
 							return err
 						}
+						return rc.HandleRequestStatus(ctx, "create export sink", deleteResp.RequestStatus)
 
-						return PrintProto(deleteResp.RequestStatus)
 					},
 				},
 				{
@@ -1398,8 +1397,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn, getRequestCl
 						if err != nil {
 							return err
 						}
-
-						return PrintProto(resp.RequestStatus)
+						return rc.HandleRequestStatus(ctx, "update export sink", resp.RequestStatus)
 					},
 				},
 			},
