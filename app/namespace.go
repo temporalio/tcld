@@ -29,6 +29,7 @@ const (
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
 	searchAttributeFlagName          = "search-attribute"
 	userNamespacePermissionFlagName  = "user-namespace-permission"
+	codecServerSpecJsonFlagName      = "codec-server-spec-json"
 )
 
 var (
@@ -429,6 +430,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
 					Aliases: []string{"p"},
 				},
+				&cli.StringFlag{
+					Name:    codecServerSpecJsonFlagName,
+					Usage:   `JSON that defines the codec server property passed to the namespace. Sample JSON: { "codecserver": { "endPoint": "https://test-endpoint.com", "PassAccessToken": true, "IncludeCredentials": false } }`,
+					Aliases: []string{"cs"},
+				},
 			},
 			Action: func(ctx *cli.Context) error {
 				n := &namespace.Namespace{
@@ -497,6 +503,15 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						} else {
 							n.Spec.SearchAttributes[attrName] = attrType
 						}
+					}
+				}
+
+				codecServerJson := ctx.String(codecServerSpecJsonFlagName)
+				// codec server spec is optional, if specified, we need to pass to the spec
+				if codecServerJson != "" {
+					n.Spec.CodecSpec, err = parseAndConvertCodecServer(codecServerJson)
+					if err != nil {
+						return err
 					}
 				}
 

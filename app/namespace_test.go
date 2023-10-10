@@ -1397,6 +1397,69 @@ func (s *NamespaceTestSuite) TestCreate() {
 	))
 }
 
+func (s *NamespaceTestSuite) TestCreateWithCodec() {
+	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.CreateNamespaceResponse{
+		RequestStatus: &request.RequestStatus{},
+	}, nil).AnyTimes()
+	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
+		User: &auth.User{
+			Id: "test-user-id",
+			Spec: &auth.UserSpec{
+				Email: "testuser@testcompany.com",
+			},
+		},
+	}, nil).AnyTimes()
+	s.NoError(s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+		"--codec-server-spec-json", "{ \"Endpoint\": \"https://test-endpoint.com\", \"PassAccessToken\": true, \"IncludeCredentials\": false }",
+	))
+
+	err := s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+		"--codec-server-spec-json", "{ \"Endpoint\": \"https://test-endpoint.com\", \"PassToken\": true \"IncludeCredentials\": false }",
+	)
+	s.Error(err)
+	s.ErrorContains(err, "invalid character '\"' after object")
+
+	err = s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+		"--codec-server-spec-json", "{ \"Endpoint\": \"\", \"PassToken\": true, \"IncludeCredentials\": false }",
+	)
+	s.Error(err)
+	s.ErrorContains(err, "field Endpoint has to be specified")
+
+	err = s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+		"--codec-server-spec-json", "{ \"Endpoint\": \"http://test-endpoint.com\", \"PassToken\": true, \"IncludeCredentials\": false }",
+	)
+	s.Error(err)
+	s.ErrorContains(err, "field Endpoint has to use https")
+}
+
 func (s *NamespaceTestSuite) TestDelete() {
 	s.Error(s.RunCmd("namespace", "delete"))
 	s.mockService.EXPECT().GetNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.GetNamespaceResponse{
