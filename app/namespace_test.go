@@ -1417,7 +1417,7 @@ func (s *NamespaceTestSuite) TestCreateWithCodec() {
 		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
 		"--search-attribute", "testsearchattribute=Keyword",
 		"--user-namespace-permission", "testuser@testcompany.com=Read",
-		"--codec-server-spec-json", "{ \"Endpoint\": \"https://test-endpoint.com\", \"PassAccessToken\": true, \"IncludeCredentials\": false }",
+		"--codec-endpoint", "https://test-endpoint.com", "--codec-pass-access-token", "--codec-include-credentials", "false",
 	))
 
 	err := s.RunCmd(
@@ -1428,33 +1428,7 @@ func (s *NamespaceTestSuite) TestCreateWithCodec() {
 		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
 		"--search-attribute", "testsearchattribute=Keyword",
 		"--user-namespace-permission", "testuser@testcompany.com=Read",
-		"--codec-server-spec-json", "{ \"Endpoint\": \"https://test-endpoint.com\", \"PassToken\": true \"IncludeCredentials\": false }",
-	)
-	s.Error(err)
-	s.ErrorContains(err, "invalid character '\"' after object")
-
-	err = s.RunCmd(
-		"namespace", "create",
-		"--namespace", "ns1",
-		"--region", "us-west-2",
-		"--ca-certificate", "cert1",
-		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
-		"--search-attribute", "testsearchattribute=Keyword",
-		"--user-namespace-permission", "testuser@testcompany.com=Read",
-		"--codec-server-spec-json", "{ \"Endpoint\": \"\", \"PassToken\": true, \"IncludeCredentials\": false }",
-	)
-	s.Error(err)
-	s.ErrorContains(err, "field Endpoint has to be specified")
-
-	err = s.RunCmd(
-		"namespace", "create",
-		"--namespace", "ns1",
-		"--region", "us-west-2",
-		"--ca-certificate", "cert1",
-		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
-		"--search-attribute", "testsearchattribute=Keyword",
-		"--user-namespace-permission", "testuser@testcompany.com=Read",
-		"--codec-server-spec-json", "{ \"Endpoint\": \"http://test-endpoint.com\", \"PassToken\": true, \"IncludeCredentials\": false }",
+		"--codec-endpoint", "http://test-endpoint.com", "--codec-pass-access-token",
 	)
 	s.Error(err)
 	s.ErrorContains(err, "field Endpoint has to use https")
