@@ -1668,6 +1668,78 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 	}
 }
 
+func (s *NamespaceTestSuite) TestValidateExportSink() {
+	ns := "namespace"
+	type morphValidateReq func(*namespaceservice.ValidateExportSinkRequest)
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+
+	tests := []struct {
+		name string
+
+		args          []string
+		expectRequest morphValidateReq
+		expectErr     bool
+		expectGet     morphGetResp
+	}{
+		{
+			name: "Validate export sinks succeeds",
+			args: []string{"namespace", "es", "validate", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket"},
+			expectRequest: func(r *namespaceservice.ValidateExportSinkRequest) {
+				r.Namespace = ns
+				r.Spec = &sink.ExportSinkSpec{
+					Name:            "sink1",
+					DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
+					S3Sink: &sink.S3Spec{
+						RoleName:     "TestRole",
+						BucketName:   "testBucket",
+						Region:       "us-west-2",
+						AwsAccountId: "123456789012",
+					},
+				}
+			},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace = &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						Region: "us-west-2",
+					},
+				}
+			},
+			expectErr: false,
+		},
+		{
+			name:      "Validate export sinks fails with invalid role arn",
+			args:      []string{"namespace", "es", "validate", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "testRole", "--s3-bucket-name", "testBucket"},
+			expectErr: true,
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			if tc.expectGet != nil {
+				getResp := namespaceservice.GetNamespaceResponse{}
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), gomock.Any()).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectRequest != nil {
+				req := namespaceservice.ValidateExportSinkRequest{}
+				tc.expectRequest(&req)
+				s.mockService.EXPECT().ValidateExportSink(gomock.Any(), &req).
+					Return(&namespaceservice.ValidateExportSinkResponse{}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+
+}
 func (s *NamespaceTestSuite) TestListExportSinks() {
 	ns := "namespace"
 	type morphGetReq func(*namespaceservice.ListExportSinksRequest)
