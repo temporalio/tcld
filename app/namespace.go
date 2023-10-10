@@ -1204,6 +1204,53 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					},
 				},
 				{
+					Name:  "validate",
+					Usage: "Validate export sink",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						sinkNameFlag,
+						sinkAssumedRoleFlagRequired,
+						s3BucketFlagRequired,
+						kmsArnFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						namespace := ctx.String(NamespaceFlagName)
+						ns, err := c.getNamespace(namespace)
+						if err != nil {
+							return fmt.Errorf("validation failed: unable to get namespace: %v", err)
+						}
+
+						awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagRequired.Name))
+						if err != nil {
+							return fmt.Errorf("validation failed: %v", err)
+						}
+
+						validateRequest := &namespaceservice.ValidateExportSinkRequest{
+							Namespace: ctx.String(NamespaceFlagName),
+							Spec: &sink.ExportSinkSpec{
+								Name:            ctx.String(sinkNameFlag.Name),
+								DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
+								S3Sink: &sink.S3Spec{
+									RoleName:     roleName,
+									BucketName:   ctx.String(s3BucketFlagRequired.Name),
+									Region:       ns.Spec.Region,
+									KmsArn:       ctx.String(kmsArnFlag.Name),
+									AwsAccountId: awsAccountID,
+								},
+							},
+						}
+
+						_, err = c.client.ValidateExportSink(c.ctx, validateRequest)
+
+						if err != nil {
+							return fmt.Errorf("validation failed with error %v", err)
+						}
+
+						fmt.Println("Validate test file can be written to the sink successfully")
+						return nil
+					},
+				},
+				{
 					Name:    "delete",
 					Aliases: []string{"d"},
 					Usage:   "Delete export sink",

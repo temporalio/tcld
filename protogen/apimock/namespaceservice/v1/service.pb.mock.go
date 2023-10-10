@@ -296,6 +296,26 @@ func (mr *MockNamespaceServiceClientMockRecorder) UpdateNamespace(ctx, in interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNamespace", reflect.TypeOf((*MockNamespaceServiceClient)(nil).UpdateNamespace), varargs...)
 }
 
+// ValidateExportSink mocks base method.
+func (m *MockNamespaceServiceClient) ValidateExportSink(ctx context.Context, in *namespaceservice.ValidateExportSinkRequest, opts ...grpc.CallOption) (*namespaceservice.ValidateExportSinkResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ValidateExportSink", varargs...)
+	ret0, _ := ret[0].(*namespaceservice.ValidateExportSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateExportSink indicates an expected call of ValidateExportSink.
+func (mr *MockNamespaceServiceClientMockRecorder) ValidateExportSink(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateExportSink", reflect.TypeOf((*MockNamespaceServiceClient)(nil).ValidateExportSink), varargs...)
+}
+
 // MockNamespaceServiceServer is a mock of NamespaceServiceServer interface.
 type MockNamespaceServiceServer struct {
 	ctrl     *gomock.Controller
@@ -512,4 +532,19 @@ func (m *MockNamespaceServiceServer) UpdateNamespace(arg0 context.Context, arg1 
 func (mr *MockNamespaceServiceServerMockRecorder) UpdateNamespace(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNamespace", reflect.TypeOf((*MockNamespaceServiceServer)(nil).UpdateNamespace), arg0, arg1)
+}
+
+// ValidateExportSink mocks base method.
+func (m *MockNamespaceServiceServer) ValidateExportSink(arg0 context.Context, arg1 *namespaceservice.ValidateExportSinkRequest) (*namespaceservice.ValidateExportSinkResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateExportSink", arg0, arg1)
+	ret0, _ := ret[0].(*namespaceservice.ValidateExportSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateExportSink indicates an expected call of ValidateExportSink.
+func (mr *MockNamespaceServiceServerMockRecorder) ValidateExportSink(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateExportSink", reflect.TypeOf((*MockNamespaceServiceServer)(nil).ValidateExportSink), arg0, arg1)
 }
