@@ -29,7 +29,6 @@ const (
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
 	searchAttributeFlagName          = "search-attribute"
 	userNamespacePermissionFlagName  = "user-namespace-permission"
-	codecServerSpecJsonFlagName      = "codec-server-spec-json"
 	codecEndpointFlagName            = "codec-endpoint"
 	codecPassAccessTokenFlagName     = "codec-pass-access-token"
 	codecIncludeCredentialsFlagName  = "codec-include-credentials"
@@ -434,22 +433,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Aliases: []string{"p"},
 				},
 				&cli.StringFlag{
-					Name:    codecServerSpecJsonFlagName,
-					Usage:   `JSON that defines the codec server property passed to the namespace. Sample JSON: { "codecserver": { "endPoint": "https://test-endpoint.com", "PassAccessToken": true, "IncludeCredentials": false } }`,
-					Aliases: []string{"cs"},
-				},
-				&cli.StringFlag{
-					Name:    "codec-endpoint",
+					Name:    codecEndpointFlagName,
 					Usage:   "The codec server endpoint to decode payloads for all users interacting with this Namespace, must be https",
 					Aliases: []string{"e"},
 				},
 				&cli.BoolFlag{
-					Name:    "codec-pass-access-token",
+					Name:    codecPassAccessTokenFlagName,
 					Usage:   "Pass the user access token with the remote endpoint",
 					Aliases: []string{"pat"},
 				},
 				&cli.BoolFlag{
-					Name:    "codec-include-credentials",
+					Name:    codecIncludeCredentialsFlagName,
 					Usage:   "Include cross-origin credentials",
 					Aliases: []string{"ic"},
 				},
