@@ -1432,6 +1432,19 @@ func (s *NamespaceTestSuite) TestCreateWithCodec() {
 	)
 	s.Error(err)
 	s.ErrorContains(err, "field Endpoint has to use https")
+
+	err = s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+		"--pass-access-token",
+	)
+	s.Error(err)
+	s.ErrorContains(err, "pass-access-token or include-credentials cannot be specified when codec endpoint is not specified")
 }
 
 func (s *NamespaceTestSuite) TestDelete() {

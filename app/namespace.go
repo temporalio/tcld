@@ -532,6 +532,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						PassAccessToken:    ctx.Bool(codecPassAccessTokenFlagName),
 						IncludeCredentials: ctx.Bool(codecIncludeCredentialsFlagName),
 					}
+				} else {
+					if ctx.Bool(codecPassAccessTokenFlagName) || ctx.Bool(codecIncludeCredentialsFlagName) {
+						return errors.New("pass-access-token or include-credentials cannot be specified when codec endpoint is not specified")
+					}
 				}
 
 				return c.createNamespace(n, unp)
