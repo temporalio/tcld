@@ -98,7 +98,7 @@ var (
 	}
 	codecPassAccessTokenFlag = &cli.BoolFlag{
 		Name:    codecPassAccessTokenFlagName,
-		Usage:   "Pass the user access token with the remote endpoint",
+		Usage:   "Pass the user access token to the remote endpoint",
 		Aliases: []string{"pat"},
 	}
 	codecEndpointFlag = &cli.StringFlag{
@@ -523,7 +523,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				codecEndpoint := ctx.String(codecEndpointFlagName)
 				// codec server spec is optional, if specified, we need to create the spec and pass along to the API
 				if codecEndpoint != "" {
-					err = validateCodecInput(codecEndpoint)
+					err = validateCodecEndpoint(codecEndpoint)
 					if err != nil {
 						return err
 					}
@@ -985,7 +985,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 
 				codecEndpoint := ctx.String(codecEndpointFlagName)
-				err = validateCodecInput(codecEndpoint)
+				err = validateCodecEndpoint(codecEndpoint)
 				if err != nil {
 					return err
 				}
@@ -1426,7 +1426,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 	return CommandOut{Command: command}, nil
 }
 
-func validateCodecInput(codecEndpoint string) error {
+func validateCodecEndpoint(codecEndpoint string) error {
 	if !strings.HasPrefix(codecEndpoint, "https://") {
 		return errors.New("field Endpoint has to use https")
 	}
