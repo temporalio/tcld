@@ -1095,28 +1095,28 @@ func (s *NamespaceTestSuite) TestUpdateCodecServer() {
 			expectErr: true,
 		},
 		{
-			args:      []string{"n", "ucs", "-n", ns, "-endpoint", "fakehost:9999"},
+			args:      []string{"n", "ucs", "-n", ns, "-endpoint", "https://fakehost:9999"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
-				r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{Endpoint: "fakehost:9999"}
+				r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{Endpoint: "https://fakehost:9999"}
 			},
 		},
 		{
-			args:      []string{"n", "ucs", "-n", ns, "-e", "fakehost:9999", "--pass-access-token"},
+			args:      []string{"n", "ucs", "-n", ns, "-e", "https://fakehost:9999", "--pass-access-token"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 				r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{
-					Endpoint:        "fakehost:9999",
+					Endpoint:        "https://fakehost:9999",
 					PassAccessToken: true,
 				}
 			},
 		},
 		{
-			args:      []string{"n", "ucs", "-n", ns, "-e", "fakehost:9999", "--pat", "--include-credentials"},
+			args:      []string{"n", "ucs", "-n", ns, "-e", "https://fakehost:9999", "--pat", "--include-credentials"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 				r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{
-					Endpoint:           "fakehost:9999",
+					Endpoint:           "https://fakehost:9999",
 					PassAccessToken:    true,
 					IncludeCredentials: true,
 				}
@@ -1395,6 +1395,56 @@ func (s *NamespaceTestSuite) TestCreate() {
 		"--search-attribute", "testsearchattribute=Keyword",
 		"--user-namespace-permission", "testuser@testcompany.com=Read",
 	))
+}
+
+func (s *NamespaceTestSuite) TestCreateWithCodec() {
+	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.CreateNamespaceResponse{
+		RequestStatus: &request.RequestStatus{},
+	}, nil).AnyTimes()
+	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
+		User: &auth.User{
+			Id: "test-user-id",
+			Spec: &auth.UserSpec{
+				Email: "testuser@testcompany.com",
+			},
+		},
+	}, nil).AnyTimes()
+	s.NoError(s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+		"--endpoint", "https://test-endpoint.com", "--pass-access-token", "--include-credentials", "false",
+	))
+
+	err := s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+		"--endpoint", "http://test-endpoint.com", "--pass-access-token",
+	)
+	s.Error(err)
+	s.ErrorContains(err, "field Endpoint has to use https")
+
+	err = s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+		"--pass-access-token",
+	)
+	s.Error(err)
+	s.ErrorContains(err, "pass-access-token or include-credentials cannot be specified when codec endpoint is not specified")
 }
 
 func (s *NamespaceTestSuite) TestDelete() {
