@@ -523,8 +523,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				codecEndpoint := ctx.String(codecEndpointFlagName)
 				// codec server spec is optional, if specified, we need to create the spec and pass along to the API
 				if codecEndpoint != "" {
-					if !strings.HasPrefix(codecEndpoint, "https://") {
-						return errors.New("field Endpoint has to use https")
+					err = validateCodecInput(codecEndpoint)
+					if err != nil {
+						return err
 					}
 					n.Spec.CodecSpec = &namespace.CodecServerPropertySpec{
 						Endpoint:           codecEndpoint,
@@ -983,8 +984,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					return err
 				}
 
+				codecEndpoint := ctx.String(codecEndpointFlagName)
+				err = validateCodecInput(codecEndpoint)
+				if err != nil {
+					return err
+				}
 				replacement := &namespace.CodecServerPropertySpec{
-					Endpoint:           ctx.String(codecEndpointFlagName),
+					Endpoint:           codecEndpoint,
 					PassAccessToken:    ctx.Bool(codecPassAccessTokenFlagName),
 					IncludeCredentials: ctx.Bool(codecIncludeCredentialsFlagName),
 				}
@@ -1418,6 +1424,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 	}
 
 	return CommandOut{Command: command}, nil
+}
+
+func validateCodecInput(codecEndpoint string) error {
+	if !strings.HasPrefix(codecEndpoint, "https://") {
+		return errors.New("field Endpoint has to use https")
+	}
+	return nil
 }
 
 func getSearchAttributeTypes() []string {
