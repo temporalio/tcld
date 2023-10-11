@@ -29,9 +29,9 @@ const (
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
 	searchAttributeFlagName          = "search-attribute"
 	userNamespacePermissionFlagName  = "user-namespace-permission"
-	codecEndpointFlagName            = "codec-endpoint"
-	codecPassAccessTokenFlagName     = "codec-pass-access-token"
-	codecIncludeCredentialsFlagName  = "codec-include-credentials"
+	codecEndpointFlagName            = "endpoint"
+	codecPassAccessTokenFlagName     = "pass-access-token"
+	codecIncludeCredentialsFlagName  = "include-credentials"
 )
 
 var (
@@ -82,7 +82,6 @@ var (
 		Name:  "kms-arn",
 		Usage: "Provide the ARN of the KMS key to use for encryption. Note: If the KMS ARN needs to be added or updated, user should create the IAM Role with KMS or modify the created IAM Role accordingly. Provided it as part of the input won't help",
 	}
-
 	pageSizeFlag = &cli.IntFlag{
 		Name:  "page-size",
 		Usage: "The page size for list operations",
@@ -91,6 +90,21 @@ var (
 	pageTokenFlag = &cli.StringFlag{
 		Name:  "page-token",
 		Usage: "The page token for list operations",
+	}
+	codecIncludeCredentialsFlag = &cli.BoolFlag{
+		Name:    codecIncludeCredentialsFlagName,
+		Usage:   "Include cross-origin credentials",
+		Aliases: []string{"ic"},
+	}
+	codecPassAccessTokenFlag = &cli.BoolFlag{
+		Name:    codecPassAccessTokenFlagName,
+		Usage:   "Pass the user access token with the remote endpoint",
+		Aliases: []string{"pat"},
+	}
+	codecEndpointFlag = &cli.StringFlag{
+		Name:    codecEndpointFlagName,
+		Usage:   "The codec server endpoint to decode payloads for all users interacting with this Namespace, must be https",
+		Aliases: []string{"e"},
 	}
 )
 
@@ -432,21 +446,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
 					Aliases: []string{"p"},
 				},
-				&cli.StringFlag{
-					Name:    codecEndpointFlagName,
-					Usage:   "The codec server endpoint to decode payloads for all users interacting with this Namespace, must be https",
-					Aliases: []string{"e"},
-				},
-				&cli.BoolFlag{
-					Name:    codecPassAccessTokenFlagName,
-					Usage:   "Pass the user access token with the remote endpoint",
-					Aliases: []string{"pat"},
-				},
-				&cli.BoolFlag{
-					Name:    codecIncludeCredentialsFlagName,
-					Usage:   "Include cross-origin credentials",
-					Aliases: []string{"ic"},
-				},
+				codecEndpointFlag,
+				codecPassAccessTokenFlag,
+				codecIncludeCredentialsFlag,
 			},
 			Action: func(ctx *cli.Context) error {
 				n := &namespace.Namespace{
@@ -519,8 +521,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 
 				codecEndpoint := ctx.String(codecEndpointFlagName)
-				codecPassAccessToken := ctx.Bool(codecPassAccessTokenFlagName)
-				codecIncludeCredentials := ctx.Bool(codecIncludeCredentialsFlagName)
 				// codec server spec is optional, if specified, we need to create the spec and pass along to the API
 				if codecEndpoint != "" {
 					if !strings.HasPrefix(codecEndpoint, "https://") {
@@ -528,8 +528,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					}
 					n.Spec.CodecSpec = &namespace.CodecServerPropertySpec{
 						Endpoint:           codecEndpoint,
-						PassAccessToken:    codecPassAccessToken,
-						IncludeCredentials: codecIncludeCredentials,
+						PassAccessToken:    ctx.Bool(codecPassAccessTokenFlagName),
+						IncludeCredentials: ctx.Bool(codecIncludeCredentialsFlagName),
 					}
 				}
 
@@ -969,21 +969,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Flags: []cli.Flag{
 				NamespaceFlag,
 				&cli.StringFlag{
-					Name:     "endpoint",
-					Usage:    "The codec server endpoint to decode payloads for all users interacting with this Namespace, must be https",
-					Aliases:  []string{"e"},
+					Name:     codecEndpointFlag.Name,
+					Usage:    codecEndpointFlag.Usage,
+					Aliases:  codecEndpointFlag.Aliases,
 					Required: true,
 				},
-				&cli.BoolFlag{
-					Name:    "pass-access-token",
-					Usage:   "Pass the user access token with the remote endpoint",
-					Aliases: []string{"pat"},
-				},
-				&cli.BoolFlag{
-					Name:    "include-credentials",
-					Usage:   "Include cross-origin credentials",
-					Aliases: []string{"ic"},
-				},
+				codecPassAccessTokenFlag,
+				codecIncludeCredentialsFlag,
 			},
 			Action: func(ctx *cli.Context) error {
 				n, err := c.getNamespace(ctx.String(NamespaceFlagName))
@@ -992,9 +984,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 
 				replacement := &namespace.CodecServerPropertySpec{
-					Endpoint:           ctx.String("endpoint"),
-					PassAccessToken:    ctx.Bool("pass-access-token"),
-					IncludeCredentials: ctx.Bool("include-credentials"),
+					Endpoint:           ctx.String(codecEndpointFlagName),
+					PassAccessToken:    ctx.Bool(codecPassAccessTokenFlagName),
+					IncludeCredentials: ctx.Bool(codecIncludeCredentialsFlagName),
 				}
 
 				difference, err := compareCodecSpec(n.Spec.CodecSpec, replacement)

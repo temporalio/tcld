@@ -1417,7 +1417,7 @@ func (s *NamespaceTestSuite) TestCreateWithCodec() {
 		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
 		"--search-attribute", "testsearchattribute=Keyword",
 		"--user-namespace-permission", "testuser@testcompany.com=Read",
-		"--codec-endpoint", "https://test-endpoint.com", "--codec-pass-access-token", "--codec-include-credentials", "false",
+		"--endpoint", "https://test-endpoint.com", "--pass-access-token", "--include-credentials", "false",
 	))
 
 	err := s.RunCmd(
@@ -1428,7 +1428,7 @@ func (s *NamespaceTestSuite) TestCreateWithCodec() {
 		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
 		"--search-attribute", "testsearchattribute=Keyword",
 		"--user-namespace-permission", "testuser@testcompany.com=Read",
-		"--codec-endpoint", "http://test-endpoint.com", "--codec-pass-access-token",
+		"--endpoint", "http://test-endpoint.com", "--pass-access-token",
 	)
 	s.Error(err)
 	s.ErrorContains(err, "field Endpoint has to use https")
