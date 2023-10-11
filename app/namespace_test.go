@@ -1095,28 +1095,28 @@ func (s *NamespaceTestSuite) TestUpdateCodecServer() {
 			expectErr: true,
 		},
 		{
-			args:      []string{"n", "ucs", "-n", ns, "-endpoint", "fakehost:9999"},
+			args:      []string{"n", "ucs", "-n", ns, "-endpoint", "https://fakehost:9999"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
-				r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{Endpoint: "fakehost:9999"}
+				r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{Endpoint: "https://fakehost:9999"}
 			},
 		},
 		{
-			args:      []string{"n", "ucs", "-n", ns, "-e", "fakehost:9999", "--pass-access-token"},
+			args:      []string{"n", "ucs", "-n", ns, "-e", "https://fakehost:9999", "--pass-access-token"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 				r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{
-					Endpoint:        "fakehost:9999",
+					Endpoint:        "https://fakehost:9999",
 					PassAccessToken: true,
 				}
 			},
 		},
 		{
-			args:      []string{"n", "ucs", "-n", ns, "-e", "fakehost:9999", "--pat", "--include-credentials"},
+			args:      []string{"n", "ucs", "-n", ns, "-e", "https://fakehost:9999", "--pat", "--include-credentials"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 				r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{
-					Endpoint:           "fakehost:9999",
+					Endpoint:           "https://fakehost:9999",
 					PassAccessToken:    true,
 					IncludeCredentials: true,
 				}
