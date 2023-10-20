@@ -413,7 +413,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 				&cli.StringSliceFlag{
 					Name:     namespaceRegionFlagName,
-					Usage:    "Create namespace in specified regions; see 'tcld account list-regions' to get a list of available regions for your account",
+					Usage:    "Create namespace in specified regions; if multiple regions are selected, the first one will be the active region. See 'tcld account list-regions' to get a list of available regions for your account",
 					Aliases:  []string{"re"},
 					Required: true,
 				},
