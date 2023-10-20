@@ -116,6 +116,26 @@ func (mr *MockNamespaceServiceClientMockRecorder) DeleteNamespace(ctx, in interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNamespace", reflect.TypeOf((*MockNamespaceServiceClient)(nil).DeleteNamespace), varargs...)
 }
 
+// FailoverNamespace mocks base method.
+func (m *MockNamespaceServiceClient) FailoverNamespace(ctx context.Context, in *namespaceservice.FailoverNamespaceRequest, opts ...grpc.CallOption) (*namespaceservice.FailoverNamespaceResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "FailoverNamespace", varargs...)
+	ret0, _ := ret[0].(*namespaceservice.FailoverNamespaceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FailoverNamespace indicates an expected call of FailoverNamespace.
+func (mr *MockNamespaceServiceClientMockRecorder) FailoverNamespace(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FailoverNamespace", reflect.TypeOf((*MockNamespaceServiceClient)(nil).FailoverNamespace), varargs...)
+}
+
 // GetExportSink mocks base method.
 func (m *MockNamespaceServiceClient) GetExportSink(ctx context.Context, in *namespaceservice.GetExportSinkRequest, opts ...grpc.CallOption) (*namespaceservice.GetExportSinkResponse, error) {
 	m.ctrl.T.Helper()
@@ -377,6 +397,21 @@ func (m *MockNamespaceServiceServer) DeleteNamespace(arg0 context.Context, arg1 
 func (mr *MockNamespaceServiceServerMockRecorder) DeleteNamespace(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNamespace", reflect.TypeOf((*MockNamespaceServiceServer)(nil).DeleteNamespace), arg0, arg1)
+}
+
+// FailoverNamespace mocks base method.
+func (m *MockNamespaceServiceServer) FailoverNamespace(arg0 context.Context, arg1 *namespaceservice.FailoverNamespaceRequest) (*namespaceservice.FailoverNamespaceResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FailoverNamespace", arg0, arg1)
+	ret0, _ := ret[0].(*namespaceservice.FailoverNamespaceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FailoverNamespace indicates an expected call of FailoverNamespace.
+func (mr *MockNamespaceServiceServerMockRecorder) FailoverNamespace(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FailoverNamespace", reflect.TypeOf((*MockNamespaceServiceServer)(nil).FailoverNamespace), arg0, arg1)
 }
 
 // GetExportSink mocks base method.

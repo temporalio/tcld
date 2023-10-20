@@ -10,16 +10,20 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/temporalio/tcld/protogen/api/auth/v1"
-	"github.com/temporalio/tcld/protogen/api/sink/v1"
+	"github.com/google/uuid"
 	"go.uber.org/multierr"
 
+	"github.com/temporalio/tcld/protogen/api/auth/v1"
+	v14 "github.com/temporalio/tcld/protogen/api/common/v1"
+	"github.com/temporalio/tcld/protogen/api/sink/v1"
+
 	"github.com/kylelemons/godebug/diff"
+	"github.com/urfave/cli/v2"
+	"google.golang.org/grpc"
+
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
-	"github.com/urfave/cli/v2"
-	"google.golang.org/grpc"
 )
 
 const (
@@ -206,6 +210,24 @@ func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespa
 		RequestId:       ctx.String(RequestIDFlagName),
 		Namespace:       n.Namespace,
 		ResourceVersion: resourceVersion,
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res)
+}
+func (c *NamespaceClient) failoverNamespace(ctx *cli.Context) error {
+	namespaceName := ctx.String(NamespaceFlagName)
+	targetRegion := ctx.String("target-region")
+	skipGracefulFailover := ctx.Bool("skip-graceful-failover")
+	res, err := c.client.FailoverNamespace(c.ctx, &namespaceservice.FailoverNamespaceRequest{
+		Namespace: namespaceName,
+		RequestId: uuid.NewString(),
+		TargetRegion: &v14.RegionID{
+			CloudProvider: "aws",
+			Name:          targetRegion,
+		},
+		SkipGracefulFailover: skipGracefulFailover,
 	})
 	if err != nil {
 		return err
@@ -551,6 +573,44 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					return err
 				}
 				return c.deleteNamespace(ctx, n)
+			},
+		},
+		{
+			Name:    "failover",
+			Usage:   "Failover [experiment] a temporal namespace from a region to a target region",
+			Aliases: []string{"fo"},
+			Flags: []cli.Flag{
+				RequestIDFlag,
+				&cli.StringFlag{
+					Name:     NamespaceFlagName,
+					Usage:    "The namespace hosted on temporal cloud",
+					Aliases:  []string{"n"},
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:     "target-region",
+					Usage:    "The region to be primary",
+					Required: true,
+				},
+				&cli.BoolFlag{
+					Name:  "skip-graceful-failover",
+					Usage: "Skip Graceful failover",
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+
+				yes, err := ConfirmPrompt(ctx,
+					fmt.Sprintf(
+						"Failover a namespace will change the namespace primary region.\nDo you still want to continue ?",
+					),
+				)
+				if err != nil {
+					return err
+				}
+				if !yes {
+					return nil
+				}
+				return c.failoverNamespace(ctx)
 			},
 		},
 		{
