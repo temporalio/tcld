@@ -466,7 +466,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					return fmt.Errorf("namespace region is required")
 				}
 				if len(regions) > 2 {
-					return fmt.Errorf("namespace can only be sepecified up to 2 regions")
+					return fmt.Errorf("namespace can only be replicated up to 2 regions")
 				}
 				n.Spec = &namespace.NamespaceSpec{
 					Region:         regions[0],
