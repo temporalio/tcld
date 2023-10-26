@@ -123,14 +123,10 @@ func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, cl
 		return fmt.Errorf("failed to retrieve oauth2 config: %w", err)
 	}
 
-	fmt.Printf("Oauth config is %v\n", config)
-
 	resp, err := config.DeviceAuth(ctx.Context, oauth2.SetAuthURLParam("audience", audience))
 	if err != nil {
 		return fmt.Errorf("failed to perform device auth: %w", err)
 	}
-
-	fmt.Printf("Received device response is %v\n", resp)
 
 	domainURL, err := parseURL(ctx.String("domain"))
 	if err != nil {
