@@ -43,7 +43,7 @@ func TestParseDuration(t *testing.T) {
 		},
 		{
 			arg:  "2d12h30m",
-			want: 2*24*time.Hour + 12*time.Hour + 30*time.Minute,
+			want: 60*time.Hour + 30*time.Minute,
 		},
 		{
 			arg:     "-2d12h30m",
@@ -62,12 +62,12 @@ func TestParseDuration(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			arg:     "2d10h4d30m",
+			arg:     "2d10h30m4d",
 			wantErr: true,
 		},
 		{
-			// technically valid due to 'time.ParseDuration', but
-			// note that we require 'd' to come first (if present)
+			// technically valid due to the behaviour of time.ParseDuration(),
+			// but note that we require 'd' to come first (if present)
 			arg:  "2d55s20m10h",
 			want: 58*time.Hour + 20*time.Minute + 55*time.Second,
 		},
