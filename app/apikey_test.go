@@ -15,6 +15,74 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+func TestParseDuration(t *testing.T) {
+	tests := []struct {
+		arg     string
+		want    time.Duration
+		wantErr bool
+	}{
+		{
+			arg:  "12h",
+			want: 12 * time.Hour,
+		},
+		{
+			arg:     "-24h",
+			wantErr: true,
+		},
+		{
+			arg:     "d",
+			wantErr: true,
+		},
+		{
+			arg:  "30d",
+			want: 30 * 24 * time.Hour,
+		},
+		{
+			arg:     "-2d",
+			wantErr: true,
+		},
+		{
+			arg:  "2d12h30m",
+			want: 2*24*time.Hour + 12*time.Hour + 30*time.Minute,
+		},
+		{
+			arg:     "-2d12h30m",
+			wantErr: true,
+		},
+		{
+			arg:     "2d-12h30m",
+			wantErr: true,
+		},
+		{
+			arg:     "abcd12h30m",
+			wantErr: true,
+		},
+		{
+			arg:     "2dddd",
+			wantErr: true,
+		},
+		{
+			arg:     "2d10h4d30m",
+			wantErr: true,
+		},
+		{
+			// technically valid due to 'time.ParseDuration', but
+			// note that we require 'd' to come first (if present)
+			arg:  "2d55s20m10h",
+			want: 58*time.Hour + 20*time.Minute + 55*time.Second,
+		},
+	}
+	for _, test := range tests {
+		if got, err := parseDuration(test.arg); err != nil {
+			if !test.wantErr {
+				t.Fatalf("unexpected error: %v, input: %s", err, test.arg)
+			}
+		} else if got != test.want {
+			t.Fatalf("expected: %s, got: %s", test.want, got)
+		}
+	}
+}
+
 func TestAPIKey(t *testing.T) {
 	suite.Run(t, new(APIKeyTestSuite))
 }
@@ -92,6 +160,7 @@ func (s *APIKeyTestSuite) TestList() {
 func (s *APIKeyTestSuite) TestCreate() {
 	s.Error(s.RunCmd("apikey", "create"))
 	s.Error(s.RunCmd("apikey", "create", "--name", "test1"))
+	s.Error(s.RunCmd("apikey", "create", "--name", "test1", "--duration", "-24h"))
 	s.mockAuthService.EXPECT().CreateAPIKey(gomock.Any(), gomock.Any()).Return(nil, errors.New("create apikey error")).Times(1)
 	s.Error(s.RunCmd("apikey", "create", "--name", "test1", "--duration", "1h"))
 	s.mockAuthService.EXPECT().CreateAPIKey(gomock.Any(), gomock.Any()).Return(&authservice.CreateAPIKeyResponse{

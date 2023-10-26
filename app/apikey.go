@@ -2,7 +2,10 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/types"
@@ -122,6 +125,40 @@ func (s *APIKeyClient) deleteAPIKey(
 	return PrintProto(resp)
 }
 
+// a hacky version of time.ParseDuration() which considers days ('d') a valid time unit.
+func parseDuration(s string) (time.Duration, error) {
+	var d time.Duration
+	durationString := s
+	parts := strings.Split(s, "d")
+	if len(parts) == 2 {
+		days, err := strconv.ParseInt(parts[0], 10, 32)
+		if err != nil {
+			return d, fmt.Errorf("time: invalid duration \"%s\"", s)
+		}
+		if days < 0 {
+			return d, errors.New("expiration cannot be negative")
+		}
+		// note: this calculation is _technically_ incorrect,
+		// due to daylight savings time zone transitions.
+		// however, when the TTL is specified in days,
+		// we can afford to be off by +/- an hour.
+		d += 24 * time.Duration(days) * time.Hour
+		durationString = parts[1]
+	}
+	if len(durationString) == 0 {
+		return d, nil
+	}
+	pd, err := time.ParseDuration(durationString)
+	if err != nil {
+		return d, err
+	}
+	if pd < 0 {
+		return d, errors.New("expiration cannot be negative")
+	}
+	d += pd
+	return d, nil
+}
+
 func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 	var c *APIKeyClient
 	return CommandOut{
@@ -151,9 +188,9 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 							Usage:   "the description of the apikey",
 							Aliases: []string{"desc"},
 						},
-						&cli.DurationFlag{
+						&cli.StringFlag{
 							Name:    "duration",
-							Usage:   "the duration from now when the apikey will expire, will be ignored if expiry flag is set, example: '24h'",
+							Usage:   "the duration from now when the apikey will expire, will be ignored if expiry flag is set, example: '30d' or '2d12h",
 							Aliases: []string{"d"},
 						},
 						&cli.TimestampFlag{
@@ -167,11 +204,15 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 					Action: func(ctx *cli.Context) error {
 						expiry := ctx.Timestamp("expiry")
 						if expiry == nil || expiry.IsZero() {
-							expiryPeriod := ctx.Duration("duration")
-							if expiryPeriod == 0 {
+							expiryPeriod := ctx.String("duration")
+							if expiryPeriod == "" {
 								return fmt.Errorf("no expiry was set")
 							}
-							e := time.Now().UTC().Add(expiryPeriod)
+							d, err := parseDuration(expiryPeriod)
+							if err != nil {
+								return fmt.Errorf("failed to parse duration: %v", err)
+							}
+							e := time.Now().UTC().Add(d)
 							expiry = &e
 						}
 						return c.createAPIKey(
