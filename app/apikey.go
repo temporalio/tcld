@@ -212,6 +212,9 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 							if err != nil {
 								return fmt.Errorf("failed to parse duration: %v", err)
 							}
+							if d == 0 {
+								return fmt.Errorf("no expiry was set")
+							}
 							e := time.Now().UTC().Add(d)
 							expiry = &e
 						}
