@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -185,20 +183,6 @@ func NewLoginCommand(c *LoginClient) (CommandOut, error) {
 			return c.login(ctx, ctx.String("domain"), ctx.String("audience"), ctx.String("client-id"), ctx.Bool("disable-pop-up"))
 		},
 	}}, nil
-}
-
-func postFormRequest(url string, values url.Values, resStruct interface{}) error {
-	res, err := http.PostForm(url, values)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(body, &resStruct)
 }
 
 func oauthConfig(ctx *cli.Context) (oauth2.Config, error) {
