@@ -34,8 +34,8 @@ func TestParseDuration(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			arg:  "30d",
-			want: 30 * 24 * time.Hour,
+			arg:  "730d",
+			want: 730 * 24 * time.Hour,
 		},
 		{
 			arg:     "-2d",
