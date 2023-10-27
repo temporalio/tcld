@@ -132,10 +132,10 @@ func parseDuration(s string) (time.Duration, error) {
 	if len(parts) == 2 {
 		days, err := strconv.ParseInt(parts[0], 10, 32)
 		if err != nil {
-			return d, fmt.Errorf("time: invalid duration \"%s\"", s)
+			return 0, fmt.Errorf("time: invalid duration \"%s\"", s)
 		}
 		if days < 0 {
-			return d, fmt.Errorf("expiration cannot be negative")
+			return 0, fmt.Errorf("expiration cannot be negative")
 		}
 		// note: this calculation is _technically_ incorrect,
 		// due to daylight savings time zone transitions.
@@ -149,10 +149,10 @@ func parseDuration(s string) (time.Duration, error) {
 	}
 	pd, err := time.ParseDuration(durationString)
 	if err != nil {
-		return d, err
+		return 0, err
 	}
 	if pd < 0 {
-		return d, fmt.Errorf("expiration cannot be negative")
+		return 0, fmt.Errorf("expiration cannot be negative")
 	}
 	d += pd
 	return d, nil
