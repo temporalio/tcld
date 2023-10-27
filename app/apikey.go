@@ -3,13 +3,12 @@ package app
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/types"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
+	"github.com/temporalio/tcld/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -124,40 +123,6 @@ func (s *APIKeyClient) deleteAPIKey(
 	return PrintProto(resp)
 }
 
-// a hacky version of time.ParseDuration() which considers days ('d') a valid time unit.
-func parseDuration(s string) (time.Duration, error) {
-	var d time.Duration
-	durationString := s
-	parts := strings.Split(s, "d")
-	if len(parts) == 2 {
-		days, err := strconv.ParseInt(parts[0], 10, 32)
-		if err != nil {
-			return 0, fmt.Errorf("time: invalid duration \"%s\"", s)
-		}
-		if days < 0 {
-			return 0, fmt.Errorf("expiration cannot be negative")
-		}
-		// note: this calculation is _technically_ incorrect,
-		// due to daylight savings time zone transitions.
-		// however, when the TTL is specified in days,
-		// we can afford to be off by +/- an hour.
-		d += 24 * time.Duration(days) * time.Hour
-		durationString = parts[1]
-	}
-	if len(durationString) == 0 {
-		return d, nil
-	}
-	pd, err := time.ParseDuration(durationString)
-	if err != nil {
-		return 0, err
-	}
-	if pd < 0 {
-		return 0, fmt.Errorf("expiration cannot be negative")
-	}
-	d += pd
-	return d, nil
-}
-
 func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 	var c *APIKeyClient
 	return CommandOut{
@@ -189,7 +154,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:    "duration",
-							Usage:   "the duration from now when the apikey will expire, will be ignored if expiry flag is set, example: '30d' or '2d12h",
+							Usage:   "the duration from now when the apikey will expire, will be ignored if expiry flag is set, example: '30d' or '4d12h",
 							Aliases: []string{"d"},
 						},
 						&cli.TimestampFlag{
@@ -207,12 +172,12 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 							if expiryPeriod == "" {
 								return fmt.Errorf("no expiry was set")
 							}
-							d, err := parseDuration(expiryPeriod)
+							d, err := utils.ParseDuration(expiryPeriod)
 							if err != nil {
 								return fmt.Errorf("failed to parse duration: %w", err)
 							}
-							if d == 0 {
-								return fmt.Errorf("expiration cannot be zero")
+							if d <= 0 {
+								return fmt.Errorf("expiry must be positive: %s", expiryPeriod)
 							}
 							e := time.Now().UTC().Add(d)
 							expiry = &e
