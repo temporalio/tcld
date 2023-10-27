@@ -34,6 +34,10 @@ func TestParseDuration(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			arg:  "0d24h",
+			want: 24 * time.Hour,
+		},
+		{
 			arg:  "730d",
 			want: 730 * 24 * time.Hour,
 		},
@@ -161,6 +165,7 @@ func (s *APIKeyTestSuite) TestCreate() {
 	s.Error(s.RunCmd("apikey", "create"))
 	s.Error(s.RunCmd("apikey", "create", "--name", "test1"))
 	s.Error(s.RunCmd("apikey", "create", "--name", "test1", "--duration", "-24h"))
+	s.Error(s.RunCmd("apikey", "create", "--name", "test1", "--duration", "0d"))
 	s.mockAuthService.EXPECT().CreateAPIKey(gomock.Any(), gomock.Any()).Return(nil, errors.New("create apikey error")).Times(1)
 	s.Error(s.RunCmd("apikey", "create", "--name", "test1", "--duration", "1h"))
 	s.mockAuthService.EXPECT().CreateAPIKey(gomock.Any(), gomock.Any()).Return(&authservice.CreateAPIKeyResponse{
