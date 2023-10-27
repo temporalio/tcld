@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -136,7 +135,7 @@ func parseDuration(s string) (time.Duration, error) {
 			return d, fmt.Errorf("time: invalid duration \"%s\"", s)
 		}
 		if days < 0 {
-			return d, errors.New("expiration cannot be negative")
+			return d, fmt.Errorf("expiration cannot be negative")
 		}
 		// note: this calculation is _technically_ incorrect,
 		// due to daylight savings time zone transitions.
@@ -153,7 +152,7 @@ func parseDuration(s string) (time.Duration, error) {
 		return d, err
 	}
 	if pd < 0 {
-		return d, errors.New("expiration cannot be negative")
+		return d, fmt.Errorf("expiration cannot be negative")
 	}
 	d += pd
 	return d, nil
@@ -213,7 +212,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 								return fmt.Errorf("failed to parse duration: %w", err)
 							}
 							if d == 0 {
-								return fmt.Errorf("no expiry was set")
+								return fmt.Errorf("expiration cannot be zero")
 							}
 							e := time.Now().UTC().Add(d)
 							expiry = &e
