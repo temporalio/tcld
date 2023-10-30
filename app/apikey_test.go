@@ -92,8 +92,10 @@ func (s *APIKeyTestSuite) TestList() {
 func (s *APIKeyTestSuite) TestCreate() {
 	s.Error(s.RunCmd("apikey", "create"))
 	s.Error(s.RunCmd("apikey", "create", "--name", "test1"))
+	s.Error(s.RunCmd("apikey", "create", "--name", "test1", "--duration", "-24h"))
+	s.Error(s.RunCmd("apikey", "create", "--name", "test1", "--duration", "0d"))
 	s.mockAuthService.EXPECT().CreateAPIKey(gomock.Any(), gomock.Any()).Return(nil, errors.New("create apikey error")).Times(1)
-	s.Error(s.RunCmd("apikey", "create", "--name", "test1", "--duration", "1h"))
+	s.Error(s.RunCmd("apikey", "create", "--name", "test1", "--duration", "30d"))
 	s.mockAuthService.EXPECT().CreateAPIKey(gomock.Any(), gomock.Any()).Return(&authservice.CreateAPIKeyResponse{
 		Id:        "id1",
 		SecretKey: "secret1",
@@ -101,7 +103,7 @@ func (s *APIKeyTestSuite) TestCreate() {
 			RequestId: "rid",
 		},
 	}, nil).Times(1)
-	s.NoError(s.RunCmd("apikey", "create", "--name", "test1", "--duration", "1h"))
+	s.NoError(s.RunCmd("apikey", "create", "--name", "test1", "--duration", "30d"))
 	s.mockAuthService.EXPECT().CreateAPIKey(gomock.Any(), gomock.Any()).Return(&authservice.CreateAPIKeyResponse{
 		Id:        "id1",
 		SecretKey: "secret1",
