@@ -154,7 +154,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:    "duration",
-							Usage:   "the duration from now when the apikey will expire, will be ignored if expiry flag is set, example: '30d' or '4d12h",
+							Usage:   "the duration from now when the apikey will expire, will be ignored if expiry flag is set, examples: '2.5y', '30d', '4d12h'",
 							Aliases: []string{"d"},
 						},
 						&cli.TimestampFlag{
@@ -177,7 +177,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 								return fmt.Errorf("failed to parse duration: %w", err)
 							}
 							if d <= 0 {
-								return fmt.Errorf("expiry must be positive: %s", expiryPeriod)
+								return fmt.Errorf("expiration must be positive: %s", expiryPeriod)
 							}
 							e := time.Now().UTC().Add(d)
 							expiry = &e
