@@ -42,8 +42,6 @@ func (s *testServer) GetRequestStatus(ctx context.Context, req *requestservice.G
 	md, _ := metadata.FromIncomingContext(ctx)
 	s.receivedMD = md.Copy()
 
-	fmt.Printf("Received md is %#v\n", md)
-
 	return &requestservice.GetRequestStatusResponse{
 		RequestStatus: &request.RequestStatus{
 			RequestId: "test-request-id",
