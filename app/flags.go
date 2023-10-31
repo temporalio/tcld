@@ -37,7 +37,7 @@ var (
 		Name:     ConfigDirFlagName,
 		Value:    filepath.Join(os.Getenv("HOME"), ".config", "tcld"),
 		Usage:    "The config directory to use",
-		EnvVars:  []string{"TEMPORAL_CLOUD_CONFIG"},
+		EnvVars:  []string{"TEMPORAL_CLOUD_CONFIG_DIR"},
 		Hidden:   true,
 		Required: false,
 	}
