@@ -1095,28 +1095,28 @@ func (s *NamespaceTestSuite) TestUpdateCodecServer() {
 			expectErr: true,
 		},
 		{
-			args:      []string{"n", "ucs", "-n", ns, "-endpoint", "fakehost:9999"},
+			args:      []string{"n", "ucs", "-n", ns, "-endpoint", "https://fakehost:9999"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
-				r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{Endpoint: "fakehost:9999"}
+				r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{Endpoint: "https://fakehost:9999"}
 			},
 		},
 		{
-			args:      []string{"n", "ucs", "-n", ns, "-e", "fakehost:9999", "--pass-access-token"},
+			args:      []string{"n", "ucs", "-n", ns, "-e", "https://fakehost:9999", "--pass-access-token"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 				r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{
-					Endpoint:        "fakehost:9999",
+					Endpoint:        "https://fakehost:9999",
 					PassAccessToken: true,
 				}
 			},
 		},
 		{
-			args:      []string{"n", "ucs", "-n", ns, "-e", "fakehost:9999", "--pat", "--include-credentials"},
+			args:      []string{"n", "ucs", "-n", ns, "-e", "https://fakehost:9999", "--pat", "--include-credentials"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 				r.Spec.CodecSpec = &namespace.CodecServerPropertySpec{
-					Endpoint:           "fakehost:9999",
+					Endpoint:           "https://fakehost:9999",
 					PassAccessToken:    true,
 					IncludeCredentials: true,
 				}
@@ -1397,6 +1397,56 @@ func (s *NamespaceTestSuite) TestCreate() {
 	))
 }
 
+func (s *NamespaceTestSuite) TestCreateWithCodec() {
+	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.CreateNamespaceResponse{
+		RequestStatus: &request.RequestStatus{},
+	}, nil).AnyTimes()
+	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
+		User: &auth.User{
+			Id: "test-user-id",
+			Spec: &auth.UserSpec{
+				Email: "testuser@testcompany.com",
+			},
+		},
+	}, nil).AnyTimes()
+	s.NoError(s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+		"--endpoint", "https://test-endpoint.com", "--pass-access-token", "--include-credentials", "false",
+	))
+
+	err := s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+		"--endpoint", "http://test-endpoint.com", "--pass-access-token",
+	)
+	s.Error(err)
+	s.ErrorContains(err, "field Endpoint has to use https")
+
+	err = s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--ca-certificate", "cert1",
+		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+		"--pass-access-token",
+	)
+	s.Error(err)
+	s.ErrorContains(err, "pass-access-token or include-credentials cannot be specified when codec endpoint is not specified")
+}
+
 func (s *NamespaceTestSuite) TestDelete() {
 	s.Error(s.RunCmd("namespace", "delete"))
 	s.mockService.EXPECT().GetNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.GetNamespaceResponse{
@@ -1605,6 +1655,78 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 	}
 }
 
+func (s *NamespaceTestSuite) TestValidateExportSink() {
+	ns := "namespace"
+	type morphValidateReq func(*namespaceservice.ValidateExportSinkRequest)
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+
+	tests := []struct {
+		name string
+
+		args          []string
+		expectRequest morphValidateReq
+		expectErr     bool
+		expectGet     morphGetResp
+	}{
+		{
+			name: "Validate export sinks succeeds",
+			args: []string{"namespace", "es", "validate", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket"},
+			expectRequest: func(r *namespaceservice.ValidateExportSinkRequest) {
+				r.Namespace = ns
+				r.Spec = &sink.ExportSinkSpec{
+					Name:            "sink1",
+					DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
+					S3Sink: &sink.S3Spec{
+						RoleName:     "TestRole",
+						BucketName:   "testBucket",
+						Region:       "us-west-2",
+						AwsAccountId: "123456789012",
+					},
+				}
+			},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace = &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						Region: "us-west-2",
+					},
+				}
+			},
+			expectErr: false,
+		},
+		{
+			name:      "Validate export sinks fails with invalid role arn",
+			args:      []string{"namespace", "es", "validate", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "testRole", "--s3-bucket-name", "testBucket"},
+			expectErr: true,
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			if tc.expectGet != nil {
+				getResp := namespaceservice.GetNamespaceResponse{}
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), gomock.Any()).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectRequest != nil {
+				req := namespaceservice.ValidateExportSinkRequest{}
+				tc.expectRequest(&req)
+				s.mockService.EXPECT().ValidateExportSink(gomock.Any(), &req).
+					Return(&namespaceservice.ValidateExportSinkResponse{}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+
+}
 func (s *NamespaceTestSuite) TestListExportSinks() {
 	ns := "namespace"
 	type morphGetReq func(*namespaceservice.ListExportSinksRequest)

@@ -5,8 +5,8 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/mail"
+	"os"
 	"strconv"
 	"strings"
 
@@ -33,6 +33,9 @@ const (
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
 	searchAttributeFlagName          = "search-attribute"
 	userNamespacePermissionFlagName  = "user-namespace-permission"
+	codecEndpointFlagName            = "endpoint"
+	codecPassAccessTokenFlagName     = "pass-access-token"
+	codecIncludeCredentialsFlagName  = "include-credentials"
 )
 
 var (
@@ -51,17 +54,7 @@ var (
 		Usage:   "The fingerprint of to the ca certificate",
 		Aliases: []string{"fp"},
 	}
-	namespaceRegions = []string{
-		"ap-northeast-1",
-		"ap-southeast-1",
-		"ap-southeast-2",
-		"ca-central-1",
-		"eu-central-1",
-		"eu-west-1",
-		"eu-west-2",
-		"us-east-1",
-		"us-west-2",
-	}
+
 	sinkNameFlag = &cli.StringFlag{
 		Name:     "sink-name",
 		Usage:    "Provide a name for the export sink",
@@ -93,7 +86,6 @@ var (
 		Name:  "kms-arn",
 		Usage: "Provide the ARN of the KMS key to use for encryption. Note: If the KMS ARN needs to be added or updated, user should create the IAM Role with KMS or modify the created IAM Role accordingly. Provided it as part of the input won't help",
 	}
-
 	pageSizeFlag = &cli.IntFlag{
 		Name:  "page-size",
 		Usage: "The page size for list operations",
@@ -102,6 +94,21 @@ var (
 	pageTokenFlag = &cli.StringFlag{
 		Name:  "page-token",
 		Usage: "The page token for list operations",
+	}
+	codecIncludeCredentialsFlag = &cli.BoolFlag{
+		Name:    codecIncludeCredentialsFlagName,
+		Usage:   "Include cross-origin credentials",
+		Aliases: []string{"ic"},
+	}
+	codecPassAccessTokenFlag = &cli.BoolFlag{
+		Name:    codecPassAccessTokenFlagName,
+		Usage:   "Pass the user access token to the remote endpoint",
+		Aliases: []string{"pat"},
+	}
+	codecEndpointFlag = &cli.StringFlag{
+		Name:    codecEndpointFlagName,
+		Usage:   "The codec server endpoint to decode payloads for all users interacting with this Namespace, must be https",
+		Aliases: []string{"e"},
 	}
 )
 
@@ -375,7 +382,7 @@ func ReadCACerts(ctx *cli.Context) (string, error) {
 	cert := ctx.String(CaCertificateFlagName)
 	if cert == "" {
 		if ctx.Path(CaCertificateFileFlagName) != "" {
-			data, err := ioutil.ReadFile(ctx.Path(CaCertificateFileFlagName))
+			data, err := os.ReadFile(ctx.Path(CaCertificateFileFlagName))
 			if err != nil {
 				return "", err
 			}
@@ -397,7 +404,7 @@ func ReadCertFilters(ctx *cli.Context) ([]byte, error) {
 	var certFilterBytes []byte
 	var err error
 	if len(certFilterFilepath) > 0 {
-		certFilterBytes, err = ioutil.ReadFile(certFilterFilepath)
+		certFilterBytes, err = os.ReadFile(certFilterFilepath)
 		if err != nil {
 			return nil, err
 		}
@@ -426,7 +433,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 				&cli.StringFlag{
 					Name:     namespaceRegionFlagName,
-					Usage:    fmt.Sprintf("Create namespace in this region; valid regions are: %v", namespaceRegions),
+					Usage:    "Create namespace in specified region; see 'tcld account list-regions' to get a list of available regions for your account",
 					Aliases:  []string{"re"},
 					Required: true,
 				},
@@ -461,6 +468,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
 					Aliases: []string{"p"},
 				},
+				codecEndpointFlag,
+				codecPassAccessTokenFlag,
+				codecIncludeCredentialsFlag,
 			},
 			Action: func(ctx *cli.Context) error {
 				n := &namespace.Namespace{
@@ -468,13 +478,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Namespace: ctx.String(NamespaceFlagName),
 				}
 
-				// region (required)
-				region := ctx.String(namespaceRegionFlagName)
-				if err := validateNamespaceRegion(region); err != nil {
-					return err
-				}
 				n.Spec = &namespace.NamespaceSpec{
-					Region: region,
+					Region: ctx.String(namespaceRegionFlagName),
 				}
 
 				// certs (required)
@@ -534,6 +539,24 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						} else {
 							n.Spec.SearchAttributes[attrName] = attrType
 						}
+					}
+				}
+
+				codecEndpoint := ctx.String(codecEndpointFlagName)
+				// codec server spec is optional, if specified, we need to create the spec and pass along to the API
+				if codecEndpoint != "" {
+					err = validateCodecEndpoint(codecEndpoint)
+					if err != nil {
+						return err
+					}
+					n.Spec.CodecSpec = &namespace.CodecServerPropertySpec{
+						Endpoint:           codecEndpoint,
+						PassAccessToken:    ctx.Bool(codecPassAccessTokenFlagName),
+						IncludeCredentials: ctx.Bool(codecIncludeCredentialsFlagName),
+					}
+				} else {
+					if ctx.Bool(codecPassAccessTokenFlagName) || ctx.Bool(codecIncludeCredentialsFlagName) {
+						return errors.New("pass-access-token or include-credentials cannot be specified when codec endpoint is not specified")
 					}
 				}
 
@@ -812,7 +835,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						var err error
 
 						if fileFlagSet {
-							jsonBytes, err = ioutil.ReadFile(ctx.Path(certificateFilterFileFlagName))
+							jsonBytes, err = os.ReadFile(ctx.Path(certificateFilterFileFlagName))
 							if err != nil {
 								return err
 							}
@@ -886,7 +909,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 						exportFile := ctx.Path(certificateFilterFileFlagName)
 						if exportFile != "" {
-							if err := ioutil.WriteFile(exportFile, []byte(jsonString), 0644); err != nil {
+							if err := os.WriteFile(exportFile, []byte(jsonString), 0644); err != nil {
 								return err
 							}
 						}
@@ -959,7 +982,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						var err error
 
 						if fileFlagSet {
-							jsonBytes, err = ioutil.ReadFile(ctx.Path(certificateFilterFileFlagName))
+							jsonBytes, err = os.ReadFile(ctx.Path(certificateFilterFileFlagName))
 							if err != nil {
 								return err
 							}
@@ -1011,21 +1034,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Flags: []cli.Flag{
 				NamespaceFlag,
 				&cli.StringFlag{
-					Name:     "endpoint",
-					Usage:    "The codec server endpoint to decode payloads for all users interacting with this Namespace, must be https",
-					Aliases:  []string{"e"},
+					Name:     codecEndpointFlag.Name,
+					Usage:    codecEndpointFlag.Usage,
+					Aliases:  codecEndpointFlag.Aliases,
 					Required: true,
 				},
-				&cli.BoolFlag{
-					Name:    "pass-access-token",
-					Usage:   "Pass the user access token with the remote endpoint",
-					Aliases: []string{"pat"},
-				},
-				&cli.BoolFlag{
-					Name:    "include-credentials",
-					Usage:   "Include cross-origin credentials",
-					Aliases: []string{"ic"},
-				},
+				codecPassAccessTokenFlag,
+				codecIncludeCredentialsFlag,
 			},
 			Action: func(ctx *cli.Context) error {
 				n, err := c.getNamespace(ctx.String(NamespaceFlagName))
@@ -1033,10 +1048,15 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					return err
 				}
 
+				codecEndpoint := ctx.String(codecEndpointFlagName)
+				err = validateCodecEndpoint(codecEndpoint)
+				if err != nil {
+					return err
+				}
 				replacement := &namespace.CodecServerPropertySpec{
-					Endpoint:           ctx.String("endpoint"),
-					PassAccessToken:    ctx.Bool("pass-access-token"),
-					IncludeCredentials: ctx.Bool("include-credentials"),
+					Endpoint:           codecEndpoint,
+					PassAccessToken:    ctx.Bool(codecPassAccessTokenFlagName),
+					IncludeCredentials: ctx.Bool(codecIncludeCredentialsFlagName),
 				}
 
 				difference, err := compareCodecSpec(n.Spec.CodecSpec, replacement)
@@ -1279,6 +1299,53 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					},
 				},
 				{
+					Name:  "validate",
+					Usage: "Validate export sink",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						sinkNameFlag,
+						sinkAssumedRoleFlagRequired,
+						s3BucketFlagRequired,
+						kmsArnFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						namespace := ctx.String(NamespaceFlagName)
+						ns, err := c.getNamespace(namespace)
+						if err != nil {
+							return fmt.Errorf("validation failed: unable to get namespace: %v", err)
+						}
+
+						awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagRequired.Name))
+						if err != nil {
+							return fmt.Errorf("validation failed: %v", err)
+						}
+
+						validateRequest := &namespaceservice.ValidateExportSinkRequest{
+							Namespace: ctx.String(NamespaceFlagName),
+							Spec: &sink.ExportSinkSpec{
+								Name:            ctx.String(sinkNameFlag.Name),
+								DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
+								S3Sink: &sink.S3Spec{
+									RoleName:     roleName,
+									BucketName:   ctx.String(s3BucketFlagRequired.Name),
+									Region:       ns.Spec.Region,
+									KmsArn:       ctx.String(kmsArnFlag.Name),
+									AwsAccountId: awsAccountID,
+								},
+							},
+						}
+
+						_, err = c.client.ValidateExportSink(c.ctx, validateRequest)
+
+						if err != nil {
+							return fmt.Errorf("validation failed with error %v", err)
+						}
+
+						fmt.Println("Validate test file can be written to the sink successfully")
+						return nil
+					},
+				},
+				{
 					Name:    "delete",
 					Aliases: []string{"d"},
 					Usage:   "Delete export sink",
@@ -1423,6 +1490,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 	return CommandOut{Command: command}, nil
 }
 
+func validateCodecEndpoint(codecEndpoint string) error {
+	if !strings.HasPrefix(codecEndpoint, "https://") {
+		return errors.New("field Endpoint has to use https")
+	}
+	return nil
+}
+
 func getSearchAttributeTypes() []string {
 	validTypes := []string{}
 	for i := 1; i < len(namespace.SearchAttributeType_name); i++ {
@@ -1510,13 +1584,4 @@ func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) 
 	}
 
 	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
-}
-
-func validateNamespaceRegion(region string) error {
-	for _, r := range namespaceRegions {
-		if r == region {
-			return nil
-		}
-	}
-	return fmt.Errorf("namespace region: %s not allowed", region)
 }

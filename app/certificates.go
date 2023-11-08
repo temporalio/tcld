@@ -11,7 +11,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/big"
 	"os"
 	"time"
@@ -419,11 +418,11 @@ func NewCertificatesCommand() (CommandOut, error) {
 								return err
 							}
 						}
-						caPem, err := ioutil.ReadFile(ctx.Path(CaCertificateFileFlagName))
+						caPem, err := os.ReadFile(ctx.Path(CaCertificateFileFlagName))
 						if err != nil {
 							return fmt.Errorf("failed to read %s: %w", CaCertificateFileFlagName, err)
 						}
-						caPrivKey, err := ioutil.ReadFile(ctx.Path(caPrivateKeyFileFlagName))
+						caPrivKey, err := os.ReadFile(ctx.Path(caPrivateKeyFileFlagName))
 						if err != nil {
 							return fmt.Errorf("failed to read %s: %w", caPrivateKeyFileFlagName, err)
 						}
@@ -494,12 +493,12 @@ func writeCertificates(ctx *cli.Context, typ string, cert, key []byte, certPath,
 	if !yes {
 		return nil
 	}
-	err = ioutil.WriteFile(certPath, cert, 0644)
+	err = os.WriteFile(certPath, cert, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write end-entity certificate: %w", err)
 
 	}
-	err = ioutil.WriteFile(keyPath, key, 0600)
+	err = os.WriteFile(keyPath, key, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to write end-entity key: %w", err)
 	}
