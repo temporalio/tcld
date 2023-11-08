@@ -600,7 +600,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 		{
 			Name:    "failover",
-			Usage:   "Failover [experiment] a temporal namespace from a region to a target region",
+			Usage:   "[Experimental feature] Failover changes a temporal global namespace's active region",
 			Aliases: []string{"fo"},
 			Flags: []cli.Flag{
 				RequestIDFlag,
@@ -621,7 +621,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 			},
 			Action: func(ctx *cli.Context) error {
-
 				yes, err := ConfirmPrompt(ctx,
 					fmt.Sprintf(
 						"Failover a namespace will change the namespace primary region.\nDo you still want to continue ?",
