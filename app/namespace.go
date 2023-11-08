@@ -10,16 +10,18 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/temporalio/tcld/protogen/api/auth/v1"
-	"github.com/temporalio/tcld/protogen/api/sink/v1"
 	"go.uber.org/multierr"
 
+	"github.com/temporalio/tcld/protogen/api/auth/v1"
+	"github.com/temporalio/tcld/protogen/api/sink/v1"
+
 	"github.com/kylelemons/godebug/diff"
+	"github.com/urfave/cli/v2"
+	"google.golang.org/grpc"
+
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
-	"github.com/urfave/cli/v2"
-	"google.golang.org/grpc"
 )
 
 const (
@@ -409,9 +411,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Aliases:  []string{"n"},
 					Required: true,
 				},
-				&cli.StringFlag{
+				&cli.StringSliceFlag{
 					Name:     namespaceRegionFlagName,
-					Usage:    "Create namespace in specified region; see 'tcld account list-regions' to get a list of available regions for your account",
+					Usage:    "Create namespace in specified regions; if multiple regions are selected, the first one will be the active region. See 'tcld account list-regions' to get a list of available regions for your account",
 					Aliases:  []string{"re"},
 					Required: true,
 				},
@@ -458,6 +460,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 				n.Spec = &namespace.NamespaceSpec{
 					Region: ctx.String(namespaceRegionFlagName),
+				}
+				regions := ctx.StringSlice(namespaceRegionFlagName)
+				if len(regions) == 0 {
+					return fmt.Errorf("namespace region is required")
+				}
+				if len(regions) > 2 {
+					return fmt.Errorf("namespace can only be replicated up to 2 regions")
+				}
+				n.Spec = &namespace.NamespaceSpec{
+					Region:         regions[0],
+					PassiveRegions: regions[1:],
 				}
 
 				// certs (required)
