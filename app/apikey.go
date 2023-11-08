@@ -8,6 +8,7 @@ import (
 	"github.com/gogo/protobuf/types"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
+	"github.com/temporalio/tcld/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -151,9 +152,9 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 							Usage:   "the description of the apikey",
 							Aliases: []string{"desc"},
 						},
-						&cli.DurationFlag{
+						&cli.StringFlag{
 							Name:    "duration",
-							Usage:   "the duration from now when the apikey will expire, will be ignored if expiry flag is set, example: '24h'",
+							Usage:   "the duration from now when the apikey will expire, will be ignored if expiry flag is set, examples: '2.5y', '30d', '4d12h'",
 							Aliases: []string{"d"},
 						},
 						&cli.TimestampFlag{
@@ -167,11 +168,18 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 					Action: func(ctx *cli.Context) error {
 						expiry := ctx.Timestamp("expiry")
 						if expiry == nil || expiry.IsZero() {
-							expiryPeriod := ctx.Duration("duration")
-							if expiryPeriod == 0 {
+							expiryPeriod := ctx.String("duration")
+							if expiryPeriod == "" {
 								return fmt.Errorf("no expiry was set")
 							}
-							e := time.Now().UTC().Add(expiryPeriod)
+							d, err := utils.ParseDuration(expiryPeriod)
+							if err != nil {
+								return fmt.Errorf("failed to parse duration: %w", err)
+							}
+							if d <= 0 {
+								return fmt.Errorf("expiration must be positive: %s", expiryPeriod)
+							}
+							e := time.Now().UTC().Add(d)
 							expiry = &e
 						}
 						return c.createAPIKey(
