@@ -11,19 +11,17 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"go.uber.org/multierr"
-
-	"github.com/temporalio/tcld/protogen/api/auth/v1"
-	v14 "github.com/temporalio/tcld/protogen/api/common/v1"
-	"github.com/temporalio/tcld/protogen/api/sink/v1"
-
 	"github.com/kylelemons/godebug/diff"
 	"github.com/urfave/cli/v2"
+	"go.uber.org/multierr"
 	"google.golang.org/grpc"
 
+	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
+	v14 "github.com/temporalio/tcld/protogen/api/common/v1"
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
+	"github.com/temporalio/tcld/protogen/api/sink/v1"
 )
 
 const (
