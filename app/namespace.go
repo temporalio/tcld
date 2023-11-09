@@ -18,7 +18,7 @@ import (
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
-	v14 "github.com/temporalio/tcld/protogen/api/common/v1"
+	"github.com/temporalio/tcld/protogen/api/common/v1"
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 	"github.com/temporalio/tcld/protogen/api/sink/v1"
@@ -34,6 +34,7 @@ const (
 	codecEndpointFlagName            = "endpoint"
 	codecPassAccessTokenFlagName     = "pass-access-token"
 	codecIncludeCredentialsFlagName  = "include-credentials"
+	awsCloudProviderName             = "aws"
 )
 
 var (
@@ -228,8 +229,8 @@ func (c *NamespaceClient) failoverNamespace(ctx *cli.Context) error {
 	res, err := c.client.FailoverNamespace(c.ctx, &namespaceservice.FailoverNamespaceRequest{
 		Namespace: namespaceName,
 		RequestId: uuid.NewString(),
-		TargetRegion: &v14.RegionID{
-			CloudProvider: "aws",
+		TargetRegion: &common.RegionID{
+			CloudProvider: awsCloudProviderName,
 			Name:          targetRegion,
 		},
 		SkipGracefulFailover: skipGracefulFailover,
