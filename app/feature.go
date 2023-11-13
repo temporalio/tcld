@@ -101,14 +101,6 @@ func NewFeatureCommand() (CommandOut, error) {
 			Hidden:  true,
 			Subcommands: []*cli.Command{
 				{
-					Name:    "toggle-export",
-					Aliases: []string{"te"},
-					Usage:   "switch export on/off",
-					Action: func(c *cli.Context) error {
-						return toggleFeature(ExportFeatureFlag)
-					},
-				},
-				{
 					Name:    "toggle-apikey",
 					Aliases: []string{"tak"},
 					Usage:   "switch api keys on/off",
