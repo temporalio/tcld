@@ -46,6 +46,9 @@ func (s *NamespaceTestSuite) SetupTest() {
 		},
 	}
 
+	err = s.RunCmd("feature", "toggle-gcp-sink")
+	s.Require().NoError(err)
+
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = namespaceservicemock.NewMockNamespaceServiceClient(s.mockCtrl)
 	s.mockAuthService = authservicemock.NewMockAuthServiceClient(s.mockCtrl)
@@ -1653,6 +1656,74 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 	}
 }
 
+func (s *NamespaceTestSuite) TestValidateExportGCPSink() {
+	ns := "namespace"
+	type morphValidateReq func(*namespaceservice.ValidateExportSinkRequest)
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+
+	tests := []struct {
+		name string
+
+		args          []string
+		expectRequest morphValidateReq
+		expectErr     bool
+		expectGet     morphGetResp
+	}{
+		{
+			name: "Validate export gcp sinks succeeds",
+			args: []string{"namespace", "gcp-sink", "validate", "--namespace", ns, "--sink-name", "sink1", "--service-account-principal", "test-sa@test-gcp.iam.gserviceaccount.com", "--gcs-bucket", "testBucket"},
+			expectRequest: func(r *namespaceservice.ValidateExportSinkRequest) {
+				r.Namespace = ns
+				r.Spec = &sink.ExportSinkSpec{
+					Name:            "sink1",
+					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
+					GcsSink: &sink.GCSSpec{
+						SaName:         "test-sa",
+						BucketName:     "testBucket",
+						GcpProjectName: "test-gcp",
+					},
+				}
+			},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace = &namespace.Namespace{
+					Namespace: ns,
+				}
+			},
+			expectErr: false,
+		},
+		{
+			name:      "Validate export sinks fails with invalid sa principal",
+			args:      []string{"namespace", "gcp-sink", "validate", "--namespace", ns, "--sink-name", "sink1", "--service-account-principal", "testSA", "--gcs-bucket", "testBucket"},
+			expectErr: true,
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			if tc.expectGet != nil {
+				getResp := namespaceservice.GetNamespaceResponse{}
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), gomock.Any()).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectRequest != nil {
+				req := namespaceservice.ValidateExportSinkRequest{}
+				tc.expectRequest(&req)
+				s.mockService.EXPECT().ValidateExportSink(gomock.Any(), &req).
+					Return(&namespaceservice.ValidateExportSinkResponse{}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
 func (s *NamespaceTestSuite) TestValidateExportSink() {
 	ns := "namespace"
 	type morphValidateReq func(*namespaceservice.ValidateExportSinkRequest)
@@ -1723,8 +1794,8 @@ func (s *NamespaceTestSuite) TestValidateExportSink() {
 			}
 		})
 	}
-
 }
+
 func (s *NamespaceTestSuite) TestListExportSinks() {
 	ns := "namespace"
 	type morphGetReq func(*namespaceservice.ListExportSinksRequest)
