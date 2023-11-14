@@ -45,8 +45,6 @@ func (s *NamespaceTestSuite) SetupTest() {
 			AutoConfirmFlag,
 		},
 	}
-	err = s.RunCmd("feature", "toggle-export")
-	s.Require().NoError(err)
 
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = namespaceservicemock.NewMockNamespaceServiceClient(s.mockCtrl)
