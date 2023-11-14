@@ -11,10 +11,11 @@ import (
 )
 
 var (
-	ExportFeatureFlag   = "enable-export"
 	APIKeyFeatureFlag   = "enable-apikey"
 	featureflagFileName = "feature.json"
 )
+
+var supportFeatureFlags = []string{APIKeyFeatureFlag}
 
 type FeatureFlag struct {
 	Name  string `json:"Name"`
@@ -28,6 +29,16 @@ func getFeatureFlags() ([]FeatureFlag, error) {
 
 func getFeatureFlagConfigFilePath() string {
 	return filepath.Join(ConfigDirFlag.Value, featureflagFileName)
+}
+
+func contains(f FeatureFlag, ffs []string) bool {
+	for _, ff := range ffs {
+		if f.Name == ff {
+			return true
+		}
+	}
+
+	return false
 }
 
 func getFeatureFlagsFromConfigFile(featureFlagConfigPath string) ([]FeatureFlag, error) {
@@ -48,7 +59,14 @@ func getFeatureFlagsFromConfigFile(featureFlagConfigPath string) ([]FeatureFlag,
 		return nil, err
 	}
 
-	return featureFlags, nil
+	var validfeatureflags []FeatureFlag
+	for _, featureflag := range featureFlags {
+		if contains(featureflag, supportFeatureFlags) {
+			validfeatureflags = append(validfeatureflags, featureflag)
+		}
+	}
+
+	return validfeatureflags, nil
 }
 
 func toggleFeature(feature string) error {
