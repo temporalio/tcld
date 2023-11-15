@@ -110,7 +110,7 @@ var (
 	}
 	serviceAccountPrincipalFlag = &cli.StringFlag{
 		Name:     "service-account-principal",
-		Usage:    "service account that could access to the sink",
+		Usage:    "service account that has access to the sink",
 		Required: true,
 	}
 	gcsBucketFlag = &cli.StringFlag{
@@ -1187,10 +1187,15 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 	}
 
 	// Export Related Command
-	subCommands = append(subCommands, &cli.Command{
+	exportCommand := &cli.Command{
 		Name:    "export",
-		Usage:   "Manage export sinks",
+		Usage:   "Manage export",
 		Aliases: []string{"es"},
+	}
+
+	export_s3_commands := &cli.Command{
+		Name:  "s3",
+		Usage: "Manage s3 export sink",
 		Subcommands: []*cli.Command{
 			{
 				Name:    "create",
@@ -1302,7 +1307,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						return fmt.Errorf("validation failed with error %v", err)
 					}
 
-					fmt.Println("Validate test file can be written to the sink successfully")
+					fmt.Println("Temporal Cloud was able to write test data to the sink")
 					return nil
 				},
 			},
@@ -1342,7 +1347,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			{
 				Name:    "list",
 				Aliases: []string{"l"},
-				Usage:   "List export sinks",
+				Usage:   "List export sink",
 				Flags: []cli.Flag{
 					NamespaceFlag,
 					pageSizeFlag,
@@ -1433,67 +1438,68 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 			},
 		},
-	})
+	}
 
-	// Note: the following commands are depend on previous commands. Please don't add more commands in the middle
-	exportCommand := subCommands[len(subCommands)-1]
+	export_gcs_commands := &cli.Command{
+		Name:  "gcs",
+		Usage: "Manage GCS export sink",
+		Subcommands: []*cli.Command{
+			{
+				Name:    "validate",
+				Aliases: []string{"v"},
+				Usage:   "Validate gcs export sink",
+				Flags: []cli.Flag{
+					NamespaceFlag,
+					sinkNameFlag,
+					serviceAccountPrincipalFlag,
+					gcsBucketFlag,
+				},
+				Action: func(ctx *cli.Context) error {
+					namespace := ctx.String(NamespaceFlagName)
+					_, err := c.getNamespace(namespace)
+					if err != nil {
+						return fmt.Errorf("unable to get existing namespace: %v", err)
+					}
 
-	// --- GCP Sink Related Commands ---
-	// Will move under export command once GCP sink is under public preview
-	if IsFeatureEnabled(GCPSinkFeatureFlag) {
-		exportCommand.Subcommands = append(exportCommand.Subcommands, &cli.Command{
-			Name:    "gcp-sink",
-			Usage:   "Manage GCP export sinks",
-			Aliases: []string{"gcp"},
-			Subcommands: []*cli.Command{
-				{
-					Name:    "validate",
-					Aliases: []string{"v"},
-					Usage:   "Validate gcp export sink",
-					Flags: []cli.Flag{
-						NamespaceFlag,
-						sinkNameFlag,
-						serviceAccountPrincipalFlag,
-						gcsBucketFlag,
-					},
-					Action: func(ctx *cli.Context) error {
-						namespace := ctx.String(NamespaceFlagName)
-						_, err := c.getNamespace(namespace)
-						if err != nil {
-							return fmt.Errorf("unable to get existing namespace: %v", err)
-						}
+					saName, projectName, err := parseSAPrincipal(ctx.String(serviceAccountPrincipalFlag.Name))
+					if err != nil {
+						return fmt.Errorf("validation failed: %v", err)
+					}
 
-						saName, projectName, err := parseSAPrincipal(ctx.String(serviceAccountPrincipalFlag.Name))
-						if err != nil {
-							return fmt.Errorf("validation failed: %v", err)
-						}
-
-						validateRequest := &namespaceservice.ValidateExportSinkRequest{
-							Namespace: namespace,
-							Spec: &sink.ExportSinkSpec{
-								Name:            ctx.String(sinkNameFlag.Name),
-								DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
-								GcsSink: &sink.GCSSpec{
-									GcpProjectName: projectName,
-									BucketName:     ctx.String(gcsBucketFlag.Name),
-									SaName:         saName,
-								},
+					validateRequest := &namespaceservice.ValidateExportSinkRequest{
+						Namespace: namespace,
+						Spec: &sink.ExportSinkSpec{
+							Name:            ctx.String(sinkNameFlag.Name),
+							DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
+							GcsSink: &sink.GCSSpec{
+								GcpProjectName: projectName,
+								BucketName:     ctx.String(gcsBucketFlag.Name),
+								SaName:         saName,
 							},
-						}
+						},
+					}
 
-						_, err = c.client.ValidateExportSink(c.ctx, validateRequest)
+					_, err = c.client.ValidateExportSink(c.ctx, validateRequest)
 
-						if err != nil {
-							return fmt.Errorf("validation failed with error %v", err)
-						}
+					if err != nil {
+						return fmt.Errorf("validation failed with error %v", err)
+					}
 
-						fmt.Println("Validate test file can be written to the sink successfully")
-						return nil
-					},
+					fmt.Println("Temporal Cloud was able to write test data to the sink")
+					return nil
 				},
 			},
-		})
+		},
 	}
+
+	exportCommand.Subcommands = append(exportCommand.Subcommands, export_s3_commands)
+
+	// TODO: remove GCP sink feature flag check when out of private preview
+	if IsFeatureEnabled(GCPSinkFeatureFlag) {
+		exportCommand.Subcommands = append(exportCommand.Subcommands, export_gcs_commands)
+	}
+
+	subCommands = append(subCommands, exportCommand)
 
 	command := &cli.Command{
 		Name:    "namespace",
