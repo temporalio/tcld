@@ -12,10 +12,11 @@ import (
 
 var (
 	APIKeyFeatureFlag   = "enable-apikey"
+	GCPSinkFeatureFlag  = "enable-gcp-sink"
 	featureflagFileName = "feature.json"
 )
 
-var supportFeatureFlags = []string{APIKeyFeatureFlag}
+var supportFeatureFlags = []string{APIKeyFeatureFlag, GCPSinkFeatureFlag}
 
 type FeatureFlag struct {
 	Name  string `json:"Name"`
@@ -124,6 +125,14 @@ func NewFeatureCommand() (CommandOut, error) {
 					Usage:   "switch api keys on/off",
 					Action: func(c *cli.Context) error {
 						return toggleFeature(APIKeyFeatureFlag)
+					},
+				},
+				{
+					Name:    "toggle-gcp-sink",
+					Aliases: []string{"tgs"},
+					Usage:   "switch gcp sink on/off",
+					Action: func(c *cli.Context) error {
+						return toggleFeature(GCPSinkFeatureFlag)
 					},
 				},
 				{
