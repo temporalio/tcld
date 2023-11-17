@@ -1195,7 +1195,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 	export_s3_commands := &cli.Command{
 		Name:  "s3",
-		Usage: "Manage s3 export sink",
+		Usage: "Manage S3 export sink",
 		Subcommands: []*cli.Command{
 			{
 				Name:    "create",
