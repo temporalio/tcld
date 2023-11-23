@@ -70,6 +70,7 @@ type LoginConfig struct {
 
 	ctx       context.Context // used for token refreshes.
 	configDir string
+	isLegacy  bool
 }
 
 func NewLoginConfig(ctx context.Context, configDir string) (*LoginConfig, error) {
@@ -79,7 +80,8 @@ func NewLoginConfig(ctx context.Context, configDir string) (*LoginConfig, error)
 	}
 
 	tokenConfig := filepath.Join(configDir, tokenFile)
-	if _, err := os.Stat(tokenConfig); err != nil {
+	fileInfo, err := os.Stat(tokenConfig)
+	if err != nil {
 		return nil, fmt.Errorf("failed to stat login config: %w", err)
 	}
 
@@ -91,6 +93,20 @@ func NewLoginConfig(ctx context.Context, configDir string) (*LoginConfig, error)
 	var config LoginConfig
 	if err := json.Unmarshal(data, &config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal login config: %w", err)
+	} else if config.StoredToken == (oauth2.Token{}) {
+		var legacy legacyOAuthToken
+
+		err = json.Unmarshal(data, &legacy)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal legacy login config: %w", err)
+		}
+
+		config.StoredToken, err = legacy.convert(fileInfo.ModTime())
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert legacy token: %w", err)
+		}
+
+		config.isLegacy = true
 	}
 
 	config.ctx = ctx
@@ -113,8 +129,8 @@ func (c *LoginConfig) Token() (*oauth2.Token, error) {
 	}
 
 	grace := c.StoredToken.Expiry.Add(-1 * time.Minute)
-	if c.StoredToken.Expiry.IsZero() || time.Now().Before(grace) {
-		// Token has not expired, use it.
+	if c.isLegacy || c.StoredToken.Expiry.IsZero() || time.Now().Before(grace) {
+		// Token has not expired, or is a legacy token, use it.
 		return &c.StoredToken, nil
 	}
 
@@ -239,4 +255,23 @@ func openBrowser(url string) error {
 	default:
 	}
 	return nil
+}
+
+// legacyOAuthToken is the legacy token version, which is kept around to
+// ensure a seamless updating experience from an older tcld version.
+type legacyOAuthToken struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	IDToken      string `json:"id_token"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int    `json:"expires_in"`
+}
+
+func (l legacyOAuthToken) convert(modTime time.Time) (oauth2.Token, error) {
+	return oauth2.Token{
+		AccessToken:  l.AccessToken,
+		TokenType:    l.TokenType,
+		RefreshToken: l.RefreshToken,
+		Expiry:       modTime.Add(time.Duration(l.ExpiresIn) * time.Second),
+	}, nil
 }

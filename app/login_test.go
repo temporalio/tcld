@@ -83,8 +83,6 @@ func (l *LoginTestSuite) TestLoginSuccessful() {
 
 	config, err := NewLoginConfig(context.Background(), l.configDir)
 	l.NoError(err)
-	l.Equal(l.token.AccessToken, config.StoredToken.AccessToken)
-	l.Equal(l.token.RefreshToken, config.StoredToken.RefreshToken)
 
 	token, err := config.Token()
 	l.NoError(err)
@@ -107,8 +105,6 @@ func (l *LoginTestSuite) TestRefreshToken() {
 
 	config, err := NewLoginConfig(context.Background(), l.configDir)
 	l.NoError(err)
-	l.Equal(l.token.AccessToken, config.StoredToken.AccessToken)
-	l.Equal(l.token.RefreshToken, config.StoredToken.RefreshToken)
 
 	token, err := config.Token()
 	l.NoError(err)
@@ -148,6 +144,50 @@ func (l *LoginTestSuite) TestLoginWithInvalidCodeResponseURL() {
 	l.deviceAuth.VerificationURIComplete = "https://temporal.io"
 
 	l.Error(l.runCmd("login", "--domain", l.server.URL))
+}
+
+func (l *LoginTestSuite) TestLegacyTokenSupport() {
+	legacy := legacyOAuthToken{
+		AccessToken:  l.token.AccessToken,
+		RefreshToken: l.token.RefreshToken,
+		TokenType:    l.token.TokenType,
+		ExpiresIn:    3600,
+	}
+
+	configFile, err := os.Create(filepath.Join(l.configDir, tokenFile))
+	l.NoError(err)
+
+	encoder := json.NewEncoder(configFile)
+	encoder.SetIndent("", "\t")
+
+	err = encoder.Encode(legacy)
+	l.NoError(err)
+	configFile.Close()
+
+	config, err := NewLoginConfig(context.Background(), l.configDir)
+	l.NoError(err)
+	l.True(config.isLegacy)
+
+	token, err := config.Token()
+	l.NoError(err)
+	l.Equal(l.token.AccessToken, token.AccessToken)
+	l.Equal(l.token.RefreshToken, token.RefreshToken)
+	l.WithinDuration(time.Now().Add(3600*time.Second), token.Expiry, time.Minute)
+
+	// Login to upgrade to new token type.
+	resp := l.runCmd("login", "--domain", l.server.URL)
+	l.NoError(resp)
+
+	config, err = NewLoginConfig(context.Background(), l.configDir)
+	l.NoError(err)
+	l.Equal(l.token.AccessToken, config.StoredToken.AccessToken)
+	l.Equal(l.token.RefreshToken, config.StoredToken.RefreshToken)
+	l.False(config.isLegacy)
+
+	token, err = config.Token()
+	l.NoError(err)
+	l.Equal(l.token.AccessToken, token.AccessToken)
+	l.Equal(l.token.RefreshToken, token.RefreshToken)
 }
 
 func (l *LoginTestSuite) handleDeviceCode() http.HandlerFunc {
