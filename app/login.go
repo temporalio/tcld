@@ -141,7 +141,10 @@ func (c *LoginConfig) Token() (*oauth2.Token, error) {
 	}
 
 	c.StoredToken = *token
-	c.StoreConfig()
+	err = c.StoreConfig()
+	if err != nil {
+		return nil, fmt.Errorf("failed to store refreshed token: %w", err)
+	}
 
 	return token, nil
 }

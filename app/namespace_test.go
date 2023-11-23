@@ -32,7 +32,6 @@ type NamespaceTestSuite struct {
 	mockCtrl        *gomock.Controller
 	mockService     *namespaceservicemock.MockNamespaceServiceClient
 	mockAuthService *authservicemock.MockAuthServiceClient
-	configDir       string
 }
 
 func (s *NamespaceTestSuite) SetupTest() {
