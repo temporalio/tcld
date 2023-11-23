@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -76,10 +78,55 @@ func (l *LoginTestSuite) TestLoginSuccessful() {
 	resp := l.runCmd("login", "--domain", l.server.URL)
 	l.NoError(resp)
 
+	_, err := os.Stat(filepath.Join(l.configDir, tokenFile))
+	l.NoError(err)
+
 	config, err := NewLoginConfig(context.Background(), l.configDir)
 	l.NoError(err)
 	l.Equal(l.token.AccessToken, config.StoredToken.AccessToken)
 	l.Equal(l.token.RefreshToken, config.StoredToken.RefreshToken)
+
+	token, err := config.Token()
+	l.NoError(err)
+	l.Equal(l.token.AccessToken, token.AccessToken)
+	l.Equal(l.token.RefreshToken, token.RefreshToken)
+
+	// Ensure it does not refresh the token, as it has not expired.
+	token, err = config.Token()
+	l.NoError(err)
+	l.Equal(l.token.AccessToken, token.AccessToken)
+	l.Equal(l.token.RefreshToken, token.RefreshToken)
+}
+
+func (l *LoginTestSuite) TestRefreshToken() {
+	resp := l.runCmd("login", "--domain", l.server.URL)
+	l.NoError(resp)
+
+	data, err := os.ReadFile(filepath.Join(l.configDir, tokenFile))
+	l.NoError(err)
+
+	config, err := NewLoginConfig(context.Background(), l.configDir)
+	l.NoError(err)
+	l.Equal(l.token.AccessToken, config.StoredToken.AccessToken)
+	l.Equal(l.token.RefreshToken, config.StoredToken.RefreshToken)
+
+	token, err := config.Token()
+	l.NoError(err)
+	l.Equal(l.token.AccessToken, token.AccessToken)
+	l.Equal(l.token.RefreshToken, token.RefreshToken)
+
+	l.token.AccessToken = "some-new-access-token"
+	l.token.RefreshToken = "some-new-refresh-token"
+	config.StoredToken.Expiry = time.Now().Add(-30 * time.Minute)
+
+	token, err = config.Token()
+	l.NoError(err)
+	l.Equal(l.token.AccessToken, token.AccessToken)
+	l.Equal(l.token.RefreshToken, token.RefreshToken)
+
+	newData, err := os.ReadFile(filepath.Join(l.configDir, tokenFile))
+	l.NoError(err)
+	l.NotEqual(data, newData, "config file did not refresh with new token")
 }
 
 func (l *LoginTestSuite) TestLoginFailureAtDeviceVerification() {

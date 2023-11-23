@@ -92,7 +92,9 @@ func NewLoginConfig(ctx context.Context, configDir string) (*LoginConfig, error)
 	if err := json.Unmarshal(data, &config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal login config: %w", err)
 	}
+
 	config.ctx = ctx
+	config.configDir = configDir
 
 	return &config, nil
 }
@@ -121,7 +123,9 @@ func (c *LoginConfig) Token() (*oauth2.Token, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to refresh access token: %w", err)
 	}
+
 	c.StoredToken = *token
+	c.StoreConfig()
 
 	return token, nil
 }
