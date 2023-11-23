@@ -7,6 +7,7 @@ import (
 
 var (
 	assumedRolePattern = regexp.MustCompile(`^arn:aws:iam::([0-9]{12}):role/(\S+)$`)
+	saPrincipalPattern = regexp.MustCompile(`^(\S+)@(\S+).iam.gserviceaccount.com$`)
 )
 
 func IsFeatureEnabled(feature string) bool {
@@ -38,6 +39,21 @@ func parseAssumedRole(assumedRole string) (string, string, error) {
 	roleName = submatch[2]
 
 	return accountID, roleName, nil
+}
+
+func parseSAPrincipal(saPrincipal string) (string, string, error) {
+	var gcpProjectName, saName string
+	re := saPrincipalPattern
+	submatch := re.FindStringSubmatch(saPrincipal)
+
+	if len(submatch) != 3 {
+		return "", "", fmt.Errorf("invalid SA principal: %s", saPrincipal)
+	}
+
+	saName = submatch[1]
+	gcpProjectName = submatch[2]
+
+	return saName, gcpProjectName, nil
 }
 
 func getAssumedRoleArn(awsAccountId string, awsRoleName string) string {
