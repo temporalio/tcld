@@ -51,9 +51,6 @@ tools:
 lint:
 	golangci-lint run
 
-mocks:
-	@mockgen -source services/loginservice.go -destination services/loginservicemock.go -package services
-
 $(COVER_ROOT):
 	@mkdir -p $(COVER_ROOT)
 

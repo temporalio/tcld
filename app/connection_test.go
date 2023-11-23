@@ -2,13 +2,10 @@ package app
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"net"
-	"os"
-	"path"
 	"strings"
 	"testing"
 	"time"
@@ -64,13 +61,17 @@ func TestServerConnection(t *testing.T) {
 
 func (s *ServerConnectionTestSuite) SetupTest() {
 	s.configDir = s.T().TempDir()
-	data, err := json.Marshal(oauth2.Token{
-		AccessToken: testAccessToken,
-		Expiry:      time.Now().Add(24 * time.Hour),
-	})
-	require.NoError(s.T(), err)
+	ConfigDirFlag.Value = s.configDir
 
-	err = os.WriteFile(path.Join(s.configDir, tokenFileName), data, 0600)
+	loginConfig := LoginConfig{
+		StoredToken: oauth2.Token{
+			AccessToken: testAccessToken,
+			Expiry:      time.Now().Add(24 * time.Hour),
+		},
+		configDir: s.configDir,
+	}
+
+	err := loginConfig.StoreConfig()
 	require.NoError(s.T(), err)
 
 	s.listener = bufconn.Listen(1024 * 1024)

@@ -32,26 +32,17 @@ type NamespaceTestSuite struct {
 	mockCtrl        *gomock.Controller
 	mockService     *namespaceservicemock.MockNamespaceServiceClient
 	mockAuthService *authservicemock.MockAuthServiceClient
+	configDir       string
 }
 
 func (s *NamespaceTestSuite) SetupTest() {
-	feature, err := NewFeatureCommand()
-	s.Require().NoError(err)
-
-	s.cliApp = &cli.App{
-		Name:     "test",
-		Commands: []*cli.Command{feature.Command},
-		Flags: []cli.Flag{
-			AutoConfirmFlag,
-		},
-	}
-
-	err = s.RunCmd("feature", "toggle-gcp-sink")
+	err := toggleFeature(GCPSinkFeatureFlag)
 	s.Require().NoError(err)
 
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = namespaceservicemock.NewMockNamespaceServiceClient(s.mockCtrl)
 	s.mockAuthService = authservicemock.NewMockAuthServiceClient(s.mockCtrl)
+
 	out, err := NewNamespaceCommand(func(ctx *cli.Context) (*NamespaceClient, error) {
 		return &NamespaceClient{
 			ctx:        context.TODO(),
@@ -59,10 +50,17 @@ func (s *NamespaceTestSuite) SetupTest() {
 			authClient: s.mockAuthService,
 		}, nil
 	})
-
 	s.Require().NoError(err)
-	AutoConfirmFlag.Value = true
-	s.cliApp.Commands = []*cli.Command{out.Command}
+
+	cmds := []*cli.Command{
+		out.Command,
+	}
+	flags := []cli.Flag{
+		AutoConfirmFlag,
+	}
+
+	s.cliApp, _ = NewTestApp(s.T(), cmds, flags)
+
 }
 
 func (s *NamespaceTestSuite) RunCmd(args ...string) error {
@@ -70,7 +68,6 @@ func (s *NamespaceTestSuite) RunCmd(args ...string) error {
 }
 
 func (s *NamespaceTestSuite) AfterTest(suiteName, testName string) {
-	defer os.Remove(getFeatureFlagConfigFilePath())
 	s.mockCtrl.Finish()
 }
 

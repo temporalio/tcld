@@ -43,6 +43,12 @@ func contains(f FeatureFlag, ffs []string) bool {
 }
 
 func getFeatureFlagsFromConfigFile(featureFlagConfigPath string) ([]FeatureFlag, error) {
+	// Ensure the config directory exists.
+	configDir := filepath.Dir(featureFlagConfigPath)
+	if err := os.MkdirAll(configDir, 0700); err != nil {
+		return nil, err
+	}
+
 	// create config file if not exist
 	if _, err := os.Stat(featureFlagConfigPath); err != nil {
 		if err := os.WriteFile(featureFlagConfigPath, []byte("[]"), 0644); err != nil {

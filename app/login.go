@@ -1,23 +1,25 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
+	"time"
 
-	"github.com/temporalio/tcld/services"
 	"golang.org/x/oauth2"
 
 	"github.com/urfave/cli/v2"
 )
 
 var (
-	tokenFileName = "tokens.json"
-	domainFlag    = &cli.StringFlag{
+	tokenFile  = "tokens.json"
+	domainFlag = &cli.StringFlag{
 		Name:     "domain",
 		Value:    "login.tmprl.cloud",
 		Aliases:  []string{"d"},
@@ -45,56 +47,93 @@ var (
 	}
 )
 
-func GetLoginClient() *LoginClient {
-	return &LoginClient{
-		loginService: services.NewLoginService(),
-	}
+func NewLoginCommand() (CommandOut, error) {
+	return CommandOut{Command: &cli.Command{
+		Name:    "login",
+		Usage:   "Login as user",
+		Aliases: []string{"l"},
+		Flags: []cli.Flag{
+			domainFlag,
+			audienceFlag,
+			clientIDFlag,
+			disablePopUpFlag,
+		},
+		Action: func(ctx *cli.Context) error {
+			return login(ctx, ctx.String("domain"), ctx.String("audience"), ctx.String("client-id"), ctx.Bool("disable-pop-up"))
+		},
+	}}, nil
 }
 
-type (
-	LoginClient struct {
-		loginService services.LoginService
-	}
-)
+type LoginConfig struct {
+	Config      oauth2.Config `json:"config"`
+	StoredToken oauth2.Token  `json:"token"`
 
-func getTokenConfigPath(ctx *cli.Context) string {
-	configDir := ctx.Path(ConfigDirFlagName)
-	return filepath.Join(configDir, tokenFileName)
+	ctx       context.Context // used for token refreshes.
+	configDir string
 }
 
-// TODO: support login config on windows
-func loadLoginConfig(ctx *cli.Context) (oauth2.TokenSource, error) {
-	configDir := ctx.Path(ConfigDirFlagName)
+func NewLoginConfig(ctx context.Context, configDir string) (*LoginConfig, error) {
 	// Create config dir if it does not exist
 	if err := os.MkdirAll(configDir, 0700); err != nil {
 		return nil, err
 	}
 
-	tokenConfig := getTokenConfigPath(ctx)
+	tokenConfig := filepath.Join(configDir, tokenFile)
 	if _, err := os.Stat(tokenConfig); err != nil {
-		// Skip if file does not exist
-		if errors.Is(err, os.ErrNotExist) {
-			return nil, nil
-		}
-		return nil, err
+		return nil, fmt.Errorf("failed to stat login config: %w", err)
 	}
 
-	tokenConfigBytes, err := os.ReadFile(tokenConfig)
+	data, err := os.ReadFile(tokenConfig)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read login config: %w", err)
 	}
 
-	var token oauth2.Token
-	if err := json.Unmarshal(tokenConfigBytes, &token); err != nil {
-		return nil, err
+	var config LoginConfig
+	if err := json.Unmarshal(data, &config); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal login config: %w", err)
+	}
+	config.ctx = ctx
+
+	return &config, nil
+}
+
+func (c *LoginConfig) TokenSource() oauth2.TokenSource {
+	if c == nil {
+		return nil
 	}
 
-	oauthConfig, err := oauthConfig(ctx)
+	return oauth2.ReuseTokenSource(nil, c)
+}
+
+func (c *LoginConfig) Token() (*oauth2.Token, error) {
+	if c == nil {
+		return nil, fmt.Errorf("nil token source")
+	}
+
+	grace := c.StoredToken.Expiry.Add(-1 * time.Minute)
+	if c.StoredToken.Expiry.IsZero() || time.Now().Before(grace) {
+		// Token has not expired, use it.
+		return &c.StoredToken, nil
+	}
+
+	// Token has expired, refresh it.
+	token, err := c.Config.TokenSource(c.ctx, &c.StoredToken).Token()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to refresh access token: %w", err)
+	}
+	c.StoredToken = *token
+
+	return token, nil
+}
+
+func (c *LoginConfig) StoreConfig() error {
+	data, err := FormatJson(c)
+	if err != nil {
+		return fmt.Errorf("failed to format login config update: %w", err)
 	}
 
-	return oauthConfig.TokenSource(ctx.Context, &token), nil
+	// Write file as 0600 because it contains private keys.
+	return os.WriteFile(filepath.Join(c.configDir, tokenFile), []byte(data), 0600)
 }
 
 func parseURL(s string) (*url.URL, error) {
@@ -115,7 +154,7 @@ func parseURL(s string) (*url.URL, error) {
 	return u, err
 }
 
-func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, clientID string, disablePopUp bool) error {
+func login(ctx *cli.Context, domain string, audience string, clientID string, disablePopUp bool) error {
 	config, err := oauthConfig(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve oauth2 config: %w", err)
@@ -143,7 +182,7 @@ func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, cl
 	fmt.Printf("Login via this url: %s\n", verificationURL.String())
 
 	if !disablePopUp {
-		if err := c.loginService.OpenBrowser(verificationURL.String()); err != nil {
+		if err := openBrowser(verificationURL.String()); err != nil {
 			fmt.Println("Unable to open browser, please open url manually.")
 		}
 	}
@@ -154,35 +193,12 @@ func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, cl
 	}
 	fmt.Println("Successfully logged in!")
 
-	tokenRespJson, err := FormatJson(token)
-	if err != nil {
-		return err
+	loginConfig := LoginConfig{
+		Config:      config,
+		StoredToken: *token,
+		configDir:   ctx.Path(ConfigDirFlagName),
 	}
-
-	// Save token info locally
-	return c.loginService.WriteToConfigFile(getTokenConfigPath(ctx), tokenRespJson)
-}
-
-func NewLoginCommand(c *LoginClient) (CommandOut, error) {
-	return CommandOut{Command: &cli.Command{
-		Name:    "login",
-		Usage:   "Login as user",
-		Aliases: []string{"l"},
-		Before: func(ctx *cli.Context) error {
-			// attempt to create and or load the login config at the beginning
-			_, err := loadLoginConfig(ctx)
-			return err
-		},
-		Flags: []cli.Flag{
-			domainFlag,
-			audienceFlag,
-			clientIDFlag,
-			disablePopUpFlag,
-		},
-		Action: func(ctx *cli.Context) error {
-			return c.login(ctx, ctx.String("domain"), ctx.String("audience"), ctx.String("client-id"), ctx.Bool("disable-pop-up"))
-		},
-	}}, nil
+	return loginConfig.StoreConfig()
 }
 
 func oauthConfig(ctx *cli.Context) (oauth2.Config, error) {
@@ -200,4 +216,23 @@ func oauthConfig(ctx *cli.Context) (oauth2.Config, error) {
 		},
 		Scopes: []string{"openid", "profile", "user", "offline_access"},
 	}, nil
+}
+
+func openBrowser(url string) error {
+	switch runtime.GOOS {
+	case "linux":
+		if err := exec.Command("xdg-open", url).Start(); err != nil {
+			return err
+		}
+	case "windows":
+		if err := exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start(); err != nil {
+			return err
+		}
+	case "darwin":
+		if err := exec.Command("open", url).Start(); err != nil {
+			return err
+		}
+	default:
+	}
+	return nil
 }
