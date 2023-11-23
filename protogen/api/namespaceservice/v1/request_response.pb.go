@@ -14,6 +14,7 @@ import (
 	v11 "github.com/temporalio/tcld/protogen/api/auth/v1"
 	v1 "github.com/temporalio/tcld/protogen/api/namespace/v1"
 	v12 "github.com/temporalio/tcld/protogen/api/request/v1"
+	v13 "github.com/temporalio/tcld/protogen/api/sink/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -791,6 +792,758 @@ func (m *DeleteNamespaceResponse) GetRequestStatus() *v12.RequestStatus {
 	return nil
 }
 
+type CreateExportSinkRequest struct {
+	// the namespace the sink is configured under
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// the spec for the sink
+	Spec *v13.ExportSinkSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	// the request id to use for this operation - optional
+	RequestId string `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+}
+
+func (m *CreateExportSinkRequest) Reset()      { *m = CreateExportSinkRequest{} }
+func (*CreateExportSinkRequest) ProtoMessage() {}
+func (*CreateExportSinkRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{14}
+}
+func (m *CreateExportSinkRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CreateExportSinkRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CreateExportSinkRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CreateExportSinkRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateExportSinkRequest.Merge(m, src)
+}
+func (m *CreateExportSinkRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *CreateExportSinkRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateExportSinkRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateExportSinkRequest proto.InternalMessageInfo
+
+func (m *CreateExportSinkRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *CreateExportSinkRequest) GetSpec() *v13.ExportSinkSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *CreateExportSinkRequest) GetRequestId() string {
+	if m != nil {
+		return m.RequestId
+	}
+	return ""
+}
+
+type CreateExportSinkResponse struct {
+	// the request status of the create operation
+	RequestStatus *v12.RequestStatus `protobuf:"bytes,1,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
+}
+
+func (m *CreateExportSinkResponse) Reset()      { *m = CreateExportSinkResponse{} }
+func (*CreateExportSinkResponse) ProtoMessage() {}
+func (*CreateExportSinkResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{15}
+}
+func (m *CreateExportSinkResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CreateExportSinkResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CreateExportSinkResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CreateExportSinkResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateExportSinkResponse.Merge(m, src)
+}
+func (m *CreateExportSinkResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *CreateExportSinkResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateExportSinkResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateExportSinkResponse proto.InternalMessageInfo
+
+func (m *CreateExportSinkResponse) GetRequestStatus() *v12.RequestStatus {
+	if m != nil {
+		return m.RequestStatus
+	}
+	return nil
+}
+
+type GetExportSinkRequest struct {
+	// the namespace the sink is scoped to
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// the sink name under the namespace to retrieve
+	SinkName string `protobuf:"bytes,2,opt,name=sink_name,json=sinkName,proto3" json:"sink_name,omitempty"`
+}
+
+func (m *GetExportSinkRequest) Reset()      { *m = GetExportSinkRequest{} }
+func (*GetExportSinkRequest) ProtoMessage() {}
+func (*GetExportSinkRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{16}
+}
+func (m *GetExportSinkRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetExportSinkRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetExportSinkRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetExportSinkRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetExportSinkRequest.Merge(m, src)
+}
+func (m *GetExportSinkRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetExportSinkRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetExportSinkRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetExportSinkRequest proto.InternalMessageInfo
+
+func (m *GetExportSinkRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *GetExportSinkRequest) GetSinkName() string {
+	if m != nil {
+		return m.SinkName
+	}
+	return ""
+}
+
+type GetExportSinkResponse struct {
+	// the sink
+	Sink *v13.ExportSink `protobuf:"bytes,1,opt,name=sink,proto3" json:"sink,omitempty"`
+}
+
+func (m *GetExportSinkResponse) Reset()      { *m = GetExportSinkResponse{} }
+func (*GetExportSinkResponse) ProtoMessage() {}
+func (*GetExportSinkResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{17}
+}
+func (m *GetExportSinkResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetExportSinkResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetExportSinkResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetExportSinkResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetExportSinkResponse.Merge(m, src)
+}
+func (m *GetExportSinkResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetExportSinkResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetExportSinkResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetExportSinkResponse proto.InternalMessageInfo
+
+func (m *GetExportSinkResponse) GetSink() *v13.ExportSink {
+	if m != nil {
+		return m.Sink
+	}
+	return nil
+}
+
+type DeleteExportSinkRequest struct {
+	// the namespace the sink is scoped to
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// the sink name under the namespace to delete
+	SinkName string `protobuf:"bytes,2,opt,name=sink_name,json=sinkName,proto3" json:"sink_name,omitempty"`
+	// the version of the sink for which this delete is intended for
+	// the latest version can be found by getting the sink
+	ResourceVersion string `protobuf:"bytes,3,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	// the request id to use for this operation - optional
+	RequestId string `protobuf:"bytes,4,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+}
+
+func (m *DeleteExportSinkRequest) Reset()      { *m = DeleteExportSinkRequest{} }
+func (*DeleteExportSinkRequest) ProtoMessage() {}
+func (*DeleteExportSinkRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{18}
+}
+func (m *DeleteExportSinkRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DeleteExportSinkRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DeleteExportSinkRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DeleteExportSinkRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteExportSinkRequest.Merge(m, src)
+}
+func (m *DeleteExportSinkRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *DeleteExportSinkRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteExportSinkRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteExportSinkRequest proto.InternalMessageInfo
+
+func (m *DeleteExportSinkRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *DeleteExportSinkRequest) GetSinkName() string {
+	if m != nil {
+		return m.SinkName
+	}
+	return ""
+}
+
+func (m *DeleteExportSinkRequest) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *DeleteExportSinkRequest) GetRequestId() string {
+	if m != nil {
+		return m.RequestId
+	}
+	return ""
+}
+
+type DeleteExportSinkResponse struct {
+	// the request status of the delete operation
+	RequestStatus *v12.RequestStatus `protobuf:"bytes,1,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
+}
+
+func (m *DeleteExportSinkResponse) Reset()      { *m = DeleteExportSinkResponse{} }
+func (*DeleteExportSinkResponse) ProtoMessage() {}
+func (*DeleteExportSinkResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{19}
+}
+func (m *DeleteExportSinkResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DeleteExportSinkResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DeleteExportSinkResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DeleteExportSinkResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteExportSinkResponse.Merge(m, src)
+}
+func (m *DeleteExportSinkResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *DeleteExportSinkResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteExportSinkResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteExportSinkResponse proto.InternalMessageInfo
+
+func (m *DeleteExportSinkResponse) GetRequestStatus() *v12.RequestStatus {
+	if m != nil {
+		return m.RequestStatus
+	}
+	return nil
+}
+
+type UpdateExportSinkRequest struct {
+	// the namespace the sink is scoped to
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// the updated sink specification
+	Spec *v13.ExportSinkSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	// the version of the sink for which this update is intended for
+	// the latest version can be found by getting the sink
+	ResourceVersion string `protobuf:"bytes,3,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	// the request id to use for this operation - optional
+	RequestId string `protobuf:"bytes,4,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+}
+
+func (m *UpdateExportSinkRequest) Reset()      { *m = UpdateExportSinkRequest{} }
+func (*UpdateExportSinkRequest) ProtoMessage() {}
+func (*UpdateExportSinkRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{20}
+}
+func (m *UpdateExportSinkRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateExportSinkRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateExportSinkRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateExportSinkRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateExportSinkRequest.Merge(m, src)
+}
+func (m *UpdateExportSinkRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateExportSinkRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateExportSinkRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateExportSinkRequest proto.InternalMessageInfo
+
+func (m *UpdateExportSinkRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *UpdateExportSinkRequest) GetSpec() *v13.ExportSinkSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *UpdateExportSinkRequest) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *UpdateExportSinkRequest) GetRequestId() string {
+	if m != nil {
+		return m.RequestId
+	}
+	return ""
+}
+
+type UpdateExportSinkResponse struct {
+	// the request status of the update operation
+	RequestStatus *v12.RequestStatus `protobuf:"bytes,1,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
+}
+
+func (m *UpdateExportSinkResponse) Reset()      { *m = UpdateExportSinkResponse{} }
+func (*UpdateExportSinkResponse) ProtoMessage() {}
+func (*UpdateExportSinkResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{21}
+}
+func (m *UpdateExportSinkResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateExportSinkResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateExportSinkResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateExportSinkResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateExportSinkResponse.Merge(m, src)
+}
+func (m *UpdateExportSinkResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateExportSinkResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateExportSinkResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateExportSinkResponse proto.InternalMessageInfo
+
+func (m *UpdateExportSinkResponse) GetRequestStatus() *v12.RequestStatus {
+	if m != nil {
+		return m.RequestStatus
+	}
+	return nil
+}
+
+type ListExportSinksRequest struct {
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// the requested size of the page to retrive
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// the page token
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+}
+
+func (m *ListExportSinksRequest) Reset()      { *m = ListExportSinksRequest{} }
+func (*ListExportSinksRequest) ProtoMessage() {}
+func (*ListExportSinksRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{22}
+}
+func (m *ListExportSinksRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListExportSinksRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListExportSinksRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListExportSinksRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListExportSinksRequest.Merge(m, src)
+}
+func (m *ListExportSinksRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListExportSinksRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListExportSinksRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListExportSinksRequest proto.InternalMessageInfo
+
+func (m *ListExportSinksRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *ListExportSinksRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *ListExportSinksRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
+type ListExportSinksResponse struct {
+	// the list of export sink names
+	SinkNames []string `protobuf:"bytes,1,rep,name=sink_names,json=sinkNames,proto3" json:"sink_names,omitempty"`
+	// the next page's token
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (m *ListExportSinksResponse) Reset()      { *m = ListExportSinksResponse{} }
+func (*ListExportSinksResponse) ProtoMessage() {}
+func (*ListExportSinksResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{23}
+}
+func (m *ListExportSinksResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListExportSinksResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListExportSinksResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListExportSinksResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListExportSinksResponse.Merge(m, src)
+}
+func (m *ListExportSinksResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListExportSinksResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListExportSinksResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListExportSinksResponse proto.InternalMessageInfo
+
+func (m *ListExportSinksResponse) GetSinkNames() []string {
+	if m != nil {
+		return m.SinkNames
+	}
+	return nil
+}
+
+func (m *ListExportSinksResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
+
+type GetExportSinksRequest struct {
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// the requested size of the page to retrive
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// the page token
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+}
+
+func (m *GetExportSinksRequest) Reset()      { *m = GetExportSinksRequest{} }
+func (*GetExportSinksRequest) ProtoMessage() {}
+func (*GetExportSinksRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{24}
+}
+func (m *GetExportSinksRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetExportSinksRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetExportSinksRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetExportSinksRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetExportSinksRequest.Merge(m, src)
+}
+func (m *GetExportSinksRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetExportSinksRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetExportSinksRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetExportSinksRequest proto.InternalMessageInfo
+
+func (m *GetExportSinksRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *GetExportSinksRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *GetExportSinksRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
+type GetExportSinksResponse struct {
+	// the list of export sinks
+	Sinks []*v13.ExportSink `protobuf:"bytes,1,rep,name=sinks,proto3" json:"sinks,omitempty"`
+	// the next page's token
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (m *GetExportSinksResponse) Reset()      { *m = GetExportSinksResponse{} }
+func (*GetExportSinksResponse) ProtoMessage() {}
+func (*GetExportSinksResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{25}
+}
+func (m *GetExportSinksResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetExportSinksResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetExportSinksResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetExportSinksResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetExportSinksResponse.Merge(m, src)
+}
+func (m *GetExportSinksResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetExportSinksResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetExportSinksResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetExportSinksResponse proto.InternalMessageInfo
+
+func (m *GetExportSinksResponse) GetSinks() []*v13.ExportSink {
+	if m != nil {
+		return m.Sinks
+	}
+	return nil
+}
+
+func (m *GetExportSinksResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
+
+type ValidateExportSinkRequest struct {
+	// the namespace the sink is scoped to
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// the sink specification needs to be validated
+	Spec *v13.ExportSinkSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+}
+
+func (m *ValidateExportSinkRequest) Reset()      { *m = ValidateExportSinkRequest{} }
+func (*ValidateExportSinkRequest) ProtoMessage() {}
+func (*ValidateExportSinkRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{26}
+}
+func (m *ValidateExportSinkRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ValidateExportSinkRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ValidateExportSinkRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ValidateExportSinkRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ValidateExportSinkRequest.Merge(m, src)
+}
+func (m *ValidateExportSinkRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *ValidateExportSinkRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ValidateExportSinkRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ValidateExportSinkRequest proto.InternalMessageInfo
+
+func (m *ValidateExportSinkRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *ValidateExportSinkRequest) GetSpec() *v13.ExportSinkSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+type ValidateExportSinkResponse struct {
+}
+
+func (m *ValidateExportSinkResponse) Reset()      { *m = ValidateExportSinkResponse{} }
+func (*ValidateExportSinkResponse) ProtoMessage() {}
+func (*ValidateExportSinkResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{27}
+}
+func (m *ValidateExportSinkResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ValidateExportSinkResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ValidateExportSinkResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ValidateExportSinkResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ValidateExportSinkResponse.Merge(m, src)
+}
+func (m *ValidateExportSinkResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *ValidateExportSinkResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ValidateExportSinkResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ValidateExportSinkResponse proto.InternalMessageInfo
+
+
 func init() {
 	proto.RegisterType((*CreateNamespaceRequest)(nil), "api.namespaceservice.v1.CreateNamespaceRequest")
 	proto.RegisterType((*CreateNamespaceResponse)(nil), "api.namespaceservice.v1.CreateNamespaceResponse")
@@ -806,6 +1559,20 @@ func init() {
 	proto.RegisterType((*RenameCustomSearchAttributeResponse)(nil), "api.namespaceservice.v1.RenameCustomSearchAttributeResponse")
 	proto.RegisterType((*DeleteNamespaceRequest)(nil), "api.namespaceservice.v1.DeleteNamespaceRequest")
 	proto.RegisterType((*DeleteNamespaceResponse)(nil), "api.namespaceservice.v1.DeleteNamespaceResponse")
+	proto.RegisterType((*CreateExportSinkRequest)(nil), "api.namespaceservice.v1.CreateExportSinkRequest")
+	proto.RegisterType((*CreateExportSinkResponse)(nil), "api.namespaceservice.v1.CreateExportSinkResponse")
+	proto.RegisterType((*GetExportSinkRequest)(nil), "api.namespaceservice.v1.GetExportSinkRequest")
+	proto.RegisterType((*GetExportSinkResponse)(nil), "api.namespaceservice.v1.GetExportSinkResponse")
+	proto.RegisterType((*DeleteExportSinkRequest)(nil), "api.namespaceservice.v1.DeleteExportSinkRequest")
+	proto.RegisterType((*DeleteExportSinkResponse)(nil), "api.namespaceservice.v1.DeleteExportSinkResponse")
+	proto.RegisterType((*UpdateExportSinkRequest)(nil), "api.namespaceservice.v1.UpdateExportSinkRequest")
+	proto.RegisterType((*UpdateExportSinkResponse)(nil), "api.namespaceservice.v1.UpdateExportSinkResponse")
+	proto.RegisterType((*ListExportSinksRequest)(nil), "api.namespaceservice.v1.ListExportSinksRequest")
+	proto.RegisterType((*ListExportSinksResponse)(nil), "api.namespaceservice.v1.ListExportSinksResponse")
+	proto.RegisterType((*GetExportSinksRequest)(nil), "api.namespaceservice.v1.GetExportSinksRequest")
+	proto.RegisterType((*GetExportSinksResponse)(nil), "api.namespaceservice.v1.GetExportSinksResponse")
+	proto.RegisterType((*ValidateExportSinkRequest)(nil), "api.namespaceservice.v1.ValidateExportSinkRequest")
+	proto.RegisterType((*ValidateExportSinkResponse)(nil), "api.namespaceservice.v1.ValidateExportSinkResponse")
 }
 
 func init() {
@@ -813,49 +1580,67 @@ func init() {
 }
 
 var fileDescriptor_667e39c23eb47b7c = []byte{
-	// 660 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x55, 0xcd, 0x6e, 0xd3, 0x40,
-	0x10, 0xce, 0x36, 0x29, 0x22, 0x13, 0x95, 0x22, 0x43, 0xd3, 0xd0, 0x9f, 0x25, 0x04, 0x15, 0x85,
-	0x8b, 0xa3, 0xa6, 0x5c, 0x50, 0x4f, 0xd0, 0x0a, 0x84, 0x84, 0x50, 0x71, 0x28, 0x07, 0x2e, 0xc6,
-	0x75, 0x46, 0xad, 0x69, 0x63, 0x9b, 0xdd, 0x75, 0x5a, 0x55, 0x1c, 0xfa, 0x08, 0x3c, 0x05, 0xe2,
-	0x05, 0x78, 0x07, 0x8e, 0x3d, 0xf6, 0x48, 0xdd, 0x0b, 0x37, 0xfa, 0x08, 0x68, 0x37, 0xb6, 0x9b,
-	0xda, 0x69, 0x08, 0x28, 0xe2, 0x98, 0x99, 0xd9, 0xef, 0xfb, 0xe6, 0x9b, 0x99, 0x18, 0x74, 0xcb,
-	0x77, 0x1a, 0xae, 0xd5, 0x41, 0xee, 0x5b, 0x36, 0x72, 0x64, 0x5d, 0xc7, 0xc6, 0x46, 0x77, 0xb9,
-	0xc1, 0xf0, 0x63, 0x80, 0x5c, 0x98, 0x0c, 0xb9, 0xef, 0xb9, 0x1c, 0x75, 0x9f, 0x79, 0xc2, 0xd3,
-	0x66, 0x2d, 0xdf, 0xd1, 0xd3, 0xf5, 0x7a, 0x77, 0x79, 0xee, 0x8e, 0x04, 0xb2, 0x02, 0xb1, 0x23,
-	0x1f, 0x77, 0x90, 0x73, 0x6b, 0x3b, 0x7a, 0x33, 0x47, 0x2f, 0x71, 0x64, 0xf3, 0x0b, 0x32, 0x1f,
-	0xf1, 0x65, 0xb2, 0xb5, 0x5f, 0x04, 0xca, 0x6b, 0x0c, 0x2d, 0x81, 0xaf, 0x62, 0x08, 0xa3, 0x57,
-	0xab, 0x2d, 0x40, 0x31, 0x81, 0xad, 0x90, 0x2a, 0xa9, 0x17, 0x8d, 0x8b, 0x80, 0xb6, 0x02, 0x05,
-	0xee, 0xa3, 0x5d, 0x99, 0xa8, 0x92, 0x7a, 0xa9, 0x79, 0x57, 0xbf, 0xa4, 0x5c, 0xef, 0x2e, 0xeb,
-	0x09, 0x5e, 0xcb, 0x47, 0xdb, 0x50, 0xc5, 0xda, 0x22, 0x40, 0xdc, 0xb9, 0xd3, 0xae, 0xe4, 0x7b,
-	0x98, 0x51, 0xe4, 0x45, 0x5b, 0xb3, 0x61, 0x2e, 0xe0, 0xc8, 0xcc, 0x04, 0xc7, 0xf4, 0x91, 0x75,
-	0x1c, 0xce, 0x1d, 0xcf, 0xe5, 0x95, 0x42, 0x35, 0x5f, 0x2f, 0x35, 0x97, 0x14, 0x93, 0xb4, 0x42,
-	0x92, 0x6c, 0x72, 0x64, 0x09, 0xd1, 0xc6, 0x45, 0xb1, 0x51, 0x09, 0xae, 0xc8, 0xd4, 0x4c, 0x98,
-	0xcd, 0x34, 0xdc, 0x1b, 0x82, 0xb6, 0x0e, 0x37, 0x62, 0x79, 0x5c, 0x58, 0x22, 0xe0, 0xaa, 0xed,
-	0x52, 0x73, 0x51, 0x71, 0x46, 0x29, 0x49, 0x1b, 0x59, 0xd4, 0x52, 0x45, 0xc6, 0x14, 0xeb, 0xff,
-	0x59, 0x6b, 0xc1, 0xcc, 0x4b, 0x87, 0x8b, 0x04, 0x9e, 0xc7, 0x86, 0xce, 0x43, 0xd1, 0xb7, 0xb6,
-	0xd1, 0xe4, 0xce, 0x61, 0xcf, 0xd0, 0x49, 0xe3, 0xba, 0x0c, 0xb4, 0x9c, 0x43, 0x94, 0xd6, 0xa8,
-	0xa4, 0xf0, 0x76, 0xd1, 0x55, 0xae, 0x16, 0x0d, 0x55, 0xfe, 0x46, 0x06, 0x6a, 0xef, 0xa1, 0x9c,
-	0x06, 0x8d, 0x44, 0x53, 0x80, 0x8b, 0x8d, 0xa9, 0x90, 0x6a, 0xbe, 0x5e, 0x34, 0xfa, 0x22, 0xda,
-	0x03, 0x98, 0x76, 0xf1, 0x40, 0x98, 0x19, 0xf4, 0x29, 0x19, 0xde, 0x48, 0x18, 0x0c, 0xb8, 0xfd,
-	0x1c, 0xc7, 0xac, 0xfa, 0x13, 0xcc, 0xa4, 0x30, 0x23, 0xd1, 0xab, 0x19, 0xd1, 0xa5, 0xe6, 0xfc,
-	0x90, 0x1d, 0xfa, 0xa7, 0x8e, 0x56, 0xe0, 0x56, 0x3f, 0xfb, 0x48, 0x7b, 0x5d, 0x7b, 0x7d, 0xd9,
-	0x86, 0x44, 0xf1, 0xe3, 0xf4, 0xab, 0x3f, 0x08, 0xee, 0x83, 0xfc, 0x46, 0xa0, 0xbc, 0xe9, 0xb7,
-	0xff, 0xd3, 0x8d, 0x3d, 0x84, 0x9b, 0x0c, 0xb9, 0x17, 0x30, 0x1b, 0xcd, 0x2e, 0x32, 0xb9, 0xf4,
-	0xd1, 0xa5, 0x4d, 0xc7, 0xf1, 0xb7, 0xbd, 0x70, 0xea, 0x1c, 0x0b, 0xa9, 0x73, 0x94, 0x97, 0x92,
-	0x91, 0x3d, 0xd6, 0x4b, 0xf9, 0x32, 0x01, 0x35, 0x03, 0x65, 0x47, 0x6b, 0x01, 0x17, 0x5e, 0xa7,
-	0x85, 0x16, 0xb3, 0x77, 0x9e, 0x08, 0xc1, 0x9c, 0xad, 0x40, 0x8c, 0x68, 0xd2, 0x06, 0x2c, 0xe1,
-	0x81, 0xc3, 0x85, 0xe3, 0x6e, 0x9b, 0xb6, 0x82, 0x31, 0xb9, 0xc2, 0x31, 0xad, 0x18, 0x48, 0xfd,
-	0xa1, 0x44, 0x3b, 0x72, 0x2f, 0x2e, 0x1e, 0x48, 0x29, 0x3b, 0xd5, 0x9e, 0x41, 0xd5, 0xc5, 0xfd,
-	0xe1, 0x60, 0x3d, 0x47, 0x17, 0x5c, 0xdc, 0xbf, 0x1a, 0x67, 0xd0, 0x24, 0x0a, 0xa3, 0x4c, 0x62,
-	0x32, 0x3d, 0x89, 0x5d, 0xb8, 0x3f, 0xd4, 0xa7, 0xb1, 0x4e, 0xe5, 0x88, 0x40, 0x79, 0x1d, 0xf7,
-	0xf0, 0xaf, 0xd7, 0x75, 0x50, 0xbf, 0x13, 0xa3, 0xf4, 0x9b, 0x1f, 0xb0, 0x79, 0x19, 0x05, 0xe3,
-	0xec, 0xf1, 0xe9, 0x87, 0xe3, 0x53, 0x9a, 0x3b, 0x39, 0xa5, 0xb9, 0xf3, 0x53, 0x4a, 0x8e, 0x42,
-	0x4a, 0xbe, 0x86, 0x94, 0x7c, 0x0f, 0x29, 0x39, 0x0e, 0x29, 0xf9, 0x11, 0x52, 0xf2, 0x33, 0xa4,
-	0xb9, 0xf3, 0x90, 0x92, 0xcf, 0x67, 0x34, 0x77, 0x7c, 0x46, 0x73, 0x27, 0x67, 0x34, 0xf7, 0xee,
-	0x91, 0xe8, 0xf8, 0x6c, 0x4f, 0xb7, 0xf7, 0xbc, 0xa0, 0xdd, 0xb8, 0xe2, 0xd3, 0xbe, 0x9a, 0x8e,
-	0x6d, 0x5d, 0x53, 0x5f, 0xda, 0x95, 0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x73, 0x5b, 0xeb, 0xc2,
-	0x0d, 0x08, 0x00, 0x00,
+	// 958 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x57, 0x4f, 0x6f, 0x1b, 0x45,
+	0x14, 0xf7, 0xd8, 0x0e, 0x8a, 0x5f, 0x08, 0x45, 0x4b, 0xeb, 0x6c, 0xfe, 0x2d, 0x66, 0x51, 0x51,
+	0x10, 0xc2, 0x56, 0x92, 0x5e, 0x50, 0xb9, 0x40, 0x43, 0xab, 0x4a, 0x08, 0x85, 0x35, 0xed, 0x81,
+	0xcb, 0x66, 0xbb, 0x79, 0x75, 0xa7, 0xb6, 0x77, 0xb7, 0x33, 0xb3, 0x6e, 0x54, 0x71, 0xe8, 0x8d,
+	0x2b, 0x9f, 0x80, 0x23, 0xe2, 0x8c, 0xc4, 0x77, 0x40, 0xe2, 0x92, 0x63, 0x8f, 0xc4, 0xb9, 0x70,
+	0xa3, 0x1f, 0x01, 0xcd, 0xee, 0xce, 0xda, 0xde, 0xb5, 0xc3, 0x06, 0x6d, 0x73, 0xf4, 0x7b, 0xcf,
+	0xbf, 0xf7, 0xfb, 0xbd, 0x3f, 0xb3, 0x33, 0xd0, 0x76, 0x02, 0xda, 0xf1, 0x9c, 0x21, 0xf2, 0xc0,
+	0x71, 0x91, 0x23, 0x1b, 0x51, 0x17, 0x3b, 0xa3, 0xdd, 0x0e, 0xc3, 0x67, 0x21, 0x72, 0x61, 0x33,
+	0xe4, 0x81, 0xef, 0x71, 0x6c, 0x07, 0xcc, 0x17, 0xbe, 0xb6, 0xe6, 0x04, 0xb4, 0x9d, 0x8d, 0x6f,
+	0x8f, 0x76, 0x37, 0xd6, 0x25, 0x90, 0x13, 0x8a, 0x27, 0xf2, 0xcf, 0x43, 0xe4, 0xdc, 0xe9, 0x25,
+	0xff, 0xd9, 0xd8, 0x94, 0x2e, 0xd7, 0x1f, 0x0e, 0x7d, 0x2f, 0xef, 0x34, 0x66, 0x08, 0xe4, 0xfd,
+	0x5b, 0xd2, 0x9f, 0x90, 0xc9, 0x7b, 0xa3, 0xac, 0x9c, 0x7a, 0xfd, 0x9c, 0xcb, 0xfc, 0x87, 0x40,
+	0xf3, 0x0e, 0x43, 0x47, 0xe0, 0x37, 0x0a, 0xdd, 0x8a, 0x61, 0xb4, 0x2d, 0x68, 0xa4, 0x19, 0x75,
+	0xd2, 0x22, 0x3b, 0x0d, 0x6b, 0x62, 0xd0, 0xf6, 0xa1, 0xce, 0x03, 0x74, 0xf5, 0x6a, 0x8b, 0xec,
+	0xac, 0xec, 0xbd, 0xdf, 0x9e, 0x51, 0xdc, 0x1e, 0xed, 0xb6, 0x53, 0xbc, 0x6e, 0x80, 0xae, 0x15,
+	0x05, 0x6b, 0xdb, 0x00, 0xaa, 0x62, 0xf4, 0x58, 0xaf, 0xc5, 0x98, 0x89, 0xe5, 0xfe, 0xb1, 0xe6,
+	0xc2, 0x46, 0xc8, 0x91, 0xd9, 0x29, 0x8e, 0x1d, 0x20, 0x1b, 0x52, 0xce, 0xa9, 0xef, 0x71, 0xbd,
+	0xde, 0xaa, 0xed, 0xac, 0xec, 0xdd, 0x8c, 0x32, 0xc9, 0x12, 0xca, 0x24, 0x0f, 0x38, 0xb2, 0x34,
+	0xd1, 0xe1, 0x24, 0xd8, 0xd2, 0xc3, 0x05, 0x1e, 0xd3, 0x86, 0xb5, 0x9c, 0xe0, 0xb8, 0x79, 0xda,
+	0x01, 0xbc, 0xa3, 0xe8, 0x71, 0xe1, 0x88, 0x90, 0x47, 0xb2, 0x57, 0xf6, 0xb6, 0xa3, 0x9c, 0x89,
+	0x4b, 0xa6, 0x4d, 0x4a, 0xd4, 0x8d, 0x82, 0xac, 0x55, 0x36, 0xfd, 0xd3, 0xec, 0xc2, 0x8d, 0xaf,
+	0x29, 0x17, 0x29, 0x3c, 0x57, 0x05, 0xdd, 0x84, 0x46, 0xe0, 0xf4, 0xd0, 0xe6, 0xf4, 0x45, 0x5c,
+	0xd0, 0x25, 0x6b, 0x59, 0x1a, 0xba, 0xf4, 0x05, 0xca, 0xd2, 0x44, 0x4e, 0xe1, 0xf7, 0xd1, 0x8b,
+	0xaa, 0xda, 0xb0, 0xa2, 0xf0, 0xef, 0xa4, 0xc1, 0x3c, 0x82, 0x66, 0x16, 0x34, 0x21, 0x6d, 0x00,
+	0x4c, 0x26, 0x4d, 0x27, 0xad, 0xda, 0x4e, 0xc3, 0x9a, 0xb2, 0x68, 0x1f, 0xc1, 0x35, 0x0f, 0x4f,
+	0x84, 0x9d, 0x43, 0x5f, 0x95, 0xe6, 0xc3, 0x34, 0x83, 0x05, 0xd7, 0xef, 0x61, 0xc9, 0xac, 0x7f,
+	0x80, 0x1b, 0x19, 0xcc, 0x84, 0xf4, 0xed, 0x1c, 0xe9, 0x95, 0xbd, 0xcd, 0x0b, 0x66, 0xe8, 0x7f,
+	0x29, 0xda, 0x87, 0xf7, 0xa6, 0xb3, 0x17, 0x9a, 0x6b, 0xf3, 0xdb, 0xd9, 0x32, 0xa4, 0x8c, 0x3f,
+	0xcb, 0xfe, 0xeb, 0x3f, 0x08, 0x4f, 0x41, 0xfe, 0x4e, 0xa0, 0xf9, 0x20, 0x38, 0xbe, 0xa2, 0x1d,
+	0xfb, 0x18, 0xde, 0x65, 0xc8, 0xfd, 0x90, 0xb9, 0x68, 0x8f, 0x90, 0xc9, 0xa1, 0x4f, 0x36, 0xed,
+	0x9a, 0xb2, 0x3f, 0x8c, 0xcd, 0x99, 0x75, 0xac, 0x67, 0xd6, 0x51, 0x6e, 0x4a, 0x8e, 0x76, 0xa9,
+	0x9b, 0xf2, 0x4b, 0x15, 0x4c, 0x0b, 0xa5, 0xa2, 0x3b, 0x21, 0x17, 0xfe, 0xb0, 0x8b, 0x0e, 0x73,
+	0x9f, 0x7c, 0x21, 0x04, 0xa3, 0x8f, 0x42, 0x51, 0xb0, 0x48, 0x87, 0x70, 0x13, 0x4f, 0x28, 0x17,
+	0xd4, 0xeb, 0xd9, 0x6e, 0x04, 0x63, 0xf3, 0x08, 0xc7, 0x76, 0x14, 0x50, 0x74, 0xa0, 0x24, 0x33,
+	0xf2, 0x81, 0x0a, 0x9e, 0x9b, 0x52, 0x2a, 0xd5, 0xee, 0x42, 0xcb, 0xc3, 0xe7, 0x17, 0x83, 0xc5,
+	0x15, 0xdd, 0xf2, 0xf0, 0xf9, 0x62, 0x9c, 0x79, 0x9d, 0xa8, 0x17, 0xe9, 0xc4, 0x52, 0xb6, 0x13,
+	0x7d, 0xf8, 0xf0, 0xc2, 0x3a, 0x95, 0xda, 0x95, 0x97, 0x04, 0x9a, 0x07, 0x38, 0xc0, 0x4b, 0x8f,
+	0xeb, 0x3c, 0xbd, 0xd5, 0x22, 0x7a, 0x6b, 0x73, 0x26, 0x2f, 0xc7, 0xa0, 0x54, 0x8d, 0x3f, 0x12,
+	0xf5, 0x15, 0xf8, 0xea, 0x24, 0xf0, 0x99, 0xe8, 0x52, 0xaf, 0x5f, 0x4c, 0x64, 0x67, 0x66, 0x27,
+	0xe3, 0x23, 0x40, 0x7e, 0x5a, 0x65, 0xca, 0x09, 0x56, 0xe1, 0x6f, 0x9e, 0x79, 0x04, 0x7a, 0x9e,
+	0x48, 0xa9, 0x5a, 0xe3, 0x13, 0xed, 0xb2, 0x3a, 0x37, 0xa1, 0x21, 0x65, 0x4d, 0xaf, 0xce, 0xb2,
+	0x34, 0xc8, 0x8e, 0x98, 0x07, 0xd1, 0xb9, 0x3e, 0x87, 0xf1, 0x27, 0x50, 0x97, 0x41, 0x09, 0xcf,
+	0xb5, 0x05, 0xd5, 0xb1, 0xa2, 0x20, 0xf3, 0x67, 0xa2, 0xda, 0x5c, 0x26, 0xb9, 0x12, 0x0f, 0xc0,
+	0x23, 0xd0, 0xf3, 0xfc, 0x4a, 0xed, 0xcd, 0x6f, 0x44, 0x9d, 0xb1, 0x6f, 0x7c, 0x0e, 0x4b, 0x2d,
+	0x4b, 0x9e, 0x73, 0xa9, 0x65, 0x61, 0xf1, 0x6d, 0x67, 0x82, 0xcf, 0x0b, 0xcf, 0xc5, 0xe4, 0xae,
+	0x52, 0xbd, 0xf0, 0xae, 0x52, 0xcb, 0xdf, 0xb0, 0xd6, 0x72, 0x39, 0x13, 0x51, 0xdb, 0x00, 0xe9,
+	0xb8, 0xa9, 0x2b, 0x56, 0x43, 0xcd, 0x5b, 0xf1, 0xfb, 0xc8, 0xb3, 0xcc, 0xd6, 0x5c, 0x81, 0x28,
+	0x1f, 0x9a, 0xd9, 0x94, 0x89, 0xa6, 0x4f, 0x61, 0x49, 0x2a, 0x50, 0x97, 0xaf, 0x85, 0xab, 0x1a,
+	0x47, 0x15, 0xd6, 0xf8, 0x14, 0xd6, 0x1f, 0x3a, 0x03, 0x7a, 0x15, 0x13, 0x6d, 0x6e, 0xc1, 0xc6,
+	0xbc, 0x5c, 0xb1, 0x40, 0xf3, 0x4f, 0x02, 0xfa, 0x5d, 0x87, 0x0e, 0xfc, 0xd1, 0xd4, 0x43, 0xa0,
+	0x18, 0x93, 0xd9, 0xf9, 0xaf, 0x66, 0x9f, 0x29, 0x9f, 0xc3, 0xaa, 0x70, 0x58, 0x0f, 0xe5, 0xb3,
+	0xaf, 0xa7, 0xd6, 0x48, 0x95, 0x30, 0x7e, 0xc1, 0xc5, 0x13, 0x2e, 0x9d, 0xf7, 0x0f, 0xac, 0xb7,
+	0xe3, 0xe8, 0xf8, 0xb7, 0x76, 0x0b, 0x9a, 0xbc, 0x4f, 0x03, 0xbb, 0xc7, 0x1c, 0x17, 0x1f, 0x87,
+	0x03, 0xfb, 0x71, 0x42, 0x32, 0x5a, 0xb4, 0x65, 0xeb, 0xba, 0xf4, 0xde, 0x4b, 0x9c, 0x4a, 0x80,
+	0xe9, 0xc0, 0xfa, 0x1c, 0x31, 0x65, 0x2e, 0xdd, 0x97, 0x4f, 0x4f, 0xcf, 0x8c, 0xca, 0xab, 0x33,
+	0xa3, 0xf2, 0xfa, 0xcc, 0x20, 0x2f, 0xc7, 0x06, 0xf9, 0x75, 0x6c, 0x90, 0x3f, 0xc6, 0x06, 0x39,
+	0x1d, 0x1b, 0xe4, 0xaf, 0xb1, 0x41, 0xfe, 0x1e, 0x1b, 0x95, 0xd7, 0x63, 0x83, 0xfc, 0x74, 0x6e,
+	0x54, 0x4e, 0xcf, 0x8d, 0xca, 0xab, 0x73, 0xa3, 0xf2, 0xfd, 0x2d, 0x31, 0x0c, 0xd8, 0xa0, 0xed,
+	0x0e, 0xfc, 0xf0, 0xb8, 0xb3, 0xe0, 0x99, 0x7c, 0x3b, 0x6b, 0x7b, 0xf4, 0x56, 0xf4, 0xfa, 0xdc,
+	0xff, 0x37, 0x00, 0x00, 0xff, 0xff, 0x8f, 0xff, 0xd3, 0x77, 0x59, 0x0f, 0x00, 0x00,
 }
 
 func (this *CreateNamespaceRequest) Equal(that interface{}) bool {
@@ -1257,6 +2042,397 @@ func (this *DeleteNamespaceResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *CreateExportSinkRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateExportSinkRequest)
+	if !ok {
+		that2, ok := that.(CreateExportSinkRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.RequestId != that1.RequestId {
+		return false
+	}
+	return true
+}
+func (this *CreateExportSinkResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateExportSinkResponse)
+	if !ok {
+		that2, ok := that.(CreateExportSinkResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.RequestStatus.Equal(that1.RequestStatus) {
+		return false
+	}
+	return true
+}
+func (this *GetExportSinkRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetExportSinkRequest)
+	if !ok {
+		that2, ok := that.(GetExportSinkRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.SinkName != that1.SinkName {
+		return false
+	}
+	return true
+}
+func (this *GetExportSinkResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetExportSinkResponse)
+	if !ok {
+		that2, ok := that.(GetExportSinkResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Sink.Equal(that1.Sink) {
+		return false
+	}
+	return true
+}
+func (this *DeleteExportSinkRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DeleteExportSinkRequest)
+	if !ok {
+		that2, ok := that.(DeleteExportSinkRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.SinkName != that1.SinkName {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	if this.RequestId != that1.RequestId {
+		return false
+	}
+	return true
+}
+func (this *DeleteExportSinkResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DeleteExportSinkResponse)
+	if !ok {
+		that2, ok := that.(DeleteExportSinkResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.RequestStatus.Equal(that1.RequestStatus) {
+		return false
+	}
+	return true
+}
+func (this *UpdateExportSinkRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateExportSinkRequest)
+	if !ok {
+		that2, ok := that.(UpdateExportSinkRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	if this.RequestId != that1.RequestId {
+		return false
+	}
+	return true
+}
+func (this *UpdateExportSinkResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateExportSinkResponse)
+	if !ok {
+		that2, ok := that.(UpdateExportSinkResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.RequestStatus.Equal(that1.RequestStatus) {
+		return false
+	}
+	return true
+}
+func (this *ListExportSinksRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ListExportSinksRequest)
+	if !ok {
+		that2, ok := that.(ListExportSinksRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.PageSize != that1.PageSize {
+		return false
+	}
+	if this.PageToken != that1.PageToken {
+		return false
+	}
+	return true
+}
+func (this *ListExportSinksResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ListExportSinksResponse)
+	if !ok {
+		that2, ok := that.(ListExportSinksResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.SinkNames) != len(that1.SinkNames) {
+		return false
+	}
+	for i := range this.SinkNames {
+		if this.SinkNames[i] != that1.SinkNames[i] {
+			return false
+		}
+	}
+	if this.NextPageToken != that1.NextPageToken {
+		return false
+	}
+	return true
+}
+func (this *GetExportSinksRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetExportSinksRequest)
+	if !ok {
+		that2, ok := that.(GetExportSinksRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.PageSize != that1.PageSize {
+		return false
+	}
+	if this.PageToken != that1.PageToken {
+		return false
+	}
+	return true
+}
+func (this *GetExportSinksResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetExportSinksResponse)
+	if !ok {
+		that2, ok := that.(GetExportSinksResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Sinks) != len(that1.Sinks) {
+		return false
+	}
+	for i := range this.Sinks {
+		if !this.Sinks[i].Equal(that1.Sinks[i]) {
+			return false
+		}
+	}
+	if this.NextPageToken != that1.NextPageToken {
+		return false
+	}
+	return true
+}
+func (this *ValidateExportSinkRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ValidateExportSinkRequest)
+	if !ok {
+		that2, ok := that.(ValidateExportSinkRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	return true
+}
+func (this *ValidateExportSinkResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ValidateExportSinkResponse)
+	if !ok {
+		that2, ok := that.(ValidateExportSinkResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	return true
+}
 func (this *CreateNamespaceRequest) GoString() string {
 	if this == nil {
 		return "nil"
@@ -1428,6 +2604,177 @@ func (this *DeleteNamespaceResponse) GoString() string {
 	if this.RequestStatus != nil {
 		s = append(s, "RequestStatus: "+fmt.Sprintf("%#v", this.RequestStatus)+",\n")
 	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CreateExportSinkRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&namespaceservice.CreateExportSinkRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "RequestId: "+fmt.Sprintf("%#v", this.RequestId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CreateExportSinkResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespaceservice.CreateExportSinkResponse{")
+	if this.RequestStatus != nil {
+		s = append(s, "RequestStatus: "+fmt.Sprintf("%#v", this.RequestStatus)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetExportSinkRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespaceservice.GetExportSinkRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "SinkName: "+fmt.Sprintf("%#v", this.SinkName)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetExportSinkResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespaceservice.GetExportSinkResponse{")
+	if this.Sink != nil {
+		s = append(s, "Sink: "+fmt.Sprintf("%#v", this.Sink)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DeleteExportSinkRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&namespaceservice.DeleteExportSinkRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "SinkName: "+fmt.Sprintf("%#v", this.SinkName)+",\n")
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "RequestId: "+fmt.Sprintf("%#v", this.RequestId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DeleteExportSinkResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespaceservice.DeleteExportSinkResponse{")
+	if this.RequestStatus != nil {
+		s = append(s, "RequestStatus: "+fmt.Sprintf("%#v", this.RequestStatus)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UpdateExportSinkRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&namespaceservice.UpdateExportSinkRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "RequestId: "+fmt.Sprintf("%#v", this.RequestId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UpdateExportSinkResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespaceservice.UpdateExportSinkResponse{")
+	if this.RequestStatus != nil {
+		s = append(s, "RequestStatus: "+fmt.Sprintf("%#v", this.RequestStatus)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ListExportSinksRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&namespaceservice.ListExportSinksRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
+	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ListExportSinksResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespaceservice.ListExportSinksResponse{")
+	s = append(s, "SinkNames: "+fmt.Sprintf("%#v", this.SinkNames)+",\n")
+	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetExportSinksRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&namespaceservice.GetExportSinksRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
+	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetExportSinksResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespaceservice.GetExportSinksResponse{")
+	if this.Sinks != nil {
+		s = append(s, "Sinks: "+fmt.Sprintf("%#v", this.Sinks)+",\n")
+	}
+	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ValidateExportSinkRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespaceservice.ValidateExportSinkRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ValidateExportSinkResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 4)
+	s = append(s, "&namespaceservice.ValidateExportSinkResponse{")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -2018,6 +3365,571 @@ func (m *DeleteNamespaceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
+func (m *CreateExportSinkRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CreateExportSinkRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateExportSinkRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.RequestId) > 0 {
+		i -= len(m.RequestId)
+		copy(dAtA[i:], m.RequestId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.RequestId)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CreateExportSinkResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CreateExportSinkResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateExportSinkResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.RequestStatus != nil {
+		{
+			size, err := m.RequestStatus.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetExportSinkRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetExportSinkRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetExportSinkRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.SinkName) > 0 {
+		i -= len(m.SinkName)
+		copy(dAtA[i:], m.SinkName)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.SinkName)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetExportSinkResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetExportSinkResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetExportSinkResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Sink != nil {
+		{
+			size, err := m.Sink.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteExportSinkRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteExportSinkRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteExportSinkRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.RequestId) > 0 {
+		i -= len(m.RequestId)
+		copy(dAtA[i:], m.RequestId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.RequestId)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.SinkName) > 0 {
+		i -= len(m.SinkName)
+		copy(dAtA[i:], m.SinkName)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.SinkName)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteExportSinkResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteExportSinkResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteExportSinkResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.RequestStatus != nil {
+		{
+			size, err := m.RequestStatus.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateExportSinkRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateExportSinkRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateExportSinkRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.RequestId) > 0 {
+		i -= len(m.RequestId)
+		copy(dAtA[i:], m.RequestId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.RequestId)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateExportSinkResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateExportSinkResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateExportSinkResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.RequestStatus != nil {
+		{
+			size, err := m.RequestStatus.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListExportSinksRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListExportSinksRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListExportSinksRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.PageToken) > 0 {
+		i -= len(m.PageToken)
+		copy(dAtA[i:], m.PageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.PageSize != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListExportSinksResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListExportSinksResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListExportSinksResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextPageToken) > 0 {
+		i -= len(m.NextPageToken)
+		copy(dAtA[i:], m.NextPageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.SinkNames) > 0 {
+		for iNdEx := len(m.SinkNames) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.SinkNames[iNdEx])
+			copy(dAtA[i:], m.SinkNames[iNdEx])
+			i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.SinkNames[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetExportSinksRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetExportSinksRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetExportSinksRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.PageToken) > 0 {
+		i -= len(m.PageToken)
+		copy(dAtA[i:], m.PageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.PageSize != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetExportSinksResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetExportSinksResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetExportSinksResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextPageToken) > 0 {
+		i -= len(m.NextPageToken)
+		copy(dAtA[i:], m.NextPageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Sinks) > 0 {
+		for iNdEx := len(m.Sinks) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Sinks[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ValidateExportSinkRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ValidateExportSinkRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ValidateExportSinkRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ValidateExportSinkResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ValidateExportSinkResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ValidateExportSinkResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintRequestResponse(dAtA []byte, offset int, v uint64) int {
 	offset -= sovRequestResponse(v)
 	base := offset
@@ -2279,6 +4191,251 @@ func (m *DeleteNamespaceResponse) Size() (n int) {
 	return n
 }
 
+func (m *CreateExportSinkRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.RequestId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *CreateExportSinkResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.RequestStatus != nil {
+		l = m.RequestStatus.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetExportSinkRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.SinkName)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetExportSinkResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Sink != nil {
+		l = m.Sink.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *DeleteExportSinkRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.SinkName)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.RequestId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *DeleteExportSinkResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.RequestStatus != nil {
+		l = m.RequestStatus.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *UpdateExportSinkRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.RequestId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *UpdateExportSinkResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.RequestStatus != nil {
+		l = m.RequestStatus.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ListExportSinksRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.PageSize != 0 {
+		n += 1 + sovRequestResponse(uint64(m.PageSize))
+	}
+	l = len(m.PageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ListExportSinksResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.SinkNames) > 0 {
+		for _, s := range m.SinkNames {
+			l = len(s)
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.NextPageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetExportSinksRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.PageSize != 0 {
+		n += 1 + sovRequestResponse(uint64(m.PageSize))
+	}
+	l = len(m.PageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetExportSinksResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Sinks) > 0 {
+		for _, e := range m.Sinks {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.NextPageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ValidateExportSinkRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ValidateExportSinkResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+
 func sovRequestResponse(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
@@ -2451,6 +4608,167 @@ func (this *DeleteNamespaceResponse) String() string {
 	}, "")
 	return s
 }
+func (this *CreateExportSinkRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateExportSinkRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ExportSinkSpec", "v13.ExportSinkSpec", 1) + `,`,
+		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateExportSinkResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateExportSinkResponse{`,
+		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v12.RequestStatus", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetExportSinkRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetExportSinkRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`SinkName:` + fmt.Sprintf("%v", this.SinkName) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetExportSinkResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetExportSinkResponse{`,
+		`Sink:` + strings.Replace(fmt.Sprintf("%v", this.Sink), "ExportSink", "v13.ExportSink", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DeleteExportSinkRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DeleteExportSinkRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`SinkName:` + fmt.Sprintf("%v", this.SinkName) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DeleteExportSinkResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DeleteExportSinkResponse{`,
+		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v12.RequestStatus", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateExportSinkRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateExportSinkRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ExportSinkSpec", "v13.ExportSinkSpec", 1) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateExportSinkResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateExportSinkResponse{`,
+		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v12.RequestStatus", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ListExportSinksRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ListExportSinksRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
+		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ListExportSinksResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ListExportSinksResponse{`,
+		`SinkNames:` + fmt.Sprintf("%v", this.SinkNames) + `,`,
+		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetExportSinksRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetExportSinksRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
+		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetExportSinksResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForSinks := "[]*ExportSink{"
+	for _, f := range this.Sinks {
+		repeatedStringForSinks += strings.Replace(fmt.Sprintf("%v", f), "ExportSink", "v13.ExportSink", 1) + ","
+	}
+	repeatedStringForSinks += "}"
+	s := strings.Join([]string{`&GetExportSinksResponse{`,
+		`Sinks:` + repeatedStringForSinks + `,`,
+		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ValidateExportSinkRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ValidateExportSinkRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ExportSinkSpec", "v13.ExportSinkSpec", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ValidateExportSinkResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ValidateExportSinkResponse{`,
+		`}`,
+	}, "")
+	return s
+}
+
 func valueToStringRequestResponse(v interface{}) string {
 	rv := reflect.ValueOf(v)
 	if rv.IsNil() {
@@ -4167,6 +6485,1681 @@ func (m *DeleteNamespaceResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *CreateExportSinkRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CreateExportSinkRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CreateExportSinkRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &v13.ExportSinkSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RequestId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CreateExportSinkResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CreateExportSinkResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CreateExportSinkResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestStatus", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.RequestStatus == nil {
+				m.RequestStatus = &v12.RequestStatus{}
+			}
+			if err := m.RequestStatus.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetExportSinkRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetExportSinkRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetExportSinkRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SinkName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SinkName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetExportSinkResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetExportSinkResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetExportSinkResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sink", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Sink == nil {
+				m.Sink = &v13.ExportSink{}
+			}
+			if err := m.Sink.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteExportSinkRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteExportSinkRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteExportSinkRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SinkName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SinkName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RequestId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteExportSinkResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteExportSinkResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteExportSinkResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestStatus", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.RequestStatus == nil {
+				m.RequestStatus = &v12.RequestStatus{}
+			}
+			if err := m.RequestStatus.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateExportSinkRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateExportSinkRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateExportSinkRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &v13.ExportSinkSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RequestId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateExportSinkResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateExportSinkResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateExportSinkResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestStatus", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.RequestStatus == nil {
+				m.RequestStatus = &v12.RequestStatus{}
+			}
+			if err := m.RequestStatus.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListExportSinksRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListExportSinksRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListExportSinksRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
+			}
+			m.PageSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PageSize |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListExportSinksResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListExportSinksResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListExportSinksResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SinkNames", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SinkNames = append(m.SinkNames, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextPageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetExportSinksRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetExportSinksRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetExportSinksRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
+			}
+			m.PageSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PageSize |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetExportSinksResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetExportSinksResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetExportSinksResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sinks", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sinks = append(m.Sinks, &v13.ExportSink{})
+			if err := m.Sinks[len(m.Sinks)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextPageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ValidateExportSinkRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ValidateExportSinkRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ValidateExportSinkRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &v13.ExportSinkSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ValidateExportSinkResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ValidateExportSinkResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ValidateExportSinkResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+
 func skipRequestResponse(dAtA []byte) (n int, err error) {
 	l := len(dAtA)
 	iNdEx := 0

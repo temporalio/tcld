@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -62,7 +62,7 @@ type (
 		loginService services.LoginService
 	}
 
-	OauthDeviceCodeResponse struct {
+	OAuthDeviceCodeResponse struct {
 		DeviceCode              string `json:"device_code"`
 		UserCode                string `json:"user_code"`
 		VerificationURI         string `json:"verification_uri"`
@@ -71,7 +71,7 @@ type (
 		Interval                int    `json:"interval"`
 	}
 
-	OauthTokenResponse struct {
+	OAuthTokenResponse struct {
 		AccessToken  string `json:"access_token"`
 		RefreshToken string `json:"refresh_token"`
 		IDToken      string `json:"id_token"`
@@ -86,9 +86,9 @@ func getTokenConfigPath(ctx *cli.Context) string {
 }
 
 // TODO: support login config on windows
-func loadLoginConfig(ctx *cli.Context) (OauthTokenResponse, error) {
+func loadLoginConfig(ctx *cli.Context) (OAuthTokenResponse, error) {
 
-	tokens := OauthTokenResponse{}
+	tokens := OAuthTokenResponse{}
 	configDir := ctx.Path(ConfigDirFlagName)
 	// Create config dir if it does not exist
 	if err := os.MkdirAll(configDir, 0700); err != nil {
@@ -104,7 +104,7 @@ func loadLoginConfig(ctx *cli.Context) (OauthTokenResponse, error) {
 		return tokens, err
 	}
 
-	tokenConfigBytes, err := ioutil.ReadFile(tokenConfig)
+	tokenConfigBytes, err := os.ReadFile(tokenConfig)
 	if err != nil {
 		return tokens, err
 	}
@@ -116,67 +116,93 @@ func loadLoginConfig(ctx *cli.Context) (OauthTokenResponse, error) {
 	return tokens, nil
 }
 
-func getURLFromDomain(domain string) (string, error) {
-	u, err := url.Parse(domain)
+func parseURL(s string) (*url.URL, error) {
+	// Without a scheme, url.Parse would interpret the path as a relative file path.
+	if !strings.HasPrefix(s, "http://") && !strings.HasPrefix(s, "https://") {
+		s = fmt.Sprintf("%s%s", "https://", s)
+	}
+
+	u, err := url.ParseRequestURI(s)
 	if err != nil {
-		return domain, err
+		return nil, err
 	}
+
 	if u.Scheme == "" {
-		return fmt.Sprintf("https://%s", domain), nil
+		u.Scheme = "https"
 	}
-	return domain, nil
+
+	return u, err
 }
 
 func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, clientID string, disablePopUp bool) error {
 	// Get device code
-	oauthDeviceCodeResponse := OauthDeviceCodeResponse{}
-	domain, err := getURLFromDomain(domain)
+	domainURL, err := parseURL(domain)
 	if err != nil {
 		return err
 	}
-	if err := postRequest(
-		fmt.Sprintf("%s/oauth/device/code", domain),
-		fmt.Sprintf("client_id=%s&scope=%s&audience=%s", clientID, scope, audience),
-		&oauthDeviceCodeResponse,
+
+	codeResp := OAuthDeviceCodeResponse{}
+	if err := postFormRequest(
+		domainURL.JoinPath("oauth", "device", "code").String(),
+		url.Values{
+			"client_id": {clientID},
+			"scope":     {scope},
+			"audience":  {audience},
+		},
+		&codeResp,
 	); err != nil {
 		return err
 	}
 
-	fmt.Printf("Login via this url: %s\n", oauthDeviceCodeResponse.VerificationURIComplete)
+	verificationURL, err := parseURL(codeResp.VerificationURIComplete)
+	if err != nil {
+		return fmt.Errorf("failed to parse verification URL: %w", err)
+	} else if verificationURL.Hostname() != domainURL.Hostname() {
+		// We expect the verification URL to be the same host as the domain URL.
+		// Otherwise the response could have us POST to any arbitrary URL.
+		return fmt.Errorf("domain URL `%s` does not match verification URL `%s` in response", domainURL.Hostname(), verificationURL.Hostname())
+	}
+
+	fmt.Printf("Login via this url: %s\n", verificationURL.String())
 
 	if !disablePopUp {
-		if err := c.loginService.OpenBrowser(oauthDeviceCodeResponse.VerificationURIComplete); err != nil {
+		if err := c.loginService.OpenBrowser(verificationURL.String()); err != nil {
 			fmt.Println("Unable to open browser, please open url manually.")
 		}
 	}
 
-	// Get access token
-	oauthTokenResponse := OauthTokenResponse{}
-	for len(oauthTokenResponse.AccessToken) == 0 {
-		time.Sleep(time.Duration(oauthDeviceCodeResponse.Interval) * time.Second)
+	// According to RFC, we should set a default polling interval if not provided.
+	// https://tools.ietf.org/html/draft-ietf-oauth-device-flow-07#section-3.5
+	if codeResp.Interval == 0 {
+		codeResp.Interval = 10
+	}
 
-		if err := postRequest(
-			fmt.Sprintf("%s/oauth/token", domain),
-			fmt.Sprintf(
-				"grant_type=%s&device_code=%s&client_id=%s",
-				"urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code",
-				oauthDeviceCodeResponse.DeviceCode,
-				clientID,
-			),
-			&oauthTokenResponse,
+	// Get access token
+	tokenResp := OAuthTokenResponse{}
+	for len(tokenResp.AccessToken) == 0 {
+		time.Sleep(time.Duration(codeResp.Interval) * time.Second)
+
+		if err := postFormRequest(
+			domainURL.JoinPath("oauth", "token").String(),
+			url.Values{
+				"grant_type":  {"urn:ietf:params:oauth:grant-type:device_code"},
+				"device_code": {codeResp.DeviceCode},
+				"client_id":   {clientID},
+			},
+			&tokenResp,
 		); err != nil {
 			return err
 		}
 	}
 
-	oauthTokenResponseJson, err := FormatJson(oauthTokenResponse)
+	tokenRespJson, err := FormatJson(tokenResp)
 	if err != nil {
 		return err
 	}
 	fmt.Println("Successfully logged in!")
 
 	// Save token info locally
-	return c.loginService.WriteToConfigFile(getTokenConfigPath(ctx), oauthTokenResponseJson)
+	return c.loginService.WriteToConfigFile(getTokenConfigPath(ctx), tokenRespJson)
 }
 
 func NewLoginCommand(c *LoginClient) (CommandOut, error) {
@@ -201,19 +227,14 @@ func NewLoginCommand(c *LoginClient) (CommandOut, error) {
 	}}, nil
 }
 
-func postRequest(url string, formData string, resStruct interface{}) error {
-	payload := strings.NewReader(formData)
-	req, err := http.NewRequest("POST", url, payload)
-	if err != nil {
-		return err
-	}
-	req.Header.Add("content-type", "application/x-www-form-urlencoded")
-	res, err := http.DefaultClient.Do(req)
+func postFormRequest(url string, values url.Values, resStruct interface{}) error {
+	res, err := http.PostForm(url, values)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}

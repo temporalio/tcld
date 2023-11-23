@@ -12,10 +12,11 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
-	"github.com/temporalio/tcld/api/temporalcloudapi/accountservicemock/v1"
 	"github.com/temporalio/tcld/protogen/api/account/v1"
 	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
+	"github.com/temporalio/tcld/protogen/api/common/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
+	accountservicemock "github.com/temporalio/tcld/protogen/apimock/accountservice/v1"
 	"github.com/urfave/cli/v2"
 )
 
@@ -70,6 +71,18 @@ func (s *AccountTestSuite) TestGet() {
 		},
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("account", "get"))
+}
+
+func (s *AccountTestSuite) TestListRegions() {
+	s.mockService.EXPECT().GetRegions(gomock.Any(), gomock.Any()).Return(nil, errors.New("some error")).Times(1)
+	s.Error(s.RunCmd("account", "list-regions"))
+
+	s.mockService.EXPECT().GetRegions(gomock.Any(), gomock.Any()).Return(&accountservice.GetRegionsResponse{
+		Regions: []*common.Region{
+			{CloudProvider: "aws", Name: "us-west-2"},
+		},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("account", "list-regions"))
 }
 
 func (s *AccountTestSuite) TestEnable() {
