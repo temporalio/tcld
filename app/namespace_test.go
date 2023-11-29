@@ -1563,7 +1563,15 @@ func (s *NamespaceTestSuite) TestGetExportSink() {
 	}{
 		{
 			name: "get export sink succeeds",
-			args: []string{"namespace", "es", "get", "--namespace", ns, "--sink-name", "sink1"},
+			args: []string{"namespace", "es", "s3", "get", "--namespace", ns, "--sink-name", "sink1"},
+			expectRequest: func(r *namespaceservice.GetExportSinkRequest) {
+				r.Namespace = ns
+				r.SinkName = "sink1"
+			},
+		},
+		{
+			name: "get export sink succeeds",
+			args: []string{"namespace", "es", "gcs", "get", "--namespace", ns, "--sink-name", "sink1"},
 			expectRequest: func(r *namespaceservice.GetExportSinkRequest) {
 				r.Namespace = ns
 				r.SinkName = "sink1"
@@ -1605,7 +1613,7 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 	}{
 		{
 			name: "delete export sink succeeds without resource version",
-			args: []string{"namespace", "es", "delete", "--namespace", ns, "--sink-name", "sink1"},
+			args: []string{"namespace", "es", "s3", "delete", "--namespace", ns, "--sink-name", "sink1"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {
 				r.Sink = &sink.ExportSink{
 					ResourceVersion: "124214124",
@@ -1619,7 +1627,33 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 		},
 		{
 			name: "delete export succeeds sink with resource version",
-			args: []string{"namespace", "es", "delete", "--namespace", ns, "--sink-name", "sink1", "--resource-version", "999999999"},
+			args: []string{"namespace", "es", "s3", "delete", "--namespace", ns, "--sink-name", "sink1", "--resource-version", "999999999"},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {
+				r.Sink = &sink.ExportSink{}
+			},
+			expectRequest: func(r *namespaceservice.DeleteExportSinkRequest) {
+				r.Namespace = ns
+				r.SinkName = "sink1"
+				r.ResourceVersion = "999999999"
+			},
+		},
+		{
+			name: "delete export sink succeeds without resource version",
+			args: []string{"namespace", "es", "gcs", "delete", "--namespace", ns, "--sink-name", "sink1"},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {
+				r.Sink = &sink.ExportSink{
+					ResourceVersion: "124214124",
+				}
+			},
+			expectRequest: func(r *namespaceservice.DeleteExportSinkRequest) {
+				r.Namespace = ns
+				r.SinkName = "sink1"
+				r.ResourceVersion = "124214124"
+			},
+		},
+		{
+			name: "delete export succeeds sink with resource version",
+			args: []string{"namespace", "es", "gcs", "delete", "--namespace", ns, "--sink-name", "sink1", "--resource-version", "999999999"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {
 				r.Sink = &sink.ExportSink{}
 			},
@@ -2057,7 +2091,15 @@ func (s *NamespaceTestSuite) TestListExportSinks() {
 	}{
 		{
 			name: "list export sinks succeeds",
-			args: []string{"namespace", "es", "list", "--namespace", ns},
+			args: []string{"namespace", "es", "s3", "list", "--namespace", ns},
+			expectRequest: func(r *namespaceservice.ListExportSinksRequest) {
+				r.Namespace = ns
+				r.PageSize = 100
+			},
+		},
+		{
+			name: "list export sinks succeeds",
+			args: []string{"namespace", "es", "gcs", "list", "--namespace", ns},
 			expectRequest: func(r *namespaceservice.ListExportSinksRequest) {
 				r.Namespace = ns
 				r.PageSize = 100

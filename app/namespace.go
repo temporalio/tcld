@@ -1648,14 +1648,15 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 	}
 
+	export_s3_commands.Subcommands = append(export_s3_commands.Subcommands, export_general_commands...)
 	exportCommand.Subcommands = append(exportCommand.Subcommands, export_s3_commands)
 
 	// TODO: remove GCP sink feature flag check when out of private preview
 	if IsFeatureEnabled(GCPSinkFeatureFlag) {
+		export_gcs_commands.Subcommands = append(export_gcs_commands.Subcommands, export_general_commands...)
 		exportCommand.Subcommands = append(exportCommand.Subcommands, export_gcs_commands)
 	}
 
-	exportCommand.Subcommands = append(exportCommand.Subcommands, export_general_commands...)
 	subCommands = append(subCommands, exportCommand)
 
 	command := &cli.Command{
