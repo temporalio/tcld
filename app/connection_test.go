@@ -2,9 +2,7 @@ package app
 
 import (
 	"context"
-	"flag"
 	"fmt"
-	"io"
 	"net"
 	"strings"
 	"testing"
@@ -49,7 +47,6 @@ func (s *testServer) GetRequestStatus(ctx context.Context, req *requestservice.G
 
 type ServerConnectionTestSuite struct {
 	suite.Suite
-	configDir   string
 	listener    *bufconn.Listener
 	grpcSrv     *grpc.Server
 	testService *testServer
@@ -60,20 +57,6 @@ func TestServerConnection(t *testing.T) {
 }
 
 func (s *ServerConnectionTestSuite) SetupTest() {
-	s.configDir = s.T().TempDir()
-	ConfigDirFlag.Value = s.configDir
-
-	loginConfig := LoginConfig{
-		StoredToken: oauth2.Token{
-			AccessToken: testAccessToken,
-			Expiry:      time.Now().Add(24 * time.Hour),
-		},
-		configDir: s.configDir,
-	}
-
-	err := loginConfig.StoreConfig()
-	require.NoError(s.T(), err)
-
 	s.listener = bufconn.Listen(1024 * 1024)
 	s.grpcSrv = grpc.NewServer()
 	s.testService = &testServer{}
@@ -87,6 +70,14 @@ func (s *ServerConnectionTestSuite) SetupTest() {
 func (s *ServerConnectionTestSuite) TeardownTest() {
 	s.grpcSrv.Stop()
 	s.listener.Close()
+}
+
+func (s *ServerConnectionTestSuite) SetupSubtest() {
+	s.SetupTest()
+}
+
+func (s *ServerConnectionTestSuite) TeardownSubtest() {
+	s.TeardownTest()
 }
 
 func (s *ServerConnectionTestSuite) TestGetServerConnection() {
@@ -119,16 +110,16 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			expectedErr: fmt.Errorf("the credentials require transport level security"),
 		},
 		{
-			name: "OAuthSucess",
+			name: "OAuthSuccess",
 			args: map[string]string{
-				InsecureConnectionFlagName: "", // required for bufconn
+				InsecureConnectionFlagName: "true", // required for bufconn
 			},
 			expectedToken: testAccessToken,
 		},
 		{
-			name: "APIKeySucess",
+			name: "APIKeySuccess",
 			args: map[string]string{
-				InsecureConnectionFlagName: "", // required for bufconn
+				InsecureConnectionFlagName: "true", // required for bufconn
 				APIKeyFlagName:             testAPIKey,
 			},
 			expectedToken: testAPIKey,
@@ -136,31 +127,30 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 	}
 	for _, tc := range testcases {
 		s.Run(tc.name, func() {
-			fs := flag.NewFlagSet(tc.name, flag.ContinueOnError)
-
-			flags := []cli.Flag{
+			app, cfgDir := NewTestApp(s.T(), nil, []cli.Flag{
 				ServerFlag,
 				ConfigDirFlag,
 				APIKeyFlag,
 				InsecureConnectionFlag,
-			}
-			for _, f := range flags {
-				require.NoError(s.T(), f.Apply(fs))
-			}
-			fs.SetOutput(io.Discard)
+			})
+			cCtx := NewTestContext(s.T(), app)
 
-			cCtx := cli.NewContext(nil, fs, nil)
-			args := []string{
-				"--" + ConfigDirFlagName, s.configDir,
-				"--" + ServerFlagName, "bufnet",
-			}
+			require.NoError(s.T(), cCtx.Set(ServerFlagName, "bufnet"))
+			require.NoError(s.T(), cCtx.Set(ConfigDirFlagName, cfgDir))
 			for k, v := range tc.args {
-				args = append(args, "--"+k)
-				if len(v) > 0 {
-					args = append(args, v)
-				}
+				require.NoError(s.T(), cCtx.Set(k, v), "failed to parse flag %q set to %q", k, v)
 			}
-			require.NoError(s.T(), fs.Parse(args))
+
+			loginConfig := TokenConfig{
+				OAuthToken: oauth2.Token{
+					AccessToken: testAccessToken,
+					Expiry:      time.Now().Add(24 * time.Hour),
+				},
+				ctx: cCtx,
+			}
+
+			err := loginConfig.Store()
+			require.NoError(s.T(), err)
 
 			opts := []grpc.DialOption{
 				grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {

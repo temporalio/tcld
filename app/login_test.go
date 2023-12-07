@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -78,11 +77,15 @@ func (l *LoginTestSuite) TestLoginSuccessful() {
 	resp := l.runCmd("login", "--domain", l.server.URL)
 	l.NoError(resp)
 
-	_, err := os.Stat(filepath.Join(l.configDir, tokenFile))
+	_, err := os.Stat(filepath.Join(l.configDir, tokenConfigFile))
 	l.NoError(err)
 
-	config, err := NewLoginConfig(context.Background(), l.configDir)
+	cCtx := NewTestContext(l.T(), l.cliApp)
+	cCtx.Set(domainFlagName, l.server.URL)
+
+	config, err := LoadTokenConfig(cCtx)
 	l.NoError(err)
+	l.NotNil(config)
 
 	token, err := config.Token()
 	l.NoError(err)
@@ -100,10 +103,13 @@ func (l *LoginTestSuite) TestRefreshToken() {
 	resp := l.runCmd("login", "--domain", l.server.URL)
 	l.NoError(resp)
 
-	data, err := os.ReadFile(filepath.Join(l.configDir, tokenFile))
+	data, err := os.ReadFile(filepath.Join(l.configDir, tokenConfigFile))
 	l.NoError(err)
 
-	config, err := NewLoginConfig(context.Background(), l.configDir)
+	cCtx := NewTestContext(l.T(), l.cliApp)
+	cCtx.Set(domainFlagName, l.server.URL)
+
+	config, err := LoadTokenConfig(cCtx)
 	l.NoError(err)
 
 	token, err := config.Token()
@@ -113,14 +119,14 @@ func (l *LoginTestSuite) TestRefreshToken() {
 
 	l.token.AccessToken = "some-new-access-token"
 	l.token.RefreshToken = "some-new-refresh-token"
-	config.StoredToken.Expiry = time.Now().Add(-30 * time.Minute)
+	config.OAuthToken.Expiry = time.Now().Add(-30 * time.Minute)
 
 	token, err = config.Token()
 	l.NoError(err)
 	l.Equal(l.token.AccessToken, token.AccessToken)
 	l.Equal(l.token.RefreshToken, token.RefreshToken)
 
-	newData, err := os.ReadFile(filepath.Join(l.configDir, tokenFile))
+	newData, err := os.ReadFile(filepath.Join(l.configDir, tokenConfigFile))
 	l.NoError(err)
 	l.NotEqual(data, newData, "config file did not refresh with new token")
 }
@@ -144,50 +150,6 @@ func (l *LoginTestSuite) TestLoginWithInvalidCodeResponseURL() {
 	l.deviceAuth.VerificationURIComplete = "https://temporal.io"
 
 	l.Error(l.runCmd("login", "--domain", l.server.URL))
-}
-
-func (l *LoginTestSuite) TestLegacyTokenSupport() {
-	legacy := legacyOAuthToken{
-		AccessToken:  l.token.AccessToken,
-		RefreshToken: l.token.RefreshToken,
-		TokenType:    l.token.TokenType,
-		ExpiresIn:    3600,
-	}
-
-	configFile, err := os.Create(filepath.Join(l.configDir, tokenFile))
-	l.NoError(err)
-
-	encoder := json.NewEncoder(configFile)
-	encoder.SetIndent("", "\t")
-
-	err = encoder.Encode(legacy)
-	l.NoError(err)
-	configFile.Close()
-
-	config, err := NewLoginConfig(context.Background(), l.configDir)
-	l.NoError(err)
-	l.True(config.isLegacy)
-
-	token, err := config.Token()
-	l.NoError(err)
-	l.Equal(l.token.AccessToken, token.AccessToken)
-	l.Equal(l.token.RefreshToken, token.RefreshToken)
-	l.WithinDuration(time.Now().Add(3600*time.Second), token.Expiry, time.Minute)
-
-	// Login to upgrade to new token type.
-	resp := l.runCmd("login", "--domain", l.server.URL)
-	l.NoError(resp)
-
-	config, err = NewLoginConfig(context.Background(), l.configDir)
-	l.NoError(err)
-	l.Equal(l.token.AccessToken, config.StoredToken.AccessToken)
-	l.Equal(l.token.RefreshToken, config.StoredToken.RefreshToken)
-	l.False(config.isLegacy)
-
-	token, err = config.Token()
-	l.NoError(err)
-	l.Equal(l.token.AccessToken, token.AccessToken)
-	l.Equal(l.token.RefreshToken, token.RefreshToken)
 }
 
 func (l *LoginTestSuite) handleDeviceCode() http.HandlerFunc {

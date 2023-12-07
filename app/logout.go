@@ -19,21 +19,13 @@ func NewLogoutCommand() (CommandOut, error) {
 		},
 		Action: func(ctx *cli.Context) error {
 			configDir := ctx.Path(ConfigDirFlagName)
-
-			if err := removeFile(filepath.Join(configDir, tokenFile)); err != nil {
+			if err := removeFile(filepath.Join(configDir, tokenConfigFile)); err != nil {
 				return fmt.Errorf("unable to remove config file: %w", err)
 			}
 
 			logoutURL := fmt.Sprintf("https://%s/v2/logout", ctx.String("domain"))
-			fmt.Printf("Logout via this url: %s\n", logoutURL)
 
-			if !ctx.Bool("disable-pop-up") {
-				if err := openBrowser(logoutURL); err != nil {
-					return fmt.Errorf("Unable to open browser, please open url manually.")
-				}
-			}
-
-			return nil
+			return openBrowser(ctx, "Logout via this url", logoutURL)
 		},
 	}}, nil
 }

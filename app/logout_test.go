@@ -52,23 +52,25 @@ func (l *LogoutTestSuite) runCmd(args ...string) error {
 }
 
 func (l *LogoutTestSuite) TestLogoutSuccessful() {
-	loginConfig := LoginConfig{
-		Config: oauth2.Config{
+	cCtx := NewTestContext(l.T(), l.cliApp)
+
+	loginConfig := TokenConfig{
+		OAuthConfig: oauth2.Config{
 			ClientID:     "test-id",
 			ClientSecret: "test-secret",
 		},
-		configDir: l.configDir,
+		ctx: cCtx,
 	}
 
-	err := loginConfig.StoreConfig()
+	err := loginConfig.Store()
 	l.NoError(err)
 
-	_, err = os.Stat(filepath.Join(l.configDir, tokenFile))
+	_, err = os.Stat(filepath.Join(l.configDir, tokenConfigFile))
 	l.NoError(err)
 
 	resp := l.runCmd("logout", "--domain", l.server.URL)
 	l.NoError(resp)
 
-	_, err = os.Stat(filepath.Join(l.configDir, tokenFile))
+	_, err = os.Stat(filepath.Join(l.configDir, tokenConfigFile))
 	l.ErrorIs(err, os.ErrNotExist)
 }

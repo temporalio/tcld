@@ -88,19 +88,13 @@ func newRPCCredential(ctx *cli.Context) (credentials.PerRPCCredentials, error) {
 		)
 	}
 
-	loginConfig, err := NewLoginConfig(ctx.Context, ctx.Path(ConfigDirFlagName))
+	config, err := ensureLogin(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load login config: %w", err)
+		return nil, err
 	}
 
-	source := loginConfig.TokenSource()
-	if source != nil {
-		return oauth.NewCredential(
-			source,
-			oauth.WithInsecureTransport(insecure),
-		)
-	}
-
-	// Use no credentials for this connection.
-	return nil, nil
+	return oauth.NewCredential(
+		config.TokenSource(),
+		oauth.WithInsecureTransport(insecure),
+	)
 }
