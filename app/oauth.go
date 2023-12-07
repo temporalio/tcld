@@ -16,25 +16,23 @@ const (
 	invalidGrantErr = "invalid_grant"
 )
 
-func login(ctx *cli.Context) (*TokenConfig, error) {
-	domainURL, err := parseURL(ctx.String(domainFlagName))
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse domain: %w", err)
+func login(ctx *cli.Context, tokenConfig *TokenConfig) (*TokenConfig, error) {
+	if tokenConfig == nil {
+		defaultConfig, err := defaultTokenConfig(ctx)
+		if err != nil {
+			return nil, err
+		}
+		tokenConfig = defaultConfig
 	}
 
-	config := oauth2.Config{
-		ClientID: ctx.String("client-id"),
-		Endpoint: oauth2.Endpoint{
-			DeviceAuthURL: domainURL.JoinPath("oauth", "device", "code").String(),
-			TokenURL:      domainURL.JoinPath("oauth", "token").String(),
-			AuthStyle:     oauth2.AuthStyleInParams,
-		},
-		Scopes: []string{"openid", "profile", "user", "offline_access"},
-	}
-
-	resp, err := config.DeviceAuth(ctx.Context, oauth2.SetAuthURLParam("audience", ctx.String(audienceFlagName)))
+	resp, err := tokenConfig.OAuthConfig.DeviceAuth(ctx.Context, oauth2.SetAuthURLParam("audience", tokenConfig.Audience))
 	if err != nil {
 		return nil, fmt.Errorf("failed to perform device auth: %w", err)
+	}
+
+	domainURL, err := parseURL(tokenConfig.Domain)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse domain: %w", err)
 	}
 
 	verificationURL, err := parseURL(resp.VerificationURIComplete)
@@ -52,18 +50,15 @@ func login(ctx *cli.Context) (*TokenConfig, error) {
 		fmt.Printf("Failed to open the browser, click the link to continue: %v", err)
 	}
 
-	token, err := config.DeviceAccessToken(ctx.Context, resp)
+	token, err := tokenConfig.OAuthConfig.DeviceAccessToken(ctx.Context, resp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve access token: %w", err)
 	}
 	// Print to stderr so other tooling can parse the command output.
 	fmt.Fprintln(os.Stderr, "Successfully logged in!")
 
-	tokenConfig := &TokenConfig{
-		OAuthConfig: config,
-		OAuthToken:  *token,
-		ctx:         ctx,
-	}
+	tokenConfig.OAuthToken = *token
+	tokenConfig.ctx = ctx
 
 	err = tokenConfig.Store()
 	if err != nil {
@@ -90,7 +85,7 @@ func ensureLogin(ctx *cli.Context) (*TokenConfig, error) {
 			len(cfg.OAuthToken.RefreshToken) == 0 {
 			// Only attempt a forced login if used in an interactive terminal.
 			if term.IsTerminal(int(os.Stdout.Fd())) {
-				cfg, err = login(ctx)
+				cfg, err = login(ctx, cfg)
 				if err != nil {
 					return nil, fmt.Errorf("failed to login: %w", err)
 				}
@@ -113,4 +108,26 @@ func ensureLogin(ctx *cli.Context) (*TokenConfig, error) {
 	}
 
 	return cfg, nil
+}
+
+func defaultTokenConfig(ctx *cli.Context) (*TokenConfig, error) {
+	domainURL, err := parseURL(ctx.String(domainFlagName))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse domain URL: %w", err)
+	}
+
+	return &TokenConfig{
+		Audience: ctx.String(audienceFlagName),
+		Domain:   domainURL.String(),
+		OAuthConfig: oauth2.Config{
+			ClientID: ctx.String("client-id"),
+			Endpoint: oauth2.Endpoint{
+				DeviceAuthURL: domainURL.JoinPath("oauth", "device", "code").String(),
+				TokenURL:      domainURL.JoinPath("oauth", "token").String(),
+				AuthStyle:     oauth2.AuthStyleInParams,
+			},
+			Scopes: []string{"openid", "profile", "user", "offline_access"},
+		},
+		ctx: ctx,
+	}, nil
 }

@@ -60,7 +60,7 @@ func NewLoginCommand() (CommandOut, error) {
 			disablePopUpFlag,
 		},
 		Action: func(ctx *cli.Context) error {
-			_, err := login(ctx)
+			_, err := login(ctx, nil)
 			return err
 		},
 	}}, nil

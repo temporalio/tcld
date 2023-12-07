@@ -9,14 +9,19 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"golang.org/x/oauth2"
-	"golang.org/x/term"
 )
 
 const (
 	tokenConfigFile = "tokens.json"
 )
 
+var (
+	unauthenticatedErr = fmt.Errorf("must authenticate by running `tcld login`")
+)
+
 type TokenConfig struct {
+	Audience    string        `json:"audience"`
+	Domain      string        `json:"domain"`
 	OAuthConfig oauth2.Config `json:"oauth_config"`
 	OAuthToken  oauth2.Token  `json:"oauth_token"`
 
@@ -29,16 +34,11 @@ func LoadTokenConfig(ctx *cli.Context) (*TokenConfig, error) {
 	_, err := os.Stat(tokenConfig)
 	if err != nil {
 		// Only attempt a forced login if used in an interactive terminal.
-		if os.IsNotExist(err) && term.IsTerminal(int(os.Stdout.Fd())) {
-			cfg, err := login(ctx)
-			if err != nil {
-				return nil, fmt.Errorf("failed to login: %w", err)
-			}
-
-			return cfg, nil
+		if os.IsNotExist(err) {
+			return nil, unauthenticatedErr
 		}
 
-		return nil, fmt.Errorf("failed to stat login config: %w", err)
+		return nil, err
 	}
 
 	data, err := os.ReadFile(tokenConfig)
@@ -50,13 +50,8 @@ func LoadTokenConfig(ctx *cli.Context) (*TokenConfig, error) {
 	if err := json.Unmarshal(data, &config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal login config: %w", err)
 	} else if config.OAuthToken == (oauth2.Token{}) {
-		// Using legacy token format, initiate a login to migrate.
-		cfg, err := login(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to login: %w", err)
-		}
-
-		config = cfg
+		// Using legacy token format, ask user to initiate a login to migrate.
+		return nil, unauthenticatedErr
 	}
 
 	config.ctx = ctx // used for token refreshes.
