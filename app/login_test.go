@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/oauth2"
@@ -81,7 +82,7 @@ func (l *LoginTestSuite) TestLoginSuccessful() {
 	l.NoError(err)
 
 	cCtx := NewTestContext(l.T(), l.cliApp)
-	cCtx.Set(domainFlagName, l.server.URL)
+	require.NoError(l.T(), cCtx.Set(domainFlagName, l.server.URL))
 
 	config, err := LoadTokenConfig(cCtx)
 	l.NoError(err)
@@ -107,7 +108,7 @@ func (l *LoginTestSuite) TestRefreshToken() {
 	l.NoError(err)
 
 	cCtx := NewTestContext(l.T(), l.cliApp)
-	cCtx.Set(domainFlagName, l.server.URL)
+	require.NoError(l.T(), cCtx.Set(domainFlagName, l.server.URL))
 
 	config, err := LoadTokenConfig(cCtx)
 	l.NoError(err)
