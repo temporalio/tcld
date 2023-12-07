@@ -26,8 +26,6 @@ type TokenConfig struct {
 func LoadTokenConfig(ctx *cli.Context) (*TokenConfig, error) {
 	tokenConfig := filepath.Join(ctx.String(ConfigDirFlagName), tokenConfigFile)
 
-	fmt.Printf("loading token config at %v\n", tokenConfig)
-
 	_, err := os.Stat(tokenConfig)
 	if err != nil {
 		// Only attempt a forced login if used in an interactive terminal.
@@ -42,14 +40,11 @@ func LoadTokenConfig(ctx *cli.Context) (*TokenConfig, error) {
 
 		return nil, fmt.Errorf("failed to stat login config: %w", err)
 	}
-	fmt.Printf("token config found\n")
 
 	data, err := os.ReadFile(tokenConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read login config: %w", err)
 	}
-
-	fmt.Printf("token config read\n")
 
 	var config *TokenConfig
 	if err := json.Unmarshal(data, &config); err != nil {
@@ -63,8 +58,6 @@ func LoadTokenConfig(ctx *cli.Context) (*TokenConfig, error) {
 
 		config = cfg
 	}
-
-	fmt.Printf("returning token config\n")
 
 	config.ctx = ctx // used for token refreshes.
 
@@ -117,8 +110,6 @@ func (c *TokenConfig) Store() error {
 	if err := os.MkdirAll(cfgDir, 0700); err != nil {
 		return err
 	}
-
-	fmt.Printf("Storing token config at %s\n", filepath.Join(cfgDir, tokenConfigFile))
 
 	// Write file as 0600 because it contains private keys.
 	return os.WriteFile(filepath.Join(cfgDir, tokenConfigFile), []byte(data), 0600)
