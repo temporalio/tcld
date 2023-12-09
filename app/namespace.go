@@ -82,7 +82,7 @@ var (
 	}
 	kmsArnFlag = &cli.StringFlag{
 		Name:  "kms-arn",
-		Usage: "Provide the ARN of the KMS key to use for encryption. Note: If the KMS ARN needs to be added or updated, user should create the IAM Role with KMS or modify the created IAM Role accordingly. Provided it as part of the input won't help",
+		Usage: "Provide the ARN of the KMS key to use for encryption. Note: If the KMS ARN needs to be added or updated, user must create the IAM Role with KMS or modify the created IAM Role accordingly.",
 	}
 	pageSizeFlag = &cli.IntFlag{
 		Name:  "page-size",
@@ -122,13 +122,13 @@ var (
 		Usage:    "GCS bucket of the sink",
 		Required: true,
 	}
-	enableCmekFlag = &cli.BoolFlag{
-		Name:  "enable-cmek",
-		Usage: "Enable customized encryption.  Note: If enable cmek needs to be updated, user should create the service account with cmek or modify the created service account accordingly. Provided it as part of the input won't help",
-	}
 	gcsBucketFlagOptional = &cli.StringFlag{
 		Name:  "gcs-bucket",
 		Usage: "GCS bucket of the sink",
+	}
+	enableCmekFlag = &cli.BoolFlag{
+		Name:  "enable-cmek",
+		Usage: "Enable customized encryption.  Note: If enable cmek needs to be updated, user must create the service account with cmek or modify the created service account accordingly.",
 	}
 )
 
@@ -218,7 +218,7 @@ func (c *NamespaceClient) isSAPrincipalChange(ctx *cli.Context, sink *sink.Expor
 		return false
 	}
 
-	saPrincipal := getSAPrincipal(sink.GetSpec().GetGcsSink().GetSaName(), sink.GetSpec().GetGcsSink().GetGcpProjectName())
+	saPrincipal := getSAPrincipal(sink.GetSpec().GetGcsSink().GetSaId(), sink.GetSpec().GetGcsSink().GetGcpProjectId())
 	return saPrincipal != ctx.String(saPrincipalFlagOptional.Name)
 }
 
@@ -1225,7 +1225,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		Aliases: []string{"es"},
 	}
 
-	export_general_commands := []*cli.Command{
+	exportGeneralCommands := []*cli.Command{
 		{
 			Name:    "get",
 			Aliases: []string{"g"},
@@ -1280,7 +1280,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		{
 			Name:    "list",
 			Aliases: []string{"l"},
-			Usage:   "List export sink",
+			Usage:   "List export sinks",
 			Flags: []cli.Flag{
 				NamespaceFlag,
 				pageSizeFlag,
@@ -1303,7 +1303,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 	}
 
-	export_s3_commands := &cli.Command{
+	exportS3Commands := &cli.Command{
 		Name:  "s3",
 		Usage: "Manage S3 export sink",
 		Subcommands: []*cli.Command{
@@ -1476,7 +1476,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 	}
 
-	export_gcs_commands := &cli.Command{
+	exportGCSCommands := &cli.Command{
 		Name:  "gcs",
 		Usage: "Manage GCS export sink",
 		Subcommands: []*cli.Command{
@@ -1491,7 +1491,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					gcsBucketFlagRequired,
 				},
 				Action: func(ctx *cli.Context) error {
-					saName, projectName, err := parseSAPrincipal(ctx.String(saPrincipalFlagRequired.Name))
+					SaId, projectName, err := parseSAPrincipal(ctx.String(saPrincipalFlagRequired.Name))
 					if err != nil {
 						return fmt.Errorf("validation failed: %v", err)
 					}
@@ -1509,10 +1509,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							Enabled:         true,
 							DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
 							GcsSink: &sink.GCSSpec{
-								GcpProjectName: projectName,
-								BucketName:     ctx.String(gcsBucketFlagRequired.Name),
-								SaName:         saName,
-								EnableCmek:     ctx.Bool(enableCmekFlag.Name),
+								GcpProjectId: projectName,
+								BucketName:   ctx.String(gcsBucketFlagRequired.Name),
+								SaId:         SaId,
+								EnableCmek:   ctx.Bool(enableCmekFlag.Name),
 							},
 						},
 						RequestId: ctx.String(RequestIDFlagName),
@@ -1564,13 +1564,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					}
 
 					if c.isSAPrincipalChange(ctx, sink) {
-						saName, gcpProjectName, err := parseSAPrincipal(ctx.String(saPrincipalFlagOptional.Name))
+						SaId, GcpProjectId, err := parseSAPrincipal(ctx.String(saPrincipalFlagOptional.Name))
 						if err != nil {
 							return err
 						}
 
-						sink.Spec.GcsSink.SaName = saName
-						sink.Spec.GcsSink.GcpProjectName = gcpProjectName
+						sink.Spec.GcsSink.SaId = SaId
+						sink.Spec.GcsSink.GcpProjectId = GcpProjectId
 					}
 
 					if c.isEnableCmekChange(ctx, sink) {
@@ -1617,7 +1617,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						return fmt.Errorf("unable to get existing namespace: %v", err)
 					}
 
-					saId, projectId, err := parseSAPrincipal(ctx.String(serviceAccountPrincipalFlag.Name))
+					SaId, projectName, err := parseSAPrincipal(ctx.String(saPrincipalFlagRequired.Name))
 					if err != nil {
 						return fmt.Errorf("validation failed: %v", err)
 					}
@@ -1628,9 +1628,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							Name:            ctx.String(sinkNameFlag.Name),
 							DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
 							GcsSink: &sink.GCSSpec{
-								GcpProjectId: projectId,
-								BucketName:   ctx.String(gcsBucketFlag.Name),
-								SaId:         saId,
+								GcpProjectId: projectName,
+								BucketName:   ctx.String(gcsBucketFlagRequired.Name),
+								SaId:         SaId,
 							},
 						},
 					}
@@ -1648,13 +1648,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 	}
 
-	export_s3_commands.Subcommands = append(export_s3_commands.Subcommands, export_general_commands...)
-	exportCommand.Subcommands = append(exportCommand.Subcommands, export_s3_commands)
+	exportS3Commands.Subcommands = append(exportS3Commands.Subcommands, exportGeneralCommands...)
+	exportCommand.Subcommands = append(exportCommand.Subcommands, exportS3Commands)
 
-	// TODO: remove GCP sink feature flag check when out of private preview
+	// TODO: remove GCP sink feature flag check when out of pre-release
 	if IsFeatureEnabled(GCPSinkFeatureFlag) {
-		export_gcs_commands.Subcommands = append(export_gcs_commands.Subcommands, export_general_commands...)
-		exportCommand.Subcommands = append(exportCommand.Subcommands, export_gcs_commands)
+		exportGCSCommands.Subcommands = append(exportGCSCommands.Subcommands, exportGeneralCommands...)
+		exportCommand.Subcommands = append(exportCommand.Subcommands, exportGCSCommands)
 	}
 
 	subCommands = append(subCommands, exportCommand)

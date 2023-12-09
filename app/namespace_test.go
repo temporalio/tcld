@@ -1714,16 +1714,16 @@ func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
 					Enabled:         true,
 					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
 					GcsSink: &sink.GCSSpec{
-						SaName:         "testSA",
-						GcpProjectName: "testGcpAccount",
-						BucketName:     "testBucket",
-						EnableCmek:     false,
+						SaId:         "testSA",
+						GcpProjectId: "testGcpAccount",
+						BucketName:   "testBucket",
+						EnableCmek:   false,
 					},
 				}
 			},
 		},
 		{
-			name:         "create export sink with invalid role arn",
+			name:         "create export sink with invalid service account principal",
 			args:         []string{"namespace", "es", "gcs", "create", "--namespace", ns, "--sink-name", "sink1", "--service-account-principal", "testSA", "--gcs-bucket", "testBucket"},
 			expectErr:    true,
 			expectErrMsg: "invalid SA principal: testSA",
@@ -1827,10 +1827,10 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 					Enabled:         false,
 					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
 					GcsSink: &sink.GCSSpec{
-						SaName:         "testSA",
-						GcpProjectName: "testGcpAccount",
-						BucketName:     "testBucket",
-						EnableCmek:     false,
+						SaId:         "testSA",
+						GcpProjectId: "testGcpAccount",
+						BucketName:   "testBucket",
+						EnableCmek:   false,
 					},
 				}
 				r.ResourceVersion = "124214124"
@@ -1847,10 +1847,10 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 					Enabled:         false,
 					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
 					GcsSink: &sink.GCSSpec{
-						SaName:         "newTestSA",
-						GcpProjectName: "newTestGcpAccount",
-						BucketName:     "testBucket",
-						EnableCmek:     false,
+						SaId:         "newTestSA",
+						GcpProjectId: "newTestGcpAccount",
+						BucketName:   "testBucket",
+						EnableCmek:   false,
 					},
 				}
 				r.ResourceVersion = "124214124"
@@ -1867,10 +1867,10 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 					Enabled:         false,
 					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
 					GcsSink: &sink.GCSSpec{
-						SaName:         "newTestSA",
-						GcpProjectName: "newTestGcpAccount",
-						BucketName:     "newTestBucket",
-						EnableCmek:     false,
+						SaId:         "newTestSA",
+						GcpProjectId: "newTestGcpAccount",
+						BucketName:   "newTestBucket",
+						EnableCmek:   false,
 					},
 				}
 				r.ResourceVersion = "124214124"
@@ -1887,10 +1887,10 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 					Enabled:         false,
 					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
 					GcsSink: &sink.GCSSpec{
-						SaName:         "newTestSA",
-						GcpProjectName: "newTestGcpAccount",
-						BucketName:     "newTestBucket",
-						EnableCmek:     true,
+						SaId:         "newTestSA",
+						GcpProjectId: "newTestGcpAccount",
+						BucketName:   "newTestBucket",
+						EnableCmek:   true,
 					},
 				}
 				r.ResourceVersion = "124214124"
@@ -1908,10 +1908,10 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 						Enabled:         true,
 						DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
 						GcsSink: &sink.GCSSpec{
-							SaName:         "testSA",
-							GcpProjectName: "testGcpAccount",
-							BucketName:     "testBucket",
-							EnableCmek:     false,
+							SaId:         "testSA",
+							GcpProjectId: "testGcpAccount",
+							BucketName:   "testBucket",
+							EnableCmek:   false,
 						},
 					},
 					ResourceVersion: "124214124",
