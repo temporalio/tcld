@@ -28,5 +28,6 @@ func NewApp(params AppParams) (*cli.App, error) {
 			EnableDebugLogsFlag,
 		},
 	}
+	app.Commands = params.Commands
 	return app, nil
 }
