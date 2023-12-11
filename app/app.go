@@ -28,8 +28,5 @@ func NewApp(params AppParams) (*cli.App, error) {
 			EnableDebugLogsFlag,
 		},
 	}
-	for _, c := range params.Commands {
-		app.Commands = append(app.Commands, c)
-	}
 	return app, nil
 }
