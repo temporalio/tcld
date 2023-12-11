@@ -29,9 +29,6 @@ func NewApp(params AppParams) (*cli.App, error) {
 		},
 	}
 	for _, c := range params.Commands {
-		if !IsFeatureEnabled(APIKeyFeatureFlag) && c.Name == "apikey" {
-			continue
-		}
 		app.Commands = append(app.Commands, c)
 	}
 	return app, nil
