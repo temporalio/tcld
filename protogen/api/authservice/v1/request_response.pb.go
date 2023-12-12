@@ -6,6 +6,7 @@ package authservice
 import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
+	v12 "github.com/temporalio/tcld/protogen/temporal/api/cloud/operation/v1"
 	io "io"
 	math "math"
 	math_bits "math/bits"
@@ -1188,6 +1189,11 @@ type GetAPIKeysRequest struct {
 	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// the page token
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// get only apikeys belonging to the owner with id
+	// for a user owner type use the id of the user
+	OwnerId string `protobuf:"bytes,3,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	// get the apikeys belonging to the user with email address
+	UserEmail string `protobuf:"bytes,4,opt,name=user_email,json=userEmail,proto3" json:"user_email,omitempty"`
 }
 
 func (m *GetAPIKeysRequest) Reset()      { *m = GetAPIKeysRequest{} }
@@ -1232,6 +1238,20 @@ func (m *GetAPIKeysRequest) GetPageSize() int32 {
 func (m *GetAPIKeysRequest) GetPageToken() string {
 	if m != nil {
 		return m.PageToken
+	}
+	return ""
+}
+
+func (m *GetAPIKeysRequest) GetOwnerId() string {
+	if m != nil {
+		return m.OwnerId
+	}
+	return ""
+}
+
+func (m *GetAPIKeysRequest) GetUserEmail() string {
+	if m != nil {
+		return m.UserEmail
 	}
 	return ""
 }
@@ -1600,29 +1620,22 @@ func (m *UpdateAPIKeyResponse) GetRequestStatus() *v11.RequestStatus {
 	return nil
 }
 
-type GetAllAPIKeysRequest struct {
-	// get only apikeys belonging to the owner with id
-	// for a user owner type use the id of the user
-	OwnerId string `protobuf:"bytes,1,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	// get the apikeys belonging to the user with email address
-	UserEmail string `protobuf:"bytes,2,opt,name=user_email,json=userEmail,proto3" json:"user_email,omitempty"`
-	// the requested size of the page to retrieve
-	PageSize int32 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	// the page token
-	PageToken string `protobuf:"bytes,4,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+type GetServiceAccountRequest struct {
+	// ID of the service account to retrieve.
+	ServiceAccountId string `protobuf:"bytes,1,opt,name=service_account_id,json=serviceAccountId,proto3" json:"service_account_id,omitempty"`
 }
 
-func (m *GetAllAPIKeysRequest) Reset()      { *m = GetAllAPIKeysRequest{} }
-func (*GetAllAPIKeysRequest) ProtoMessage() {}
-func (*GetAllAPIKeysRequest) Descriptor() ([]byte, []int) {
+func (m *GetServiceAccountRequest) Reset()      { *m = GetServiceAccountRequest{} }
+func (*GetServiceAccountRequest) ProtoMessage() {}
+func (*GetServiceAccountRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_82df425cb2a9bb43, []int{30}
 }
-func (m *GetAllAPIKeysRequest) XXX_Unmarshal(b []byte) error {
+func (m *GetServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *GetAllAPIKeysRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *GetServiceAccountRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_GetAllAPIKeysRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_GetServiceAccountRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1632,64 +1645,141 @@ func (m *GetAllAPIKeysRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte
 		return b[:n], nil
 	}
 }
-func (m *GetAllAPIKeysRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetAllAPIKeysRequest.Merge(m, src)
+func (m *GetServiceAccountRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetServiceAccountRequest.Merge(m, src)
 }
-func (m *GetAllAPIKeysRequest) XXX_Size() int {
+func (m *GetServiceAccountRequest) XXX_Size() int {
 	return m.Size()
 }
-func (m *GetAllAPIKeysRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetAllAPIKeysRequest.DiscardUnknown(m)
+func (m *GetServiceAccountRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetServiceAccountRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetAllAPIKeysRequest proto.InternalMessageInfo
+var xxx_messageInfo_GetServiceAccountRequest proto.InternalMessageInfo
 
-func (m *GetAllAPIKeysRequest) GetOwnerId() string {
+func (m *GetServiceAccountRequest) GetServiceAccountId() string {
 	if m != nil {
-		return m.OwnerId
+		return m.ServiceAccountId
 	}
 	return ""
 }
 
-func (m *GetAllAPIKeysRequest) GetUserEmail() string {
-	if m != nil {
-		return m.UserEmail
-	}
-	return ""
+type GetServiceAccountResponse struct {
+	// The service account retrieved.
+	ServiceAccount *v1.ServiceAccount `protobuf:"bytes,1,opt,name=service_account,json=serviceAccount,proto3" json:"service_account,omitempty"`
 }
 
-func (m *GetAllAPIKeysRequest) GetPageSize() int32 {
+func (m *GetServiceAccountResponse) Reset()      { *m = GetServiceAccountResponse{} }
+func (*GetServiceAccountResponse) ProtoMessage() {}
+func (*GetServiceAccountResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_82df425cb2a9bb43, []int{31}
+}
+func (m *GetServiceAccountResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetServiceAccountResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetServiceAccountResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetServiceAccountResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetServiceAccountResponse.Merge(m, src)
+}
+func (m *GetServiceAccountResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetServiceAccountResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetServiceAccountResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetServiceAccountResponse proto.InternalMessageInfo
+
+func (m *GetServiceAccountResponse) GetServiceAccount() *v1.ServiceAccount {
+	if m != nil {
+		return m.ServiceAccount
+	}
+	return nil
+}
+
+type GetServiceAccountsRequest struct {
+	// The requested size of the page to retrieve - optional.
+	// Cannot exceed 1000. Defaults to 100.
+	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// The page token if this is continuing from another response - optional.
+	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+}
+
+func (m *GetServiceAccountsRequest) Reset()      { *m = GetServiceAccountsRequest{} }
+func (*GetServiceAccountsRequest) ProtoMessage() {}
+func (*GetServiceAccountsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_82df425cb2a9bb43, []int{32}
+}
+func (m *GetServiceAccountsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetServiceAccountsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetServiceAccountsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetServiceAccountsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetServiceAccountsRequest.Merge(m, src)
+}
+func (m *GetServiceAccountsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetServiceAccountsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetServiceAccountsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetServiceAccountsRequest proto.InternalMessageInfo
+
+func (m *GetServiceAccountsRequest) GetPageSize() int32 {
 	if m != nil {
 		return m.PageSize
 	}
 	return 0
 }
 
-func (m *GetAllAPIKeysRequest) GetPageToken() string {
+func (m *GetServiceAccountsRequest) GetPageToken() string {
 	if m != nil {
 		return m.PageToken
 	}
 	return ""
 }
 
-type GetAllAPIKeysResponse struct {
-	// the list of apikeys
-	ApiKeys []*v1.APIKey `protobuf:"bytes,1,rep,name=api_keys,json=apiKeys,proto3" json:"api_keys,omitempty"`
-	// the next page's token
+type GetServiceAccountsResponse struct {
+	// The list of service accounts in ascending ID order.
+	ServiceAccount []*v1.ServiceAccount `protobuf:"bytes,1,rep,name=service_account,json=serviceAccount,proto3" json:"service_account,omitempty"`
+	// The next page token, set if there is another page.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 }
 
-func (m *GetAllAPIKeysResponse) Reset()      { *m = GetAllAPIKeysResponse{} }
-func (*GetAllAPIKeysResponse) ProtoMessage() {}
-func (*GetAllAPIKeysResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_82df425cb2a9bb43, []int{31}
+func (m *GetServiceAccountsResponse) Reset()      { *m = GetServiceAccountsResponse{} }
+func (*GetServiceAccountsResponse) ProtoMessage() {}
+func (*GetServiceAccountsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_82df425cb2a9bb43, []int{33}
 }
-func (m *GetAllAPIKeysResponse) XXX_Unmarshal(b []byte) error {
+func (m *GetServiceAccountsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *GetAllAPIKeysResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *GetServiceAccountsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_GetAllAPIKeysResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_GetServiceAccountsResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1699,141 +1789,50 @@ func (m *GetAllAPIKeysResponse) XXX_Marshal(b []byte, deterministic bool) ([]byt
 		return b[:n], nil
 	}
 }
-func (m *GetAllAPIKeysResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetAllAPIKeysResponse.Merge(m, src)
+func (m *GetServiceAccountsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetServiceAccountsResponse.Merge(m, src)
 }
-func (m *GetAllAPIKeysResponse) XXX_Size() int {
+func (m *GetServiceAccountsResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *GetAllAPIKeysResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetAllAPIKeysResponse.DiscardUnknown(m)
+func (m *GetServiceAccountsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetServiceAccountsResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetAllAPIKeysResponse proto.InternalMessageInfo
+var xxx_messageInfo_GetServiceAccountsResponse proto.InternalMessageInfo
 
-func (m *GetAllAPIKeysResponse) GetApiKeys() []*v1.APIKey {
+func (m *GetServiceAccountsResponse) GetServiceAccount() []*v1.ServiceAccount {
 	if m != nil {
-		return m.ApiKeys
+		return m.ServiceAccount
 	}
 	return nil
 }
 
-func (m *GetAllAPIKeysResponse) GetNextPageToken() string {
+func (m *GetServiceAccountsResponse) GetNextPageToken() string {
 	if m != nil {
 		return m.NextPageToken
 	}
 	return ""
 }
 
-type GetAnyAPIKeyRequest struct {
-	// the apikey id
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+type CreateServiceAccountRequest struct {
+	// The spec of the service account to create.
+	Spec *v1.ServiceAccountSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
+	// The ID to use for this async operation - optional.
+	AsyncOperationId string `protobuf:"bytes,2,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
 }
 
-func (m *GetAnyAPIKeyRequest) Reset()      { *m = GetAnyAPIKeyRequest{} }
-func (*GetAnyAPIKeyRequest) ProtoMessage() {}
-func (*GetAnyAPIKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_82df425cb2a9bb43, []int{32}
-}
-func (m *GetAnyAPIKeyRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *GetAnyAPIKeyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_GetAnyAPIKeyRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *GetAnyAPIKeyRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetAnyAPIKeyRequest.Merge(m, src)
-}
-func (m *GetAnyAPIKeyRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *GetAnyAPIKeyRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetAnyAPIKeyRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetAnyAPIKeyRequest proto.InternalMessageInfo
-
-func (m *GetAnyAPIKeyRequest) GetId() string {
-	if m != nil {
-		return m.Id
-	}
-	return ""
-}
-
-type GetAnyAPIKeyResponse struct {
-	// the apikey
-	ApiKey *v1.APIKey `protobuf:"bytes,1,opt,name=api_key,json=apiKey,proto3" json:"api_key,omitempty"`
-}
-
-func (m *GetAnyAPIKeyResponse) Reset()      { *m = GetAnyAPIKeyResponse{} }
-func (*GetAnyAPIKeyResponse) ProtoMessage() {}
-func (*GetAnyAPIKeyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_82df425cb2a9bb43, []int{33}
-}
-func (m *GetAnyAPIKeyResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *GetAnyAPIKeyResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_GetAnyAPIKeyResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *GetAnyAPIKeyResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetAnyAPIKeyResponse.Merge(m, src)
-}
-func (m *GetAnyAPIKeyResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *GetAnyAPIKeyResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetAnyAPIKeyResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetAnyAPIKeyResponse proto.InternalMessageInfo
-
-func (m *GetAnyAPIKeyResponse) GetApiKey() *v1.APIKey {
-	if m != nil {
-		return m.ApiKey
-	}
-	return nil
-}
-
-type DeleteAnyAPIKeyRequest struct {
-	// the apikey id
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// the version of the apikey for which this delete is intended for
-	// the latest version can be found in the apikey status
-	ResourceVersion string `protobuf:"bytes,2,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
-	// the request id to use for this operation - optional
-	RequestId string `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-}
-
-func (m *DeleteAnyAPIKeyRequest) Reset()      { *m = DeleteAnyAPIKeyRequest{} }
-func (*DeleteAnyAPIKeyRequest) ProtoMessage() {}
-func (*DeleteAnyAPIKeyRequest) Descriptor() ([]byte, []int) {
+func (m *CreateServiceAccountRequest) Reset()      { *m = CreateServiceAccountRequest{} }
+func (*CreateServiceAccountRequest) ProtoMessage() {}
+func (*CreateServiceAccountRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_82df425cb2a9bb43, []int{34}
 }
-func (m *DeleteAnyAPIKeyRequest) XXX_Unmarshal(b []byte) error {
+func (m *CreateServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *DeleteAnyAPIKeyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *CreateServiceAccountRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_DeleteAnyAPIKeyRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_CreateServiceAccountRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1843,171 +1842,50 @@ func (m *DeleteAnyAPIKeyRequest) XXX_Marshal(b []byte, deterministic bool) ([]by
 		return b[:n], nil
 	}
 }
-func (m *DeleteAnyAPIKeyRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DeleteAnyAPIKeyRequest.Merge(m, src)
+func (m *CreateServiceAccountRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateServiceAccountRequest.Merge(m, src)
 }
-func (m *DeleteAnyAPIKeyRequest) XXX_Size() int {
+func (m *CreateServiceAccountRequest) XXX_Size() int {
 	return m.Size()
 }
-func (m *DeleteAnyAPIKeyRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_DeleteAnyAPIKeyRequest.DiscardUnknown(m)
+func (m *CreateServiceAccountRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateServiceAccountRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_DeleteAnyAPIKeyRequest proto.InternalMessageInfo
+var xxx_messageInfo_CreateServiceAccountRequest proto.InternalMessageInfo
 
-func (m *DeleteAnyAPIKeyRequest) GetId() string {
-	if m != nil {
-		return m.Id
-	}
-	return ""
-}
-
-func (m *DeleteAnyAPIKeyRequest) GetResourceVersion() string {
-	if m != nil {
-		return m.ResourceVersion
-	}
-	return ""
-}
-
-func (m *DeleteAnyAPIKeyRequest) GetRequestId() string {
-	if m != nil {
-		return m.RequestId
-	}
-	return ""
-}
-
-type DeleteAnyAPIKeyResponse struct {
-	// the request status of the delete operation
-	RequestStatus *v11.RequestStatus `protobuf:"bytes,3,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
-}
-
-func (m *DeleteAnyAPIKeyResponse) Reset()      { *m = DeleteAnyAPIKeyResponse{} }
-func (*DeleteAnyAPIKeyResponse) ProtoMessage() {}
-func (*DeleteAnyAPIKeyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_82df425cb2a9bb43, []int{35}
-}
-func (m *DeleteAnyAPIKeyResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *DeleteAnyAPIKeyResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_DeleteAnyAPIKeyResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *DeleteAnyAPIKeyResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DeleteAnyAPIKeyResponse.Merge(m, src)
-}
-func (m *DeleteAnyAPIKeyResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *DeleteAnyAPIKeyResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_DeleteAnyAPIKeyResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_DeleteAnyAPIKeyResponse proto.InternalMessageInfo
-
-func (m *DeleteAnyAPIKeyResponse) GetRequestStatus() *v11.RequestStatus {
-	if m != nil {
-		return m.RequestStatus
-	}
-	return nil
-}
-
-type UpdateAnyAPIKeyRequest struct {
-	// the id of the apikey to update
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// the new apikey specification
-	Spec *v1.APIKeySpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
-	// the version of the apikey for which this update is intended for
-	// the latest version can be found in the get apikey response
-	ResourceVersion string `protobuf:"bytes,3,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
-	// the request id to use for this operation - optional
-	RequestId string `protobuf:"bytes,4,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-}
-
-func (m *UpdateAnyAPIKeyRequest) Reset()      { *m = UpdateAnyAPIKeyRequest{} }
-func (*UpdateAnyAPIKeyRequest) ProtoMessage() {}
-func (*UpdateAnyAPIKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_82df425cb2a9bb43, []int{36}
-}
-func (m *UpdateAnyAPIKeyRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *UpdateAnyAPIKeyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_UpdateAnyAPIKeyRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *UpdateAnyAPIKeyRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateAnyAPIKeyRequest.Merge(m, src)
-}
-func (m *UpdateAnyAPIKeyRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *UpdateAnyAPIKeyRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateAnyAPIKeyRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UpdateAnyAPIKeyRequest proto.InternalMessageInfo
-
-func (m *UpdateAnyAPIKeyRequest) GetId() string {
-	if m != nil {
-		return m.Id
-	}
-	return ""
-}
-
-func (m *UpdateAnyAPIKeyRequest) GetSpec() *v1.APIKeySpec {
+func (m *CreateServiceAccountRequest) GetSpec() *v1.ServiceAccountSpec {
 	if m != nil {
 		return m.Spec
 	}
 	return nil
 }
 
-func (m *UpdateAnyAPIKeyRequest) GetResourceVersion() string {
+func (m *CreateServiceAccountRequest) GetAsyncOperationId() string {
 	if m != nil {
-		return m.ResourceVersion
+		return m.AsyncOperationId
 	}
 	return ""
 }
 
-func (m *UpdateAnyAPIKeyRequest) GetRequestId() string {
-	if m != nil {
-		return m.RequestId
-	}
-	return ""
+type CreateServiceAccountResponse struct {
+	// The ID of the created service account.
+	ServiceAccountId string `protobuf:"bytes,1,opt,name=service_account_id,json=serviceAccountId,proto3" json:"service_account_id,omitempty"`
+	// The async operation.
+	AsyncOperation *v12.AsyncOperation `protobuf:"bytes,2,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
 }
 
-type UpdateAnyAPIKeyResponse struct {
-	// the request status of the update operation
-	RequestStatus *v11.RequestStatus `protobuf:"bytes,1,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
+func (m *CreateServiceAccountResponse) Reset()      { *m = CreateServiceAccountResponse{} }
+func (*CreateServiceAccountResponse) ProtoMessage() {}
+func (*CreateServiceAccountResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_82df425cb2a9bb43, []int{35}
 }
-
-func (m *UpdateAnyAPIKeyResponse) Reset()      { *m = UpdateAnyAPIKeyResponse{} }
-func (*UpdateAnyAPIKeyResponse) ProtoMessage() {}
-func (*UpdateAnyAPIKeyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_82df425cb2a9bb43, []int{37}
-}
-func (m *UpdateAnyAPIKeyResponse) XXX_Unmarshal(b []byte) error {
+func (m *CreateServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *UpdateAnyAPIKeyResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *CreateServiceAccountResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_UpdateAnyAPIKeyResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_CreateServiceAccountResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -2017,21 +1895,375 @@ func (m *UpdateAnyAPIKeyResponse) XXX_Marshal(b []byte, deterministic bool) ([]b
 		return b[:n], nil
 	}
 }
-func (m *UpdateAnyAPIKeyResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateAnyAPIKeyResponse.Merge(m, src)
+func (m *CreateServiceAccountResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateServiceAccountResponse.Merge(m, src)
 }
-func (m *UpdateAnyAPIKeyResponse) XXX_Size() int {
+func (m *CreateServiceAccountResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *UpdateAnyAPIKeyResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateAnyAPIKeyResponse.DiscardUnknown(m)
+func (m *CreateServiceAccountResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateServiceAccountResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_UpdateAnyAPIKeyResponse proto.InternalMessageInfo
+var xxx_messageInfo_CreateServiceAccountResponse proto.InternalMessageInfo
 
-func (m *UpdateAnyAPIKeyResponse) GetRequestStatus() *v11.RequestStatus {
+func (m *CreateServiceAccountResponse) GetServiceAccountId() string {
 	if m != nil {
-		return m.RequestStatus
+		return m.ServiceAccountId
+	}
+	return ""
+}
+
+func (m *CreateServiceAccountResponse) GetAsyncOperation() *v12.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+type CreateServiceAccountAPIKeyRequest struct {
+	// ID of the service account to create the API key for.
+	ServiceAccountId string `protobuf:"bytes,1,opt,name=service_account_id,json=serviceAccountId,proto3" json:"service_account_id,omitempty"`
+	// The spec for the apikey to create.
+	Spec *v1.APIKeySpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	// The ID to use for this async operation - optional.
+	AsyncOperationId string `protobuf:"bytes,3,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *CreateServiceAccountAPIKeyRequest) Reset()      { *m = CreateServiceAccountAPIKeyRequest{} }
+func (*CreateServiceAccountAPIKeyRequest) ProtoMessage() {}
+func (*CreateServiceAccountAPIKeyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_82df425cb2a9bb43, []int{36}
+}
+func (m *CreateServiceAccountAPIKeyRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CreateServiceAccountAPIKeyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CreateServiceAccountAPIKeyRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CreateServiceAccountAPIKeyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateServiceAccountAPIKeyRequest.Merge(m, src)
+}
+func (m *CreateServiceAccountAPIKeyRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *CreateServiceAccountAPIKeyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateServiceAccountAPIKeyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateServiceAccountAPIKeyRequest proto.InternalMessageInfo
+
+func (m *CreateServiceAccountAPIKeyRequest) GetServiceAccountId() string {
+	if m != nil {
+		return m.ServiceAccountId
+	}
+	return ""
+}
+
+func (m *CreateServiceAccountAPIKeyRequest) GetSpec() *v1.APIKeySpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *CreateServiceAccountAPIKeyRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+type CreateServiceAccountAPIKeyResponse struct {
+	// The apikey id
+	ApiKeyId string `protobuf:"bytes,1,opt,name=api_key_id,json=apiKeyId,proto3" json:"api_key_id,omitempty"`
+	// The apikey secret key
+	SecretKey string `protobuf:"bytes,2,opt,name=secret_key,json=secretKey,proto3" json:"secret_key,omitempty"`
+	// The async operation.
+	AsyncOperation *v12.AsyncOperation `protobuf:"bytes,3,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *CreateServiceAccountAPIKeyResponse) Reset()      { *m = CreateServiceAccountAPIKeyResponse{} }
+func (*CreateServiceAccountAPIKeyResponse) ProtoMessage() {}
+func (*CreateServiceAccountAPIKeyResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_82df425cb2a9bb43, []int{37}
+}
+func (m *CreateServiceAccountAPIKeyResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CreateServiceAccountAPIKeyResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CreateServiceAccountAPIKeyResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CreateServiceAccountAPIKeyResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateServiceAccountAPIKeyResponse.Merge(m, src)
+}
+func (m *CreateServiceAccountAPIKeyResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *CreateServiceAccountAPIKeyResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateServiceAccountAPIKeyResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateServiceAccountAPIKeyResponse proto.InternalMessageInfo
+
+func (m *CreateServiceAccountAPIKeyResponse) GetApiKeyId() string {
+	if m != nil {
+		return m.ApiKeyId
+	}
+	return ""
+}
+
+func (m *CreateServiceAccountAPIKeyResponse) GetSecretKey() string {
+	if m != nil {
+		return m.SecretKey
+	}
+	return ""
+}
+
+func (m *CreateServiceAccountAPIKeyResponse) GetAsyncOperation() *v12.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+type UpdateServiceAccountRequest struct {
+	// The ID of the service account to update.
+	ServiceAccountId string `protobuf:"bytes,1,opt,name=service_account_id,json=serviceAccountId,proto3" json:"service_account_id,omitempty"`
+	// The new service account specification.
+	Spec *v1.ServiceAccountSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	// The version of the service account for which this update is intended for.
+	// The latest version can be found in the GetServiceAccount response.
+	ResourceVersion string `protobuf:"bytes,3,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	// The ID to use for this async operation - optional.
+	AsyncOperationId string `protobuf:"bytes,4,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *UpdateServiceAccountRequest) Reset()      { *m = UpdateServiceAccountRequest{} }
+func (*UpdateServiceAccountRequest) ProtoMessage() {}
+func (*UpdateServiceAccountRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_82df425cb2a9bb43, []int{38}
+}
+func (m *UpdateServiceAccountRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateServiceAccountRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateServiceAccountRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateServiceAccountRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateServiceAccountRequest.Merge(m, src)
+}
+func (m *UpdateServiceAccountRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateServiceAccountRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateServiceAccountRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateServiceAccountRequest proto.InternalMessageInfo
+
+func (m *UpdateServiceAccountRequest) GetServiceAccountId() string {
+	if m != nil {
+		return m.ServiceAccountId
+	}
+	return ""
+}
+
+func (m *UpdateServiceAccountRequest) GetSpec() *v1.ServiceAccountSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *UpdateServiceAccountRequest) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *UpdateServiceAccountRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+type UpdateServiceAccountResponse struct {
+	// The async operation.
+	AsyncOperation *v12.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *UpdateServiceAccountResponse) Reset()      { *m = UpdateServiceAccountResponse{} }
+func (*UpdateServiceAccountResponse) ProtoMessage() {}
+func (*UpdateServiceAccountResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_82df425cb2a9bb43, []int{39}
+}
+func (m *UpdateServiceAccountResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateServiceAccountResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateServiceAccountResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateServiceAccountResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateServiceAccountResponse.Merge(m, src)
+}
+func (m *UpdateServiceAccountResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateServiceAccountResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateServiceAccountResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateServiceAccountResponse proto.InternalMessageInfo
+
+func (m *UpdateServiceAccountResponse) GetAsyncOperation() *v12.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+type DeleteServiceAccountRequest struct {
+	// The ID of the service account to delete;
+	ServiceAccountId string `protobuf:"bytes,1,opt,name=service_account_id,json=serviceAccountId,proto3" json:"service_account_id,omitempty"`
+	// The version of the service account for which this update is intended for.
+	// The latest version can be found in the GetServiceAccount response.
+	ResourceVersion string `protobuf:"bytes,2,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	// The ID to use for this async operation - optional.
+	AsyncOperationId string `protobuf:"bytes,3,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *DeleteServiceAccountRequest) Reset()      { *m = DeleteServiceAccountRequest{} }
+func (*DeleteServiceAccountRequest) ProtoMessage() {}
+func (*DeleteServiceAccountRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_82df425cb2a9bb43, []int{40}
+}
+func (m *DeleteServiceAccountRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DeleteServiceAccountRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DeleteServiceAccountRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DeleteServiceAccountRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteServiceAccountRequest.Merge(m, src)
+}
+func (m *DeleteServiceAccountRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *DeleteServiceAccountRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteServiceAccountRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteServiceAccountRequest proto.InternalMessageInfo
+
+func (m *DeleteServiceAccountRequest) GetServiceAccountId() string {
+	if m != nil {
+		return m.ServiceAccountId
+	}
+	return ""
+}
+
+func (m *DeleteServiceAccountRequest) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *DeleteServiceAccountRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+type DeleteServiceAccountResponse struct {
+	// The async operation.
+	AsyncOperation *v12.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *DeleteServiceAccountResponse) Reset()      { *m = DeleteServiceAccountResponse{} }
+func (*DeleteServiceAccountResponse) ProtoMessage() {}
+func (*DeleteServiceAccountResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_82df425cb2a9bb43, []int{41}
+}
+func (m *DeleteServiceAccountResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DeleteServiceAccountResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DeleteServiceAccountResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DeleteServiceAccountResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteServiceAccountResponse.Merge(m, src)
+}
+func (m *DeleteServiceAccountResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *DeleteServiceAccountResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteServiceAccountResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteServiceAccountResponse proto.InternalMessageInfo
+
+func (m *DeleteServiceAccountResponse) GetAsyncOperation() *v12.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
 	}
 	return nil
 }
@@ -2067,14 +2299,18 @@ func init() {
 	proto.RegisterType((*DeleteAPIKeyResponse)(nil), "api.authservice.v1.DeleteAPIKeyResponse")
 	proto.RegisterType((*UpdateAPIKeyRequest)(nil), "api.authservice.v1.UpdateAPIKeyRequest")
 	proto.RegisterType((*UpdateAPIKeyResponse)(nil), "api.authservice.v1.UpdateAPIKeyResponse")
-	proto.RegisterType((*GetAllAPIKeysRequest)(nil), "api.authservice.v1.GetAllAPIKeysRequest")
-	proto.RegisterType((*GetAllAPIKeysResponse)(nil), "api.authservice.v1.GetAllAPIKeysResponse")
-	proto.RegisterType((*GetAnyAPIKeyRequest)(nil), "api.authservice.v1.GetAnyAPIKeyRequest")
-	proto.RegisterType((*GetAnyAPIKeyResponse)(nil), "api.authservice.v1.GetAnyAPIKeyResponse")
-	proto.RegisterType((*DeleteAnyAPIKeyRequest)(nil), "api.authservice.v1.DeleteAnyAPIKeyRequest")
-	proto.RegisterType((*DeleteAnyAPIKeyResponse)(nil), "api.authservice.v1.DeleteAnyAPIKeyResponse")
-	proto.RegisterType((*UpdateAnyAPIKeyRequest)(nil), "api.authservice.v1.UpdateAnyAPIKeyRequest")
-	proto.RegisterType((*UpdateAnyAPIKeyResponse)(nil), "api.authservice.v1.UpdateAnyAPIKeyResponse")
+	proto.RegisterType((*GetServiceAccountRequest)(nil), "api.authservice.v1.GetServiceAccountRequest")
+	proto.RegisterType((*GetServiceAccountResponse)(nil), "api.authservice.v1.GetServiceAccountResponse")
+	proto.RegisterType((*GetServiceAccountsRequest)(nil), "api.authservice.v1.GetServiceAccountsRequest")
+	proto.RegisterType((*GetServiceAccountsResponse)(nil), "api.authservice.v1.GetServiceAccountsResponse")
+	proto.RegisterType((*CreateServiceAccountRequest)(nil), "api.authservice.v1.CreateServiceAccountRequest")
+	proto.RegisterType((*CreateServiceAccountResponse)(nil), "api.authservice.v1.CreateServiceAccountResponse")
+	proto.RegisterType((*CreateServiceAccountAPIKeyRequest)(nil), "api.authservice.v1.CreateServiceAccountAPIKeyRequest")
+	proto.RegisterType((*CreateServiceAccountAPIKeyResponse)(nil), "api.authservice.v1.CreateServiceAccountAPIKeyResponse")
+	proto.RegisterType((*UpdateServiceAccountRequest)(nil), "api.authservice.v1.UpdateServiceAccountRequest")
+	proto.RegisterType((*UpdateServiceAccountResponse)(nil), "api.authservice.v1.UpdateServiceAccountResponse")
+	proto.RegisterType((*DeleteServiceAccountRequest)(nil), "api.authservice.v1.DeleteServiceAccountRequest")
+	proto.RegisterType((*DeleteServiceAccountResponse)(nil), "api.authservice.v1.DeleteServiceAccountResponse")
 }
 
 func init() {
@@ -2082,70 +2318,83 @@ func init() {
 }
 
 var fileDescriptor_82df425cb2a9bb43 = []byte{
-	// 997 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x57, 0xcf, 0x6f, 0xdc, 0x54,
-	0x10, 0xde, 0xb7, 0xbb, 0xf9, 0x35, 0xa8, 0x49, 0xe3, 0x4d, 0xb3, 0xdb, 0x90, 0x58, 0x91, 0xa5,
-	0x94, 0x86, 0x56, 0x1b, 0xa5, 0x5c, 0x90, 0x38, 0xb5, 0x04, 0xb5, 0xab, 0x48, 0x10, 0x1c, 0xca,
-	0xa1, 0x54, 0x72, 0x8c, 0x77, 0x54, 0xac, 0x7a, 0x6d, 0xe3, 0xe7, 0x5d, 0xd8, 0x9e, 0x38, 0x70,
-	0x83, 0x03, 0x57, 0x24, 0x24, 0xc4, 0x8d, 0x3f, 0x05, 0x6e, 0x39, 0xf6, 0x48, 0x36, 0x17, 0x8e,
-	0xf9, 0x13, 0xd0, 0xfb, 0xe1, 0xb5, 0xbd, 0xf6, 0xae, 0x97, 0xc8, 0xd0, 0x5b, 0xde, 0xcc, 0xbc,
-	0x37, 0xdf, 0x37, 0x33, 0xdf, 0x38, 0x0b, 0xfb, 0xa6, 0x6f, 0x1f, 0x98, 0xfd, 0xf0, 0x2b, 0x8a,
-	0xc1, 0xc0, 0xb6, 0xf0, 0x60, 0x70, 0x78, 0x10, 0xe0, 0xd7, 0x7d, 0xa4, 0xa1, 0x11, 0x20, 0xf5,
-	0x3d, 0x97, 0x62, 0xdb, 0x0f, 0xbc, 0xd0, 0x53, 0x14, 0xd3, 0xb7, 0xdb, 0x89, 0xd0, 0xf6, 0xe0,
-	0x70, 0xeb, 0x76, 0x74, 0x9d, 0xdd, 0xeb, 0x21, 0xa5, 0xe6, 0x0b, 0x19, 0xbe, 0xb5, 0xcd, 0x5c,
-	0xf2, 0xa9, 0x8c, 0x57, 0xdb, 0x87, 0xd5, 0xc7, 0x18, 0xea, 0x9e, 0x83, 0xba, 0x08, 0x51, 0x9a,
-	0xb0, 0x14, 0x78, 0x0e, 0x1a, 0x76, 0xb7, 0x55, 0xdf, 0x25, 0x77, 0x57, 0xf4, 0x45, 0x76, 0xec,
-	0x74, 0xb5, 0xf7, 0x61, 0x6d, 0x1c, 0x2a, 0x00, 0x29, 0x7b, 0x50, 0x67, 0xce, 0x16, 0xd9, 0x25,
-	0x77, 0xdf, 0x7a, 0xb0, 0xde, 0x8e, 0x90, 0xb5, 0x07, 0x87, 0x6d, 0x1e, 0xc8, 0xdd, 0xda, 0xf7,
-	0x64, 0x7c, 0x95, 0x46, 0x69, 0xde, 0x86, 0x15, 0xdf, 0x7c, 0x81, 0x06, 0xb5, 0x5f, 0x89, 0xfb,
-	0x0b, 0xfa, 0x32, 0x33, 0x9c, 0xda, 0xaf, 0x50, 0xd9, 0x01, 0xe0, 0xce, 0xd0, 0x7b, 0x89, 0x6e,
-	0xab, 0xca, 0x61, 0xf0, 0xf0, 0xcf, 0x98, 0x41, 0xd9, 0x86, 0x15, 0xd7, 0xec, 0x21, 0xf5, 0x4d,
-	0x0b, 0x5b, 0x35, 0xe1, 0x1d, 0x1b, 0x18, 0x81, 0x3e, 0xc5, 0x20, 0x41, 0x80, 0x1d, 0x3b, 0x5d,
-	0xcd, 0x82, 0x9b, 0x31, 0x0a, 0xc9, 0xe0, 0x1d, 0x58, 0x60, 0x10, 0x69, 0x8b, 0xec, 0xd6, 0xf2,
-	0x29, 0x08, 0xbf, 0x72, 0x07, 0xd6, 0x5c, 0xfc, 0x36, 0x34, 0x32, 0xb8, 0x6e, 0x30, 0xf3, 0x49,
-	0x84, 0x4d, 0x3b, 0x86, 0xed, 0x28, 0xc9, 0xa3, 0xe1, 0x09, 0x06, 0x3d, 0x9b, 0x52, 0xdb, 0x73,
-	0xc7, 0xbc, 0xef, 0xc1, 0x02, 0xf5, 0xd1, 0x8a, 0x12, 0xde, 0xca, 0x24, 0x3c, 0xf5, 0xd1, 0xd2,
-	0x45, 0x8c, 0xf6, 0x04, 0x76, 0xa6, 0x3c, 0xf6, 0x2f, 0xe1, 0x6b, 0x3f, 0x8b, 0x16, 0x3c, 0xa5,
-	0x18, 0xfc, 0x0f, 0x2d, 0xb8, 0x0f, 0x0b, 0x34, 0x34, 0x43, 0xe4, 0x0d, 0x58, 0x7d, 0xb0, 0x99,
-	0x82, 0xc5, 0x30, 0x9c, 0x32, 0xaf, 0x2e, 0x82, 0x64, 0x5f, 0x24, 0xb4, 0x98, 0x18, 0xeb, 0x5a,
-	0x3e, 0x31, 0x16, 0xaa, 0x0b, 0xff, 0xdc, 0x7d, 0x79, 0xc2, 0x07, 0x9d, 0xdf, 0x8c, 0x07, 0x3d,
-	0x9a, 0x13, 0x92, 0x9c, 0x13, 0x46, 0x9d, 0x3b, 0xb0, 0x67, 0xda, 0x4e, 0x44, 0x9d, 0x59, 0x3e,
-	0x62, 0x06, 0xa9, 0x03, 0xf1, 0x52, 0xac, 0x03, 0xe6, 0xcf, 0xd5, 0x01, 0x0f, 0xe4, 0x6e, 0xed,
-	0x0c, 0x94, 0x8e, 0x3b, 0xb0, 0x43, 0x4c, 0xb5, 0x61, 0xe6, 0x44, 0xf0, 0x62, 0xc5, 0x13, 0xc1,
-	0xb0, 0x45, 0x6b, 0xc1, 0xee, 0x46, 0xd8, 0xa4, 0xa5, 0xd3, 0xd5, 0xbe, 0x80, 0x46, 0x2a, 0x83,
-	0xc4, 0x77, 0x04, 0xab, 0xd1, 0x2d, 0x56, 0xf2, 0x3e, 0x95, 0x48, 0x77, 0x78, 0x2e, 0xe9, 0xe2,
-	0x23, 0x23, 0xfe, 0x3c, 0xe5, 0x41, 0xfa, 0x8d, 0x20, 0x79, 0xd4, 0x3e, 0x85, 0xa6, 0x8e, 0x14,
-	0xdd, 0x2e, 0x7b, 0x5c, 0xa4, 0x99, 0xa7, 0x96, 0xb3, 0xf0, 0x9e, 0x41, 0x2b, 0xfb, 0x64, 0xa9,
-	0xa0, 0x7f, 0x23, 0xb0, 0xfe, 0xd4, 0xef, 0x9a, 0xa2, 0x24, 0x85, 0x78, 0xf7, 0xa1, 0xce, 0x0a,
-	0xcd, 0x91, 0x4e, 0xed, 0x05, 0x0f, 0x51, 0xf6, 0xe1, 0x66, 0x80, 0xd4, 0xeb, 0x07, 0x16, 0x1a,
-	0x03, 0x0c, 0x98, 0x30, 0xa5, 0x12, 0xd6, 0x22, 0xfb, 0xe7, 0xc2, 0x3c, 0x51, 0x85, 0xfa, 0x64,
-	0x15, 0x9e, 0x81, 0x92, 0x84, 0x58, 0x2a, 0xff, 0x01, 0xac, 0x1f, 0xa1, 0x83, 0x73, 0xd3, 0xcf,
-	0x72, 0xaa, 0xce, 0xc3, 0xa9, 0x96, 0xc3, 0x29, 0x99, 0xb7, 0x54, 0x4e, 0x7f, 0x12, 0xd8, 0x8b,
-	0x0b, 0xf6, 0x71, 0xb4, 0x76, 0x72, 0xb6, 0x6d, 0x6a, 0x4d, 0x91, 0xc9, 0x35, 0x65, 0xc1, 0x16,
-	0x2f, 0xc3, 0xd8, 0x62, 0xf8, 0xf1, 0x13, 0xad, 0x2a, 0x97, 0xe3, 0x5e, 0x66, 0x04, 0x72, 0xf3,
-	0xb5, 0xfa, 0x53, 0x3c, 0x45, 0x75, 0x72, 0xe1, 0x4e, 0x11, 0x95, 0x52, 0x6b, 0x67, 0x42, 0xe3,
-	0xc3, 0x00, 0xcd, 0x10, 0x1f, 0x9e, 0x74, 0x8e, 0x71, 0x18, 0x2f, 0x21, 0x31, 0xf7, 0xe2, 0xc9,
-	0x66, 0x8a, 0xb4, 0x88, 0x4c, 0x4c, 0x7e, 0x81, 0xa8, 0x7f, 0x20, 0xb0, 0x91, 0xce, 0x21, 0x19,
-	0xac, 0x42, 0x75, 0x3c, 0x71, 0x55, 0x9b, 0x2f, 0x07, 0x8a, 0x56, 0x80, 0xa1, 0xf1, 0x12, 0x87,
-	0xd1, 0x3b, 0xc2, 0x72, 0x8c, 0xc3, 0x1c, 0xc2, 0xb5, 0x6b, 0x10, 0xfe, 0x04, 0xd6, 0x1f, 0x63,
-	0x28, 0x90, 0x94, 0xf1, 0xe9, 0xd3, 0x1c, 0x50, 0x92, 0x0f, 0x4a, 0x6e, 0x6d, 0x58, 0x36, 0x7d,
-	0x9b, 0x11, 0x89, 0x16, 0x79, 0x23, 0xa7, 0x88, 0xfa, 0x92, 0xe9, 0xdb, 0xec, 0xde, 0xdc, 0xdf,
-	0x2d, 0x8d, 0x7f, 0x1c, 0xd3, 0xcd, 0x9a, 0xa8, 0xa3, 0xf6, 0x30, 0x41, 0x71, 0x0c, 0xe8, 0x3e,
-	0x2c, 0x49, 0x40, 0xb2, 0xa9, 0xb9, 0x78, 0x16, 0x05, 0x1e, 0xcd, 0x83, 0x86, 0x90, 0xeb, 0xcc,
-	0x4c, 0x25, 0xee, 0x87, 0xe7, 0xb0, 0x91, 0x4e, 0x38, 0x75, 0xca, 0xaf, 0xd3, 0xf4, 0x5f, 0x08,
-	0x34, 0x84, 0xac, 0x66, 0xf3, 0xb9, 0x97, 0x5a, 0xf7, 0x05, 0x63, 0x5f, 0xde, 0xc2, 0x7f, 0x0e,
-	0x1b, 0x69, 0x74, 0xa5, 0x4a, 0xfc, 0x47, 0x02, 0x1b, 0x6c, 0x1e, 0x1c, 0x67, 0x62, 0xea, 0x6f,
-	0xc3, 0xb2, 0xf7, 0x8d, 0x9b, 0xdc, 0xfb, 0x4b, 0xfc, 0x5c, 0xf8, 0x3f, 0x4f, 0x5a, 0x2f, 0xb5,
-	0x99, 0x7a, 0xa9, 0x4f, 0xea, 0xc5, 0x83, 0x5b, 0x13, 0x68, 0xfe, 0x63, 0xc9, 0xec, 0x41, 0x83,
-	0x25, 0x74, 0x87, 0xb3, 0x55, 0x73, 0x24, 0xaa, 0x14, 0x87, 0x5d, 0x4b, 0x38, 0x01, 0x6c, 0xca,
-	0x39, 0x2e, 0xc8, 0x57, 0xa2, 0x76, 0x0c, 0x68, 0x66, 0x72, 0x96, 0x2a, 0x9f, 0x5f, 0x09, 0x6c,
-	0xca, 0x01, 0x2d, 0x62, 0xf5, 0x86, 0x14, 0x64, 0x40, 0x33, 0x03, 0xb0, 0x4c, 0x11, 0x3d, 0x3a,
-	0x3b, 0xbf, 0x50, 0x2b, 0xaf, 0x2f, 0xd4, 0xca, 0xd5, 0x85, 0x4a, 0xbe, 0x1b, 0xa9, 0xe4, 0xf7,
-	0x91, 0x4a, 0xfe, 0x18, 0xa9, 0xe4, 0x7c, 0xa4, 0x92, 0xbf, 0x46, 0x2a, 0xf9, 0x7b, 0xa4, 0x56,
-	0xae, 0x46, 0x2a, 0xf9, 0xe9, 0x52, 0xad, 0x9c, 0x5f, 0xaa, 0x95, 0xd7, 0x97, 0x6a, 0xe5, 0xd9,
-	0xbb, 0x61, 0xcf, 0x0f, 0x9c, 0xb6, 0xe5, 0x78, 0xfd, 0xee, 0x41, 0xf6, 0x27, 0xfd, 0x07, 0x89,
-	0xe3, 0x97, 0x8b, 0xfc, 0x17, 0xf8, 0x7b, 0xff, 0x04, 0x00, 0x00, 0xff, 0xff, 0xd0, 0xf4, 0xa9,
-	0x0e, 0xfb, 0x0f, 0x00, 0x00,
+	// 1204 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x58, 0x4d, 0x6f, 0x1b, 0xc5,
+	0x1b, 0xf7, 0xd8, 0xce, 0xdb, 0xf3, 0x57, 0x9d, 0x64, 0x93, 0x3f, 0x71, 0x12, 0x67, 0x09, 0x2b,
+	0xa5, 0x34, 0x34, 0xd8, 0x4a, 0x7b, 0x41, 0xe2, 0x94, 0x52, 0x94, 0x58, 0x91, 0x20, 0x6c, 0x28,
+	0xa0, 0x52, 0xc9, 0x59, 0xd6, 0x8f, 0xca, 0xaa, 0xf6, 0xee, 0xb2, 0xb3, 0x36, 0x49, 0x4f, 0x3d,
+	0x70, 0x01, 0x2e, 0x5c, 0x91, 0xb8, 0x20, 0x21, 0xc4, 0x81, 0x6f, 0xc0, 0x17, 0x80, 0x5b, 0x8e,
+	0xe5, 0x46, 0x9c, 0x0b, 0xc7, 0x7e, 0x04, 0x34, 0x33, 0xfb, 0x6a, 0x8f, 0xdf, 0xaa, 0x85, 0x9b,
+	0x77, 0x9e, 0x67, 0xe6, 0xf9, 0xfd, 0x7e, 0xcf, 0xcb, 0x68, 0x0c, 0xbb, 0x86, 0x6b, 0xd5, 0x8c,
+	0x8e, 0xff, 0x39, 0x45, 0xaf, 0x6b, 0x99, 0x58, 0xeb, 0xee, 0xd7, 0x3c, 0xfc, 0xa2, 0x83, 0xd4,
+	0x6f, 0x78, 0x48, 0x5d, 0xc7, 0xa6, 0x58, 0x75, 0x3d, 0xc7, 0x77, 0x14, 0xc5, 0x70, 0xad, 0x6a,
+	0xc2, 0xb5, 0xda, 0xdd, 0xdf, 0x58, 0x0f, 0xb7, 0xb3, 0x7d, 0x6d, 0xa4, 0xd4, 0x78, 0x1c, 0xb8,
+	0x6f, 0x54, 0x98, 0x29, 0x38, 0x6a, 0xd0, 0xfa, 0xa6, 0x8f, 0x6d, 0xd7, 0xf1, 0x8c, 0x56, 0x8d,
+	0xb9, 0x99, 0x2d, 0xa7, 0xd3, 0xac, 0x39, 0x2e, 0x7a, 0x86, 0x6f, 0x39, 0xf6, 0x80, 0xbb, 0xb6,
+	0x0b, 0xa5, 0x43, 0xf4, 0x75, 0xa7, 0x85, 0xba, 0x38, 0x51, 0x59, 0x83, 0x39, 0xcf, 0x69, 0x61,
+	0xc3, 0x6a, 0x96, 0x8b, 0xdb, 0xe4, 0xd6, 0x82, 0x3e, 0xcb, 0x3e, 0xeb, 0x4d, 0xed, 0x2d, 0x58,
+	0x8c, 0x5c, 0x05, 0x7e, 0x65, 0x07, 0x8a, 0xcc, 0x58, 0x26, 0xdb, 0xe4, 0xd6, 0xff, 0xee, 0x2c,
+	0x57, 0x43, 0x22, 0xd5, 0xee, 0x7e, 0x95, 0x3b, 0x72, 0xb3, 0xf6, 0x15, 0x89, 0xb6, 0xd2, 0x30,
+	0xcc, 0x26, 0x2c, 0xb8, 0xc6, 0x63, 0x6c, 0x50, 0xeb, 0xa9, 0xd8, 0x3f, 0xa3, 0xcf, 0xb3, 0x85,
+	0x53, 0xeb, 0x29, 0x2a, 0x5b, 0x00, 0xdc, 0xe8, 0x3b, 0x4f, 0xd0, 0x2e, 0xe7, 0x39, 0x0c, 0xee,
+	0xfe, 0x21, 0x5b, 0x50, 0x2a, 0xb0, 0x60, 0x1b, 0x6d, 0xa4, 0xae, 0x61, 0x62, 0xb9, 0x20, 0xac,
+	0xd1, 0x02, 0x23, 0xd0, 0xa1, 0xe8, 0x25, 0x08, 0xb0, 0xcf, 0x7a, 0x53, 0x33, 0x61, 0x29, 0x46,
+	0x11, 0x30, 0x78, 0x1d, 0x66, 0x18, 0x44, 0x5a, 0x26, 0xdb, 0x05, 0x39, 0x05, 0x61, 0x57, 0x6e,
+	0xc2, 0xa2, 0x8d, 0xe7, 0x7e, 0x63, 0x00, 0xd7, 0x0d, 0xb6, 0x7c, 0x12, 0x62, 0xd3, 0x8e, 0xa1,
+	0x12, 0x06, 0xb9, 0x77, 0x71, 0x82, 0x5e, 0xdb, 0xa2, 0xd4, 0x72, 0xec, 0x88, 0xf7, 0x6d, 0x98,
+	0xa1, 0x2e, 0x9a, 0x61, 0xc0, 0xff, 0x0f, 0x04, 0x3c, 0x75, 0xd1, 0xd4, 0x85, 0x8f, 0x76, 0x04,
+	0x5b, 0x43, 0x0e, 0x9b, 0x12, 0xbe, 0xf6, 0xbd, 0x48, 0xc1, 0x03, 0x8a, 0xde, 0x7f, 0x90, 0x82,
+	0x3d, 0x98, 0xa1, 0xbe, 0xe1, 0x23, 0x4f, 0x40, 0xe9, 0xce, 0x2b, 0x29, 0x58, 0x0c, 0xc3, 0x29,
+	0xb3, 0xea, 0xc2, 0x29, 0xc8, 0x4b, 0x00, 0x2d, 0x26, 0xc6, 0xb2, 0x26, 0x27, 0xc6, 0x5c, 0x75,
+	0x61, 0x9f, 0x38, 0x2f, 0x47, 0xbc, 0xd0, 0xf9, 0xce, 0xb8, 0xd0, 0xc3, 0x3a, 0x21, 0xc9, 0x3a,
+	0x61, 0xd4, 0xb9, 0x01, 0xdb, 0x86, 0xd5, 0x0a, 0xa9, 0xb3, 0x95, 0x77, 0xd9, 0x42, 0xd0, 0x07,
+	0xe2, 0xa4, 0xb8, 0x0f, 0x98, 0x5d, 0xda, 0x07, 0xdc, 0x91, 0x9b, 0xb5, 0x33, 0x50, 0xea, 0x76,
+	0xd7, 0xf2, 0x31, 0x95, 0x86, 0x91, 0x15, 0xc1, 0xc5, 0x8a, 0x2b, 0x82, 0x61, 0x0b, 0xa7, 0x88,
+	0xd5, 0x0c, 0xb1, 0x05, 0x2b, 0xf5, 0xa6, 0xf6, 0x29, 0xac, 0xa4, 0x22, 0x04, 0xf8, 0xee, 0x43,
+	0x29, 0xdc, 0xc5, 0x24, 0xef, 0xd0, 0x00, 0xe9, 0x16, 0x8f, 0x15, 0x98, 0x78, 0xc9, 0x88, 0x9f,
+	0xa7, 0xdc, 0x49, 0xbf, 0xe1, 0x25, 0x3f, 0xb5, 0x0f, 0x60, 0x4d, 0x47, 0x8a, 0x76, 0x93, 0x1d,
+	0x2e, 0xc2, 0x4c, 0xa2, 0xe5, 0x28, 0xbc, 0x67, 0x50, 0x1e, 0x3c, 0x32, 0x53, 0xd0, 0x3f, 0x12,
+	0x58, 0x7e, 0xe0, 0x36, 0x0d, 0x21, 0xc9, 0x58, 0xbc, 0xbb, 0x50, 0x64, 0x42, 0x73, 0xa4, 0x43,
+	0x73, 0xc1, 0x5d, 0x94, 0x5d, 0x58, 0xf2, 0x90, 0x3a, 0x1d, 0xcf, 0xc4, 0x46, 0x17, 0x3d, 0xd6,
+	0x98, 0x41, 0x27, 0x2c, 0x86, 0xeb, 0x1f, 0x89, 0xe5, 0x3e, 0x15, 0x8a, 0xfd, 0x2a, 0x3c, 0x04,
+	0x25, 0x09, 0x31, 0x53, 0xfe, 0x5d, 0x58, 0xbe, 0x8f, 0x2d, 0x9c, 0x98, 0xfe, 0x20, 0xa7, 0xfc,
+	0x24, 0x9c, 0x0a, 0x12, 0x4e, 0xc9, 0xb8, 0x99, 0x72, 0xfa, 0x83, 0xc0, 0x4e, 0x2c, 0xd8, 0x7b,
+	0xe1, 0xd8, 0x91, 0x4c, 0xdb, 0xd4, 0x98, 0x22, 0xfd, 0x63, 0xca, 0x84, 0x0d, 0x2e, 0x43, 0xb4,
+	0xd2, 0x70, 0xe3, 0x23, 0xca, 0x79, 0xde, 0x8e, 0x3b, 0x03, 0x25, 0x20, 0x8d, 0x57, 0xee, 0x0c,
+	0xb1, 0x8c, 0xd3, 0xc9, 0x86, 0x9b, 0xe3, 0xa8, 0x64, 0xaa, 0x9d, 0x01, 0x2b, 0xef, 0x78, 0x68,
+	0xf8, 0x78, 0x70, 0x52, 0x3f, 0xc6, 0x8b, 0x78, 0x08, 0x89, 0xba, 0x17, 0x47, 0xae, 0xa5, 0x48,
+	0x0b, 0xcf, 0x44, 0xe5, 0x8f, 0x69, 0xea, 0x6f, 0x09, 0xac, 0xa6, 0x63, 0x04, 0x0c, 0x4a, 0x90,
+	0x8f, 0x2a, 0x2e, 0x6f, 0xf1, 0xe1, 0x40, 0xd1, 0xf4, 0xd0, 0x6f, 0x3c, 0xc1, 0x8b, 0xf0, 0x1c,
+	0xb1, 0x72, 0x8c, 0x17, 0x12, 0xc2, 0x85, 0x97, 0x20, 0xfc, 0x35, 0x81, 0xe5, 0x43, 0xf4, 0x05,
+	0x94, 0x4c, 0xee, 0xbe, 0x75, 0x98, 0x77, 0xbe, 0xb4, 0x45, 0xfb, 0x88, 0x7c, 0xce, 0xf1, 0xef,
+	0x81, 0xab, 0xa3, 0xd8, 0x7f, 0x75, 0xb4, 0x40, 0x49, 0x42, 0x09, 0x64, 0xa9, 0xc2, 0xbc, 0xe1,
+	0x5a, 0x4c, 0x83, 0xf0, 0x0e, 0x58, 0x91, 0xe8, 0xaf, 0xcf, 0x19, 0xae, 0xc5, 0xf6, 0x4d, 0x7c,
+	0xe5, 0x69, 0xfc, 0x5e, 0x4d, 0xe7, 0xb9, 0x2f, 0x05, 0xda, 0x41, 0x42, 0x9c, 0x08, 0xd0, 0x1e,
+	0xcc, 0x05, 0x80, 0x82, 0x7a, 0x90, 0xe2, 0x99, 0x15, 0x78, 0x34, 0x07, 0x56, 0x44, 0xa7, 0x8f,
+	0x8c, 0x94, 0xe1, 0x68, 0x79, 0x04, 0xab, 0xe9, 0x80, 0x43, 0x1b, 0xe4, 0x65, 0xea, 0xe5, 0x07,
+	0x02, 0x2b, 0xa2, 0x23, 0x47, 0xf3, 0xb9, 0x9d, 0xba, 0x29, 0xc6, 0x74, 0x4c, 0x76, 0x77, 0xc5,
+	0x23, 0x58, 0x4d, 0xa3, 0xcb, 0x74, 0x3a, 0x1c, 0x41, 0xf9, 0x10, 0xfd, 0x53, 0xf1, 0x0e, 0x39,
+	0x30, 0x4d, 0xa7, 0x63, 0xfb, 0xa1, 0x00, 0x7b, 0xa0, 0x04, 0x0f, 0x94, 0x86, 0x21, 0x2c, 0xf1,
+	0xfd, 0xb1, 0x44, 0x53, 0x5b, 0xea, 0x4d, 0xcd, 0x80, 0x75, 0xc9, 0x49, 0x11, 0xd8, 0xc5, 0xbe,
+	0xa3, 0x02, 0xb4, 0x9b, 0x29, 0x19, 0xfb, 0x76, 0x97, 0xd2, 0x41, 0xb4, 0x8f, 0x25, 0x21, 0xb2,
+	0x68, 0x70, 0xed, 0x1b, 0x02, 0x1b, 0xb2, 0x93, 0x47, 0xa1, 0x2f, 0x4c, 0x89, 0x7e, 0xe2, 0x2e,
+	0x7e, 0x46, 0x60, 0x53, 0x4c, 0x53, 0x79, 0x5a, 0xee, 0xa6, 0x26, 0xf7, 0xab, 0x23, 0x20, 0x24,
+	0xea, 0x71, 0x0f, 0x14, 0x83, 0x5e, 0xd8, 0x66, 0x23, 0x7a, 0x1a, 0xc6, 0x93, 0x7c, 0x89, 0x5b,
+	0xde, 0x0f, 0x0d, 0xf5, 0xa6, 0xf6, 0x33, 0x81, 0x8a, 0x1c, 0x42, 0x34, 0x30, 0xa6, 0x28, 0x0d,
+	0xe5, 0x13, 0x58, 0xec, 0x0b, 0x1e, 0x34, 0x51, 0xad, 0x1a, 0x3e, 0x5e, 0x39, 0x0b, 0xfe, 0x78,
+	0xad, 0x46, 0x4e, 0xbc, 0xb1, 0x52, 0xd0, 0xf4, 0x52, 0x1a, 0xaa, 0xf6, 0x2b, 0x81, 0xd7, 0x64,
+	0x40, 0xd3, 0x9d, 0x3c, 0x1d, 0xda, 0xa9, 0xfa, 0x5c, 0xae, 0x6b, 0x61, 0x88, 0xae, 0xbf, 0x11,
+	0xd0, 0x46, 0xc1, 0x0d, 0xd4, 0xad, 0x00, 0x04, 0xe3, 0x38, 0xc6, 0x39, 0x2f, 0x86, 0x6f, 0x7d,
+	0xec, 0x25, 0x2a, 0x11, 0xbb, 0x90, 0x8d, 0xd8, 0x7f, 0x12, 0xd8, 0x14, 0xa3, 0x28, 0x83, 0x79,
+	0x11, 0x95, 0x71, 0x7e, 0x9a, 0x32, 0x9e, 0x62, 0xac, 0xca, 0x33, 0x53, 0x1c, 0x92, 0x99, 0x73,
+	0xa8, 0xc8, 0xa9, 0x05, 0x29, 0x91, 0xa8, 0x4a, 0xb2, 0x51, 0xf5, 0x27, 0x02, 0x9b, 0xe2, 0x76,
+	0xcb, 0x42, 0xd5, 0x29, 0x2e, 0xdd, 0xe9, 0x4a, 0xf7, 0x1c, 0x2a, 0x72, 0x94, 0xff, 0xb6, 0x40,
+	0xf7, 0xce, 0x2e, 0xaf, 0xd4, 0xdc, 0xf3, 0x2b, 0x35, 0xf7, 0xe2, 0x4a, 0x25, 0xcf, 0x7a, 0x2a,
+	0xf9, 0xa5, 0xa7, 0x92, 0xdf, 0x7b, 0x2a, 0xb9, 0xec, 0xa9, 0xe4, 0xaf, 0x9e, 0x4a, 0xfe, 0xee,
+	0xa9, 0xb9, 0x17, 0x3d, 0x95, 0x7c, 0x77, 0xad, 0xe6, 0x2e, 0xaf, 0xd5, 0xdc, 0xf3, 0x6b, 0x35,
+	0xf7, 0xf0, 0x0d, 0xbf, 0xed, 0x7a, 0x2d, 0x11, 0xae, 0x36, 0xf8, 0xd7, 0xdc, 0xdb, 0x89, 0xcf,
+	0xcf, 0x66, 0xf9, 0x5f, 0x63, 0x77, 0xff, 0x09, 0x00, 0x00, 0xff, 0xff, 0x0e, 0x6a, 0x24, 0x29,
+	0xc3, 0x13, 0x00, 0x00,
 }
 
 func (this *GetRoleRequest) Equal(that interface{}) bool {
@@ -2794,6 +3043,12 @@ func (this *GetAPIKeysRequest) Equal(that interface{}) bool {
 	if this.PageToken != that1.PageToken {
 		return false
 	}
+	if this.OwnerId != that1.OwnerId {
+		return false
+	}
+	if this.UserEmail != that1.UserEmail {
+		return false
+	}
 	return true
 }
 func (this *GetAPIKeysResponse) Equal(that interface{}) bool {
@@ -2987,14 +3242,14 @@ func (this *UpdateAPIKeyResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *GetAllAPIKeysRequest) Equal(that interface{}) bool {
+func (this *GetServiceAccountRequest) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*GetAllAPIKeysRequest)
+	that1, ok := that.(*GetServiceAccountRequest)
 	if !ok {
-		that2, ok := that.(GetAllAPIKeysRequest)
+		that2, ok := that.(GetServiceAccountRequest)
 		if ok {
 			that1 = &that2
 		} else {
@@ -3006,10 +3261,52 @@ func (this *GetAllAPIKeysRequest) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.OwnerId != that1.OwnerId {
+	if this.ServiceAccountId != that1.ServiceAccountId {
 		return false
 	}
-	if this.UserEmail != that1.UserEmail {
+	return true
+}
+func (this *GetServiceAccountResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetServiceAccountResponse)
+	if !ok {
+		that2, ok := that.(GetServiceAccountResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ServiceAccount.Equal(that1.ServiceAccount) {
+		return false
+	}
+	return true
+}
+func (this *GetServiceAccountsRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetServiceAccountsRequest)
+	if !ok {
+		that2, ok := that.(GetServiceAccountsRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
 		return false
 	}
 	if this.PageSize != that1.PageSize {
@@ -3020,14 +3317,14 @@ func (this *GetAllAPIKeysRequest) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *GetAllAPIKeysResponse) Equal(that interface{}) bool {
+func (this *GetServiceAccountsResponse) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*GetAllAPIKeysResponse)
+	that1, ok := that.(*GetServiceAccountsResponse)
 	if !ok {
-		that2, ok := that.(GetAllAPIKeysResponse)
+		that2, ok := that.(GetServiceAccountsResponse)
 		if ok {
 			that1 = &that2
 		} else {
@@ -3039,11 +3336,11 @@ func (this *GetAllAPIKeysResponse) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if len(this.ApiKeys) != len(that1.ApiKeys) {
+	if len(this.ServiceAccount) != len(that1.ServiceAccount) {
 		return false
 	}
-	for i := range this.ApiKeys {
-		if !this.ApiKeys[i].Equal(that1.ApiKeys[i]) {
+	for i := range this.ServiceAccount {
+		if !this.ServiceAccount[i].Equal(that1.ServiceAccount[i]) {
 			return false
 		}
 	}
@@ -3052,14 +3349,14 @@ func (this *GetAllAPIKeysResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *GetAnyAPIKeyRequest) Equal(that interface{}) bool {
+func (this *CreateServiceAccountRequest) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*GetAnyAPIKeyRequest)
+	that1, ok := that.(*CreateServiceAccountRequest)
 	if !ok {
-		that2, ok := that.(GetAnyAPIKeyRequest)
+		that2, ok := that.(CreateServiceAccountRequest)
 		if ok {
 			that1 = &that2
 		} else {
@@ -3071,19 +3368,22 @@ func (this *GetAnyAPIKeyRequest) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.Id != that1.Id {
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
 		return false
 	}
 	return true
 }
-func (this *GetAnyAPIKeyResponse) Equal(that interface{}) bool {
+func (this *CreateServiceAccountResponse) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*GetAnyAPIKeyResponse)
+	that1, ok := that.(*CreateServiceAccountResponse)
 	if !ok {
-		that2, ok := that.(GetAnyAPIKeyResponse)
+		that2, ok := that.(CreateServiceAccountResponse)
 		if ok {
 			that1 = &that2
 		} else {
@@ -3095,19 +3395,22 @@ func (this *GetAnyAPIKeyResponse) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if !this.ApiKey.Equal(that1.ApiKey) {
+	if this.ServiceAccountId != that1.ServiceAccountId {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
 		return false
 	}
 	return true
 }
-func (this *DeleteAnyAPIKeyRequest) Equal(that interface{}) bool {
+func (this *CreateServiceAccountAPIKeyRequest) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*DeleteAnyAPIKeyRequest)
+	that1, ok := that.(*CreateServiceAccountAPIKeyRequest)
 	if !ok {
-		that2, ok := that.(DeleteAnyAPIKeyRequest)
+		that2, ok := that.(CreateServiceAccountAPIKeyRequest)
 		if ok {
 			that1 = &that2
 		} else {
@@ -3119,25 +3422,25 @@ func (this *DeleteAnyAPIKeyRequest) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.Id != that1.Id {
+	if this.ServiceAccountId != that1.ServiceAccountId {
 		return false
 	}
-	if this.ResourceVersion != that1.ResourceVersion {
+	if !this.Spec.Equal(that1.Spec) {
 		return false
 	}
-	if this.RequestId != that1.RequestId {
+	if this.AsyncOperationId != that1.AsyncOperationId {
 		return false
 	}
 	return true
 }
-func (this *DeleteAnyAPIKeyResponse) Equal(that interface{}) bool {
+func (this *CreateServiceAccountAPIKeyResponse) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*DeleteAnyAPIKeyResponse)
+	that1, ok := that.(*CreateServiceAccountAPIKeyResponse)
 	if !ok {
-		that2, ok := that.(DeleteAnyAPIKeyResponse)
+		that2, ok := that.(CreateServiceAccountAPIKeyResponse)
 		if ok {
 			that1 = &that2
 		} else {
@@ -3149,19 +3452,25 @@ func (this *DeleteAnyAPIKeyResponse) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if !this.RequestStatus.Equal(that1.RequestStatus) {
+	if this.ApiKeyId != that1.ApiKeyId {
+		return false
+	}
+	if this.SecretKey != that1.SecretKey {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
 		return false
 	}
 	return true
 }
-func (this *UpdateAnyAPIKeyRequest) Equal(that interface{}) bool {
+func (this *UpdateServiceAccountRequest) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*UpdateAnyAPIKeyRequest)
+	that1, ok := that.(*UpdateServiceAccountRequest)
 	if !ok {
-		that2, ok := that.(UpdateAnyAPIKeyRequest)
+		that2, ok := that.(UpdateServiceAccountRequest)
 		if ok {
 			that1 = &that2
 		} else {
@@ -3173,7 +3482,7 @@ func (this *UpdateAnyAPIKeyRequest) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.Id != that1.Id {
+	if this.ServiceAccountId != that1.ServiceAccountId {
 		return false
 	}
 	if !this.Spec.Equal(that1.Spec) {
@@ -3182,19 +3491,19 @@ func (this *UpdateAnyAPIKeyRequest) Equal(that interface{}) bool {
 	if this.ResourceVersion != that1.ResourceVersion {
 		return false
 	}
-	if this.RequestId != that1.RequestId {
+	if this.AsyncOperationId != that1.AsyncOperationId {
 		return false
 	}
 	return true
 }
-func (this *UpdateAnyAPIKeyResponse) Equal(that interface{}) bool {
+func (this *UpdateServiceAccountResponse) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*UpdateAnyAPIKeyResponse)
+	that1, ok := that.(*UpdateServiceAccountResponse)
 	if !ok {
-		that2, ok := that.(UpdateAnyAPIKeyResponse)
+		that2, ok := that.(UpdateServiceAccountResponse)
 		if ok {
 			that1 = &that2
 		} else {
@@ -3206,7 +3515,61 @@ func (this *UpdateAnyAPIKeyResponse) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if !this.RequestStatus.Equal(that1.RequestStatus) {
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
+		return false
+	}
+	return true
+}
+func (this *DeleteServiceAccountRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DeleteServiceAccountRequest)
+	if !ok {
+		that2, ok := that.(DeleteServiceAccountRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ServiceAccountId != that1.ServiceAccountId {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *DeleteServiceAccountResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DeleteServiceAccountResponse)
+	if !ok {
+		that2, ok := that.(DeleteServiceAccountResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
 		return false
 	}
 	return true
@@ -3488,10 +3851,12 @@ func (this *GetAPIKeysRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 6)
+	s := make([]string, 0, 8)
 	s = append(s, "&authservice.GetAPIKeysRequest{")
 	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
 	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	s = append(s, "OwnerId: "+fmt.Sprintf("%#v", this.OwnerId)+",\n")
+	s = append(s, "UserEmail: "+fmt.Sprintf("%#v", this.UserEmail)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -3581,101 +3946,153 @@ func (this *UpdateAPIKeyResponse) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *GetAllAPIKeysRequest) GoString() string {
+func (this *GetServiceAccountRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 8)
-	s = append(s, "&authservice.GetAllAPIKeysRequest{")
-	s = append(s, "OwnerId: "+fmt.Sprintf("%#v", this.OwnerId)+",\n")
-	s = append(s, "UserEmail: "+fmt.Sprintf("%#v", this.UserEmail)+",\n")
+	s := make([]string, 0, 5)
+	s = append(s, "&authservice.GetServiceAccountRequest{")
+	s = append(s, "ServiceAccountId: "+fmt.Sprintf("%#v", this.ServiceAccountId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetServiceAccountResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&authservice.GetServiceAccountResponse{")
+	if this.ServiceAccount != nil {
+		s = append(s, "ServiceAccount: "+fmt.Sprintf("%#v", this.ServiceAccount)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetServiceAccountsRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&authservice.GetServiceAccountsRequest{")
 	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
 	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *GetAllAPIKeysResponse) GoString() string {
+func (this *GetServiceAccountsResponse) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := make([]string, 0, 6)
-	s = append(s, "&authservice.GetAllAPIKeysResponse{")
-	if this.ApiKeys != nil {
-		s = append(s, "ApiKeys: "+fmt.Sprintf("%#v", this.ApiKeys)+",\n")
+	s = append(s, "&authservice.GetServiceAccountsResponse{")
+	if this.ServiceAccount != nil {
+		s = append(s, "ServiceAccount: "+fmt.Sprintf("%#v", this.ServiceAccount)+",\n")
 	}
 	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *GetAnyAPIKeyRequest) GoString() string {
+func (this *CreateServiceAccountRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 5)
-	s = append(s, "&authservice.GetAnyAPIKeyRequest{")
-	s = append(s, "Id: "+fmt.Sprintf("%#v", this.Id)+",\n")
+	s := make([]string, 0, 6)
+	s = append(s, "&authservice.CreateServiceAccountRequest{")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *GetAnyAPIKeyResponse) GoString() string {
+func (this *CreateServiceAccountResponse) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 5)
-	s = append(s, "&authservice.GetAnyAPIKeyResponse{")
-	if this.ApiKey != nil {
-		s = append(s, "ApiKey: "+fmt.Sprintf("%#v", this.ApiKey)+",\n")
+	s := make([]string, 0, 6)
+	s = append(s, "&authservice.CreateServiceAccountResponse{")
+	s = append(s, "ServiceAccountId: "+fmt.Sprintf("%#v", this.ServiceAccountId)+",\n")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *DeleteAnyAPIKeyRequest) GoString() string {
+func (this *CreateServiceAccountAPIKeyRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := make([]string, 0, 7)
-	s = append(s, "&authservice.DeleteAnyAPIKeyRequest{")
-	s = append(s, "Id: "+fmt.Sprintf("%#v", this.Id)+",\n")
-	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
-	s = append(s, "RequestId: "+fmt.Sprintf("%#v", this.RequestId)+",\n")
+	s = append(s, "&authservice.CreateServiceAccountAPIKeyRequest{")
+	s = append(s, "ServiceAccountId: "+fmt.Sprintf("%#v", this.ServiceAccountId)+",\n")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *DeleteAnyAPIKeyResponse) GoString() string {
+func (this *CreateServiceAccountAPIKeyResponse) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 5)
-	s = append(s, "&authservice.DeleteAnyAPIKeyResponse{")
-	if this.RequestStatus != nil {
-		s = append(s, "RequestStatus: "+fmt.Sprintf("%#v", this.RequestStatus)+",\n")
+	s := make([]string, 0, 7)
+	s = append(s, "&authservice.CreateServiceAccountAPIKeyResponse{")
+	s = append(s, "ApiKeyId: "+fmt.Sprintf("%#v", this.ApiKeyId)+",\n")
+	s = append(s, "SecretKey: "+fmt.Sprintf("%#v", this.SecretKey)+",\n")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *UpdateAnyAPIKeyRequest) GoString() string {
+func (this *UpdateServiceAccountRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := make([]string, 0, 8)
-	s = append(s, "&authservice.UpdateAnyAPIKeyRequest{")
-	s = append(s, "Id: "+fmt.Sprintf("%#v", this.Id)+",\n")
+	s = append(s, "&authservice.UpdateServiceAccountRequest{")
+	s = append(s, "ServiceAccountId: "+fmt.Sprintf("%#v", this.ServiceAccountId)+",\n")
 	if this.Spec != nil {
 		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
 	}
 	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
-	s = append(s, "RequestId: "+fmt.Sprintf("%#v", this.RequestId)+",\n")
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *UpdateAnyAPIKeyResponse) GoString() string {
+func (this *UpdateServiceAccountResponse) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := make([]string, 0, 5)
-	s = append(s, "&authservice.UpdateAnyAPIKeyResponse{")
-	if this.RequestStatus != nil {
-		s = append(s, "RequestStatus: "+fmt.Sprintf("%#v", this.RequestStatus)+",\n")
+	s = append(s, "&authservice.UpdateServiceAccountResponse{")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DeleteServiceAccountRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&authservice.DeleteServiceAccountRequest{")
+	s = append(s, "ServiceAccountId: "+fmt.Sprintf("%#v", this.ServiceAccountId)+",\n")
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DeleteServiceAccountResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&authservice.DeleteServiceAccountResponse{")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -4601,6 +5018,20 @@ func (m *GetAPIKeysRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.UserEmail) > 0 {
+		i -= len(m.UserEmail)
+		copy(dAtA[i:], m.UserEmail)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.UserEmail)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.OwnerId) > 0 {
+		i -= len(m.OwnerId)
+		copy(dAtA[i:], m.OwnerId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.OwnerId)))
+		i--
+		dAtA[i] = 0x1a
+	}
 	if len(m.PageToken) > 0 {
 		i -= len(m.PageToken)
 		copy(dAtA[i:], m.PageToken)
@@ -4895,7 +5326,7 @@ func (m *UpdateAPIKeyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *GetAllAPIKeysRequest) Marshal() (dAtA []byte, err error) {
+func (m *GetServiceAccountRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -4905,12 +5336,77 @@ func (m *GetAllAPIKeysRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *GetAllAPIKeysRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *GetServiceAccountRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *GetAllAPIKeysRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *GetServiceAccountRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ServiceAccountId) > 0 {
+		i -= len(m.ServiceAccountId)
+		copy(dAtA[i:], m.ServiceAccountId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ServiceAccountId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetServiceAccountResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetServiceAccountResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetServiceAccountResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ServiceAccount != nil {
+		{
+			size, err := m.ServiceAccount.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetServiceAccountsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetServiceAccountsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetServiceAccountsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -4920,31 +5416,17 @@ func (m *GetAllAPIKeysRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		copy(dAtA[i:], m.PageToken)
 		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
 		i--
-		dAtA[i] = 0x22
+		dAtA[i] = 0x12
 	}
 	if m.PageSize != 0 {
 		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
 		i--
-		dAtA[i] = 0x18
-	}
-	if len(m.UserEmail) > 0 {
-		i -= len(m.UserEmail)
-		copy(dAtA[i:], m.UserEmail)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.UserEmail)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.OwnerId) > 0 {
-		i -= len(m.OwnerId)
-		copy(dAtA[i:], m.OwnerId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.OwnerId)))
-		i--
-		dAtA[i] = 0xa
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *GetAllAPIKeysResponse) Marshal() (dAtA []byte, err error) {
+func (m *GetServiceAccountsResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -4954,12 +5436,12 @@ func (m *GetAllAPIKeysResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *GetAllAPIKeysResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *GetServiceAccountsResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *GetAllAPIKeysResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *GetServiceAccountsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -4971,10 +5453,10 @@ func (m *GetAllAPIKeysResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.ApiKeys) > 0 {
-		for iNdEx := len(m.ApiKeys) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.ServiceAccount) > 0 {
+		for iNdEx := len(m.ServiceAccount) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.ApiKeys[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.ServiceAccount[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -4988,7 +5470,7 @@ func (m *GetAllAPIKeysResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *GetAnyAPIKeyRequest) Marshal() (dAtA []byte, err error) {
+func (m *CreateServiceAccountRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -4998,106 +5480,39 @@ func (m *GetAnyAPIKeyRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *GetAnyAPIKeyRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *CreateServiceAccountRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *GetAnyAPIKeyRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *CreateServiceAccountRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Id) > 0 {
-		i -= len(m.Id)
-		copy(dAtA[i:], m.Id)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Id)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *GetAnyAPIKeyResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *GetAnyAPIKeyResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GetAnyAPIKeyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.ApiKey != nil {
-		{
-			size, err := m.ApiKey.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *DeleteAnyAPIKeyRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *DeleteAnyAPIKeyRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *DeleteAnyAPIKeyRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.RequestId) > 0 {
-		i -= len(m.RequestId)
-		copy(dAtA[i:], m.RequestId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.RequestId)))
-		i--
-		dAtA[i] = 0x1a
-	}
-	if len(m.ResourceVersion) > 0 {
-		i -= len(m.ResourceVersion)
-		copy(dAtA[i:], m.ResourceVersion)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Id) > 0 {
-		i -= len(m.Id)
-		copy(dAtA[i:], m.Id)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Id)))
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
 		i--
 		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *DeleteAnyAPIKeyResponse) Marshal() (dAtA []byte, err error) {
+func (m *CreateServiceAccountResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -5107,19 +5522,110 @@ func (m *DeleteAnyAPIKeyResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *DeleteAnyAPIKeyResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *CreateServiceAccountResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *DeleteAnyAPIKeyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *CreateServiceAccountResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.RequestStatus != nil {
+	if m.AsyncOperation != nil {
 		{
-			size, err := m.RequestStatus.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ServiceAccountId) > 0 {
+		i -= len(m.ServiceAccountId)
+		copy(dAtA[i:], m.ServiceAccountId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ServiceAccountId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CreateServiceAccountAPIKeyRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CreateServiceAccountAPIKeyRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateServiceAccountAPIKeyRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ServiceAccountId) > 0 {
+		i -= len(m.ServiceAccountId)
+		copy(dAtA[i:], m.ServiceAccountId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ServiceAccountId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CreateServiceAccountAPIKeyResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CreateServiceAccountAPIKeyResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateServiceAccountAPIKeyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -5129,10 +5635,24 @@ func (m *DeleteAnyAPIKeyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 		i--
 		dAtA[i] = 0x1a
 	}
+	if len(m.SecretKey) > 0 {
+		i -= len(m.SecretKey)
+		copy(dAtA[i:], m.SecretKey)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.SecretKey)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ApiKeyId) > 0 {
+		i -= len(m.ApiKeyId)
+		copy(dAtA[i:], m.ApiKeyId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ApiKeyId)))
+		i--
+		dAtA[i] = 0xa
+	}
 	return len(dAtA) - i, nil
 }
 
-func (m *UpdateAnyAPIKeyRequest) Marshal() (dAtA []byte, err error) {
+func (m *UpdateServiceAccountRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -5142,20 +5662,20 @@ func (m *UpdateAnyAPIKeyRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *UpdateAnyAPIKeyRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *UpdateServiceAccountRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *UpdateAnyAPIKeyRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *UpdateServiceAccountRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.RequestId) > 0 {
-		i -= len(m.RequestId)
-		copy(dAtA[i:], m.RequestId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.RequestId)))
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
 		i--
 		dAtA[i] = 0x22
 	}
@@ -5178,17 +5698,17 @@ func (m *UpdateAnyAPIKeyRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Id) > 0 {
-		i -= len(m.Id)
-		copy(dAtA[i:], m.Id)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Id)))
+	if len(m.ServiceAccountId) > 0 {
+		i -= len(m.ServiceAccountId)
+		copy(dAtA[i:], m.ServiceAccountId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ServiceAccountId)))
 		i--
 		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *UpdateAnyAPIKeyResponse) Marshal() (dAtA []byte, err error) {
+func (m *UpdateServiceAccountResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -5198,19 +5718,98 @@ func (m *UpdateAnyAPIKeyResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *UpdateAnyAPIKeyResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *UpdateServiceAccountResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *UpdateAnyAPIKeyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *UpdateServiceAccountResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.RequestStatus != nil {
+	if m.AsyncOperation != nil {
 		{
-			size, err := m.RequestStatus.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteServiceAccountRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteServiceAccountRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteServiceAccountRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ServiceAccountId) > 0 {
+		i -= len(m.ServiceAccountId)
+		copy(dAtA[i:], m.ServiceAccountId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ServiceAccountId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteServiceAccountResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteServiceAccountResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteServiceAccountResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -5626,6 +6225,14 @@ func (m *GetAPIKeysRequest) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
+	l = len(m.OwnerId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.UserEmail)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
 	return n
 }
 
@@ -5746,20 +6353,38 @@ func (m *UpdateAPIKeyResponse) Size() (n int) {
 	return n
 }
 
-func (m *GetAllAPIKeysRequest) Size() (n int) {
+func (m *GetServiceAccountRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.OwnerId)
+	l = len(m.ServiceAccountId)
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
-	l = len(m.UserEmail)
-	if l > 0 {
+	return n
+}
+
+func (m *GetServiceAccountResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ServiceAccount != nil {
+		l = m.ServiceAccount.Size()
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
+	return n
+}
+
+func (m *GetServiceAccountsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
 	if m.PageSize != 0 {
 		n += 1 + sovRequestResponse(uint64(m.PageSize))
 	}
@@ -5770,14 +6395,14 @@ func (m *GetAllAPIKeysRequest) Size() (n int) {
 	return n
 }
 
-func (m *GetAllAPIKeysResponse) Size() (n int) {
+func (m *GetServiceAccountsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if len(m.ApiKeys) > 0 {
-		for _, e := range m.ApiKeys {
+	if len(m.ServiceAccount) > 0 {
+		for _, e := range m.ServiceAccount {
 			l = e.Size()
 			n += 1 + l + sovRequestResponse(uint64(l))
 		}
@@ -5789,73 +6414,89 @@ func (m *GetAllAPIKeysResponse) Size() (n int) {
 	return n
 }
 
-func (m *GetAnyAPIKeyRequest) Size() (n int) {
+func (m *CreateServiceAccountRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.Id)
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.AsyncOperationId)
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
 	return n
 }
 
-func (m *GetAnyAPIKeyResponse) Size() (n int) {
+func (m *CreateServiceAccountResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.ApiKey != nil {
-		l = m.ApiKey.Size()
+	l = len(m.ServiceAccountId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
 	return n
 }
 
-func (m *DeleteAnyAPIKeyRequest) Size() (n int) {
+func (m *CreateServiceAccountAPIKeyRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.Id)
+	l = len(m.ServiceAccountId)
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
-	l = len(m.ResourceVersion)
-	if l > 0 {
+	if m.Spec != nil {
+		l = m.Spec.Size()
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
-	l = len(m.RequestId)
+	l = len(m.AsyncOperationId)
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
 	return n
 }
 
-func (m *DeleteAnyAPIKeyResponse) Size() (n int) {
+func (m *CreateServiceAccountAPIKeyResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.RequestStatus != nil {
-		l = m.RequestStatus.Size()
+	l = len(m.ApiKeyId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.SecretKey)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
 	return n
 }
 
-func (m *UpdateAnyAPIKeyRequest) Size() (n int) {
+func (m *UpdateServiceAccountRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.Id)
+	l = len(m.ServiceAccountId)
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
@@ -5867,21 +6508,55 @@ func (m *UpdateAnyAPIKeyRequest) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
-	l = len(m.RequestId)
+	l = len(m.AsyncOperationId)
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
 	return n
 }
 
-func (m *UpdateAnyAPIKeyResponse) Size() (n int) {
+func (m *UpdateServiceAccountResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.RequestStatus != nil {
-		l = m.RequestStatus.Size()
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *DeleteServiceAccountRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ServiceAccountId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.AsyncOperationId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *DeleteServiceAccountResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
 	return n
@@ -6171,6 +6846,8 @@ func (this *GetAPIKeysRequest) String() string {
 	s := strings.Join([]string{`&GetAPIKeysRequest{`,
 		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
 		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`OwnerId:` + fmt.Sprintf("%v", this.OwnerId) + `,`,
+		`UserEmail:` + fmt.Sprintf("%v", this.UserEmail) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -6256,96 +6933,140 @@ func (this *UpdateAPIKeyResponse) String() string {
 	}, "")
 	return s
 }
-func (this *GetAllAPIKeysRequest) String() string {
+func (this *GetServiceAccountRequest) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&GetAllAPIKeysRequest{`,
-		`OwnerId:` + fmt.Sprintf("%v", this.OwnerId) + `,`,
-		`UserEmail:` + fmt.Sprintf("%v", this.UserEmail) + `,`,
+	s := strings.Join([]string{`&GetServiceAccountRequest{`,
+		`ServiceAccountId:` + fmt.Sprintf("%v", this.ServiceAccountId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetServiceAccountResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetServiceAccountResponse{`,
+		`ServiceAccount:` + strings.Replace(fmt.Sprintf("%v", this.ServiceAccount), "ServiceAccount", "v1.ServiceAccount", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetServiceAccountsRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetServiceAccountsRequest{`,
 		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
 		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *GetAllAPIKeysResponse) String() string {
+func (this *GetServiceAccountsResponse) String() string {
 	if this == nil {
 		return "nil"
 	}
-	repeatedStringForApiKeys := "[]*APIKey{"
-	for _, f := range this.ApiKeys {
-		repeatedStringForApiKeys += strings.Replace(fmt.Sprintf("%v", f), "APIKey", "v1.APIKey", 1) + ","
+	repeatedStringForServiceAccount := "[]*ServiceAccount{"
+	for _, f := range this.ServiceAccount {
+		repeatedStringForServiceAccount += strings.Replace(fmt.Sprintf("%v", f), "ServiceAccount", "v1.ServiceAccount", 1) + ","
 	}
-	repeatedStringForApiKeys += "}"
-	s := strings.Join([]string{`&GetAllAPIKeysResponse{`,
-		`ApiKeys:` + repeatedStringForApiKeys + `,`,
+	repeatedStringForServiceAccount += "}"
+	s := strings.Join([]string{`&GetServiceAccountsResponse{`,
+		`ServiceAccount:` + repeatedStringForServiceAccount + `,`,
 		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *GetAnyAPIKeyRequest) String() string {
+func (this *CreateServiceAccountRequest) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&GetAnyAPIKeyRequest{`,
-		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
+	s := strings.Join([]string{`&CreateServiceAccountRequest{`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ServiceAccountSpec", "v1.ServiceAccountSpec", 1) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *GetAnyAPIKeyResponse) String() string {
+func (this *CreateServiceAccountResponse) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&GetAnyAPIKeyResponse{`,
-		`ApiKey:` + strings.Replace(fmt.Sprintf("%v", this.ApiKey), "APIKey", "v1.APIKey", 1) + `,`,
+	s := strings.Join([]string{`&CreateServiceAccountResponse{`,
+		`ServiceAccountId:` + fmt.Sprintf("%v", this.ServiceAccountId) + `,`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v12.AsyncOperation", 1) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *DeleteAnyAPIKeyRequest) String() string {
+func (this *CreateServiceAccountAPIKeyRequest) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&DeleteAnyAPIKeyRequest{`,
-		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
-		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
-		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *DeleteAnyAPIKeyResponse) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&DeleteAnyAPIKeyResponse{`,
-		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v11.RequestStatus", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *UpdateAnyAPIKeyRequest) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&UpdateAnyAPIKeyRequest{`,
-		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
+	s := strings.Join([]string{`&CreateServiceAccountAPIKeyRequest{`,
+		`ServiceAccountId:` + fmt.Sprintf("%v", this.ServiceAccountId) + `,`,
 		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "APIKeySpec", "v1.APIKeySpec", 1) + `,`,
-		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
-		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *UpdateAnyAPIKeyResponse) String() string {
+func (this *CreateServiceAccountAPIKeyResponse) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&UpdateAnyAPIKeyResponse{`,
-		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v11.RequestStatus", 1) + `,`,
+	s := strings.Join([]string{`&CreateServiceAccountAPIKeyResponse{`,
+		`ApiKeyId:` + fmt.Sprintf("%v", this.ApiKeyId) + `,`,
+		`SecretKey:` + fmt.Sprintf("%v", this.SecretKey) + `,`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v12.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateServiceAccountRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateServiceAccountRequest{`,
+		`ServiceAccountId:` + fmt.Sprintf("%v", this.ServiceAccountId) + `,`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ServiceAccountSpec", "v1.ServiceAccountSpec", 1) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateServiceAccountResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateServiceAccountResponse{`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v12.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DeleteServiceAccountRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DeleteServiceAccountRequest{`,
+		`ServiceAccountId:` + fmt.Sprintf("%v", this.ServiceAccountId) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DeleteServiceAccountResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DeleteServiceAccountResponse{`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v12.AsyncOperation", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -8993,6 +9714,70 @@ func (m *GetAPIKeysRequest) Unmarshal(dAtA []byte) error {
 			}
 			m.PageToken = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OwnerId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.OwnerId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UserEmail", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UserEmail = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipRequestResponse(dAtA[iNdEx:])
@@ -9822,7 +10607,7 @@ func (m *UpdateAPIKeyResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *GetAllAPIKeysRequest) Unmarshal(dAtA []byte) error {
+func (m *GetServiceAccountRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -9845,15 +10630,15 @@ func (m *GetAllAPIKeysRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: GetAllAPIKeysRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: GetServiceAccountRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetAllAPIKeysRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: GetServiceAccountRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field OwnerId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ServiceAccountId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -9881,13 +10666,66 @@ func (m *GetAllAPIKeysRequest) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.OwnerId = string(dAtA[iNdEx:postIndex])
+			m.ServiceAccountId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 2:
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetServiceAccountResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetServiceAccountResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetServiceAccountResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field UserEmail", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ServiceAccount", wireType)
 			}
-			var stringLen uint64
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowRequestResponse
@@ -9897,25 +10735,82 @@ func (m *GetAllAPIKeysRequest) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
+			if msglen < 0 {
 				return ErrInvalidLengthRequestResponse
 			}
-			postIndex := iNdEx + intStringLen
+			postIndex := iNdEx + msglen
 			if postIndex < 0 {
 				return ErrInvalidLengthRequestResponse
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.UserEmail = string(dAtA[iNdEx:postIndex])
+			if m.ServiceAccount == nil {
+				m.ServiceAccount = &v1.ServiceAccount{}
+			}
+			if err := m.ServiceAccount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
-		case 3:
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetServiceAccountsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetServiceAccountsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetServiceAccountsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
 			}
@@ -9934,7 +10829,7 @@ func (m *GetAllAPIKeysRequest) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 4:
+		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
 			}
@@ -9990,7 +10885,7 @@ func (m *GetAllAPIKeysRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *GetAllAPIKeysResponse) Unmarshal(dAtA []byte) error {
+func (m *GetServiceAccountsResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -10013,15 +10908,15 @@ func (m *GetAllAPIKeysResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: GetAllAPIKeysResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: GetServiceAccountsResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetAllAPIKeysResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: GetServiceAccountsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ApiKeys", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ServiceAccount", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -10048,8 +10943,8 @@ func (m *GetAllAPIKeysResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.ApiKeys = append(m.ApiKeys, &v1.APIKey{})
-			if err := m.ApiKeys[len(m.ApiKeys)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.ServiceAccount = append(m.ServiceAccount, &v1.ServiceAccount{})
+			if err := m.ServiceAccount[len(m.ServiceAccount)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -10109,7 +11004,7 @@ func (m *GetAllAPIKeysResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *GetAnyAPIKeyRequest) Unmarshal(dAtA []byte) error {
+func (m *CreateServiceAccountRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -10132,100 +11027,15 @@ func (m *GetAnyAPIKeyRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: GetAnyAPIKeyRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: CreateServiceAccountRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetAnyAPIKeyRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: CreateServiceAccountRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Id = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *GetAnyAPIKeyResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: GetAnyAPIKeyResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetAnyAPIKeyResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ApiKey", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -10252,101 +11062,16 @@ func (m *GetAnyAPIKeyResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ApiKey == nil {
-				m.ApiKey = &v1.APIKey{}
+			if m.Spec == nil {
+				m.Spec = &v1.ServiceAccountSpec{}
 			}
-			if err := m.ApiKey.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *DeleteAnyAPIKeyRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: DeleteAnyAPIKeyRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: DeleteAnyAPIKeyRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Id = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -10374,39 +11099,7 @@ func (m *DeleteAnyAPIKeyRequest) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.RequestId = string(dAtA[iNdEx:postIndex])
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -10432,7 +11125,7 @@ func (m *DeleteAnyAPIKeyRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *DeleteAnyAPIKeyResponse) Unmarshal(dAtA []byte) error {
+func (m *CreateServiceAccountResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -10455,15 +11148,47 @@ func (m *DeleteAnyAPIKeyResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: DeleteAnyAPIKeyResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: CreateServiceAccountResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: DeleteAnyAPIKeyResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: CreateServiceAccountResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 3:
+		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestStatus", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ServiceAccountId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ServiceAccountId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -10490,10 +11215,10 @@ func (m *DeleteAnyAPIKeyResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.RequestStatus == nil {
-				m.RequestStatus = &v11.RequestStatus{}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v12.AsyncOperation{}
 			}
-			if err := m.RequestStatus.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -10521,7 +11246,7 @@ func (m *DeleteAnyAPIKeyResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *UpdateAnyAPIKeyRequest) Unmarshal(dAtA []byte) error {
+func (m *CreateServiceAccountAPIKeyRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -10544,15 +11269,15 @@ func (m *UpdateAnyAPIKeyRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: UpdateAnyAPIKeyRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: CreateServiceAccountAPIKeyRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UpdateAnyAPIKeyRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: CreateServiceAccountAPIKeyRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ServiceAccountId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -10580,7 +11305,7 @@ func (m *UpdateAnyAPIKeyRequest) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Id = string(dAtA[iNdEx:postIndex])
+			m.ServiceAccountId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -10620,6 +11345,312 @@ func (m *UpdateAnyAPIKeyRequest) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CreateServiceAccountAPIKeyResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CreateServiceAccountAPIKeyResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CreateServiceAccountAPIKeyResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ApiKeyId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ApiKeyId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SecretKey", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SecretKey = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v12.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateServiceAccountRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateServiceAccountRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateServiceAccountRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServiceAccountId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ServiceAccountId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &v1.ServiceAccountSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
 			}
 			var stringLen uint64
@@ -10652,7 +11683,7 @@ func (m *UpdateAnyAPIKeyRequest) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -10680,7 +11711,7 @@ func (m *UpdateAnyAPIKeyRequest) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.RequestId = string(dAtA[iNdEx:postIndex])
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -10706,7 +11737,7 @@ func (m *UpdateAnyAPIKeyRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *UpdateAnyAPIKeyResponse) Unmarshal(dAtA []byte) error {
+func (m *UpdateServiceAccountResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -10729,15 +11760,15 @@ func (m *UpdateAnyAPIKeyResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: UpdateAnyAPIKeyResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: UpdateServiceAccountResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UpdateAnyAPIKeyResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: UpdateServiceAccountResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestStatus", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -10764,10 +11795,248 @@ func (m *UpdateAnyAPIKeyResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.RequestStatus == nil {
-				m.RequestStatus = &v11.RequestStatus{}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v12.AsyncOperation{}
 			}
-			if err := m.RequestStatus.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteServiceAccountRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteServiceAccountRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteServiceAccountRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServiceAccountId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ServiceAccountId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteServiceAccountResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteServiceAccountResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteServiceAccountResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v12.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

@@ -27,42 +27,44 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 func init() { proto.RegisterFile("api/authservice/v1/service.proto", fileDescriptor_80c42cd25eb3e22a) }
 
 var fileDescriptor_80c42cd25eb3e22a = []byte{
-	// 551 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x96, 0xcf, 0x6e, 0xd3, 0x40,
-	0x10, 0xc6, 0xed, 0x0b, 0x7f, 0xb6, 0xa0, 0xa2, 0x95, 0xb8, 0xf4, 0xb0, 0x42, 0xa5, 0x2d, 0xfd,
-	0x83, 0x1c, 0x02, 0x27, 0xe0, 0xd4, 0x82, 0x54, 0x55, 0x48, 0xa8, 0x0a, 0x54, 0x48, 0x95, 0x10,
-	0x35, 0xc9, 0xa0, 0x5a, 0x72, 0x6c, 0xb3, 0xbb, 0x89, 0x94, 0x0b, 0xe2, 0x11, 0xb8, 0xf2, 0x06,
-	0x48, 0xbc, 0x08, 0xc7, 0x1c, 0x7b, 0x24, 0xce, 0x85, 0x63, 0x1f, 0x01, 0xb9, 0xeb, 0xdd, 0x4c,
-	0x12, 0x67, 0x1c, 0xb8, 0x25, 0x3b, 0xbf, 0xf9, 0xbe, 0x9d, 0x6f, 0x7c, 0x58, 0x76, 0x2f, 0xcc,
-	0xa2, 0x46, 0xd8, 0xd3, 0xe7, 0x0a, 0x64, 0x3f, 0x6a, 0x43, 0xa3, 0xdf, 0x6c, 0x94, 0x3f, 0x83,
-	0x4c, 0xa6, 0x3a, 0xe5, 0x3c, 0xcc, 0xa2, 0x00, 0x11, 0x41, 0xbf, 0xb9, 0xb6, 0x53, 0xd1, 0x25,
-	0xe1, 0x73, 0x0f, 0x94, 0xfe, 0x20, 0x41, 0x65, 0x69, 0xa2, 0xca, 0xf6, 0xc7, 0x3f, 0x57, 0xd9,
-	0xca, 0x7e, 0x4f, 0x9f, 0xbf, 0x31, 0x24, 0x7f, 0xcb, 0xae, 0x1f, 0x82, 0x6e, 0xa5, 0x31, 0xf0,
-	0xf5, 0x60, 0x5e, 0x3a, 0x28, 0x8b, 0x2d, 0xa3, 0xb6, 0x76, 0x9f, 0x64, 0x8c, 0xd3, 0xba, 0xc7,
-	0xdf, 0xb1, 0x1b, 0xe5, 0xa1, 0xe2, 0x54, 0x8b, 0xb2, 0xba, 0x1b, 0x34, 0xe4, 0x84, 0xbf, 0xb0,
-	0xbb, 0xf6, 0xf4, 0x60, 0x70, 0x0c, 0xb2, 0x1b, 0x29, 0x15, 0xa5, 0x89, 0xe2, 0x8f, 0x28, 0x81,
-	0x29, 0xd4, 0x5a, 0x36, 0xff, 0xa1, 0x63, 0x66, 0xb0, 0x13, 0x05, 0x72, 0xf1, 0x60, 0x57, 0xd5,
-	0xba, 0xc1, 0x4a, 0xc8, 0x09, 0x9b, 0x3d, 0x14, 0xa7, 0x0b, 0xf7, 0x50, 0x14, 0xeb, 0xf6, 0x60,
-	0x18, 0xa7, 0x7a, 0xc6, 0x56, 0x8e, 0x92, 0x7e, 0xa4, 0xc1, 0xdc, 0x78, 0xab, 0xaa, 0x0b, 0x01,
-	0x56, 0xfd, 0x41, 0x2d, 0xe7, 0x1c, 0x52, 0x76, 0xa7, 0x05, 0x0a, 0x92, 0x4e, 0x51, 0x30, 0x08,
-	0xdf, 0xab, 0x6a, 0x9f, 0xa5, 0xac, 0xd7, 0xc3, 0xe5, 0x60, 0x67, 0xf8, 0x9e, 0xb1, 0x93, 0xac,
-	0x13, 0x9a, 0x9b, 0xf0, 0xcd, 0xaa, 0xee, 0x49, 0xdd, 0x9a, 0x6c, 0xd5, 0x61, 0x58, 0xfe, 0x25,
-	0xc4, 0x40, 0xc9, 0x4f, 0xea, 0xa4, 0x3c, 0xc6, 0x9c, 0xfc, 0x77, 0x9f, 0x89, 0x89, 0xef, 0xeb,
-	0xb0, 0x0b, 0x2a, 0x0b, 0xdb, 0x80, 0xbf, 0xe4, 0xa7, 0xf4, 0x5d, 0xab, 0x7a, 0xec, 0x3d, 0x9e,
-	0xfd, 0x4f, 0xab, 0xbb, 0x5b, 0x9b, 0xdd, 0x7a, 0x21, 0x21, 0xd4, 0xb0, 0x7f, 0x7c, 0xf4, 0x0a,
-	0x06, 0xbc, 0xf2, 0x2b, 0xc0, 0x84, 0xb5, 0xdd, 0xae, 0x07, 0x71, 0xbe, 0x87, 0xa0, 0xcd, 0xb1,
-	0xaa, 0xce, 0x77, 0x52, 0x27, 0xf3, 0xc5, 0x98, 0x93, 0x3f, 0x65, 0x37, 0xdd, 0x39, 0xdf, 0x20,
-	0xdb, 0xac, 0xf8, 0x66, 0x0d, 0x85, 0xf3, 0x31, 0x3b, 0xa5, 0xf2, 0xc1, 0x04, 0x99, 0xcf, 0x34,
-	0x88, 0x4d, 0xcc, 0xc2, 0x28, 0x13, 0x4c, 0x90, 0x26, 0xd3, 0xa0, 0x33, 0xf9, 0xc4, 0x6e, 0x17,
-	0x03, 0xc6, 0xb1, 0xdd, 0xc3, 0xf6, 0xa2, 0x0c, 0x1c, 0x62, 0x6d, 0x76, 0x96, 0x20, 0xf1, 0x30,
-	0x45, 0x29, 0x19, 0x50, 0xc3, 0x60, 0x82, 0x1c, 0x66, 0x1a, 0x74, 0x26, 0x31, 0x5b, 0x2d, 0xb3,
-	0x74, 0x3e, 0xbb, 0x44, 0xe0, 0xb3, 0x56, 0x7b, 0x4b, 0xb1, 0xd8, 0xad, 0x0c, 0x95, 0x76, 0x9b,
-	0x81, 0x48, 0xb7, 0x39, 0xd6, 0xba, 0x1d, 0x9c, 0x0d, 0x47, 0xc2, 0xbb, 0x18, 0x09, 0xef, 0x72,
-	0x24, 0xfc, 0xaf, 0xb9, 0xf0, 0x7f, 0xe4, 0xc2, 0xff, 0x95, 0x0b, 0x7f, 0x98, 0x0b, 0xff, 0x77,
-	0x2e, 0xfc, 0x3f, 0xb9, 0xf0, 0x2e, 0x73, 0xe1, 0x7f, 0x1b, 0x0b, 0x6f, 0x38, 0x16, 0xde, 0xc5,
-	0x58, 0x78, 0xa7, 0xbb, 0xba, 0x9b, 0xc9, 0x38, 0x68, 0xc7, 0x69, 0xaf, 0xd3, 0x98, 0x7f, 0x1a,
-	0x3c, 0x47, 0x7f, 0x3f, 0x5e, 0xbb, 0x7a, 0x16, 0x3c, 0xf9, 0x1b, 0x00, 0x00, 0xff, 0xff, 0xb8,
-	0xec, 0x21, 0x25, 0x79, 0x08, 0x00, 0x00,
+	// 592 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x96, 0x4f, 0x6b, 0x13, 0x41,
+	0x18, 0xc6, 0x77, 0x2e, 0xfe, 0x99, 0x7a, 0xb0, 0x83, 0x5e, 0x72, 0x18, 0xa4, 0xb6, 0xf5, 0x5f,
+	0xdd, 0x34, 0x8a, 0x82, 0x7a, 0x4a, 0x15, 0x42, 0x11, 0xa4, 0x44, 0x8b, 0x50, 0x10, 0xbb, 0x6e,
+	0x5e, 0xe8, 0x42, 0xb2, 0xbb, 0xce, 0xcc, 0x06, 0x8a, 0x20, 0x7e, 0x01, 0xc1, 0xab, 0xdf, 0xc0,
+	0x8f, 0xe2, 0x31, 0xc7, 0x1e, 0xcd, 0xe6, 0xe2, 0xb1, 0x07, 0x3f, 0x80, 0xa4, 0xb3, 0x33, 0x99,
+	0x4d, 0x26, 0xb3, 0xdb, 0xde, 0xda, 0x79, 0x7f, 0xcf, 0xf3, 0xcc, 0xbc, 0xef, 0x0b, 0x59, 0x7c,
+	0x2b, 0x48, 0xa3, 0x66, 0x90, 0x89, 0x23, 0x0e, 0x6c, 0x18, 0x85, 0xd0, 0x1c, 0xb6, 0x9a, 0xc5,
+	0x9f, 0x7e, 0xca, 0x12, 0x91, 0x10, 0x12, 0xa4, 0x91, 0x6f, 0x10, 0xfe, 0xb0, 0xd5, 0xb8, 0x67,
+	0x51, 0x31, 0xf8, 0x9c, 0x01, 0x17, 0x1f, 0x19, 0xf0, 0x34, 0x89, 0x79, 0x21, 0x7f, 0xf4, 0x6f,
+	0x15, 0xaf, 0xb4, 0x33, 0x71, 0xf4, 0x56, 0x92, 0xe4, 0x1d, 0xbe, 0xdc, 0x01, 0xd1, 0x4d, 0xfa,
+	0x40, 0xd6, 0xfc, 0x45, 0x6b, 0xbf, 0x28, 0x76, 0xa5, 0x5b, 0xe3, 0xb6, 0x93, 0x91, 0x49, 0x6b,
+	0x1e, 0x79, 0x8f, 0xaf, 0x14, 0x87, 0x9c, 0xb8, 0x24, 0x5c, 0xf9, 0xae, 0xbb, 0x21, 0x6d, 0xfc,
+	0x15, 0xdf, 0x54, 0xa7, 0x3b, 0xc7, 0x7b, 0xc0, 0x06, 0x11, 0xe7, 0x51, 0x12, 0x73, 0xb2, 0xed,
+	0x32, 0x28, 0xa1, 0x2a, 0xb2, 0x75, 0x0e, 0xc5, 0xdc, 0xc3, 0xf6, 0x39, 0xb0, 0xe5, 0x0f, 0x3b,
+	0xab, 0x56, 0x3d, 0xac, 0x80, 0xb4, 0xb1, 0x9c, 0xc3, 0xf4, 0x74, 0xe9, 0x1c, 0xa6, 0xc5, 0xaa,
+	0x39, 0x48, 0x46, 0xbb, 0x1e, 0xe2, 0x95, 0xdd, 0x78, 0x18, 0x09, 0x90, 0x37, 0xde, 0xb4, 0xa9,
+	0x0c, 0x40, 0xb9, 0xdf, 0xa9, 0xe4, 0x74, 0x42, 0x82, 0xaf, 0x77, 0x81, 0x43, 0xdc, 0x9b, 0x16,
+	0x24, 0x42, 0x1e, 0xd8, 0xe4, 0xf3, 0x94, 0xca, 0xda, 0xaa, 0x07, 0xeb, 0xc0, 0x0f, 0x18, 0xef,
+	0xa7, 0xbd, 0x40, 0xde, 0x84, 0x6c, 0xd8, 0xd4, 0xb3, 0xba, 0x0a, 0xd9, 0xac, 0xc2, 0x4c, 0xfb,
+	0x57, 0xd0, 0x07, 0x97, 0xfd, 0xac, 0xee, 0xb4, 0x37, 0x31, 0x6d, 0xff, 0x13, 0x61, 0x3a, 0xcb,
+	0x7d, 0x13, 0x0c, 0x80, 0xa7, 0x41, 0x08, 0xe6, 0x26, 0x3f, 0x73, 0xdf, 0xd5, 0xa6, 0x51, 0xf7,
+	0x78, 0x7e, 0x11, 0xa9, 0xbe, 0x5b, 0x88, 0xaf, 0xbd, 0x64, 0x10, 0x08, 0x68, 0xef, 0xed, 0xbe,
+	0x86, 0x63, 0x62, 0xdd, 0x02, 0x93, 0x50, 0xb1, 0x77, 0xab, 0x41, 0xb3, 0xbf, 0x1d, 0x10, 0xf2,
+	0x98, 0xdb, 0xfb, 0x3b, 0xab, 0x3b, 0xfb, 0x6b, 0x62, 0xda, 0xfe, 0x00, 0x5f, 0xd5, 0xe7, 0x64,
+	0xdd, 0x29, 0x53, 0xe6, 0x1b, 0x15, 0x94, 0xd9, 0x1f, 0x39, 0x53, 0x57, 0x7f, 0x4c, 0xc2, 0xd9,
+	0x9f, 0x32, 0x68, 0x86, 0xc8, 0x81, 0xb9, 0x42, 0x4c, 0xc2, 0x19, 0x52, 0x06, 0x75, 0x08, 0xc3,
+	0xab, 0x1d, 0x10, 0xc5, 0x4f, 0x40, 0x3b, 0x0c, 0x93, 0x2c, 0x16, 0x64, 0x6b, 0x49, 0x1f, 0xca,
+	0x98, 0x8a, 0x7b, 0x58, 0x93, 0xd6, 0x99, 0x19, 0x26, 0x0b, 0x65, 0x4e, 0xea, 0xd9, 0xe8, 0x45,
+	0xf0, 0xeb, 0xe2, 0x3a, 0xf6, 0x0b, 0xbe, 0x21, 0x37, 0x71, 0xee, 0xb5, 0xcd, 0xe5, 0x3b, 0x6b,
+	0x7f, 0xf0, 0x76, 0x7d, 0x81, 0x0e, 0xff, 0x8e, 0x70, 0xc3, 0x86, 0x14, 0xb3, 0x7d, 0x52, 0xd7,
+	0xb2, 0x3c, 0xe9, 0xa7, 0xe7, 0x95, 0x99, 0xcd, 0x90, 0x1b, 0x51, 0xa7, 0x19, 0x36, 0xd2, 0xd9,
+	0x0c, 0xbb, 0xc0, 0x0c, 0x97, 0x3b, 0x5f, 0x27, 0xdc, 0x46, 0x3a, 0xc3, 0xed, 0x02, 0x15, 0xbe,
+	0x73, 0x38, 0x1a, 0x53, 0xef, 0x64, 0x4c, 0xbd, 0xd3, 0x31, 0x45, 0xdf, 0x72, 0x8a, 0x7e, 0xe5,
+	0x14, 0xfd, 0xce, 0x29, 0x1a, 0xe5, 0x14, 0xfd, 0xc9, 0x29, 0xfa, 0x9b, 0x53, 0xef, 0x34, 0xa7,
+	0xe8, 0xc7, 0x84, 0x7a, 0xa3, 0x09, 0xf5, 0x4e, 0x26, 0xd4, 0x3b, 0xb8, 0x2f, 0x06, 0x29, 0xeb,
+	0xfb, 0x61, 0x3f, 0xc9, 0x7a, 0xcd, 0xc5, 0x6f, 0xac, 0x17, 0xc6, 0xbf, 0x9f, 0x2e, 0x9d, 0x7d,
+	0x5f, 0x3d, 0xfe, 0x1f, 0x00, 0x00, 0xff, 0xff, 0xb6, 0x82, 0xc6, 0x74, 0xc2, 0x09, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -92,10 +94,12 @@ type AuthServiceClient interface {
 	GetAPIKey(ctx context.Context, in *GetAPIKeyRequest, opts ...grpc.CallOption) (*GetAPIKeyResponse, error)
 	DeleteAPIKey(ctx context.Context, in *DeleteAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAPIKeyResponse, error)
 	UpdateAPIKey(ctx context.Context, in *UpdateAPIKeyRequest, opts ...grpc.CallOption) (*UpdateAPIKeyResponse, error)
-	GetAllAPIKeys(ctx context.Context, in *GetAllAPIKeysRequest, opts ...grpc.CallOption) (*GetAllAPIKeysResponse, error)
-	GetAnyAPIKey(ctx context.Context, in *GetAnyAPIKeyRequest, opts ...grpc.CallOption) (*GetAnyAPIKeyResponse, error)
-	DeleteAnyAPIKey(ctx context.Context, in *DeleteAnyAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAnyAPIKeyResponse, error)
-	UpdateAnyAPIKey(ctx context.Context, in *UpdateAnyAPIKeyRequest, opts ...grpc.CallOption) (*UpdateAnyAPIKeyResponse, error)
+	GetServiceAccount(ctx context.Context, in *GetServiceAccountRequest, opts ...grpc.CallOption) (*GetServiceAccountResponse, error)
+	GetServiceAccounts(ctx context.Context, in *GetServiceAccountsRequest, opts ...grpc.CallOption) (*GetServiceAccountsResponse, error)
+	CreateServiceAccount(ctx context.Context, in *CreateServiceAccountRequest, opts ...grpc.CallOption) (*CreateServiceAccountResponse, error)
+	CreateServiceAccountAPIKey(ctx context.Context, in *CreateServiceAccountAPIKeyRequest, opts ...grpc.CallOption) (*CreateServiceAccountAPIKeyResponse, error)
+	UpdateServiceAccount(ctx context.Context, in *UpdateServiceAccountRequest, opts ...grpc.CallOption) (*UpdateServiceAccountResponse, error)
+	DeleteServiceAccount(ctx context.Context, in *DeleteServiceAccountRequest, opts ...grpc.CallOption) (*DeleteServiceAccountResponse, error)
 }
 
 type authServiceClient struct {
@@ -241,36 +245,54 @@ func (c *authServiceClient) UpdateAPIKey(ctx context.Context, in *UpdateAPIKeyRe
 	return out, nil
 }
 
-func (c *authServiceClient) GetAllAPIKeys(ctx context.Context, in *GetAllAPIKeysRequest, opts ...grpc.CallOption) (*GetAllAPIKeysResponse, error) {
-	out := new(GetAllAPIKeysResponse)
-	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/GetAllAPIKeys", in, out, opts...)
+func (c *authServiceClient) GetServiceAccount(ctx context.Context, in *GetServiceAccountRequest, opts ...grpc.CallOption) (*GetServiceAccountResponse, error) {
+	out := new(GetServiceAccountResponse)
+	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/GetServiceAccount", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *authServiceClient) GetAnyAPIKey(ctx context.Context, in *GetAnyAPIKeyRequest, opts ...grpc.CallOption) (*GetAnyAPIKeyResponse, error) {
-	out := new(GetAnyAPIKeyResponse)
-	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/GetAnyAPIKey", in, out, opts...)
+func (c *authServiceClient) GetServiceAccounts(ctx context.Context, in *GetServiceAccountsRequest, opts ...grpc.CallOption) (*GetServiceAccountsResponse, error) {
+	out := new(GetServiceAccountsResponse)
+	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/GetServiceAccounts", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *authServiceClient) DeleteAnyAPIKey(ctx context.Context, in *DeleteAnyAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAnyAPIKeyResponse, error) {
-	out := new(DeleteAnyAPIKeyResponse)
-	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/DeleteAnyAPIKey", in, out, opts...)
+func (c *authServiceClient) CreateServiceAccount(ctx context.Context, in *CreateServiceAccountRequest, opts ...grpc.CallOption) (*CreateServiceAccountResponse, error) {
+	out := new(CreateServiceAccountResponse)
+	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/CreateServiceAccount", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *authServiceClient) UpdateAnyAPIKey(ctx context.Context, in *UpdateAnyAPIKeyRequest, opts ...grpc.CallOption) (*UpdateAnyAPIKeyResponse, error) {
-	out := new(UpdateAnyAPIKeyResponse)
-	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/UpdateAnyAPIKey", in, out, opts...)
+func (c *authServiceClient) CreateServiceAccountAPIKey(ctx context.Context, in *CreateServiceAccountAPIKeyRequest, opts ...grpc.CallOption) (*CreateServiceAccountAPIKeyResponse, error) {
+	out := new(CreateServiceAccountAPIKeyResponse)
+	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/CreateServiceAccountAPIKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) UpdateServiceAccount(ctx context.Context, in *UpdateServiceAccountRequest, opts ...grpc.CallOption) (*UpdateServiceAccountResponse, error) {
+	out := new(UpdateServiceAccountResponse)
+	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/UpdateServiceAccount", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) DeleteServiceAccount(ctx context.Context, in *DeleteServiceAccountRequest, opts ...grpc.CallOption) (*DeleteServiceAccountResponse, error) {
+	out := new(DeleteServiceAccountResponse)
+	err := c.cc.Invoke(ctx, "/api.authservice.v1.AuthService/DeleteServiceAccount", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -294,10 +316,12 @@ type AuthServiceServer interface {
 	GetAPIKey(context.Context, *GetAPIKeyRequest) (*GetAPIKeyResponse, error)
 	DeleteAPIKey(context.Context, *DeleteAPIKeyRequest) (*DeleteAPIKeyResponse, error)
 	UpdateAPIKey(context.Context, *UpdateAPIKeyRequest) (*UpdateAPIKeyResponse, error)
-	GetAllAPIKeys(context.Context, *GetAllAPIKeysRequest) (*GetAllAPIKeysResponse, error)
-	GetAnyAPIKey(context.Context, *GetAnyAPIKeyRequest) (*GetAnyAPIKeyResponse, error)
-	DeleteAnyAPIKey(context.Context, *DeleteAnyAPIKeyRequest) (*DeleteAnyAPIKeyResponse, error)
-	UpdateAnyAPIKey(context.Context, *UpdateAnyAPIKeyRequest) (*UpdateAnyAPIKeyResponse, error)
+	GetServiceAccount(context.Context, *GetServiceAccountRequest) (*GetServiceAccountResponse, error)
+	GetServiceAccounts(context.Context, *GetServiceAccountsRequest) (*GetServiceAccountsResponse, error)
+	CreateServiceAccount(context.Context, *CreateServiceAccountRequest) (*CreateServiceAccountResponse, error)
+	CreateServiceAccountAPIKey(context.Context, *CreateServiceAccountAPIKeyRequest) (*CreateServiceAccountAPIKeyResponse, error)
+	UpdateServiceAccount(context.Context, *UpdateServiceAccountRequest) (*UpdateServiceAccountResponse, error)
+	DeleteServiceAccount(context.Context, *DeleteServiceAccountRequest) (*DeleteServiceAccountResponse, error)
 }
 
 // UnimplementedAuthServiceServer can be embedded to have forward compatible implementations.
@@ -349,17 +373,23 @@ func (*UnimplementedAuthServiceServer) DeleteAPIKey(ctx context.Context, req *De
 func (*UnimplementedAuthServiceServer) UpdateAPIKey(ctx context.Context, req *UpdateAPIKeyRequest) (*UpdateAPIKeyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateAPIKey not implemented")
 }
-func (*UnimplementedAuthServiceServer) GetAllAPIKeys(ctx context.Context, req *GetAllAPIKeysRequest) (*GetAllAPIKeysResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAllAPIKeys not implemented")
+func (*UnimplementedAuthServiceServer) GetServiceAccount(ctx context.Context, req *GetServiceAccountRequest) (*GetServiceAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetServiceAccount not implemented")
 }
-func (*UnimplementedAuthServiceServer) GetAnyAPIKey(ctx context.Context, req *GetAnyAPIKeyRequest) (*GetAnyAPIKeyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAnyAPIKey not implemented")
+func (*UnimplementedAuthServiceServer) GetServiceAccounts(ctx context.Context, req *GetServiceAccountsRequest) (*GetServiceAccountsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetServiceAccounts not implemented")
 }
-func (*UnimplementedAuthServiceServer) DeleteAnyAPIKey(ctx context.Context, req *DeleteAnyAPIKeyRequest) (*DeleteAnyAPIKeyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteAnyAPIKey not implemented")
+func (*UnimplementedAuthServiceServer) CreateServiceAccount(ctx context.Context, req *CreateServiceAccountRequest) (*CreateServiceAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateServiceAccount not implemented")
 }
-func (*UnimplementedAuthServiceServer) UpdateAnyAPIKey(ctx context.Context, req *UpdateAnyAPIKeyRequest) (*UpdateAnyAPIKeyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateAnyAPIKey not implemented")
+func (*UnimplementedAuthServiceServer) CreateServiceAccountAPIKey(ctx context.Context, req *CreateServiceAccountAPIKeyRequest) (*CreateServiceAccountAPIKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateServiceAccountAPIKey not implemented")
+}
+func (*UnimplementedAuthServiceServer) UpdateServiceAccount(ctx context.Context, req *UpdateServiceAccountRequest) (*UpdateServiceAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateServiceAccount not implemented")
+}
+func (*UnimplementedAuthServiceServer) DeleteServiceAccount(ctx context.Context, req *DeleteServiceAccountRequest) (*DeleteServiceAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteServiceAccount not implemented")
 }
 
 func RegisterAuthServiceServer(s *grpc.Server, srv AuthServiceServer) {
@@ -636,74 +666,110 @@ func _AuthService_UpdateAPIKey_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_GetAllAPIKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAllAPIKeysRequest)
+func _AuthService_GetServiceAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetServiceAccountRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).GetAllAPIKeys(ctx, in)
+		return srv.(AuthServiceServer).GetServiceAccount(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.authservice.v1.AuthService/GetAllAPIKeys",
+		FullMethod: "/api.authservice.v1.AuthService/GetServiceAccount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).GetAllAPIKeys(ctx, req.(*GetAllAPIKeysRequest))
+		return srv.(AuthServiceServer).GetServiceAccount(ctx, req.(*GetServiceAccountRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_GetAnyAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAnyAPIKeyRequest)
+func _AuthService_GetServiceAccounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetServiceAccountsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).GetAnyAPIKey(ctx, in)
+		return srv.(AuthServiceServer).GetServiceAccounts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.authservice.v1.AuthService/GetAnyAPIKey",
+		FullMethod: "/api.authservice.v1.AuthService/GetServiceAccounts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).GetAnyAPIKey(ctx, req.(*GetAnyAPIKeyRequest))
+		return srv.(AuthServiceServer).GetServiceAccounts(ctx, req.(*GetServiceAccountsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_DeleteAnyAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteAnyAPIKeyRequest)
+func _AuthService_CreateServiceAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateServiceAccountRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).DeleteAnyAPIKey(ctx, in)
+		return srv.(AuthServiceServer).CreateServiceAccount(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.authservice.v1.AuthService/DeleteAnyAPIKey",
+		FullMethod: "/api.authservice.v1.AuthService/CreateServiceAccount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).DeleteAnyAPIKey(ctx, req.(*DeleteAnyAPIKeyRequest))
+		return srv.(AuthServiceServer).CreateServiceAccount(ctx, req.(*CreateServiceAccountRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_UpdateAnyAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateAnyAPIKeyRequest)
+func _AuthService_CreateServiceAccountAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateServiceAccountAPIKeyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).UpdateAnyAPIKey(ctx, in)
+		return srv.(AuthServiceServer).CreateServiceAccountAPIKey(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.authservice.v1.AuthService/UpdateAnyAPIKey",
+		FullMethod: "/api.authservice.v1.AuthService/CreateServiceAccountAPIKey",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).UpdateAnyAPIKey(ctx, req.(*UpdateAnyAPIKeyRequest))
+		return srv.(AuthServiceServer).CreateServiceAccountAPIKey(ctx, req.(*CreateServiceAccountAPIKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_UpdateServiceAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateServiceAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).UpdateServiceAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.authservice.v1.AuthService/UpdateServiceAccount",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).UpdateServiceAccount(ctx, req.(*UpdateServiceAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_DeleteServiceAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteServiceAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).DeleteServiceAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.authservice.v1.AuthService/DeleteServiceAccount",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).DeleteServiceAccount(ctx, req.(*DeleteServiceAccountRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -773,20 +839,28 @@ var _AuthService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _AuthService_UpdateAPIKey_Handler,
 		},
 		{
-			MethodName: "GetAllAPIKeys",
-			Handler:    _AuthService_GetAllAPIKeys_Handler,
+			MethodName: "GetServiceAccount",
+			Handler:    _AuthService_GetServiceAccount_Handler,
 		},
 		{
-			MethodName: "GetAnyAPIKey",
-			Handler:    _AuthService_GetAnyAPIKey_Handler,
+			MethodName: "GetServiceAccounts",
+			Handler:    _AuthService_GetServiceAccounts_Handler,
 		},
 		{
-			MethodName: "DeleteAnyAPIKey",
-			Handler:    _AuthService_DeleteAnyAPIKey_Handler,
+			MethodName: "CreateServiceAccount",
+			Handler:    _AuthService_CreateServiceAccount_Handler,
 		},
 		{
-			MethodName: "UpdateAnyAPIKey",
-			Handler:    _AuthService_UpdateAnyAPIKey_Handler,
+			MethodName: "CreateServiceAccountAPIKey",
+			Handler:    _AuthService_CreateServiceAccountAPIKey_Handler,
+		},
+		{
+			MethodName: "UpdateServiceAccount",
+			Handler:    _AuthService_UpdateServiceAccount_Handler,
+		},
+		{
+			MethodName: "DeleteServiceAccount",
+			Handler:    _AuthService_DeleteServiceAccount_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -42,7 +42,7 @@ func parseAssumedRole(assumedRole string) (string, string, error) {
 }
 
 func parseSAPrincipal(saPrincipal string) (string, string, error) {
-	var gcpProjectName, saName string
+	var gcpProjectId, saId string
 	re := saPrincipalPattern
 	submatch := re.FindStringSubmatch(saPrincipal)
 
@@ -50,10 +50,10 @@ func parseSAPrincipal(saPrincipal string) (string, string, error) {
 		return "", "", fmt.Errorf("invalid SA principal: %s", saPrincipal)
 	}
 
-	saName = submatch[1]
-	gcpProjectName = submatch[2]
+	saId = submatch[1]
+	gcpProjectId = submatch[2]
 
-	return saName, gcpProjectName, nil
+	return saId, gcpProjectId, nil
 }
 
 func getAssumedRoleArn(awsAccountId string, awsRoleName string) string {
