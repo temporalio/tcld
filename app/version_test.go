@@ -12,10 +12,7 @@ func TestVersionCommand(t *testing.T) {
 	out, err := NewVersionCommand()
 	assert.NoError(t, err)
 
-	cliApp := &cli.App{
-		Name:     "test",
-		Commands: []*cli.Command{out.Command},
-	}
+	cliApp, _ := NewTestApp(t, []*cli.Command{out.Command}, nil)
 	err = cliApp.Run([]string{"tcld", "version"})
 	assert.NoError(t, err)
 }

@@ -1,119 +1,69 @@
 package app
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
+	"os/exec"
+	"runtime"
 	"strings"
-	"time"
-
-	"github.com/temporalio/tcld/services"
 
 	"github.com/urfave/cli/v2"
 )
 
 const (
-	scope = "openid profile user"
+	// Flags.
+	domainFlagName       = "domain"
+	audienceFlagName     = "audience"
+	clientIDFlagName     = "client-id"
+	disablePopUpFlagName = "disable-pop-up"
 )
 
 var (
-	tokenFileName = "tokens.json"
-	domainFlag    = &cli.StringFlag{
-		Name:     "domain",
+	domainFlag = &cli.StringFlag{
+		Name:     domainFlagName,
 		Value:    "login.tmprl.cloud",
 		Aliases:  []string{"d"},
 		Required: false,
 		Hidden:   true,
 	}
 	audienceFlag = &cli.StringFlag{
-		Name:     "audience",
+		Name:     audienceFlagName,
 		Value:    "https://saas-api.tmprl.cloud",
 		Aliases:  []string{"a"},
 		Required: false,
 		Hidden:   true,
 	}
 	clientIDFlag = &cli.StringFlag{
-		Name:     "client-id",
+		Name:     clientIDFlagName,
 		Value:    "d7V5bZMLCbRLfRVpqC567AqjAERaWHhl",
 		Aliases:  []string{"id"},
 		Required: false,
 		Hidden:   true,
 	}
 	disablePopUpFlag = &cli.BoolFlag{
-		Name:     "disable-pop-up",
+		Name:     disablePopUpFlagName,
 		Usage:    "disable browser pop-up",
 		Required: false,
 	}
 )
 
-func GetLoginClient() *LoginClient {
-	return &LoginClient{
-		loginService: services.NewLoginService(),
-	}
-}
-
-type (
-	LoginClient struct {
-		loginService services.LoginService
-	}
-
-	OAuthDeviceCodeResponse struct {
-		DeviceCode              string `json:"device_code"`
-		UserCode                string `json:"user_code"`
-		VerificationURI         string `json:"verification_uri"`
-		VerificationURIComplete string `json:"verification_uri_complete"`
-		ExpiresIn               int    `json:"expires_in"`
-		Interval                int    `json:"interval"`
-	}
-
-	OAuthTokenResponse struct {
-		AccessToken  string `json:"access_token"`
-		RefreshToken string `json:"refresh_token"`
-		IDToken      string `json:"id_token"`
-		TokenType    string `json:"token_type"`
-		ExpiresIn    int    `json:"expires_in"`
-	}
-)
-
-func getTokenConfigPath(ctx *cli.Context) string {
-	configDir := ctx.Path(ConfigDirFlagName)
-	return filepath.Join(configDir, tokenFileName)
-}
-
-// TODO: support login config on windows
-func loadLoginConfig(ctx *cli.Context) (OAuthTokenResponse, error) {
-
-	tokens := OAuthTokenResponse{}
-	configDir := ctx.Path(ConfigDirFlagName)
-	// Create config dir if it does not exist
-	if err := os.MkdirAll(configDir, 0700); err != nil {
-		return tokens, err
-	}
-
-	tokenConfig := getTokenConfigPath(ctx)
-	if _, err := os.Stat(tokenConfig); err != nil {
-		// Skip if file does not exist
-		if errors.Is(err, os.ErrNotExist) {
-			return tokens, nil
-		}
-		return tokens, err
-	}
-
-	tokenConfigBytes, err := os.ReadFile(tokenConfig)
-	if err != nil {
-		return tokens, err
-	}
-
-	if err := json.Unmarshal(tokenConfigBytes, &tokens); err != nil {
-		return tokens, err
-	}
-
-	return tokens, nil
+func NewLoginCommand() (CommandOut, error) {
+	return CommandOut{Command: &cli.Command{
+		Name:    "login",
+		Usage:   "Login as user",
+		Aliases: []string{"l"},
+		Flags: []cli.Flag{
+			domainFlag,
+			audienceFlag,
+			clientIDFlag,
+			disablePopUpFlag,
+		},
+		Action: func(ctx *cli.Context) error {
+			_, err := login(ctx, nil)
+			return err
+		},
+	}}, nil
 }
 
 func parseURL(s string) (*url.URL, error) {
@@ -134,109 +84,28 @@ func parseURL(s string) (*url.URL, error) {
 	return u, err
 }
 
-func (c *LoginClient) login(ctx *cli.Context, domain string, audience string, clientID string, disablePopUp bool) error {
-	// Get device code
-	domainURL, err := parseURL(domain)
-	if err != nil {
-		return err
+func openBrowser(ctx *cli.Context, message string, url string) error {
+	// Print to stderr so other tooling can parse the command output.
+	fmt.Fprintf(os.Stderr, "%s: %s\n", message, url)
+
+	if ctx.Bool(disablePopUpFlagName) {
+		return nil
 	}
 
-	codeResp := OAuthDeviceCodeResponse{}
-	if err := postFormRequest(
-		domainURL.JoinPath("oauth", "device", "code").String(),
-		url.Values{
-			"client_id": {clientID},
-			"scope":     {scope},
-			"audience":  {audience},
-		},
-		&codeResp,
-	); err != nil {
-		return err
-	}
-
-	verificationURL, err := parseURL(codeResp.VerificationURIComplete)
-	if err != nil {
-		return fmt.Errorf("failed to parse verification URL: %w", err)
-	} else if verificationURL.Hostname() != domainURL.Hostname() {
-		// We expect the verification URL to be the same host as the domain URL.
-		// Otherwise the response could have us POST to any arbitrary URL.
-		return fmt.Errorf("domain URL `%s` does not match verification URL `%s` in response", domainURL.Hostname(), verificationURL.Hostname())
-	}
-
-	fmt.Printf("Login via this url: %s\n", verificationURL.String())
-
-	if !disablePopUp {
-		if err := c.loginService.OpenBrowser(verificationURL.String()); err != nil {
-			fmt.Println("Unable to open browser, please open url manually.")
-		}
-	}
-
-	// According to RFC, we should set a default polling interval if not provided.
-	// https://tools.ietf.org/html/draft-ietf-oauth-device-flow-07#section-3.5
-	if codeResp.Interval == 0 {
-		codeResp.Interval = 10
-	}
-
-	// Get access token
-	tokenResp := OAuthTokenResponse{}
-	for len(tokenResp.AccessToken) == 0 {
-		time.Sleep(time.Duration(codeResp.Interval) * time.Second)
-
-		if err := postFormRequest(
-			domainURL.JoinPath("oauth", "token").String(),
-			url.Values{
-				"grant_type":  {"urn:ietf:params:oauth:grant-type:device_code"},
-				"device_code": {codeResp.DeviceCode},
-				"client_id":   {clientID},
-			},
-			&tokenResp,
-		); err != nil {
+	switch runtime.GOOS {
+	case "linux":
+		if err := exec.Command("xdg-open", url).Start(); err != nil {
 			return err
 		}
-	}
-
-	tokenRespJson, err := FormatJson(tokenResp)
-	if err != nil {
-		return err
-	}
-	fmt.Println("Successfully logged in!")
-
-	// Save token info locally
-	return c.loginService.WriteToConfigFile(getTokenConfigPath(ctx), tokenRespJson)
-}
-
-func NewLoginCommand(c *LoginClient) (CommandOut, error) {
-	return CommandOut{Command: &cli.Command{
-		Name:    "login",
-		Usage:   "Login as user",
-		Aliases: []string{"l"},
-		Before: func(ctx *cli.Context) error {
-			// attempt to create and or load the login config at the beginning
-			_, err := loadLoginConfig(ctx)
+	case "windows":
+		if err := exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start(); err != nil {
 			return err
-		},
-		Flags: []cli.Flag{
-			domainFlag,
-			audienceFlag,
-			clientIDFlag,
-			disablePopUpFlag,
-		},
-		Action: func(ctx *cli.Context) error {
-			return c.login(ctx, ctx.String("domain"), ctx.String("audience"), ctx.String("client-id"), ctx.Bool("disable-pop-up"))
-		},
-	}}, nil
-}
-
-func postFormRequest(url string, values url.Values, resStruct interface{}) error {
-	res, err := http.PostForm(url, values)
-	if err != nil {
-		return err
+		}
+	case "darwin":
+		if err := exec.Command("open", url).Start(); err != nil {
+			return err
+		}
+	default:
 	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(body, &resStruct)
+	return nil
 }

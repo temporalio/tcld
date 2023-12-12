@@ -35,14 +35,14 @@ func (s *UserTestSuite) SetupTest() {
 		}, nil
 	})
 	s.Require().NoError(err)
-	AutoConfirmFlag.Value = true
-	s.cliApp = &cli.App{
-		Name:     "test",
-		Commands: []*cli.Command{out.Command},
-		Flags: []cli.Flag{
-			AutoConfirmFlag,
-		},
+
+	cmds := []*cli.Command{
+		out.Command,
 	}
+	flags := []cli.Flag{
+		AutoConfirmFlag,
+	}
+	s.cliApp, _ = NewTestApp(s.T(), cmds, flags)
 }
 
 func (s *UserTestSuite) RunCmd(args ...string) error {

@@ -18,7 +18,6 @@ func fxOptions() fx.Option {
 			app.NewNamespaceCommand,
 			app.NewUserCommand,
 			app.NewRequestCommand,
-			app.GetLoginClient,
 			app.NewLoginCommand,
 			app.NewLogoutCommand,
 			app.NewCertificatesCommand,
