@@ -222,7 +222,7 @@ func (c *NamespaceClient) isSAPrincipalChange(ctx *cli.Context, sink *sink.Expor
 	return saPrincipal != ctx.String(saPrincipalFlagOptional.Name)
 }
 
-func (c *NamespaceClient) isSinkEnabledChange(ctx *cli.Context, sink *sink.ExportSink) (bool, error) {
+func (c *NamespaceClient) isSinkToggleChange(ctx *cli.Context, sink *sink.ExportSink) (bool, error) {
 	if !ctx.IsSet(sinkEnabledFlag.Name) {
 		return false, nil
 	}
@@ -1427,17 +1427,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					}
 					resourceVersion := c.selectExportSinkResourceVersion(ctx, sink)
 
-					isEnabledChange, err := c.isSinkEnabledChange(ctx, sink)
+					isToggleChanged, err := c.isSinkToggleChange(ctx, sink)
 					if err != nil {
 						return err
 					}
 
-					if !isEnabledChange && !c.isAssumedRoleChange(ctx, sink) && !c.isKmsArnChange(ctx, sink) && !c.isS3BucketChange(ctx, sink) {
+					if !isToggleChanged && !c.isAssumedRoleChange(ctx, sink) && !c.isKmsArnChange(ctx, sink) && !c.isS3BucketChange(ctx, sink) {
 						fmt.Println("nothing to update")
 						return nil
 					}
 
-					if isEnabledChange {
+					if isToggleChanged {
 						sink.Spec.Enabled = !sink.Spec.Enabled
 					}
 
@@ -1549,17 +1549,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					}
 					resourceVersion := c.selectExportSinkResourceVersion(ctx, sink)
 
-					isEnabledChange, err := c.isSinkEnabledChange(ctx, sink)
+					isToggleChanged, err := c.isSinkToggleChange(ctx, sink)
 					if err != nil {
 						return err
 					}
 
-					if !isEnabledChange && !c.isSAPrincipalChange(ctx, sink) && !c.isEnableCmekChange(ctx, sink) && !c.isGCSBucketChange(ctx, sink) {
+					if !isToggleChanged && !c.isSAPrincipalChange(ctx, sink) && !c.isEnableCmekChange(ctx, sink) && !c.isGCSBucketChange(ctx, sink) {
 						fmt.Println("nothing to update")
 						return nil
 					}
 
-					if isEnabledChange {
+					if isToggleChanged {
 						sink.Spec.Enabled = !sink.Spec.Enabled
 					}
 

@@ -60,6 +60,6 @@ func getAssumedRoleArn(awsAccountId string, awsRoleName string) string {
 	return fmt.Sprintf("arn:aws:iam::%s:role/%s", awsAccountId, awsRoleName)
 }
 
-func getSAPrincipal(saName string, gcpProjectName string) string {
-	return fmt.Sprintf("%s@%s.iam.gserviceaccount.com", saName, gcpProjectName)
+func getSAPrincipal(saId string, gcpProjectId string) string {
+	return fmt.Sprintf("%s@%s.iam.gserviceaccount.com", saId, gcpProjectId)
 }
