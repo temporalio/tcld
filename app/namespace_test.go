@@ -1678,9 +1678,9 @@ func (s *NamespaceTestSuite) TestValidateExportGCPSink() {
 					Name:            "sink1",
 					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
 					GcsSink: &sink.GCSSpec{
-						SaName:         "test-sa",
-						BucketName:     "testBucket",
-						GcpProjectName: "test-gcs",
+						SaId:         "test-sa",
+						BucketName:   "testBucket",
+						GcpProjectId: "test-gcs",
 					},
 				}
 			},
