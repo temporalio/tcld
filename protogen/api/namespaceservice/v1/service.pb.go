@@ -103,6 +103,8 @@ type NamespaceServiceClient interface {
 	ValidateExportSink(ctx context.Context, in *ValidateExportSinkRequest, opts ...grpc.CallOption) (*ValidateExportSinkResponse, error)
 	// GetExportSinks retrieves the export sinks under the specified namespace on Temporal Cloud
 	GetExportSinks(ctx context.Context, in *GetExportSinksRequest, opts ...grpc.CallOption) (*GetExportSinksResponse, error)
+	// FailoverNamespace failovers the namespace from the source_region to the target_region on Temporal Cloud
+	FailoverNamespace(ctx context.Context, in *FailoverNamespaceRequest, opts ...grpc.CallOption) (*FailoverNamespaceResponse, error)
 }
 
 type namespaceServiceClient struct {
@@ -239,6 +241,15 @@ func (c *namespaceServiceClient) GetExportSinks(ctx context.Context, in *GetExpo
 	return out, nil
 }
 
+func (c *namespaceServiceClient) FailoverNamespace(ctx context.Context, in *FailoverNamespaceRequest, opts ...grpc.CallOption) (*FailoverNamespaceResponse, error) {
+	out := new(FailoverNamespaceResponse)
+	err := c.cc.Invoke(ctx, "/api.namespaceservice.v1.NamespaceService/FailoverNamespace", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NamespaceServiceServer is the server API for NamespaceService service.
 type NamespaceServiceServer interface {
 	// CreateNamespace creates a new namespace on Temporal cloud.
@@ -269,6 +280,8 @@ type NamespaceServiceServer interface {
 	ValidateExportSink(context.Context, *ValidateExportSinkRequest) (*ValidateExportSinkResponse, error)
 	// GetExportSinks retrieves the export sinks under the specified namespace on Temporal Cloud
 	GetExportSinks(context.Context, *GetExportSinksRequest) (*GetExportSinksResponse, error)
+	// FailoverNamespace failovers the namespace from the source_region to the target_region on Temporal Cloud
+	FailoverNamespace(context.Context, *FailoverNamespaceRequest) (*FailoverNamespaceResponse, error)
 }
 
 // UnimplementedNamespaceServiceServer can be embedded to have forward compatible implementations.
@@ -316,6 +329,9 @@ func (*UnimplementedNamespaceServiceServer) ValidateExportSink(ctx context.Conte
 }
 func (*UnimplementedNamespaceServiceServer) GetExportSinks(ctx context.Context, req *GetExportSinksRequest) (*GetExportSinksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetExportSinks not implemented")
+}
+func (*UnimplementedNamespaceServiceServer) FailoverNamespace(ctx context.Context, req *FailoverNamespaceRequest) (*FailoverNamespaceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FailoverNamespace not implemented")
 }
 
 func RegisterNamespaceServiceServer(s *grpc.Server, srv NamespaceServiceServer) {
@@ -574,6 +590,24 @@ func _NamespaceService_GetExportSinks_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NamespaceService_FailoverNamespace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FailoverNamespaceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NamespaceServiceServer).FailoverNamespace(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.namespaceservice.v1.NamespaceService/FailoverNamespace",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NamespaceServiceServer).FailoverNamespace(ctx, req.(*FailoverNamespaceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _NamespaceService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "api.namespaceservice.v1.NamespaceService",
 	HandlerType: (*NamespaceServiceServer)(nil),
@@ -633,6 +667,10 @@ var _NamespaceService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetExportSinks",
 			Handler:    _NamespaceService_GetExportSinks_Handler,
+		},
+		{
+			MethodName: "FailoverNamespace",
+			Handler:    _NamespaceService_FailoverNamespace_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

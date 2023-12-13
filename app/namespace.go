@@ -1461,7 +1461,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						return fmt.Errorf("unable to get existing namespace: %v", err)
 					}
 
-					saName, projectName, err := parseSAPrincipal(ctx.String(serviceAccountPrincipalFlag.Name))
+					saId, projectId, err := parseSAPrincipal(ctx.String(serviceAccountPrincipalFlag.Name))
 					if err != nil {
 						return fmt.Errorf("validation failed: %v", err)
 					}
@@ -1472,9 +1472,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							Name:            ctx.String(sinkNameFlag.Name),
 							DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
 							GcsSink: &sink.GCSSpec{
-								GcpProjectName: projectName,
-								BucketName:     ctx.String(gcsBucketFlag.Name),
-								SaName:         saName,
+								GcpProjectId: projectId,
+								BucketName:   ctx.String(gcsBucketFlag.Name),
+								SaId:         saId,
 							},
 						},
 					}

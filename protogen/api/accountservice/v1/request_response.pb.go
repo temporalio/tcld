@@ -139,7 +139,7 @@ func (m *GetNamespaceUsageResponse) GetEntries() []*v1.MeteringEntry {
 }
 
 type GetNamespacesUsageRequest struct {
-	// the requested size of the page to retrive
+	// the requested size of the page to retrieve
 	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// the page token
 	PageToken string           `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`

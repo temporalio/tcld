@@ -12,6 +12,7 @@ import (
 	reflect "reflect"
 	strings "strings"
 	v11 "github.com/temporalio/tcld/protogen/api/auth/v1"
+	v14 "github.com/temporalio/tcld/protogen/api/common/v1"
 	v1 "github.com/temporalio/tcld/protogen/api/namespace/v1"
 	v12 "github.com/temporalio/tcld/protogen/api/request/v1"
 	v13 "github.com/temporalio/tcld/protogen/api/sink/v1"
@@ -1543,6 +1544,120 @@ func (m *ValidateExportSinkResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ValidateExportSinkResponse proto.InternalMessageInfo
 
+type FailoverNamespaceRequest struct {
+	// The namespace to be failed over.
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// the request id to use for this operation - optional
+	RequestId string `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	// The target region is the region to be primary after the failover.
+	TargetRegion *v14.RegionID `protobuf:"bytes,3,opt,name=target_region,json=targetRegion,proto3" json:"target_region,omitempty"`
+	// This will skip graceful failover and fail over namespace without any condition.
+	SkipGracefulFailover bool `protobuf:"varint,4,opt,name=skip_graceful_failover,json=skipGracefulFailover,proto3" json:"skip_graceful_failover,omitempty"`
+}
+
+func (m *FailoverNamespaceRequest) Reset()      { *m = FailoverNamespaceRequest{} }
+func (*FailoverNamespaceRequest) ProtoMessage() {}
+func (*FailoverNamespaceRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{28}
+}
+func (m *FailoverNamespaceRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *FailoverNamespaceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_FailoverNamespaceRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *FailoverNamespaceRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_FailoverNamespaceRequest.Merge(m, src)
+}
+func (m *FailoverNamespaceRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *FailoverNamespaceRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_FailoverNamespaceRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_FailoverNamespaceRequest proto.InternalMessageInfo
+
+func (m *FailoverNamespaceRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *FailoverNamespaceRequest) GetRequestId() string {
+	if m != nil {
+		return m.RequestId
+	}
+	return ""
+}
+
+func (m *FailoverNamespaceRequest) GetTargetRegion() *v14.RegionID {
+	if m != nil {
+		return m.TargetRegion
+	}
+	return nil
+}
+
+func (m *FailoverNamespaceRequest) GetSkipGracefulFailover() bool {
+	if m != nil {
+		return m.SkipGracefulFailover
+	}
+	return false
+}
+
+type FailoverNamespaceResponse struct {
+	// Failover status
+	RequestStatus *v12.RequestStatus `protobuf:"bytes,1,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
+}
+
+func (m *FailoverNamespaceResponse) Reset()      { *m = FailoverNamespaceResponse{} }
+func (*FailoverNamespaceResponse) ProtoMessage() {}
+func (*FailoverNamespaceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{29}
+}
+func (m *FailoverNamespaceResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *FailoverNamespaceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_FailoverNamespaceResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *FailoverNamespaceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_FailoverNamespaceResponse.Merge(m, src)
+}
+func (m *FailoverNamespaceResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *FailoverNamespaceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_FailoverNamespaceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_FailoverNamespaceResponse proto.InternalMessageInfo
+
+func (m *FailoverNamespaceResponse) GetRequestStatus() *v12.RequestStatus {
+	if m != nil {
+		return m.RequestStatus
+	}
+	return nil
+}
 
 func init() {
 	proto.RegisterType((*CreateNamespaceRequest)(nil), "api.namespaceservice.v1.CreateNamespaceRequest")
@@ -1573,6 +1688,8 @@ func init() {
 	proto.RegisterType((*GetExportSinksResponse)(nil), "api.namespaceservice.v1.GetExportSinksResponse")
 	proto.RegisterType((*ValidateExportSinkRequest)(nil), "api.namespaceservice.v1.ValidateExportSinkRequest")
 	proto.RegisterType((*ValidateExportSinkResponse)(nil), "api.namespaceservice.v1.ValidateExportSinkResponse")
+	proto.RegisterType((*FailoverNamespaceRequest)(nil), "api.namespaceservice.v1.FailoverNamespaceRequest")
+	proto.RegisterType((*FailoverNamespaceResponse)(nil), "api.namespaceservice.v1.FailoverNamespaceResponse")
 }
 
 func init() {
@@ -2433,6 +2550,63 @@ func (this *ValidateExportSinkResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *FailoverNamespaceRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*FailoverNamespaceRequest)
+	if !ok {
+		that2, ok := that.(FailoverNamespaceRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.RequestId != that1.RequestId {
+		return false
+	}
+	if !this.TargetRegion.Equal(that1.TargetRegion) {
+		return false
+	}
+	if this.SkipGracefulFailover != that1.SkipGracefulFailover {
+		return false
+	}
+	return true
+}
+func (this *FailoverNamespaceResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*FailoverNamespaceResponse)
+	if !ok {
+		that2, ok := that.(FailoverNamespaceResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.RequestStatus.Equal(that1.RequestStatus) {
+		return false
+	}
+	return true
+}
 func (this *CreateNamespaceRequest) GoString() string {
 	if this == nil {
 		return "nil"
@@ -2775,6 +2949,33 @@ func (this *ValidateExportSinkResponse) GoString() string {
 	}
 	s := make([]string, 0, 4)
 	s = append(s, "&namespaceservice.ValidateExportSinkResponse{")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *FailoverNamespaceRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&namespaceservice.FailoverNamespaceRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "RequestId: "+fmt.Sprintf("%#v", this.RequestId)+",\n")
+	if this.TargetRegion != nil {
+		s = append(s, "TargetRegion: "+fmt.Sprintf("%#v", this.TargetRegion)+",\n")
+	}
+	s = append(s, "SkipGracefulFailover: "+fmt.Sprintf("%#v", this.SkipGracefulFailover)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *FailoverNamespaceResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespaceservice.FailoverNamespaceResponse{")
+	if this.RequestStatus != nil {
+		s = append(s, "RequestStatus: "+fmt.Sprintf("%#v", this.RequestStatus)+",\n")
+	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -3930,6 +4131,100 @@ func (m *ValidateExportSinkResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
+func (m *FailoverNamespaceRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *FailoverNamespaceRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *FailoverNamespaceRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.SkipGracefulFailover {
+		i--
+		if m.SkipGracefulFailover {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.TargetRegion != nil {
+		{
+			size, err := m.TargetRegion.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.RequestId) > 0 {
+		i -= len(m.RequestId)
+		copy(dAtA[i:], m.RequestId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.RequestId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *FailoverNamespaceResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *FailoverNamespaceResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *FailoverNamespaceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.RequestStatus != nil {
+		{
+			size, err := m.RequestStatus.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintRequestResponse(dAtA []byte, offset int, v uint64) int {
 	offset -= sovRequestResponse(v)
 	base := offset
@@ -4435,6 +4730,42 @@ func (m *ValidateExportSinkResponse) Size() (n int) {
 	return n
 }
 
+func (m *FailoverNamespaceRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.RequestId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.TargetRegion != nil {
+		l = m.TargetRegion.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.SkipGracefulFailover {
+		n += 2
+	}
+	return n
+}
+
+func (m *FailoverNamespaceResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.RequestStatus != nil {
+		l = m.RequestStatus.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
 
 func sovRequestResponse(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
@@ -4768,7 +5099,29 @@ func (this *ValidateExportSinkResponse) String() string {
 	}, "")
 	return s
 }
-
+func (this *FailoverNamespaceRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&FailoverNamespaceRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
+		`TargetRegion:` + strings.Replace(fmt.Sprintf("%v", this.TargetRegion), "RegionID", "v14.RegionID", 1) + `,`,
+		`SkipGracefulFailover:` + fmt.Sprintf("%v", this.SkipGracefulFailover) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *FailoverNamespaceResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&FailoverNamespaceResponse{`,
+		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v12.RequestStatus", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func valueToStringRequestResponse(v interface{}) string {
 	rv := reflect.ValueOf(v)
 	if rv.IsNil() {
@@ -8159,7 +8512,268 @@ func (m *ValidateExportSinkResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *FailoverNamespaceRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: FailoverNamespaceRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: FailoverNamespaceRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RequestId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TargetRegion", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.TargetRegion == nil {
+				m.TargetRegion = &v14.RegionID{}
+			}
+			if err := m.TargetRegion.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SkipGracefulFailover", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.SkipGracefulFailover = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
 
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *FailoverNamespaceResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: FailoverNamespaceResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: FailoverNamespaceResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestStatus", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.RequestStatus == nil {
+				m.RequestStatus = &v12.RequestStatus{}
+			}
+			if err := m.RequestStatus.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func skipRequestResponse(dAtA []byte) (n int, err error) {
 	l := len(dAtA)
 	iNdEx := 0
