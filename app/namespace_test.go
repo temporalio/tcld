@@ -1461,7 +1461,7 @@ func (s *NamespaceTestSuite) TestDelete() {
 	s.NoError(s.RunCmd("namespace", "delete", "--namespace", "ns1"))
 }
 
-func (s *NamespaceTestSuite) TestCreateExportSink() {
+func (s *NamespaceTestSuite) TestCreateExportS3Sink() {
 	ns := "testNamespace"
 	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
 	type morphCreateSinkReq func(*namespaceservice.CreateExportSinkRequest)
@@ -1569,6 +1569,14 @@ func (s *NamespaceTestSuite) TestGetExportSink() {
 				r.SinkName = "sink1"
 			},
 		},
+		{
+			name: "get export sink succeeds",
+			args: []string{"namespace", "es", "gcs", "get", "--namespace", ns, "--sink-name", "sink1"},
+			expectRequest: func(r *namespaceservice.GetExportSinkRequest) {
+				r.Namespace = ns
+				r.SinkName = "sink1"
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -1629,6 +1637,32 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 				r.ResourceVersion = "999999999"
 			},
 		},
+		{
+			name: "delete export sink succeeds without resource version",
+			args: []string{"namespace", "es", "gcs", "delete", "--namespace", ns, "--sink-name", "sink1"},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {
+				r.Sink = &sink.ExportSink{
+					ResourceVersion: "124214124",
+				}
+			},
+			expectRequest: func(r *namespaceservice.DeleteExportSinkRequest) {
+				r.Namespace = ns
+				r.SinkName = "sink1"
+				r.ResourceVersion = "124214124"
+			},
+		},
+		{
+			name: "delete export succeeds sink with resource version",
+			args: []string{"namespace", "es", "gcs", "delete", "--namespace", ns, "--sink-name", "sink1", "--resource-version", "999999999"},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {
+				r.Sink = &sink.ExportSink{}
+			},
+			expectRequest: func(r *namespaceservice.DeleteExportSinkRequest) {
+				r.Namespace = ns
+				r.SinkName = "sink1"
+				r.ResourceVersion = "999999999"
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -1649,6 +1683,254 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 			err := s.RunCmd(tc.args...)
 			if tc.expectErr {
 				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
+	ns := "testNamespace"
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+	type morphCreateSinkReq func(*namespaceservice.CreateExportSinkRequest)
+
+	tests := []struct {
+		name          string
+		args          []string
+		expectGet     morphGetResp
+		expectRequest morphCreateSinkReq
+		expectErr     bool
+		expectErrMsg  string
+	}{
+		{
+			name:      "create export sink",
+			args:      []string{"namespace", "es", "gcs", "create", "--namespace", ns, "--sink-name", "sink1", "--service-account-principal", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectRequest: func(r *namespaceservice.CreateExportSinkRequest) {
+				r.Namespace = ns
+				r.Spec = &sink.ExportSinkSpec{
+					Name:            "sink1",
+					Enabled:         true,
+					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
+					GcsSink: &sink.GCSSpec{
+						SaId:         "testSA",
+						GcpProjectId: "testGcpAccount",
+						BucketName:   "testBucket",
+						EnableCmek:   false,
+					},
+				}
+			},
+		},
+		{
+			name:         "create export sink with invalid service account principal",
+			args:         []string{"namespace", "es", "gcs", "create", "--namespace", ns, "--sink-name", "sink1", "--service-account-principal", "testSA", "--gcs-bucket", "testBucket"},
+			expectErr:    true,
+			expectErrMsg: "invalid SA principal: testSA",
+		},
+		{
+			name: "create export sink with invalid namespace",
+			args: []string{"namespace", "es", "gcs", "create", "--namespace", ns, "--sink-name", "sink1", "--service-account-principal", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace = &namespace.Namespace{
+					Namespace: "",
+					Spec: &namespace.NamespaceSpec{
+						Region: "us-west-2",
+					},
+				}
+			},
+			expectErr:    true,
+			expectErrMsg: "unable to get namespace: invalid namespace returned by server",
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						Region: "us-west-2",
+					},
+				},
+			}
+
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectRequest != nil {
+				req := namespaceservice.CreateExportSinkRequest{}
+				tc.expectRequest(&req)
+				s.mockService.EXPECT().CreateExportSink(gomock.Any(), &req).
+					Return(&namespaceservice.CreateExportSinkResponse{RequestStatus: &request.RequestStatus{}}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+				s.ErrorContains(err, tc.expectErrMsg)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
+	ns := "sink1"
+	type morphGetReq func(*namespaceservice.UpdateExportSinkRequest)
+	type morphGetSinkResp func(*namespaceservice.GetExportSinkResponse)
+
+	tests := []struct {
+		name                  string
+		args                  []string
+		expectGetSinkResponse morphGetSinkResp
+		expectRequest         morphGetReq
+		expectErr             bool
+		expectErrMsg          string
+	}{
+		{
+			name:                  "update export sink succeeds with no input",
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--sink-name", "testSink"},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+		},
+		{
+			name:                  "update export sink succeeds with no updates",
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-principal", "testSA@testGcpAccount.iam.gserviceaccount.com", "--enabled", "true", "--gcs-bucket", "testBucket", "--sink-name", "testSink"},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+		},
+		{
+			name:         "update export sink fails with no sink name",
+			args:         []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-principal", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket", "--enabled", "true"},
+			expectErr:    true,
+			expectErrMsg: "Required flag \"sink-name\" not set",
+		},
+		{
+			name:                  "update export sink fails with not valid enabled value",
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-principal", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket", "--sink-name", "testSink", "--enabled", ""},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+			expectErr:             true,
+			expectErrMsg:          "invalid value for enabled flag",
+		},
+		{
+			name:                  "update export sink succeeds with enable flag",
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--enabled", "false", "--sink-name", "testSink"},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
+				r.Namespace = ns
+				r.Spec = &sink.ExportSinkSpec{
+					Name:            "sink1",
+					Enabled:         false,
+					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
+					GcsSink: &sink.GCSSpec{
+						SaId:         "testSA",
+						GcpProjectId: "testGcpAccount",
+						BucketName:   "testBucket",
+						EnableCmek:   false,
+					},
+				}
+				r.ResourceVersion = "124214124"
+			},
+		},
+		{
+			name:                  "update export sink succeeds with sa principal and enabled flag",
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--enabled", "false", "--service-account-principal", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--sink-name", "testSink"},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
+				r.Namespace = ns
+				r.Spec = &sink.ExportSinkSpec{
+					Name:            "sink1",
+					Enabled:         false,
+					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
+					GcsSink: &sink.GCSSpec{
+						SaId:         "newTestSA",
+						GcpProjectId: "newTestGcpAccount",
+						BucketName:   "testBucket",
+						EnableCmek:   false,
+					},
+				}
+				r.ResourceVersion = "124214124"
+			},
+		},
+		{
+			name:                  "update export sink succeeds with sa principal, bucket name and enabled flag",
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-principal", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "newTestBucket", "--enabled", "false", "--sink-name", "testSink"},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
+				r.Namespace = ns
+				r.Spec = &sink.ExportSinkSpec{
+					Name:            "sink1",
+					Enabled:         false,
+					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
+					GcsSink: &sink.GCSSpec{
+						SaId:         "newTestSA",
+						GcpProjectId: "newTestGcpAccount",
+						BucketName:   "newTestBucket",
+						EnableCmek:   false,
+					},
+				}
+				r.ResourceVersion = "124214124"
+			},
+		},
+		{
+			name:                  "update export sink succeeds with sa principal, bucket name, cmek and enabled flag",
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-principal", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "newTestBucket", "--enabled", "false", "--sink-name", "testSink", "--enable-cmek"},
+			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
+				r.Namespace = ns
+				r.Spec = &sink.ExportSinkSpec{
+					Name:            "sink1",
+					Enabled:         false,
+					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
+					GcsSink: &sink.GCSSpec{
+						SaId:         "newTestSA",
+						GcpProjectId: "newTestGcpAccount",
+						BucketName:   "newTestBucket",
+						EnableCmek:   true,
+					},
+				}
+				r.ResourceVersion = "124214124"
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			if tc.expectGetSinkResponse != nil {
+				getSinkResp := namespaceservice.GetExportSinkResponse{Sink: &sink.ExportSink{
+					Name: ns,
+					Spec: &sink.ExportSinkSpec{
+						Name:            ns,
+						Enabled:         true,
+						DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
+						GcsSink: &sink.GCSSpec{
+							SaId:         "testSA",
+							GcpProjectId: "testGcpAccount",
+							BucketName:   "testBucket",
+							EnableCmek:   false,
+						},
+					},
+					ResourceVersion: "124214124",
+				}}
+				tc.expectGetSinkResponse(&getSinkResp)
+				s.mockService.EXPECT().GetExportSink(gomock.Any(), gomock.Any()).Return(&getSinkResp, nil).Times(1)
+			}
+
+			if tc.expectRequest != nil {
+				req := namespaceservice.UpdateExportSinkRequest{}
+				tc.expectRequest(&req)
+				s.mockService.EXPECT().UpdateExportSink(gomock.Any(), &req).
+					Return(&namespaceservice.UpdateExportSinkResponse{RequestStatus: &request.RequestStatus{}}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+				s.ErrorContains(err, tc.expectErrMsg)
 			} else {
 				s.NoError(err)
 			}
@@ -1724,7 +2006,7 @@ func (s *NamespaceTestSuite) TestValidateExportGCPSink() {
 	}
 }
 
-func (s *NamespaceTestSuite) TestValidateExportSink() {
+func (s *NamespaceTestSuite) TestValidateExportS3Sink() {
 	ns := "namespace"
 	type morphValidateReq func(*namespaceservice.ValidateExportSinkRequest)
 	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
@@ -1815,6 +2097,14 @@ func (s *NamespaceTestSuite) TestListExportSinks() {
 				r.PageSize = 100
 			},
 		},
+		{
+			name: "list export sinks succeeds",
+			args: []string{"namespace", "es", "gcs", "list", "--namespace", ns},
+			expectRequest: func(r *namespaceservice.ListExportSinksRequest) {
+				r.Namespace = ns
+				r.PageSize = 100
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -1836,8 +2126,8 @@ func (s *NamespaceTestSuite) TestListExportSinks() {
 	}
 }
 
-func (s *NamespaceTestSuite) TestUpdateExportSink() {
-	ns := "namespace"
+func (s *NamespaceTestSuite) TestUpdateExportS3Sink() {
+	ns := "sink1"
 	type morphGetReq func(*namespaceservice.UpdateExportSinkRequest)
 	type morphGetSinkResp func(*namespaceservice.GetExportSinkResponse)
 
@@ -1860,13 +2150,13 @@ func (s *NamespaceTestSuite) TestUpdateExportSink() {
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 		},
 		{
-			name:         "update export sink succeeds with no updates",
+			name:         "update export sink fails with no sink name",
 			args:         []string{"namespace", "es", "s3", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--enabled", "true"},
 			expectErr:    true,
 			expectErrMsg: "Required flag \"sink-name\" not set",
 		},
 		{
-			name:                  "update export sink succeeds with not valid enabled value",
+			name:                  "update export sink fails with not valid enabled value",
 			args:                  []string{"namespace", "es", "s3", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--sink-name", "testSink", "--enabled", ""},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectErr:             true,
@@ -1959,9 +2249,9 @@ func (s *NamespaceTestSuite) TestUpdateExportSink() {
 		s.Run(strings.Join(tc.args, " "), func() {
 			if tc.expectGetSinkResponse != nil {
 				getSinkResp := namespaceservice.GetExportSinkResponse{Sink: &sink.ExportSink{
-					Name: "sink1",
+					Name: ns,
 					Spec: &sink.ExportSinkSpec{
-						Name:            "sink1",
+						Name:            ns,
 						Enabled:         true,
 						DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
 						S3Sink: &sink.S3Spec{

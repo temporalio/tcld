@@ -59,3 +59,7 @@ func parseSAPrincipal(saPrincipal string) (string, string, error) {
 func getAssumedRoleArn(awsAccountId string, awsRoleName string) string {
 	return fmt.Sprintf("arn:aws:iam::%s:role/%s", awsAccountId, awsRoleName)
 }
+
+func getSAPrincipal(saId string, gcpProjectId string) string {
+	return fmt.Sprintf("%s@%s.iam.gserviceaccount.com", saId, gcpProjectId)
+}

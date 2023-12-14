@@ -82,7 +82,7 @@ var (
 	}
 	kmsArnFlag = &cli.StringFlag{
 		Name:  "kms-arn",
-		Usage: "Provide the ARN of the KMS key to use for encryption. Note: If the KMS ARN needs to be added or updated, user should create the IAM Role with KMS or modify the created IAM Role accordingly. Provided it as part of the input won't help",
+		Usage: "Provide the ARN of the KMS key to use for encryption. Note: If the KMS ARN needs to be added or updated, user must create the IAM Role with KMS or modify the created IAM Role accordingly.",
 	}
 	pageSizeFlag = &cli.IntFlag{
 		Name:  "page-size",
@@ -108,15 +108,27 @@ var (
 		Usage:   "The codec server endpoint to decode payloads for all users interacting with this Namespace, must be https",
 		Aliases: []string{"e"},
 	}
-	serviceAccountPrincipalFlag = &cli.StringFlag{
+	saPrincipalFlagRequired = &cli.StringFlag{
 		Name:     "service-account-principal",
-		Usage:    "service account that has access to the sink",
+		Usage:    "Service account that has access to the sink",
 		Required: true,
 	}
-	gcsBucketFlag = &cli.StringFlag{
+	saPrincipalFlagOptional = &cli.StringFlag{
+		Name:  "service-account-principal",
+		Usage: "Service account that has access to the sink",
+	}
+	gcsBucketFlagRequired = &cli.StringFlag{
 		Name:     "gcs-bucket",
-		Usage:    "gcs bucket of the sink",
+		Usage:    "GCS bucket of the sink",
 		Required: true,
+	}
+	gcsBucketFlagOptional = &cli.StringFlag{
+		Name:  "gcs-bucket",
+		Usage: "GCS bucket of the sink",
+	}
+	enableCmekFlag = &cli.BoolFlag{
+		Name:  "enable-cmek",
+		Usage: "Enable customized encryption.  Note: If enable cmek needs to be updated, user must create the service account with cmek or modify the created service account accordingly.",
 	}
 )
 
@@ -165,21 +177,20 @@ func (c *NamespaceClient) selectExportSinkResourceVersion(ctx *cli.Context, sink
 }
 
 func (c *NamespaceClient) isS3BucketChange(ctx *cli.Context, sink *sink.ExportSink) bool {
-	if !ctx.IsSet(s3BucketFlagRequired.Name) {
+	if !ctx.IsSet(s3BucketFlagOptional.Name) {
 		return false
 	}
 
-	return sink.GetSpec().GetS3Sink().GetBucketName() != ctx.String(s3BucketFlagRequired.Name)
+	return sink.GetSpec().GetS3Sink().GetBucketName() != ctx.String(s3BucketFlagOptional.Name)
 }
 
 func (c *NamespaceClient) isAssumedRoleChange(ctx *cli.Context, sink *sink.ExportSink) bool {
-	if !ctx.IsSet(sinkAssumedRoleFlagRequired.Name) {
+	if !ctx.IsSet(sinkAssumedRoleFlagOptional.Name) {
 		return false
 	}
 
 	roleArn := getAssumedRoleArn(sink.GetSpec().GetS3Sink().GetAwsAccountId(), sink.GetSpec().GetS3Sink().GetRoleName())
-	return roleArn != ctx.String(sinkAssumedRoleFlagRequired.Name)
-
+	return roleArn != ctx.String(sinkAssumedRoleFlagOptional.Name)
 }
 
 func (c *NamespaceClient) isKmsArnChange(ctx *cli.Context, sink *sink.ExportSink) bool {
@@ -190,7 +201,28 @@ func (c *NamespaceClient) isKmsArnChange(ctx *cli.Context, sink *sink.ExportSink
 	return sink.GetSpec().GetS3Sink().GetKmsArn() != ctx.String(kmsArnFlag.Name)
 }
 
-func (c *NamespaceClient) isSinkEnabledChange(ctx *cli.Context, sink *sink.ExportSink) (bool, error) {
+func (c *NamespaceClient) isGCSBucketChange(ctx *cli.Context, sink *sink.ExportSink) bool {
+	if !ctx.IsSet(gcsBucketFlagOptional.Name) {
+		return false
+	}
+
+	return sink.GetSpec().GetGcsSink().GetBucketName() != ctx.String(gcsBucketFlagOptional.Name)
+}
+
+func (c *NamespaceClient) isEnableCmekChange(ctx *cli.Context, sink *sink.ExportSink) bool {
+	return sink.GetSpec().GetGcsSink().GetEnableCmek() != ctx.Bool(enableCmekFlag.Name)
+}
+
+func (c *NamespaceClient) isSAPrincipalChange(ctx *cli.Context, sink *sink.ExportSink) bool {
+	if !ctx.IsSet(saPrincipalFlagOptional.Name) {
+		return false
+	}
+
+	saPrincipal := getSAPrincipal(sink.GetSpec().GetGcsSink().GetSaId(), sink.GetSpec().GetGcsSink().GetGcpProjectId())
+	return saPrincipal != ctx.String(saPrincipalFlagOptional.Name)
+}
+
+func (c *NamespaceClient) isSinkToggleChange(ctx *cli.Context, sink *sink.ExportSink) (bool, error) {
 	if !ctx.IsSet(sinkEnabledFlag.Name) {
 		return false, nil
 	}
@@ -1193,7 +1225,85 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		Aliases: []string{"es"},
 	}
 
-	export_s3_commands := &cli.Command{
+	exportGeneralCommands := []*cli.Command{
+		{
+			Name:    "get",
+			Aliases: []string{"g"},
+			Usage:   "Get export sink",
+			Flags: []cli.Flag{
+				NamespaceFlag,
+				sinkNameFlag,
+			},
+			Action: func(ctx *cli.Context) error {
+				sink, err := c.getExportSink(ctx, ctx.String(NamespaceFlagName), ctx.String(sinkNameFlag.Name))
+
+				if err != nil {
+					return err
+				}
+
+				return PrintProto(sink)
+			},
+		},
+		{
+			Name:    "delete",
+			Aliases: []string{"d"},
+			Usage:   "Delete export sink",
+			Flags: []cli.Flag{
+				NamespaceFlag,
+				sinkNameFlag,
+				ResourceVersionFlag,
+				RequestIDFlag,
+			},
+			Action: func(ctx *cli.Context) error {
+				namespaceName := ctx.String(NamespaceFlagName)
+				sinkName := ctx.String(sinkNameFlag.Name)
+				resourceVersion, err := c.getExportSinkResourceVersion(ctx, namespaceName, sinkName)
+				if err != nil {
+					return err
+				}
+
+				deleteRequest := &namespaceservice.DeleteExportSinkRequest{
+					Namespace:       namespaceName,
+					SinkName:        sinkName,
+					ResourceVersion: resourceVersion,
+					RequestId:       ctx.String(RequestIDFlagName),
+				}
+
+				deleteResp, err := c.client.DeleteExportSink(c.ctx, deleteRequest)
+				if err != nil {
+					return err
+				}
+
+				return PrintProto(deleteResp.RequestStatus)
+			},
+		},
+		{
+			Name:    "list",
+			Aliases: []string{"l"},
+			Usage:   "List export sinks",
+			Flags: []cli.Flag{
+				NamespaceFlag,
+				pageSizeFlag,
+				pageTokenFlag,
+			},
+			Action: func(ctx *cli.Context) error {
+				request := &namespaceservice.ListExportSinksRequest{
+					Namespace: ctx.String(NamespaceFlagName),
+					PageSize:  int32(pageSizeFlag.Value),
+					PageToken: ctx.String(pageTokenFlag.Name),
+				}
+
+				resp, err := c.client.ListExportSinks(c.ctx, request)
+				if err != nil {
+					return err
+				}
+
+				return PrintProto(resp)
+			},
+		},
+	}
+
+	exportS3Commands := &cli.Command{
 		Name:  "s3",
 		Usage: "Manage S3 export sink",
 		Subcommands: []*cli.Command{
@@ -1247,26 +1357,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 			},
 			{
-				Name:    "get",
-				Aliases: []string{"g"},
-				Usage:   "Get export sink",
-				Flags: []cli.Flag{
-					NamespaceFlag,
-					sinkNameFlag,
-				},
-				Action: func(ctx *cli.Context) error {
-					sink, err := c.getExportSink(ctx, ctx.String(NamespaceFlagName), ctx.String(sinkNameFlag.Name))
-
-					if err != nil {
-						return err
-					}
-
-					return PrintProto(sink)
-				},
-			},
-			{
-				Name:  "validate",
-				Usage: "Validate export sink",
+				Name:    "validate",
+				Usage:   "Validate export sink",
+				Aliases: []string{"v"},
 				Flags: []cli.Flag{
 					NamespaceFlag,
 					sinkNameFlag,
@@ -1312,63 +1405,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 			},
 			{
-				Name:    "delete",
-				Aliases: []string{"d"},
-				Usage:   "Delete export sink",
-				Flags: []cli.Flag{
-					NamespaceFlag,
-					sinkNameFlag,
-					ResourceVersionFlag,
-					RequestIDFlag,
-				},
-				Action: func(ctx *cli.Context) error {
-					namespaceName := ctx.String(NamespaceFlagName)
-					sinkName := ctx.String(sinkNameFlag.Name)
-					resourceVersion, err := c.getExportSinkResourceVersion(ctx, namespaceName, sinkName)
-					if err != nil {
-						return err
-					}
-
-					deleteRequest := &namespaceservice.DeleteExportSinkRequest{
-						Namespace:       namespaceName,
-						SinkName:        sinkName,
-						ResourceVersion: resourceVersion,
-						RequestId:       ctx.String(RequestIDFlagName),
-					}
-
-					deleteResp, err := c.client.DeleteExportSink(c.ctx, deleteRequest)
-					if err != nil {
-						return err
-					}
-
-					return PrintProto(deleteResp.RequestStatus)
-				},
-			},
-			{
-				Name:    "list",
-				Aliases: []string{"l"},
-				Usage:   "List export sink",
-				Flags: []cli.Flag{
-					NamespaceFlag,
-					pageSizeFlag,
-					pageTokenFlag,
-				},
-				Action: func(ctx *cli.Context) error {
-					request := &namespaceservice.ListExportSinksRequest{
-						Namespace: ctx.String(NamespaceFlagName),
-						PageSize:  int32(pageSizeFlag.Value),
-						PageToken: ctx.String(pageTokenFlag.Name),
-					}
-
-					resp, err := c.client.ListExportSinks(c.ctx, request)
-					if err != nil {
-						return err
-					}
-
-					return PrintProto(resp)
-				},
-			},
-			{
 				Name:    "update",
 				Aliases: []string{"u"},
 				Usage:   "Update export sink",
@@ -1391,17 +1427,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					}
 					resourceVersion := c.selectExportSinkResourceVersion(ctx, sink)
 
-					isEnabledChange, err := c.isSinkEnabledChange(ctx, sink)
+					isToggleChanged, err := c.isSinkToggleChange(ctx, sink)
 					if err != nil {
 						return err
 					}
 
-					if !isEnabledChange && !c.isAssumedRoleChange(ctx, sink) && !c.isKmsArnChange(ctx, sink) && !c.isS3BucketChange(ctx, sink) {
+					if !isToggleChanged && !c.isAssumedRoleChange(ctx, sink) && !c.isKmsArnChange(ctx, sink) && !c.isS3BucketChange(ctx, sink) {
 						fmt.Println("nothing to update")
 						return nil
 					}
 
-					if isEnabledChange {
+					if isToggleChanged {
 						sink.Spec.Enabled = !sink.Spec.Enabled
 					}
 
@@ -1440,19 +1476,139 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 	}
 
-	export_gcs_commands := &cli.Command{
+	exportGCSCommands := &cli.Command{
 		Name:  "gcs",
 		Usage: "Manage GCS export sink",
 		Subcommands: []*cli.Command{
 			{
-				Name:    "validate",
-				Aliases: []string{"v"},
-				Usage:   "Validate gcs export sink",
+				Name:    "create",
+				Aliases: []string{"c"},
+				Usage:   "Create export sink",
 				Flags: []cli.Flag{
 					NamespaceFlag,
 					sinkNameFlag,
-					serviceAccountPrincipalFlag,
-					gcsBucketFlag,
+					saPrincipalFlagRequired,
+					gcsBucketFlagRequired,
+				},
+				Action: func(ctx *cli.Context) error {
+					SaId, projectName, err := parseSAPrincipal(ctx.String(saPrincipalFlagRequired.Name))
+					if err != nil {
+						return fmt.Errorf("validation failed: %v", err)
+					}
+
+					namespace := ctx.String(NamespaceFlagName)
+					_, err = c.getNamespace(namespace)
+					if err != nil {
+						return fmt.Errorf("unable to get namespace: %v", err)
+					}
+
+					request := &namespaceservice.CreateExportSinkRequest{
+						Namespace: namespace,
+						Spec: &sink.ExportSinkSpec{
+							Name:            ctx.String(sinkNameFlag.Name),
+							Enabled:         true,
+							DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
+							GcsSink: &sink.GCSSpec{
+								GcpProjectId: projectName,
+								BucketName:   ctx.String(gcsBucketFlagRequired.Name),
+								SaId:         SaId,
+								EnableCmek:   ctx.Bool(enableCmekFlag.Name),
+							},
+						},
+						RequestId: ctx.String(RequestIDFlagName),
+					}
+
+					res, err := c.client.CreateExportSink(c.ctx, request)
+					if err != nil {
+						return err
+					}
+
+					return PrintProto(res.RequestStatus)
+				},
+			},
+			{
+				Name:    "update",
+				Aliases: []string{"u"},
+				Usage:   "Update export sink",
+				Flags: []cli.Flag{
+					NamespaceFlag,
+					sinkNameFlag,
+					sinkEnabledFlag,
+					saPrincipalFlagOptional,
+					gcsBucketFlagOptional,
+					ResourceVersionFlag,
+					enableCmekFlag,
+					RequestIDFlag,
+				},
+				Action: func(ctx *cli.Context) error {
+					namespaceName := ctx.String(NamespaceFlagName)
+					sinkName := ctx.String(sinkNameFlag.Name)
+					sink, err := c.getExportSink(ctx, namespaceName, sinkName)
+					if err != nil {
+						return err
+					}
+					resourceVersion := c.selectExportSinkResourceVersion(ctx, sink)
+
+					isToggleChanged, err := c.isSinkToggleChange(ctx, sink)
+					if err != nil {
+						return err
+					}
+
+					if !isToggleChanged && !c.isSAPrincipalChange(ctx, sink) && !c.isEnableCmekChange(ctx, sink) && !c.isGCSBucketChange(ctx, sink) {
+						fmt.Println("nothing to update")
+						return nil
+					}
+
+					if isToggleChanged {
+						sink.Spec.Enabled = !sink.Spec.Enabled
+					}
+
+					if c.isSAPrincipalChange(ctx, sink) {
+						SaId, GcpProjectId, err := parseSAPrincipal(ctx.String(saPrincipalFlagOptional.Name))
+						if err != nil {
+							return err
+						}
+
+						sink.Spec.GcsSink.SaId = SaId
+						sink.Spec.GcsSink.GcpProjectId = GcpProjectId
+					}
+
+					if c.isEnableCmekChange(ctx, sink) {
+						sink.Spec.GcsSink.EnableCmek = ctx.Bool(enableCmekFlag.Name)
+					}
+
+					if c.isS3BucketChange(ctx, sink) {
+						sink.Spec.S3Sink.BucketName = ctx.String(s3BucketFlagOptional.Name)
+					}
+
+					if c.isGCSBucketChange(ctx, sink) {
+						sink.Spec.GcsSink.BucketName = ctx.String(gcsBucketFlagOptional.Name)
+					}
+
+					request := &namespaceservice.UpdateExportSinkRequest{
+						Namespace:       ctx.String(NamespaceFlagName),
+						Spec:            sink.Spec,
+						ResourceVersion: resourceVersion,
+						RequestId:       ctx.String(RequestIDFlagName),
+					}
+
+					resp, err := c.client.UpdateExportSink(c.ctx, request)
+					if err != nil {
+						return err
+					}
+
+					return PrintProto(resp.RequestStatus)
+				},
+			},
+			{
+				Name:    "validate",
+				Aliases: []string{"v"},
+				Usage:   "Validate export sink",
+				Flags: []cli.Flag{
+					NamespaceFlag,
+					sinkNameFlag,
+					saPrincipalFlagRequired,
+					gcsBucketFlagRequired,
 				},
 				Action: func(ctx *cli.Context) error {
 					namespace := ctx.String(NamespaceFlagName)
@@ -1461,7 +1617,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						return fmt.Errorf("unable to get existing namespace: %v", err)
 					}
 
-					saId, projectId, err := parseSAPrincipal(ctx.String(serviceAccountPrincipalFlag.Name))
+					SaId, projectName, err := parseSAPrincipal(ctx.String(saPrincipalFlagRequired.Name))
 					if err != nil {
 						return fmt.Errorf("validation failed: %v", err)
 					}
@@ -1472,9 +1628,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							Name:            ctx.String(sinkNameFlag.Name),
 							DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
 							GcsSink: &sink.GCSSpec{
-								GcpProjectId: projectId,
-								BucketName:   ctx.String(gcsBucketFlag.Name),
-								SaId:         saId,
+								GcpProjectId: projectName,
+								BucketName:   ctx.String(gcsBucketFlagRequired.Name),
+								SaId:         SaId,
 							},
 						},
 					}
@@ -1492,11 +1648,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 	}
 
-	exportCommand.Subcommands = append(exportCommand.Subcommands, export_s3_commands)
+	exportS3Commands.Subcommands = append(exportS3Commands.Subcommands, exportGeneralCommands...)
+	exportCommand.Subcommands = append(exportCommand.Subcommands, exportS3Commands)
 
-	// TODO: remove GCP sink feature flag check when out of private preview
+	// TODO: remove GCP sink feature flag check when out of pre-release
 	if IsFeatureEnabled(GCPSinkFeatureFlag) {
-		exportCommand.Subcommands = append(exportCommand.Subcommands, export_gcs_commands)
+		exportGCSCommands.Subcommands = append(exportGCSCommands.Subcommands, exportGeneralCommands...)
+		exportCommand.Subcommands = append(exportCommand.Subcommands, exportGCSCommands)
 	}
 
 	subCommands = append(subCommands, exportCommand)
