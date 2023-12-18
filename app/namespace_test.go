@@ -46,6 +46,9 @@ func (s *NamespaceTestSuite) SetupTest() {
 		},
 	}
 
+	err = s.RunCmd("feature", "toggle-export")
+	s.Require().NoError(err)
+
 	err = s.RunCmd("feature", "toggle-gcp-sink")
 	s.Require().NoError(err)
 
