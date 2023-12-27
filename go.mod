@@ -10,7 +10,7 @@ require (
 	github.com/google/uuid v1.3.1
 	github.com/kylelemons/godebug v1.1.0
 	github.com/stretchr/testify v1.8.4
-	github.com/urfave/cli/v2 v2.25.7
+	github.com/urfave/cli/v2 v2.27.0
 	go.uber.org/fx v1.20.1
 	go.uber.org/multierr v1.11.0
 	golang.org/x/mod v0.12.0
