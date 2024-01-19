@@ -82,68 +82,6 @@ func (c *ServiceAccountClient) getServiceAccount(serviceAccountID string) (*auth
 	return res.ServiceAccount, nil
 }
 
-func (c *ServiceAccountClient) updateServiceAccount(
-	ctx *cli.Context,
-	serviceAccountID string,
-	description string,
-	name string,
-) error {
-	if len(description) == 0 && len(name) == 0 {
-		return fmt.Errorf("no update parameters provided")
-	}
-
-	sa, err := c.getServiceAccount(serviceAccountID)
-	if err != nil {
-		return err
-	}
-
-	spec := sa.Spec
-
-	if len(name) > 0 {
-		spec.Name = name
-	}
-	if len(description) > 0 {
-		spec.Description = description
-	}
-
-	req := &authservice.UpdateServiceAccountRequest{
-		ServiceAccountId: sa.Id,
-		Spec:             spec,
-	}
-	if ctx.IsSet(ResourceVersionFlagName) {
-		req.ResourceVersion = ctx.String(ResourceVersionFlagName)
-	}
-	if ctx.IsSet(RequestIDFlagName) {
-		req.AsyncOperationId = ctx.String(RequestIDFlagName)
-	}
-	if req.ResourceVersion == "" {
-		req.ResourceVersion = sa.ResourceVersion
-	}
-
-	resp, err := c.client.UpdateServiceAccount(c.ctx, req)
-	if err != nil {
-		return fmt.Errorf("unable to update service account: %w", err)
-	}
-
-	return PrintProto(resp.AsyncOperation)
-}
-
-func (c *ServiceAccountClient) setDisabledFlagOnServiceAccount(
-	ctx *cli.Context,
-	serviceAccountID string,
-	disabled bool,
-) error {
-	return c.performUpdate(
-		ctx,
-		serviceAccountID,
-		"",
-		"",
-		&disabled,
-		"",
-		nil,
-	)
-}
-
 func (c *ServiceAccountClient) deleteServiceAccount(
 	ctx *cli.Context,
 	serviceAccountID string,
@@ -224,47 +162,6 @@ func (c *ServiceAccountClient) performUpdate(
 	if err != nil {
 		return fmt.Errorf("unable to update service account: %w", err)
 	}
-	return PrintProto(resp.AsyncOperation)
-}
-
-func (c *ServiceAccountClient) setAccountRole(
-	ctx *cli.Context,
-	serviceAccountID string,
-	accountRole string,
-) error {
-	if len(accountRole) == 0 {
-		return fmt.Errorf("no account role parameter provided")
-	}
-
-	sa, err := c.getServiceAccount(serviceAccountID)
-	if err != nil {
-		return err
-	}
-	spec := sa.Spec
-	accountAccess := &identity.AccountAccess{
-		Role: accountRole,
-	}
-	spec.Access.AccountAccess = accountAccess
-
-	req := &authservice.UpdateServiceAccountRequest{
-		ServiceAccountId: sa.Id,
-		Spec:             spec,
-	}
-	if ctx.IsSet(ResourceVersionFlagName) {
-		req.ResourceVersion = ctx.String(ResourceVersionFlagName)
-	}
-	if ctx.IsSet(RequestIDFlagName) {
-		req.AsyncOperationId = ctx.String(RequestIDFlagName)
-	}
-	if req.ResourceVersion == "" {
-		req.ResourceVersion = sa.ResourceVersion
-	}
-
-	resp, err := c.client.UpdateServiceAccount(c.ctx, req)
-	if err != nil {
-		return fmt.Errorf("unable to update service account: %w", err)
-	}
-
 	return PrintProto(resp.AsyncOperation)
 }
 
