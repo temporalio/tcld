@@ -57,6 +57,34 @@ func (s *APIKeyClient) createAPIKey(
 	return PrintProto(resp)
 }
 
+func (s *APIKeyClient) createServiceAccountAPIKey(
+	serviceAccountID string,
+	displayName string,
+	description string,
+	expiry time.Time,
+	requestID string,
+) error {
+	expiryts, err := types.TimestampProto(expiry)
+	if err != nil {
+		return fmt.Errorf("failed to convert timestamp to proto: %w", err)
+	}
+	resp, err := s.client.CreateServiceAccountAPIKey(s.ctx, &authservice.CreateServiceAccountAPIKeyRequest{
+		ServiceAccountId: serviceAccountID,
+		Spec: &auth.APIKeySpec{
+			AccessType:  auth.APIKEY_ACCESS_TYPE_INHERIT_OWNER_ACCESS,
+			Disabled:    false,
+			DisplayName: displayName,
+			Description: description,
+			ExpiryTime:  expiryts,
+		},
+		AsyncOperationId: requestID,
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(resp)
+}
+
 func (s *APIKeyClient) listAPIKey() error {
 
 	totalRes := &authservice.GetAPIKeysResponse{}
@@ -136,6 +164,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 				return err
 			},
 			Subcommands: []*cli.Command{
+				// TODO: need a create for service account command
 				{
 					Name:    "create",
 					Usage:   "Create an apikey. Make sure to copy the secret or else you will not be able to retrieve it again.",
@@ -163,6 +192,11 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 							Aliases: []string{"e"},
 							Layout:  time.RFC3339,
 						},
+						&cli.StringFlag{
+							Name:    "service-account-id",
+							Usage:   "setting this flag will create an api key for a service account, not a user",
+							Aliases: []string{"si"},
+						},
 						RequestIDFlag,
 					},
 					Action: func(ctx *cli.Context) error {
@@ -181,6 +215,16 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 							}
 							e := time.Now().UTC().Add(d)
 							expiry = &e
+						}
+						// create api key for service account
+						if ctx.String("service-account-id") != "" {
+							return c.createServiceAccountAPIKey(
+								ctx.String("service-account-id"),
+								ctx.String("name"),
+								ctx.String("description"),
+								*expiry,
+								ctx.String(RequestIDFlagName),
+							)
 						}
 						return c.createAPIKey(
 							ctx.String("name"),
