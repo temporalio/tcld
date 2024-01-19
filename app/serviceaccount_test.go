@@ -7,8 +7,9 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
-	"github.com/temporalio/tcld/protogen/api/request/v1"
 	authservicemock "github.com/temporalio/tcld/protogen/apimock/authservice/v1"
+	"github.com/temporalio/tcld/protogen/temporal/api/cloud/identity/v1"
+	"github.com/temporalio/tcld/protogen/temporal/api/cloud/operation/v1"
 	"github.com/urfave/cli/v2"
 	"reflect"
 	"testing"
@@ -68,374 +69,252 @@ func (m *updateServiceAccountRequestMatcher) String() string {
 }
 
 func (s *ServiceAccountTestSuite) TestGet() {
-	s.Error(s.RunCmd("user", "get"))
-	s.Error(s.RunCmd("user", "get", "--user-email", "test@example.com", "--user-id", "test-user-id"))
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(nil, errors.New("get user error")).Times(1)
-	s.Error(s.RunCmd("user", "get", "--user-email", "test@example.com"))
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{}, nil).Times(1)
-	s.Error(s.RunCmd("user", "get", "--user-email", "test@example.com"))
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
-		User: &auth.User{
-			Id: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
+	s.Error(s.RunCmd("service-account", "get"))
+	s.Error(s.RunCmd("service-account", "get", "--service-account-id"))
+	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("get service-account error")).Times(1)
+	s.Error(s.RunCmd("service-account", "get", "--service-account-id", "test-service-account-id"))
+	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.GetServiceAccountResponse{}, nil).Times(1)
+	s.Error(s.RunCmd("service-account", "get", "--service-account-id", "test-service-account-id"))
+	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.GetServiceAccountResponse{
+		ServiceAccount: &auth.ServiceAccount{
+			Id: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
 			},
 		},
-	}, nil).Times(2)
-	s.mockAuthService.EXPECT().GetRoles(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesResponse{
-		Roles: []*auth.Role{
-			{
-				Id:   "test-account-dev-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					AccountRole: &auth.AccountRoleSpec{
-						ActionGroup: auth.ACCOUNT_ACTION_GROUP_DEVELOPER,
-					},
-				},
-			},
-			{
-				Id:   "test-ns1-admin-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					NamespaceRoles: []*auth.NamespaceRoleSpec{{
-						Namespace:   "test-ns1",
-						ActionGroup: auth.NAMESPACE_ACTION_GROUP_ADMIN,
-					}},
-				},
-			},
-		},
-	}, nil).Times(2)
-	s.NoError(s.RunCmd("user", "get", "--user-email", "test@example.com"))
-	s.NoError(s.RunCmd("user", "get", "--user-id", "test-user-id"))
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("service-account", "get", "--service-account-id", "test-service-account-id"))
 }
 
 func (s *ServiceAccountTestSuite) TestList() {
-	s.mockAuthService.EXPECT().GetUsers(gomock.Any(), gomock.Any()).Return(nil, errors.New("get users error")).Times(1)
-	s.Error(s.RunCmd("user", "list"))
-	s.mockAuthService.EXPECT().GetUsers(gomock.Any(), gomock.Any()).Return(&authservice.GetUsersResponse{
-		Users: []*auth.User{{
-			Id: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
+	s.mockAuthService.EXPECT().GetServiceAccounts(gomock.Any(), gomock.Any()).Return(nil, errors.New("get service accounts error")).Times(1)
+	s.Error(s.RunCmd("service-account", "list"))
+	s.mockAuthService.EXPECT().GetServiceAccounts(gomock.Any(), gomock.Any()).Return(&authservice.GetServiceAccountsResponse{
+		ServiceAccount: []*auth.ServiceAccount{{
+			Id: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
 			},
 		}},
 	}, nil).Times(1)
-	s.mockAuthService.EXPECT().GetRoles(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesResponse{
-		Roles: []*auth.Role{
-			{
-				Id:   "test-account-dev-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					AccountRole: &auth.AccountRoleSpec{
-						ActionGroup: auth.ACCOUNT_ACTION_GROUP_DEVELOPER,
-					},
-				},
-			},
-			{
-				Id:   "test-ns1-admin-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					NamespaceRoles: []*auth.NamespaceRoleSpec{{
-						Namespace:   "test-ns1",
-						ActionGroup: auth.NAMESPACE_ACTION_GROUP_ADMIN,
-					}},
-				},
-			},
-		},
-	}, nil).Times(1)
-	s.NoError(s.RunCmd("user", "list"))
+	s.NoError(s.RunCmd("service-account", "list"))
 }
 
-func (s *ServiceAccountTestSuite) TestDeleteUser() {
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(nil, errors.New("get user error")).Times(1)
-	s.EqualError(s.RunCmd("user", "delete", "--user-email", "test@example.com"), "unable to get user: get user error")
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
-		User: &auth.User{
-			Id: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
+func (s *ServiceAccountTestSuite) TestDeleteServiceAccount() {
+	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("get service account error")).Times(1)
+	s.EqualError(s.RunCmd("service-account", "delete", "--service-account-id", "test-service-account-id"), "unable to get service account: get service account error")
+	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.GetServiceAccountResponse{
+		ServiceAccount: &auth.ServiceAccount{
+			Id: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
 			},
 		},
 	}, nil).Times(1)
-	s.mockAuthService.EXPECT().DeleteUser(gomock.Any(), gomock.Any()).Return(nil, errors.New("delete user error")).Times(1)
-	s.EqualError(s.RunCmd("user", "delete", "--user-email", "test@example.com"), "unable to delete user: delete user error")
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
-		User: &auth.User{
-			Id: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
+	s.mockAuthService.EXPECT().DeleteServiceAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("delete service account error")).Times(1)
+	s.EqualError(s.RunCmd("service-account", "delete", "--service-account-id", "test-service-account-id"), "unable to delete service account: delete service account error")
+	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.GetServiceAccountResponse{
+		ServiceAccount: &auth.ServiceAccount{
+			Id: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
 			},
 		},
 	}, nil).Times(1)
-	s.mockAuthService.EXPECT().DeleteUser(gomock.Any(), gomock.Any()).Return(&authservice.DeleteUserResponse{
-		RequestStatus: &request.RequestStatus{
-			State: request.STATE_FULFILLED,
+	s.mockAuthService.EXPECT().DeleteServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.DeleteServiceAccountResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			State: "FULFILLED",
 		},
 	}, nil).Times(1)
-	s.NoError(s.RunCmd("user", "delete", "--user-email", "test@example.com"))
+	s.NoError(s.RunCmd("service-account", "delete", "--service-account-id", "test-service-account-id"))
+}
+
+func (s *ServiceAccountTestSuite) TestInvalidSetAccountRole() {
+	s.ErrorContains(
+		s.RunCmd("service-account", "set-account-role", "--service-account-id", "test-service-account-id", "--account-role", "wrong-role"),
+		"invalid account role wrong-role; valid types are:",
+	)
 }
 
 func (s *ServiceAccountTestSuite) TestSetAccountRole() {
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
-		User: &auth.User{
-			Id: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
-			},
-		},
-	}, nil).Times(1)
-	s.mockAuthService.EXPECT().GetRoles(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesResponse{
-		Roles: []*auth.Role{
-			{
-				Id:   "test-account-admin-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					AccountRole: &auth.AccountRoleSpec{
-						ActionGroup: auth.ACCOUNT_ACTION_GROUP_ADMIN,
+	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.GetServiceAccountResponse{
+		ServiceAccount: &auth.ServiceAccount{
+			Id: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
+				Access: &identity.Access{
+					AccountAccess: &identity.AccountAccess{
+						Role: "Read",
+					},
+					NamespaceAccesses: map[string]*identity.NamespaceAccess{
+						"test-namespace": {
+							Permission: "test-namespace-role",
+						},
 					},
 				},
 			},
 		},
 	}, nil).Times(1)
-	s.mockAuthService.EXPECT().GetRolesByPermissions(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesByPermissionsResponse{
-		Roles: []*auth.Role{
-			{
-				Id:   "test-account-developer-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					AccountRole: &auth.AccountRoleSpec{
-						ActionGroup: auth.ACCOUNT_ACTION_GROUP_DEVELOPER,
+	s.mockAuthService.EXPECT().UpdateServiceAccount(gomock.Any(), gomock.All(&updateServiceAccountRequestMatcher{
+		request: &authservice.UpdateServiceAccountRequest{
+			ServiceAccountId: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
+				Access: &identity.Access{
+					AccountAccess: &identity.AccountAccess{
+						Role: "Developer",
+					},
+					NamespaceAccesses: map[string]*identity.NamespaceAccess{
+						"test-namespace": {
+							Permission: "test-namespace-role",
+						},
 					},
 				},
 			},
 		},
-	}, nil).Times(1)
-	s.mockAuthService.EXPECT().UpdateUser(gomock.Any(), gomock.All(&updateUserRequestMatcher{
-		request: &authservice.UpdateUserRequest{
-			UserId: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
-				Roles: []string{
-					"test-account-developer-role",
-				},
-			},
-		},
-	})).Return(&authservice.UpdateUserResponse{
-		RequestStatus: &request.RequestStatus{
-			State: request.STATE_FULFILLED,
+	})).Return(&authservice.UpdateServiceAccountResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			State: "FULFILLED",
 		},
 	}, nil)
-	s.NoError(s.RunCmd("user", "set-account-role", "--user-email", "test@example.com", "--account-role", "Developer"))
+	s.NoError(s.RunCmd("service-account", "set-account-role", "--service-account-id", "test-service-account-id", "--account-role", "Developer"))
 }
 
 func (s *ServiceAccountTestSuite) TestSetAccountRoleAdmin() {
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
-		User: &auth.User{
-			Id: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
-			},
-		},
-	}, nil).Times(1)
-	s.mockAuthService.EXPECT().GetRoles(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesResponse{
-		Roles: []*auth.Role{
-			{
-				Id:   "test-account-developer-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					AccountRole: &auth.AccountRoleSpec{
-						ActionGroup: auth.ACCOUNT_ACTION_GROUP_DEVELOPER,
+	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.GetServiceAccountResponse{
+		ServiceAccount: &auth.ServiceAccount{
+			Id: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
+				Access: &identity.Access{
+					AccountAccess: &identity.AccountAccess{
+						Role: "Read",
 					},
-				},
-			},
-			{
-				Id:   "test-namespace-admin-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					NamespaceRoles: []*auth.NamespaceRoleSpec{
-						{
-							Namespace:   "ns1",
-							ActionGroup: auth.NAMESPACE_ACTION_GROUP_ADMIN,
+					NamespaceAccesses: map[string]*identity.NamespaceAccess{
+						"test-namespace": {
+							Permission: "test-namespace-role",
 						},
 					},
 				},
 			},
 		},
 	}, nil).Times(1)
-	s.mockAuthService.EXPECT().GetRolesByPermissions(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesByPermissionsResponse{
-		Roles: []*auth.Role{
-			{
-				Id:   "test-account-admin-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					AccountRole: &auth.AccountRoleSpec{
-						ActionGroup: auth.ACCOUNT_ACTION_GROUP_ADMIN,
+	s.mockAuthService.EXPECT().UpdateServiceAccount(gomock.Any(), gomock.All(&updateServiceAccountRequestMatcher{
+		request: &authservice.UpdateServiceAccountRequest{
+			ServiceAccountId: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
+				Access: &identity.Access{
+					AccountAccess: &identity.AccountAccess{
+						Role: "Admin",
 					},
+					NamespaceAccesses: map[string]*identity.NamespaceAccess{},
 				},
 			},
 		},
-	}, nil).Times(1)
-	s.mockAuthService.EXPECT().UpdateUser(gomock.Any(), gomock.All(&updateUserRequestMatcher{
-		request: &authservice.UpdateUserRequest{
-			UserId: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
-				Roles: []string{
-					"test-account-admin-role",
-				},
-			},
-		},
-	})).Return(&authservice.UpdateUserResponse{
-		RequestStatus: &request.RequestStatus{
-			State: request.STATE_FULFILLED,
+	})).Return(&authservice.UpdateServiceAccountResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			State: "FULFILLED",
 		},
 	}, nil)
-	s.NoError(s.RunCmd("user", "set-account-role", "--user-email", "test@example.com", "--account-role", "Admin"))
+	s.NoError(s.RunCmd("service-account", "set-account-role", "--service-account-id", "test-service-account-id", "--account-role", "Admin"))
+}
+
+func (s *ServiceAccountTestSuite) TestInvalidSetNamespacePermissions() {
+	s.ErrorContains(
+		s.RunCmd("service-account", "set-namespace-permissions", "--service-account-id", "test-service-account-id", "-p", "test-namespace-1=wrong-role"),
+		"invalid namespace permission \"wrong-role\" must be one of:",
+	)
 }
 
 func (s *ServiceAccountTestSuite) TestSetNamespacePermissions() {
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
-		User: &auth.User{
-			Id: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
-			},
-		},
-	}, nil).Times(1)
-	s.mockAuthService.EXPECT().GetRoles(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesResponse{
-		Roles: []*auth.Role{
-			{
-				Id:   "test-account-developer-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					AccountRole: &auth.AccountRoleSpec{
-						ActionGroup: auth.ACCOUNT_ACTION_GROUP_DEVELOPER,
+	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.GetServiceAccountResponse{
+		ServiceAccount: &auth.ServiceAccount{
+			Id: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
+				Access: &identity.Access{
+					AccountAccess: &identity.AccountAccess{
+						Role: "Read",
 					},
-				},
-			},
-			{
-				Id:   "test-ns0-admin-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					NamespaceRoles: []*auth.NamespaceRoleSpec{
-						{
-							Namespace:   "ns0",
-							ActionGroup: auth.NAMESPACE_ACTION_GROUP_ADMIN,
-						},
-					},
+					NamespaceAccesses: map[string]*identity.NamespaceAccess{},
 				},
 			},
 		},
 	}, nil).Times(1)
-	s.mockAuthService.EXPECT().GetRolesByPermissions(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesByPermissionsResponse{
-		Roles: []*auth.Role{
-			{
-				Id:   "test-ns1-admin-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					NamespaceRoles: []*auth.NamespaceRoleSpec{
-						{
-							Namespace:   "ns1",
-							ActionGroup: auth.NAMESPACE_ACTION_GROUP_ADMIN,
-						},
+	s.mockAuthService.EXPECT().UpdateServiceAccount(gomock.Any(), gomock.All(&updateServiceAccountRequestMatcher{
+		request: &authservice.UpdateServiceAccountRequest{
+			ServiceAccountId: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
+				Access: &identity.Access{
+					AccountAccess: &identity.AccountAccess{
+						Role: "Read",
 					},
-				},
-			},
-			{
-				Id:   "test-ns2-write-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					NamespaceRoles: []*auth.NamespaceRoleSpec{
-						{
-							Namespace:   "ns2",
-							ActionGroup: auth.NAMESPACE_ACTION_GROUP_WRITE,
-						},
-					},
-				},
-			},
-			{
-				Id:   "test-ns3-read-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					NamespaceRoles: []*auth.NamespaceRoleSpec{
-						{
-							Namespace:   "ns3",
-							ActionGroup: auth.NAMESPACE_ACTION_GROUP_READ,
+					NamespaceAccesses: map[string]*identity.NamespaceAccess{
+						"test-namespace-1": {
+							Permission: "Read",
 						},
 					},
 				},
 			},
 		},
-	}, nil).Times(1)
-	s.mockAuthService.EXPECT().UpdateUser(gomock.Any(), gomock.All(&updateUserRequestMatcher{
-		request: &authservice.UpdateUserRequest{
-			UserId: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
-				Roles: []string{
-					"test-account-developer-role",
-					"test-ns1-admin-role",
-					"test-ns2-write-role",
-					"test-ns3-read-role",
-				},
-			},
-		},
-	})).Return(&authservice.UpdateUserResponse{
-		RequestStatus: &request.RequestStatus{
-			State: request.STATE_FULFILLED,
+	})).Return(&authservice.UpdateServiceAccountResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			State: "FULFILLED",
 		},
 	}, nil)
-	s.NoError(s.RunCmd("user", "set-namespace-permissions", "--user-email", "test@example.com", "-p", "ns1=Admin", "-p", "ns2=Write", "-p", "ns3=Read"))
+	s.NoError(s.RunCmd("service-account", "set-namespace-permissions", "--service-account-id", "test-service-account-id", "-p", "test-namespace-1=Read"))
 }
 
 func (s *ServiceAccountTestSuite) TestSetNamespacePermissionsEmpty() {
-	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
-		User: &auth.User{
-			Id: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
-			},
-		},
-	}, nil).Times(1)
-	s.mockAuthService.EXPECT().GetRoles(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesResponse{
-		Roles: []*auth.Role{
-			{
-				Id:   "test-account-developer-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					AccountRole: &auth.AccountRoleSpec{
-						ActionGroup: auth.ACCOUNT_ACTION_GROUP_DEVELOPER,
+	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.GetServiceAccountResponse{
+		ServiceAccount: &auth.ServiceAccount{
+			Id: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
+				Access: &identity.Access{
+					AccountAccess: &identity.AccountAccess{
+						Role: "Read",
 					},
-				},
-			},
-			{
-				Id:   "test-ns0-admin-role",
-				Type: auth.ROLE_TYPE_PREDEFINED,
-				Spec: &auth.RoleSpec{
-					NamespaceRoles: []*auth.NamespaceRoleSpec{
-						{
-							Namespace:   "ns0",
-							ActionGroup: auth.NAMESPACE_ACTION_GROUP_ADMIN,
+					NamespaceAccesses: map[string]*identity.NamespaceAccess{
+						"test-namespace-1": {
+							Permission: "Read",
 						},
 					},
 				},
 			},
 		},
 	}, nil).Times(1)
-	s.mockAuthService.EXPECT().UpdateUser(gomock.Any(), gomock.All(&updateUserRequestMatcher{
-		request: &authservice.UpdateUserRequest{
-			UserId: "test-user-id",
-			Spec: &auth.UserSpec{
-				Email: "test@example.com",
-				Roles: []string{
-					"test-account-developer-role",
+	s.mockAuthService.EXPECT().UpdateServiceAccount(gomock.Any(), gomock.All(&updateServiceAccountRequestMatcher{
+		request: &authservice.UpdateServiceAccountRequest{
+			ServiceAccountId: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
+				Access: &identity.Access{
+					AccountAccess: &identity.AccountAccess{
+						Role: "Read",
+					},
+					NamespaceAccesses: map[string]*identity.NamespaceAccess{},
 				},
 			},
 		},
-	})).Return(&authservice.UpdateUserResponse{
-		RequestStatus: &request.RequestStatus{
-			State: request.STATE_FULFILLED,
+	})).Return(&authservice.UpdateServiceAccountResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			State: "FULFILLED",
 		},
 	}, nil)
-	s.NoError(s.RunCmd("user", "set-namespace-permissions", "--user-email", "test@example.com"))
+	s.NoError(s.RunCmd("service-account", "set-namespace-permissions", "--service-account-id", "test-service-account-id"))
 }
