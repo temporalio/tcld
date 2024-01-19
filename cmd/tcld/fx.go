@@ -24,6 +24,7 @@ func fxOptions() fx.Option {
 			app.NewCertificatesCommand,
 			app.NewAPIKeyCommand,
 			app.NewFeatureCommand,
+			app.NewServiceAccountCommand,
 			func() app.GetNamespaceClientFn {
 				return app.GetNamespaceClient
 			},
@@ -38,6 +39,9 @@ func fxOptions() fx.Option {
 			},
 			func() app.GetAPIKeyClientFn {
 				return app.GetAPIKeyClient
+			},
+			func() app.GetServiceAccountClientFn {
+				return app.GetServiceAccountClient
 			},
 		),
 		fx.Invoke(func(app *cli.App, shutdowner fx.Shutdowner) error {
