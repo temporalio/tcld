@@ -109,12 +109,12 @@ var (
 		Aliases: []string{"e"},
 	}
 	saPrincipalFlagRequired = &cli.StringFlag{
-		Name:     "service-account-principal",
+		Name:     "service-account-email",
 		Usage:    "Service account that has access to the sink",
 		Required: true,
 	}
 	saPrincipalFlagOptional = &cli.StringFlag{
-		Name:  "service-account-principal",
+		Name:  "service-account-email",
 		Usage: "Service account that has access to the sink",
 	}
 	gcsBucketFlagRequired = &cli.StringFlag{

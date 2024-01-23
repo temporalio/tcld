@@ -1708,7 +1708,7 @@ func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
 	}{
 		{
 			name:      "create export sink",
-			args:      []string{"namespace", "es", "gcs", "create", "--namespace", ns, "--sink-name", "sink1", "--service-account-principal", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket"},
+			args:      []string{"namespace", "es", "gcs", "create", "--namespace", ns, "--sink-name", "sink1", "--service-account-email", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectRequest: func(r *namespaceservice.CreateExportSinkRequest) {
 				r.Namespace = ns
@@ -1727,13 +1727,13 @@ func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
 		},
 		{
 			name:         "create export sink with invalid service account principal",
-			args:         []string{"namespace", "es", "gcs", "create", "--namespace", ns, "--sink-name", "sink1", "--service-account-principal", "testSA", "--gcs-bucket", "testBucket"},
+			args:         []string{"namespace", "es", "gcs", "create", "--namespace", ns, "--sink-name", "sink1", "--service-account-email", "testSA", "--gcs-bucket", "testBucket"},
 			expectErr:    true,
 			expectErrMsg: "invalid SA principal: testSA",
 		},
 		{
 			name: "create export sink with invalid namespace",
-			args: []string{"namespace", "es", "gcs", "create", "--namespace", ns, "--sink-name", "sink1", "--service-account-principal", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket"},
+			args: []string{"namespace", "es", "gcs", "create", "--namespace", ns, "--sink-name", "sink1", "--service-account-email", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
 				g.Namespace = &namespace.Namespace{
 					Namespace: "",
@@ -1803,18 +1803,18 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 		},
 		{
 			name:                  "update export sink succeeds with no updates",
-			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-principal", "testSA@testGcpAccount.iam.gserviceaccount.com", "--enabled", "true", "--gcs-bucket", "testBucket", "--sink-name", "testSink"},
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-email", "testSA@testGcpAccount.iam.gserviceaccount.com", "--enabled", "true", "--gcs-bucket", "testBucket", "--sink-name", "testSink"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 		},
 		{
 			name:         "update export sink fails with no sink name",
-			args:         []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-principal", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket", "--enabled", "true"},
+			args:         []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-email", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket", "--enabled", "true"},
 			expectErr:    true,
 			expectErrMsg: "Required flag \"sink-name\" not set",
 		},
 		{
 			name:                  "update export sink fails with not valid enabled value",
-			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-principal", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket", "--sink-name", "testSink", "--enabled", ""},
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-email", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket", "--sink-name", "testSink", "--enabled", ""},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectErr:             true,
 			expectErrMsg:          "invalid value for enabled flag",
@@ -1841,7 +1841,7 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 		},
 		{
 			name:                  "update export sink succeeds with sa principal and enabled flag",
-			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--enabled", "false", "--service-account-principal", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--sink-name", "testSink"},
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--enabled", "false", "--service-account-email", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--sink-name", "testSink"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
 				r.Namespace = ns
@@ -1861,7 +1861,7 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 		},
 		{
 			name:                  "update export sink succeeds with sa principal, bucket name and enabled flag",
-			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-principal", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "newTestBucket", "--enabled", "false", "--sink-name", "testSink"},
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-email", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "newTestBucket", "--enabled", "false", "--sink-name", "testSink"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
 				r.Namespace = ns
@@ -1881,7 +1881,7 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 		},
 		{
 			name:                  "update export sink succeeds with sa principal, bucket name, cmek and enabled flag",
-			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-principal", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "newTestBucket", "--enabled", "false", "--sink-name", "testSink", "--enable-cmek"},
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-email", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "newTestBucket", "--enabled", "false", "--sink-name", "testSink", "--enable-cmek"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
 				r.Namespace = ns
@@ -1956,7 +1956,7 @@ func (s *NamespaceTestSuite) TestValidateExportGCPSink() {
 	}{
 		{
 			name: "Validate export gcs sinks succeeds",
-			args: []string{"namespace", "es", "gcs", "validate", "--namespace", ns, "--sink-name", "sink1", "--service-account-principal", "test-sa@test-gcs.iam.gserviceaccount.com", "--gcs-bucket", "testBucket"},
+			args: []string{"namespace", "es", "gcs", "validate", "--namespace", ns, "--sink-name", "sink1", "--service-account-email", "test-sa@test-gcs.iam.gserviceaccount.com", "--gcs-bucket", "testBucket"},
 			expectRequest: func(r *namespaceservice.ValidateExportSinkRequest) {
 				r.Namespace = ns
 				r.Spec = &sink.ExportSinkSpec{
@@ -1978,7 +1978,7 @@ func (s *NamespaceTestSuite) TestValidateExportGCPSink() {
 		},
 		{
 			name:      "Validate export gcs sinks fails with invalid sa principal",
-			args:      []string{"namespace", "es", "gcs", "validate", "--namespace", ns, "--sink-name", "sink1", "--service-account-principal", "testSA", "--gcs-bucket", "testBucket"},
+			args:      []string{"namespace", "es", "gcs", "validate", "--namespace", ns, "--sink-name", "sink1", "--service-account-email", "testSA", "--gcs-bucket", "testBucket"},
 			expectErr: true,
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		},
