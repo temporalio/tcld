@@ -1720,7 +1720,6 @@ func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
 						SaId:         "testSA",
 						GcpProjectId: "testGcpAccount",
 						BucketName:   "testBucket",
-						EnableCmek:   false,
 					},
 				}
 			},
@@ -1833,7 +1832,6 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 						SaId:         "testSA",
 						GcpProjectId: "testGcpAccount",
 						BucketName:   "testBucket",
-						EnableCmek:   false,
 					},
 				}
 				r.ResourceVersion = "124214124"
@@ -1853,7 +1851,6 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 						SaId:         "newTestSA",
 						GcpProjectId: "newTestGcpAccount",
 						BucketName:   "testBucket",
-						EnableCmek:   false,
 					},
 				}
 				r.ResourceVersion = "124214124"
@@ -1873,15 +1870,14 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 						SaId:         "newTestSA",
 						GcpProjectId: "newTestGcpAccount",
 						BucketName:   "newTestBucket",
-						EnableCmek:   false,
 					},
 				}
 				r.ResourceVersion = "124214124"
 			},
 		},
 		{
-			name:                  "update export sink succeeds with sa principal, bucket name, cmek and enabled flag",
-			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-email", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "newTestBucket", "--enabled", "false", "--sink-name", "testSink", "--enable-cmek"},
+			name:                  "update export sink succeeds with sa principal, bucket name and enabled flag",
+			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-email", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "newTestBucket", "--enabled", "false", "--sink-name", "testSink"},
 			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
 			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
 				r.Namespace = ns
@@ -1893,7 +1889,6 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 						SaId:         "newTestSA",
 						GcpProjectId: "newTestGcpAccount",
 						BucketName:   "newTestBucket",
-						EnableCmek:   true,
 					},
 				}
 				r.ResourceVersion = "124214124"
@@ -1914,7 +1909,6 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 							SaId:         "testSA",
 							GcpProjectId: "testGcpAccount",
 							BucketName:   "testBucket",
-							EnableCmek:   false,
 						},
 					},
 					ResourceVersion: "124214124",
