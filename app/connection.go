@@ -8,7 +8,6 @@ import (
 
 	"github.com/temporalio/tcld/app/credentials/apikey"
 	"github.com/temporalio/tcld/app/credentials/oauth"
-	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -19,7 +18,7 @@ const (
 	VersionHeader                 = "tcld-version"
 	CommitHeader                  = "tcld-commit"
 	TemporalCloudAPIVersionHeader = "temporal-cloud-api-version"
-	TemporalCloudAPIVersion       = "2023-07-26-01"
+	TemporalCloudAPIVersion       = "2024-01-22-00"
 )
 
 func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Context, *grpc.ClientConn, error) {
