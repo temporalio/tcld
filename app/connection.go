@@ -8,6 +8,7 @@ import (
 
 	"github.com/temporalio/tcld/app/credentials/apikey"
 	"github.com/temporalio/tcld/app/credentials/oauth"
+	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
