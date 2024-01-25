@@ -54,6 +54,24 @@ func GetServiceAccountClient(ctx *cli.Context) (*ServiceAccountClient, error) {
 	}, nil
 }
 
+func (c *ServiceAccountClient) createServiceAccount(
+	ctx *cli.Context,
+	spec *auth.ServiceAccountSpec,
+	operationID string,
+) error {
+	req := &authservice.CreateServiceAccountRequest{
+		Spec:             spec,
+		AsyncOperationId: operationID,
+	}
+
+	resp, err := c.client.CreateServiceAccount(c.ctx, req)
+	if err != nil {
+		return fmt.Errorf("unable to create service account: %w", err)
+	}
+
+	return PrintProto(resp.AsyncOperation)
+}
+
 func (c *ServiceAccountClient) listServiceAccounts(
 	pageToken string,
 	pageSize int,
@@ -179,6 +197,80 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 			},
 			Subcommands: []*cli.Command{
 				{
+					Name:    "create",
+					Usage:   "Create a service account",
+					Aliases: []string{"c"},
+					Flags: []cli.Flag{
+						serviceAccountDescriptionFlag,
+						serviceAccountNameFlag,
+						RequestIDFlag,
+						&cli.StringFlag{
+							Name:     accountRoleFlagName,
+							Usage:    fmt.Sprintf("The account role to set on the service account; valid types are: %v", accountActionGroups),
+							Required: true,
+							Aliases:  []string{"ar"},
+						},
+						&cli.StringSliceFlag{
+							Name:    namespacePermissionFlagName,
+							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"namespace=permission\"; valid types are: %v", namespaceActionGroups),
+							Aliases: []string{"np"},
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						if len(ctx.String(serviceAccountNameFlagName)) == 0 {
+							return fmt.Errorf("service account name must be provied with '--%s'", serviceAccountNameFlagName)
+						}
+
+						if len(ctx.String(accountRoleFlagName)) == 0 {
+							return fmt.Errorf("account role must be specified; valid types are %v", accountActionGroups)
+						}
+
+						if _, ok := auth.AccountActionGroup_value[ctx.String(accountRoleFlagName)]; !ok {
+							return fmt.Errorf("invalid account role; valid types are: %v", accountActionGroups)
+						}
+
+						spec := &auth.ServiceAccountSpec{
+							Name: serviceAccountIDFlagName,
+							Access: &identity.Access{
+								AccountAccess: &identity.AccountAccess{
+									Role: ctx.String(accountRoleFlagName),
+								},
+								NamespaceAccesses: map[string]*identity.NamespaceAccess{},
+							},
+							Description: ctx.String(serviceAccountDescriptionFlagName),
+							Disabled:    false,
+						}
+
+						isAccountAdmin := ctx.String(accountRoleFlagName) == auth.AccountActionGroup_name[int32(auth.ACCOUNT_ACTION_GROUP_ADMIN)]
+						namespacePermissionsList := ctx.StringSlice(namespacePermissionFlagName)
+						if len(namespacePermissionsList) > 0 {
+							if isAccountAdmin {
+								y, err := ConfirmPrompt(ctx, "Setting admin role on service account. All existing namespace permissions will be replaced, please confirm")
+								if err != nil {
+									return err
+								}
+								if !y {
+									fmt.Println("operation canceled")
+									return nil
+								}
+							}
+
+							nsMap, err := toNamespacePermissionsMap(namespacePermissionsList)
+							if err != nil {
+								return fmt.Errorf("failed to read namespace permissions: %w", err)
+							}
+
+							for ns, perm := range nsMap {
+								spec.Access.NamespaceAccesses[ns] = &identity.NamespaceAccess{
+									Permission: perm,
+								}
+							}
+						}
+
+						return c.createServiceAccount(ctx, spec, ctx.String(RequestIDFlagName))
+					},
+				},
+				{
 					Name:    "list",
 					Usage:   "List service accounts",
 					Aliases: []string{"l"},
@@ -259,43 +351,6 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							&disabled,
 							"",
 							nil,
-						)
-					},
-				},
-				{
-					Name:  "enable",
-					Usage: "Enable service account from Temporal Cloud",
-					Flags: []cli.Flag{
-						serviceAccountIDFlag,
-						ResourceVersionFlag,
-						RequestIDFlag,
-					},
-					Action: func(ctx *cli.Context) error {
-						disabled := false
-						return c.performUpdate(
-							ctx,
-							ctx.String(serviceAccountIDFlagName),
-							"",
-							"",
-							&disabled,
-							"",
-							nil,
-						)
-					},
-				},
-				{
-					Name:    "delete",
-					Usage:   "Delete service account from Temporal Cloud",
-					Aliases: []string{"d"},
-					Flags: []cli.Flag{
-						serviceAccountIDFlag,
-						ResourceVersionFlag,
-						RequestIDFlag,
-					},
-					Action: func(ctx *cli.Context) error {
-						return c.deleteServiceAccount(
-							ctx,
-							ctx.String(serviceAccountIDFlagName),
 						)
 					},
 				},
