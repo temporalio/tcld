@@ -230,7 +230,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 						}
 
 						spec := &auth.ServiceAccountSpec{
-							Name: ctx.String(serviceAccountIDFlagName),
+							Name: ctx.String(serviceAccountNameFlagName),
 							Access: &identity.Access{
 								AccountAccess: &identity.AccountAccess{
 									Role: ctx.String(accountRoleFlagName),
