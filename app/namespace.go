@@ -109,12 +109,12 @@ var (
 		Aliases: []string{"e"},
 	}
 	saPrincipalFlagRequired = &cli.StringFlag{
-		Name:     "service-account-principal",
+		Name:     "service-account-email",
 		Usage:    "Service account that has access to the sink",
 		Required: true,
 	}
 	saPrincipalFlagOptional = &cli.StringFlag{
-		Name:  "service-account-principal",
+		Name:  "service-account-email",
 		Usage: "Service account that has access to the sink",
 	}
 	gcsBucketFlagRequired = &cli.StringFlag{
@@ -125,10 +125,6 @@ var (
 	gcsBucketFlagOptional = &cli.StringFlag{
 		Name:  "gcs-bucket",
 		Usage: "GCS bucket of the sink",
-	}
-	enableCmekFlag = &cli.BoolFlag{
-		Name:  "enable-cmek",
-		Usage: "Enable customized encryption.  Note: If enable cmek needs to be updated, user must create the service account with cmek or modify the created service account accordingly.",
 	}
 )
 
@@ -207,10 +203,6 @@ func (c *NamespaceClient) isGCSBucketChange(ctx *cli.Context, sink *sink.ExportS
 	}
 
 	return sink.GetSpec().GetGcsSink().GetBucketName() != ctx.String(gcsBucketFlagOptional.Name)
-}
-
-func (c *NamespaceClient) isEnableCmekChange(ctx *cli.Context, sink *sink.ExportSink) bool {
-	return sink.GetSpec().GetGcsSink().GetEnableCmek() != ctx.Bool(enableCmekFlag.Name)
 }
 
 func (c *NamespaceClient) isSAPrincipalChange(ctx *cli.Context, sink *sink.ExportSink) bool {
@@ -1512,7 +1504,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 								GcpProjectId: projectName,
 								BucketName:   ctx.String(gcsBucketFlagRequired.Name),
 								SaId:         SaId,
-								EnableCmek:   ctx.Bool(enableCmekFlag.Name),
 							},
 						},
 						RequestId: ctx.String(RequestIDFlagName),
@@ -1537,7 +1528,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					saPrincipalFlagOptional,
 					gcsBucketFlagOptional,
 					ResourceVersionFlag,
-					enableCmekFlag,
 					RequestIDFlag,
 				},
 				Action: func(ctx *cli.Context) error {
@@ -1554,7 +1544,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						return err
 					}
 
-					if !isToggleChanged && !c.isSAPrincipalChange(ctx, sink) && !c.isEnableCmekChange(ctx, sink) && !c.isGCSBucketChange(ctx, sink) {
+					if !isToggleChanged && !c.isSAPrincipalChange(ctx, sink) && !c.isGCSBucketChange(ctx, sink) {
 						fmt.Println("nothing to update")
 						return nil
 					}
@@ -1571,10 +1561,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 						sink.Spec.GcsSink.SaId = SaId
 						sink.Spec.GcsSink.GcpProjectId = GcpProjectId
-					}
-
-					if c.isEnableCmekChange(ctx, sink) {
-						sink.Spec.GcsSink.EnableCmek = ctx.Bool(enableCmekFlag.Name)
 					}
 
 					if c.isS3BucketChange(ctx, sink) {
