@@ -110,7 +110,6 @@ func (c *ServiceAccountClient) performUpdate(
 	serviceAccountID string,
 	name string,
 	description string,
-	disabled *bool,
 	accountRole string,
 	namespaceRoles map[string]string,
 ) error {
@@ -125,9 +124,6 @@ func (c *ServiceAccountClient) performUpdate(
 	}
 	if len(description) > 0 {
 		spec.Description = description
-	}
-	if disabled != nil {
-		spec.Disabled = *disabled
 	}
 	if len(accountRole) > 0 {
 		spec.Access.AccountAccess = &identity.AccountAccess{
@@ -235,49 +231,6 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							ctx.String(serviceAccountIDFlagName),
 							ctx.String(serviceAccountNameFlagName),
 							ctx.String(serviceAccountDescriptionFlagName),
-							nil,
-							"",
-							nil,
-						)
-					},
-				},
-				{
-					Name:  "disable",
-					Usage: "Disable service account from Temporal Cloud",
-					Flags: []cli.Flag{
-						serviceAccountIDFlag,
-						ResourceVersionFlag,
-						RequestIDFlag,
-					},
-					Action: func(ctx *cli.Context) error {
-						disabled := true
-						return c.performUpdate(
-							ctx,
-							ctx.String(serviceAccountIDFlagName),
-							"",
-							"",
-							&disabled,
-							"",
-							nil,
-						)
-					},
-				},
-				{
-					Name:  "enable",
-					Usage: "Enable service account from Temporal Cloud",
-					Flags: []cli.Flag{
-						serviceAccountIDFlag,
-						ResourceVersionFlag,
-						RequestIDFlag,
-					},
-					Action: func(ctx *cli.Context) error {
-						disabled := false
-						return c.performUpdate(
-							ctx,
-							ctx.String(serviceAccountIDFlagName),
-							"",
-							"",
-							&disabled,
 							"",
 							nil,
 						)
@@ -337,7 +290,6 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							ctx.String(serviceAccountIDFlagName),
 							"",
 							"",
-							nil,
 							ctx.String(accountRoleFlagName),
 							namespacePermissions,
 						)
@@ -380,7 +332,6 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							ctx.String(serviceAccountIDFlagName),
 							"",
 							"",
-							nil,
 							"",
 							m,
 						)
