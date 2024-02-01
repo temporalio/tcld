@@ -69,7 +69,7 @@ func (c *ServiceAccountClient) createServiceAccount(
 		return fmt.Errorf("unable to create service account: %w", err)
 	}
 
-	return PrintProto(resp.AsyncOperation)
+	return PrintProto(resp)
 }
 
 func (c *ServiceAccountClient) listServiceAccounts(
