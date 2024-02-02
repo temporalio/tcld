@@ -321,9 +321,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 								return nil
 							}
 						}
-						fmt.Println(namespacePermissionsList)
 						m, err := toNamespacePermissionsMap(namespacePermissionsList)
-						fmt.Println(m)
 						if err != nil {
 							return err
 						}
