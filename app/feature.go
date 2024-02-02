@@ -11,12 +11,13 @@ import (
 )
 
 var (
-	ExportFeatureFlag   = "enable-export"
-	GCPSinkFeatureFlag  = "enable-gcp-sink"
-	featureflagFileName = "feature.json"
+	ExportFeatureFlag         = "enable-export"
+	GCPSinkFeatureFlag        = "enable-gcp-sink"
+	ServiceAccountFeatureFlag = "enable-service-account"
+	featureflagFileName       = "feature.json"
 )
 
-var supportFeatureFlags = []string{GCPSinkFeatureFlag, ExportFeatureFlag}
+var supportFeatureFlags = []string{GCPSinkFeatureFlag, ExportFeatureFlag, ServiceAccountFeatureFlag}
 
 type FeatureFlag struct {
 	Name  string `json:"Name"`
@@ -133,6 +134,14 @@ func NewFeatureCommand() (CommandOut, error) {
 					Usage:   "switch gcp sink on/off",
 					Action: func(c *cli.Context) error {
 						return toggleFeature(GCPSinkFeatureFlag)
+					},
+				},
+				{
+					Name:    "toggle-service-account",
+					Aliases: []string{"tsa"},
+					Usage:   "switch service account on/off",
+					Action: func(c *cli.Context) error {
+						return toggleFeature(ServiceAccountFeatureFlag)
 					},
 				},
 				{
