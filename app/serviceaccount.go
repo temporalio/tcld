@@ -248,16 +248,16 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 									fmt.Println("operation canceled")
 									return nil
 								}
-							}
+							} else {
+								nsMap, err := toNamespacePermissionsMap(namespacePermissionsList)
+								if err != nil {
+									return fmt.Errorf("failed to read namespace permissions: %w", err)
+								}
 
-							nsMap, err := toNamespacePermissionsMap(namespacePermissionsList)
-							if err != nil {
-								return fmt.Errorf("failed to read namespace permissions: %w", err)
-							}
-
-							for ns, perm := range nsMap {
-								spec.Access.NamespaceAccesses[ns] = &identity.NamespaceAccess{
-									Permission: perm,
+								for ns, perm := range nsMap {
+									spec.Access.NamespaceAccesses[ns] = &identity.NamespaceAccess{
+										Permission: perm,
+									}
 								}
 							}
 						}

@@ -102,6 +102,29 @@ func (s *ServiceAccountTestSuite) TestList() {
 	s.NoError(s.RunCmd("service-account", "list"))
 }
 
+func (s *ServiceAccountTestSuite) TestCreateServiceAccount() {
+	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("create service account error")).Times(1)
+	s.EqualError(s.RunCmd("service-account", "create", "--description", "test description", "--name", "test name", "--account-role", "Read"), "unable to create service account: create service account error")
+	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.CreateServiceAccountResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			State: "FULFILLED",
+		},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("service-account", "create", "--description", "test description", "--name", "test name", "--account-role", "Read"))
+	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.CreateServiceAccountResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			State: "FULFILLED",
+		},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("service-account", "create", "--description", "test description", "--name", "test name", "--account-role", "Admin", "--namespace-permission", "test-namespace=Admin"))
+	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.CreateServiceAccountResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			State: "FULFILLED",
+		},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("service-account", "create", "--description", "test description", "--name", "test name", "--account-role", "Read", "--namespace-permission", "test-namespace=Read"))
+}
+
 func (s *ServiceAccountTestSuite) TestDeleteServiceAccount() {
 	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("get service account error")).Times(1)
 	s.EqualError(s.RunCmd("service-account", "delete", "--service-account-id", "test-service-account-id"), "unable to get service account: get service account error")
