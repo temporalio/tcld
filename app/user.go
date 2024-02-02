@@ -352,6 +352,10 @@ func toNamespacePermissionsMap(keyValues []string) (map[string]string, error) {
 			return nil, errors.New("permission must not be empty in namespace permission")
 		}
 
+		if _, ok := auth.NamespaceActionGroup_value[actionGroupValue]; !ok {
+			return nil, fmt.Errorf("invalid namespace permission \"%s\" must be one of: %s", actionGroupValue, namespaceActionGroups)
+		}
+
 		res[namespace] = actionGroupValue
 	}
 	return res, nil

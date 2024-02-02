@@ -191,9 +191,12 @@ func (s *UserTestSuite) TestParsingNamespacePermissionsErrors() {
 	s.EqualError(err, "permission must not be empty in namespace permission")
 	_, err = toNamespacePermissionsMap([]string{"=="})
 	s.EqualError(err, "invalid namespace permission \"==\" must be of format: \"namespace=permission\"")
-	ag, err := toNamespacePermissionsMap([]string{"ns1=wrongpermission"})
+	_, err = toNamespacePermissionsMap([]string{"ns1=wrongpermission"})
+	s.ErrorContains(err, "invalid namespace permission \"wrongpermission\" must be one of:")
+	ag, err := toNamespacePermissionsMap([]string{"ns1=Admin"})
 	s.NoError(err)
-	_, err = toNamespaceActionGroup(ag["ns1"])
+	s.Equal("Admin", ag["ns1"])
+	_, err = toNamespaceActionGroup("wrongpermission")
 	s.ErrorContains(err, "invalid action group: should be one of")
 }
 
