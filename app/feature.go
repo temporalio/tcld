@@ -11,13 +11,12 @@ import (
 )
 
 var (
-	ExportFeatureFlag         = "enable-export"
 	GCPSinkFeatureFlag        = "enable-gcp-sink"
 	ServiceAccountFeatureFlag = "enable-service-account"
 	featureflagFileName       = "feature.json"
 )
 
-var supportFeatureFlags = []string{GCPSinkFeatureFlag, ExportFeatureFlag, ServiceAccountFeatureFlag}
+var supportFeatureFlags = []string{GCPSinkFeatureFlag, ServiceAccountFeatureFlag}
 
 type FeatureFlag struct {
 	Name  string `json:"Name"`
@@ -120,14 +119,6 @@ func NewFeatureCommand() (CommandOut, error) {
 			Usage:   "feature commands",
 			Hidden:  true,
 			Subcommands: []*cli.Command{
-				{
-					Name:    "toggle-export",
-					Aliases: []string{"te"},
-					Usage:   "switch export on/off",
-					Action: func(c *cli.Context) error {
-						return toggleFeature(ExportFeatureFlag)
-					},
-				},
 				{
 					Name:    "toggle-gcp-sink",
 					Aliases: []string{"tgs"},
