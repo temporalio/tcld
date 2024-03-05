@@ -13,6 +13,7 @@ import (
 	"go.uber.org/multierr"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
+	"github.com/temporalio/tcld/protogen/api/common/v1"
 	"github.com/temporalio/tcld/protogen/api/sink/v1"
 
 	"github.com/kylelemons/godebug/diff"
@@ -269,6 +270,32 @@ func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.User
 	return PrintProto(res)
 }
 
+func (c *NamespaceClient) addReplica(ctx *cli.Context) error {
+	var resourceVersion string
+	if v := ctx.String(ResourceVersionFlagName); v != "" {
+		resourceVersion = v
+	}
+
+	region := ctx.String(namespaceRegionFlagName)
+	if len(region) == 0 {
+		return fmt.Errorf("namespace region is required")
+	}
+
+	res, err := c.client.GlobalizeNamespace(c.ctx, &namespaceservice.GlobalizeNamespaceRequest{
+		RequestId: ctx.String(RequestIDFlagName),
+		Namespace: ctx.String(NamespaceFlagName),
+		TargetRegion: &common.RegionID{
+			CloudProvider: "aws",
+			Name:          region,
+		},
+		ResourceVersion: resourceVersion,
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res)
+}
+
 func (c *NamespaceClient) listNamespaces() error {
 	totalRes := &namespaceservice.ListNamespacesResponse{}
 	pageToken := ""
@@ -492,9 +519,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Namespace: ctx.String(NamespaceFlagName),
 				}
 
-				n.Spec = &namespace.NamespaceSpec{
-					Region: ctx.String(namespaceRegionFlagName),
-				}
 				regions := ctx.StringSlice(namespaceRegionFlagName)
 				if len(regions) == 0 {
 					return fmt.Errorf("namespace region is required")
@@ -586,6 +610,30 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 
 				return c.createNamespace(n, unp)
+			},
+		},
+		{
+			Name:    "add-region",
+			Usage:   "Add an new region to the temporal namespace",
+			Aliases: []string{"c"},
+			Flags: []cli.Flag{
+				RequestIDFlag,
+				ResourceVersionFlag,
+				&cli.StringFlag{
+					Name:     NamespaceFlagName,
+					Usage:    "The namespace hosted on temporal cloud",
+					Aliases:  []string{"n"},
+					Required: true,
+				},
+				&cli.StringSliceFlag{
+					Name:     namespaceRegionFlagName,
+					Usage:    "New region to add to the namespace.",
+					Aliases:  []string{"re"},
+					Required: true,
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				return c.addReplica(ctx)
 			},
 		},
 		{

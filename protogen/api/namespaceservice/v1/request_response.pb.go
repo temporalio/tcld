@@ -4,8 +4,10 @@
 package namespaceservice
 
 import (
+	bytes "bytes"
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
+	types "github.com/gogo/protobuf/types"
 	io "io"
 	math "math"
 	math_bits "math/bits"
@@ -1230,7 +1232,7 @@ func (m *UpdateExportSinkResponse) GetRequestStatus() *v12.RequestStatus {
 
 type ListExportSinksRequest struct {
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
-	// the requested size of the page to retrive
+	// the requested size of the page to retrieve
 	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// the page token
 	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
@@ -1344,7 +1346,7 @@ func (m *ListExportSinksResponse) GetNextPageToken() string {
 
 type GetExportSinksRequest struct {
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
-	// the requested size of the page to retrive
+	// the requested size of the page to retrieve
 	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// the page token
 	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
@@ -1659,6 +1661,701 @@ func (m *FailoverNamespaceResponse) GetRequestStatus() *v12.RequestStatus {
 	return nil
 }
 
+type GetReplicationStatusRequest struct {
+	// The namespace to get replication status.
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+}
+
+func (m *GetReplicationStatusRequest) Reset()      { *m = GetReplicationStatusRequest{} }
+func (*GetReplicationStatusRequest) ProtoMessage() {}
+func (*GetReplicationStatusRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{30}
+}
+func (m *GetReplicationStatusRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetReplicationStatusRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetReplicationStatusRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetReplicationStatusRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetReplicationStatusRequest.Merge(m, src)
+}
+func (m *GetReplicationStatusRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetReplicationStatusRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetReplicationStatusRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetReplicationStatusRequest proto.InternalMessageInfo
+
+func (m *GetReplicationStatusRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+type GetReplicationStatusResponse struct {
+	// The replication status group by the source region and the target region.
+	ReplicationStatus []*ReplicationStatus `protobuf:"bytes,1,rep,name=replication_status,json=replicationStatus,proto3" json:"replication_status,omitempty"`
+	// Use the timestamp for long poll case.
+	NextPollTime *types.Timestamp `protobuf:"bytes,2,opt,name=next_poll_time,json=nextPollTime,proto3" json:"next_poll_time,omitempty"`
+}
+
+func (m *GetReplicationStatusResponse) Reset()      { *m = GetReplicationStatusResponse{} }
+func (*GetReplicationStatusResponse) ProtoMessage() {}
+func (*GetReplicationStatusResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{31}
+}
+func (m *GetReplicationStatusResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetReplicationStatusResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetReplicationStatusResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetReplicationStatusResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetReplicationStatusResponse.Merge(m, src)
+}
+func (m *GetReplicationStatusResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetReplicationStatusResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetReplicationStatusResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetReplicationStatusResponse proto.InternalMessageInfo
+
+func (m *GetReplicationStatusResponse) GetReplicationStatus() []*ReplicationStatus {
+	if m != nil {
+		return m.ReplicationStatus
+	}
+	return nil
+}
+
+func (m *GetReplicationStatusResponse) GetNextPollTime() *types.Timestamp {
+	if m != nil {
+		return m.NextPollTime
+	}
+	return nil
+}
+
+type ReplicationStatus struct {
+	// The region data is replicating from.
+	SourceRegion *v14.RegionID `protobuf:"bytes,1,opt,name=source_region,json=sourceRegion,proto3" json:"source_region,omitempty"`
+	// The region data is replicating to.
+	TargetRegion *v14.RegionID `protobuf:"bytes,2,opt,name=target_region,json=targetRegion,proto3" json:"target_region,omitempty"`
+	// The max replication lag.
+	ReplicationLag *types.Duration `protobuf:"bytes,3,opt,name=replication_lag,json=replicationLag,proto3" json:"replication_lag,omitempty"`
+}
+
+func (m *ReplicationStatus) Reset()      { *m = ReplicationStatus{} }
+func (*ReplicationStatus) ProtoMessage() {}
+func (*ReplicationStatus) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{32}
+}
+func (m *ReplicationStatus) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ReplicationStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ReplicationStatus.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ReplicationStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReplicationStatus.Merge(m, src)
+}
+func (m *ReplicationStatus) XXX_Size() int {
+	return m.Size()
+}
+func (m *ReplicationStatus) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReplicationStatus.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReplicationStatus proto.InternalMessageInfo
+
+func (m *ReplicationStatus) GetSourceRegion() *v14.RegionID {
+	if m != nil {
+		return m.SourceRegion
+	}
+	return nil
+}
+
+func (m *ReplicationStatus) GetTargetRegion() *v14.RegionID {
+	if m != nil {
+		return m.TargetRegion
+	}
+	return nil
+}
+
+func (m *ReplicationStatus) GetReplicationLag() *types.Duration {
+	if m != nil {
+		return m.ReplicationLag
+	}
+	return nil
+}
+
+type ListFailoverHistoryByNamespaceRequest struct {
+	// The namespace to get failover history.
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// List request pagination size, defaults to 100, max 1000
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Next pagination token.
+	NextPageToken []byte `protobuf:"bytes,3,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (m *ListFailoverHistoryByNamespaceRequest) Reset()      { *m = ListFailoverHistoryByNamespaceRequest{} }
+func (*ListFailoverHistoryByNamespaceRequest) ProtoMessage() {}
+func (*ListFailoverHistoryByNamespaceRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{33}
+}
+func (m *ListFailoverHistoryByNamespaceRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListFailoverHistoryByNamespaceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListFailoverHistoryByNamespaceRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListFailoverHistoryByNamespaceRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListFailoverHistoryByNamespaceRequest.Merge(m, src)
+}
+func (m *ListFailoverHistoryByNamespaceRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListFailoverHistoryByNamespaceRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListFailoverHistoryByNamespaceRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListFailoverHistoryByNamespaceRequest proto.InternalMessageInfo
+
+func (m *ListFailoverHistoryByNamespaceRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *ListFailoverHistoryByNamespaceRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *ListFailoverHistoryByNamespaceRequest) GetNextPageToken() []byte {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return nil
+}
+
+type ListFailoverHistoryByNamespaceResponse struct {
+	// A list of failover records
+	FailoverHistory []*FailoverRecord `protobuf:"bytes,1,rep,name=failover_history,json=failoverHistory,proto3" json:"failover_history,omitempty"`
+	// Next pagination token.
+	NextPageToken []byte `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (m *ListFailoverHistoryByNamespaceResponse) Reset() {
+	*m = ListFailoverHistoryByNamespaceResponse{}
+}
+func (*ListFailoverHistoryByNamespaceResponse) ProtoMessage() {}
+func (*ListFailoverHistoryByNamespaceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{34}
+}
+func (m *ListFailoverHistoryByNamespaceResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListFailoverHistoryByNamespaceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListFailoverHistoryByNamespaceResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListFailoverHistoryByNamespaceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListFailoverHistoryByNamespaceResponse.Merge(m, src)
+}
+func (m *ListFailoverHistoryByNamespaceResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListFailoverHistoryByNamespaceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListFailoverHistoryByNamespaceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListFailoverHistoryByNamespaceResponse proto.InternalMessageInfo
+
+func (m *ListFailoverHistoryByNamespaceResponse) GetFailoverHistory() []*FailoverRecord {
+	if m != nil {
+		return m.FailoverHistory
+	}
+	return nil
+}
+
+func (m *ListFailoverHistoryByNamespaceResponse) GetNextPageToken() []byte {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return nil
+}
+
+type FailoverRecord struct {
+	FailoverType v14.FailoverType   `protobuf:"varint,1,opt,name=failover_type,json=failoverType,proto3,enum=api.common.v1.FailoverType" json:"failover_type,omitempty"`
+	SourceRegion *v14.RegionID      `protobuf:"bytes,2,opt,name=source_region,json=sourceRegion,proto3" json:"source_region,omitempty"`
+	TargetRegion *v14.RegionID      `protobuf:"bytes,3,opt,name=target_region,json=targetRegion,proto3" json:"target_region,omitempty"`
+	StartTimeUtc *types.Timestamp   `protobuf:"bytes,4,opt,name=start_time_utc,json=startTimeUtc,proto3" json:"start_time_utc,omitempty"`
+	EndTimeUtc   *types.Timestamp   `protobuf:"bytes,5,opt,name=end_time_utc,json=endTimeUtc,proto3" json:"end_time_utc,omitempty"`
+	Status       v14.FailoverStatus `protobuf:"varint,6,opt,name=status,proto3,enum=api.common.v1.FailoverStatus" json:"status,omitempty"`
+	Operator     string             `protobuf:"bytes,7,opt,name=operator,proto3" json:"operator,omitempty"`
+}
+
+func (m *FailoverRecord) Reset()      { *m = FailoverRecord{} }
+func (*FailoverRecord) ProtoMessage() {}
+func (*FailoverRecord) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{35}
+}
+func (m *FailoverRecord) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *FailoverRecord) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_FailoverRecord.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *FailoverRecord) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_FailoverRecord.Merge(m, src)
+}
+func (m *FailoverRecord) XXX_Size() int {
+	return m.Size()
+}
+func (m *FailoverRecord) XXX_DiscardUnknown() {
+	xxx_messageInfo_FailoverRecord.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_FailoverRecord proto.InternalMessageInfo
+
+func (m *FailoverRecord) GetFailoverType() v14.FailoverType {
+	if m != nil {
+		return m.FailoverType
+	}
+	return v14.FAILOVER_TYPE_UNSPECIFIED
+}
+
+func (m *FailoverRecord) GetSourceRegion() *v14.RegionID {
+	if m != nil {
+		return m.SourceRegion
+	}
+	return nil
+}
+
+func (m *FailoverRecord) GetTargetRegion() *v14.RegionID {
+	if m != nil {
+		return m.TargetRegion
+	}
+	return nil
+}
+
+func (m *FailoverRecord) GetStartTimeUtc() *types.Timestamp {
+	if m != nil {
+		return m.StartTimeUtc
+	}
+	return nil
+}
+
+func (m *FailoverRecord) GetEndTimeUtc() *types.Timestamp {
+	if m != nil {
+		return m.EndTimeUtc
+	}
+	return nil
+}
+
+func (m *FailoverRecord) GetStatus() v14.FailoverStatus {
+	if m != nil {
+		return m.Status
+	}
+	return v14.FAILOVER_STATUS_UNSPECIFIED
+}
+
+func (m *FailoverRecord) GetOperator() string {
+	if m != nil {
+		return m.Operator
+	}
+	return ""
+}
+
+type GlobalizeNamespaceRequest struct {
+	// The namespace to be globalize.
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// The request id to use for this operation - optional
+	RequestId string `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	// The target region to be added into global namespace.
+	TargetRegion *v14.RegionID `protobuf:"bytes,3,opt,name=target_region,json=targetRegion,proto3" json:"target_region,omitempty"`
+	// the version of the namespace for which this update is intended for
+	// the latest version can be found in the namespace status.
+	ResourceVersion string `protobuf:"bytes,4,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+}
+
+func (m *GlobalizeNamespaceRequest) Reset()      { *m = GlobalizeNamespaceRequest{} }
+func (*GlobalizeNamespaceRequest) ProtoMessage() {}
+func (*GlobalizeNamespaceRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{36}
+}
+func (m *GlobalizeNamespaceRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GlobalizeNamespaceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GlobalizeNamespaceRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GlobalizeNamespaceRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GlobalizeNamespaceRequest.Merge(m, src)
+}
+func (m *GlobalizeNamespaceRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GlobalizeNamespaceRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GlobalizeNamespaceRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GlobalizeNamespaceRequest proto.InternalMessageInfo
+
+func (m *GlobalizeNamespaceRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *GlobalizeNamespaceRequest) GetRequestId() string {
+	if m != nil {
+		return m.RequestId
+	}
+	return ""
+}
+
+func (m *GlobalizeNamespaceRequest) GetTargetRegion() *v14.RegionID {
+	if m != nil {
+		return m.TargetRegion
+	}
+	return nil
+}
+
+func (m *GlobalizeNamespaceRequest) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+type GlobalizeNamespaceResponse struct {
+	// Request status
+	RequestStatus *v12.RequestStatus `protobuf:"bytes,1,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
+}
+
+func (m *GlobalizeNamespaceResponse) Reset()      { *m = GlobalizeNamespaceResponse{} }
+func (*GlobalizeNamespaceResponse) ProtoMessage() {}
+func (*GlobalizeNamespaceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{37}
+}
+func (m *GlobalizeNamespaceResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GlobalizeNamespaceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GlobalizeNamespaceResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GlobalizeNamespaceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GlobalizeNamespaceResponse.Merge(m, src)
+}
+func (m *GlobalizeNamespaceResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GlobalizeNamespaceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GlobalizeNamespaceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GlobalizeNamespaceResponse proto.InternalMessageInfo
+
+func (m *GlobalizeNamespaceResponse) GetRequestStatus() *v12.RequestStatus {
+	if m != nil {
+		return m.RequestStatus
+	}
+	return nil
+}
+
+type ValidateGlobalizeNamespaceRequest struct {
+	// The namespace to be validated
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+}
+
+func (m *ValidateGlobalizeNamespaceRequest) Reset()      { *m = ValidateGlobalizeNamespaceRequest{} }
+func (*ValidateGlobalizeNamespaceRequest) ProtoMessage() {}
+func (*ValidateGlobalizeNamespaceRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{38}
+}
+func (m *ValidateGlobalizeNamespaceRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ValidateGlobalizeNamespaceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ValidateGlobalizeNamespaceRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ValidateGlobalizeNamespaceRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ValidateGlobalizeNamespaceRequest.Merge(m, src)
+}
+func (m *ValidateGlobalizeNamespaceRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *ValidateGlobalizeNamespaceRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ValidateGlobalizeNamespaceRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ValidateGlobalizeNamespaceRequest proto.InternalMessageInfo
+
+func (m *ValidateGlobalizeNamespaceRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+type ValidateGlobalizeNamespaceResponse struct {
+	// The flag indicates if the validation succeed.
+	Success bool `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	// The failure reason when the validation failed.
+	FailureReason string `protobuf:"bytes,2,opt,name=failure_reason,json=failureReason,proto3" json:"failure_reason,omitempty"`
+}
+
+func (m *ValidateGlobalizeNamespaceResponse) Reset()      { *m = ValidateGlobalizeNamespaceResponse{} }
+func (*ValidateGlobalizeNamespaceResponse) ProtoMessage() {}
+func (*ValidateGlobalizeNamespaceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{39}
+}
+func (m *ValidateGlobalizeNamespaceResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ValidateGlobalizeNamespaceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ValidateGlobalizeNamespaceResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ValidateGlobalizeNamespaceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ValidateGlobalizeNamespaceResponse.Merge(m, src)
+}
+func (m *ValidateGlobalizeNamespaceResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *ValidateGlobalizeNamespaceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ValidateGlobalizeNamespaceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ValidateGlobalizeNamespaceResponse proto.InternalMessageInfo
+
+func (m *ValidateGlobalizeNamespaceResponse) GetSuccess() bool {
+	if m != nil {
+		return m.Success
+	}
+	return false
+}
+
+func (m *ValidateGlobalizeNamespaceResponse) GetFailureReason() string {
+	if m != nil {
+		return m.FailureReason
+	}
+	return ""
+}
+
+type ListReplicaStatusRequest struct {
+	// The namespace to get replica status from.
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// the requested size of the page to retrieve
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// the page token
+	PageToken []byte `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+}
+
+func (m *ListReplicaStatusRequest) Reset()      { *m = ListReplicaStatusRequest{} }
+func (*ListReplicaStatusRequest) ProtoMessage() {}
+func (*ListReplicaStatusRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{40}
+}
+func (m *ListReplicaStatusRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListReplicaStatusRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListReplicaStatusRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListReplicaStatusRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListReplicaStatusRequest.Merge(m, src)
+}
+func (m *ListReplicaStatusRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListReplicaStatusRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListReplicaStatusRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListReplicaStatusRequest proto.InternalMessageInfo
+
+func (m *ListReplicaStatusRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *ListReplicaStatusRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *ListReplicaStatusRequest) GetPageToken() []byte {
+	if m != nil {
+		return m.PageToken
+	}
+	return nil
+}
+
+type ListReplicaStatusResponse struct {
+	// A list of replica status group by region
+	Statuses []*v14.ReplicaStatus `protobuf:"bytes,1,rep,name=statuses,proto3" json:"statuses,omitempty"`
+	// the page token
+	PageToken []byte `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+}
+
+func (m *ListReplicaStatusResponse) Reset()      { *m = ListReplicaStatusResponse{} }
+func (*ListReplicaStatusResponse) ProtoMessage() {}
+func (*ListReplicaStatusResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{41}
+}
+func (m *ListReplicaStatusResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListReplicaStatusResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListReplicaStatusResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListReplicaStatusResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListReplicaStatusResponse.Merge(m, src)
+}
+func (m *ListReplicaStatusResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListReplicaStatusResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListReplicaStatusResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListReplicaStatusResponse proto.InternalMessageInfo
+
+func (m *ListReplicaStatusResponse) GetStatuses() []*v14.ReplicaStatus {
+	if m != nil {
+		return m.Statuses
+	}
+	return nil
+}
+
+func (m *ListReplicaStatusResponse) GetPageToken() []byte {
+	if m != nil {
+		return m.PageToken
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*CreateNamespaceRequest)(nil), "api.namespaceservice.v1.CreateNamespaceRequest")
 	proto.RegisterType((*CreateNamespaceResponse)(nil), "api.namespaceservice.v1.CreateNamespaceResponse")
@@ -1690,6 +2387,18 @@ func init() {
 	proto.RegisterType((*ValidateExportSinkResponse)(nil), "api.namespaceservice.v1.ValidateExportSinkResponse")
 	proto.RegisterType((*FailoverNamespaceRequest)(nil), "api.namespaceservice.v1.FailoverNamespaceRequest")
 	proto.RegisterType((*FailoverNamespaceResponse)(nil), "api.namespaceservice.v1.FailoverNamespaceResponse")
+	proto.RegisterType((*GetReplicationStatusRequest)(nil), "api.namespaceservice.v1.GetReplicationStatusRequest")
+	proto.RegisterType((*GetReplicationStatusResponse)(nil), "api.namespaceservice.v1.GetReplicationStatusResponse")
+	proto.RegisterType((*ReplicationStatus)(nil), "api.namespaceservice.v1.ReplicationStatus")
+	proto.RegisterType((*ListFailoverHistoryByNamespaceRequest)(nil), "api.namespaceservice.v1.ListFailoverHistoryByNamespaceRequest")
+	proto.RegisterType((*ListFailoverHistoryByNamespaceResponse)(nil), "api.namespaceservice.v1.ListFailoverHistoryByNamespaceResponse")
+	proto.RegisterType((*FailoverRecord)(nil), "api.namespaceservice.v1.FailoverRecord")
+	proto.RegisterType((*GlobalizeNamespaceRequest)(nil), "api.namespaceservice.v1.GlobalizeNamespaceRequest")
+	proto.RegisterType((*GlobalizeNamespaceResponse)(nil), "api.namespaceservice.v1.GlobalizeNamespaceResponse")
+	proto.RegisterType((*ValidateGlobalizeNamespaceRequest)(nil), "api.namespaceservice.v1.ValidateGlobalizeNamespaceRequest")
+	proto.RegisterType((*ValidateGlobalizeNamespaceResponse)(nil), "api.namespaceservice.v1.ValidateGlobalizeNamespaceResponse")
+	proto.RegisterType((*ListReplicaStatusRequest)(nil), "api.namespaceservice.v1.ListReplicaStatusRequest")
+	proto.RegisterType((*ListReplicaStatusResponse)(nil), "api.namespaceservice.v1.ListReplicaStatusResponse")
 }
 
 func init() {
@@ -1697,67 +2406,96 @@ func init() {
 }
 
 var fileDescriptor_667e39c23eb47b7c = []byte{
-	// 958 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x57, 0x4f, 0x6f, 0x1b, 0x45,
-	0x14, 0xf7, 0xd8, 0x0e, 0x8a, 0x5f, 0x08, 0x45, 0x4b, 0xeb, 0x6c, 0xfe, 0x2d, 0x66, 0x51, 0x51,
-	0x10, 0xc2, 0x56, 0x92, 0x5e, 0x50, 0xb9, 0x40, 0x43, 0xab, 0x4a, 0x08, 0x85, 0x35, 0xed, 0x81,
-	0xcb, 0x66, 0xbb, 0x79, 0x75, 0xa7, 0xb6, 0x77, 0xb7, 0x33, 0xb3, 0x6e, 0x54, 0x71, 0xe8, 0x8d,
-	0x2b, 0x9f, 0x80, 0x23, 0xe2, 0x8c, 0xc4, 0x77, 0x40, 0xe2, 0x92, 0x63, 0x8f, 0xc4, 0xb9, 0x70,
-	0xa3, 0x1f, 0x01, 0xcd, 0xee, 0xce, 0xda, 0xde, 0xb5, 0xc3, 0x06, 0x6d, 0x73, 0xf4, 0x7b, 0xcf,
-	0xbf, 0xf7, 0xfb, 0xbd, 0x3f, 0xb3, 0x33, 0xd0, 0x76, 0x02, 0xda, 0xf1, 0x9c, 0x21, 0xf2, 0xc0,
-	0x71, 0x91, 0x23, 0x1b, 0x51, 0x17, 0x3b, 0xa3, 0xdd, 0x0e, 0xc3, 0x67, 0x21, 0x72, 0x61, 0x33,
-	0xe4, 0x81, 0xef, 0x71, 0x6c, 0x07, 0xcc, 0x17, 0xbe, 0xb6, 0xe6, 0x04, 0xb4, 0x9d, 0x8d, 0x6f,
-	0x8f, 0x76, 0x37, 0xd6, 0x25, 0x90, 0x13, 0x8a, 0x27, 0xf2, 0xcf, 0x43, 0xe4, 0xdc, 0xe9, 0x25,
-	0xff, 0xd9, 0xd8, 0x94, 0x2e, 0xd7, 0x1f, 0x0e, 0x7d, 0x2f, 0xef, 0x34, 0x66, 0x08, 0xe4, 0xfd,
-	0x5b, 0xd2, 0x9f, 0x90, 0xc9, 0x7b, 0xa3, 0xac, 0x9c, 0x7a, 0xfd, 0x9c, 0xcb, 0xfc, 0x87, 0x40,
-	0xf3, 0x0e, 0x43, 0x47, 0xe0, 0x37, 0x0a, 0xdd, 0x8a, 0x61, 0xb4, 0x2d, 0x68, 0xa4, 0x19, 0x75,
-	0xd2, 0x22, 0x3b, 0x0d, 0x6b, 0x62, 0xd0, 0xf6, 0xa1, 0xce, 0x03, 0x74, 0xf5, 0x6a, 0x8b, 0xec,
-	0xac, 0xec, 0xbd, 0xdf, 0x9e, 0x51, 0xdc, 0x1e, 0xed, 0xb6, 0x53, 0xbc, 0x6e, 0x80, 0xae, 0x15,
-	0x05, 0x6b, 0xdb, 0x00, 0xaa, 0x62, 0xf4, 0x58, 0xaf, 0xc5, 0x98, 0x89, 0xe5, 0xfe, 0xb1, 0xe6,
-	0xc2, 0x46, 0xc8, 0x91, 0xd9, 0x29, 0x8e, 0x1d, 0x20, 0x1b, 0x52, 0xce, 0xa9, 0xef, 0x71, 0xbd,
-	0xde, 0xaa, 0xed, 0xac, 0xec, 0xdd, 0x8c, 0x32, 0xc9, 0x12, 0xca, 0x24, 0x0f, 0x38, 0xb2, 0x34,
-	0xd1, 0xe1, 0x24, 0xd8, 0xd2, 0xc3, 0x05, 0x1e, 0xd3, 0x86, 0xb5, 0x9c, 0xe0, 0xb8, 0x79, 0xda,
-	0x01, 0xbc, 0xa3, 0xe8, 0x71, 0xe1, 0x88, 0x90, 0x47, 0xb2, 0x57, 0xf6, 0xb6, 0xa3, 0x9c, 0x89,
-	0x4b, 0xa6, 0x4d, 0x4a, 0xd4, 0x8d, 0x82, 0xac, 0x55, 0x36, 0xfd, 0xd3, 0xec, 0xc2, 0x8d, 0xaf,
-	0x29, 0x17, 0x29, 0x3c, 0x57, 0x05, 0xdd, 0x84, 0x46, 0xe0, 0xf4, 0xd0, 0xe6, 0xf4, 0x45, 0x5c,
-	0xd0, 0x25, 0x6b, 0x59, 0x1a, 0xba, 0xf4, 0x05, 0xca, 0xd2, 0x44, 0x4e, 0xe1, 0xf7, 0xd1, 0x8b,
-	0xaa, 0xda, 0xb0, 0xa2, 0xf0, 0xef, 0xa4, 0xc1, 0x3c, 0x82, 0x66, 0x16, 0x34, 0x21, 0x6d, 0x00,
-	0x4c, 0x26, 0x4d, 0x27, 0xad, 0xda, 0x4e, 0xc3, 0x9a, 0xb2, 0x68, 0x1f, 0xc1, 0x35, 0x0f, 0x4f,
-	0x84, 0x9d, 0x43, 0x5f, 0x95, 0xe6, 0xc3, 0x34, 0x83, 0x05, 0xd7, 0xef, 0x61, 0xc9, 0xac, 0x7f,
-	0x80, 0x1b, 0x19, 0xcc, 0x84, 0xf4, 0xed, 0x1c, 0xe9, 0x95, 0xbd, 0xcd, 0x0b, 0x66, 0xe8, 0x7f,
-	0x29, 0xda, 0x87, 0xf7, 0xa6, 0xb3, 0x17, 0x9a, 0x6b, 0xf3, 0xdb, 0xd9, 0x32, 0xa4, 0x8c, 0x3f,
-	0xcb, 0xfe, 0xeb, 0x3f, 0x08, 0x4f, 0x41, 0xfe, 0x4e, 0xa0, 0xf9, 0x20, 0x38, 0xbe, 0xa2, 0x1d,
-	0xfb, 0x18, 0xde, 0x65, 0xc8, 0xfd, 0x90, 0xb9, 0x68, 0x8f, 0x90, 0xc9, 0xa1, 0x4f, 0x36, 0xed,
-	0x9a, 0xb2, 0x3f, 0x8c, 0xcd, 0x99, 0x75, 0xac, 0x67, 0xd6, 0x51, 0x6e, 0x4a, 0x8e, 0x76, 0xa9,
-	0x9b, 0xf2, 0x4b, 0x15, 0x4c, 0x0b, 0xa5, 0xa2, 0x3b, 0x21, 0x17, 0xfe, 0xb0, 0x8b, 0x0e, 0x73,
-	0x9f, 0x7c, 0x21, 0x04, 0xa3, 0x8f, 0x42, 0x51, 0xb0, 0x48, 0x87, 0x70, 0x13, 0x4f, 0x28, 0x17,
-	0xd4, 0xeb, 0xd9, 0x6e, 0x04, 0x63, 0xf3, 0x08, 0xc7, 0x76, 0x14, 0x50, 0x74, 0xa0, 0x24, 0x33,
-	0xf2, 0x81, 0x0a, 0x9e, 0x9b, 0x52, 0x2a, 0xd5, 0xee, 0x42, 0xcb, 0xc3, 0xe7, 0x17, 0x83, 0xc5,
-	0x15, 0xdd, 0xf2, 0xf0, 0xf9, 0x62, 0x9c, 0x79, 0x9d, 0xa8, 0x17, 0xe9, 0xc4, 0x52, 0xb6, 0x13,
-	0x7d, 0xf8, 0xf0, 0xc2, 0x3a, 0x95, 0xda, 0x95, 0x97, 0x04, 0x9a, 0x07, 0x38, 0xc0, 0x4b, 0x8f,
-	0xeb, 0x3c, 0xbd, 0xd5, 0x22, 0x7a, 0x6b, 0x73, 0x26, 0x2f, 0xc7, 0xa0, 0x54, 0x8d, 0x3f, 0x12,
-	0xf5, 0x15, 0xf8, 0xea, 0x24, 0xf0, 0x99, 0xe8, 0x52, 0xaf, 0x5f, 0x4c, 0x64, 0x67, 0x66, 0x27,
-	0xe3, 0x23, 0x40, 0x7e, 0x5a, 0x65, 0xca, 0x09, 0x56, 0xe1, 0x6f, 0x9e, 0x79, 0x04, 0x7a, 0x9e,
-	0x48, 0xa9, 0x5a, 0xe3, 0x13, 0xed, 0xb2, 0x3a, 0x37, 0xa1, 0x21, 0x65, 0x4d, 0xaf, 0xce, 0xb2,
-	0x34, 0xc8, 0x8e, 0x98, 0x07, 0xd1, 0xb9, 0x3e, 0x87, 0xf1, 0x27, 0x50, 0x97, 0x41, 0x09, 0xcf,
-	0xb5, 0x05, 0xd5, 0xb1, 0xa2, 0x20, 0xf3, 0x67, 0xa2, 0xda, 0x5c, 0x26, 0xb9, 0x12, 0x0f, 0xc0,
-	0x23, 0xd0, 0xf3, 0xfc, 0x4a, 0xed, 0xcd, 0x6f, 0x44, 0x9d, 0xb1, 0x6f, 0x7c, 0x0e, 0x4b, 0x2d,
-	0x4b, 0x9e, 0x73, 0xa9, 0x65, 0x61, 0xf1, 0x6d, 0x67, 0x82, 0xcf, 0x0b, 0xcf, 0xc5, 0xe4, 0xae,
-	0x52, 0xbd, 0xf0, 0xae, 0x52, 0xcb, 0xdf, 0xb0, 0xd6, 0x72, 0x39, 0x13, 0x51, 0xdb, 0x00, 0xe9,
-	0xb8, 0xa9, 0x2b, 0x56, 0x43, 0xcd, 0x5b, 0xf1, 0xfb, 0xc8, 0xb3, 0xcc, 0xd6, 0x5c, 0x81, 0x28,
-	0x1f, 0x9a, 0xd9, 0x94, 0x89, 0xa6, 0x4f, 0x61, 0x49, 0x2a, 0x50, 0x97, 0xaf, 0x85, 0xab, 0x1a,
-	0x47, 0x15, 0xd6, 0xf8, 0x14, 0xd6, 0x1f, 0x3a, 0x03, 0x7a, 0x15, 0x13, 0x6d, 0x6e, 0xc1, 0xc6,
-	0xbc, 0x5c, 0xb1, 0x40, 0xf3, 0x4f, 0x02, 0xfa, 0x5d, 0x87, 0x0e, 0xfc, 0xd1, 0xd4, 0x43, 0xa0,
-	0x18, 0x93, 0xd9, 0xf9, 0xaf, 0x66, 0x9f, 0x29, 0x9f, 0xc3, 0xaa, 0x70, 0x58, 0x0f, 0xe5, 0xb3,
-	0xaf, 0xa7, 0xd6, 0x48, 0x95, 0x30, 0x7e, 0xc1, 0xc5, 0x13, 0x2e, 0x9d, 0xf7, 0x0f, 0xac, 0xb7,
-	0xe3, 0xe8, 0xf8, 0xb7, 0x76, 0x0b, 0x9a, 0xbc, 0x4f, 0x03, 0xbb, 0xc7, 0x1c, 0x17, 0x1f, 0x87,
-	0x03, 0xfb, 0x71, 0x42, 0x32, 0x5a, 0xb4, 0x65, 0xeb, 0xba, 0xf4, 0xde, 0x4b, 0x9c, 0x4a, 0x80,
-	0xe9, 0xc0, 0xfa, 0x1c, 0x31, 0x65, 0x2e, 0xdd, 0x97, 0x4f, 0x4f, 0xcf, 0x8c, 0xca, 0xab, 0x33,
-	0xa3, 0xf2, 0xfa, 0xcc, 0x20, 0x2f, 0xc7, 0x06, 0xf9, 0x75, 0x6c, 0x90, 0x3f, 0xc6, 0x06, 0x39,
-	0x1d, 0x1b, 0xe4, 0xaf, 0xb1, 0x41, 0xfe, 0x1e, 0x1b, 0x95, 0xd7, 0x63, 0x83, 0xfc, 0x74, 0x6e,
-	0x54, 0x4e, 0xcf, 0x8d, 0xca, 0xab, 0x73, 0xa3, 0xf2, 0xfd, 0x2d, 0x31, 0x0c, 0xd8, 0xa0, 0xed,
-	0x0e, 0xfc, 0xf0, 0xb8, 0xb3, 0xe0, 0x99, 0x7c, 0x3b, 0x6b, 0x7b, 0xf4, 0x56, 0xf4, 0xfa, 0xdc,
-	0xff, 0x37, 0x00, 0x00, 0xff, 0xff, 0x8f, 0xff, 0xd3, 0x77, 0x59, 0x0f, 0x00, 0x00,
+	// 1420 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x58, 0xcf, 0x6f, 0xdc, 0xc4,
+	0x17, 0x8f, 0x37, 0x49, 0x9b, 0x7d, 0x49, 0x36, 0xad, 0xbf, 0x6d, 0xb2, 0xd9, 0x24, 0x6e, 0xea,
+	0xaf, 0x52, 0x02, 0x08, 0xaf, 0x9a, 0x16, 0x09, 0xd4, 0x1e, 0xfa, 0x23, 0x34, 0x54, 0xaa, 0x50,
+	0x71, 0xda, 0x4a, 0x70, 0x71, 0x1d, 0xef, 0x64, 0xeb, 0xc6, 0x6b, 0xbb, 0x33, 0xe3, 0xb4, 0xa9,
+	0x38, 0xf4, 0x86, 0xc4, 0x89, 0xbf, 0x00, 0x09, 0x09, 0x21, 0xce, 0x48, 0x9c, 0x38, 0x71, 0x43,
+	0xe2, 0x52, 0x89, 0x4b, 0x8f, 0x74, 0x7b, 0xe1, 0x46, 0xff, 0x04, 0x34, 0xbf, 0xf6, 0x87, 0xbd,
+	0xbb, 0xd9, 0x2d, 0x26, 0xe2, 0x38, 0xf3, 0xde, 0xbc, 0xf7, 0x79, 0xef, 0x7d, 0xde, 0xf3, 0x8c,
+	0xc1, 0x72, 0x63, 0xbf, 0x1a, 0xba, 0x0d, 0x44, 0x62, 0xd7, 0x43, 0x04, 0xe1, 0x7d, 0xdf, 0x43,
+	0xd5, 0xfd, 0xf3, 0x55, 0x8c, 0x1e, 0x25, 0x88, 0x50, 0x07, 0x23, 0x12, 0x47, 0x21, 0x41, 0x56,
+	0x8c, 0x23, 0x1a, 0xe9, 0x0b, 0x6e, 0xec, 0x5b, 0x69, 0x7d, 0x6b, 0xff, 0x7c, 0x65, 0x91, 0x19,
+	0x72, 0x13, 0xfa, 0x80, 0x1d, 0x6e, 0x20, 0x42, 0xdc, 0xba, 0x3c, 0x53, 0x59, 0x62, 0x22, 0x2f,
+	0x6a, 0x34, 0xa2, 0x30, 0x2b, 0x34, 0xba, 0x00, 0x64, 0xe5, 0xcb, 0x4c, 0x2e, 0xc1, 0x64, 0xa5,
+	0xdc, 0x2b, 0xf1, 0xc3, 0xbd, 0xac, 0xe8, 0x4c, 0x3d, 0x8a, 0xea, 0x01, 0xaa, 0xf2, 0xd5, 0x4e,
+	0xb2, 0x5b, 0xa5, 0x7e, 0x03, 0x11, 0xea, 0x36, 0x62, 0xe5, 0x39, 0xad, 0x50, 0x4b, 0xb0, 0x4b,
+	0xfd, 0x28, 0x14, 0x72, 0xf3, 0x2f, 0x0d, 0xe6, 0xaf, 0x63, 0xe4, 0x52, 0xf4, 0x89, 0x82, 0x67,
+	0x0b, 0x1c, 0xfa, 0x32, 0x14, 0x5b, 0x90, 0xcb, 0xda, 0xaa, 0xb6, 0x5e, 0xb4, 0xdb, 0x1b, 0xfa,
+	0x05, 0x98, 0x20, 0x31, 0xf2, 0xca, 0x85, 0x55, 0x6d, 0x7d, 0x7a, 0xe3, 0x8c, 0xd5, 0x95, 0x32,
+	0x6b, 0xff, 0xbc, 0xd5, 0xb2, 0xb7, 0x1d, 0x23, 0xcf, 0xe6, 0xca, 0xfa, 0x0a, 0x80, 0x4a, 0xb9,
+	0x5f, 0x2b, 0x8f, 0x0b, 0x9b, 0x72, 0xe7, 0x66, 0x4d, 0xf7, 0xa0, 0x92, 0x10, 0x84, 0x9d, 0x96,
+	0x1d, 0x27, 0x46, 0xb8, 0xe1, 0x13, 0xe2, 0x47, 0x21, 0x29, 0x4f, 0xac, 0x8e, 0xaf, 0x4f, 0x6f,
+	0xac, 0x71, 0x4f, 0xac, 0x06, 0xcc, 0xc9, 0x5d, 0x82, 0x70, 0xcb, 0xd1, 0xed, 0xb6, 0xb2, 0x5d,
+	0x4e, 0xfa, 0x48, 0x4c, 0x07, 0x16, 0x32, 0x01, 0x8b, 0xea, 0xeb, 0x9b, 0x50, 0x52, 0xf0, 0x08,
+	0x75, 0x69, 0x42, 0x78, 0xd8, 0xd3, 0x1b, 0x2b, 0xdc, 0xa7, 0x14, 0x31, 0xb7, 0x32, 0x45, 0xdb,
+	0x5c, 0xc9, 0x9e, 0xc5, 0x9d, 0x4b, 0x73, 0x1b, 0x4e, 0xdf, 0xf2, 0x09, 0x6d, 0x99, 0x27, 0x2a,
+	0xa1, 0x4b, 0x50, 0x8c, 0xdd, 0x3a, 0x72, 0x88, 0xff, 0x54, 0x24, 0x74, 0xd2, 0x9e, 0x62, 0x1b,
+	0xdb, 0xfe, 0x53, 0xc4, 0x52, 0xc3, 0x85, 0x34, 0xda, 0x43, 0x21, 0xcf, 0x6a, 0xd1, 0xe6, 0xea,
+	0x77, 0xd8, 0x86, 0x79, 0x1f, 0xe6, 0xd3, 0x46, 0x25, 0x68, 0x03, 0xa0, 0x4d, 0xd5, 0xb2, 0xb6,
+	0x3a, 0xbe, 0x5e, 0xb4, 0x3b, 0x76, 0xf4, 0x73, 0x30, 0x17, 0xa2, 0x27, 0xd4, 0xc9, 0x58, 0x9f,
+	0x65, 0xdb, 0xb7, 0x5b, 0x1e, 0x6c, 0x38, 0xb5, 0x85, 0x72, 0x46, 0xfd, 0x05, 0x9c, 0x4e, 0xd9,
+	0x94, 0xa0, 0x2f, 0x65, 0x40, 0x4f, 0x6f, 0x2c, 0x0d, 0xe0, 0xd0, 0x1b, 0x45, 0x74, 0x01, 0xfe,
+	0xd7, 0xe9, 0x7d, 0x28, 0x5e, 0x9b, 0x9f, 0x76, 0xa7, 0xa1, 0x85, 0xf8, 0xc3, 0xf4, 0xa9, 0x43,
+	0x00, 0x77, 0x98, 0xfc, 0x49, 0x83, 0xf9, 0xbb, 0x71, 0xed, 0x88, 0x7a, 0xec, 0x6d, 0x38, 0x81,
+	0x11, 0x89, 0x12, 0xec, 0x21, 0x67, 0x1f, 0x61, 0x46, 0x7a, 0xd9, 0x69, 0x73, 0x6a, 0xff, 0x9e,
+	0xd8, 0x4e, 0xb5, 0xe3, 0x44, 0xaa, 0x1d, 0x59, 0xa7, 0x64, 0x60, 0xe7, 0xda, 0x29, 0xdf, 0x17,
+	0xc0, 0xb4, 0x11, 0x8b, 0xe8, 0x7a, 0x42, 0x68, 0xd4, 0xd8, 0x46, 0x2e, 0xf6, 0x1e, 0x5c, 0xa5,
+	0x14, 0xfb, 0x3b, 0x09, 0x1d, 0x32, 0x49, 0xb7, 0x61, 0x0d, 0x3d, 0xf1, 0x09, 0xf5, 0xc3, 0xba,
+	0xe3, 0x71, 0x33, 0x0e, 0xe1, 0x76, 0x1c, 0x57, 0x19, 0xe2, 0x03, 0x45, 0x72, 0xe4, 0xac, 0x52,
+	0xee, 0xe9, 0x92, 0x45, 0xaa, 0xdf, 0x80, 0xd5, 0x10, 0x3d, 0x1e, 0x6c, 0x4c, 0x64, 0x74, 0x39,
+	0x44, 0x8f, 0xfb, 0xdb, 0xe9, 0x55, 0x89, 0x89, 0x61, 0x2a, 0x31, 0x99, 0xae, 0xc4, 0x1e, 0xfc,
+	0x7f, 0x60, 0x9e, 0x72, 0xad, 0xca, 0x33, 0x0d, 0xe6, 0x37, 0x51, 0x80, 0x46, 0xa6, 0x6b, 0xaf,
+	0x78, 0x0b, 0xc3, 0xc4, 0x3b, 0xde, 0x83, 0x79, 0x19, 0x04, 0xb9, 0xc6, 0xf8, 0xa5, 0xa6, 0xbe,
+	0x02, 0x1f, 0x3d, 0x89, 0x23, 0x4c, 0xb7, 0xfd, 0x70, 0x6f, 0xb8, 0x20, 0xab, 0x5d, 0x3d, 0x29,
+	0x46, 0x00, 0xfb, 0x36, 0x33, 0x97, 0x6d, 0x5b, 0x43, 0x7f, 0xf3, 0xcc, 0xfb, 0x50, 0xce, 0x02,
+	0xc9, 0x35, 0x56, 0x31, 0xd1, 0x46, 0x8d, 0x73, 0x09, 0x8a, 0x2c, 0xac, 0xce, 0xd6, 0x99, 0x62,
+	0x1b, 0xac, 0x22, 0xe6, 0x26, 0x9f, 0xeb, 0x3d, 0x10, 0xbf, 0x0b, 0x13, 0x4c, 0x49, 0xe2, 0x5c,
+	0xe8, 0x93, 0x1d, 0x9b, 0x2b, 0x99, 0xdf, 0x68, 0xaa, 0xcc, 0x79, 0x82, 0xcb, 0x71, 0x00, 0xde,
+	0x87, 0x72, 0x16, 0x5f, 0xae, 0xb5, 0xf9, 0x51, 0x53, 0x33, 0xf6, 0x5f, 0xe7, 0x61, 0xae, 0x69,
+	0xc9, 0x62, 0xce, 0x35, 0x2d, 0x58, 0xdc, 0x76, 0xda, 0xf6, 0xc9, 0xd0, 0xbc, 0x68, 0xdf, 0x55,
+	0x0a, 0x03, 0xef, 0x2a, 0xe3, 0xd9, 0x1b, 0xd6, 0x42, 0xc6, 0xa7, 0x0c, 0x6a, 0x05, 0xa0, 0x45,
+	0x37, 0x75, 0xc5, 0x2a, 0x2a, 0xbe, 0x0d, 0x7f, 0x1f, 0x79, 0x94, 0xea, 0x9a, 0x23, 0x08, 0x2a,
+	0x82, 0xf9, 0xb4, 0x4b, 0x19, 0xd3, 0x7b, 0x30, 0xc9, 0x22, 0x50, 0x97, 0xaf, 0xbe, 0xad, 0x2a,
+	0xb4, 0x86, 0x8e, 0xf1, 0x21, 0x2c, 0xde, 0x73, 0x03, 0xff, 0x28, 0x18, 0x6d, 0x2e, 0x43, 0xa5,
+	0x97, 0x2f, 0x11, 0xa0, 0xf9, 0x9b, 0x06, 0xe5, 0x1b, 0xae, 0x1f, 0x44, 0xfb, 0x1d, 0x0f, 0x81,
+	0xe1, 0x90, 0x74, 0xf3, 0xbf, 0x90, 0x7e, 0xa6, 0x5c, 0x86, 0x59, 0xea, 0xe2, 0x3a, 0x62, 0xef,
+	0xc6, 0xba, 0x6a, 0x23, 0x95, 0x42, 0xf1, 0x04, 0x14, 0x0c, 0x67, 0xc2, 0x9b, 0x9b, 0xf6, 0x8c,
+	0xd0, 0x16, 0x6b, 0xfd, 0x22, 0xcc, 0x93, 0x3d, 0x3f, 0x76, 0xea, 0xd8, 0xf5, 0xd0, 0x6e, 0x12,
+	0x38, 0xbb, 0x12, 0x24, 0x6f, 0xb4, 0x29, 0xfb, 0x14, 0x93, 0x6e, 0x49, 0xa1, 0x0a, 0xc0, 0x74,
+	0x61, 0xb1, 0x47, 0x30, 0xb9, 0x36, 0xdd, 0x25, 0x58, 0xda, 0x62, 0x28, 0xe3, 0xc0, 0xf7, 0xf8,
+	0x13, 0x51, 0xaa, 0x0d, 0x75, 0x6d, 0xfe, 0x59, 0x83, 0xe5, 0xde, 0xa7, 0x25, 0xc6, 0xcf, 0x40,
+	0xc7, 0x6d, 0x61, 0x1b, 0x27, 0x23, 0xdf, 0x3b, 0x56, 0x9f, 0x07, 0xb7, 0x95, 0xb5, 0x77, 0x12,
+	0xa7, 0xb7, 0xf4, 0x2b, 0x50, 0x12, 0xdc, 0x8c, 0x82, 0xc0, 0x61, 0x0f, 0x60, 0x49, 0xa1, 0x8a,
+	0x25, 0x1e, 0xbf, 0x96, 0x7a, 0xfc, 0x5a, 0x77, 0xd4, 0xeb, 0xd8, 0x9e, 0xe1, 0xb4, 0x8d, 0x82,
+	0x80, 0x6d, 0x99, 0xbf, 0x6b, 0x70, 0x32, 0xe3, 0x8a, 0xd5, 0x59, 0xce, 0x4b, 0x59, 0x67, 0xed,
+	0x90, 0x3a, 0x0b, 0x6d, 0x59, 0xe7, 0x0c, 0x4b, 0x0a, 0xa3, 0xb0, 0xe4, 0x1a, 0xcc, 0x75, 0xa6,
+	0x2b, 0x70, 0xeb, 0x92, 0x65, 0x8b, 0x99, 0xa0, 0x36, 0xe5, 0x8b, 0xde, 0x2e, 0x75, 0x9c, 0xb8,
+	0xe5, 0xd6, 0xcd, 0xaf, 0x34, 0x58, 0x63, 0x23, 0x4d, 0x11, 0xe7, 0x63, 0x9f, 0xd0, 0x08, 0x1f,
+	0x5c, 0x3b, 0x18, 0xb1, 0x1d, 0x06, 0x0e, 0xa0, 0x1e, 0x83, 0x81, 0x01, 0x9d, 0x49, 0x0f, 0x86,
+	0xef, 0x34, 0x38, 0x77, 0x18, 0x18, 0x49, 0x15, 0x1b, 0x4e, 0xa8, 0x9e, 0x70, 0x1e, 0x08, 0x35,
+	0x49, 0x94, 0xb7, 0xfa, 0x12, 0x45, 0x99, 0xb5, 0x91, 0x17, 0xe1, 0x9a, 0x3d, 0xb7, 0xdb, 0xed,
+	0xa6, 0xdf, 0xfc, 0xca, 0xc0, 0xfc, 0x76, 0x1c, 0x4a, 0xdd, 0xb6, 0xf4, 0x2b, 0x30, 0xdb, 0x82,
+	0x43, 0x0f, 0x62, 0x91, 0xa0, 0x92, 0x1c, 0x50, 0xed, 0x42, 0xaa, 0x53, 0x77, 0x0e, 0x62, 0x64,
+	0xcf, 0xec, 0x76, 0xac, 0xb2, 0x44, 0x2a, 0xfc, 0x23, 0x22, 0x8d, 0x34, 0x6e, 0xae, 0x40, 0x89,
+	0x50, 0x17, 0x53, 0xde, 0x18, 0x4e, 0x42, 0x3d, 0x3e, 0x66, 0x0e, 0x69, 0x0e, 0x7e, 0x82, 0xad,
+	0xef, 0x52, 0x4f, 0xbf, 0x0c, 0x33, 0x28, 0xac, 0xb5, 0xcf, 0x4f, 0x1e, 0x7a, 0x1e, 0x50, 0x58,
+	0x53, 0xa7, 0xdf, 0x87, 0x63, 0xb2, 0xd7, 0x8f, 0xf1, 0xb4, 0xad, 0xf4, 0x49, 0x9b, 0x6c, 0x6f,
+	0xa9, 0xac, 0x57, 0x60, 0x2a, 0x8a, 0x11, 0x76, 0x69, 0x84, 0xcb, 0xc7, 0xc5, 0x05, 0x4f, 0xad,
+	0xcd, 0x5f, 0x34, 0x58, 0xdc, 0x0a, 0xa2, 0x1d, 0x37, 0xf0, 0x9f, 0xa2, 0xff, 0xd2, 0x68, 0x1f,
+	0xfe, 0xc1, 0x67, 0xee, 0x40, 0xa5, 0x57, 0x08, 0xb9, 0x0e, 0xf4, 0xab, 0x70, 0x56, 0x7d, 0x1f,
+	0xdf, 0x30, 0x5d, 0x26, 0x02, 0x73, 0x90, 0x09, 0x09, 0xb7, 0x0c, 0xc7, 0x49, 0xe2, 0x79, 0x88,
+	0x08, 0x9c, 0x53, 0xb6, 0x5a, 0xea, 0x6b, 0x50, 0x62, 0x9d, 0x90, 0x60, 0x46, 0x7d, 0x97, 0xb4,
+	0x1e, 0x84, 0xb3, 0x72, 0xd7, 0xe6, 0x9b, 0x26, 0x85, 0x32, 0x9b, 0x0d, 0x72, 0x04, 0x8f, 0xf0,
+	0xdd, 0x19, 0xf5, 0x72, 0x34, 0xd3, 0x79, 0x39, 0xa2, 0xb0, 0xd8, 0xc3, 0xab, 0x8c, 0xe9, 0x03,
+	0x98, 0x12, 0xa9, 0x6f, 0xfd, 0x9f, 0x5a, 0xce, 0x90, 0xa0, 0xf3, 0x5c, 0x4b, 0xbb, 0xc7, 0x3f,
+	0xb1, 0x4e, 0xaf, 0xd7, 0x1e, 0x3e, 0x7f, 0x69, 0x8c, 0xbd, 0x78, 0x69, 0x8c, 0xbd, 0x7e, 0x69,
+	0x68, 0xcf, 0x9a, 0x86, 0xf6, 0x43, 0xd3, 0xd0, 0x7e, 0x6d, 0x1a, 0xda, 0xf3, 0xa6, 0xa1, 0xfd,
+	0xd1, 0x34, 0xb4, 0x3f, 0x9b, 0xc6, 0xd8, 0xeb, 0xa6, 0xa1, 0x7d, 0xfd, 0xca, 0x18, 0x7b, 0xfe,
+	0xca, 0x18, 0x7b, 0xf1, 0xca, 0x18, 0xfb, 0xfc, 0x22, 0x6d, 0xc4, 0x38, 0xb0, 0xbc, 0x20, 0x4a,
+	0x6a, 0xd5, 0x3e, 0xbf, 0xb3, 0x2f, 0xa5, 0xf7, 0x76, 0x8e, 0xf1, 0xe6, 0xbc, 0xf0, 0x77, 0x00,
+	0x00, 0x00, 0xff, 0xff, 0xc2, 0x72, 0x57, 0xc9, 0x01, 0x17, 0x00, 0x00,
 }
 
 func (this *CreateNamespaceRequest) Equal(that interface{}) bool {
@@ -2607,6 +3345,366 @@ func (this *FailoverNamespaceResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *GetReplicationStatusRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetReplicationStatusRequest)
+	if !ok {
+		that2, ok := that.(GetReplicationStatusRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	return true
+}
+func (this *GetReplicationStatusResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetReplicationStatusResponse)
+	if !ok {
+		that2, ok := that.(GetReplicationStatusResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.ReplicationStatus) != len(that1.ReplicationStatus) {
+		return false
+	}
+	for i := range this.ReplicationStatus {
+		if !this.ReplicationStatus[i].Equal(that1.ReplicationStatus[i]) {
+			return false
+		}
+	}
+	if !this.NextPollTime.Equal(that1.NextPollTime) {
+		return false
+	}
+	return true
+}
+func (this *ReplicationStatus) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplicationStatus)
+	if !ok {
+		that2, ok := that.(ReplicationStatus)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.SourceRegion.Equal(that1.SourceRegion) {
+		return false
+	}
+	if !this.TargetRegion.Equal(that1.TargetRegion) {
+		return false
+	}
+	if !this.ReplicationLag.Equal(that1.ReplicationLag) {
+		return false
+	}
+	return true
+}
+func (this *ListFailoverHistoryByNamespaceRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ListFailoverHistoryByNamespaceRequest)
+	if !ok {
+		that2, ok := that.(ListFailoverHistoryByNamespaceRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.PageSize != that1.PageSize {
+		return false
+	}
+	if !bytes.Equal(this.NextPageToken, that1.NextPageToken) {
+		return false
+	}
+	return true
+}
+func (this *ListFailoverHistoryByNamespaceResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ListFailoverHistoryByNamespaceResponse)
+	if !ok {
+		that2, ok := that.(ListFailoverHistoryByNamespaceResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.FailoverHistory) != len(that1.FailoverHistory) {
+		return false
+	}
+	for i := range this.FailoverHistory {
+		if !this.FailoverHistory[i].Equal(that1.FailoverHistory[i]) {
+			return false
+		}
+	}
+	if !bytes.Equal(this.NextPageToken, that1.NextPageToken) {
+		return false
+	}
+	return true
+}
+func (this *FailoverRecord) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*FailoverRecord)
+	if !ok {
+		that2, ok := that.(FailoverRecord)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.FailoverType != that1.FailoverType {
+		return false
+	}
+	if !this.SourceRegion.Equal(that1.SourceRegion) {
+		return false
+	}
+	if !this.TargetRegion.Equal(that1.TargetRegion) {
+		return false
+	}
+	if !this.StartTimeUtc.Equal(that1.StartTimeUtc) {
+		return false
+	}
+	if !this.EndTimeUtc.Equal(that1.EndTimeUtc) {
+		return false
+	}
+	if this.Status != that1.Status {
+		return false
+	}
+	if this.Operator != that1.Operator {
+		return false
+	}
+	return true
+}
+func (this *GlobalizeNamespaceRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalizeNamespaceRequest)
+	if !ok {
+		that2, ok := that.(GlobalizeNamespaceRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.RequestId != that1.RequestId {
+		return false
+	}
+	if !this.TargetRegion.Equal(that1.TargetRegion) {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	return true
+}
+func (this *GlobalizeNamespaceResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalizeNamespaceResponse)
+	if !ok {
+		that2, ok := that.(GlobalizeNamespaceResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.RequestStatus.Equal(that1.RequestStatus) {
+		return false
+	}
+	return true
+}
+func (this *ValidateGlobalizeNamespaceRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ValidateGlobalizeNamespaceRequest)
+	if !ok {
+		that2, ok := that.(ValidateGlobalizeNamespaceRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	return true
+}
+func (this *ValidateGlobalizeNamespaceResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ValidateGlobalizeNamespaceResponse)
+	if !ok {
+		that2, ok := that.(ValidateGlobalizeNamespaceResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Success != that1.Success {
+		return false
+	}
+	if this.FailureReason != that1.FailureReason {
+		return false
+	}
+	return true
+}
+func (this *ListReplicaStatusRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ListReplicaStatusRequest)
+	if !ok {
+		that2, ok := that.(ListReplicaStatusRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.PageSize != that1.PageSize {
+		return false
+	}
+	if !bytes.Equal(this.PageToken, that1.PageToken) {
+		return false
+	}
+	return true
+}
+func (this *ListReplicaStatusResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ListReplicaStatusResponse)
+	if !ok {
+		that2, ok := that.(ListReplicaStatusResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Statuses) != len(that1.Statuses) {
+		return false
+	}
+	for i := range this.Statuses {
+		if !this.Statuses[i].Equal(that1.Statuses[i]) {
+			return false
+		}
+	}
+	if !bytes.Equal(this.PageToken, that1.PageToken) {
+		return false
+	}
+	return true
+}
 func (this *CreateNamespaceRequest) GoString() string {
 	if this == nil {
 		return "nil"
@@ -2976,6 +4074,171 @@ func (this *FailoverNamespaceResponse) GoString() string {
 	if this.RequestStatus != nil {
 		s = append(s, "RequestStatus: "+fmt.Sprintf("%#v", this.RequestStatus)+",\n")
 	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetReplicationStatusRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespaceservice.GetReplicationStatusRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetReplicationStatusResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespaceservice.GetReplicationStatusResponse{")
+	if this.ReplicationStatus != nil {
+		s = append(s, "ReplicationStatus: "+fmt.Sprintf("%#v", this.ReplicationStatus)+",\n")
+	}
+	if this.NextPollTime != nil {
+		s = append(s, "NextPollTime: "+fmt.Sprintf("%#v", this.NextPollTime)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ReplicationStatus) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&namespaceservice.ReplicationStatus{")
+	if this.SourceRegion != nil {
+		s = append(s, "SourceRegion: "+fmt.Sprintf("%#v", this.SourceRegion)+",\n")
+	}
+	if this.TargetRegion != nil {
+		s = append(s, "TargetRegion: "+fmt.Sprintf("%#v", this.TargetRegion)+",\n")
+	}
+	if this.ReplicationLag != nil {
+		s = append(s, "ReplicationLag: "+fmt.Sprintf("%#v", this.ReplicationLag)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ListFailoverHistoryByNamespaceRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&namespaceservice.ListFailoverHistoryByNamespaceRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
+	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ListFailoverHistoryByNamespaceResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespaceservice.ListFailoverHistoryByNamespaceResponse{")
+	if this.FailoverHistory != nil {
+		s = append(s, "FailoverHistory: "+fmt.Sprintf("%#v", this.FailoverHistory)+",\n")
+	}
+	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *FailoverRecord) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 11)
+	s = append(s, "&namespaceservice.FailoverRecord{")
+	s = append(s, "FailoverType: "+fmt.Sprintf("%#v", this.FailoverType)+",\n")
+	if this.SourceRegion != nil {
+		s = append(s, "SourceRegion: "+fmt.Sprintf("%#v", this.SourceRegion)+",\n")
+	}
+	if this.TargetRegion != nil {
+		s = append(s, "TargetRegion: "+fmt.Sprintf("%#v", this.TargetRegion)+",\n")
+	}
+	if this.StartTimeUtc != nil {
+		s = append(s, "StartTimeUtc: "+fmt.Sprintf("%#v", this.StartTimeUtc)+",\n")
+	}
+	if this.EndTimeUtc != nil {
+		s = append(s, "EndTimeUtc: "+fmt.Sprintf("%#v", this.EndTimeUtc)+",\n")
+	}
+	s = append(s, "Status: "+fmt.Sprintf("%#v", this.Status)+",\n")
+	s = append(s, "Operator: "+fmt.Sprintf("%#v", this.Operator)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GlobalizeNamespaceRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&namespaceservice.GlobalizeNamespaceRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "RequestId: "+fmt.Sprintf("%#v", this.RequestId)+",\n")
+	if this.TargetRegion != nil {
+		s = append(s, "TargetRegion: "+fmt.Sprintf("%#v", this.TargetRegion)+",\n")
+	}
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GlobalizeNamespaceResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespaceservice.GlobalizeNamespaceResponse{")
+	if this.RequestStatus != nil {
+		s = append(s, "RequestStatus: "+fmt.Sprintf("%#v", this.RequestStatus)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ValidateGlobalizeNamespaceRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespaceservice.ValidateGlobalizeNamespaceRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ValidateGlobalizeNamespaceResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespaceservice.ValidateGlobalizeNamespaceResponse{")
+	s = append(s, "Success: "+fmt.Sprintf("%#v", this.Success)+",\n")
+	s = append(s, "FailureReason: "+fmt.Sprintf("%#v", this.FailureReason)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ListReplicaStatusRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&namespaceservice.ListReplicaStatusRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
+	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ListReplicaStatusResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespaceservice.ListReplicaStatusResponse{")
+	if this.Statuses != nil {
+		s = append(s, "Statuses: "+fmt.Sprintf("%#v", this.Statuses)+",\n")
+	}
+	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -4225,6 +5488,565 @@ func (m *FailoverNamespaceResponse) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	return len(dAtA) - i, nil
 }
 
+func (m *GetReplicationStatusRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetReplicationStatusRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetReplicationStatusRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetReplicationStatusResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetReplicationStatusResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetReplicationStatusResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.NextPollTime != nil {
+		{
+			size, err := m.NextPollTime.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ReplicationStatus) > 0 {
+		for iNdEx := len(m.ReplicationStatus) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ReplicationStatus[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ReplicationStatus) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ReplicationStatus) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplicationStatus) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ReplicationLag != nil {
+		{
+			size, err := m.ReplicationLag.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.TargetRegion != nil {
+		{
+			size, err := m.TargetRegion.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.SourceRegion != nil {
+		{
+			size, err := m.SourceRegion.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListFailoverHistoryByNamespaceRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListFailoverHistoryByNamespaceRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListFailoverHistoryByNamespaceRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextPageToken) > 0 {
+		i -= len(m.NextPageToken)
+		copy(dAtA[i:], m.NextPageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.PageSize != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListFailoverHistoryByNamespaceResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListFailoverHistoryByNamespaceResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListFailoverHistoryByNamespaceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextPageToken) > 0 {
+		i -= len(m.NextPageToken)
+		copy(dAtA[i:], m.NextPageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.FailoverHistory) > 0 {
+		for iNdEx := len(m.FailoverHistory) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.FailoverHistory[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *FailoverRecord) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *FailoverRecord) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *FailoverRecord) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Operator) > 0 {
+		i -= len(m.Operator)
+		copy(dAtA[i:], m.Operator)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Operator)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.Status != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x30
+	}
+	if m.EndTimeUtc != nil {
+		{
+			size, err := m.EndTimeUtc.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.StartTimeUtc != nil {
+		{
+			size, err := m.StartTimeUtc.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.TargetRegion != nil {
+		{
+			size, err := m.TargetRegion.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.SourceRegion != nil {
+		{
+			size, err := m.SourceRegion.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.FailoverType != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.FailoverType))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GlobalizeNamespaceRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GlobalizeNamespaceRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalizeNamespaceRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.TargetRegion != nil {
+		{
+			size, err := m.TargetRegion.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.RequestId) > 0 {
+		i -= len(m.RequestId)
+		copy(dAtA[i:], m.RequestId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.RequestId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GlobalizeNamespaceResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GlobalizeNamespaceResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalizeNamespaceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.RequestStatus != nil {
+		{
+			size, err := m.RequestStatus.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ValidateGlobalizeNamespaceRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ValidateGlobalizeNamespaceRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ValidateGlobalizeNamespaceRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ValidateGlobalizeNamespaceResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ValidateGlobalizeNamespaceResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ValidateGlobalizeNamespaceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.FailureReason) > 0 {
+		i -= len(m.FailureReason)
+		copy(dAtA[i:], m.FailureReason)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.FailureReason)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Success {
+		i--
+		if m.Success {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListReplicaStatusRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListReplicaStatusRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListReplicaStatusRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.PageToken) > 0 {
+		i -= len(m.PageToken)
+		copy(dAtA[i:], m.PageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.PageSize != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListReplicaStatusResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListReplicaStatusResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListReplicaStatusResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.PageToken) > 0 {
+		i -= len(m.PageToken)
+		copy(dAtA[i:], m.PageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Statuses) > 0 {
+		for iNdEx := len(m.Statuses) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Statuses[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintRequestResponse(dAtA []byte, offset int, v uint64) int {
 	offset -= sovRequestResponse(v)
 	base := offset
@@ -4767,6 +6589,239 @@ func (m *FailoverNamespaceResponse) Size() (n int) {
 	return n
 }
 
+func (m *GetReplicationStatusRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetReplicationStatusResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.ReplicationStatus) > 0 {
+		for _, e := range m.ReplicationStatus {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	if m.NextPollTime != nil {
+		l = m.NextPollTime.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ReplicationStatus) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.SourceRegion != nil {
+		l = m.SourceRegion.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.TargetRegion != nil {
+		l = m.TargetRegion.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.ReplicationLag != nil {
+		l = m.ReplicationLag.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ListFailoverHistoryByNamespaceRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.PageSize != 0 {
+		n += 1 + sovRequestResponse(uint64(m.PageSize))
+	}
+	l = len(m.NextPageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ListFailoverHistoryByNamespaceResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.FailoverHistory) > 0 {
+		for _, e := range m.FailoverHistory {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.NextPageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *FailoverRecord) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.FailoverType != 0 {
+		n += 1 + sovRequestResponse(uint64(m.FailoverType))
+	}
+	if m.SourceRegion != nil {
+		l = m.SourceRegion.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.TargetRegion != nil {
+		l = m.TargetRegion.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.StartTimeUtc != nil {
+		l = m.StartTimeUtc.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.EndTimeUtc != nil {
+		l = m.EndTimeUtc.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.Status != 0 {
+		n += 1 + sovRequestResponse(uint64(m.Status))
+	}
+	l = len(m.Operator)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GlobalizeNamespaceRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.RequestId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.TargetRegion != nil {
+		l = m.TargetRegion.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GlobalizeNamespaceResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.RequestStatus != nil {
+		l = m.RequestStatus.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ValidateGlobalizeNamespaceRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ValidateGlobalizeNamespaceResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Success {
+		n += 2
+	}
+	l = len(m.FailureReason)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ListReplicaStatusRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.PageSize != 0 {
+		n += 1 + sovRequestResponse(uint64(m.PageSize))
+	}
+	l = len(m.PageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ListReplicaStatusResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Statuses) > 0 {
+		for _, e := range m.Statuses {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.PageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
 func sovRequestResponse(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
@@ -5118,6 +7173,160 @@ func (this *FailoverNamespaceResponse) String() string {
 	}
 	s := strings.Join([]string{`&FailoverNamespaceResponse{`,
 		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v12.RequestStatus", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetReplicationStatusRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetReplicationStatusRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetReplicationStatusResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForReplicationStatus := "[]*ReplicationStatus{"
+	for _, f := range this.ReplicationStatus {
+		repeatedStringForReplicationStatus += strings.Replace(f.String(), "ReplicationStatus", "ReplicationStatus", 1) + ","
+	}
+	repeatedStringForReplicationStatus += "}"
+	s := strings.Join([]string{`&GetReplicationStatusResponse{`,
+		`ReplicationStatus:` + repeatedStringForReplicationStatus + `,`,
+		`NextPollTime:` + strings.Replace(fmt.Sprintf("%v", this.NextPollTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplicationStatus) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplicationStatus{`,
+		`SourceRegion:` + strings.Replace(fmt.Sprintf("%v", this.SourceRegion), "RegionID", "v14.RegionID", 1) + `,`,
+		`TargetRegion:` + strings.Replace(fmt.Sprintf("%v", this.TargetRegion), "RegionID", "v14.RegionID", 1) + `,`,
+		`ReplicationLag:` + strings.Replace(fmt.Sprintf("%v", this.ReplicationLag), "Duration", "types.Duration", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ListFailoverHistoryByNamespaceRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ListFailoverHistoryByNamespaceRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
+		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ListFailoverHistoryByNamespaceResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForFailoverHistory := "[]*FailoverRecord{"
+	for _, f := range this.FailoverHistory {
+		repeatedStringForFailoverHistory += strings.Replace(f.String(), "FailoverRecord", "FailoverRecord", 1) + ","
+	}
+	repeatedStringForFailoverHistory += "}"
+	s := strings.Join([]string{`&ListFailoverHistoryByNamespaceResponse{`,
+		`FailoverHistory:` + repeatedStringForFailoverHistory + `,`,
+		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *FailoverRecord) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&FailoverRecord{`,
+		`FailoverType:` + fmt.Sprintf("%v", this.FailoverType) + `,`,
+		`SourceRegion:` + strings.Replace(fmt.Sprintf("%v", this.SourceRegion), "RegionID", "v14.RegionID", 1) + `,`,
+		`TargetRegion:` + strings.Replace(fmt.Sprintf("%v", this.TargetRegion), "RegionID", "v14.RegionID", 1) + `,`,
+		`StartTimeUtc:` + strings.Replace(fmt.Sprintf("%v", this.StartTimeUtc), "Timestamp", "types.Timestamp", 1) + `,`,
+		`EndTimeUtc:` + strings.Replace(fmt.Sprintf("%v", this.EndTimeUtc), "Timestamp", "types.Timestamp", 1) + `,`,
+		`Status:` + fmt.Sprintf("%v", this.Status) + `,`,
+		`Operator:` + fmt.Sprintf("%v", this.Operator) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GlobalizeNamespaceRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalizeNamespaceRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
+		`TargetRegion:` + strings.Replace(fmt.Sprintf("%v", this.TargetRegion), "RegionID", "v14.RegionID", 1) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GlobalizeNamespaceResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalizeNamespaceResponse{`,
+		`RequestStatus:` + strings.Replace(fmt.Sprintf("%v", this.RequestStatus), "RequestStatus", "v12.RequestStatus", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ValidateGlobalizeNamespaceRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ValidateGlobalizeNamespaceRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ValidateGlobalizeNamespaceResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ValidateGlobalizeNamespaceResponse{`,
+		`Success:` + fmt.Sprintf("%v", this.Success) + `,`,
+		`FailureReason:` + fmt.Sprintf("%v", this.FailureReason) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ListReplicaStatusRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ListReplicaStatusRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
+		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ListReplicaStatusResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForStatuses := "[]*ReplicaStatus{"
+	for _, f := range this.Statuses {
+		repeatedStringForStatuses += strings.Replace(fmt.Sprintf("%v", f), "ReplicaStatus", "v14.ReplicaStatus", 1) + ","
+	}
+	repeatedStringForStatuses += "}"
+	s := strings.Join([]string{`&ListReplicaStatusResponse{`,
+		`Statuses:` + repeatedStringForStatuses + `,`,
+		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -8748,6 +10957,1624 @@ func (m *FailoverNamespaceResponse) Unmarshal(dAtA []byte) error {
 			}
 			if err := m.RequestStatus.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetReplicationStatusRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetReplicationStatusRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetReplicationStatusRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetReplicationStatusResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetReplicationStatusResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetReplicationStatusResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReplicationStatus", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReplicationStatus = append(m.ReplicationStatus, &ReplicationStatus{})
+			if err := m.ReplicationStatus[len(m.ReplicationStatus)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPollTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.NextPollTime == nil {
+				m.NextPollTime = &types.Timestamp{}
+			}
+			if err := m.NextPollTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ReplicationStatus) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ReplicationStatus: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ReplicationStatus: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SourceRegion", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.SourceRegion == nil {
+				m.SourceRegion = &v14.RegionID{}
+			}
+			if err := m.SourceRegion.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TargetRegion", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.TargetRegion == nil {
+				m.TargetRegion = &v14.RegionID{}
+			}
+			if err := m.TargetRegion.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReplicationLag", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ReplicationLag == nil {
+				m.ReplicationLag = &types.Duration{}
+			}
+			if err := m.ReplicationLag.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListFailoverHistoryByNamespaceRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListFailoverHistoryByNamespaceRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListFailoverHistoryByNamespaceRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
+			}
+			m.PageSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PageSize |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextPageToken = append(m.NextPageToken[:0], dAtA[iNdEx:postIndex]...)
+			if m.NextPageToken == nil {
+				m.NextPageToken = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListFailoverHistoryByNamespaceResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListFailoverHistoryByNamespaceResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListFailoverHistoryByNamespaceResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FailoverHistory", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.FailoverHistory = append(m.FailoverHistory, &FailoverRecord{})
+			if err := m.FailoverHistory[len(m.FailoverHistory)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextPageToken = append(m.NextPageToken[:0], dAtA[iNdEx:postIndex]...)
+			if m.NextPageToken == nil {
+				m.NextPageToken = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *FailoverRecord) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: FailoverRecord: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: FailoverRecord: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FailoverType", wireType)
+			}
+			m.FailoverType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.FailoverType |= v14.FailoverType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SourceRegion", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.SourceRegion == nil {
+				m.SourceRegion = &v14.RegionID{}
+			}
+			if err := m.SourceRegion.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TargetRegion", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.TargetRegion == nil {
+				m.TargetRegion = &v14.RegionID{}
+			}
+			if err := m.TargetRegion.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartTimeUtc", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.StartTimeUtc == nil {
+				m.StartTimeUtc = &types.Timestamp{}
+			}
+			if err := m.StartTimeUtc.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EndTimeUtc", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.EndTimeUtc == nil {
+				m.EndTimeUtc = &types.Timestamp{}
+			}
+			if err := m.EndTimeUtc.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= v14.FailoverStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Operator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GlobalizeNamespaceRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GlobalizeNamespaceRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GlobalizeNamespaceRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RequestId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TargetRegion", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.TargetRegion == nil {
+				m.TargetRegion = &v14.RegionID{}
+			}
+			if err := m.TargetRegion.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GlobalizeNamespaceResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GlobalizeNamespaceResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GlobalizeNamespaceResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestStatus", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.RequestStatus == nil {
+				m.RequestStatus = &v12.RequestStatus{}
+			}
+			if err := m.RequestStatus.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ValidateGlobalizeNamespaceRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ValidateGlobalizeNamespaceRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ValidateGlobalizeNamespaceRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ValidateGlobalizeNamespaceResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ValidateGlobalizeNamespaceResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ValidateGlobalizeNamespaceResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Success", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Success = bool(v != 0)
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FailureReason", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.FailureReason = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListReplicaStatusRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListReplicaStatusRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListReplicaStatusRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
+			}
+			m.PageSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PageSize |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PageToken = append(m.PageToken[:0], dAtA[iNdEx:postIndex]...)
+			if m.PageToken == nil {
+				m.PageToken = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListReplicaStatusResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListReplicaStatusResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListReplicaStatusResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Statuses", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Statuses = append(m.Statuses, &v14.ReplicaStatus{})
+			if err := m.Statuses[len(m.Statuses)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PageToken = append(m.PageToken[:0], dAtA[iNdEx:postIndex]...)
+			if m.PageToken == nil {
+				m.PageToken = []byte{}
 			}
 			iNdEx = postIndex
 		default:
