@@ -13,6 +13,7 @@ import (
 	"go.uber.org/multierr"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
+	"github.com/temporalio/tcld/protogen/api/common/v1"
 	"github.com/temporalio/tcld/protogen/api/sink/v1"
 
 	"github.com/kylelemons/godebug/diff"
@@ -26,6 +27,7 @@ import (
 
 const (
 	namespaceRegionFlagName          = "region"
+	regionCloudProviderFlagName      = "cloud-provider"
 	CaCertificateFlagName            = "ca-certificate"
 	CaCertificateFileFlagName        = "ca-certificate-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
@@ -240,6 +242,7 @@ func (c *NamespaceClient) getExportSinkResourceVersion(ctx *cli.Context, namespa
 
 	return resourceVersion, nil
 }
+
 func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespace) error {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
@@ -389,6 +392,21 @@ func readAndParseCACerts(ctx *cli.Context) (read caCerts, err error) {
 		return nil, err
 	}
 	return parseCertificates(cert)
+}
+
+func (c *NamespaceClient) failoverNamespace(ctx *cli.Context) error {
+	res, err := c.client.FailoverNamespace(c.ctx, &namespaceservice.FailoverNamespaceRequest{
+		Namespace: ctx.String(NamespaceFlagName),
+		RequestId: ctx.String(RequestIDFlagName),
+		TargetRegion: &common.RegionID{
+			CloudProvider: "",
+			Name:          ctx.String(namespaceRegionFlagName),
+		},
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res)
 }
 
 // ReadCACerts reads ca certs based on cli flags.
@@ -1206,6 +1224,49 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						return c.renameSearchAttribute(ctx, n, existingName, newName)
 					},
 				},
+			},
+		},
+		{
+			Name:    "failover",
+			Usage:   "Failover a temporal namespace",
+			Aliases: []string{"fo"},
+			Flags: []cli.Flag{
+				RequestIDFlag,
+				&cli.StringFlag{
+					Name:     NamespaceFlagName,
+					Usage:    "The namespace hosted on temporal cloud",
+					Aliases:  []string{"n"},
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:     namespaceRegionFlagName,
+					Usage:    "The region to failover to",
+					Aliases:  []string{"r"},
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:  regionCloudProviderFlagName,
+					Usage: "The cloud provider of the region. Default: aws",
+					Value: "aws",
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				namespaceName := ctx.String(NamespaceFlagName)
+				region := ctx.String(namespaceRegionFlagName)
+				yes, err := ConfirmPrompt(ctx,
+					fmt.Sprintf(
+						"Do you want to failover namespace \"%s\" to region \"%s\"?",
+						namespaceName,
+						region,
+					),
+				)
+				if err != nil {
+					return err
+				}
+				if !yes {
+					return nil
+				}
+				return c.failoverNamespace(ctx)
 			},
 		},
 	}
