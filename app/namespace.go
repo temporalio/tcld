@@ -282,11 +282,16 @@ func (c *NamespaceClient) addRegion(ctx *cli.Context) error {
 		return fmt.Errorf("namespace region is required")
 	}
 
+	cloudProvider := ctx.String(regionCloudProviderFlagName)
+	if len(cloudProvider) == 0 {
+		return fmt.Errorf("namespace cloud provider is required")
+	}
+
 	res, err := c.client.GlobalizeNamespace(c.ctx, &namespaceservice.GlobalizeNamespaceRequest{
 		RequestId: ctx.String(RequestIDFlagName),
 		Namespace: ctx.String(NamespaceFlagName),
 		TargetRegion: &common.RegionID{
-			CloudProvider: "aws",
+			CloudProvider: cloudProvider,
 			Name:          region,
 		},
 		ResourceVersion: resourceVersion,
