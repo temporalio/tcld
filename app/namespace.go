@@ -395,11 +395,26 @@ func readAndParseCACerts(ctx *cli.Context) (read caCerts, err error) {
 }
 
 func (c *NamespaceClient) failoverNamespace(ctx *cli.Context) error {
+	namespace := ctx.String(NamespaceFlagName)
+	if len(namespace) == 0 {
+		return fmt.Errorf("namespace is required")
+	}
+
+	region := ctx.String(namespaceRegionFlagName)
+	if len(region) == 0 {
+		return fmt.Errorf("region is required")
+	}
+
+	cloudProvider := ctx.String(regionCloudProviderFlagName)
+	if len(cloudProvider) == 0 {
+		return fmt.Errorf("cloud provider is required")
+	}
+
 	res, err := c.client.FailoverNamespace(c.ctx, &namespaceservice.FailoverNamespaceRequest{
-		Namespace: ctx.String(NamespaceFlagName),
+		Namespace: namespace,
 		RequestId: ctx.String(RequestIDFlagName),
 		TargetRegion: &common.RegionID{
-			CloudProvider: "",
+			CloudProvider: cloudProvider,
 			Name:          ctx.String(namespaceRegionFlagName),
 		},
 	})
