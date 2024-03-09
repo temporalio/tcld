@@ -27,6 +27,7 @@ import (
 
 const (
 	namespaceRegionFlagName          = "region"
+	regionCloudProviderFlagName      = "cloud-provider"
 	CaCertificateFlagName            = "ca-certificate"
 	CaCertificateFileFlagName        = "ca-certificate-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
@@ -270,7 +271,7 @@ func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.User
 	return PrintProto(res)
 }
 
-func (c *NamespaceClient) addReplica(ctx *cli.Context) error {
+func (c *NamespaceClient) addRegion(ctx *cli.Context) error {
 	var resourceVersion string
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
 		resourceVersion = v
@@ -631,9 +632,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Aliases:  []string{"re"},
 					Required: true,
 				},
+				&cli.StringFlag{
+					Name:  regionCloudProviderFlagName,
+					Usage: "The cloud provider of the region. Default: aws",
+					Value: "aws",
+				},
 			},
 			Action: func(ctx *cli.Context) error {
-				return c.addReplica(ctx)
+				return c.addRegion(ctx)
 			},
 		},
 		{
