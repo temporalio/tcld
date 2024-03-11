@@ -27,7 +27,7 @@ import (
 
 const (
 	namespaceRegionFlagName          = "region"
-	regionCloudProviderFlagName      = "cloud-provider"
+	cloudProviderFlagName            = "cloud-provider"
 	CaCertificateFlagName            = "ca-certificate"
 	CaCertificateFileFlagName        = "ca-certificate-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
@@ -242,6 +242,7 @@ func (c *NamespaceClient) getExportSinkResourceVersion(ctx *cli.Context, namespa
 
 	return resourceVersion, nil
 }
+
 func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespace) error {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
@@ -282,7 +283,7 @@ func (c *NamespaceClient) addRegion(ctx *cli.Context) error {
 		return fmt.Errorf("namespace region is required")
 	}
 
-	cloudProvider := ctx.String(regionCloudProviderFlagName)
+	cloudProvider := ctx.String(cloudProviderFlagName)
 	if len(cloudProvider) == 0 {
 		return fmt.Errorf("namespace cloud provider is required")
 	}
@@ -422,6 +423,36 @@ func readAndParseCACerts(ctx *cli.Context) (read caCerts, err error) {
 		return nil, err
 	}
 	return parseCertificates(cert)
+}
+
+func (c *NamespaceClient) failoverNamespace(ctx *cli.Context) error {
+	namespace := ctx.String(NamespaceFlagName)
+	if len(namespace) == 0 {
+		return fmt.Errorf("namespace is required")
+	}
+
+	region := ctx.String(namespaceRegionFlagName)
+	if len(region) == 0 {
+		return fmt.Errorf("region is required")
+	}
+
+	cloudProvider := ctx.String(cloudProviderFlagName)
+	if len(cloudProvider) == 0 {
+		return fmt.Errorf("cloud provider is required")
+	}
+
+	res, err := c.client.FailoverNamespace(c.ctx, &namespaceservice.FailoverNamespaceRequest{
+		Namespace: namespace,
+		RequestId: ctx.String(RequestIDFlagName),
+		TargetRegion: &common.RegionID{
+			CloudProvider: cloudProvider,
+			Name:          ctx.String(namespaceRegionFlagName),
+		},
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res)
 }
 
 // ReadCACerts reads ca certs based on cli flags.
@@ -638,7 +669,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Required: true,
 				},
 				&cli.StringFlag{
-					Name:  regionCloudProviderFlagName,
+					Name:  cloudProviderFlagName,
 					Usage: "The cloud provider of the region. Default: aws",
 					Value: "aws",
 				},
@@ -1265,6 +1296,49 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						return c.renameSearchAttribute(ctx, n, existingName, newName)
 					},
 				},
+			},
+		},
+		{
+			Name:    "failover",
+			Usage:   "Failover a temporal namespace",
+			Aliases: []string{"fo"},
+			Flags: []cli.Flag{
+				RequestIDFlag,
+				&cli.StringFlag{
+					Name:     NamespaceFlagName,
+					Usage:    "The namespace hosted on temporal cloud",
+					Aliases:  []string{"n"},
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:     namespaceRegionFlagName,
+					Usage:    "The region to failover to",
+					Aliases:  []string{"r"},
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:  cloudProviderFlagName,
+					Usage: "The cloud provider of the region. Default: aws",
+					Value: "aws",
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				namespaceName := ctx.String(NamespaceFlagName)
+				region := ctx.String(namespaceRegionFlagName)
+				yes, err := ConfirmPrompt(ctx,
+					fmt.Sprintf(
+						"Do you want to failover namespace \"%s\" to region \"%s\"?",
+						namespaceName,
+						region,
+					),
+				)
+				if err != nil {
+					return err
+				}
+				if !yes {
+					return nil
+				}
+				return c.failoverNamespace(ctx)
 			},
 		},
 	}
