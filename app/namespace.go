@@ -27,7 +27,7 @@ import (
 
 const (
 	namespaceRegionFlagName          = "region"
-	regionCloudProviderFlagName      = "cloud-provider"
+	cloudProviderFlagName      = "cloud-provider"
 	CaCertificateFlagName            = "ca-certificate"
 	CaCertificateFileFlagName        = "ca-certificate-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
