@@ -283,7 +283,7 @@ func (c *NamespaceClient) addRegion(ctx *cli.Context) error {
 		return fmt.Errorf("namespace region is required")
 	}
 
-	cloudProvider := ctx.String(regionCloudProviderFlagName)
+	cloudProvider := ctx.String(cloudProviderFlagName)
 	if len(cloudProvider) == 0 {
 		return fmt.Errorf("namespace cloud provider is required")
 	}
@@ -669,7 +669,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Required: true,
 				},
 				&cli.StringFlag{
-					Name:  regionCloudProviderFlagName,
+					Name:  cloudProviderFlagName,
 					Usage: "The cloud provider of the region. Default: aws",
 					Value: "aws",
 				},
