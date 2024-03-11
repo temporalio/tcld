@@ -27,7 +27,7 @@ import (
 
 const (
 	namespaceRegionFlagName          = "region"
-	cloudProviderFlagName      = "cloud-provider"
+	cloudProviderFlagName            = "cloud-provider"
 	CaCertificateFlagName            = "ca-certificate"
 	CaCertificateFileFlagName        = "ca-certificate-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
@@ -405,7 +405,7 @@ func (c *NamespaceClient) failoverNamespace(ctx *cli.Context) error {
 		return fmt.Errorf("region is required")
 	}
 
-	cloudProvider := ctx.String(regionCloudProviderFlagName)
+	cloudProvider := ctx.String(cloudProviderFlagName)
 	if len(cloudProvider) == 0 {
 		return fmt.Errorf("cloud provider is required")
 	}
@@ -1260,7 +1260,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Required: true,
 				},
 				&cli.StringFlag{
-					Name:  regionCloudProviderFlagName,
+					Name:  cloudProviderFlagName,
 					Usage: "The cloud provider of the region. Default: aws",
 					Value: "aws",
 				},
