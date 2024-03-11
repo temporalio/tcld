@@ -273,9 +273,9 @@ func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.User
 }
 
 func (c *NamespaceClient) addRegion(ctx *cli.Context) error {
-	var resourceVersion string
-	if v := ctx.String(ResourceVersionFlagName); v != "" {
-		resourceVersion = v
+	ns, err := c.getNamespace(ctx.String(NamespaceFlagName))
+	if err != nil {
+		return err
 	}
 
 	region := ctx.String(namespaceRegionFlagName)
@@ -295,7 +295,7 @@ func (c *NamespaceClient) addRegion(ctx *cli.Context) error {
 			CloudProvider: cloudProvider,
 			Name:          region,
 		},
-		ResourceVersion: resourceVersion,
+		ResourceVersion: ns.GetResourceVersion(),
 	})
 	if err != nil {
 		return err
@@ -650,12 +650,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			},
 		},
 		{
-			Name:    "add-region",
-			Usage:   "Add an new region to the temporal namespace",
-			Aliases: []string{"c"},
+			Name:  "add-region",
+			Usage: "Add a new region to the Temporal Namespace",
 			Flags: []cli.Flag{
 				RequestIDFlag,
-				ResourceVersionFlag,
 				&cli.StringFlag{
 					Name:     NamespaceFlagName,
 					Usage:    "The namespace hosted on temporal cloud",
