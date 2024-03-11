@@ -651,7 +651,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 		{
 			Name:  "add-region",
-			Usage: "Add an new region to the temporal namespace",
+			Usage: "Add a new region to the Temporal Namespace",
 			Flags: []cli.Flag{
 				RequestIDFlag,
 				ResourceVersionFlag,
