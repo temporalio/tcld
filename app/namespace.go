@@ -660,7 +660,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Aliases:  []string{"n"},
 					Required: true,
 				},
-				&cli.StringSliceFlag{
+				&cli.StringFlag{
 					Name:     namespaceRegionFlagName,
 					Usage:    "New region to add to the namespace.",
 					Aliases:  []string{"re"},
@@ -1311,7 +1311,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				&cli.StringFlag{
 					Name:     namespaceRegionFlagName,
 					Usage:    "The region to failover to",
-					Aliases:  []string{"r"},
+					Aliases:  []string{"re"},
 					Required: true,
 				},
 				&cli.StringFlag{
