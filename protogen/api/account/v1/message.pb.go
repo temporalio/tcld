@@ -15,7 +15,7 @@ import (
 	reflect "reflect"
 	strconv "strconv"
 	strings "strings"
-	v1 "github.com/temporalio/saas-proto/protogen/api/sink/v1"
+	v1 "github.com/temporalio/tcld/protogen/api/sink/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	authservice "github.com/temporalio/saas-proto/protogen/api/authservice/v1"
+	authservice "github.com/temporalio/tcld/protogen/api/authservice/v1"
 	grpc "google.golang.org/grpc"
 )
 

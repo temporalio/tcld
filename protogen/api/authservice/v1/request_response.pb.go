@@ -6,14 +6,14 @@ package authservice
 import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
-	v12 "github.com/temporalio/saas-proto/protogen/temporal/api/cloud/operation/v1"
+	v12 "github.com/temporalio/tcld/protogen/temporal/api/cloud/operation/v1"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
-	v1 "github.com/temporalio/saas-proto/protogen/api/auth/v1"
-	v11 "github.com/temporalio/saas-proto/protogen/api/request/v1"
+	v1 "github.com/temporalio/tcld/protogen/api/auth/v1"
+	v11 "github.com/temporalio/tcld/protogen/api/request/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
