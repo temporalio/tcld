@@ -7,7 +7,7 @@ import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
 	types "github.com/gogo/protobuf/types"
-	v1 "github.com/temporalio/tcld/protogen/temporal/api/cloud/identity/v1"
+	v1 "github.com/temporalio/saas-proto/protogen/temporal/api/cloud/identity/v1"
 	io "io"
 	math "math"
 	math_bits "math/bits"
