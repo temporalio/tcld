@@ -575,6 +575,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 				n.Spec.AcceptedClientCa = cert
 
+				n.Spec.AuthMethod = namespace.AUTH_METHOD_MTLS
+
 				// retention (required)
 				retention := ctx.Int(RetentionDaysFlagName)
 				if retention < 1 {
