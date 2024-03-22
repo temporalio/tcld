@@ -19,7 +19,7 @@ const (
 	VersionHeader                 = "tcld-version"
 	CommitHeader                  = "tcld-commit"
 	TemporalCloudAPIVersionHeader = "temporal-cloud-api-version"
-	TemporalCloudAPIVersion       = "2024-01-22-00"
+	TemporalCloudAPIVersion       = "2024-03-18-00"
 )
 
 func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Context, *grpc.ClientConn, error) {
