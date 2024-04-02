@@ -144,7 +144,7 @@ func checkForUpdate(buildInfo *BuildInfo) error {
 }
 
 func fetchLatestVersion() (Release, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/temporalio/tcld/releases/latest")
+	url := "https://api.github.com/repos/temporalio/tcld/releases/latest"
 	resp, err := http.Get(url)
 	if err != nil {
 		return Release{}, err
