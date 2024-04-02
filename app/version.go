@@ -9,6 +9,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/semver"
+	"net/http"
+	"io"
+	"encoding/json"
 )
 
 const (
@@ -32,21 +35,39 @@ var (
 	version string
 )
 
-type BuildInfo struct {
-	Date    string // build time or commit time.
-	Commit  string
-	Version string
-}
+type (
+	BuildInfo struct {
+		Date    string // build time or commit time.
+		Commit  string
+		Version string
+	}
+	Release struct {
+		TagName string `json:"tag_name"`
+	}
+
+	//GetVersionClientFn interface {
+	//	FetchLatestVersion() (Release, error)
+	//	NewBuildInfo() BuildInfo
+	//}
+)
 
 func NewVersionCommand() (CommandOut, error) {
 	return CommandOut{Command: &cli.Command{
 		Name:    "version",
 		Usage:   "Version information",
 		Aliases: []string{"v"},
-		Action: func(c *cli.Context) error {
-			return PrintObj(NewBuildInfo())
-		},
+		Action:  versionAction,
 	}}, nil
+}
+
+func versionAction(c *cli.Context) error {
+	buildInfo := NewBuildInfo()
+	err := PrintObj(buildInfo)
+	if err != nil {
+		return err
+	}
+
+	return checkForUpdate(&buildInfo)
 }
 
 // NewBuildInfo will populate build info, to make debugging API errors easier,
@@ -108,4 +129,52 @@ func NewBuildInfo() BuildInfo {
 	}
 
 	return info
+}
+
+func checkForUpdate(buildInfo *BuildInfo) error {
+	latestInfo, err := fetchLatestVersion()
+	if err != nil {
+		return fmt.Errorf("failed to fetch latest version: %w", err)
+	}
+
+	if strings.Contains(buildInfo.Version, "no-version-available") {
+		fmt.Println("no-version-available detected, unable to determine if current build is latest version")
+	} else if buildInfo.Version == latestInfo.TagName {
+		fmt.Println("You are running the latest version")
+	} else {
+		fmt.Printf("A newer version is available: %s\n", latestInfo.TagName)
+	}
+
+	return nil
+}
+
+func fetchLatestVersion() (Release, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/temporalio/tcld/releases/latest")
+	resp, err := http.Get(url)
+	if err != nil {
+		return Release{}, err
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Printf("Failed to close response body: %v\n", err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != 200 {
+		return Release{}, fmt.Errorf("GitHub API error: %s", resp.Status)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return Release{}, err
+	}
+
+	var r Release
+	if err := json.Unmarshal(body, &r); err != nil {
+		return Release{}, err
+	}
+
+	return r, nil
 }
