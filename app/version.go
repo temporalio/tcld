@@ -44,11 +44,6 @@ type (
 	Release struct {
 		TagName string `json:"tag_name"`
 	}
-
-	//GetVersionClientFn interface {
-	//	FetchLatestVersion() (Release, error)
-	//	NewBuildInfo() BuildInfo
-	//}
 )
 
 func NewVersionCommand() (CommandOut, error) {
