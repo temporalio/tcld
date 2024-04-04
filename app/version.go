@@ -150,12 +150,11 @@ func fetchLatestVersion() (Release, error) {
 		return Release{}, err
 	}
 
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
 			fmt.Printf("Failed to close response body: %v\n", err)
 		}
-	}(resp.Body)
+	}()
 
 	if resp.StatusCode != 200 {
 		return Release{}, fmt.Errorf("GitHub API error: %s", resp.Status)
