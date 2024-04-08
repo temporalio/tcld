@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/temporalio/tcld/protogen/temporal/api/cloud/identity/v1"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
@@ -60,8 +59,8 @@ func (c *ServiceAccountClient) createServiceAccount(
 	operationID string,
 ) error {
 	req := &authservice.CreateServiceAccountRequest{
-		Spec:             spec,
-		AsyncOperationId: operationID,
+		Spec:      spec,
+		RequestId: operationID,
 	}
 
 	resp, err := c.client.CreateServiceAccount(c.ctx, req)
@@ -111,7 +110,7 @@ func (c *ServiceAccountClient) deleteServiceAccount(
 	req := &authservice.DeleteServiceAccountRequest{
 		ServiceAccountId: sa.Id,
 		ResourceVersion:  ctx.String(ResourceVersionFlagName),
-		AsyncOperationId: ctx.String(RequestIDFlagName),
+		RequestId:        ctx.String(RequestIDFlagName),
 	}
 	if req.ResourceVersion == "" {
 		req.ResourceVersion = sa.ResourceVersion
@@ -120,7 +119,7 @@ func (c *ServiceAccountClient) deleteServiceAccount(
 	if err != nil {
 		return fmt.Errorf("unable to delete service account: %w", err)
 	}
-	return PrintProto(resp.AsyncOperation)
+	return PrintProto(resp.RequestStatus)
 }
 
 func (c *ServiceAccountClient) performUpdate(
@@ -144,15 +143,25 @@ func (c *ServiceAccountClient) performUpdate(
 		spec.Description = description
 	}
 	if len(accountRole) > 0 {
-		spec.Access.AccountAccess = &identity.AccountAccess{
-			Role: accountRole,
+		ag, err := toAccountActionGroup(accountRole)
+		if err != nil {
+			return fmt.Errorf("failed to parse account role: %w", err)
+		}
+
+		spec.Access.AccountAccess = &auth.AccountAccess{
+			Role: ag,
 		}
 	}
 	if namespaceRoles != nil {
-		nrs := map[string]*identity.NamespaceAccess{}
+		nrs := map[string]*auth.NamespaceAccess{}
 		for ns, p := range namespaceRoles {
-			nrs[ns] = &identity.NamespaceAccess{
-				Permission: p,
+			nsActionGroup, err := toNamespaceActionGroup(p)
+			if err != nil {
+				return fmt.Errorf("failed to parse namespace %q permission: %w", ns, err)
+			}
+
+			nrs[ns] = &auth.NamespaceAccess{
+				Permission: nsActionGroup,
 			}
 		}
 		spec.Access.NamespaceAccesses = nrs
@@ -166,7 +175,7 @@ func (c *ServiceAccountClient) performUpdate(
 		req.ResourceVersion = ctx.String(ResourceVersionFlagName)
 	}
 	if ctx.IsSet(RequestIDFlagName) {
-		req.AsyncOperationId = ctx.String(RequestIDFlagName)
+		req.RequestId = ctx.String(RequestIDFlagName)
 	}
 	if req.ResourceVersion == "" {
 		req.ResourceVersion = sa.ResourceVersion
@@ -176,7 +185,7 @@ func (c *ServiceAccountClient) performUpdate(
 	if err != nil {
 		return fmt.Errorf("unable to update service account: %w", err)
 	}
-	return PrintProto(resp.AsyncOperation)
+	return PrintProto(resp.RequestStatus)
 }
 
 func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientFn) (CommandOut, error) {
@@ -221,17 +230,18 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							return fmt.Errorf("account role must be specified; valid types are %v", accountActionGroups)
 						}
 
-						if _, ok := auth.AccountActionGroup_value[ctx.String(accountRoleFlagName)]; !ok {
-							return fmt.Errorf("invalid account role; valid types are: %v", accountActionGroups)
+						acctActionGroup, err := toAccountActionGroup(ctx.String(accountRoleFlagName))
+						if err != nil {
+							return fmt.Errorf("failed to parse account role: %w", err)
 						}
 
 						spec := &auth.ServiceAccountSpec{
 							Name: ctx.String(serviceAccountNameFlagName),
-							Access: &identity.Access{
-								AccountAccess: &identity.AccountAccess{
-									Role: ctx.String(accountRoleFlagName),
+							Access: &auth.Access{
+								AccountAccess: &auth.AccountAccess{
+									Role: acctActionGroup,
 								},
-								NamespaceAccesses: map[string]*identity.NamespaceAccess{},
+								NamespaceAccesses: map[string]*auth.NamespaceAccess{},
 							},
 							Description: ctx.String(serviceAccountDescriptionFlagName),
 						}
@@ -255,8 +265,13 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 								}
 
 								for ns, perm := range nsMap {
-									spec.Access.NamespaceAccesses[ns] = &identity.NamespaceAccess{
-										Permission: perm,
+									nsActionGroup, err := toNamespaceActionGroup(perm)
+									if err != nil {
+										return fmt.Errorf("failed to parse %q namespace permission: %w", ns, err)
+									}
+
+									spec.Access.NamespaceAccesses[ns] = &auth.NamespaceAccess{
+										Permission: nsActionGroup,
 									}
 								}
 							}

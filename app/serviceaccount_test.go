@@ -3,16 +3,16 @@ package app
 import (
 	"context"
 	"errors"
+	"reflect"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
+	"github.com/temporalio/tcld/protogen/api/request/v1"
 	authservicemock "github.com/temporalio/tcld/protogen/apimock/authservice/v1"
-	"github.com/temporalio/tcld/protogen/temporal/api/cloud/identity/v1"
-	"github.com/temporalio/tcld/protogen/temporal/api/cloud/operation/v1"
 	"github.com/urfave/cli/v2"
-	"reflect"
-	"testing"
 )
 
 func TestServiceAccount(t *testing.T) {
@@ -106,20 +106,20 @@ func (s *ServiceAccountTestSuite) TestCreateServiceAccount() {
 	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("create service account error")).Times(1)
 	s.EqualError(s.RunCmd("service-account", "create", "--description", "test description", "--name", "test name", "--account-role", "Read"), "unable to create service account: create service account error")
 	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.CreateServiceAccountResponse{
-		AsyncOperation: &operation.AsyncOperation{
-			State: "FULFILLED",
+		RequestStatus: &request.RequestStatus{
+			State: request.STATE_FULFILLED,
 		},
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("service-account", "create", "--description", "test description", "--name", "test name", "--account-role", "Read"))
 	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.CreateServiceAccountResponse{
-		AsyncOperation: &operation.AsyncOperation{
-			State: "FULFILLED",
+		RequestStatus: &request.RequestStatus{
+			State: request.STATE_FULFILLED,
 		},
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("service-account", "create", "--description", "test description", "--name", "test name", "--account-role", "Admin", "--namespace-permission", "test-namespace=Admin"))
 	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.CreateServiceAccountResponse{
-		AsyncOperation: &operation.AsyncOperation{
-			State: "FULFILLED",
+		RequestStatus: &request.RequestStatus{
+			State: request.STATE_FULFILLED,
 		},
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("service-account", "create", "--description", "test description", "--name", "test name", "--account-role", "Read", "--namespace-permission", "test-namespace=Read"))
@@ -149,8 +149,8 @@ func (s *ServiceAccountTestSuite) TestDeleteServiceAccount() {
 		},
 	}, nil).Times(1)
 	s.mockAuthService.EXPECT().DeleteServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.DeleteServiceAccountResponse{
-		AsyncOperation: &operation.AsyncOperation{
-			State: "FULFILLED",
+		RequestStatus: &request.RequestStatus{
+			State: request.STATE_FULFILLED,
 		},
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("service-account", "delete", "--service-account-id", "test-service-account-id"))
@@ -170,13 +170,13 @@ func (s *ServiceAccountTestSuite) TestSetAccountRole() {
 			Spec: &auth.ServiceAccountSpec{
 				Name:        "test-service-account-name",
 				Description: "test-service-account-desc",
-				Access: &identity.Access{
-					AccountAccess: &identity.AccountAccess{
-						Role: "Read",
+				Access: &auth.Access{
+					AccountAccess: &auth.AccountAccess{
+						Role: auth.ACCOUNT_ACTION_GROUP_READ,
 					},
-					NamespaceAccesses: map[string]*identity.NamespaceAccess{
+					NamespaceAccesses: map[string]*auth.NamespaceAccess{
 						"test-namespace": {
-							Permission: "test-namespace-role",
+							Permission: auth.NAMESPACE_ACTION_GROUP_READ,
 						},
 					},
 				},
@@ -189,21 +189,21 @@ func (s *ServiceAccountTestSuite) TestSetAccountRole() {
 			Spec: &auth.ServiceAccountSpec{
 				Name:        "test-service-account-name",
 				Description: "test-service-account-desc",
-				Access: &identity.Access{
-					AccountAccess: &identity.AccountAccess{
-						Role: "Developer",
+				Access: &auth.Access{
+					AccountAccess: &auth.AccountAccess{
+						Role: auth.ACCOUNT_ACTION_GROUP_DEVELOPER,
 					},
-					NamespaceAccesses: map[string]*identity.NamespaceAccess{
+					NamespaceAccesses: map[string]*auth.NamespaceAccess{
 						"test-namespace": {
-							Permission: "test-namespace-role",
+							Permission: auth.NAMESPACE_ACTION_GROUP_READ,
 						},
 					},
 				},
 			},
 		},
 	})).Return(&authservice.UpdateServiceAccountResponse{
-		AsyncOperation: &operation.AsyncOperation{
-			State: "FULFILLED",
+		RequestStatus: &request.RequestStatus{
+			State: request.STATE_FULFILLED,
 		},
 	}, nil)
 	s.NoError(s.RunCmd("service-account", "set-account-role", "--service-account-id", "test-service-account-id", "--account-role", "Developer"))
@@ -216,13 +216,13 @@ func (s *ServiceAccountTestSuite) TestSetAccountRoleAdmin() {
 			Spec: &auth.ServiceAccountSpec{
 				Name:        "test-service-account-name",
 				Description: "test-service-account-desc",
-				Access: &identity.Access{
-					AccountAccess: &identity.AccountAccess{
-						Role: "Read",
+				Access: &auth.Access{
+					AccountAccess: &auth.AccountAccess{
+						Role: auth.ACCOUNT_ACTION_GROUP_READ,
 					},
-					NamespaceAccesses: map[string]*identity.NamespaceAccess{
+					NamespaceAccesses: map[string]*auth.NamespaceAccess{
 						"test-namespace": {
-							Permission: "test-namespace-role",
+							Permission: auth.NAMESPACE_ACTION_GROUP_READ,
 						},
 					},
 				},
@@ -235,17 +235,17 @@ func (s *ServiceAccountTestSuite) TestSetAccountRoleAdmin() {
 			Spec: &auth.ServiceAccountSpec{
 				Name:        "test-service-account-name",
 				Description: "test-service-account-desc",
-				Access: &identity.Access{
-					AccountAccess: &identity.AccountAccess{
-						Role: "Admin",
+				Access: &auth.Access{
+					AccountAccess: &auth.AccountAccess{
+						Role: auth.ACCOUNT_ACTION_GROUP_ADMIN,
 					},
-					NamespaceAccesses: map[string]*identity.NamespaceAccess{},
+					NamespaceAccesses: map[string]*auth.NamespaceAccess{},
 				},
 			},
 		},
 	})).Return(&authservice.UpdateServiceAccountResponse{
-		AsyncOperation: &operation.AsyncOperation{
-			State: "FULFILLED",
+		RequestStatus: &request.RequestStatus{
+			State: request.STATE_FULFILLED,
 		},
 	}, nil)
 	s.NoError(s.RunCmd("service-account", "set-account-role", "--service-account-id", "test-service-account-id", "--account-role", "Admin"))
@@ -265,11 +265,11 @@ func (s *ServiceAccountTestSuite) TestSetNamespacePermissions() {
 			Spec: &auth.ServiceAccountSpec{
 				Name:        "test-service-account-name",
 				Description: "test-service-account-desc",
-				Access: &identity.Access{
-					AccountAccess: &identity.AccountAccess{
-						Role: "Read",
+				Access: &auth.Access{
+					AccountAccess: &auth.AccountAccess{
+						Role: auth.ACCOUNT_ACTION_GROUP_READ,
 					},
-					NamespaceAccesses: map[string]*identity.NamespaceAccess{},
+					NamespaceAccesses: map[string]*auth.NamespaceAccess{},
 				},
 			},
 		},
@@ -280,21 +280,21 @@ func (s *ServiceAccountTestSuite) TestSetNamespacePermissions() {
 			Spec: &auth.ServiceAccountSpec{
 				Name:        "test-service-account-name",
 				Description: "test-service-account-desc",
-				Access: &identity.Access{
-					AccountAccess: &identity.AccountAccess{
-						Role: "Read",
+				Access: &auth.Access{
+					AccountAccess: &auth.AccountAccess{
+						Role: auth.ACCOUNT_ACTION_GROUP_READ,
 					},
-					NamespaceAccesses: map[string]*identity.NamespaceAccess{
+					NamespaceAccesses: map[string]*auth.NamespaceAccess{
 						"test-namespace-1": {
-							Permission: "Read",
+							Permission: auth.NAMESPACE_ACTION_GROUP_READ,
 						},
 					},
 				},
 			},
 		},
 	})).Return(&authservice.UpdateServiceAccountResponse{
-		AsyncOperation: &operation.AsyncOperation{
-			State: "FULFILLED",
+		RequestStatus: &request.RequestStatus{
+			State: request.STATE_FULFILLED,
 		},
 	}, nil)
 	s.NoError(s.RunCmd("service-account", "set-namespace-permissions", "--service-account-id", "test-service-account-id", "-p", "test-namespace-1=Read"))
@@ -307,13 +307,13 @@ func (s *ServiceAccountTestSuite) TestSetNamespacePermissionsEmpty() {
 			Spec: &auth.ServiceAccountSpec{
 				Name:        "test-service-account-name",
 				Description: "test-service-account-desc",
-				Access: &identity.Access{
-					AccountAccess: &identity.AccountAccess{
-						Role: "Read",
+				Access: &auth.Access{
+					AccountAccess: &auth.AccountAccess{
+						Role: auth.ACCOUNT_ACTION_GROUP_READ,
 					},
-					NamespaceAccesses: map[string]*identity.NamespaceAccess{
+					NamespaceAccesses: map[string]*auth.NamespaceAccess{
 						"test-namespace-1": {
-							Permission: "Read",
+							Permission: auth.NAMESPACE_ACTION_GROUP_READ,
 						},
 					},
 				},
@@ -326,17 +326,17 @@ func (s *ServiceAccountTestSuite) TestSetNamespacePermissionsEmpty() {
 			Spec: &auth.ServiceAccountSpec{
 				Name:        "test-service-account-name",
 				Description: "test-service-account-desc",
-				Access: &identity.Access{
-					AccountAccess: &identity.AccountAccess{
-						Role: "Read",
+				Access: &auth.Access{
+					AccountAccess: &auth.AccountAccess{
+						Role: auth.ACCOUNT_ACTION_GROUP_READ,
 					},
-					NamespaceAccesses: map[string]*identity.NamespaceAccess{},
+					NamespaceAccesses: map[string]*auth.NamespaceAccess{},
 				},
 			},
 		},
 	})).Return(&authservice.UpdateServiceAccountResponse{
-		AsyncOperation: &operation.AsyncOperation{
-			State: "FULFILLED",
+		RequestStatus: &request.RequestStatus{
+			State: request.STATE_FULFILLED,
 		},
 	}, nil)
 	s.NoError(s.RunCmd("service-account", "set-namespace-permissions", "--service-account-id", "test-service-account-id"))

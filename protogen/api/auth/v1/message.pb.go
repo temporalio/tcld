@@ -6,8 +6,8 @@ package auth
 import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
+	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 	types "github.com/gogo/protobuf/types"
-	v1 "github.com/temporalio/tcld/protogen/temporal/api/cloud/identity/v1"
 	io "io"
 	math "math"
 	math_bits "math/bits"
@@ -259,6 +259,72 @@ var APIKeyState_value = map[string]int32{
 
 func (APIKeyState) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_bea184b0c3eae56b, []int{6}
+}
+
+type ServiceAccountState int32
+
+const (
+	SERVICE_ACCOUNT_STATE_UNSPECIFIED   ServiceAccountState = 0
+	SERVICE_ACCOUNT_STATE_CREATING      ServiceAccountState = 1
+	SERVICE_ACCOUNT_STATE_CREATE_FAILED ServiceAccountState = 2
+	SERVICE_ACCOUNT_STATE_ACTIVE        ServiceAccountState = 3
+	SERVICE_ACCOUNT_STATE_UPDATING      ServiceAccountState = 4
+	SERVICE_ACCOUNT_STATE_UPDATE_FAILED ServiceAccountState = 5
+	SERVICE_ACCOUNT_STATE_DELETING      ServiceAccountState = 6
+	SERVICE_ACCOUNT_STATE_DELETE_FAILED ServiceAccountState = 7
+	SERVICE_ACCOUNT_STATE_DELETED       ServiceAccountState = 8
+)
+
+var ServiceAccountState_name = map[int32]string{
+	0: "Unspecified",
+	1: "Creating",
+	2: "CreateFailed",
+	3: "Active",
+	4: "Updating",
+	5: "UpdateFailed",
+	6: "Deleting",
+	7: "DeleteFailed",
+	8: "Deleted",
+}
+
+var ServiceAccountState_value = map[string]int32{
+	"Unspecified":  0,
+	"Creating":     1,
+	"CreateFailed": 2,
+	"Active":       3,
+	"Updating":     4,
+	"UpdateFailed": 5,
+	"Deleting":     6,
+	"DeleteFailed": 7,
+	"Deleted":      8,
+}
+
+func (ServiceAccountState) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_bea184b0c3eae56b, []int{7}
+}
+
+type IdentityType int32
+
+const (
+	IDENTITY_TYPE_UNSPECIFIED     IdentityType = 0
+	IDENTITY_TYPE_USER            IdentityType = 1
+	IDENTITY_TYPE_SERVICE_ACCOUNT IdentityType = 2
+)
+
+var IdentityType_name = map[int32]string{
+	0: "Unspecified",
+	1: "User",
+	2: "ServiceAccount",
+}
+
+var IdentityType_value = map[string]int32{
+	"Unspecified":    0,
+	"User":           1,
+	"ServiceAccount": 2,
+}
+
+func (IdentityType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_bea184b0c3eae56b, []int{8}
 }
 
 type UserSpec struct {
@@ -992,6 +1058,148 @@ func (m *APIKey) GetLastModifiedTime() *types.Timestamp {
 	return nil
 }
 
+type AccountAccess struct {
+	// The role on the account.
+	Role AccountActionGroup `protobuf:"varint,1,opt,name=role,proto3,enum=api.auth.v1.AccountActionGroup" json:"role,omitempty"`
+}
+
+func (m *AccountAccess) Reset()      { *m = AccountAccess{} }
+func (*AccountAccess) ProtoMessage() {}
+func (*AccountAccess) Descriptor() ([]byte, []int) {
+	return fileDescriptor_bea184b0c3eae56b, []int{11}
+}
+func (m *AccountAccess) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AccountAccess) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AccountAccess.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AccountAccess) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AccountAccess.Merge(m, src)
+}
+func (m *AccountAccess) XXX_Size() int {
+	return m.Size()
+}
+func (m *AccountAccess) XXX_DiscardUnknown() {
+	xxx_messageInfo_AccountAccess.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AccountAccess proto.InternalMessageInfo
+
+func (m *AccountAccess) GetRole() AccountActionGroup {
+	if m != nil {
+		return m.Role
+	}
+	return ACCOUNT_ACTION_GROUP_UNSPECIFIED
+}
+
+type NamespaceAccess struct {
+	// The permission for this namespace.
+	Permission NamespaceActionGroup `protobuf:"varint,1,opt,name=permission,proto3,enum=api.auth.v1.NamespaceActionGroup" json:"permission,omitempty"`
+}
+
+func (m *NamespaceAccess) Reset()      { *m = NamespaceAccess{} }
+func (*NamespaceAccess) ProtoMessage() {}
+func (*NamespaceAccess) Descriptor() ([]byte, []int) {
+	return fileDescriptor_bea184b0c3eae56b, []int{12}
+}
+func (m *NamespaceAccess) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *NamespaceAccess) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_NamespaceAccess.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *NamespaceAccess) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_NamespaceAccess.Merge(m, src)
+}
+func (m *NamespaceAccess) XXX_Size() int {
+	return m.Size()
+}
+func (m *NamespaceAccess) XXX_DiscardUnknown() {
+	xxx_messageInfo_NamespaceAccess.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_NamespaceAccess proto.InternalMessageInfo
+
+func (m *NamespaceAccess) GetPermission() NamespaceActionGroup {
+	if m != nil {
+		return m.Permission
+	}
+	return NAMESPACE_ACTION_GROUP_UNSPECIFIED
+}
+
+type Access struct {
+	// The account access
+	AccountAccess *AccountAccess `protobuf:"bytes,1,opt,name=account_access,json=accountAccess,proto3" json:"account_access,omitempty"`
+	// The map of namespace accesses
+	// The key is the namespace name and the value is the access to the namespace
+	NamespaceAccesses map[string]*NamespaceAccess `protobuf:"bytes,2,rep,name=namespace_accesses,json=namespaceAccesses,proto3" json:"namespace_accesses,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+func (m *Access) Reset()      { *m = Access{} }
+func (*Access) ProtoMessage() {}
+func (*Access) Descriptor() ([]byte, []int) {
+	return fileDescriptor_bea184b0c3eae56b, []int{13}
+}
+func (m *Access) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Access) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Access.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Access) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Access.Merge(m, src)
+}
+func (m *Access) XXX_Size() int {
+	return m.Size()
+}
+func (m *Access) XXX_DiscardUnknown() {
+	xxx_messageInfo_Access.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Access proto.InternalMessageInfo
+
+func (m *Access) GetAccountAccess() *AccountAccess {
+	if m != nil {
+		return m.AccountAccess
+	}
+	return nil
+}
+
+func (m *Access) GetNamespaceAccesses() map[string]*NamespaceAccess {
+	if m != nil {
+		return m.NamespaceAccesses
+	}
+	return nil
+}
+
 type ServiceAccount struct {
 	// The id of the service account.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -1001,9 +1209,9 @@ type ServiceAccount struct {
 	// The service account specification.
 	Spec *ServiceAccountSpec `protobuf:"bytes,3,opt,name=spec,proto3" json:"spec,omitempty"`
 	// The current state of the service account.
-	State string `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
-	// The id of the async operation that is creating/updating/deleting the service account, if any.
-	AsyncOperationId string `protobuf:"bytes,5,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+	State ServiceAccountState `protobuf:"varint,4,opt,name=state,proto3,enum=api.auth.v1.ServiceAccountState" json:"state,omitempty"`
+	// The request id that is creating/updating/deleting the service account, if any.
+	RequestId string `protobuf:"bytes,5,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	// The date and time when the service account was created
 	CreatedTime *types.Timestamp `protobuf:"bytes,6,opt,name=created_time,json=createdTime,proto3" json:"created_time,omitempty"`
 	// The date and time when the service account was last modified
@@ -1014,7 +1222,7 @@ type ServiceAccount struct {
 func (m *ServiceAccount) Reset()      { *m = ServiceAccount{} }
 func (*ServiceAccount) ProtoMessage() {}
 func (*ServiceAccount) Descriptor() ([]byte, []int) {
-	return fileDescriptor_bea184b0c3eae56b, []int{11}
+	return fileDescriptor_bea184b0c3eae56b, []int{14}
 }
 func (m *ServiceAccount) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1064,16 +1272,16 @@ func (m *ServiceAccount) GetSpec() *ServiceAccountSpec {
 	return nil
 }
 
-func (m *ServiceAccount) GetState() string {
+func (m *ServiceAccount) GetState() ServiceAccountState {
 	if m != nil {
 		return m.State
 	}
-	return ""
+	return SERVICE_ACCOUNT_STATE_UNSPECIFIED
 }
 
-func (m *ServiceAccount) GetAsyncOperationId() string {
+func (m *ServiceAccount) GetRequestId() string {
 	if m != nil {
-		return m.AsyncOperationId
+		return m.RequestId
 	}
 	return ""
 }
@@ -1096,7 +1304,7 @@ type ServiceAccountSpec struct {
 	// The name associated with the service account.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// The access assigned to the service account.
-	Access *v1.Access `protobuf:"bytes,2,opt,name=access,proto3" json:"access,omitempty"`
+	Access *Access `protobuf:"bytes,2,opt,name=access,proto3" json:"access,omitempty"`
 	// The description associated with the service account - optional.
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 }
@@ -1104,7 +1312,7 @@ type ServiceAccountSpec struct {
 func (m *ServiceAccountSpec) Reset()      { *m = ServiceAccountSpec{} }
 func (*ServiceAccountSpec) ProtoMessage() {}
 func (*ServiceAccountSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_bea184b0c3eae56b, []int{12}
+	return fileDescriptor_bea184b0c3eae56b, []int{15}
 }
 func (m *ServiceAccountSpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1140,7 +1348,7 @@ func (m *ServiceAccountSpec) GetName() string {
 	return ""
 }
 
-func (m *ServiceAccountSpec) GetAccess() *v1.Access {
+func (m *ServiceAccountSpec) GetAccess() *Access {
 	if m != nil {
 		return m.Access
 	}
@@ -1154,6 +1362,68 @@ func (m *ServiceAccountSpec) GetDescription() string {
 	return ""
 }
 
+type IdentityNamespacePermissions struct {
+	// The identity to add namespace permissions for.
+	IdentityId string `protobuf:"bytes,1,opt,name=identity_id,json=identityId,proto3" json:"identity_id,omitempty"`
+	// The identity type to add namespace permissions for.
+	IdentityType IdentityType `protobuf:"varint,2,opt,name=identity_type,json=identityType,proto3,enum=api.auth.v1.IdentityType" json:"identity_type,omitempty"`
+	// The namespace action group to set for the user.
+	ActionGroup NamespaceActionGroup `protobuf:"varint,3,opt,name=action_group,json=actionGroup,proto3,enum=api.auth.v1.NamespaceActionGroup" json:"action_group,omitempty"`
+}
+
+func (m *IdentityNamespacePermissions) Reset()      { *m = IdentityNamespacePermissions{} }
+func (*IdentityNamespacePermissions) ProtoMessage() {}
+func (*IdentityNamespacePermissions) Descriptor() ([]byte, []int) {
+	return fileDescriptor_bea184b0c3eae56b, []int{16}
+}
+func (m *IdentityNamespacePermissions) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *IdentityNamespacePermissions) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_IdentityNamespacePermissions.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *IdentityNamespacePermissions) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IdentityNamespacePermissions.Merge(m, src)
+}
+func (m *IdentityNamespacePermissions) XXX_Size() int {
+	return m.Size()
+}
+func (m *IdentityNamespacePermissions) XXX_DiscardUnknown() {
+	xxx_messageInfo_IdentityNamespacePermissions.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_IdentityNamespacePermissions proto.InternalMessageInfo
+
+func (m *IdentityNamespacePermissions) GetIdentityId() string {
+	if m != nil {
+		return m.IdentityId
+	}
+	return ""
+}
+
+func (m *IdentityNamespacePermissions) GetIdentityType() IdentityType {
+	if m != nil {
+		return m.IdentityType
+	}
+	return IDENTITY_TYPE_UNSPECIFIED
+}
+
+func (m *IdentityNamespacePermissions) GetActionGroup() NamespaceActionGroup {
+	if m != nil {
+		return m.ActionGroup
+	}
+	return NAMESPACE_ACTION_GROUP_UNSPECIFIED
+}
+
 func init() {
 	proto.RegisterEnum("api.auth.v1.UserState", UserState_name, UserState_value)
 	proto.RegisterEnum("api.auth.v1.RoleType", RoleType_name, RoleType_value)
@@ -1162,6 +1432,8 @@ func init() {
 	proto.RegisterEnum("api.auth.v1.APIKeyAccessType", APIKeyAccessType_name, APIKeyAccessType_value)
 	proto.RegisterEnum("api.auth.v1.APIKeyOwnerType", APIKeyOwnerType_name, APIKeyOwnerType_value)
 	proto.RegisterEnum("api.auth.v1.APIKeyState", APIKeyState_name, APIKeyState_value)
+	proto.RegisterEnum("api.auth.v1.ServiceAccountState", ServiceAccountState_name, ServiceAccountState_value)
+	proto.RegisterEnum("api.auth.v1.IdentityType", IdentityType_name, IdentityType_value)
 	proto.RegisterType((*UserSpec)(nil), "api.auth.v1.UserSpec")
 	proto.RegisterType((*UserNamespacePermissions)(nil), "api.auth.v1.UserNamespacePermissions")
 	proto.RegisterType((*Invitation)(nil), "api.auth.v1.Invitation")
@@ -1173,99 +1445,117 @@ func init() {
 	proto.RegisterType((*APIKeySpec)(nil), "api.auth.v1.APIKeySpec")
 	proto.RegisterType((*Owner)(nil), "api.auth.v1.Owner")
 	proto.RegisterType((*APIKey)(nil), "api.auth.v1.APIKey")
+	proto.RegisterType((*AccountAccess)(nil), "api.auth.v1.AccountAccess")
+	proto.RegisterType((*NamespaceAccess)(nil), "api.auth.v1.NamespaceAccess")
+	proto.RegisterType((*Access)(nil), "api.auth.v1.Access")
+	proto.RegisterMapType((map[string]*NamespaceAccess)(nil), "api.auth.v1.Access.NamespaceAccessesEntry")
 	proto.RegisterType((*ServiceAccount)(nil), "api.auth.v1.ServiceAccount")
 	proto.RegisterType((*ServiceAccountSpec)(nil), "api.auth.v1.ServiceAccountSpec")
+	proto.RegisterType((*IdentityNamespacePermissions)(nil), "api.auth.v1.IdentityNamespacePermissions")
 }
 
 func init() { proto.RegisterFile("api/auth/v1/message.proto", fileDescriptor_bea184b0c3eae56b) }
 
 var fileDescriptor_bea184b0c3eae56b = []byte{
-	// 1350 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x57, 0xbf, 0x6f, 0xdb, 0xc6,
-	0x17, 0x17, 0x65, 0x49, 0x96, 0x9e, 0x02, 0x9b, 0xb9, 0xf8, 0x87, 0xac, 0xaf, 0xcd, 0xd8, 0xc2,
-	0xb7, 0x69, 0xe2, 0x04, 0x12, 0xe2, 0x00, 0xed, 0x10, 0x34, 0x01, 0x23, 0x5d, 0x1c, 0x22, 0x8e,
-	0x24, 0x9c, 0x24, 0xa7, 0xe9, 0x42, 0x30, 0xd2, 0xc5, 0x25, 0x20, 0x89, 0x2c, 0x49, 0x39, 0xd5,
-	0xd6, 0xb9, 0x53, 0x87, 0x4e, 0x05, 0x3a, 0x75, 0x69, 0xff, 0x93, 0x2e, 0x05, 0x32, 0x66, 0x6c,
-	0x94, 0xa5, 0xe8, 0x14, 0x74, 0xcd, 0x52, 0xdc, 0xf1, 0x87, 0x48, 0x8a, 0x8e, 0x91, 0x36, 0x43,
-	0x27, 0xdf, 0xbd, 0xf7, 0x79, 0x9f, 0xc7, 0xf7, 0xb9, 0x7b, 0xef, 0x64, 0xd8, 0xd2, 0x4c, 0xbd,
-	0xa6, 0x4d, 0x9c, 0x2f, 0x6b, 0xa7, 0x37, 0x6b, 0x23, 0x6a, 0xdb, 0xda, 0x09, 0xad, 0x9a, 0x96,
-	0xe1, 0x18, 0xa8, 0xa8, 0x99, 0x7a, 0x95, 0xb9, 0xaa, 0xa7, 0x37, 0xcb, 0x97, 0x4f, 0x0c, 0xe3,
-	0x64, 0x48, 0x6b, 0xdc, 0xf5, 0x74, 0xf2, 0xac, 0xe6, 0xe8, 0x23, 0x6a, 0x3b, 0xda, 0xc8, 0x74,
-	0xd1, 0xe5, 0x1b, 0x0e, 0x1d, 0x99, 0x86, 0xa5, 0x0d, 0x6b, 0x8c, 0xb1, 0x3f, 0x34, 0x26, 0x83,
-	0x9a, 0x3e, 0xa0, 0x63, 0x47, 0x77, 0xa6, 0x0b, 0xdc, 0x95, 0x4f, 0x20, 0xdf, 0xb3, 0xa9, 0xd5,
-	0x31, 0x69, 0x1f, 0xad, 0x41, 0x96, 0x8e, 0x34, 0x7d, 0x58, 0x12, 0x76, 0x85, 0xab, 0x05, 0xe2,
-	0x6e, 0x98, 0xd5, 0x32, 0x86, 0xd4, 0x2e, 0xa5, 0x77, 0x97, 0x98, 0x95, 0x6f, 0x2a, 0x53, 0x28,
-	0xb1, 0xb8, 0xa6, 0x36, 0xa2, 0xb6, 0xa9, 0xf5, 0x69, 0x9b, 0x5a, 0x23, 0xdd, 0xb6, 0x75, 0x63,
-	0x6c, 0xa3, 0x4d, 0x58, 0x9e, 0xd8, 0xd4, 0x52, 0xf5, 0x81, 0xc7, 0x94, 0x63, 0x5b, 0x65, 0x80,
-	0x1a, 0x70, 0x41, 0xeb, 0x3b, 0xba, 0x31, 0x56, 0x4f, 0x2c, 0x63, 0x62, 0x96, 0xd2, 0xbb, 0xc2,
-	0xd5, 0x95, 0x83, 0xbd, 0x6a, 0xa8, 0xbe, 0x6a, 0xc0, 0x28, 0x73, 0xe4, 0x21, 0x03, 0x92, 0xa2,
-	0x36, 0xdf, 0x54, 0x7e, 0x10, 0x00, 0x94, 0xf1, 0xa9, 0xee, 0x68, 0xcc, 0x86, 0x44, 0x58, 0x9a,
-	0x58, 0xba, 0x97, 0x89, 0x2d, 0xd1, 0x67, 0x70, 0xa1, 0x6f, 0x51, 0xcd, 0xa1, 0x03, 0x95, 0x89,
-	0xc3, 0xd3, 0x14, 0x0f, 0xca, 0x55, 0x57, 0xb9, 0xaa, 0xaf, 0x5c, 0xb5, 0xeb, 0x2b, 0x47, 0x8a,
-	0x1e, 0x9e, 0x59, 0xd0, 0x6d, 0x28, 0xd2, 0xaf, 0x4d, 0xdd, 0x9a, 0xba, 0xd1, 0x4b, 0xe7, 0x46,
-	0x83, 0x0b, 0x67, 0x86, 0xca, 0xdb, 0x34, 0x64, 0x98, 0x30, 0x68, 0x05, 0xd2, 0x41, 0xfd, 0x69,
-	0x7d, 0x80, 0xae, 0x81, 0x68, 0x51, 0xdb, 0x98, 0x58, 0x7d, 0xaa, 0x9e, 0x52, 0x8b, 0x29, 0xc5,
-	0x3f, 0xac, 0x40, 0x56, 0x7d, 0xfb, 0xb1, 0x6b, 0x46, 0xd7, 0x20, 0x63, 0x9b, 0xb4, 0xef, 0x65,
-	0x5e, 0x8f, 0xc8, 0xe3, 0x1f, 0x16, 0xe1, 0x10, 0x74, 0x03, 0xb2, 0xb6, 0xa3, 0x39, 0xb4, 0x94,
-	0xe1, 0x52, 0x6e, 0x2c, 0x62, 0x99, 0x97, 0xb8, 0x20, 0xb4, 0x03, 0x60, 0xd1, 0xaf, 0x26, 0xd4,
-	0x76, 0xd8, 0xd9, 0x64, 0x79, 0xf6, 0x82, 0x67, 0x51, 0x06, 0xe8, 0x53, 0x00, 0x3d, 0xd0, 0xb5,
-	0x94, 0xe3, 0xd9, 0x37, 0x23, 0x8c, 0x73, 0xd9, 0x49, 0x08, 0xba, 0x20, 0xf8, 0xf2, 0xfb, 0x09,
-	0xfe, 0x00, 0xd0, 0x50, 0xb3, 0x1d, 0x75, 0x64, 0x0c, 0xf4, 0x67, 0xba, 0x4f, 0x92, 0x3f, 0x97,
-	0x44, 0x64, 0x51, 0x8f, 0xbc, 0x20, 0xae, 0xfe, 0x73, 0xb8, 0x18, 0xdc, 0x1f, 0x62, 0x0c, 0x29,
-	0xbf, 0xd6, 0xdb, 0x50, 0x18, 0xfb, 0x46, 0xef, 0x40, 0xe6, 0x86, 0x0f, 0x74, 0x27, 0x7b, 0xb0,
-	0x2a, 0xf7, 0xfb, 0xc6, 0x64, 0xec, 0x04, 0x69, 0xef, 0xc5, 0x88, 0x05, 0x4e, 0x7c, 0x39, 0x42,
-	0xec, 0xc5, 0x9c, 0x49, 0xfb, 0xbd, 0x00, 0xf9, 0x80, 0xf0, 0x2e, 0x23, 0xe4, 0x78, 0x95, 0xf5,
-	0x20, 0x27, 0x2c, 0x1e, 0x6c, 0x27, 0x11, 0xfa, 0x31, 0x8c, 0x2d, 0x30, 0xa0, 0x43, 0x58, 0x0d,
-	0xea, 0x56, 0xe7, 0x3d, 0x5d, 0x3c, 0x90, 0x92, 0xab, 0x0d, 0x58, 0x56, 0xc6, 0x61, 0x93, 0x5d,
-	0x19, 0x42, 0x86, 0x13, 0x2e, 0xde, 0xf1, 0x8c, 0x33, 0x35, 0xa9, 0xa7, 0x61, 0xf4, 0xe2, 0xb2,
-	0x80, 0xee, 0xd4, 0xa4, 0x84, 0x43, 0xde, 0x79, 0xc7, 0x83, 0xbc, 0x1c, 0x52, 0xf9, 0x53, 0x00,
-	0x90, 0xdb, 0xca, 0x43, 0x3a, 0xe5, 0x32, 0xdc, 0x01, 0x56, 0x14, 0xb5, 0x6d, 0x95, 0xe7, 0x72,
-	0x65, 0xdd, 0x89, 0xaa, 0xc0, 0xd1, 0x32, 0x47, 0xf1, 0x9c, 0xa0, 0x05, 0x6b, 0xb4, 0x07, 0x17,
-	0x06, 0xba, 0x6d, 0x0e, 0xb5, 0xa9, 0xca, 0xca, 0xf2, 0x9a, 0xb0, 0xe8, 0xd9, 0x58, 0xf1, 0x68,
-	0x17, 0x8a, 0x03, 0x6a, 0xf7, 0x2d, 0xdd, 0xe4, 0x9d, 0xb0, 0xe4, 0x21, 0xe6, 0xa6, 0xf8, 0x8c,
-	0xc8, 0xbc, 0xcf, 0x8c, 0x40, 0x65, 0xc8, 0x0f, 0x74, 0x5b, 0x7b, 0x3a, 0xa4, 0x6e, 0x13, 0xe6,
-	0x49, 0xb0, 0xaf, 0xa8, 0x90, 0x6d, 0x3d, 0x1f, 0x53, 0x0b, 0x6d, 0x41, 0xde, 0x60, 0x8b, 0xf9,
-	0x14, 0x5d, 0xe6, 0x7b, 0x65, 0x80, 0x6e, 0x03, 0xb8, 0xae, 0x90, 0xd8, 0xdb, 0x09, 0x02, 0x70,
-	0x22, 0x5e, 0x7f, 0xc1, 0xf0, 0x97, 0x95, 0xbf, 0xd2, 0x90, 0x73, 0xdd, 0x0b, 0xc7, 0x77, 0x15,
-	0xb2, 0x1c, 0xe7, 0x0d, 0x4c, 0x14, 0xa1, 0xe4, 0x64, 0xc4, 0x05, 0xa0, 0xeb, 0x91, 0xd3, 0xdb,
-	0x4c, 0xc8, 0x1d, 0x9a, 0x51, 0x49, 0x93, 0x2f, 0x93, 0x3c, 0xf9, 0xaa, 0xfe, 0x38, 0xcb, 0xf2,
-	0xa2, 0x4a, 0x49, 0xc4, 0x67, 0x0f, 0xb4, 0x5c, 0x7c, 0xa0, 0xfd, 0x67, 0xe6, 0xd2, 0x6f, 0x69,
-	0x58, 0xe9, 0x50, 0xeb, 0x54, 0x67, 0x23, 0x84, 0x37, 0xe4, 0xbf, 0x79, 0x1f, 0x6e, 0x45, 0xd4,
-	0x8f, 0x4e, 0x94, 0x68, 0x96, 0xd0, 0x29, 0xac, 0x85, 0x5f, 0x8a, 0x82, 0x2f, 0xe0, 0x0d, 0x40,
-	0x9a, 0x3d, 0x1d, 0xf7, 0x55, 0xc3, 0xa4, 0x16, 0x1f, 0xe6, 0xf3, 0x97, 0x41, 0xe4, 0x9e, 0x96,
-	0xef, 0x48, 0xd0, 0x33, 0xf7, 0x21, 0xf4, 0x5c, 0xfe, 0x07, 0x7a, 0x7e, 0x2b, 0x00, 0x5a, 0xac,
-	0x14, 0x21, 0xc8, 0xf0, 0x96, 0x76, 0x55, 0xe5, 0x6b, 0x74, 0x07, 0x72, 0x6e, 0xf3, 0x7b, 0xb7,
-	0xfa, 0x4a, 0xd5, 0xff, 0x7d, 0xc4, 0x75, 0xe3, 0xbf, 0x8f, 0xaa, 0xfe, 0xef, 0x23, 0x6f, 0x84,
-	0x52, 0xdb, 0x26, 0x5e, 0xd4, 0xf9, 0xb3, 0x60, 0xff, 0xad, 0x00, 0x85, 0xe0, 0xa9, 0x45, 0x65,
-	0xd8, 0xe8, 0x75, 0x30, 0x51, 0x3b, 0x5d, 0xb9, 0x8b, 0xd5, 0x5e, 0xb3, 0xd3, 0xc6, 0x75, 0xe5,
-	0xbe, 0x82, 0x1b, 0x62, 0x0a, 0x6d, 0xc2, 0xa5, 0x90, 0xaf, 0x4e, 0xb0, 0xdc, 0x55, 0x9a, 0x87,
-	0xa2, 0x80, 0xb6, 0xa1, 0x14, 0x77, 0x60, 0xf5, 0xbe, 0xac, 0x1c, 0xe1, 0x86, 0x98, 0x46, 0xeb,
-	0x70, 0x31, 0xe4, 0x95, 0xeb, 0x5d, 0xe5, 0x18, 0x8b, 0x4b, 0x31, 0xb6, 0x5e, 0xbb, 0xe1, 0xb2,
-	0x65, 0x62, 0x6c, 0xdc, 0x11, 0xb0, 0x65, 0x63, 0x61, 0x0d, 0x7c, 0x84, 0x79, 0x58, 0x2e, 0x16,
-	0xc6, 0x1d, 0x41, 0xd8, 0x32, 0xda, 0x00, 0xb4, 0xe0, 0x6d, 0x88, 0xf9, 0xfd, 0xbb, 0xee, 0x0b,
-	0xc5, 0x47, 0xeb, 0x16, 0xac, 0x93, 0xd6, 0x11, 0x56, 0xbb, 0x4f, 0xda, 0xf1, 0xd2, 0x4b, 0xb0,
-	0x36, 0x77, 0xb5, 0x09, 0x6e, 0xe0, 0xfb, 0x4a, 0x13, 0x37, 0x44, 0x61, 0xff, 0x27, 0x01, 0xd6,
-	0x92, 0x1e, 0x58, 0x74, 0x05, 0x2a, 0x4d, 0xf9, 0x11, 0xee, 0xb4, 0xe5, 0xba, 0x5b, 0x75, 0xab,
-	0xa9, 0x1e, 0x92, 0x56, 0xaf, 0x1d, 0xa3, 0xde, 0x85, 0xed, 0x33, 0x70, 0x72, 0xe3, 0x91, 0xd2,
-	0x14, 0x85, 0x77, 0x20, 0x1e, 0x13, 0xa5, 0x8b, 0xc5, 0x34, 0xba, 0x0c, 0xff, 0x3b, 0x03, 0x41,
-	0xb0, 0xdc, 0x10, 0x97, 0xf6, 0x7f, 0x14, 0x00, 0x2d, 0xbe, 0xd6, 0xe8, 0xff, 0xb0, 0x2b, 0xd7,
-	0xeb, 0xad, 0x5e, 0xb3, 0xfb, 0xae, 0x2f, 0x94, 0xa0, 0x9c, 0x88, 0xf2, 0xbf, 0xaf, 0x02, 0x52,
-	0xa2, 0xbf, 0x81, 0x8f, 0xf1, 0x51, 0xab, 0x8d, 0x89, 0x98, 0x46, 0x3b, 0xb0, 0x95, 0x88, 0xf1,
-	0xbe, 0xaf, 0x0f, 0x62, 0xfc, 0xd5, 0xe3, 0xb4, 0x6d, 0xe5, 0x21, 0x7e, 0xa2, 0xca, 0xf5, 0x3a,
-	0xee, 0x74, 0x92, 0xce, 0xe5, 0x3a, 0x7c, 0x9c, 0x80, 0x51, 0x9a, 0x0f, 0x30, 0x51, 0xba, 0x6a,
-	0xeb, 0x71, 0x13, 0x13, 0xcf, 0x23, 0x0a, 0xfb, 0xcf, 0x61, 0x35, 0xf6, 0xb2, 0xa0, 0x3d, 0xd8,
-	0xf1, 0xe2, 0x5d, 0x6c, 0x42, 0x8a, 0x32, 0x6c, 0x24, 0x40, 0x3a, 0x98, 0x88, 0x02, 0xfa, 0x08,
-	0xf6, 0x16, 0x7d, 0x1d, 0x4c, 0x8e, 0x15, 0x7e, 0x0e, 0xbc, 0x5e, 0x31, 0xbd, 0xff, 0x4b, 0x1a,
-	0x8a, 0xa1, 0xf1, 0xcf, 0xae, 0xaa, 0x17, 0x96, 0xd4, 0x66, 0x5b, 0xb0, 0x1e, 0xf1, 0x86, 0x1a,
-	0x8d, 0x9d, 0xc4, 0x82, 0x2b, 0xd4, 0x6a, 0x9b, 0x70, 0x29, 0xe2, 0x0f, 0x9a, 0x2d, 0xce, 0x19,
-	0x6a, 0xb7, 0x38, 0x67, 0xbc, 0xe1, 0x4a, 0xb0, 0x16, 0xf1, 0xe3, 0xcf, 0xdb, 0x0a, 0xc1, 0x0d,
-	0x31, 0xb7, 0x40, 0x1a, 0x34, 0xe3, 0xf2, 0x02, 0x69, 0xb4, 0x1d, 0xf3, 0x0b, 0xa4, 0x7e, 0x43,
-	0x16, 0xee, 0x91, 0x17, 0xaf, 0xa4, 0xd4, 0xcb, 0x57, 0x52, 0xea, 0xcd, 0x2b, 0x49, 0xf8, 0x66,
-	0x26, 0x09, 0x3f, 0xcf, 0x24, 0xe1, 0xd7, 0x99, 0x24, 0xbc, 0x98, 0x49, 0xc2, 0xef, 0x33, 0x49,
-	0xf8, 0x63, 0x26, 0xa5, 0xde, 0xcc, 0x24, 0xe1, 0xbb, 0xd7, 0x52, 0xea, 0xc5, 0x6b, 0x29, 0xf5,
-	0xf2, 0xb5, 0x94, 0xfa, 0x62, 0xdb, 0x19, 0x99, 0xd6, 0xd0, 0x1d, 0x87, 0xb5, 0xd0, 0xbf, 0xa2,
-	0xb7, 0xd9, 0xdf, 0xa7, 0x39, 0x3e, 0x95, 0x6f, 0xfd, 0x1d, 0x00, 0x00, 0xff, 0xff, 0xb6, 0x44,
-	0x56, 0xb9, 0xa5, 0x0e, 0x00, 0x00,
+	// 1560 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x58, 0xbd, 0x6f, 0xdb, 0x46,
+	0x14, 0x37, 0x65, 0x49, 0x96, 0x9f, 0x1c, 0x9b, 0x39, 0x7f, 0xc9, 0xaa, 0x4c, 0xcb, 0xea, 0x47,
+	0x12, 0xa5, 0x90, 0x11, 0x07, 0x48, 0x8b, 0x06, 0x4d, 0xc0, 0x48, 0x17, 0x87, 0x88, 0x23, 0x0b,
+	0x94, 0xec, 0xd4, 0x5d, 0x08, 0x5a, 0xba, 0x38, 0x44, 0x24, 0x91, 0x25, 0x29, 0xa7, 0xda, 0x3a,
+	0x77, 0xea, 0xd0, 0xa9, 0x40, 0xa7, 0x2e, 0xed, 0x1f, 0x52, 0xa0, 0x63, 0xc6, 0x8c, 0x89, 0xb3,
+	0x04, 0x9d, 0x82, 0xae, 0x59, 0x8a, 0x3b, 0x7e, 0x88, 0xa4, 0x28, 0xe7, 0xa3, 0x19, 0x3a, 0x59,
+	0xf7, 0xde, 0xef, 0xfd, 0x1e, 0xdf, 0xef, 0xee, 0xbd, 0x3b, 0x18, 0xd6, 0x54, 0x43, 0xdb, 0x52,
+	0x07, 0xf6, 0xc3, 0xad, 0x93, 0x2b, 0x5b, 0x3d, 0x62, 0x59, 0xea, 0x31, 0xa9, 0x18, 0xa6, 0x6e,
+	0xeb, 0x28, 0xab, 0x1a, 0x5a, 0x85, 0xba, 0x2a, 0x27, 0x57, 0xf2, 0x1b, 0xc7, 0xba, 0x7e, 0xdc,
+	0x25, 0x5b, 0xcc, 0x75, 0x34, 0x78, 0xb0, 0x65, 0x6b, 0x3d, 0x62, 0xd9, 0x6a, 0xcf, 0x70, 0xd0,
+	0xa5, 0x6b, 0x90, 0xd9, 0xb7, 0x88, 0xd9, 0x34, 0x48, 0x1b, 0x2d, 0x41, 0x8a, 0xf4, 0x54, 0xad,
+	0x9b, 0xe3, 0x8a, 0xdc, 0xc5, 0x59, 0xd9, 0x59, 0x50, 0xab, 0xa9, 0x77, 0x89, 0x95, 0x4b, 0x14,
+	0xa7, 0xa9, 0x95, 0x2d, 0x4a, 0x43, 0xc8, 0xd1, 0xb8, 0xba, 0xda, 0x23, 0x96, 0xa1, 0xb6, 0x49,
+	0x83, 0x98, 0x3d, 0xcd, 0xb2, 0x34, 0xbd, 0x6f, 0xa1, 0x55, 0x98, 0x19, 0x58, 0xc4, 0x54, 0xb4,
+	0x8e, 0xcb, 0x94, 0xa6, 0x4b, 0xa9, 0x83, 0x6a, 0x30, 0xa7, 0xb6, 0x6d, 0x4d, 0xef, 0x2b, 0xc7,
+	0xa6, 0x3e, 0x30, 0x72, 0x89, 0x22, 0x77, 0x71, 0x7e, 0x7b, 0xb3, 0x12, 0xf8, 0xe2, 0x8a, 0xcf,
+	0x28, 0x32, 0xe4, 0x0e, 0x05, 0xca, 0x59, 0x75, 0xb4, 0x28, 0xfd, 0xc2, 0x01, 0x48, 0xfd, 0x13,
+	0xcd, 0x56, 0xa9, 0x0d, 0xf1, 0x30, 0x3d, 0x30, 0x35, 0x37, 0x13, 0xfd, 0x89, 0xbe, 0x86, 0xb9,
+	0xb6, 0x49, 0x54, 0x9b, 0x74, 0x14, 0x5a, 0x2e, 0x4b, 0x93, 0xdd, 0xce, 0x57, 0x1c, 0x2d, 0x2a,
+	0x9e, 0x16, 0x95, 0x96, 0xa7, 0x85, 0x9c, 0x75, 0xf1, 0xd4, 0x82, 0xae, 0x43, 0x96, 0x7c, 0x6f,
+	0x68, 0xe6, 0xd0, 0x89, 0x9e, 0x7e, 0x63, 0x34, 0x38, 0x70, 0x6a, 0x28, 0xbd, 0x4e, 0x40, 0x92,
+	0x0a, 0x83, 0xe6, 0x21, 0xe1, 0xd7, 0x9f, 0xd0, 0x3a, 0xe8, 0x12, 0xf0, 0x26, 0xb1, 0xf4, 0x81,
+	0xd9, 0x26, 0xca, 0x09, 0x31, 0xa9, 0x52, 0xec, 0xc3, 0x66, 0xe5, 0x05, 0xcf, 0x7e, 0xe0, 0x98,
+	0xd1, 0x25, 0x48, 0x5a, 0x06, 0x69, 0xbb, 0x99, 0x97, 0x43, 0xf2, 0x78, 0x9b, 0x25, 0x33, 0x08,
+	0xfa, 0x1c, 0x52, 0x96, 0xad, 0xda, 0x24, 0x97, 0x64, 0x52, 0xae, 0x8c, 0x63, 0xa9, 0x57, 0x76,
+	0x40, 0x68, 0x1d, 0xc0, 0x24, 0xdf, 0x0d, 0x88, 0x65, 0xd3, 0xbd, 0x49, 0xb1, 0xec, 0xb3, 0xae,
+	0x45, 0xea, 0xa0, 0x2f, 0x00, 0x34, 0x5f, 0xd7, 0x5c, 0x9a, 0x65, 0x5f, 0x0d, 0x31, 0x8e, 0x64,
+	0x97, 0x03, 0xd0, 0x31, 0xc1, 0x67, 0xde, 0x4d, 0xf0, 0x3b, 0x80, 0xba, 0xaa, 0x65, 0x2b, 0x3d,
+	0xbd, 0xa3, 0x3d, 0xd0, 0x3c, 0x92, 0xcc, 0x1b, 0x49, 0x78, 0x1a, 0x75, 0xcf, 0x0d, 0x62, 0xea,
+	0x3f, 0x86, 0xf3, 0xfe, 0xf9, 0x91, 0xf5, 0x2e, 0x61, 0xc7, 0xba, 0x00, 0xb3, 0x7d, 0xcf, 0xe8,
+	0x6e, 0xc8, 0xc8, 0xf0, 0x81, 0xce, 0xe4, 0x3e, 0x2c, 0x88, 0xed, 0xb6, 0x3e, 0xe8, 0xdb, 0x7e,
+	0xda, 0x5b, 0x11, 0x62, 0x8e, 0x11, 0x6f, 0x84, 0x88, 0xdd, 0x98, 0x89, 0xb4, 0x3f, 0x73, 0x90,
+	0xf1, 0x09, 0x6f, 0x52, 0x42, 0x86, 0x57, 0x68, 0x0f, 0x32, 0xc2, 0xec, 0x76, 0x21, 0x8e, 0xd0,
+	0x8b, 0xa1, 0x6c, 0xbe, 0x01, 0xed, 0xc0, 0x82, 0x5f, 0xb7, 0x32, 0xea, 0xe9, 0xec, 0xb6, 0x10,
+	0x5f, 0xad, 0xcf, 0x32, 0xdf, 0x0f, 0x9a, 0xac, 0x52, 0x17, 0x92, 0x8c, 0x70, 0xfc, 0x8c, 0x27,
+	0xed, 0xa1, 0x41, 0x5c, 0x0d, 0xc3, 0x07, 0x97, 0x06, 0xb4, 0x86, 0x06, 0x91, 0x19, 0xe4, 0xcc,
+	0x33, 0xee, 0xe7, 0x65, 0x90, 0xd2, 0xdf, 0x1c, 0x80, 0xd8, 0x90, 0xee, 0x92, 0x21, 0x93, 0xe1,
+	0x06, 0xd0, 0xa2, 0x88, 0x65, 0x29, 0x2c, 0x97, 0x23, 0xeb, 0x7a, 0x58, 0x05, 0x86, 0x16, 0x19,
+	0x8a, 0xe5, 0x04, 0xd5, 0xff, 0x8d, 0x36, 0x61, 0xae, 0xa3, 0x59, 0x46, 0x57, 0x1d, 0x2a, 0xb4,
+	0x2c, 0xb7, 0x09, 0xb3, 0xae, 0x8d, 0x16, 0x8f, 0x8a, 0x90, 0xed, 0x10, 0xab, 0x6d, 0x6a, 0x06,
+	0xeb, 0x84, 0x69, 0x17, 0x31, 0x32, 0x45, 0x67, 0x44, 0xf2, 0x5d, 0x66, 0x04, 0xca, 0x43, 0xa6,
+	0xa3, 0x59, 0xea, 0x51, 0x97, 0x38, 0x4d, 0x98, 0x91, 0xfd, 0x75, 0x49, 0x81, 0xd4, 0xde, 0xe3,
+	0x3e, 0x31, 0xd1, 0x1a, 0x64, 0x74, 0xfa, 0x63, 0x34, 0x45, 0x67, 0xd8, 0x5a, 0xea, 0xa0, 0xeb,
+	0x00, 0x8e, 0x2b, 0x20, 0x76, 0x21, 0x46, 0x00, 0x46, 0xc4, 0xea, 0x9f, 0xd5, 0xbd, 0x9f, 0xa5,
+	0x7f, 0x12, 0x90, 0x76, 0xdc, 0x63, 0xdb, 0x77, 0x11, 0x52, 0x0c, 0xe7, 0x0e, 0x4c, 0x14, 0xa2,
+	0x64, 0x64, 0xb2, 0x03, 0x40, 0x97, 0x43, 0xbb, 0xb7, 0x1a, 0x93, 0x3b, 0x30, 0xa3, 0xe2, 0x26,
+	0x5f, 0x32, 0x7e, 0xf2, 0x55, 0xbc, 0x71, 0x96, 0x62, 0x45, 0xe5, 0xe2, 0x88, 0x27, 0x0f, 0xb4,
+	0x74, 0x74, 0xa0, 0xfd, 0x6f, 0xe6, 0x52, 0x0d, 0xce, 0xf9, 0xad, 0x4e, 0x0f, 0x22, 0xba, 0x0a,
+	0x49, 0xbf, 0x87, 0xdf, 0x62, 0x28, 0x30, 0x70, 0xa9, 0x05, 0x0b, 0x81, 0x49, 0xc4, 0x78, 0x44,
+	0x00, 0xc3, 0xbf, 0x79, 0x5d, 0xb6, 0xb7, 0x98, 0x5d, 0x81, 0xa0, 0xd2, 0x8f, 0xf4, 0x40, 0x78,
+	0x6c, 0xf3, 0xde, 0x84, 0x71, 0x1a, 0xc6, 0x9d, 0x31, 0xf9, 0xf8, 0xef, 0xa3, 0x08, 0xf9, 0x9c,
+	0x1a, 0x2a, 0xec, 0x10, 0xd0, 0x68, 0xc6, 0x38, 0x24, 0xfe, 0x98, 0x29, 0x47, 0x69, 0x88, 0x65,
+	0x55, 0x22, 0x15, 0x11, 0x0b, 0xf7, 0x6d, 0x73, 0x28, 0x9f, 0xef, 0x47, 0xed, 0xf9, 0x23, 0x58,
+	0x89, 0x07, 0xd3, 0x27, 0xc0, 0x23, 0x32, 0xf4, 0x9e, 0x00, 0x8f, 0xc8, 0x10, 0x6d, 0x43, 0xea,
+	0x44, 0xed, 0x0e, 0xbc, 0xbb, 0xbf, 0x30, 0x49, 0x12, 0x56, 0x82, 0x03, 0xfd, 0x2a, 0xf1, 0x25,
+	0x57, 0x7a, 0x96, 0x80, 0xf9, 0x26, 0x31, 0x4f, 0x34, 0xe6, 0xa4, 0x75, 0xfd, 0x97, 0x8b, 0xfc,
+	0x6a, 0xa8, 0x4d, 0xc2, 0xbb, 0x1c, 0xce, 0x12, 0x68, 0x97, 0x6b, 0xe1, 0x2b, 0xbd, 0x78, 0x56,
+	0xd4, 0x3b, 0x5c, 0xee, 0xd1, 0x5e, 0x48, 0x7f, 0x88, 0x5e, 0x98, 0x79, 0xaf, 0x3b, 0x1a, 0x8d,
+	0xd7, 0x8e, 0x10, 0x24, 0xd9, 0x34, 0x76, 0x74, 0x66, 0xbf, 0xd1, 0x65, 0x48, 0xbb, 0xc7, 0xd0,
+	0xd9, 0xc5, 0xc5, 0x98, 0xf3, 0x23, 0xbb, 0x90, 0x37, 0xcf, 0xec, 0xd2, 0x9f, 0x1c, 0x14, 0xa4,
+	0x0e, 0xe9, 0xdb, 0x9a, 0x3d, 0x8c, 0x7d, 0xb7, 0x6e, 0x40, 0x56, 0x73, 0xfd, 0xa3, 0xa9, 0x0b,
+	0x9e, 0x49, 0xea, 0xa0, 0x1b, 0x70, 0xce, 0x07, 0x04, 0x66, 0xef, 0x5a, 0xf8, 0x8d, 0xe4, 0x22,
+	0xd8, 0xe0, 0x9d, 0xd3, 0x02, 0xab, 0xb1, 0xb7, 0xc6, 0xf4, 0xfb, 0xbc, 0x35, 0xca, 0xaf, 0x39,
+	0x98, 0xf5, 0x9f, 0x76, 0x28, 0x0f, 0x2b, 0xfb, 0x4d, 0x2c, 0x2b, 0xcd, 0x96, 0xd8, 0xc2, 0xca,
+	0x7e, 0xbd, 0xd9, 0xc0, 0x55, 0xe9, 0xb6, 0x84, 0x6b, 0xfc, 0x14, 0x5a, 0x85, 0xc5, 0x80, 0xaf,
+	0x2a, 0x63, 0xb1, 0x25, 0xd5, 0x77, 0x78, 0x0e, 0x15, 0x20, 0x17, 0x75, 0x60, 0xe5, 0xb6, 0x28,
+	0xed, 0xe2, 0x1a, 0x9f, 0x40, 0xcb, 0x70, 0x3e, 0xe0, 0x15, 0xab, 0x2d, 0xe9, 0x00, 0xf3, 0xd3,
+	0x11, 0xb6, 0xfd, 0x46, 0xcd, 0x61, 0x4b, 0x46, 0xd8, 0x98, 0xc3, 0x67, 0x4b, 0x45, 0xc2, 0x6a,
+	0x78, 0x17, 0xb3, 0xb0, 0x74, 0x24, 0x8c, 0x39, 0xfc, 0xb0, 0x19, 0xb4, 0x02, 0x68, 0xcc, 0x5b,
+	0xe3, 0x33, 0xe5, 0x9b, 0xce, 0x8b, 0x88, 0xe9, 0xb9, 0x06, 0xcb, 0xf2, 0xde, 0x2e, 0x56, 0x5a,
+	0x87, 0x8d, 0x68, 0xe9, 0x39, 0x58, 0x1a, 0xb9, 0x1a, 0x32, 0xae, 0xe1, 0xdb, 0x52, 0x1d, 0xd7,
+	0x78, 0xae, 0xfc, 0x1b, 0x07, 0x4b, 0x71, 0x22, 0xa3, 0xcf, 0xa0, 0x54, 0x17, 0xef, 0xe1, 0x66,
+	0x43, 0xac, 0x3a, 0x55, 0xef, 0xd5, 0x95, 0x1d, 0x79, 0x6f, 0xbf, 0x11, 0xa1, 0x2e, 0x42, 0x61,
+	0x02, 0x4e, 0xac, 0xdd, 0x93, 0xea, 0x3c, 0x77, 0x06, 0xe2, 0xbe, 0x2c, 0xb5, 0x30, 0x9f, 0x40,
+	0x1b, 0xf0, 0xd1, 0x04, 0x84, 0x8c, 0xc5, 0x1a, 0x3f, 0x5d, 0xfe, 0x95, 0x03, 0x34, 0x7e, 0x11,
+	0xa0, 0x4f, 0xa0, 0x28, 0x56, 0xab, 0x7b, 0xfb, 0xf5, 0xd6, 0x59, 0x5f, 0x28, 0x40, 0x3e, 0x16,
+	0xe5, 0x7d, 0x5f, 0x09, 0x84, 0x58, 0x7f, 0x0d, 0x1f, 0xe0, 0xdd, 0xbd, 0x06, 0x96, 0xf9, 0x04,
+	0x5a, 0x87, 0xb5, 0x58, 0x8c, 0xfb, 0x7d, 0x6d, 0xe0, 0xa3, 0xaf, 0x2c, 0x46, 0xdb, 0x90, 0xee,
+	0xe2, 0x43, 0x45, 0xac, 0x56, 0x71, 0xb3, 0x19, 0xb7, 0x2f, 0x97, 0xe1, 0x42, 0x0c, 0x46, 0xaa,
+	0xdf, 0xc1, 0xb2, 0xd4, 0x52, 0xf6, 0xee, 0xd7, 0xb1, 0xec, 0x7a, 0x78, 0xae, 0xfc, 0x18, 0x16,
+	0x22, 0x2f, 0x19, 0xb4, 0x09, 0xeb, 0x6e, 0xbc, 0x83, 0x8d, 0x49, 0x91, 0x87, 0x95, 0x18, 0x48,
+	0x13, 0xcb, 0x3c, 0x87, 0x3e, 0x85, 0xcd, 0x71, 0x5f, 0x13, 0xcb, 0x07, 0x12, 0xdb, 0x07, 0x56,
+	0x2f, 0x9f, 0x28, 0xff, 0x91, 0x80, 0x6c, 0xe0, 0xb9, 0x41, 0x8f, 0xaa, 0x1b, 0x16, 0xd7, 0x66,
+	0x6b, 0xb0, 0x1c, 0xf2, 0x06, 0x1a, 0x8d, 0xee, 0xc4, 0x98, 0x2b, 0xd0, 0x6a, 0xab, 0xb0, 0x18,
+	0xf2, 0xfb, 0xcd, 0x16, 0xe5, 0x0c, 0xb4, 0x5b, 0x94, 0x33, 0xda, 0x70, 0x39, 0x58, 0x0a, 0xf9,
+	0xf1, 0x37, 0x0d, 0x49, 0xc6, 0x35, 0x3e, 0x3d, 0x46, 0xea, 0x37, 0xe3, 0xcc, 0x18, 0x69, 0xb8,
+	0x1d, 0x33, 0x63, 0xa4, 0x5e, 0x43, 0xce, 0x96, 0x5f, 0x26, 0x60, 0x31, 0xe6, 0x5a, 0xa2, 0x52,
+	0x47, 0x84, 0x8d, 0x15, 0xaf, 0x04, 0x42, 0x3c, 0x2c, 0xa0, 0xe2, 0x05, 0xf8, 0xf8, 0x0c, 0x4c,
+	0x40, 0xce, 0x22, 0x14, 0xe2, 0x81, 0xbe, 0xae, 0x13, 0xd3, 0x05, 0x04, 0x9e, 0x98, 0x2e, 0xaa,
+	0xf4, 0x44, 0xb2, 0xc0, 0x94, 0x9b, 0x48, 0x16, 0x1d, 0x78, 0x9b, 0xb0, 0x7e, 0x16, 0x90, 0xce,
+	0xbe, 0x87, 0x30, 0x17, 0xbc, 0x5d, 0x68, 0x8f, 0x4a, 0x35, 0x5c, 0x6f, 0x49, 0xad, 0xc3, 0xb8,
+	0x46, 0x58, 0x01, 0x14, 0x71, 0x3b, 0x4d, 0xb0, 0x09, 0xeb, 0x61, 0xfb, 0x58, 0x03, 0xdc, 0x92,
+	0x9f, 0x3c, 0x17, 0xa6, 0x9e, 0x3e, 0x17, 0xa6, 0x5e, 0x3d, 0x17, 0xb8, 0x1f, 0x4e, 0x05, 0xee,
+	0xf7, 0x53, 0x81, 0xfb, 0xeb, 0x54, 0xe0, 0x9e, 0x9c, 0x0a, 0xdc, 0xb3, 0x53, 0x81, 0x7b, 0x79,
+	0x2a, 0x4c, 0xbd, 0x3a, 0x15, 0xb8, 0x9f, 0x5e, 0x08, 0x53, 0x4f, 0x5e, 0x08, 0x53, 0x4f, 0x5f,
+	0x08, 0x53, 0xdf, 0x16, 0xec, 0x9e, 0x61, 0x76, 0x2b, 0xed, 0xae, 0x3e, 0xe8, 0x6c, 0x05, 0xfe,
+	0x43, 0x75, 0x9d, 0xfe, 0x3d, 0x4a, 0xb3, 0xe7, 0xc1, 0xd5, 0x7f, 0x03, 0x00, 0x00, 0xff, 0xff,
+	0xb4, 0x85, 0x1e, 0x10, 0xbc, 0x12, 0x00, 0x00,
 }
 
 func (x UserState) String() string {
@@ -1312,6 +1602,20 @@ func (x APIKeyOwnerType) String() string {
 }
 func (x APIKeyState) String() string {
 	s, ok := APIKeyState_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x ServiceAccountState) String() string {
+	s, ok := ServiceAccountState_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x IdentityType) String() string {
+	s, ok := IdentityType_name[int32(x)]
 	if ok {
 		return s
 	}
@@ -1672,6 +1976,86 @@ func (this *APIKey) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *AccountAccess) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AccountAccess)
+	if !ok {
+		that2, ok := that.(AccountAccess)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Role != that1.Role {
+		return false
+	}
+	return true
+}
+func (this *NamespaceAccess) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*NamespaceAccess)
+	if !ok {
+		that2, ok := that.(NamespaceAccess)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Permission != that1.Permission {
+		return false
+	}
+	return true
+}
+func (this *Access) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Access)
+	if !ok {
+		that2, ok := that.(Access)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AccountAccess.Equal(that1.AccountAccess) {
+		return false
+	}
+	if len(this.NamespaceAccesses) != len(that1.NamespaceAccesses) {
+		return false
+	}
+	for i := range this.NamespaceAccesses {
+		if !this.NamespaceAccesses[i].Equal(that1.NamespaceAccesses[i]) {
+			return false
+		}
+	}
+	return true
+}
 func (this *ServiceAccount) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -1703,7 +2087,7 @@ func (this *ServiceAccount) Equal(that interface{}) bool {
 	if this.State != that1.State {
 		return false
 	}
-	if this.AsyncOperationId != that1.AsyncOperationId {
+	if this.RequestId != that1.RequestId {
 		return false
 	}
 	if !this.CreatedTime.Equal(that1.CreatedTime) {
@@ -1740,6 +2124,36 @@ func (this *ServiceAccountSpec) Equal(that interface{}) bool {
 		return false
 	}
 	if this.Description != that1.Description {
+		return false
+	}
+	return true
+}
+func (this *IdentityNamespacePermissions) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*IdentityNamespacePermissions)
+	if !ok {
+		that2, ok := that.(IdentityNamespacePermissions)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.IdentityId != that1.IdentityId {
+		return false
+	}
+	if this.IdentityType != that1.IdentityType {
+		return false
+	}
+	if this.ActionGroup != that1.ActionGroup {
 		return false
 	}
 	return true
@@ -1909,6 +2323,51 @@ func (this *APIKey) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *AccountAccess) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&auth.AccountAccess{")
+	s = append(s, "Role: "+fmt.Sprintf("%#v", this.Role)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *NamespaceAccess) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&auth.NamespaceAccess{")
+	s = append(s, "Permission: "+fmt.Sprintf("%#v", this.Permission)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *Access) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&auth.Access{")
+	if this.AccountAccess != nil {
+		s = append(s, "AccountAccess: "+fmt.Sprintf("%#v", this.AccountAccess)+",\n")
+	}
+	keysForNamespaceAccesses := make([]string, 0, len(this.NamespaceAccesses))
+	for k, _ := range this.NamespaceAccesses {
+		keysForNamespaceAccesses = append(keysForNamespaceAccesses, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForNamespaceAccesses)
+	mapStringForNamespaceAccesses := "map[string]*NamespaceAccess{"
+	for _, k := range keysForNamespaceAccesses {
+		mapStringForNamespaceAccesses += fmt.Sprintf("%#v: %#v,", k, this.NamespaceAccesses[k])
+	}
+	mapStringForNamespaceAccesses += "}"
+	if this.NamespaceAccesses != nil {
+		s = append(s, "NamespaceAccesses: "+mapStringForNamespaceAccesses+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
 func (this *ServiceAccount) GoString() string {
 	if this == nil {
 		return "nil"
@@ -1921,7 +2380,7 @@ func (this *ServiceAccount) GoString() string {
 		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
 	}
 	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
-	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "RequestId: "+fmt.Sprintf("%#v", this.RequestId)+",\n")
 	if this.CreatedTime != nil {
 		s = append(s, "CreatedTime: "+fmt.Sprintf("%#v", this.CreatedTime)+",\n")
 	}
@@ -1942,6 +2401,18 @@ func (this *ServiceAccountSpec) GoString() string {
 		s = append(s, "Access: "+fmt.Sprintf("%#v", this.Access)+",\n")
 	}
 	s = append(s, "Description: "+fmt.Sprintf("%#v", this.Description)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *IdentityNamespacePermissions) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&auth.IdentityNamespacePermissions{")
+	s = append(s, "IdentityId: "+fmt.Sprintf("%#v", this.IdentityId)+",\n")
+	s = append(s, "IdentityType: "+fmt.Sprintf("%#v", this.IdentityType)+",\n")
+	s = append(s, "ActionGroup: "+fmt.Sprintf("%#v", this.ActionGroup)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -2533,6 +3004,123 @@ func (m *APIKey) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *AccountAccess) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AccountAccess) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AccountAccess) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Role != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.Role))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *NamespaceAccess) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *NamespaceAccess) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *NamespaceAccess) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Permission != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.Permission))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Access) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Access) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Access) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NamespaceAccesses) > 0 {
+		for k := range m.NamespaceAccesses {
+			v := m.NamespaceAccesses[k]
+			baseI := i
+			if v != nil {
+				{
+					size, err := v.MarshalToSizedBuffer(dAtA[:i])
+					if err != nil {
+						return 0, err
+					}
+					i -= size
+					i = encodeVarintMessage(dAtA, i, uint64(size))
+				}
+				i--
+				dAtA[i] = 0x12
+			}
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintMessage(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintMessage(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if m.AccountAccess != nil {
+		{
+			size, err := m.AccountAccess.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *ServiceAccount) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -2577,19 +3165,17 @@ func (m *ServiceAccount) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x32
 	}
-	if len(m.AsyncOperationId) > 0 {
-		i -= len(m.AsyncOperationId)
-		copy(dAtA[i:], m.AsyncOperationId)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.AsyncOperationId)))
+	if len(m.RequestId) > 0 {
+		i -= len(m.RequestId)
+		copy(dAtA[i:], m.RequestId)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.RequestId)))
 		i--
 		dAtA[i] = 0x2a
 	}
-	if len(m.State) > 0 {
-		i -= len(m.State)
-		copy(dAtA[i:], m.State)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.State)))
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
 		i--
-		dAtA[i] = 0x22
+		dAtA[i] = 0x20
 	}
 	if m.Spec != nil {
 		{
@@ -2663,6 +3249,46 @@ func (m *ServiceAccountSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.Name)
 		copy(dAtA[i:], m.Name)
 		i = encodeVarintMessage(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *IdentityNamespacePermissions) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *IdentityNamespacePermissions) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *IdentityNamespacePermissions) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ActionGroup != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.ActionGroup))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.IdentityType != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.IdentityType))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.IdentityId) > 0 {
+		i -= len(m.IdentityId)
+		copy(dAtA[i:], m.IdentityId)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.IdentityId)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -2926,6 +3552,56 @@ func (m *APIKey) Size() (n int) {
 	return n
 }
 
+func (m *AccountAccess) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Role != 0 {
+		n += 1 + sovMessage(uint64(m.Role))
+	}
+	return n
+}
+
+func (m *NamespaceAccess) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Permission != 0 {
+		n += 1 + sovMessage(uint64(m.Permission))
+	}
+	return n
+}
+
+func (m *Access) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AccountAccess != nil {
+		l = m.AccountAccess.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if len(m.NamespaceAccesses) > 0 {
+		for k, v := range m.NamespaceAccesses {
+			_ = k
+			_ = v
+			l = 0
+			if v != nil {
+				l = v.Size()
+				l += 1 + sovMessage(uint64(l))
+			}
+			mapEntrySize := 1 + len(k) + sovMessage(uint64(len(k))) + l
+			n += mapEntrySize + 1 + sovMessage(uint64(mapEntrySize))
+		}
+	}
+	return n
+}
+
 func (m *ServiceAccount) Size() (n int) {
 	if m == nil {
 		return 0
@@ -2944,11 +3620,10 @@ func (m *ServiceAccount) Size() (n int) {
 		l = m.Spec.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
-	l = len(m.State)
-	if l > 0 {
-		n += 1 + l + sovMessage(uint64(l))
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
 	}
-	l = len(m.AsyncOperationId)
+	l = len(m.RequestId)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
@@ -2980,6 +3655,25 @@ func (m *ServiceAccountSpec) Size() (n int) {
 	l = len(m.Description)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+
+func (m *IdentityNamespacePermissions) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.IdentityId)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.IdentityType != 0 {
+		n += 1 + sovMessage(uint64(m.IdentityType))
+	}
+	if m.ActionGroup != 0 {
+		n += 1 + sovMessage(uint64(m.ActionGroup))
 	}
 	return n
 }
@@ -3132,6 +3826,47 @@ func (this *APIKey) String() string {
 	}, "")
 	return s
 }
+func (this *AccountAccess) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AccountAccess{`,
+		`Role:` + fmt.Sprintf("%v", this.Role) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *NamespaceAccess) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&NamespaceAccess{`,
+		`Permission:` + fmt.Sprintf("%v", this.Permission) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Access) String() string {
+	if this == nil {
+		return "nil"
+	}
+	keysForNamespaceAccesses := make([]string, 0, len(this.NamespaceAccesses))
+	for k, _ := range this.NamespaceAccesses {
+		keysForNamespaceAccesses = append(keysForNamespaceAccesses, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForNamespaceAccesses)
+	mapStringForNamespaceAccesses := "map[string]*NamespaceAccess{"
+	for _, k := range keysForNamespaceAccesses {
+		mapStringForNamespaceAccesses += fmt.Sprintf("%v: %v,", k, this.NamespaceAccesses[k])
+	}
+	mapStringForNamespaceAccesses += "}"
+	s := strings.Join([]string{`&Access{`,
+		`AccountAccess:` + strings.Replace(this.AccountAccess.String(), "AccountAccess", "AccountAccess", 1) + `,`,
+		`NamespaceAccesses:` + mapStringForNamespaceAccesses + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *ServiceAccount) String() string {
 	if this == nil {
 		return "nil"
@@ -3141,7 +3876,7 @@ func (this *ServiceAccount) String() string {
 		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
 		`Spec:` + strings.Replace(this.Spec.String(), "ServiceAccountSpec", "ServiceAccountSpec", 1) + `,`,
 		`State:` + fmt.Sprintf("%v", this.State) + `,`,
-		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
 		`CreatedTime:` + strings.Replace(fmt.Sprintf("%v", this.CreatedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`LastModifiedTime:` + strings.Replace(fmt.Sprintf("%v", this.LastModifiedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`}`,
@@ -3154,8 +3889,20 @@ func (this *ServiceAccountSpec) String() string {
 	}
 	s := strings.Join([]string{`&ServiceAccountSpec{`,
 		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
-		`Access:` + strings.Replace(fmt.Sprintf("%v", this.Access), "Access", "v1.Access", 1) + `,`,
+		`Access:` + strings.Replace(this.Access.String(), "Access", "Access", 1) + `,`,
 		`Description:` + fmt.Sprintf("%v", this.Description) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *IdentityNamespacePermissions) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&IdentityNamespacePermissions{`,
+		`IdentityId:` + fmt.Sprintf("%v", this.IdentityId) + `,`,
+		`IdentityType:` + fmt.Sprintf("%v", this.IdentityType) + `,`,
+		`ActionGroup:` + fmt.Sprintf("%v", this.ActionGroup) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -4905,6 +5652,368 @@ func (m *APIKey) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *AccountAccess) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AccountAccess: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AccountAccess: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Role", wireType)
+			}
+			m.Role = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Role |= AccountActionGroup(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *NamespaceAccess) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: NamespaceAccess: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: NamespaceAccess: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Permission", wireType)
+			}
+			m.Permission = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Permission |= NamespaceActionGroup(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Access) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Access: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Access: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AccountAccess", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AccountAccess == nil {
+				m.AccountAccess = &AccountAccess{}
+			}
+			if err := m.AccountAccess.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NamespaceAccesses", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.NamespaceAccesses == nil {
+				m.NamespaceAccesses = make(map[string]*NamespaceAccess)
+			}
+			var mapkey string
+			var mapvalue *NamespaceAccess
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowMessage
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowMessage
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthMessage
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthMessage
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var mapmsglen int
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowMessage
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						mapmsglen |= int(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					if mapmsglen < 0 {
+						return ErrInvalidLengthMessage
+					}
+					postmsgIndex := iNdEx + mapmsglen
+					if postmsgIndex < 0 {
+						return ErrInvalidLengthMessage
+					}
+					if postmsgIndex > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = &NamespaceAccess{}
+					if err := mapvalue.Unmarshal(dAtA[iNdEx:postmsgIndex]); err != nil {
+						return err
+					}
+					iNdEx = postmsgIndex
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipMessage(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthMessage
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.NamespaceAccesses[mapkey] = mapvalue
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *ServiceAccount) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -5035,10 +6144,10 @@ func (m *ServiceAccount) Unmarshal(dAtA []byte) error {
 			}
 			iNdEx = postIndex
 		case 4:
-			if wireType != 2 {
+			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
 			}
-			var stringLen uint64
+			m.State = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowMessage
@@ -5048,27 +6157,14 @@ func (m *ServiceAccount) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				m.State |= ServiceAccountState(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthMessage
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthMessage
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.State = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -5096,7 +6192,7 @@ func (m *ServiceAccount) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			m.RequestId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
@@ -5285,7 +6381,7 @@ func (m *ServiceAccountSpec) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Access == nil {
-				m.Access = &v1.Access{}
+				m.Access = &Access{}
 			}
 			if err := m.Access.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -5323,6 +6419,129 @@ func (m *ServiceAccountSpec) Unmarshal(dAtA []byte) error {
 			}
 			m.Description = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *IdentityNamespacePermissions) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: IdentityNamespacePermissions: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: IdentityNamespacePermissions: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IdentityId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.IdentityId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IdentityType", wireType)
+			}
+			m.IdentityType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.IdentityType |= IdentityType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ActionGroup", wireType)
+			}
+			m.ActionGroup = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ActionGroup |= NamespaceActionGroup(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
