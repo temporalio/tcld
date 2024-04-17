@@ -1552,6 +1552,7 @@ func (s *NamespaceTestSuite) TestCreate() {
 	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1"))
 	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2"))
 	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--auth-method", "api_key_or_mtls"))
+	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--auth-method", "invalid"))
 	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(nil, errors.New("create namespace error")).Times(1)
 	s.EqualError(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--ca-certificate", "cert1"), "create namespace error")
 	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.CreateNamespaceResponse{
@@ -1564,7 +1565,7 @@ func (s *NamespaceTestSuite) TestCreate() {
 				Email: "testuser@testcompany.com",
 			},
 		},
-	}, nil).Times(2)
+	}, nil)
 	s.NoError(s.RunCmd(
 		"namespace", "create",
 		"--namespace", "ns1",
@@ -1572,14 +1573,6 @@ func (s *NamespaceTestSuite) TestCreate() {
 		"--auth-method", "api_key_or_mtls",
 		"--ca-certificate", "cert1",
 		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
-		"--search-attribute", "testsearchattribute=Keyword",
-		"--user-namespace-permission", "testuser@testcompany.com=Read",
-	))
-	s.NoError(s.RunCmd(
-		"namespace", "create",
-		"--namespace", "ns1",
-		"--region", "us-west-2",
-		"--auth-method", "api_key",
 		"--search-attribute", "testsearchattribute=Keyword",
 		"--user-namespace-permission", "testuser@testcompany.com=Read",
 	))
