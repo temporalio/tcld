@@ -900,7 +900,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Subcommands: []*cli.Command{
 				{
 					Name:  "set",
-					Usage: "Set the authentication method for namespace (e.g. 'mtls', 'api_key')",
+					Usage: "Set the authentication method for namespace",
 					Flags: []cli.Flag{
 						NamespaceFlag,
 						RequestIDFlag,
