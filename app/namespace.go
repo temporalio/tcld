@@ -938,7 +938,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if err != nil {
 							return err
 						}
-						fmt.Println(authMethodToString(n.Spec.AuthMethod))
+						fmt.Println(toString(n.Spec.AuthMethod))
 						return nil
 					},
 				},
@@ -1972,7 +1972,7 @@ func toAuthMethod(m string) (namespace.AuthMethod, error) {
 	}
 }
 
-func authMethodToString(m namespace.AuthMethod) string {
+func toString(m namespace.AuthMethod) string {
 	switch m {
 	case namespace.AUTH_METHOD_RESTRICTED:
 		return AuthMethodRestricted
