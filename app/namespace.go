@@ -581,8 +581,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					PassiveRegions: regions[1:],
 				}
 
-				s := ctx.String(authMethodFlagName)
-				authMethod, err := toAuthMethod(s)
+				authMethod, err := toAuthMethod(ctx.String(authMethodFlagName))
 				if err != nil {
 					return err
 				}
