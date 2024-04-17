@@ -1565,14 +1565,21 @@ func (s *NamespaceTestSuite) TestCreate() {
 				Email: "testuser@testcompany.com",
 			},
 		},
-	}, nil)
+	}, nil).Times(2)
 	s.NoError(s.RunCmd(
 		"namespace", "create",
 		"--namespace", "ns1",
 		"--region", "us-west-2",
-		"--auth-method", "api_key_or_mtls",
 		"--ca-certificate", "cert1",
 		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+	))
+	s.NoError(s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--auth-method", "api_key",
 		"--search-attribute", "testsearchattribute=Keyword",
 		"--user-namespace-permission", "testuser@testcompany.com=Read",
 	))
