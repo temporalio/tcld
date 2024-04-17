@@ -145,6 +145,183 @@ func (s *NamespaceTestSuite) TestList() {
 	s.NoError(s.RunCmd("namespace", "list"))
 }
 
+func (s *NamespaceTestSuite) TestUpdateAuthMethod() {
+	ns := "ns1"
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)
+
+	tests := []struct {
+		name         string
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{
+		{
+			name: "help",
+			args: []string{"namespace", "auth-method"},
+		},
+		{
+			name:      "no args",
+			args:      []string{"namespace", "auth-method", "set"},
+			expectErr: true,
+		},
+		{
+			name:      "alias with no args",
+			args:      []string{"n", "am", "set"},
+			expectErr: true,
+		},
+		{
+			name:      "invalid auth method",
+			args:      []string{"n", "am", "set", "-n", ns, "--auth-method", "invalid"},
+			expectErr: true,
+		},
+		{
+			name:      "no change",
+			args:      []string{"n", "am", "set", "-n", ns, "--auth-method", AuthMethodRestricted},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectErr: true,
+		},
+		{
+			name:      "success",
+			args:      []string{"n", "am", "set", "-n", ns, "--auth-method", AuthMethodMTLS},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.AuthMethod = namespace.AUTH_METHOD_MTLS
+			},
+		},
+		{
+			name: "missing namespace",
+			args: []string{"n", "am", "set", "-n", ns, "--auth-method", AuthMethodMTLS},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace = nil
+			},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						SearchAttributes: map[string]namespace.SearchAttributeType{
+							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
+						},
+						RetentionDays: 7,
+						AuthMethod:    namespace.AUTH_METHOD_RESTRICTED,
+					},
+					State:           namespace.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Namespace.Spec)
+				req := namespaceservice.UpdateNamespaceRequest{
+					Namespace:       ns,
+					Spec:            &spec,
+					ResourceVersion: getResp.Namespace.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.UpdateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestGetAuthMethod() {
+
+	ns := "ns1"
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+
+	tests := []struct {
+		name      string
+		args      []string
+		expectGet morphGetResp
+		expectErr bool
+	}{
+		{
+			name: "help",
+			args: []string{"namespace", "auth-method"},
+		},
+		{
+			name:      "no args",
+			args:      []string{"namespace", "auth-method", "get"},
+			expectErr: true,
+		},
+		{
+			name:      "alias with no args",
+			args:      []string{"n", "am", "get"},
+			expectErr: true,
+		},
+		{
+			name:      "success",
+			args:      []string{"n", "am", "get", "-n", ns},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectErr: false,
+		},
+		{
+			name: "no namespace found",
+			args: []string{"n", "am", "get", "-n", ns},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace = nil
+			},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						AcceptedClientCa: "cert1",
+						AuthMethod:       namespace.AUTH_METHOD_MTLS,
+						SearchAttributes: map[string]namespace.SearchAttributeType{
+							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
+						},
+						RetentionDays: 10,
+					},
+					State:           namespace.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
 func (s *NamespaceTestSuite) TestUpdateCA() {
 
 	ns := "ns1"
@@ -1374,6 +1551,8 @@ func (s *NamespaceTestSuite) TestCreate() {
 	s.Error(s.RunCmd("namespace", "create"))
 	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1"))
 	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2"))
+	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--auth-method", "api_key_or_mtls"))
+	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--auth-method", "invalid"))
 	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(nil, errors.New("create namespace error")).Times(1)
 	s.EqualError(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--ca-certificate", "cert1"), "create namespace error")
 	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.CreateNamespaceResponse{
@@ -1386,13 +1565,21 @@ func (s *NamespaceTestSuite) TestCreate() {
 				Email: "testuser@testcompany.com",
 			},
 		},
-	}, nil)
+	}, nil).Times(2)
 	s.NoError(s.RunCmd(
 		"namespace", "create",
 		"--namespace", "ns1",
 		"--region", "us-west-2",
 		"--ca-certificate", "cert1",
 		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
+		"--search-attribute", "testsearchattribute=Keyword",
+		"--user-namespace-permission", "testuser@testcompany.com=Read",
+	))
+	s.NoError(s.RunCmd(
+		"namespace", "create",
+		"--namespace", "ns1",
+		"--region", "us-west-2",
+		"--auth-method", "api_key",
 		"--search-attribute", "testsearchattribute=Keyword",
 		"--user-namespace-permission", "testuser@testcompany.com=Read",
 	))

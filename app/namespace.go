@@ -28,6 +28,7 @@ import (
 const (
 	namespaceRegionFlagName          = "region"
 	cloudProviderFlagName            = "cloud-provider"
+	authMethodFlagName               = "auth-method"
 	CaCertificateFlagName            = "ca-certificate"
 	CaCertificateFileFlagName        = "ca-certificate-file"
 	caCertificateFingerprintFlagName = "ca-certificate-fingerprint"
@@ -36,6 +37,13 @@ const (
 	codecEndpointFlagName            = "endpoint"
 	codecPassAccessTokenFlagName     = "pass-access-token"
 	codecIncludeCredentialsFlagName  = "include-credentials"
+)
+
+const (
+	AuthMethodRestricted   = "restricted"
+	AuthMethodMTLS         = "mtls"
+	AuthMethodAPIKey       = "api_key"
+	AuthMethodAPIKeyOrMTLS = "api_key_or_mtls"
 )
 
 var (
@@ -49,12 +57,12 @@ var (
 		Usage:   "The path to the ca pem file",
 		Aliases: []string{"f"},
 	}
+
 	caCertificateFingerprintFlag = &cli.StringFlag{
 		Name:    caCertificateFingerprintFlagName,
 		Usage:   "The fingerprint of to the ca certificate",
 		Aliases: []string{"fp"},
 	}
-
 	sinkNameFlag = &cli.StringFlag{
 		Name:     "sink-name",
 		Usage:    "Provide a name for the export sink",
@@ -457,6 +465,10 @@ func (c *NamespaceClient) failoverNamespace(ctx *cli.Context) error {
 
 // ReadCACerts reads ca certs based on cli flags.
 func ReadCACerts(ctx *cli.Context) (string, error) {
+	return ReadCACertsRequired(ctx, true)
+}
+
+func ReadCACertsRequired(ctx *cli.Context, required bool) (string, error) {
 	cert := ctx.String(CaCertificateFlagName)
 	if cert == "" {
 		if ctx.Path(CaCertificateFileFlagName) != "" {
@@ -467,7 +479,7 @@ func ReadCACerts(ctx *cli.Context) (string, error) {
 			cert = base64.StdEncoding.EncodeToString(data)
 		}
 	}
-	if cert == "" {
+	if cert == "" && required {
 		return "", fmt.Errorf("no ca certificate provided")
 	}
 	return cert, nil
@@ -521,6 +533,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Aliases: []string{"rd"},
 					Value:   30,
 				},
+				&cli.StringFlag{
+					Name:  authMethodFlagName,
+					Usage: "The authentication method to use for the namespace (e.g. 'mtls', 'api_key')",
+					Value: AuthMethodMTLS,
+				},
 				&cli.PathFlag{
 					Name:    CaCertificateFileFlagName,
 					Usage:   "The path to the ca pem file",
@@ -568,14 +585,20 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					PassiveRegions: regions[1:],
 				}
 
-				// certs (required)
-				cert, err := ReadCACerts(ctx)
+				authMethod, err := toAuthMethod(ctx.String(authMethodFlagName))
+				if err != nil {
+					return err
+				}
+				n.Spec.AuthMethod = authMethod
+
+				// certs (required if mTLS is enabled)
+				cert, err := ReadCACertsRequired(ctx, authMethod == namespace.AUTH_METHOD_MTLS ||
+					authMethod == namespace.AUTH_METHOD_API_KEY_OR_MTLS,
+				)
 				if err != nil {
 					return err
 				}
 				n.Spec.AcceptedClientCa = cert
-
-				n.Spec.AuthMethod = namespace.AUTH_METHOD_MTLS
 
 				// retention (required)
 				retention := ctx.Int(RetentionDaysFlagName)
@@ -872,6 +895,57 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						}
 						n.Spec.AcceptedClientCa = cert
 						return c.updateNamespace(ctx, n)
+					},
+				},
+			},
+		},
+		{
+			Name:    "auth-method",
+			Usage:   "Manage the authentication method for the namespace",
+			Aliases: []string{"am"},
+			Subcommands: []*cli.Command{
+				{
+					Name:  "set",
+					Usage: "Set the authentication method for the namespace",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RequestIDFlag,
+						ResourceVersionFlag,
+						&cli.StringFlag{
+							Name:     authMethodFlagName,
+							Usage:    "The authentication method used for the namespace (e.g. 'mtls', 'api_key')",
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						authMethod, err := toAuthMethod(ctx.String(authMethodFlagName))
+						if err != nil {
+							return err
+						}
+						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						if err != nil {
+							return err
+						}
+						if n.Spec.AuthMethod == authMethod {
+							return errors.New("nothing to change")
+						}
+						n.Spec.AuthMethod = authMethod
+						return c.updateNamespace(ctx, n)
+					},
+				},
+				{
+					Name:  "get",
+					Usage: "Retrieve the authentication method for namespace",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						if err != nil {
+							return err
+						}
+						fmt.Println(toString(n.Spec.AuthMethod))
+						return nil
 					},
 				},
 			},
@@ -1887,4 +1961,34 @@ func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) 
 	}
 
 	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
+}
+
+func toAuthMethod(m string) (namespace.AuthMethod, error) {
+	switch m {
+	case AuthMethodRestricted:
+		return namespace.AUTH_METHOD_RESTRICTED, nil
+	case AuthMethodAPIKey:
+		return namespace.AUTH_METHOD_API_KEY, nil
+	case AuthMethodMTLS:
+		return namespace.AUTH_METHOD_MTLS, nil
+	case AuthMethodAPIKeyOrMTLS:
+		return namespace.AUTH_METHOD_API_KEY_OR_MTLS, nil
+	default:
+		return namespace.AUTH_METHOD_UNSPECIFIED, fmt.Errorf("invalid auth method: '%s'", m)
+	}
+}
+
+func toString(m namespace.AuthMethod) string {
+	switch m {
+	case namespace.AUTH_METHOD_RESTRICTED:
+		return AuthMethodRestricted
+	case namespace.AUTH_METHOD_API_KEY:
+		return AuthMethodAPIKey
+	case namespace.AUTH_METHOD_MTLS:
+		return AuthMethodMTLS
+	case namespace.AUTH_METHOD_API_KEY_OR_MTLS:
+		return AuthMethodAPIKeyOrMTLS
+	default:
+		return "unspecified"
+	}
 }
