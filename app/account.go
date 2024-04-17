@@ -310,7 +310,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 										CaCertificateFileFlag,
 									},
 									Action: func(ctx *cli.Context) error {
-										cert, err := ReadCACerts(ctx, true)
+										cert, err := ReadCACerts(ctx)
 										if err != nil {
 											return err
 										}

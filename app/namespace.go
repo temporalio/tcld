@@ -426,7 +426,7 @@ func (c *NamespaceClient) toUserNamespacePermissions(userPermissionsInput map[st
 }
 
 func readAndParseCACerts(ctx *cli.Context) (read caCerts, err error) {
-	cert, err := ReadCACerts(ctx, true)
+	cert, err := ReadCACerts(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -464,7 +464,11 @@ func (c *NamespaceClient) failoverNamespace(ctx *cli.Context) error {
 }
 
 // ReadCACerts reads ca certs based on cli flags.
-func ReadCACerts(ctx *cli.Context, required bool) (string, error) {
+func ReadCACerts(ctx *cli.Context) (string, error) {
+	return ReadCACertsRequired(ctx, true)
+}
+
+func ReadCACertsRequired(ctx *cli.Context, required bool) (string, error) {
 	cert := ctx.String(CaCertificateFlagName)
 	if cert == "" {
 		if ctx.Path(CaCertificateFileFlagName) != "" {
@@ -588,7 +592,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				n.Spec.AuthMethod = authMethod
 
 				// certs (required if mTLS is enabled)
-				cert, err := ReadCACerts(ctx, authMethod == namespace.AUTH_METHOD_MTLS || authMethod == namespace.AUTH_METHOD_API_KEY_OR_MTLS)
+				cert, err := ReadCACertsRequired(ctx, authMethod == namespace.AUTH_METHOD_MTLS ||
+					authMethod == namespace.AUTH_METHOD_API_KEY_OR_MTLS,
+				)
 				if err != nil {
 					return err
 				}
@@ -876,7 +882,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						CaCertificateFileFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						cert, err := ReadCACerts(ctx, true)
+						cert, err := ReadCACerts(ctx)
 						if err != nil {
 							return err
 						}
