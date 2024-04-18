@@ -931,7 +931,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						}
 						if disruptiveChange(n.Spec.AuthMethod, authMethod) {
 							yes, err := ConfirmPrompt(ctx,
-								fmt.Sprintf("setting auth method from '%s' to '%s' will cause existing client connections to be dropped. "+
+								fmt.Sprintf("setting auth method from '%s' to '%s' will cause existing client connections to fail. "+
 									"are you sure you want to continue?", n.Spec.AuthMethod, authMethod))
 							if err != nil {
 								return err
@@ -1976,10 +1976,7 @@ func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) 
 
 // Determines if an `AuthMethod` update will result in dropped client connections.
 func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
-	return (new == namespace.AUTH_METHOD_RESTRICTED) ||
-		(old == namespace.AUTH_METHOD_API_KEY_OR_MTLS) ||
-		(old == namespace.AUTH_METHOD_MTLS && new == namespace.AUTH_METHOD_API_KEY) ||
-		(old == namespace.AUTH_METHOD_API_KEY && new == namespace.AUTH_METHOD_MTLS)
+	return old != namespace.AUTH_METHOD_RESTRICTED && new != namespace.AUTH_METHOD_API_KEY_OR_MTLS
 }
 
 func toAuthMethod(m string) (namespace.AuthMethod, error) {
