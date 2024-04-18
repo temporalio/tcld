@@ -1979,7 +1979,7 @@ func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) 
 func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
 	return (new == namespace.AUTH_METHOD_RESTRICTED) ||
 		(old == namespace.AUTH_METHOD_API_KEY_OR_MTLS) ||
-		(old == namespace.AUTH_METHOD_MTLS && new == namespace.AUTH_METHOD_MTLS) ||
+		(old == namespace.AUTH_METHOD_MTLS && new == namespace.AUTH_METHOD_API_KEY) ||
 		(old == namespace.AUTH_METHOD_API_KEY && new == namespace.AUTH_METHOD_MTLS)
 }
 
