@@ -1974,7 +1974,6 @@ func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) 
 	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
 }
 
-// Determines if an `AuthMethod` update will fail existing client connections.
 func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
 	return old != namespace.AUTH_METHOD_RESTRICTED && new != namespace.AUTH_METHOD_API_KEY_OR_MTLS
 }
