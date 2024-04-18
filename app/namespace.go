@@ -1975,6 +1975,7 @@ func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) 
 }
 
 // Determines if an `AuthMethod` update will result in dropped client connections.
+// Note that `old` and `new` must be different.
 func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
 	return (new == namespace.AUTH_METHOD_RESTRICTED) ||
 		(old == namespace.AUTH_METHOD_API_KEY_OR_MTLS) ||
