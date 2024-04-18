@@ -929,6 +929,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if n.Spec.AuthMethod == authMethod {
 							return errors.New("nothing to change")
 						}
+						if disruptiveChange(n.Spec.AuthMethod, authMethod) {
+							yes, err := ConfirmPrompt(ctx,
+								fmt.Sprintf("setting auth method from '%s' to '%s' will cause existing client connections to fail. "+
+									"are you sure you want to continue?", n.Spec.AuthMethod, authMethod))
+							if err != nil {
+								return err
+							}
+							if !yes {
+								return nil
+							}
+						}
 						n.Spec.AuthMethod = authMethod
 						return c.updateNamespace(ctx, n)
 					},
@@ -1961,6 +1972,10 @@ func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) 
 	}
 
 	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
+}
+
+func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
+	return old != namespace.AUTH_METHOD_RESTRICTED && new != namespace.AUTH_METHOD_API_KEY_OR_MTLS
 }
 
 func toAuthMethod(m string) (namespace.AuthMethod, error) {
