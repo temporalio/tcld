@@ -931,8 +931,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						}
 						if disruptiveChange(n.Spec.AuthMethod, authMethod) {
 							yes, err := ConfirmPrompt(ctx,
-								fmt.Sprintf("setting auth method to '%s' will cause existing client connections to be dropped. "+
-									"are you sure you want to continue?", authMethod))
+								fmt.Sprintf("setting auth method to '%s' from '%s' will cause existing client connections to be dropped. "+
+									"are you sure you want to continue?", authMethod, n.Spec.AuthMethod))
 							if err != nil {
 								return err
 							}
