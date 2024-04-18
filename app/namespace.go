@@ -1982,6 +1982,7 @@ func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
 	if old == namespace.AUTH_METHOD_API_KEY_OR_MTLS {
 		return true
 	}
+	/* covers (api_key, mtls) and (mtls, api_key) */
 	if new*old == namespace.AUTH_METHOD_API_KEY*namespace.AUTH_METHOD_MTLS {
 		return true
 	}
