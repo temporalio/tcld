@@ -28,11 +28,19 @@ func NewApp(params AppParams) (*cli.App, error) {
 			EnableDebugLogsFlag,
 		},
 	}
-	for _, c := range params.Commands {
-		if !IsFeatureEnabled(APIKeyFeatureFlag) && c.Name == "apikey" {
-			continue
+
+	var commands []*cli.Command
+
+	for _, command := range params.Commands {
+		if command.Name == "service-account" {
+			if IsFeatureEnabled(ServiceAccountFeatureFlag) {
+				commands = append(commands, command)
+			}
+		} else {
+			commands = append(commands, command)
 		}
-		app.Commands = append(app.Commands, c)
 	}
+	app.Commands = commands
+
 	return app, nil
 }
