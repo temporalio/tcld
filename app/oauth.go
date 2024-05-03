@@ -1,13 +1,11 @@
 package app
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
 	"github.com/urfave/cli/v2"
 	"golang.org/x/oauth2"
-	"golang.org/x/term"
 )
 
 const (
@@ -57,7 +55,7 @@ func login(ctx *cli.Context, tokenConfig *TokenConfig) (*TokenConfig, error) {
 	// Print to stderr so other tooling can parse the command output.
 	fmt.Fprintln(os.Stderr, "Successfully logged in!")
 
-	tokenConfig.OAuthToken = *token
+	tokenConfig.OAuthToken = token
 	tokenConfig.ctx = ctx
 
 	err = tokenConfig.Store()
@@ -66,48 +64,6 @@ func login(ctx *cli.Context, tokenConfig *TokenConfig) (*TokenConfig, error) {
 	}
 
 	return tokenConfig, nil
-}
-
-func ensureLogin(ctx *cli.Context) (*TokenConfig, error) {
-	cfg, err := LoadTokenConfig(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load token config: %w", err)
-	}
-
-	_, err = cfg.Token()
-	if err != nil {
-		var retrieveErr *oauth2.RetrieveError
-
-		// Handle one of two cases:
-		//   1. Refresh token has expired.
-		//   2. Refresh tokens were enabled, but the user has not logged in to receive one yet.
-		if (errors.As(err, &retrieveErr) && retrieveErr.ErrorCode == invalidGrantErr) ||
-			len(cfg.OAuthToken.RefreshToken) == 0 {
-			// Only attempt a forced login if used in an interactive terminal.
-			if term.IsTerminal(int(os.Stdout.Fd())) {
-				cfg, err = login(ctx, cfg)
-				if err != nil {
-					return nil, fmt.Errorf("failed to login: %w", err)
-				}
-
-				_, err := cfg.Token()
-				if err != nil {
-					return nil, fmt.Errorf("failed to retrieve auth token: %w", err)
-				}
-
-				err = cfg.Store()
-				if err != nil {
-					return nil, fmt.Errorf("failed to store new tokens: %w", err)
-				}
-
-				return cfg, nil
-			}
-		}
-
-		return nil, err
-	}
-
-	return cfg, nil
 }
 
 func defaultTokenConfig(ctx *cli.Context) (*TokenConfig, error) {

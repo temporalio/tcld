@@ -88,7 +88,7 @@ func newRPCCredential(ctx *cli.Context) (credentials.PerRPCCredentials, error) {
 		)
 	}
 
-	config, err := ensureLogin(ctx)
+	config, err := LoadTokenConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
