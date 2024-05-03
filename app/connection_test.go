@@ -142,7 +142,7 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			}
 
 			loginConfig := TokenConfig{
-				OAuthToken: oauth2.Token{
+				OAuthToken: &oauth2.Token{
 					AccessToken: testAccessToken,
 					Expiry:      time.Now().Add(24 * time.Hour),
 				},
