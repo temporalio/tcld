@@ -16,10 +16,6 @@ const (
 	tokenConfigFile = "tokens.json"
 )
 
-var (
-	unauthenticatedErr = fmt.Errorf("must authenticate by running `tcld login`")
-)
-
 type TokenConfig struct {
 	Audience    string        `json:"audience"`
 	Domain      string        `json:"domain"`
