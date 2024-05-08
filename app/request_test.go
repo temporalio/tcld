@@ -33,10 +33,11 @@ func (s *RequestTestSuite) SetupTest() {
 		}, nil
 	})
 	s.Require().NoError(err)
-	s.cliApp = &cli.App{
-		Name:     "test",
-		Commands: []*cli.Command{out.Command},
+
+	cmds := []*cli.Command{
+		out.Command,
 	}
+	s.cliApp, _ = NewTestApp(s.T(), cmds, nil)
 }
 
 func (s *RequestTestSuite) AfterTest(suiteName, testName string) {

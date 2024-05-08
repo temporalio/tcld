@@ -3,12 +3,13 @@ package app
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
-	"github.com/temporalio/tcld/services"
 	"github.com/urfave/cli/v2"
+	"golang.org/x/oauth2"
 )
 
 func TestLogout(t *testing.T) {
@@ -17,29 +18,33 @@ func TestLogout(t *testing.T) {
 
 type LogoutTestSuite struct {
 	suite.Suite
-	cliApp      *cli.App
-	server      *httptest.Server
-	mux         *http.ServeMux
-	mockCtrl    *gomock.Controller
-	mockService *services.MockLoginService
+
+	cliApp    *cli.App
+	server    *httptest.Server
+	mux       *http.ServeMux
+	configDir string
 }
 
 func (l *LogoutTestSuite) SetupTest() {
-	l.mockCtrl = gomock.NewController(l.T())
-	l.mockService = services.NewMockLoginService(l.mockCtrl)
 	l.mux = http.NewServeMux()
+
 	l.server = httptest.NewServer(l.mux)
-	out, err := NewLogoutCommand(&LoginClient{
-		loginService: l.mockService,
-	})
+
+	out, err := NewLogoutCommand()
 	l.Require().NoError(err)
-	l.cliApp = &cli.App{
-		Name:     "test",
-		Commands: []*cli.Command{out.Command},
-		Flags: []cli.Flag{
-			ConfigDirFlag,
-		},
+
+	cmds := []*cli.Command{
+		out.Command,
 	}
+	flags := []cli.Flag{
+		ConfigDirFlag,
+		disablePopUpFlag,
+	}
+	l.cliApp, l.configDir = NewTestApp(l.T(), cmds, flags)
+}
+
+func (l *LogoutTestSuite) TearDownTest() {
+	l.server.Close()
 }
 
 func (l *LogoutTestSuite) runCmd(args ...string) error {
@@ -47,19 +52,25 @@ func (l *LogoutTestSuite) runCmd(args ...string) error {
 }
 
 func (l *LogoutTestSuite) TestLogoutSuccessful() {
-	l.mockService.EXPECT().DeleteConfigFile(gomock.Any()).Return(nil)
-	l.mockService.EXPECT().OpenBrowser(gomock.Any()).Return(nil)
+	cCtx := NewTestContext(l.T(), l.cliApp)
+
+	loginConfig := TokenConfig{
+		OAuthConfig: oauth2.Config{
+			ClientID:     "test-id",
+			ClientSecret: "test-secret",
+		},
+		ctx: cCtx,
+	}
+
+	err := loginConfig.Store()
+	l.NoError(err)
+
+	_, err = os.Stat(filepath.Join(l.configDir, tokenConfigFile))
+	l.NoError(err)
+
 	resp := l.runCmd("logout", "--domain", l.server.URL)
 	l.NoError(resp)
-}
 
-func (l *LogoutTestSuite) TestLogoutDisablePopup() {
-	l.mockService.EXPECT().DeleteConfigFile(gomock.Any()).Return(nil)
-	resp := l.runCmd("logout", "--domain", l.server.URL, "--disable-pop-up")
-	l.NoError(resp)
-}
-
-func (l *LogoutTestSuite) AfterTest(_, _ string) {
-	l.mockCtrl.Finish()
-	l.server.Close()
+	_, err = os.Stat(filepath.Join(l.configDir, tokenConfigFile))
+	l.ErrorIs(err, os.ErrNotExist)
 }

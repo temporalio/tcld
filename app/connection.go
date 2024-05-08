@@ -77,10 +77,10 @@ func defaultDialOptions(c *cli.Context, addr *url.URL) ([]grpc.DialOption, error
 	return opts, nil
 }
 
-func newRPCCredential(c *cli.Context) (credentials.PerRPCCredentials, error) {
-	insecure := c.Bool(InsecureConnectionFlagName)
+func newRPCCredential(ctx *cli.Context) (credentials.PerRPCCredentials, error) {
+	insecure := ctx.Bool(InsecureConnectionFlagName)
 
-	apiKey := c.String(APIKeyFlagName)
+	apiKey := ctx.String(APIKeyFlagName)
 	if len(apiKey) > 0 {
 		return apikey.NewCredential(
 			apiKey,
@@ -88,18 +88,13 @@ func newRPCCredential(c *cli.Context) (credentials.PerRPCCredentials, error) {
 		)
 	}
 
-	tokens, err := loadLoginConfig(c)
+	config, err := LoadTokenConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(tokens.AccessToken) > 0 {
-		return oauth.NewCredential(
-			tokens.AccessToken,
-			oauth.WithInsecureTransport(insecure),
-		)
-	}
-
-	// Use no credentials for this connection.
-	return nil, nil
+	return oauth.NewCredential(
+		config.TokenSource(),
+		oauth.WithInsecureTransport(insecure),
+	)
 }

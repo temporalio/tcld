@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/grpc/credentials"
+	"github.com/temporalio/tcld/app/credentials"
+	grpccreds "google.golang.org/grpc/credentials"
 )
 
 const (
-	AuthorizationHeader       = "Authorization"
-	AuthorizationHeaderPrefix = "Bearer"
-	Separator                 = "_"
+	Separator = "_"
 )
 
 type Credential struct {
@@ -42,20 +41,20 @@ func NewCredential(key string, opts ...Option) (Credential, error) {
 }
 
 func (c Credential) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	ri, ok := credentials.RequestInfoFromContext(ctx)
+	ri, ok := grpccreds.RequestInfoFromContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("failed to retrieve request info from context")
 	}
 
 	if !c.allowInsecureTransport {
 		// Ensure the API key, AKA bearer token, is sent over a secure connection - meaning TLS.
-		if err := credentials.CheckSecurityLevel(ri.AuthInfo, credentials.PrivacyAndIntegrity); err != nil {
+		if err := grpccreds.CheckSecurityLevel(ri.AuthInfo, grpccreds.PrivacyAndIntegrity); err != nil {
 			return nil, fmt.Errorf("the connection's transport security level is too low for API keys: %v", err)
 		}
 	}
 
 	return map[string]string{
-		AuthorizationHeader: fmt.Sprintf("%s %s", AuthorizationHeaderPrefix, c.Key),
+		credentials.AuthorizationHeader: fmt.Sprintf("%s %s", credentials.AuthorizationBearer, c.Key),
 	}, nil
 }
 
@@ -63,4 +62,4 @@ func (c Credential) RequireTransportSecurity() bool {
 	return !c.allowInsecureTransport
 }
 
-var _ credentials.PerRPCCredentials = (*Credential)(nil)
+var _ grpccreds.PerRPCCredentials = (*Credential)(nil)
