@@ -20,7 +20,7 @@ func NewLogoutCommand() (CommandOut, error) {
 		Action: func(ctx *cli.Context) error {
 			configDir := ctx.Path(ConfigDirFlagName)
 			if err := removeFile(filepath.Join(configDir, tokenConfigFile)); err != nil {
-				return fmt.Errorf("unable to remove config file: %w", err)
+				fmt.Printf("unable to remove config file, continuing with logout anyways: %v", err)
 			}
 
 			logoutURL := fmt.Sprintf("https://%s/v2/logout", ctx.String("domain"))
