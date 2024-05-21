@@ -6,10 +6,9 @@ package cloudservice
 import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
-	v15 "github.com/temporalio/tcld/protogen/api/cloud/account/v1"
+	v14 "github.com/temporalio/tcld/protogen/api/cloud/account/v1"
 	v1 "github.com/temporalio/tcld/protogen/api/cloud/identity/v1"
 	v12 "github.com/temporalio/tcld/protogen/api/cloud/namespace/v1"
-	v14 "github.com/temporalio/tcld/protogen/api/cloud/nexus/v1"
 	v11 "github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
 	v13 "github.com/temporalio/tcld/protogen/api/cloud/region/v1"
 	io "io"
@@ -1840,564 +1839,13 @@ func (m *GetRegionResponse) GetRegion() *v13.Region {
 	return nil
 }
 
-type GetNexusEndpointsRequest struct {
-	// The requested size of the page to retrieve - optional.
-	// Cannot exceed 1000. Defaults to 100.
-	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	// The page token if this is continuing from another response - optional.
-	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	// optional, treated as an AND if specified
-	TargetNamespaceId string `protobuf:"bytes,3,opt,name=target_namespace_id,json=targetNamespaceId,proto3" json:"target_namespace_id,omitempty"`
-	// optional, treated as an AND if specified
-	TargetTaskQueue string `protobuf:"bytes,4,opt,name=target_task_queue,json=targetTaskQueue,proto3" json:"target_task_queue,omitempty"`
-	// Filter endpoints by their name - optional, treated as an AND if specified. Specifying this will result in zero or one results.
-	Name string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
-}
-
-func (m *GetNexusEndpointsRequest) Reset()      { *m = GetNexusEndpointsRequest{} }
-func (*GetNexusEndpointsRequest) ProtoMessage() {}
-func (*GetNexusEndpointsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{34}
-}
-func (m *GetNexusEndpointsRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *GetNexusEndpointsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_GetNexusEndpointsRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *GetNexusEndpointsRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetNexusEndpointsRequest.Merge(m, src)
-}
-func (m *GetNexusEndpointsRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *GetNexusEndpointsRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetNexusEndpointsRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetNexusEndpointsRequest proto.InternalMessageInfo
-
-func (m *GetNexusEndpointsRequest) GetPageSize() int32 {
-	if m != nil {
-		return m.PageSize
-	}
-	return 0
-}
-
-func (m *GetNexusEndpointsRequest) GetPageToken() string {
-	if m != nil {
-		return m.PageToken
-	}
-	return ""
-}
-
-func (m *GetNexusEndpointsRequest) GetTargetNamespaceId() string {
-	if m != nil {
-		return m.TargetNamespaceId
-	}
-	return ""
-}
-
-func (m *GetNexusEndpointsRequest) GetTargetTaskQueue() string {
-	if m != nil {
-		return m.TargetTaskQueue
-	}
-	return ""
-}
-
-func (m *GetNexusEndpointsRequest) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-type GetNexusEndpointsResponse struct {
-	// The list of endpoints in ascending id order.
-	Endpoints []*v14.Endpoint `protobuf:"bytes,1,rep,name=endpoints,proto3" json:"endpoints,omitempty"`
-	// The next page's token.
-	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-}
-
-func (m *GetNexusEndpointsResponse) Reset()      { *m = GetNexusEndpointsResponse{} }
-func (*GetNexusEndpointsResponse) ProtoMessage() {}
-func (*GetNexusEndpointsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{35}
-}
-func (m *GetNexusEndpointsResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *GetNexusEndpointsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_GetNexusEndpointsResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *GetNexusEndpointsResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetNexusEndpointsResponse.Merge(m, src)
-}
-func (m *GetNexusEndpointsResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *GetNexusEndpointsResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetNexusEndpointsResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetNexusEndpointsResponse proto.InternalMessageInfo
-
-func (m *GetNexusEndpointsResponse) GetEndpoints() []*v14.Endpoint {
-	if m != nil {
-		return m.Endpoints
-	}
-	return nil
-}
-
-func (m *GetNexusEndpointsResponse) GetNextPageToken() string {
-	if m != nil {
-		return m.NextPageToken
-	}
-	return ""
-}
-
-type GetNexusEndpointRequest struct {
-	// The id of the nexus endpoint to get.
-	EndpointId string `protobuf:"bytes,1,opt,name=endpoint_id,json=endpointId,proto3" json:"endpoint_id,omitempty"`
-}
-
-func (m *GetNexusEndpointRequest) Reset()      { *m = GetNexusEndpointRequest{} }
-func (*GetNexusEndpointRequest) ProtoMessage() {}
-func (*GetNexusEndpointRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{36}
-}
-func (m *GetNexusEndpointRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *GetNexusEndpointRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_GetNexusEndpointRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *GetNexusEndpointRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetNexusEndpointRequest.Merge(m, src)
-}
-func (m *GetNexusEndpointRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *GetNexusEndpointRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetNexusEndpointRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetNexusEndpointRequest proto.InternalMessageInfo
-
-func (m *GetNexusEndpointRequest) GetEndpointId() string {
-	if m != nil {
-		return m.EndpointId
-	}
-	return ""
-}
-
-type GetNexusEndpointResponse struct {
-	// The nexus endpoint.
-	Endpoint *v14.Endpoint `protobuf:"bytes,1,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
-}
-
-func (m *GetNexusEndpointResponse) Reset()      { *m = GetNexusEndpointResponse{} }
-func (*GetNexusEndpointResponse) ProtoMessage() {}
-func (*GetNexusEndpointResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{37}
-}
-func (m *GetNexusEndpointResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *GetNexusEndpointResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_GetNexusEndpointResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *GetNexusEndpointResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetNexusEndpointResponse.Merge(m, src)
-}
-func (m *GetNexusEndpointResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *GetNexusEndpointResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetNexusEndpointResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetNexusEndpointResponse proto.InternalMessageInfo
-
-func (m *GetNexusEndpointResponse) GetEndpoint() *v14.Endpoint {
-	if m != nil {
-		return m.Endpoint
-	}
-	return nil
-}
-
-type CreateNexusEndpointRequest struct {
-	// The spec for the nexus endpoint.
-	Spec *v14.EndpointSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
-	// The id to use for this async operation - optional.
-	AsyncOperationId string `protobuf:"bytes,2,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
-}
-
-func (m *CreateNexusEndpointRequest) Reset()      { *m = CreateNexusEndpointRequest{} }
-func (*CreateNexusEndpointRequest) ProtoMessage() {}
-func (*CreateNexusEndpointRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{38}
-}
-func (m *CreateNexusEndpointRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *CreateNexusEndpointRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_CreateNexusEndpointRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *CreateNexusEndpointRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CreateNexusEndpointRequest.Merge(m, src)
-}
-func (m *CreateNexusEndpointRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *CreateNexusEndpointRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_CreateNexusEndpointRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CreateNexusEndpointRequest proto.InternalMessageInfo
-
-func (m *CreateNexusEndpointRequest) GetSpec() *v14.EndpointSpec {
-	if m != nil {
-		return m.Spec
-	}
-	return nil
-}
-
-func (m *CreateNexusEndpointRequest) GetAsyncOperationId() string {
-	if m != nil {
-		return m.AsyncOperationId
-	}
-	return ""
-}
-
-type CreateNexusEndpointResponse struct {
-	// The id of the endpoint that was created.
-	EndpointId string `protobuf:"bytes,1,opt,name=endpoint_id,json=endpointId,proto3" json:"endpoint_id,omitempty"`
-	// The async operation.
-	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,2,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
-}
-
-func (m *CreateNexusEndpointResponse) Reset()      { *m = CreateNexusEndpointResponse{} }
-func (*CreateNexusEndpointResponse) ProtoMessage() {}
-func (*CreateNexusEndpointResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{39}
-}
-func (m *CreateNexusEndpointResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *CreateNexusEndpointResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_CreateNexusEndpointResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *CreateNexusEndpointResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CreateNexusEndpointResponse.Merge(m, src)
-}
-func (m *CreateNexusEndpointResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *CreateNexusEndpointResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_CreateNexusEndpointResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CreateNexusEndpointResponse proto.InternalMessageInfo
-
-func (m *CreateNexusEndpointResponse) GetEndpointId() string {
-	if m != nil {
-		return m.EndpointId
-	}
-	return ""
-}
-
-func (m *CreateNexusEndpointResponse) GetAsyncOperation() *v11.AsyncOperation {
-	if m != nil {
-		return m.AsyncOperation
-	}
-	return nil
-}
-
-type UpdateNexusEndpointRequest struct {
-	// The id of the nexus endpoint to update.
-	EndpointId string `protobuf:"bytes,1,opt,name=endpoint_id,json=endpointId,proto3" json:"endpoint_id,omitempty"`
-	// The updated nexus endpoint specification.
-	Spec *v14.EndpointSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
-	// The version of the nexus endpoint for which this update is intended for.
-	// The latest version can be found in the GetNexusEndpoint operation response.
-	ResourceVersion string `protobuf:"bytes,3,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
-	// The id to use for this async operation - optional.
-	AsyncOperationId string `protobuf:"bytes,4,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
-}
-
-func (m *UpdateNexusEndpointRequest) Reset()      { *m = UpdateNexusEndpointRequest{} }
-func (*UpdateNexusEndpointRequest) ProtoMessage() {}
-func (*UpdateNexusEndpointRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{40}
-}
-func (m *UpdateNexusEndpointRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *UpdateNexusEndpointRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_UpdateNexusEndpointRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *UpdateNexusEndpointRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateNexusEndpointRequest.Merge(m, src)
-}
-func (m *UpdateNexusEndpointRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *UpdateNexusEndpointRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateNexusEndpointRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UpdateNexusEndpointRequest proto.InternalMessageInfo
-
-func (m *UpdateNexusEndpointRequest) GetEndpointId() string {
-	if m != nil {
-		return m.EndpointId
-	}
-	return ""
-}
-
-func (m *UpdateNexusEndpointRequest) GetSpec() *v14.EndpointSpec {
-	if m != nil {
-		return m.Spec
-	}
-	return nil
-}
-
-func (m *UpdateNexusEndpointRequest) GetResourceVersion() string {
-	if m != nil {
-		return m.ResourceVersion
-	}
-	return ""
-}
-
-func (m *UpdateNexusEndpointRequest) GetAsyncOperationId() string {
-	if m != nil {
-		return m.AsyncOperationId
-	}
-	return ""
-}
-
-type UpdateNexusEndpointResponse struct {
-	// The async operation.
-	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
-}
-
-func (m *UpdateNexusEndpointResponse) Reset()      { *m = UpdateNexusEndpointResponse{} }
-func (*UpdateNexusEndpointResponse) ProtoMessage() {}
-func (*UpdateNexusEndpointResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{41}
-}
-func (m *UpdateNexusEndpointResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *UpdateNexusEndpointResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_UpdateNexusEndpointResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *UpdateNexusEndpointResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateNexusEndpointResponse.Merge(m, src)
-}
-func (m *UpdateNexusEndpointResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *UpdateNexusEndpointResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateNexusEndpointResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UpdateNexusEndpointResponse proto.InternalMessageInfo
-
-func (m *UpdateNexusEndpointResponse) GetAsyncOperation() *v11.AsyncOperation {
-	if m != nil {
-		return m.AsyncOperation
-	}
-	return nil
-}
-
-type DeleteNexusEndpointRequest struct {
-	// The id of the nexus endpoint to delete.
-	EndpointId string `protobuf:"bytes,1,opt,name=endpoint_id,json=endpointId,proto3" json:"endpoint_id,omitempty"`
-	// The version of the endpoint for which this delete is intended for.
-	// The latest version can be found in the GetNexusEndpoint operation response.
-	ResourceVersion string `protobuf:"bytes,2,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
-	// The id to use for this async operation - optional.
-	AsyncOperationId string `protobuf:"bytes,3,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
-}
-
-func (m *DeleteNexusEndpointRequest) Reset()      { *m = DeleteNexusEndpointRequest{} }
-func (*DeleteNexusEndpointRequest) ProtoMessage() {}
-func (*DeleteNexusEndpointRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{42}
-}
-func (m *DeleteNexusEndpointRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *DeleteNexusEndpointRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_DeleteNexusEndpointRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *DeleteNexusEndpointRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DeleteNexusEndpointRequest.Merge(m, src)
-}
-func (m *DeleteNexusEndpointRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *DeleteNexusEndpointRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_DeleteNexusEndpointRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_DeleteNexusEndpointRequest proto.InternalMessageInfo
-
-func (m *DeleteNexusEndpointRequest) GetEndpointId() string {
-	if m != nil {
-		return m.EndpointId
-	}
-	return ""
-}
-
-func (m *DeleteNexusEndpointRequest) GetResourceVersion() string {
-	if m != nil {
-		return m.ResourceVersion
-	}
-	return ""
-}
-
-func (m *DeleteNexusEndpointRequest) GetAsyncOperationId() string {
-	if m != nil {
-		return m.AsyncOperationId
-	}
-	return ""
-}
-
-type DeleteNexusEndpointResponse struct {
-	// The async operation
-	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
-}
-
-func (m *DeleteNexusEndpointResponse) Reset()      { *m = DeleteNexusEndpointResponse{} }
-func (*DeleteNexusEndpointResponse) ProtoMessage() {}
-func (*DeleteNexusEndpointResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{43}
-}
-func (m *DeleteNexusEndpointResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *DeleteNexusEndpointResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_DeleteNexusEndpointResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *DeleteNexusEndpointResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DeleteNexusEndpointResponse.Merge(m, src)
-}
-func (m *DeleteNexusEndpointResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *DeleteNexusEndpointResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_DeleteNexusEndpointResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_DeleteNexusEndpointResponse proto.InternalMessageInfo
-
-func (m *DeleteNexusEndpointResponse) GetAsyncOperation() *v11.AsyncOperation {
-	if m != nil {
-		return m.AsyncOperation
-	}
-	return nil
-}
-
 type GetAccountRequest struct {
 }
 
 func (m *GetAccountRequest) Reset()      { *m = GetAccountRequest{} }
 func (*GetAccountRequest) ProtoMessage() {}
 func (*GetAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{44}
+	return fileDescriptor_d04330087ace166d, []int{34}
 }
 func (m *GetAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2428,13 +1876,13 @@ var xxx_messageInfo_GetAccountRequest proto.InternalMessageInfo
 
 type GetAccountResponse struct {
 	// The account.
-	Account *v15.Account `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Account *v14.Account `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
 }
 
 func (m *GetAccountResponse) Reset()      { *m = GetAccountResponse{} }
 func (*GetAccountResponse) ProtoMessage() {}
 func (*GetAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{45}
+	return fileDescriptor_d04330087ace166d, []int{35}
 }
 func (m *GetAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2463,7 +1911,7 @@ func (m *GetAccountResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetAccountResponse proto.InternalMessageInfo
 
-func (m *GetAccountResponse) GetAccount() *v15.Account {
+func (m *GetAccountResponse) GetAccount() *v14.Account {
 	if m != nil {
 		return m.Account
 	}
@@ -2472,7 +1920,7 @@ func (m *GetAccountResponse) GetAccount() *v15.Account {
 
 type UpdateAccountRequest struct {
 	// The updated account specification to apply.
-	Spec *v15.AccountSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
+	Spec *v14.AccountSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
 	// The version of the account for which this update is intended for.
 	// The latest version can be found in the GetAccount operation response.
 	ResourceVersion string `protobuf:"bytes,2,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
@@ -2484,7 +1932,7 @@ type UpdateAccountRequest struct {
 func (m *UpdateAccountRequest) Reset()      { *m = UpdateAccountRequest{} }
 func (*UpdateAccountRequest) ProtoMessage() {}
 func (*UpdateAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{46}
+	return fileDescriptor_d04330087ace166d, []int{36}
 }
 func (m *UpdateAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2513,7 +1961,7 @@ func (m *UpdateAccountRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_UpdateAccountRequest proto.InternalMessageInfo
 
-func (m *UpdateAccountRequest) GetSpec() *v15.AccountSpec {
+func (m *UpdateAccountRequest) GetSpec() *v14.AccountSpec {
 	if m != nil {
 		return m.Spec
 	}
@@ -2542,7 +1990,7 @@ type UpdateAccountResponse struct {
 func (m *UpdateAccountResponse) Reset()      { *m = UpdateAccountResponse{} }
 func (*UpdateAccountResponse) ProtoMessage() {}
 func (*UpdateAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{47}
+	return fileDescriptor_d04330087ace166d, []int{37}
 }
 func (m *UpdateAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2593,7 +2041,7 @@ type GetUserGroupsRequest struct {
 func (m *GetUserGroupsRequest) Reset()      { *m = GetUserGroupsRequest{} }
 func (*GetUserGroupsRequest) ProtoMessage() {}
 func (*GetUserGroupsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{48}
+	return fileDescriptor_d04330087ace166d, []int{38}
 }
 func (m *GetUserGroupsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2660,7 +2108,7 @@ type GetUserGroupsResponse struct {
 func (m *GetUserGroupsResponse) Reset()      { *m = GetUserGroupsResponse{} }
 func (*GetUserGroupsResponse) ProtoMessage() {}
 func (*GetUserGroupsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{49}
+	return fileDescriptor_d04330087ace166d, []int{39}
 }
 func (m *GetUserGroupsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2711,7 +2159,7 @@ type GetUserGroupRequest struct {
 func (m *GetUserGroupRequest) Reset()      { *m = GetUserGroupRequest{} }
 func (*GetUserGroupRequest) ProtoMessage() {}
 func (*GetUserGroupRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{50}
+	return fileDescriptor_d04330087ace166d, []int{40}
 }
 func (m *GetUserGroupRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2755,7 +2203,7 @@ type GetUserGroupResponse struct {
 func (m *GetUserGroupResponse) Reset()      { *m = GetUserGroupResponse{} }
 func (*GetUserGroupResponse) ProtoMessage() {}
 func (*GetUserGroupResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{51}
+	return fileDescriptor_d04330087ace166d, []int{41}
 }
 func (m *GetUserGroupResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2802,7 +2250,7 @@ type CreateUserGroupRequest struct {
 func (m *CreateUserGroupRequest) Reset()      { *m = CreateUserGroupRequest{} }
 func (*CreateUserGroupRequest) ProtoMessage() {}
 func (*CreateUserGroupRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{52}
+	return fileDescriptor_d04330087ace166d, []int{42}
 }
 func (m *CreateUserGroupRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2855,7 +2303,7 @@ type CreateUserGroupResponse struct {
 func (m *CreateUserGroupResponse) Reset()      { *m = CreateUserGroupResponse{} }
 func (*CreateUserGroupResponse) ProtoMessage() {}
 func (*CreateUserGroupResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{53}
+	return fileDescriptor_d04330087ace166d, []int{43}
 }
 func (m *CreateUserGroupResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2914,7 +2362,7 @@ type UpdateUserGroupRequest struct {
 func (m *UpdateUserGroupRequest) Reset()      { *m = UpdateUserGroupRequest{} }
 func (*UpdateUserGroupRequest) ProtoMessage() {}
 func (*UpdateUserGroupRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{54}
+	return fileDescriptor_d04330087ace166d, []int{44}
 }
 func (m *UpdateUserGroupRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2979,7 +2427,7 @@ type UpdateUserGroupResponse struct {
 func (m *UpdateUserGroupResponse) Reset()      { *m = UpdateUserGroupResponse{} }
 func (*UpdateUserGroupResponse) ProtoMessage() {}
 func (*UpdateUserGroupResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{55}
+	return fileDescriptor_d04330087ace166d, []int{45}
 }
 func (m *UpdateUserGroupResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3029,7 +2477,7 @@ type DeleteUserGroupRequest struct {
 func (m *DeleteUserGroupRequest) Reset()      { *m = DeleteUserGroupRequest{} }
 func (*DeleteUserGroupRequest) ProtoMessage() {}
 func (*DeleteUserGroupRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{56}
+	return fileDescriptor_d04330087ace166d, []int{46}
 }
 func (m *DeleteUserGroupRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3087,7 +2535,7 @@ type DeleteUserGroupResponse struct {
 func (m *DeleteUserGroupResponse) Reset()      { *m = DeleteUserGroupResponse{} }
 func (*DeleteUserGroupResponse) ProtoMessage() {}
 func (*DeleteUserGroupResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{57}
+	return fileDescriptor_d04330087ace166d, []int{47}
 }
 func (m *DeleteUserGroupResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3140,7 +2588,7 @@ type SetUserGroupNamespaceAccessRequest struct {
 func (m *SetUserGroupNamespaceAccessRequest) Reset()      { *m = SetUserGroupNamespaceAccessRequest{} }
 func (*SetUserGroupNamespaceAccessRequest) ProtoMessage() {}
 func (*SetUserGroupNamespaceAccessRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{58}
+	return fileDescriptor_d04330087ace166d, []int{48}
 }
 func (m *SetUserGroupNamespaceAccessRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3212,7 +2660,7 @@ type SetUserGroupNamespaceAccessResponse struct {
 func (m *SetUserGroupNamespaceAccessResponse) Reset()      { *m = SetUserGroupNamespaceAccessResponse{} }
 func (*SetUserGroupNamespaceAccessResponse) ProtoMessage() {}
 func (*SetUserGroupNamespaceAccessResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{59}
+	return fileDescriptor_d04330087ace166d, []int{49}
 }
 func (m *SetUserGroupNamespaceAccessResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3258,7 +2706,7 @@ type CreateServiceAccountRequest struct {
 func (m *CreateServiceAccountRequest) Reset()      { *m = CreateServiceAccountRequest{} }
 func (*CreateServiceAccountRequest) ProtoMessage() {}
 func (*CreateServiceAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{60}
+	return fileDescriptor_d04330087ace166d, []int{50}
 }
 func (m *CreateServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3311,7 +2759,7 @@ type CreateServiceAccountResponse struct {
 func (m *CreateServiceAccountResponse) Reset()      { *m = CreateServiceAccountResponse{} }
 func (*CreateServiceAccountResponse) ProtoMessage() {}
 func (*CreateServiceAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{61}
+	return fileDescriptor_d04330087ace166d, []int{51}
 }
 func (m *CreateServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3362,7 +2810,7 @@ type GetServiceAccountRequest struct {
 func (m *GetServiceAccountRequest) Reset()      { *m = GetServiceAccountRequest{} }
 func (*GetServiceAccountRequest) ProtoMessage() {}
 func (*GetServiceAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{62}
+	return fileDescriptor_d04330087ace166d, []int{52}
 }
 func (m *GetServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3406,7 +2854,7 @@ type GetServiceAccountResponse struct {
 func (m *GetServiceAccountResponse) Reset()      { *m = GetServiceAccountResponse{} }
 func (*GetServiceAccountResponse) ProtoMessage() {}
 func (*GetServiceAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{63}
+	return fileDescriptor_d04330087ace166d, []int{53}
 }
 func (m *GetServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3453,7 +2901,7 @@ type GetServiceAccountsRequest struct {
 func (m *GetServiceAccountsRequest) Reset()      { *m = GetServiceAccountsRequest{} }
 func (*GetServiceAccountsRequest) ProtoMessage() {}
 func (*GetServiceAccountsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{64}
+	return fileDescriptor_d04330087ace166d, []int{54}
 }
 func (m *GetServiceAccountsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3506,7 +2954,7 @@ type GetServiceAccountsResponse struct {
 func (m *GetServiceAccountsResponse) Reset()      { *m = GetServiceAccountsResponse{} }
 func (*GetServiceAccountsResponse) ProtoMessage() {}
 func (*GetServiceAccountsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{65}
+	return fileDescriptor_d04330087ace166d, []int{55}
 }
 func (m *GetServiceAccountsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3564,7 +3012,7 @@ type UpdateServiceAccountRequest struct {
 func (m *UpdateServiceAccountRequest) Reset()      { *m = UpdateServiceAccountRequest{} }
 func (*UpdateServiceAccountRequest) ProtoMessage() {}
 func (*UpdateServiceAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{66}
+	return fileDescriptor_d04330087ace166d, []int{56}
 }
 func (m *UpdateServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3629,7 +3077,7 @@ type UpdateServiceAccountResponse struct {
 func (m *UpdateServiceAccountResponse) Reset()      { *m = UpdateServiceAccountResponse{} }
 func (*UpdateServiceAccountResponse) ProtoMessage() {}
 func (*UpdateServiceAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{67}
+	return fileDescriptor_d04330087ace166d, []int{57}
 }
 func (m *UpdateServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3678,7 +3126,7 @@ type DeleteServiceAccountRequest struct {
 func (m *DeleteServiceAccountRequest) Reset()      { *m = DeleteServiceAccountRequest{} }
 func (*DeleteServiceAccountRequest) ProtoMessage() {}
 func (*DeleteServiceAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{68}
+	return fileDescriptor_d04330087ace166d, []int{58}
 }
 func (m *DeleteServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3736,7 +3184,7 @@ type DeleteServiceAccountResponse struct {
 func (m *DeleteServiceAccountResponse) Reset()      { *m = DeleteServiceAccountResponse{} }
 func (*DeleteServiceAccountResponse) ProtoMessage() {}
 func (*DeleteServiceAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{69}
+	return fileDescriptor_d04330087ace166d, []int{59}
 }
 func (m *DeleteServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3807,16 +3255,6 @@ func init() {
 	proto.RegisterType((*GetRegionsResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetRegionsResponse")
 	proto.RegisterType((*GetRegionRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetRegionRequest")
 	proto.RegisterType((*GetRegionResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetRegionResponse")
-	proto.RegisterType((*GetNexusEndpointsRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetNexusEndpointsRequest")
-	proto.RegisterType((*GetNexusEndpointsResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetNexusEndpointsResponse")
-	proto.RegisterType((*GetNexusEndpointRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetNexusEndpointRequest")
-	proto.RegisterType((*GetNexusEndpointResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetNexusEndpointResponse")
-	proto.RegisterType((*CreateNexusEndpointRequest)(nil), "temporal.api.cloud.cloudservice.v1.CreateNexusEndpointRequest")
-	proto.RegisterType((*CreateNexusEndpointResponse)(nil), "temporal.api.cloud.cloudservice.v1.CreateNexusEndpointResponse")
-	proto.RegisterType((*UpdateNexusEndpointRequest)(nil), "temporal.api.cloud.cloudservice.v1.UpdateNexusEndpointRequest")
-	proto.RegisterType((*UpdateNexusEndpointResponse)(nil), "temporal.api.cloud.cloudservice.v1.UpdateNexusEndpointResponse")
-	proto.RegisterType((*DeleteNexusEndpointRequest)(nil), "temporal.api.cloud.cloudservice.v1.DeleteNexusEndpointRequest")
-	proto.RegisterType((*DeleteNexusEndpointResponse)(nil), "temporal.api.cloud.cloudservice.v1.DeleteNexusEndpointResponse")
 	proto.RegisterType((*GetAccountRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetAccountRequest")
 	proto.RegisterType((*GetAccountResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetAccountResponse")
 	proto.RegisterType((*UpdateAccountRequest)(nil), "temporal.api.cloud.cloudservice.v1.UpdateAccountRequest")
@@ -3850,110 +3288,97 @@ func init() {
 }
 
 var fileDescriptor_d04330087ace166d = []byte{
-	// 1647 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x5a, 0xcb, 0x6f, 0x1b, 0x45,
-	0x18, 0xcf, 0x38, 0xaf, 0xe6, 0xab, 0x68, 0x9a, 0x6d, 0x9a, 0xa4, 0x4e, 0xba, 0x0d, 0x5b, 0x5a,
-	0x25, 0xa1, 0x75, 0x68, 0x2b, 0x24, 0x28, 0xa5, 0xe0, 0x16, 0x9a, 0x06, 0xa4, 0xd2, 0x3a, 0x7d,
-	0x20, 0x24, 0xb4, 0x6c, 0xed, 0xc1, 0xac, 0x92, 0xec, 0xba, 0xbb, 0x6b, 0x27, 0x2d, 0x87, 0x02,
-	0x02, 0xf1, 0x14, 0x0f, 0x21, 0x21, 0x2e, 0xdc, 0x10, 0x42, 0x5c, 0x38, 0xf1, 0x17, 0x20, 0x21,
-	0x6e, 0x54, 0x42, 0x48, 0x3d, 0x52, 0xf7, 0xc2, 0x81, 0x43, 0x8f, 0xdc, 0x40, 0x3b, 0x2f, 0xef,
-	0xda, 0xb3, 0xce, 0xda, 0xf5, 0x54, 0x5c, 0xa2, 0xec, 0xec, 0xf7, 0xf8, 0x7d, 0xbf, 0x6f, 0x66,
-	0xbe, 0x6f, 0x66, 0x0d, 0x4f, 0x06, 0x78, 0xbd, 0xe2, 0x7a, 0xd6, 0xda, 0xa2, 0x55, 0xb1, 0x17,
-	0x8b, 0x6b, 0x6e, 0xb5, 0x44, 0xff, 0xfa, 0xd8, 0xab, 0xd9, 0x45, 0xbc, 0x58, 0x3b, 0xb2, 0xe8,
-	0xe1, 0x6b, 0x55, 0xec, 0x07, 0xa6, 0x87, 0xfd, 0x8a, 0xeb, 0xf8, 0x38, 0x57, 0xf1, 0xdc, 0xc0,
-	0xd5, 0x0c, 0xae, 0x9a, 0xb3, 0x2a, 0x76, 0x8e, 0x28, 0xe5, 0xa2, 0xaa, 0xb9, 0xda, 0x91, 0xec,
-	0x61, 0x89, 0x79, 0xb7, 0x82, 0x3d, 0x2b, 0xb0, 0x5d, 0x27, 0xb4, 0xbd, 0x8e, 0x7d, 0xdf, 0x2a,
-	0x33, 0x93, 0xd9, 0x43, 0x12, 0x71, 0xbb, 0x84, 0x9d, 0xc0, 0x0e, 0xae, 0xb7, 0x4a, 0xcb, 0x8c,
-	0x3b, 0xd6, 0x3a, 0xf6, 0x2b, 0x16, 0x05, 0x1e, 0x17, 0x9f, 0x97, 0x89, 0xe3, 0xcd, 0xaa, 0xdf,
-	0x2a, 0xba, 0x20, 0x11, 0xf5, 0x70, 0x59, 0x8a, 0xf9, 0x51, 0x89, 0xac, 0x55, 0x2c, 0xba, 0x55,
-	0x27, 0x68, 0x11, 0x36, 0xde, 0x46, 0x30, 0xba, 0x84, 0x83, 0x4b, 0x3e, 0xf6, 0xfc, 0x02, 0xa5,
-	0x55, 0x9b, 0x86, 0x91, 0x8a, 0x55, 0xc6, 0xa6, 0x6f, 0xdf, 0xc0, 0x53, 0x68, 0x16, 0xcd, 0x0d,
-	0x16, 0xb6, 0x85, 0x03, 0x2b, 0xf6, 0x0d, 0xac, 0xed, 0x05, 0x20, 0x2f, 0x03, 0x77, 0x15, 0x3b,
-	0x53, 0x99, 0x59, 0x34, 0x37, 0x52, 0x20, 0xe2, 0x17, 0xc3, 0x01, 0x6d, 0x1c, 0x06, 0xf1, 0xba,
-	0x65, 0xaf, 0x4d, 0xf5, 0x93, 0x37, 0xf4, 0x41, 0x9b, 0x81, 0x11, 0xc1, 0xc3, 0xd4, 0x00, 0xd5,
-	0x11, 0x03, 0x46, 0x0d, 0x76, 0x36, 0x20, 0xd0, 0x8c, 0x6a, 0xc7, 0x61, 0xb0, 0x1a, 0x0e, 0x4c,
-	0xa1, 0xd9, 0xfe, 0xb9, 0xed, 0x47, 0x1f, 0xc9, 0x49, 0x72, 0xcb, 0x13, 0x91, 0xab, 0x1d, 0xc9,
-	0x85, 0xda, 0x05, 0xaa, 0xa2, 0x1d, 0x84, 0x51, 0x07, 0x6f, 0x06, 0x66, 0x0b, 0xce, 0x87, 0xc2,
-	0xe1, 0xf3, 0x1c, 0xab, 0x31, 0x0f, 0x3b, 0x98, 0x5f, 0x1e, 0xf9, 0x24, 0x0c, 0x87, 0x26, 0x4c,
-	0xbb, 0x44, 0xe2, 0x1e, 0x29, 0x0c, 0x85, 0x8f, 0xcb, 0x25, 0xe3, 0x45, 0xc1, 0x92, 0x40, 0xf8,
-	0x04, 0x0c, 0x84, 0x2f, 0x89, 0x60, 0x5a, 0x80, 0x44, 0xc3, 0xb8, 0x09, 0x63, 0xa7, 0x3d, 0x6c,
-	0x05, 0x38, 0xea, 0xfa, 0x04, 0x0c, 0xf8, 0x15, 0x5c, 0x64, 0xe6, 0xe6, 0xd2, 0x98, 0x5b, 0xa9,
-	0xe0, 0x62, 0x81, 0x68, 0x69, 0x87, 0x40, 0xb3, 0xfc, 0xeb, 0x4e, 0xd1, 0x14, 0x73, 0x39, 0x8c,
-	0x81, 0x46, 0xbd, 0x93, 0xbc, 0x79, 0x89, 0xbf, 0x58, 0x2e, 0x19, 0xef, 0x23, 0xd0, 0xa2, 0x08,
-	0x58, 0x44, 0x49, 0xd1, 0x6b, 0x2f, 0xc3, 0x68, 0x93, 0x75, 0x62, 0x7a, 0xfb, 0xd1, 0x45, 0x19,
-	0x4c, 0x21, 0x14, 0xe2, 0xcc, 0xc7, 0x7c, 0x17, 0x76, 0xc4, 0xb1, 0x18, 0x3f, 0x23, 0x18, 0xbb,
-	0x54, 0x29, 0x35, 0x71, 0x91, 0x08, 0x84, 0x93, 0x94, 0xe9, 0x8a, 0xa4, 0x79, 0xd8, 0xe9, 0x61,
-	0xdf, 0xad, 0x7a, 0x45, 0x6c, 0xd6, 0xb0, 0xe7, 0x87, 0x71, 0xd0, 0x69, 0x3a, 0xca, 0xc7, 0x2f,
-	0xd3, 0xe1, 0x04, 0x3e, 0x07, 0x12, 0xf8, 0x74, 0x40, 0x8b, 0x06, 0xc1, 0xe8, 0x94, 0xb0, 0x86,
-	0x7a, 0xc3, 0xda, 0x7b, 0x08, 0xc6, 0x9e, 0xc3, 0x6b, 0x38, 0x25, 0x6b, 0xb2, 0xb8, 0x33, 0x9d,
-	0xc4, 0xdd, 0x9f, 0x1c, 0x77, 0x14, 0x86, 0xf2, 0xb8, 0xff, 0x41, 0xb0, 0x77, 0x85, 0x2e, 0xc3,
-	0x73, 0x7c, 0xf7, 0xc8, 0x17, 0x8b, 0xd8, 0x17, 0x5b, 0x57, 0x6c, 0xa3, 0x41, 0x4d, 0x1b, 0x4d,
-	0x94, 0xa1, 0x4c, 0x8c, 0xa1, 0x25, 0x18, 0xb2, 0x88, 0x1d, 0x12, 0x6a, 0x02, 0xd2, 0xe8, 0xcc,
-	0x6a, 0x76, 0xcf, 0xd4, 0xa5, 0x54, 0x0f, 0x74, 0x42, 0xf5, 0x60, 0x02, 0xd5, 0x37, 0x40, 0x4f,
-	0x8a, 0x5c, 0x39, 0xed, 0x67, 0x61, 0x6a, 0x09, 0x07, 0x4d, 0x42, 0x8c, 0x70, 0x79, 0x14, 0x28,
-	0x21, 0x8a, 0x2a, 0xec, 0x91, 0x58, 0x52, 0x1e, 0xc0, 0x47, 0x08, 0x26, 0xe8, 0x7e, 0x27, 0xc8,
-	0xe3, 0xf8, 0x4f, 0xc5, 0x76, 0x94, 0x9c, 0xcc, 0x93, 0x98, 0x3f, 0xb1, 0xc4, 0x6f, 0xb9, 0xf9,
-	0x26, 0x2d, 0x9a, 0x2f, 0x10, 0x4c, 0xb6, 0x80, 0x61, 0x14, 0xb4, 0x9f, 0xbe, 0xea, 0xb6, 0xe1,
-	0xd7, 0x61, 0x7c, 0x09, 0x07, 0x02, 0x4f, 0x4f, 0x3a, 0x01, 0x0d, 0x06, 0x42, 0xe8, 0x8c, 0x07,
-	0xf2, 0xbf, 0xf1, 0x31, 0x82, 0xdd, 0x4d, 0x8e, 0x58, 0xe4, 0x2f, 0x00, 0x88, 0x40, 0x79, 0xd1,
-	0x5f, 0x48, 0x9f, 0x8d, 0x42, 0x44, 0x3b, 0x75, 0xfd, 0x3f, 0x06, 0xbb, 0xa2, 0x60, 0x52, 0xed,
-	0x21, 0xc6, 0x6b, 0x71, 0xaa, 0x44, 0x00, 0x67, 0x9b, 0xb5, 0x3a, 0xc3, 0x1f, 0xf1, 0xf0, 0x3b,
-	0x82, 0x09, 0x5a, 0x4e, 0x3a, 0x83, 0xd6, 0x93, 0xb9, 0xac, 0xac, 0x46, 0xfa, 0x30, 0xd9, 0x12,
-	0x94, 0xf2, 0x85, 0xff, 0x53, 0x06, 0x8c, 0x02, 0x0e, 0x83, 0x3e, 0x5d, 0xf5, 0x03, 0x77, 0x7d,
-	0x05, 0x5b, 0x5e, 0xf1, 0x8d, 0x7c, 0x10, 0x78, 0xf6, 0xd5, 0x6a, 0x90, 0x92, 0xd6, 0xf3, 0x70,
-	0x00, 0x6f, 0xda, 0x7e, 0x60, 0x3b, 0x65, 0xb3, 0x48, 0xcc, 0x98, 0x3e, 0xb1, 0x63, 0x5a, 0xdc,
-	0x90, 0x49, 0x66, 0x3a, 0x9d, 0x64, 0x0f, 0x73, 0x61, 0xa9, 0xcb, 0x30, 0x7a, 0xed, 0x0c, 0xcc,
-	0x3a, 0x78, 0xa3, 0xbd, 0x31, 0x4a, 0xfa, 0x8c, 0x83, 0x37, 0x92, 0xed, 0x28, 0xab, 0x36, 0x37,
-	0x61, 0x7f, 0x5b, 0xda, 0x94, 0x27, 0xee, 0x33, 0x04, 0x13, 0xb4, 0xb5, 0xe8, 0x70, 0x0d, 0x28,
-	0xeb, 0x75, 0x7c, 0x98, 0x6c, 0x01, 0xa4, 0x9c, 0x86, 0x77, 0x11, 0xe8, 0x67, 0x2c, 0x7b, 0xcd,
-	0xad, 0x45, 0xea, 0x7e, 0x81, 0x9c, 0xfb, 0xd2, 0xd1, 0x31, 0x01, 0x43, 0xf4, 0x98, 0xc8, 0x1b,
-	0x1e, 0xfa, 0xd4, 0x61, 0xec, 0x6f, 0xc2, 0xbe, 0x44, 0x14, 0xca, 0x39, 0xf8, 0x01, 0xc1, 0x9e,
-	0x7c, 0xa9, 0xd4, 0xd3, 0xf0, 0x95, 0xed, 0x72, 0x35, 0xc8, 0xca, 0xb0, 0x2a, 0x27, 0x69, 0x17,
-	0x8c, 0x2d, 0xe1, 0x80, 0xba, 0xe3, 0xd5, 0xdb, 0xb8, 0x08, 0x5a, 0x74, 0x90, 0x81, 0x38, 0x09,
-	0xc3, 0x94, 0x85, 0xb6, 0x67, 0x6b, 0x2a, 0x12, 0x7a, 0x66, 0x31, 0x70, 0x25, 0x63, 0x81, 0x9c,
-	0xd6, 0xe3, 0x59, 0x68, 0xf0, 0x8c, 0xa2, 0x3c, 0x1b, 0x17, 0x22, 0xb0, 0x04, 0x80, 0x13, 0x31,
-	0xe1, 0xb4, 0xfe, 0xb9, 0xc9, 0x5f, 0x10, 0xe9, 0x46, 0xcf, 0xe1, 0xcd, 0xaa, 0xff, 0xbc, 0x53,
-	0xaa, 0xb8, 0xb6, 0x13, 0xf4, 0xa4, 0x5f, 0xc9, 0xc1, 0xae, 0xc0, 0xf2, 0xca, 0x38, 0x30, 0xc5,
-	0xfc, 0x69, 0xac, 0x89, 0x31, 0xfa, 0x4a, 0x24, 0x76, 0xb9, 0xa4, 0x2d, 0x00, 0x1b, 0x34, 0x03,
-	0xcb, 0x5f, 0x35, 0xaf, 0x55, 0x71, 0x95, 0xdf, 0x6d, 0x8c, 0xd2, 0x17, 0x17, 0x2d, 0x7f, 0xf5,
-	0x42, 0x38, 0x2c, 0x7a, 0xa1, 0xc1, 0x48, 0x2f, 0xf4, 0x01, 0x22, 0xcd, 0x70, 0x73, 0x20, 0x8c,
-	0xa4, 0xd3, 0x30, 0x82, 0xf9, 0x20, 0xcb, 0xd3, 0x01, 0x69, 0x41, 0x0f, 0xd5, 0x43, 0x9a, 0xb8,
-	0x89, 0x42, 0x43, 0x2f, 0x75, 0x23, 0x74, 0x1c, 0x26, 0x9b, 0x91, 0x70, 0x46, 0xf7, 0xc1, 0x76,
-	0x6e, 0xaf, 0xd1, 0xd8, 0x03, 0x1f, 0x5a, 0x2e, 0x19, 0xaf, 0xb6, 0xa6, 0x43, 0x04, 0x91, 0x87,
-	0x6d, 0x5c, 0x92, 0xe5, 0x3a, 0x65, 0x0c, 0x42, 0xcd, 0xf8, 0x10, 0x41, 0x96, 0x75, 0xcb, 0x32,
-	0x78, 0x4f, 0xc7, 0x6e, 0x4d, 0xe6, 0x53, 0x59, 0xef, 0xfa, 0xda, 0xe4, 0x6b, 0x04, 0xd3, 0x52,
-	0x2c, 0x2c, 0xdc, 0xad, 0xb8, 0x52, 0xd8, 0xc0, 0xff, 0x81, 0x20, 0xcb, 0xda, 0xab, 0x6e, 0xb2,
-	0x28, 0x78, 0xcc, 0x74, 0xc7, 0xa3, 0xb2, 0xfd, 0x74, 0x03, 0xa6, 0xa5, 0x61, 0x29, 0xdf, 0x50,
-	0xbf, 0x42, 0x90, 0x65, 0xf5, 0xbe, 0x2b, 0x42, 0x95, 0xf5, 0x21, 0x1b, 0x30, 0x2d, 0xc5, 0xf5,
-	0x80, 0x4a, 0x4c, 0x9e, 0x5e, 0x24, 0xf3, 0x12, 0x73, 0x99, 0x94, 0x18, 0x31, 0xc8, 0x40, 0x3c,
-	0x0b, 0xc3, 0xec, 0xc2, 0x99, 0x39, 0x3f, 0x28, 0x73, 0xce, 0x44, 0x88, 0x6b, 0x66, 0x80, 0xab,
-	0x19, 0x3f, 0x22, 0x18, 0xa7, 0x89, 0x8f, 0x3b, 0xd4, 0x4e, 0xc6, 0x16, 0xfc, 0x42, 0x3a, 0xbb,
-	0x5b, 0xcc, 0xd4, 0x9e, 0xe4, 0xe5, 0x1a, 0xec, 0x6e, 0x02, 0xfc, 0x20, 0x9a, 0xe4, 0x71, 0x76,
-	0x2b, 0xbd, 0xe4, 0xb9, 0xd5, 0x4a, 0x4f, 0xca, 0x60, 0xac, 0xa1, 0xea, 0x6f, 0x6e, 0xa8, 0xf6,
-	0x02, 0x94, 0x43, 0x57, 0xf4, 0x8c, 0xc2, 0x6e, 0xf2, 0xc9, 0x48, 0x58, 0x1a, 0x8d, 0x77, 0xe8,
-	0xf9, 0x3e, 0x8a, 0x48, 0x94, 0x82, 0x21, 0x22, 0xc6, 0x8b, 0xd9, 0x7c, 0x9a, 0xbb, 0x5b, 0x62,
-	0xa3, 0xc0, 0x14, 0x53, 0x57, 0xb3, 0xc7, 0xc8, 0xb1, 0xbe, 0xa1, 0xcf, 0x48, 0xd9, 0x03, 0xdb,
-	0x28, 0x74, 0xb1, 0x5e, 0x87, 0xc9, 0xf3, 0x72, 0xc9, 0xb8, 0x12, 0xe7, 0x51, 0x80, 0x7e, 0x06,
-	0x06, 0x89, 0x48, 0xbb, 0xf2, 0x22, 0xc7, 0x4c, 0xf5, 0xc2, 0xea, 0x35, 0xd1, 0xb8, 0x68, 0x8f,
-	0xc1, 0xc9, 0xc7, 0x26, 0xf2, 0xe1, 0xd4, 0xa6, 0xbb, 0xae, 0x5e, 0x9f, 0x8a, 0x7b, 0xa7, 0xd6,
-	0x40, 0x93, 0xb9, 0x51, 0x58, 0xb3, 0x7e, 0x13, 0xf7, 0x1c, 0x1d, 0xe4, 0x4a, 0xf0, 0x96, 0xe9,
-	0x9e, 0x37, 0xf5, 0x77, 0x1c, 0xad, 0x0c, 0xab, 0xdb, 0x05, 0x3e, 0x11, 0x47, 0xe5, 0x4e, 0x68,
-	0x54, 0x7f, 0x4e, 0x7e, 0x90, 0x1c, 0xfc, 0x8b, 0xc0, 0x58, 0x89, 0xac, 0xe0, 0xae, 0xbe, 0x0e,
-	0x44, 0xd9, 0xca, 0xc4, 0xd9, 0xfa, 0xff, 0x7f, 0x1f, 0xb8, 0x09, 0xfb, 0xdb, 0x12, 0xa0, 0x3c,
-	0x05, 0x5f, 0x8a, 0xe6, 0x78, 0x85, 0x7e, 0x6d, 0x6f, 0x2a, 0xdc, 0x67, 0x62, 0xfb, 0xdd, 0xd1,
-	0xad, 0x08, 0x8c, 0x1b, 0xe9, 0x7a, 0xd3, 0xfb, 0x0e, 0xc1, 0x8c, 0x1c, 0x15, 0x23, 0xe4, 0x10,
-	0x68, 0xec, 0xd7, 0x01, 0x26, 0xeb, 0x1b, 0x22, 0xdf, 0x2f, 0xfc, 0x98, 0x8e, 0xd2, 0xcd, 0x90,
-	0x7e, 0x63, 0x91, 0x53, 0xd7, 0x11, 0x46, 0x23, 0x20, 0xc7, 0xca, 0x84, 0x70, 0xaf, 0xc0, 0x68,
-	0x93, 0x29, 0x96, 0x90, 0x5c, 0x67, 0x09, 0x29, 0xec, 0x88, 0xfb, 0x35, 0xae, 0x48, 0xbc, 0xf6,
-	0xa2, 0x1f, 0x31, 0xbe, 0x41, 0x90, 0x95, 0x59, 0x6e, 0x17, 0x50, 0xff, 0xfd, 0x07, 0x94, 0xba,
-	0xdb, 0xf8, 0x1b, 0xf1, 0x23, 0x4a, 0x0f, 0x92, 0x27, 0x56, 0x49, 0xe6, 0x3e, 0x57, 0x89, 0xb2,
-	0x12, 0xb7, 0x09, 0x33, 0xf2, 0x68, 0x95, 0x6f, 0x30, 0xdf, 0x22, 0x7e, 0xf2, 0xe9, 0x05, 0xd1,
-	0xca, 0xea, 0xdf, 0x26, 0xcc, 0xc8, 0x51, 0xaa, 0x26, 0xe8, 0xd4, 0xea, 0xad, 0x3b, 0x7a, 0xdf,
-	0xed, 0x3b, 0x7a, 0xdf, 0xbd, 0x3b, 0x3a, 0x7a, 0xab, 0xae, 0xa3, 0xef, 0xeb, 0x3a, 0xfa, 0xb5,
-	0xae, 0xa3, 0x5b, 0x75, 0x1d, 0xfd, 0x59, 0xd7, 0xd1, 0x5f, 0x75, 0xbd, 0xef, 0x5e, 0x5d, 0x47,
-	0x9f, 0xdf, 0xd5, 0xfb, 0x6e, 0xdd, 0xd5, 0xfb, 0x6e, 0xdf, 0xd5, 0xfb, 0x5e, 0x79, 0xbc, 0xec,
-	0x36, 0x1c, 0xdb, 0x6e, 0xf2, 0xaf, 0xae, 0x9e, 0x8a, 0x3e, 0x5f, 0x1d, 0x22, 0x3f, 0x1f, 0x3a,
-	0xf6, 0x5f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x2f, 0xc0, 0x9c, 0x89, 0xaf, 0x25, 0x00, 0x00,
+	// 1439 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x59, 0xcd, 0x6f, 0xdc, 0xc4,
+	0x1b, 0xde, 0xd9, 0x6c, 0x92, 0xe6, 0xad, 0x7e, 0x4d, 0xe2, 0xa6, 0xc9, 0xe6, 0xcb, 0xbf, 0xe0,
+	0x42, 0x95, 0x84, 0x74, 0x43, 0x52, 0x21, 0xf1, 0x51, 0x15, 0xb6, 0x45, 0xd9, 0x06, 0x24, 0x28,
+	0xde, 0xb6, 0x41, 0x5c, 0x16, 0xd7, 0x3b, 0x2c, 0x56, 0x13, 0xdb, 0xb5, 0xbd, 0xdb, 0x34, 0x1c,
+	0x02, 0x08, 0x84, 0xf8, 0x10, 0x1f, 0xe2, 0xcc, 0x0d, 0x21, 0xc4, 0x85, 0x13, 0x7f, 0x01, 0x17,
+	0x6e, 0x44, 0xe2, 0xd2, 0x23, 0xd9, 0x5c, 0x38, 0x70, 0xe8, 0x91, 0x1b, 0xc8, 0x33, 0x63, 0xc7,
+	0xde, 0x1d, 0x6f, 0xbc, 0xe9, 0x4e, 0xc5, 0x25, 0x8a, 0xc7, 0xef, 0xc7, 0xf3, 0x3c, 0x33, 0xf3,
+	0xce, 0xeb, 0x59, 0x78, 0xd6, 0xc3, 0x5b, 0xb6, 0xe5, 0x68, 0x9b, 0xcb, 0x9a, 0x6d, 0x2c, 0xeb,
+	0x9b, 0x56, 0xbd, 0x4a, 0xff, 0xba, 0xd8, 0x69, 0x18, 0x3a, 0x5e, 0x6e, 0xac, 0x2c, 0x3b, 0xf8,
+	0x4e, 0x1d, 0xbb, 0x5e, 0xc5, 0xc1, 0xae, 0x6d, 0x99, 0x2e, 0x2e, 0xd8, 0x8e, 0xe5, 0x59, 0x92,
+	0x12, 0xb8, 0x16, 0x34, 0xdb, 0x28, 0x10, 0xa7, 0x42, 0xd4, 0xb5, 0xd0, 0x58, 0x99, 0x3a, 0xcf,
+	0x09, 0x6f, 0xd9, 0xd8, 0xd1, 0x3c, 0xc3, 0x32, 0xfd, 0xd8, 0x5b, 0xd8, 0x75, 0xb5, 0x1a, 0x0b,
+	0x39, 0xb5, 0xc4, 0x31, 0x37, 0xaa, 0xd8, 0xf4, 0x0c, 0xef, 0x5e, 0xbb, 0x35, 0x2f, 0xb8, 0xa9,
+	0x6d, 0x61, 0xd7, 0xd6, 0x28, 0xf0, 0xb8, 0xf9, 0x02, 0xcf, 0x1c, 0x6f, 0xd7, 0xdd, 0x76, 0xd3,
+	0x45, 0x8e, 0xa9, 0x83, 0x6b, 0x5c, 0xcc, 0x4f, 0x72, 0x6c, 0x35, 0x5d, 0xb7, 0xea, 0xa6, 0xd7,
+	0x66, 0xac, 0xbc, 0x8f, 0x60, 0xb8, 0x84, 0xbd, 0x1b, 0x2e, 0x76, 0x5c, 0x95, 0xca, 0x2a, 0x4d,
+	0xc3, 0x90, 0xad, 0xd5, 0x70, 0xc5, 0x35, 0x76, 0x70, 0x1e, 0xcd, 0xa1, 0xf9, 0x7e, 0xf5, 0x84,
+	0x3f, 0x50, 0x36, 0x76, 0xb0, 0x34, 0x0b, 0x40, 0x5e, 0x7a, 0xd6, 0x6d, 0x6c, 0xe6, 0xb3, 0x73,
+	0x68, 0x7e, 0x48, 0x25, 0xe6, 0xd7, 0xfd, 0x01, 0x69, 0x0c, 0xfa, 0xf1, 0x96, 0x66, 0x6c, 0xe6,
+	0xfb, 0xc8, 0x1b, 0xfa, 0x20, 0xcd, 0xc0, 0x50, 0xa8, 0x43, 0x3e, 0x47, 0x7d, 0xc2, 0x01, 0xa5,
+	0x01, 0x23, 0x87, 0x10, 0xe8, 0x8c, 0x4a, 0xcf, 0x41, 0x7f, 0xdd, 0x1f, 0xc8, 0xa3, 0xb9, 0xbe,
+	0xf9, 0x93, 0xab, 0x8f, 0x17, 0x38, 0x73, 0x1b, 0x4c, 0x44, 0xa1, 0xb1, 0x52, 0xf0, 0xbd, 0x55,
+	0xea, 0x22, 0x9d, 0x83, 0x61, 0x13, 0x6f, 0x7b, 0x95, 0x36, 0x9c, 0xff, 0xf3, 0x87, 0xaf, 0x05,
+	0x58, 0x95, 0x05, 0x38, 0xc5, 0xf2, 0x06, 0xcc, 0x27, 0x60, 0xd0, 0x0f, 0x51, 0x31, 0xaa, 0x84,
+	0xf7, 0x90, 0x3a, 0xe0, 0x3f, 0xae, 0x57, 0x95, 0x57, 0x42, 0x95, 0x42, 0x84, 0xcf, 0x40, 0xce,
+	0x7f, 0x49, 0x0c, 0xd3, 0x02, 0x24, 0x1e, 0xca, 0x2e, 0x8c, 0x5e, 0x71, 0xb0, 0xe6, 0xe1, 0x68,
+	0xea, 0x8b, 0x90, 0x73, 0x6d, 0xac, 0xb3, 0x70, 0xf3, 0x69, 0xc2, 0x95, 0x6d, 0xac, 0xab, 0xc4,
+	0x4b, 0x5a, 0x02, 0x49, 0x73, 0xef, 0x99, 0x7a, 0x25, 0x5c, 0xcb, 0x3e, 0x07, 0xca, 0x7a, 0x84,
+	0xbc, 0x79, 0x2d, 0x78, 0xb1, 0x5e, 0x55, 0x3e, 0x46, 0x20, 0x45, 0x11, 0x30, 0x46, 0x49, 0xec,
+	0xa5, 0x37, 0x60, 0xb8, 0x25, 0x3a, 0x09, 0x7d, 0x72, 0x75, 0x99, 0x07, 0x33, 0x34, 0xf2, 0x71,
+	0x16, 0x63, 0xb9, 0xd5, 0x53, 0x71, 0x2c, 0xca, 0x2f, 0x08, 0x46, 0x6f, 0xd8, 0xd5, 0x16, 0x2d,
+	0x12, 0x81, 0x04, 0x22, 0x65, 0x8f, 0x25, 0xd2, 0x02, 0x8c, 0x38, 0xd8, 0xb5, 0xea, 0x8e, 0x8e,
+	0x2b, 0x0d, 0xec, 0xb8, 0x3e, 0x0f, 0xba, 0x4c, 0x87, 0x83, 0xf1, 0x9b, 0x74, 0x38, 0x41, 0xcf,
+	0x5c, 0x82, 0x9e, 0x26, 0x48, 0x51, 0x12, 0x4c, 0x4e, 0x8e, 0x6a, 0xa8, 0x37, 0xaa, 0x7d, 0x84,
+	0x60, 0xf4, 0x25, 0xbc, 0x89, 0x53, 0xaa, 0xc6, 0xe3, 0x9d, 0xed, 0x86, 0x77, 0x5f, 0x32, 0xef,
+	0x28, 0x0c, 0xe1, 0xbc, 0xff, 0x46, 0x30, 0x5b, 0xa6, 0xdb, 0xf0, 0xd5, 0xa0, 0x7a, 0x14, 0x75,
+	0x1d, 0xbb, 0x61, 0xe9, 0x8a, 0x15, 0x1a, 0xd4, 0x52, 0x68, 0xa2, 0x0a, 0x65, 0x63, 0x0a, 0x95,
+	0x60, 0x40, 0x23, 0x71, 0x08, 0xd5, 0x04, 0xa4, 0xd1, 0x95, 0xd5, 0x9a, 0x9e, 0xb9, 0x73, 0xa5,
+	0xce, 0x75, 0x23, 0x75, 0x7f, 0x82, 0xd4, 0x3b, 0x20, 0x27, 0x31, 0x17, 0x2e, 0xfb, 0x55, 0xc8,
+	0x97, 0xb0, 0xd7, 0x62, 0xc4, 0x04, 0xe7, 0xb3, 0x40, 0x09, 0x2c, 0xea, 0x30, 0xc9, 0x89, 0x24,
+	0x9c, 0xc0, 0xa7, 0x08, 0xc6, 0x69, 0xbd, 0x0b, 0xc5, 0x0b, 0xf0, 0x5f, 0x8e, 0x55, 0x94, 0x02,
+	0x2f, 0x53, 0xb8, 0x7e, 0x62, 0x13, 0x7f, 0x64, 0xf1, 0x4d, 0xda, 0x34, 0x5f, 0x23, 0x98, 0x68,
+	0x03, 0xc3, 0x24, 0xe8, 0xbc, 0x7c, 0xc5, 0x95, 0xe1, 0xb7, 0x61, 0xac, 0x84, 0xbd, 0x10, 0x4f,
+	0x4f, 0x3a, 0x01, 0x09, 0x72, 0x3e, 0x74, 0xa6, 0x03, 0xf9, 0x5f, 0xf9, 0x0c, 0xc1, 0x99, 0x96,
+	0x44, 0x8c, 0xf9, 0xcb, 0x00, 0x21, 0xd1, 0xe0, 0xd0, 0x5f, 0x4c, 0x3f, 0x1b, 0x6a, 0xc4, 0x3b,
+	0xf5, 0xf9, 0x7f, 0x01, 0x4e, 0x47, 0xc1, 0xa4, 0xaa, 0x21, 0xca, 0x5b, 0x71, 0xa9, 0x42, 0x02,
+	0x57, 0x5b, 0xbd, 0xba, 0xc3, 0x1f, 0xc9, 0xf0, 0x3b, 0x82, 0x71, 0x7a, 0x9c, 0x74, 0x07, 0xad,
+	0x27, 0x6b, 0x59, 0xd8, 0x19, 0xe9, 0xc2, 0x44, 0x1b, 0x29, 0xe1, 0x1b, 0xff, 0xe7, 0x2c, 0x28,
+	0x2a, 0xf6, 0x49, 0x5f, 0xa9, 0xbb, 0x9e, 0xb5, 0x55, 0xc6, 0x9a, 0xa3, 0xbf, 0x53, 0xf4, 0x3c,
+	0xc7, 0xb8, 0x55, 0xf7, 0x52, 0xca, 0x7a, 0x0d, 0x9e, 0xc0, 0xdb, 0x86, 0xeb, 0x19, 0x66, 0xad,
+	0xa2, 0x93, 0x30, 0x15, 0x97, 0xc4, 0xa9, 0x68, 0x41, 0xa0, 0x0a, 0x59, 0xe9, 0x74, 0x91, 0x3d,
+	0x16, 0x18, 0x73, 0x53, 0xfa, 0xec, 0xa5, 0x35, 0x98, 0x33, 0xf1, 0xdd, 0xce, 0xc1, 0xa8, 0xe8,
+	0x33, 0x26, 0xbe, 0x9b, 0x1c, 0x47, 0xd8, 0x69, 0xb3, 0x0b, 0x67, 0x3b, 0xca, 0x26, 0x7c, 0xe2,
+	0xbe, 0x44, 0x30, 0x4e, 0x5b, 0x8b, 0x2e, 0xf7, 0x80, 0xb0, 0x5e, 0xc7, 0x85, 0x89, 0x36, 0x40,
+	0xc2, 0x65, 0xf8, 0x10, 0x81, 0xbc, 0xa6, 0x19, 0x9b, 0x56, 0x23, 0x72, 0xee, 0xab, 0xe4, 0xbb,
+	0x2f, 0x9d, 0x1c, 0xe3, 0x30, 0x40, 0x3f, 0x13, 0x83, 0x86, 0x87, 0x3e, 0x75, 0xc9, 0xfd, 0x5d,
+	0xf8, 0x7f, 0x22, 0x0a, 0xe1, 0x1a, 0xfc, 0x88, 0x60, 0xb2, 0x58, 0xad, 0xf6, 0x94, 0xbe, 0xb0,
+	0x2a, 0xd7, 0x80, 0x29, 0x1e, 0x56, 0xe1, 0x22, 0x9d, 0x86, 0xd1, 0x12, 0xf6, 0x68, 0xba, 0xe0,
+	0xf4, 0x56, 0xae, 0x83, 0x14, 0x1d, 0x64, 0x20, 0x2e, 0xc1, 0x20, 0x55, 0xa1, 0xe3, 0xb7, 0x35,
+	0x35, 0xf1, 0x33, 0x33, 0x0e, 0x81, 0x93, 0xb2, 0x48, 0xbe, 0xd6, 0xe3, 0xb3, 0x70, 0xa8, 0x33,
+	0x8a, 0xea, 0xac, 0xbc, 0x1e, 0x81, 0x15, 0x02, 0xb8, 0x18, 0x33, 0x4e, 0x9b, 0x3f, 0x08, 0x49,
+	0x99, 0x16, 0xe9, 0x7d, 0x46, 0xc0, 0xf4, 0x26, 0x61, 0x1a, 0x0e, 0xb2, 0x44, 0x2f, 0xc2, 0x20,
+	0xbb, 0xf7, 0x60, 0x99, 0xce, 0xf1, 0x32, 0x31, 0x13, 0x22, 0x32, 0x0b, 0x10, 0xb8, 0x29, 0x3f,
+	0x21, 0x18, 0xa3, 0xa7, 0x56, 0x3c, 0xa1, 0x74, 0x29, 0xf6, 0xb5, 0xbe, 0x98, 0x2e, 0xee, 0x11,
+	0xc7, 0x6c, 0x4f, 0xca, 0xd4, 0x1d, 0x38, 0xd3, 0x02, 0xf8, 0x51, 0xd4, 0xea, 0x31, 0x76, 0x39,
+	0x52, 0x72, 0xac, 0xba, 0xdd, 0x93, 0xee, 0x31, 0xb6, 0xaf, 0xfb, 0x5a, 0xf7, 0xf5, 0x2c, 0x40,
+	0xcd, 0x4f, 0x45, 0x8f, 0x4a, 0x76, 0xa1, 0x44, 0x46, 0xfc, 0xad, 0xa7, 0x7c, 0x40, 0xdb, 0xcc,
+	0x28, 0x22, 0xa6, 0x42, 0x11, 0x06, 0x88, 0x59, 0xb0, 0xf6, 0x17, 0xd2, 0x5c, 0x21, 0x90, 0x18,
+	0x2a, 0x73, 0x4c, 0xdd, 0x5d, 0x3e, 0x45, 0xba, 0xcb, 0x43, 0x7f, 0x26, 0xca, 0x24, 0x9c, 0xa0,
+	0xd0, 0xc3, 0xcf, 0xa4, 0x41, 0xf2, 0xbc, 0x5e, 0x55, 0x36, 0xe2, 0x3a, 0x86, 0xa0, 0x5f, 0x80,
+	0x7e, 0x62, 0xc2, 0x26, 0xac, 0x0b, 0xcc, 0xd4, 0x4f, 0xf9, 0x24, 0xfc, 0xfe, 0x69, 0x83, 0x53,
+	0x8c, 0x2d, 0xe4, 0xf3, 0xa9, 0x43, 0x1f, 0xfb, 0xee, 0xe9, 0x8b, 0xf0, 0xf3, 0xa7, 0x9d, 0x68,
+	0xb2, 0x36, 0x02, 0xbf, 0x7d, 0x7e, 0x0b, 0xdb, 0xed, 0x2e, 0xe6, 0x2a, 0xd4, 0x2d, 0x7b, 0x7c,
+	0xdd, 0xc4, 0xb7, 0xda, 0xed, 0x0a, 0x8b, 0xab, 0x02, 0x9f, 0x87, 0x1d, 0x5b, 0x37, 0x32, 0x8a,
+	0x6f, 0xd7, 0x1e, 0xa5, 0x06, 0xff, 0x20, 0x50, 0xca, 0x91, 0x1d, 0x7c, 0xac, 0x4b, 0xaa, 0xa8,
+	0x5a, 0xd9, 0xb8, 0x5a, 0xff, 0xfd, 0x6b, 0xaa, 0x5d, 0x38, 0xdb, 0x51, 0x00, 0xe1, 0x53, 0xf0,
+	0x0d, 0x82, 0x69, 0x5a, 0x5e, 0xca, 0xf4, 0x47, 0x9f, 0x96, 0x83, 0x7b, 0x2d, 0x56, 0xef, 0x56,
+	0x8f, 0x12, 0x30, 0x1e, 0xe4, 0xd8, 0x45, 0xef, 0x7b, 0x04, 0x33, 0x7c, 0x54, 0x4c, 0x90, 0x25,
+	0x90, 0xd8, 0x8f, 0x54, 0x15, 0xd6, 0x37, 0x44, 0xae, 0xd1, 0xdc, 0x98, 0x8f, 0xd0, 0x62, 0x48,
+	0xaf, 0xfa, 0xf8, 0xd2, 0x75, 0x85, 0x51, 0xf1, 0xc8, 0x55, 0x5f, 0x02, 0xdd, 0x0d, 0x18, 0x6e,
+	0x09, 0xc5, 0x26, 0xa4, 0xd0, 0xdd, 0x84, 0xa8, 0xa7, 0xe2, 0x79, 0x95, 0x0d, 0x4e, 0xd6, 0x5e,
+	0xf4, 0x23, 0xca, 0xb7, 0x08, 0xa6, 0x78, 0x91, 0x3b, 0x11, 0xea, 0x7b, 0x78, 0x42, 0xa9, 0xbb,
+	0x8d, 0xbf, 0x10, 0x4c, 0xd3, 0xa2, 0xdf, 0x83, 0xc9, 0x0b, 0x77, 0x49, 0xf6, 0x21, 0x77, 0x89,
+	0xb0, 0x23, 0x6e, 0x1b, 0x66, 0xf8, 0x6c, 0x85, 0x17, 0x98, 0xef, 0x10, 0x4c, 0xd3, 0x93, 0xa5,
+	0x17, 0x42, 0x0b, 0x3b, 0xff, 0xb6, 0x61, 0x86, 0x8f, 0x52, 0xb4, 0x40, 0x97, 0x6f, 0xef, 0xed,
+	0xcb, 0x99, 0xfb, 0xfb, 0x72, 0xe6, 0xc1, 0xbe, 0x8c, 0xde, 0x6b, 0xca, 0xe8, 0x87, 0xa6, 0x8c,
+	0x7e, 0x6d, 0xca, 0x68, 0xaf, 0x29, 0xa3, 0x3f, 0x9a, 0x32, 0xfa, 0xb3, 0x29, 0x67, 0x1e, 0x34,
+	0x65, 0xf4, 0xd5, 0x81, 0x9c, 0xd9, 0x3b, 0x90, 0x33, 0xf7, 0x0f, 0xe4, 0xcc, 0x9b, 0x4f, 0xd7,
+	0xac, 0xc3, 0xc4, 0x86, 0x95, 0xfc, 0xe3, 0xff, 0xf3, 0xd1, 0xe7, 0x5b, 0x03, 0xe4, 0x57, 0xec,
+	0x0b, 0xff, 0x06, 0x00, 0x00, 0xff, 0xff, 0xa5, 0x87, 0xed, 0x8f, 0x36, 0x20, 0x00, 0x00,
 }
 
 func (this *GetUsersRequest) Equal(that interface{}) bool {
@@ -4882,287 +4307,6 @@ func (this *GetRegionResponse) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.Region.Equal(that1.Region) {
-		return false
-	}
-	return true
-}
-func (this *GetNexusEndpointsRequest) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*GetNexusEndpointsRequest)
-	if !ok {
-		that2, ok := that.(GetNexusEndpointsRequest)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.PageSize != that1.PageSize {
-		return false
-	}
-	if this.PageToken != that1.PageToken {
-		return false
-	}
-	if this.TargetNamespaceId != that1.TargetNamespaceId {
-		return false
-	}
-	if this.TargetTaskQueue != that1.TargetTaskQueue {
-		return false
-	}
-	if this.Name != that1.Name {
-		return false
-	}
-	return true
-}
-func (this *GetNexusEndpointsResponse) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*GetNexusEndpointsResponse)
-	if !ok {
-		that2, ok := that.(GetNexusEndpointsResponse)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if len(this.Endpoints) != len(that1.Endpoints) {
-		return false
-	}
-	for i := range this.Endpoints {
-		if !this.Endpoints[i].Equal(that1.Endpoints[i]) {
-			return false
-		}
-	}
-	if this.NextPageToken != that1.NextPageToken {
-		return false
-	}
-	return true
-}
-func (this *GetNexusEndpointRequest) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*GetNexusEndpointRequest)
-	if !ok {
-		that2, ok := that.(GetNexusEndpointRequest)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.EndpointId != that1.EndpointId {
-		return false
-	}
-	return true
-}
-func (this *GetNexusEndpointResponse) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*GetNexusEndpointResponse)
-	if !ok {
-		that2, ok := that.(GetNexusEndpointResponse)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Endpoint.Equal(that1.Endpoint) {
-		return false
-	}
-	return true
-}
-func (this *CreateNexusEndpointRequest) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*CreateNexusEndpointRequest)
-	if !ok {
-		that2, ok := that.(CreateNexusEndpointRequest)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Spec.Equal(that1.Spec) {
-		return false
-	}
-	if this.AsyncOperationId != that1.AsyncOperationId {
-		return false
-	}
-	return true
-}
-func (this *CreateNexusEndpointResponse) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*CreateNexusEndpointResponse)
-	if !ok {
-		that2, ok := that.(CreateNexusEndpointResponse)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.EndpointId != that1.EndpointId {
-		return false
-	}
-	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
-		return false
-	}
-	return true
-}
-func (this *UpdateNexusEndpointRequest) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*UpdateNexusEndpointRequest)
-	if !ok {
-		that2, ok := that.(UpdateNexusEndpointRequest)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.EndpointId != that1.EndpointId {
-		return false
-	}
-	if !this.Spec.Equal(that1.Spec) {
-		return false
-	}
-	if this.ResourceVersion != that1.ResourceVersion {
-		return false
-	}
-	if this.AsyncOperationId != that1.AsyncOperationId {
-		return false
-	}
-	return true
-}
-func (this *UpdateNexusEndpointResponse) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*UpdateNexusEndpointResponse)
-	if !ok {
-		that2, ok := that.(UpdateNexusEndpointResponse)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
-		return false
-	}
-	return true
-}
-func (this *DeleteNexusEndpointRequest) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*DeleteNexusEndpointRequest)
-	if !ok {
-		that2, ok := that.(DeleteNexusEndpointRequest)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.EndpointId != that1.EndpointId {
-		return false
-	}
-	if this.ResourceVersion != that1.ResourceVersion {
-		return false
-	}
-	if this.AsyncOperationId != that1.AsyncOperationId {
-		return false
-	}
-	return true
-}
-func (this *DeleteNexusEndpointResponse) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*DeleteNexusEndpointResponse)
-	if !ok {
-		that2, ok := that.(DeleteNexusEndpointResponse)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
 		return false
 	}
 	return true
@@ -6289,132 +5433,6 @@ func (this *GetRegionResponse) GoString() string {
 	s = append(s, "&cloudservice.GetRegionResponse{")
 	if this.Region != nil {
 		s = append(s, "Region: "+fmt.Sprintf("%#v", this.Region)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *GetNexusEndpointsRequest) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 9)
-	s = append(s, "&cloudservice.GetNexusEndpointsRequest{")
-	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
-	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
-	s = append(s, "TargetNamespaceId: "+fmt.Sprintf("%#v", this.TargetNamespaceId)+",\n")
-	s = append(s, "TargetTaskQueue: "+fmt.Sprintf("%#v", this.TargetTaskQueue)+",\n")
-	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *GetNexusEndpointsResponse) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&cloudservice.GetNexusEndpointsResponse{")
-	if this.Endpoints != nil {
-		s = append(s, "Endpoints: "+fmt.Sprintf("%#v", this.Endpoints)+",\n")
-	}
-	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *GetNexusEndpointRequest) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&cloudservice.GetNexusEndpointRequest{")
-	s = append(s, "EndpointId: "+fmt.Sprintf("%#v", this.EndpointId)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *GetNexusEndpointResponse) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&cloudservice.GetNexusEndpointResponse{")
-	if this.Endpoint != nil {
-		s = append(s, "Endpoint: "+fmt.Sprintf("%#v", this.Endpoint)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *CreateNexusEndpointRequest) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&cloudservice.CreateNexusEndpointRequest{")
-	if this.Spec != nil {
-		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
-	}
-	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *CreateNexusEndpointResponse) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&cloudservice.CreateNexusEndpointResponse{")
-	s = append(s, "EndpointId: "+fmt.Sprintf("%#v", this.EndpointId)+",\n")
-	if this.AsyncOperation != nil {
-		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *UpdateNexusEndpointRequest) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 8)
-	s = append(s, "&cloudservice.UpdateNexusEndpointRequest{")
-	s = append(s, "EndpointId: "+fmt.Sprintf("%#v", this.EndpointId)+",\n")
-	if this.Spec != nil {
-		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
-	}
-	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
-	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *UpdateNexusEndpointResponse) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&cloudservice.UpdateNexusEndpointResponse{")
-	if this.AsyncOperation != nil {
-		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *DeleteNexusEndpointRequest) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 7)
-	s = append(s, "&cloudservice.DeleteNexusEndpointRequest{")
-	s = append(s, "EndpointId: "+fmt.Sprintf("%#v", this.EndpointId)+",\n")
-	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
-	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *DeleteNexusEndpointResponse) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&cloudservice.DeleteNexusEndpointResponse{")
-	if this.AsyncOperation != nil {
-		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -8113,425 +7131,6 @@ func (m *GetRegionResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *GetNexusEndpointsRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *GetNexusEndpointsRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GetNexusEndpointsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Name) > 0 {
-		i -= len(m.Name)
-		copy(dAtA[i:], m.Name)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Name)))
-		i--
-		dAtA[i] = 0x2a
-	}
-	if len(m.TargetTaskQueue) > 0 {
-		i -= len(m.TargetTaskQueue)
-		copy(dAtA[i:], m.TargetTaskQueue)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.TargetTaskQueue)))
-		i--
-		dAtA[i] = 0x22
-	}
-	if len(m.TargetNamespaceId) > 0 {
-		i -= len(m.TargetNamespaceId)
-		copy(dAtA[i:], m.TargetNamespaceId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.TargetNamespaceId)))
-		i--
-		dAtA[i] = 0x1a
-	}
-	if len(m.PageToken) > 0 {
-		i -= len(m.PageToken)
-		copy(dAtA[i:], m.PageToken)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if m.PageSize != 0 {
-		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *GetNexusEndpointsResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *GetNexusEndpointsResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GetNexusEndpointsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.NextPageToken) > 0 {
-		i -= len(m.NextPageToken)
-		copy(dAtA[i:], m.NextPageToken)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Endpoints) > 0 {
-		for iNdEx := len(m.Endpoints) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Endpoints[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0xa
-		}
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *GetNexusEndpointRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *GetNexusEndpointRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GetNexusEndpointRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.EndpointId) > 0 {
-		i -= len(m.EndpointId)
-		copy(dAtA[i:], m.EndpointId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.EndpointId)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *GetNexusEndpointResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *GetNexusEndpointResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GetNexusEndpointResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.Endpoint != nil {
-		{
-			size, err := m.Endpoint.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *CreateNexusEndpointRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *CreateNexusEndpointRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *CreateNexusEndpointRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.AsyncOperationId) > 0 {
-		i -= len(m.AsyncOperationId)
-		copy(dAtA[i:], m.AsyncOperationId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if m.Spec != nil {
-		{
-			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *CreateNexusEndpointResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *CreateNexusEndpointResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *CreateNexusEndpointResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.AsyncOperation != nil {
-		{
-			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.EndpointId) > 0 {
-		i -= len(m.EndpointId)
-		copy(dAtA[i:], m.EndpointId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.EndpointId)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *UpdateNexusEndpointRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *UpdateNexusEndpointRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *UpdateNexusEndpointRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.AsyncOperationId) > 0 {
-		i -= len(m.AsyncOperationId)
-		copy(dAtA[i:], m.AsyncOperationId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
-		i--
-		dAtA[i] = 0x22
-	}
-	if len(m.ResourceVersion) > 0 {
-		i -= len(m.ResourceVersion)
-		copy(dAtA[i:], m.ResourceVersion)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
-		i--
-		dAtA[i] = 0x1a
-	}
-	if m.Spec != nil {
-		{
-			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.EndpointId) > 0 {
-		i -= len(m.EndpointId)
-		copy(dAtA[i:], m.EndpointId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.EndpointId)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *UpdateNexusEndpointResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *UpdateNexusEndpointResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *UpdateNexusEndpointResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.AsyncOperation != nil {
-		{
-			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *DeleteNexusEndpointRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *DeleteNexusEndpointRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *DeleteNexusEndpointRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.AsyncOperationId) > 0 {
-		i -= len(m.AsyncOperationId)
-		copy(dAtA[i:], m.AsyncOperationId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
-		i--
-		dAtA[i] = 0x1a
-	}
-	if len(m.ResourceVersion) > 0 {
-		i -= len(m.ResourceVersion)
-		copy(dAtA[i:], m.ResourceVersion)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.EndpointId) > 0 {
-		i -= len(m.EndpointId)
-		copy(dAtA[i:], m.EndpointId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.EndpointId)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *DeleteNexusEndpointResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *DeleteNexusEndpointResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *DeleteNexusEndpointResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.AsyncOperation != nil {
-		{
-			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
 func (m *GetAccountRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -10171,185 +8770,6 @@ func (m *GetRegionResponse) Size() (n int) {
 	return n
 }
 
-func (m *GetNexusEndpointsRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.PageSize != 0 {
-		n += 1 + sovRequestResponse(uint64(m.PageSize))
-	}
-	l = len(m.PageToken)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.TargetNamespaceId)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.TargetTaskQueue)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.Name)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
-func (m *GetNexusEndpointsResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.Endpoints) > 0 {
-		for _, e := range m.Endpoints {
-			l = e.Size()
-			n += 1 + l + sovRequestResponse(uint64(l))
-		}
-	}
-	l = len(m.NextPageToken)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
-func (m *GetNexusEndpointRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.EndpointId)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
-func (m *GetNexusEndpointResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Endpoint != nil {
-		l = m.Endpoint.Size()
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
-func (m *CreateNexusEndpointRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Spec != nil {
-		l = m.Spec.Size()
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.AsyncOperationId)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
-func (m *CreateNexusEndpointResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.EndpointId)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	if m.AsyncOperation != nil {
-		l = m.AsyncOperation.Size()
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
-func (m *UpdateNexusEndpointRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.EndpointId)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	if m.Spec != nil {
-		l = m.Spec.Size()
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.ResourceVersion)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.AsyncOperationId)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
-func (m *UpdateNexusEndpointResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.AsyncOperation != nil {
-		l = m.AsyncOperation.Size()
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
-func (m *DeleteNexusEndpointRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.EndpointId)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.ResourceVersion)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.AsyncOperationId)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
-func (m *DeleteNexusEndpointResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.AsyncOperation != nil {
-		l = m.AsyncOperation.Size()
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
 func (m *GetAccountRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -11184,123 +9604,6 @@ func (this *GetRegionResponse) String() string {
 	}, "")
 	return s
 }
-func (this *GetNexusEndpointsRequest) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&GetNexusEndpointsRequest{`,
-		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
-		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
-		`TargetNamespaceId:` + fmt.Sprintf("%v", this.TargetNamespaceId) + `,`,
-		`TargetTaskQueue:` + fmt.Sprintf("%v", this.TargetTaskQueue) + `,`,
-		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *GetNexusEndpointsResponse) String() string {
-	if this == nil {
-		return "nil"
-	}
-	repeatedStringForEndpoints := "[]*Endpoint{"
-	for _, f := range this.Endpoints {
-		repeatedStringForEndpoints += strings.Replace(fmt.Sprintf("%v", f), "Endpoint", "v14.Endpoint", 1) + ","
-	}
-	repeatedStringForEndpoints += "}"
-	s := strings.Join([]string{`&GetNexusEndpointsResponse{`,
-		`Endpoints:` + repeatedStringForEndpoints + `,`,
-		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *GetNexusEndpointRequest) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&GetNexusEndpointRequest{`,
-		`EndpointId:` + fmt.Sprintf("%v", this.EndpointId) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *GetNexusEndpointResponse) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&GetNexusEndpointResponse{`,
-		`Endpoint:` + strings.Replace(fmt.Sprintf("%v", this.Endpoint), "Endpoint", "v14.Endpoint", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *CreateNexusEndpointRequest) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&CreateNexusEndpointRequest{`,
-		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "EndpointSpec", "v14.EndpointSpec", 1) + `,`,
-		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *CreateNexusEndpointResponse) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&CreateNexusEndpointResponse{`,
-		`EndpointId:` + fmt.Sprintf("%v", this.EndpointId) + `,`,
-		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *UpdateNexusEndpointRequest) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&UpdateNexusEndpointRequest{`,
-		`EndpointId:` + fmt.Sprintf("%v", this.EndpointId) + `,`,
-		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "EndpointSpec", "v14.EndpointSpec", 1) + `,`,
-		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
-		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *UpdateNexusEndpointResponse) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&UpdateNexusEndpointResponse{`,
-		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *DeleteNexusEndpointRequest) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&DeleteNexusEndpointRequest{`,
-		`EndpointId:` + fmt.Sprintf("%v", this.EndpointId) + `,`,
-		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
-		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *DeleteNexusEndpointResponse) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&DeleteNexusEndpointResponse{`,
-		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
 func (this *GetAccountRequest) String() string {
 	if this == nil {
 		return "nil"
@@ -11315,7 +9618,7 @@ func (this *GetAccountResponse) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&GetAccountResponse{`,
-		`Account:` + strings.Replace(fmt.Sprintf("%v", this.Account), "Account", "v15.Account", 1) + `,`,
+		`Account:` + strings.Replace(fmt.Sprintf("%v", this.Account), "Account", "v14.Account", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -11325,7 +9628,7 @@ func (this *UpdateAccountRequest) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&UpdateAccountRequest{`,
-		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "AccountSpec", "v15.AccountSpec", 1) + `,`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "AccountSpec", "v14.AccountSpec", 1) + `,`,
 		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
 		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
 		`}`,
@@ -15606,1253 +13909,6 @@ func (m *GetRegionResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *GetNexusEndpointsRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: GetNexusEndpointsRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetNexusEndpointsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
-			}
-			m.PageSize = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.PageSize |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.PageToken = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TargetNamespaceId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TargetNamespaceId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TargetTaskQueue", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TargetTaskQueue = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 5:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Name = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *GetNexusEndpointsResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: GetNexusEndpointsResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetNexusEndpointsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Endpoints", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Endpoints = append(m.Endpoints, &v14.Endpoint{})
-			if err := m.Endpoints[len(m.Endpoints)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.NextPageToken = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *GetNexusEndpointRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: GetNexusEndpointRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetNexusEndpointRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field EndpointId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.EndpointId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *GetNexusEndpointResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: GetNexusEndpointResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetNexusEndpointResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Endpoint", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Endpoint == nil {
-				m.Endpoint = &v14.Endpoint{}
-			}
-			if err := m.Endpoint.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *CreateNexusEndpointRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: CreateNexusEndpointRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: CreateNexusEndpointRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Spec == nil {
-				m.Spec = &v14.EndpointSpec{}
-			}
-			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *CreateNexusEndpointResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: CreateNexusEndpointResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: CreateNexusEndpointResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field EndpointId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.EndpointId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.AsyncOperation == nil {
-				m.AsyncOperation = &v11.AsyncOperation{}
-			}
-			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *UpdateNexusEndpointRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: UpdateNexusEndpointRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UpdateNexusEndpointRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field EndpointId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.EndpointId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Spec == nil {
-				m.Spec = &v14.EndpointSpec{}
-			}
-			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *UpdateNexusEndpointResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: UpdateNexusEndpointResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UpdateNexusEndpointResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.AsyncOperation == nil {
-				m.AsyncOperation = &v11.AsyncOperation{}
-			}
-			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *DeleteNexusEndpointRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: DeleteNexusEndpointRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: DeleteNexusEndpointRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field EndpointId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.EndpointId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *DeleteNexusEndpointResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: DeleteNexusEndpointResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: DeleteNexusEndpointResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.AsyncOperation == nil {
-				m.AsyncOperation = &v11.AsyncOperation{}
-			}
-			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
 func (m *GetAccountRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -16965,7 +14021,7 @@ func (m *GetAccountResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Account == nil {
-				m.Account = &v15.Account{}
+				m.Account = &v14.Account{}
 			}
 			if err := m.Account.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -17054,7 +14110,7 @@ func (m *UpdateAccountRequest) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Spec == nil {
-				m.Spec = &v15.AccountSpec{}
+				m.Spec = &v14.AccountSpec{}
 			}
 			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
