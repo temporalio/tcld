@@ -13,10 +13,11 @@ import (
 var (
 	GCPSinkFeatureFlag        = "enable-gcp-sink"
 	ServiceAccountFeatureFlag = "enable-service-account"
+	NexusFeatureFlag          = "enable-nexus"
 	featureflagFileName       = "feature.json"
 )
 
-var supportFeatureFlags = []string{GCPSinkFeatureFlag, ServiceAccountFeatureFlag}
+var supportFeatureFlags = []string{GCPSinkFeatureFlag, ServiceAccountFeatureFlag, NexusFeatureFlag}
 
 type FeatureFlag struct {
 	Name  string `json:"Name"`
@@ -139,6 +140,14 @@ func NewFeatureCommand() (CommandOut, error) {
 					Usage:   "switch service account on/off",
 					Action: func(c *cli.Context) error {
 						return toggleFeature(ServiceAccountFeatureFlag)
+					},
+				},
+				{
+					Name:    "toggle-nexus",
+					Aliases: []string{"tnxs"},
+					Usage:   "switch nexus on/off",
+					Action: func(c *cli.Context) error {
+						return toggleFeature(NexusFeatureFlag)
 					},
 				},
 				{

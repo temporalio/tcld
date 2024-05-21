@@ -36,6 +36,10 @@ func NewApp(params AppParams) (*cli.App, error) {
 			if IsFeatureEnabled(ServiceAccountFeatureFlag) {
 				commands = append(commands, command)
 			}
+		} else if command.Name == "nexus" {
+			if IsFeatureEnabled(NexusFeatureFlag) {
+				commands = append(commands, command)
+			}
 		} else {
 			commands = append(commands, command)
 		}
