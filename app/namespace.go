@@ -13,7 +13,7 @@ import (
 	"go.uber.org/multierr"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
-	"github.com/temporalio/tcld/protogen/api/common/v1"
+	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/sink/v1"
 
 	"github.com/kylelemons/godebug/diff"
@@ -139,16 +139,18 @@ var (
 )
 
 type NamespaceClient struct {
-	client     namespaceservice.NamespaceServiceClient
-	authClient authservice.AuthServiceClient
-	ctx        context.Context
+	client         namespaceservice.NamespaceServiceClient
+	cloudAPIClient cloudservice.CloudServiceClient
+	authClient     authservice.AuthServiceClient
+	ctx            context.Context
 }
 
 func NewNamespaceClient(ctx context.Context, conn *grpc.ClientConn) *NamespaceClient {
 	return &NamespaceClient{
-		client:     namespaceservice.NewNamespaceServiceClient(conn),
-		authClient: authservice.NewAuthServiceClient(conn),
-		ctx:        ctx,
+		client:         namespaceservice.NewNamespaceServiceClient(conn),
+		cloudAPIClient: cloudservice.NewCloudServiceClient(conn),
+		authClient:     authservice.NewAuthServiceClient(conn),
+		ctx:            ctx,
 	}
 }
 
@@ -296,19 +298,16 @@ func (c *NamespaceClient) addRegion(ctx *cli.Context) error {
 		return fmt.Errorf("namespace cloud provider is required")
 	}
 
-	res, err := c.client.GlobalizeNamespace(c.ctx, &namespaceservice.GlobalizeNamespaceRequest{
-		RequestId: ctx.String(RequestIDFlagName),
-		Namespace: ctx.String(NamespaceFlagName),
-		TargetRegion: &common.RegionID{
-			CloudProvider: cloudProvider,
-			Name:          region,
-		},
-		ResourceVersion: ns.GetResourceVersion(),
+	res, err := c.cloudAPIClient.AddNamespaceRegion(c.ctx, &cloudservice.AddNamespaceRegionRequest{
+		Namespace:        ctx.String(NamespaceFlagName),
+		Region:           fmt.Sprintf("%s-%s", cloudProvider, region),
+		ResourceVersion:  ns.GetResourceVersion(),
+		AsyncOperationId: ctx.String(RequestIDFlagName),
 	})
 	if err != nil {
 		return err
 	}
-	return PrintProto(res)
+	return PrintProto(res.GetAsyncOperation())
 }
 
 func (c *NamespaceClient) listNamespaces() error {
@@ -449,18 +448,15 @@ func (c *NamespaceClient) failoverNamespace(ctx *cli.Context) error {
 		return fmt.Errorf("cloud provider is required")
 	}
 
-	res, err := c.client.FailoverNamespace(c.ctx, &namespaceservice.FailoverNamespaceRequest{
-		Namespace: namespace,
-		RequestId: ctx.String(RequestIDFlagName),
-		TargetRegion: &common.RegionID{
-			CloudProvider: cloudProvider,
-			Name:          ctx.String(namespaceRegionFlagName),
-		},
+	res, err := c.cloudAPIClient.FailoverNamespaceRegion(c.ctx, &cloudservice.FailoverNamespaceRegionRequest{
+		Namespace:        namespace,
+		Region:           fmt.Sprintf("%s-%s", cloudProvider, ctx.String(namespaceRegionFlagName)),
+		AsyncOperationId: ctx.String(RequestIDFlagName),
 	})
 	if err != nil {
 		return err
 	}
-	return PrintProto(res)
+	return PrintProto(res.GetAsyncOperation())
 }
 
 // ReadCACerts reads ca certs based on cli flags.
