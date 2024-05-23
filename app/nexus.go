@@ -33,6 +33,9 @@ func (c *NexusClient) getEndpointByName(endpointName string) (*nexus.Endpoint, e
 	if err != nil {
 		return nil, err
 	}
+	if len(endpoints) > 1 {
+		return nil, fmt.Errorf("more than 1 endpoint found with the same name. This should not happen")
+	}
 	if len(endpoints) > 0 {
 		return endpoints[0], nil
 	}
@@ -94,7 +97,7 @@ func (c *NexusClient) createEndpoint(
 	return resp, nil
 }
 
-func (c *NexusClient) updateEndpoint(
+func (c *NexusClient) patchEndpoint(
 	existingEndpoint *nexus.Endpoint,
 	targetNamespaceID string,
 	targetTaskQueue string,
@@ -182,19 +185,19 @@ func (c *NexusClient) setAllowedNamespaces(
 
 func (c *NexusClient) removeAllowedNamespaces(
 	existingEndpoint *nexus.Endpoint,
-	namespaceIDs []string,
+	namespaceIDsToRemove []string,
 	resourceVersion string,
 	asyncOperationId string,
 ) (*operation.AsyncOperation, error) {
 	existingPolicySpecs := existingEndpoint.Spec.PolicySpecs
-	namespaceIDMap := make(map[string]struct{}, len(namespaceIDs))
-	for _, namespaceID := range namespaceIDs {
-		namespaceIDMap[namespaceID] = struct{}{}
+	namespaceIDsToRemoveMap := make(map[string]struct{}, len(namespaceIDsToRemove))
+	for _, namespaceID := range namespaceIDsToRemove {
+		namespaceIDsToRemoveMap[namespaceID] = struct{}{}
 	}
 
-	updatedPolicySpecs := make([]*nexus.EndpointPolicySpec, 0)
+	var updatedPolicySpecs []*nexus.EndpointPolicySpec
 	for _, existingPolicySpec := range existingPolicySpecs {
-		if _, ok := namespaceIDMap[existingPolicySpec.AllowedCloudNamespacePolicySpec.NamespaceId]; !ok {
+		if _, ok := namespaceIDsToRemoveMap[existingPolicySpec.AllowedCloudNamespacePolicySpec.NamespaceId]; !ok {
 			updatedPolicySpecs = append(updatedPolicySpecs, existingPolicySpec)
 		}
 	}
@@ -287,7 +290,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 							Name:        "get",
 							Aliases:     []string{"g"},
 							Usage:       "Get a Nexus Endpoint by name (EXPERIMENTAL)",
-							Description: "This command gets a Nexus Endpoint configuration by name from the Server",
+							Description: "This command gets a Nexus Endpoint configuration by name from the Cloud Account",
 							Flags: []cli.Flag{
 								endpointNameFlag,
 							},
@@ -304,7 +307,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 							Name:        "list",
 							Aliases:     []string{"l"},
 							Usage:       "List Nexus Endpoints (EXPERIMENTAL)",
-							Description: "This command lists all Nexus Endpoint configurations on the Server",
+							Description: "This command lists all Nexus Endpoint configurations on the Cloud Account",
 							Flags:       []cli.Flag{},
 							Action: func(ctx *cli.Context) error {
 								endpoints, err := c.listEndpoints("")
@@ -318,7 +321,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 							Name:    "create",
 							Aliases: []string{"c"},
 							Usage:   "Create a new Nexus Endpoint (EXPERIMENTAL)",
-							Description: "This command creates a new Nexus Endpoint on the Server.\n" +
+							Description: "This command creates a new Nexus Endpoint on the Cloud Account.\n" +
 								"An endpoint name is used by in workflow code to invoke Nexus operations.\n" +
 								"The endpoint target is a worker and `--target-namespace` and `--target-task-queue` must both be provided.\n" +
 								"This will fail if an endpoint with the same name is already registered",
@@ -347,7 +350,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 							Name:    "update",
 							Aliases: []string{"u"},
 							Usage:   "Update an existing Nexus Endpoint (EXPERIMENTAL)",
-							Description: "This command updates an existing Nexus Endpoint on the Server.\n" +
+							Description: "This command updates an existing Nexus Endpoint on the Cloud Account.\n" +
 								"An endpoint name is used by in workflow code to invoke Nexus operations.\n" +
 								"The endpoint target is a worker and `--target-namespace` and `--target-task-queue` must both be provided.\n" +
 								"Only the fields that are provided will be updated",
@@ -375,9 +378,13 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 									resourceVersion = existingEndpoint.ResourceVersion
 								}
 
+								if targetNamespaceID == existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId && targetTaskQueue == existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue {
+									return fmt.Errorf("no updates to be made")
+								}
+
 								requestID := ctx.String(RequestIDFlag.Name)
 
-								resp, err := c.updateEndpoint(existingEndpoint, targetNamespaceID, targetTaskQueue, resourceVersion, requestID)
+								resp, err := c.patchEndpoint(existingEndpoint, targetNamespaceID, targetTaskQueue, resourceVersion, requestID)
 								if err != nil {
 									return err
 								}
@@ -511,7 +518,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 							Name:        "delete",
 							Aliases:     []string{"d"},
 							Usage:       "Delete a Nexus Endpoint (EXPERIMENTAL)",
-							Description: "This command deletes a Nexus Endpoint on the Server.\n",
+							Description: "This command deletes a Nexus Endpoint on the Cloud Account.\n",
 							Flags: []cli.Flag{
 								endpointNameFlag,
 								ResourceVersionFlag,
