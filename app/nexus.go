@@ -43,9 +43,7 @@ func (c *NexusClient) getEndpointByName(endpointName string) (*nexus.Endpoint, e
 }
 
 func (c *NexusClient) listEndpoints(endpointName string) ([]*nexus.Endpoint, error) {
-	listResponse := &cloudservice.GetNexusEndpointsResponse{
-		Endpoints: make([]*nexus.Endpoint, 0),
-	}
+	endpoints := make([]*nexus.Endpoint, 0)
 	pageToken := ""
 	for {
 		resp, err := c.client.GetNexusEndpoints(c.ctx, &cloudservice.GetNexusEndpointsRequest{
@@ -55,10 +53,10 @@ func (c *NexusClient) listEndpoints(endpointName string) ([]*nexus.Endpoint, err
 		if err != nil {
 			return nil, err
 		}
-		listResponse.Endpoints = append(listResponse.Endpoints, resp.Endpoints...)
+		endpoints = append(endpoints, resp.Endpoints...)
 		pageToken = resp.NextPageToken
 		if len(pageToken) == 0 {
-			return listResponse.Endpoints, nil
+			return endpoints, nil
 		}
 	}
 }
