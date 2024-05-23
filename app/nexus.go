@@ -271,7 +271,6 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 		Command: &cli.Command{
 			Name:    "nexus",
 			Aliases: []string{"nxs"},
-			Usage:   "Commands for managing Nexus operations (EXPERIMENTAL)",
 			Before: func(ctx *cli.Context) error {
 				var err error
 				c, err = getNexusClientFn(ctx)
@@ -279,10 +278,9 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 			},
 			Subcommands: []*cli.Command{
 				{
-					Name:        "endpoint",
-					Aliases:     []string{"ep"},
-					Usage:       "Commands for managing Nexus Endpoints (EXPERIMENTAL)",
-					Description: "Endpoint commands enable managing Nexus Endpoints",
+					Name:    "endpoint",
+					Aliases: []string{"ep"},
+					Usage:   "Commands for managing Nexus Endpoints (EXPERIMENTAL)",
 					Subcommands: []*cli.Command{
 						{
 							Name:        "get",
