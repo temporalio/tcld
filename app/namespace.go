@@ -15,6 +15,7 @@ import (
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/sink/v1"
+	"github.com/temporalio/tcld/utils"
 
 	"github.com/kylelemons/godebug/diff"
 	"github.com/urfave/cli/v2"
@@ -298,9 +299,14 @@ func (c *NamespaceClient) addRegion(ctx *cli.Context) error {
 		return fmt.Errorf("namespace cloud provider is required")
 	}
 
+	targetRegion := fmt.Sprintf("%s-%s", cloudProvider, region)
+	if err := utils.ValidateCloudProviderAndRegion(targetRegion); err != nil {
+		return err
+	}
+
 	res, err := c.cloudAPIClient.AddNamespaceRegion(c.ctx, &cloudservice.AddNamespaceRegionRequest{
 		Namespace:        ctx.String(NamespaceFlagName),
-		Region:           fmt.Sprintf("%s-%s", cloudProvider, region),
+		Region:           targetRegion,
 		ResourceVersion:  ns.GetResourceVersion(),
 		AsyncOperationId: ctx.String(RequestIDFlagName),
 	})
@@ -448,9 +454,14 @@ func (c *NamespaceClient) failoverNamespace(ctx *cli.Context) error {
 		return fmt.Errorf("cloud provider is required")
 	}
 
+	targetRegion := fmt.Sprintf("%s-%s", cloudProvider, region)
+	if err := utils.ValidateCloudProviderAndRegion(targetRegion); err != nil {
+		return err
+	}
+
 	res, err := c.cloudAPIClient.FailoverNamespaceRegion(c.ctx, &cloudservice.FailoverNamespaceRegionRequest{
 		Namespace:        namespace,
-		Region:           fmt.Sprintf("%s-%s", cloudProvider, ctx.String(namespaceRegionFlagName)),
+		Region:           targetRegion,
 		AsyncOperationId: ctx.String(RequestIDFlagName),
 	})
 	if err != nil {
