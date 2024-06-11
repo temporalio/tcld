@@ -66,7 +66,8 @@ func getExampleNexusEndpoint() *nexus.Endpoint {
 					TaskQueue:   "test-task-queue",
 				},
 			},
-			Name: "test_name",
+			Name:        "test_name",
+			Description: "test description",
 			PolicySpecs: []*nexus.EndpointPolicySpec{
 				{
 					AllowedCloudNamespacePolicySpec: &nexus.AllowedCloudNamespacePolicySpec{
@@ -93,10 +94,10 @@ func (s *NexusTestSuite) TestEndpointGet() {
 	s.Error(s.RunCmd("nexus", "endpoint", "get", "--name"))
 
 	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(nil, errors.New("not found")).Times(1)
-	s.Error(s.RunCmd("nexus", "endpoint", "get", "--name", "test-nexus-endpoint-name"))
+	s.Error(s.RunCmd("nexus", "endpoint", "get", "--name", "test_nexus_endpoint_name"))
 
 	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
-	s.NoError(s.RunCmd("nexus", "endpoint", "get", "--name", "test-nexus-endpoint-name"))
+	s.NoError(s.RunCmd("nexus", "endpoint", "get", "--name", "test_nexus_endpoint_name"))
 }
 
 func (s *NexusTestSuite) TestEndpointList() {
@@ -116,6 +117,7 @@ func (s *NexusTestSuite) TestEndpointCreate() {
 	s.mockCloudService.EXPECT().CreateNexusEndpoint(gomock.Any(), gomock.Any()).Return(nil, errors.New("create error")).Times(1)
 	s.EqualError(s.RunCmd("nexus", "endpoint", "create",
 		"--name", exampleEndpoint.Spec.Name,
+		"--description", exampleEndpoint.Spec.Description,
 		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId,
 		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue,
 		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
@@ -123,6 +125,21 @@ func (s *NexusTestSuite) TestEndpointCreate() {
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "create error")
 
+	// test success all fields
+	s.mockCloudService.EXPECT().CreateNexusEndpoint(gomock.Any(), gomock.Any()).Return(&cloudservice.CreateNexusEndpointResponse{
+		EndpointId: exampleEndpoint.Id,
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("nexus", "endpoint", "create",
+		"--name", exampleEndpoint.Spec.Name,
+		"--description", exampleEndpoint.Spec.Description,
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId,
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--request-id", exampleEndpoint.AsyncOperationId,
+	))
+
+	// test success mandatory fields
 	s.mockCloudService.EXPECT().CreateNexusEndpoint(gomock.Any(), gomock.Any()).Return(&cloudservice.CreateNexusEndpointResponse{
 		EndpointId: exampleEndpoint.Id,
 	}, nil).Times(1)
@@ -139,6 +156,7 @@ func (s *NexusTestSuite) TestEndpointCreate() {
 func (s *NexusTestSuite) TestEndpointUpdate() {
 	exampleEndpoint := getExampleNexusEndpoint()
 
+	// endpoint not found
 	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{}}, nil).Times(1)
 	s.EqualError(s.RunCmd("nexus", "endpoint", "update",
 		"--name", exampleEndpoint.Spec.Name,
@@ -146,6 +164,7 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "endpoint not found")
 
+	// update error
 	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
 	s.mockCloudService.EXPECT().UpdateNexusEndpoint(gomock.Any(), gomock.Any()).Return(nil, errors.New("update error")).Times(1)
 	s.EqualError(s.RunCmd("nexus", "endpoint", "update",
@@ -154,6 +173,7 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "update error")
 
+	// update target-task-queue success
 	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
 	s.mockCloudService.EXPECT().UpdateNexusEndpoint(gomock.Any(), gomock.Any()).Return(&cloudservice.UpdateNexusEndpointResponse{
 		AsyncOperation: &operation.AsyncOperation{
@@ -166,6 +186,7 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 
+	// update target-namespace success
 	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
 	s.mockCloudService.EXPECT().UpdateNexusEndpoint(gomock.Any(), gomock.Any()).Return(&cloudservice.UpdateNexusEndpointResponse{
 		AsyncOperation: &operation.AsyncOperation{
@@ -178,6 +199,35 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 
+	// update description success
+	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
+	s.mockCloudService.EXPECT().UpdateNexusEndpoint(gomock.Any(), gomock.Any()).Return(&cloudservice.UpdateNexusEndpointResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			Id: exampleEndpoint.AsyncOperationId,
+		},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("nexus", "endpoint", "update",
+		"--name", exampleEndpoint.Spec.Name,
+		"--description", exampleEndpoint.Spec.Description+"-updated",
+		"--request-id", exampleEndpoint.AsyncOperationId,
+	))
+
+	// update all success
+	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
+	s.mockCloudService.EXPECT().UpdateNexusEndpoint(gomock.Any(), gomock.Any()).Return(&cloudservice.UpdateNexusEndpointResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			Id: exampleEndpoint.AsyncOperationId,
+		},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("nexus", "endpoint", "update",
+		"--name", exampleEndpoint.Spec.Name,
+		"--description", exampleEndpoint.Spec.Description+"-updated",
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId+"-updated",
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue+"-updated",
+		"--request-id", exampleEndpoint.AsyncOperationId,
+	))
+
+	// no updates to be made
 	s.EqualError(s.RunCmd("nexus", "endpoint", "update",
 		"--name", exampleEndpoint.Spec.Name,
 		"--request-id", exampleEndpoint.AsyncOperationId,

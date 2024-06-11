@@ -63,6 +63,7 @@ func (c *NexusClient) listEndpoints(endpointName string) ([]*nexus.Endpoint, err
 
 func (c *NexusClient) createEndpoint(
 	endpointName string,
+	endpointDescription string,
 	targetNamespaceID string,
 	targetTaskQueue string,
 	allowedNamespaceIDs []string,
@@ -78,7 +79,8 @@ func (c *NexusClient) createEndpoint(
 	}
 	resp, err := c.client.CreateNexusEndpoint(c.ctx, &cloudservice.CreateNexusEndpointRequest{
 		Spec: &nexus.EndpointSpec{
-			Name: endpointName,
+			Name:        endpointName,
+			Description: endpointDescription,
 			TargetSpec: &nexus.EndpointTargetSpec{
 				WorkerTargetSpec: &nexus.WorkerTargetSpec{
 					NamespaceId: targetNamespaceID,
@@ -97,11 +99,15 @@ func (c *NexusClient) createEndpoint(
 
 func (c *NexusClient) patchEndpoint(
 	existingEndpoint *nexus.Endpoint,
+	description string,
 	targetNamespaceID string,
 	targetTaskQueue string,
 	resourceVersion string,
 	asyncOperationId string,
 ) (*operation.AsyncOperation, error) {
+	if description != "" {
+		existingEndpoint.Spec.Description = description
+	}
 	if targetNamespaceID != "" {
 		existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId = targetNamespaceID
 	}
@@ -231,6 +237,12 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 		Usage:    "Endpoint name",
 		Required: true,
 	}
+	endpointDescriptionOptionalFlag := &cli.StringFlag{
+		Name:     "description",
+		Aliases:  []string{"d"},
+		Usage:    "Endpoint description (optional)",
+		Required: false,
+	}
 	targetNamespaceFlag := &cli.StringFlag{
 		Name:     "target-namespace",
 		Aliases:  []string{"tns"},
@@ -323,6 +335,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 								"This will fail if an endpoint with the same name is already registered",
 							Flags: []cli.Flag{
 								endpointNameFlag,
+								endpointDescriptionOptionalFlag,
 								targetNamespaceFlag,
 								targetTaskQueueFlag,
 								allowNamespaceFlag,
@@ -331,6 +344,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 							Action: func(ctx *cli.Context) error {
 								resp, err := c.createEndpoint(
 									ctx.String(endpointNameFlag.Name),
+									ctx.String(endpointDescriptionOptionalFlag.Name),
 									ctx.String(targetNamespaceFlag.Name),
 									ctx.String(targetTaskQueueFlag.Name),
 									ctx.StringSlice(allowNamespaceFlag.Name),
@@ -352,6 +366,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 								"Only the fields that are provided will be updated",
 							Flags: []cli.Flag{
 								endpointNameFlag,
+								endpointDescriptionOptionalFlag,
 								targetNamespaceFlagOptional,
 								targetTaskQueueFlagOptional,
 								ResourceVersionFlag,
@@ -359,11 +374,12 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 							},
 							Action: func(ctx *cli.Context) error {
 								endpointName := ctx.String(endpointNameFlag.Name)
+								endpointDescription := ctx.String(endpointDescriptionOptionalFlag.Name)
 								targetNamespaceID := ctx.String(targetNamespaceFlagOptional.Name)
 								targetTaskQueue := ctx.String(targetTaskQueueFlagOptional.Name)
 								resourceVersion := ctx.String(ResourceVersionFlag.Name)
 
-								if targetNamespaceID == "" && targetTaskQueue == "" {
+								if endpointDescription == "" && targetNamespaceID == "" && targetTaskQueue == "" {
 									return fmt.Errorf("no updates to be made")
 								}
 								existingEndpoint, err := c.getEndpointByName(endpointName)
@@ -380,7 +396,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 
 								requestID := ctx.String(RequestIDFlag.Name)
 
-								resp, err := c.patchEndpoint(existingEndpoint, targetNamespaceID, targetTaskQueue, resourceVersion, requestID)
+								resp, err := c.patchEndpoint(existingEndpoint, endpointDescription, targetNamespaceID, targetTaskQueue, resourceVersion, requestID)
 								if err != nil {
 									return err
 								}
