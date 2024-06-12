@@ -7,6 +7,7 @@ import (
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/nexus/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
+	"os"
 	"testing"
 	"time"
 
@@ -125,7 +126,24 @@ func (s *NexusTestSuite) TestEndpointCreate() {
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "create error")
 
-	// test success all fields
+	// test success all fields - description file
+	path := "nexus_endpoint_description_test.md"
+	s.NoError(os.WriteFile(path, []byte("*my awesome endpoint*\n"), 0644))
+	defer os.Remove(path)
+	s.mockCloudService.EXPECT().CreateNexusEndpoint(gomock.Any(), gomock.Any()).Return(&cloudservice.CreateNexusEndpointResponse{
+		EndpointId: exampleEndpoint.Id,
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("nexus", "endpoint", "create",
+		"--name", exampleEndpoint.Spec.Name,
+		"--description-file", path,
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId,
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--request-id", exampleEndpoint.AsyncOperationId,
+	))
+
+	// test success all fields - description string
 	s.mockCloudService.EXPECT().CreateNexusEndpoint(gomock.Any(), gomock.Any()).Return(&cloudservice.CreateNexusEndpointResponse{
 		EndpointId: exampleEndpoint.Id,
 	}, nil).Times(1)
@@ -151,6 +169,32 @@ func (s *NexusTestSuite) TestEndpointCreate() {
 		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].AllowedCloudNamespacePolicySpec.NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
+
+	// provided both --description and --description-file
+	s.EqualError(s.RunCmd("nexus", "endpoint", "create",
+		"--name", exampleEndpoint.Spec.Name,
+		"--description", exampleEndpoint.Spec.Description,
+		"--description-file", "nexus_endpoint_description_test.md",
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId,
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--request-id", exampleEndpoint.AsyncOperationId,
+	), "provided both --description and --description-file")
+
+	// empty description file
+	path2 := "nexus_endpoint_empty_description_test.md"
+	s.NoError(os.WriteFile(path2, []byte(""), 0644))
+	defer os.Remove(path2)
+	s.EqualError(s.RunCmd("nexus", "endpoint", "create",
+		"--name", exampleEndpoint.Spec.Name,
+		"--description-file", path2,
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId,
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--request-id", exampleEndpoint.AsyncOperationId,
+	), "empty description file: \"nexus_endpoint_empty_description_test.md\"")
 }
 
 func (s *NexusTestSuite) TestEndpointUpdate() {
@@ -199,6 +243,22 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 
+	// update description file success
+	path := "nexus_endpoint_description_test.md"
+	s.NoError(os.WriteFile(path, []byte("*my awesome endpoint*\n"), 0644))
+	defer os.Remove(path)
+	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
+	s.mockCloudService.EXPECT().UpdateNexusEndpoint(gomock.Any(), gomock.Any()).Return(&cloudservice.UpdateNexusEndpointResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			Id: exampleEndpoint.AsyncOperationId,
+		},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("nexus", "endpoint", "update",
+		"--name", exampleEndpoint.Spec.Name,
+		"--description-file", path,
+		"--request-id", exampleEndpoint.AsyncOperationId,
+	))
+
 	// update description success
 	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
 	s.mockCloudService.EXPECT().UpdateNexusEndpoint(gomock.Any(), gomock.Any()).Return(&cloudservice.UpdateNexusEndpointResponse{
@@ -209,6 +269,19 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 	s.NoError(s.RunCmd("nexus", "endpoint", "update",
 		"--name", exampleEndpoint.Spec.Name,
 		"--description", exampleEndpoint.Spec.Description+"-updated",
+		"--request-id", exampleEndpoint.AsyncOperationId,
+	))
+
+	// unset-description success
+	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
+	s.mockCloudService.EXPECT().UpdateNexusEndpoint(gomock.Any(), gomock.Any()).Return(&cloudservice.UpdateNexusEndpointResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			Id: exampleEndpoint.AsyncOperationId,
+		},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("nexus", "endpoint", "update",
+		"--unset-description",
+		"--name", exampleEndpoint.Spec.Name,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 
@@ -232,6 +305,31 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 		"--name", exampleEndpoint.Spec.Name,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "no updates to be made")
+
+	// no updates to be made
+	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
+	s.EqualError(s.RunCmd("nexus", "endpoint", "update",
+		"--name", exampleEndpoint.Spec.Name,
+		"--description", exampleEndpoint.Spec.Description,
+		"--request-id", exampleEndpoint.AsyncOperationId,
+	), "no updates to be made")
+
+	// provided both --description and --description-file
+	s.EqualError(s.RunCmd("nexus", "endpoint", "update",
+		"--name", exampleEndpoint.Spec.Name,
+		"--description", exampleEndpoint.Spec.Description+"-updated",
+		"--description-file", "nexus_endpoint_description_test.md",
+		"--request-id", exampleEndpoint.AsyncOperationId,
+	), "provided both --description and --description-file")
+
+	// --unset-description should not be set if --description or --description-file is set
+	s.EqualError(s.RunCmd("nexus", "endpoint", "update",
+		"--name", exampleEndpoint.Spec.Name,
+		"--description", exampleEndpoint.Spec.Description+"-updated",
+		"--unset-description",
+		"--request-id", exampleEndpoint.AsyncOperationId,
+	), "--unset-description should not be set if --description or --description-file is set")
+
 }
 
 func (s *NexusTestSuite) TestEndpointAllowedNamespaceAdd() {
