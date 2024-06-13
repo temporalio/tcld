@@ -7,6 +7,7 @@ import (
 	"github.com/temporalio/tcld/protogen/api/cloud/nexus/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
 	"github.com/urfave/cli/v2"
+	"os"
 )
 
 type (
@@ -63,6 +64,7 @@ func (c *NexusClient) listEndpoints(endpointName string) ([]*nexus.Endpoint, err
 
 func (c *NexusClient) createEndpoint(
 	endpointName string,
+	endpointDescription string,
 	targetNamespaceID string,
 	targetTaskQueue string,
 	allowedNamespaceIDs []string,
@@ -78,7 +80,8 @@ func (c *NexusClient) createEndpoint(
 	}
 	resp, err := c.client.CreateNexusEndpoint(c.ctx, &cloudservice.CreateNexusEndpointRequest{
 		Spec: &nexus.EndpointSpec{
-			Name: endpointName,
+			Name:        endpointName,
+			Description: endpointDescription,
 			TargetSpec: &nexus.EndpointTargetSpec{
 				WorkerTargetSpec: &nexus.WorkerTargetSpec{
 					NamespaceId: targetNamespaceID,
@@ -97,16 +100,33 @@ func (c *NexusClient) createEndpoint(
 
 func (c *NexusClient) patchEndpoint(
 	existingEndpoint *nexus.Endpoint,
+	description string,
+	unsetDescription bool,
 	targetNamespaceID string,
 	targetTaskQueue string,
 	resourceVersion string,
 	asyncOperationId string,
 ) (*operation.AsyncOperation, error) {
-	if targetNamespaceID != "" {
-		existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId = targetNamespaceID
+	hasChanges := false
+	if unsetDescription && existingEndpoint.Spec.Description != "" {
+		existingEndpoint.Spec.Description = ""
+		hasChanges = true
 	}
-	if targetTaskQueue != "" {
+	if !unsetDescription && description != "" && description != existingEndpoint.Spec.Description {
+		existingEndpoint.Spec.Description = description
+		hasChanges = true
+	}
+	if targetNamespaceID != "" && targetNamespaceID != existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId {
+		existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId = targetNamespaceID
+		hasChanges = true
+	}
+	if targetTaskQueue != "" && targetTaskQueue != existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue {
 		existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue = targetTaskQueue
+		hasChanges = true
+	}
+
+	if !hasChanges {
+		return nil, fmt.Errorf("no updates to be made")
 	}
 
 	return c.callUpdateEndpoint(existingEndpoint, resourceVersion, asyncOperationId)
@@ -231,6 +251,23 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 		Usage:    "Endpoint name",
 		Required: true,
 	}
+	endpointDescriptionOptionalFlag := &cli.StringFlag{
+		Name:     "description",
+		Aliases:  []string{"d"},
+		Usage:    "Endpoint description in markdown format (optional)",
+		Required: false,
+	}
+	endpointDescriptionFileOptionalFlag := &cli.StringFlag{
+		Name:     "description-file",
+		Aliases:  []string{"df"},
+		Usage:    "Endpoint description file in markdown format (optional)",
+		Required: false,
+	}
+	unsetEndpointDescriptionOptionalFlag := &cli.BoolFlag{
+		Name:     "unset-description",
+		Usage:    "Unset endpoint description",
+		Required: false,
+	}
 	targetNamespaceFlag := &cli.StringFlag{
 		Name:     "target-namespace",
 		Aliases:  []string{"tns"},
@@ -266,6 +303,28 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 		Aliases:  []string{"ns"},
 		Usage:    "Namespace that is allowed to call this endpoint",
 		Required: true,
+	}
+	getEndpointDescription := func(ctx *cli.Context) (string, error) {
+		description := ctx.String(endpointDescriptionOptionalFlag.Name)
+		descriptionFile := ctx.String(endpointDescriptionFileOptionalFlag.Name)
+		if description != "" && descriptionFile != "" {
+			return "", fmt.Errorf("provided both --%s and --%s", endpointDescriptionOptionalFlag.Name, endpointDescriptionFileOptionalFlag.Name)
+		}
+
+		if descriptionFile != "" {
+			if ctx.Path(endpointDescriptionFileOptionalFlag.Name) != "" {
+				data, err := os.ReadFile(ctx.Path(endpointDescriptionFileOptionalFlag.Name))
+				if err != nil {
+					return "", fmt.Errorf("failed reading input file %q: %w", descriptionFile, err)
+				}
+				if len(data) == 0 {
+					return "", fmt.Errorf("empty description file: %q", descriptionFile)
+				}
+				description = string(data)
+			}
+		}
+
+		return description, nil
 	}
 	return CommandOut{
 		Command: &cli.Command{
@@ -323,14 +382,22 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 								"This will fail if an endpoint with the same name is already registered",
 							Flags: []cli.Flag{
 								endpointNameFlag,
+								endpointDescriptionOptionalFlag,
+								endpointDescriptionFileOptionalFlag,
 								targetNamespaceFlag,
 								targetTaskQueueFlag,
 								allowNamespaceFlag,
 								RequestIDFlag,
 							},
 							Action: func(ctx *cli.Context) error {
+								endpointDescription, err := getEndpointDescription(ctx)
+								if err != nil {
+									return err
+								}
+
 								resp, err := c.createEndpoint(
 									ctx.String(endpointNameFlag.Name),
+									endpointDescription,
 									ctx.String(targetNamespaceFlag.Name),
 									ctx.String(targetTaskQueueFlag.Name),
 									ctx.StringSlice(allowNamespaceFlag.Name),
@@ -348,22 +415,34 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 							Usage:   "Update an existing Nexus Endpoint (EXPERIMENTAL)",
 							Description: "This command updates an existing Nexus Endpoint on the Cloud Account.\n" +
 								"An endpoint name is used by in workflow code to invoke Nexus operations.\n" +
-								"The endpoint target is a worker and `--target-namespace` and `--target-task-queue` must both be provided.\n" +
-								"Only the fields that are provided will be updated",
+								"The endpoint target is a worker and `--target-namespace` and `--target-task-queue` must both be provided.\n\n" +
+								"The endpoint is patched leaving any existing fields for which flags are not provided as they were.",
 							Flags: []cli.Flag{
 								endpointNameFlag,
+								endpointDescriptionOptionalFlag,
+								endpointDescriptionFileOptionalFlag,
+								unsetEndpointDescriptionOptionalFlag,
 								targetNamespaceFlagOptional,
 								targetTaskQueueFlagOptional,
 								ResourceVersionFlag,
 								RequestIDFlag,
 							},
 							Action: func(ctx *cli.Context) error {
+								unsetEndpointDescription := ctx.Bool(unsetEndpointDescriptionOptionalFlag.Name)
+								endpointDescription, err := getEndpointDescription(ctx)
+								if err != nil {
+									return err
+								}
+								if endpointDescription != "" && unsetEndpointDescription {
+									return fmt.Errorf("--%s should not be set if --%s or --%s is set", unsetEndpointDescriptionOptionalFlag.Name, endpointDescriptionOptionalFlag.Name, endpointDescriptionFileOptionalFlag.Name)
+								}
+
 								endpointName := ctx.String(endpointNameFlag.Name)
 								targetNamespaceID := ctx.String(targetNamespaceFlagOptional.Name)
 								targetTaskQueue := ctx.String(targetTaskQueueFlagOptional.Name)
 								resourceVersion := ctx.String(ResourceVersionFlag.Name)
 
-								if targetNamespaceID == "" && targetTaskQueue == "" {
+								if (endpointDescription == "" && !unsetEndpointDescription) && targetNamespaceID == "" && targetTaskQueue == "" {
 									return fmt.Errorf("no updates to be made")
 								}
 								existingEndpoint, err := c.getEndpointByName(endpointName)
@@ -374,13 +453,9 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 									resourceVersion = existingEndpoint.ResourceVersion
 								}
 
-								if targetNamespaceID == existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId && targetTaskQueue == existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue {
-									return fmt.Errorf("no updates to be made")
-								}
-
 								requestID := ctx.String(RequestIDFlag.Name)
 
-								resp, err := c.patchEndpoint(existingEndpoint, targetNamespaceID, targetTaskQueue, resourceVersion, requestID)
+								resp, err := c.patchEndpoint(existingEndpoint, endpointDescription, unsetEndpointDescription, targetNamespaceID, targetTaskQueue, resourceVersion, requestID)
 								if err != nil {
 									return err
 								}
