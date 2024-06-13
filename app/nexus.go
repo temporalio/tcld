@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/nexus/v1"
@@ -309,7 +308,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 		description := ctx.String(endpointDescriptionOptionalFlag.Name)
 		descriptionFile := ctx.String(endpointDescriptionFileOptionalFlag.Name)
 		if description != "" && descriptionFile != "" {
-			return "", fmt.Errorf("provided both --description and --description-file")
+			return "", fmt.Errorf("provided both --%s and --%s", endpointDescriptionOptionalFlag.Name, endpointDescriptionFileOptionalFlag.Name)
 		}
 
 		if descriptionFile != "" {
@@ -321,7 +320,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 				if len(data) == 0 {
 					return "", fmt.Errorf("empty description file: %q", descriptionFile)
 				}
-				description = base64.StdEncoding.EncodeToString(data)
+				description = string(data)
 			}
 		}
 
@@ -435,7 +434,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 									return err
 								}
 								if endpointDescription != "" && unsetEndpointDescription {
-									return fmt.Errorf("--unset-description should not be set if --description or --description-file is set")
+									return fmt.Errorf("--%s should not be set if --%s or --%s is set", unsetEndpointDescriptionOptionalFlag.Name, endpointDescriptionOptionalFlag.Name, endpointDescriptionFileOptionalFlag.Name)
 								}
 
 								endpointName := ctx.String(endpointNameFlag.Name)
