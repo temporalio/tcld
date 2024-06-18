@@ -84,6 +84,19 @@ func getAccountRole(ctx context.Context, client authservice.AuthServiceClient, a
 	return res.Roles[0], nil
 }
 
+func toOptionalAccountActionGroup(actionGroup string) (auth.AccountActionGroup, error) {
+	if len(actionGroup) == 0 {
+		return auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED, nil
+	}
+	g := strings.ToLower(strings.TrimSpace(actionGroup))
+	for n, v := range auth.AccountActionGroup_value {
+		if strings.ToLower(n) == g {
+			return auth.AccountActionGroup(v), nil
+		}
+	}
+	return auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED, fmt.Errorf("invalid action group: should be one of: %s", accountActionGroups)
+}
+
 func toAccountActionGroup(actionGroup string) (auth.AccountActionGroup, error) {
 	g := strings.ToLower(strings.TrimSpace(actionGroup))
 	var ag auth.AccountActionGroup

@@ -13,7 +13,23 @@ const (
 	serviceAccountIDFlagName          = "service-account-id"
 	serviceAccountNameFlagName        = "name"
 	serviceAccountDescriptionFlagName = "description"
+	serviceAccountScopeType           = "scope-type"
+	serviceAccountScopeID             = "scope-id"
 )
+
+var (
+	scopeTypes = map[string]auth.ServiceAccountScopeType{
+		"namespace": auth.SERVICE_ACCOUNT_SCOPE_TYPE_NAMESPACE,
+	}
+)
+
+func getScopeTypes() []string {
+	var types []string
+	for st, _ := range scopeTypes {
+		types = append(types, st)
+	}
+	return types
+}
 
 var (
 	serviceAccountIDFlag = &cli.StringFlag{
@@ -220,17 +236,46 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"namespace=permission\"; valid types are: %v", namespaceActionGroups),
 							Aliases: []string{"np"},
 						},
+						&cli.StringFlag{
+							Name:    serviceAccountScopeType,
+							Usage:   fmt.Sprintf("The service account scope type; valid types are: %v", getScopeTypes()),
+							Aliases: []string{"st"},
+						},
+						&cli.StringFlag{
+							Name:    serviceAccountScopeID,
+							Usage:   "The entity ID that the service account is scoped to (e.g. namespace ID if creating a namespace scoped service account)",
+							Aliases: []string{"sid"},
+						},
 					},
 					Action: func(ctx *cli.Context) error {
 						if len(ctx.String(serviceAccountNameFlagName)) == 0 {
-							return fmt.Errorf("service account name must be provied with '--%s'", serviceAccountNameFlagName)
+							return fmt.Errorf("service account name must be provided with '--%s'", serviceAccountNameFlagName)
 						}
 
-						if len(ctx.String(accountRoleFlagName)) == 0 {
+						scopeType := ctx.String(serviceAccountScopeType)
+						scopeID := ctx.String(serviceAccountScopeID)
+						if (len(scopeType) > 0) != (len(scopeID) > 0) {
+							return fmt.Errorf("both scope type and scope ID must be provided")
+						}
+
+						var scope *auth.ServiceAccountScope
+						if len(scopeType) > 0 {
+							t, ok := scopeTypes[scopeType]
+							if !ok {
+								return fmt.Errorf("invalid scope type: %s", scopeType)
+							}
+							scope = &auth.ServiceAccountScope{
+								Type: t,
+								Id:   scopeID,
+							}
+						}
+
+						// require an account role if the service account is unscoped.
+						if len(ctx.String(accountRoleFlagName)) == 0 && scope == nil {
 							return fmt.Errorf("account role must be specified; valid types are %v", accountActionGroups)
 						}
 
-						acctActionGroup, err := toAccountActionGroup(ctx.String(accountRoleFlagName))
+						acctActionGroup, err := toOptionalAccountActionGroup(ctx.String(accountRoleFlagName))
 						if err != nil {
 							return fmt.Errorf("failed to parse account role: %w", err)
 						}
@@ -244,6 +289,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 								NamespaceAccesses: map[string]*auth.NamespaceAccess{},
 							},
 							Description: ctx.String(serviceAccountDescriptionFlagName),
+							Scope:       scope,
 						}
 
 						isAccountAdmin := ctx.String(accountRoleFlagName) == auth.AccountActionGroup_name[int32(auth.ACCOUNT_ACTION_GROUP_ADMIN)]
