@@ -25,7 +25,7 @@ var (
 
 func getScopeTypes() []string {
 	var types []string
-	for st, _ := range scopeTypes {
+	for st := range scopeTypes {
 		types = append(types, st)
 	}
 	return types
