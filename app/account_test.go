@@ -79,14 +79,7 @@ func (s *AccountTestSuite) TestListRegions() {
 
 	s.mockService.EXPECT().GetRegions(gomock.Any(), gomock.Any()).Return(&accountservice.GetRegionsResponse{
 		Regions: []*common.Region{
-			{
-				CloudProvider: "aws",
-				Name:          "us-west-2",
-				RegionId: &common.RegionID{
-					Name:     "us-west-2",
-					Provider: common.CLOUD_PROVIDER_AWS,
-				},
-			},
+			{CloudProvider: "aws", Name: "us-west-2"},
 		},
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("account", "list-regions"))

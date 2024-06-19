@@ -69,14 +69,9 @@ func (c *AccountClient) listRegions() ([]regionInfo, error) {
 
 	var regions []regionInfo
 	for _, r := range resp.Regions {
-		rid := r.GetRegionId()
-		cp, ok := cloudProviderMap[rid.GetProvider()]
-		if !ok {
-			cp = "unspecifed"
-		}
 		regions = append(regions, regionInfo{
-			CloudProviderRegion: rid.GetName(),
-			CloudProvider:       cp,
+			CloudProviderRegion: r.GetName(),
+			CloudProvider:       r.GetCloudProvider(),
 		})
 	}
 
