@@ -226,10 +226,9 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 						serviceAccountNameFlag,
 						RequestIDFlag,
 						&cli.StringFlag{
-							Name:     accountRoleFlagName,
-							Usage:    fmt.Sprintf("The account role to set on the service account; valid types are: %v", accountActionGroups),
-							Required: true,
-							Aliases:  []string{"ar"},
+							Name:    accountRoleFlagName,
+							Usage:   fmt.Sprintf("The account role to set on the service account; valid types are: %v", accountActionGroups),
+							Aliases: []string{"ar"},
 						},
 						&cli.StringSliceFlag{
 							Name:    namespacePermissionFlagName,
@@ -270,14 +269,18 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							}
 						}
 
-						// require an account role if the service account is unscoped.
-						if len(ctx.String(accountRoleFlagName)) == 0 && scope == nil {
-							return fmt.Errorf("account role must be specified; valid types are %v", accountActionGroups)
-						}
-
-						acctActionGroup, err := toOptionalAccountActionGroup(ctx.String(accountRoleFlagName))
-						if err != nil {
-							return fmt.Errorf("failed to parse account role: %w", err)
+						var acctActionGroup auth.AccountActionGroup
+						if scope == nil {
+							if len(ctx.String(accountRoleFlagName)) == 0 {
+								return fmt.Errorf("account role must be specified; valid types are %v", accountActionGroups)
+							}
+							ag, err := toAccountActionGroup(ctx.String(accountRoleFlagName))
+							if err != nil {
+								return fmt.Errorf("failed to parse account role: %w", err)
+							}
+							acctActionGroup = ag
+						} else if scope.Type == auth.SERVICE_ACCOUNT_SCOPE_TYPE_NAMESPACE && len(ctx.String(accountRoleFlagName)) > 0 {
+							return fmt.Errorf("account role must be empty when creating a namespace scoped service account")
 						}
 
 						spec := &auth.ServiceAccountSpec{
