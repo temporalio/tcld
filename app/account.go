@@ -8,8 +8,16 @@ import (
 
 	"github.com/temporalio/tcld/protogen/api/account/v1"
 	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
+	"github.com/temporalio/tcld/protogen/api/common/v1"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
+)
+
+var (
+	cloudProviderMap = map[common.RegionID_CloudProvider]string{
+		common.CLOUD_PROVIDER_AWS: "aws",
+		common.CLOUD_PROVIDER_GCP: "gcp",
+	}
 )
 
 type AccountClient struct {
@@ -61,9 +69,10 @@ func (c *AccountClient) listRegions() ([]regionInfo, error) {
 
 	var regions []regionInfo
 	for _, r := range resp.Regions {
+		rid := r.GetRegionId()
 		regions = append(regions, regionInfo{
-			CloudProviderRegion: r.GetName(),
-			CloudProvider:       r.GetCloudProvider(),
+			CloudProviderRegion: rid.GetName(),
+			CloudProvider:       cloudProviderMap[rid.GetProvider()],
 		})
 	}
 
