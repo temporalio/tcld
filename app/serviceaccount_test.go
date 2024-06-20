@@ -108,7 +108,7 @@ func (s *ServiceAccountTestSuite) TestCreateServiceAccount() {
 	s.EqualError(s.RunCmd("service-account", "create", "--name", "test name", "--scope-type", "namespace"), "both scope type and scope ID must be provided")
 	s.EqualError(s.RunCmd("service-account", "create", "--name", "test name", "--scope-id", "test.ns"), "both scope type and scope ID must be provided")
 	s.EqualError(s.RunCmd("service-account", "create", "--name", "test name", "--scope-type", "invalid", "--scope-id", "test.ns"), "invalid scope type: invalid")
-	s.EqualError(s.RunCmd("service-account", "create", "--name", "test name", "--scope-type", "namespace", "--scope-id", "test.ns", "--account-role", "Read"), "account role must be empty when creating a namespace scoped service account")
+	s.EqualError(s.RunCmd("service-account", "create", "--name", "test name", "--scope-type", "namespace", "--scope-id", "test.ns", "--account-role", "Read"), "namespace scoped service accounts may not have an account role")
 	s.ErrorContains(s.RunCmd("service-account", "create", "--name", "test name"), "account role must be specified")
 
 	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.CreateServiceAccountResponse{
