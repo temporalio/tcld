@@ -98,7 +98,7 @@ func (s *ServerConnectionTestSuite) TeardownSubtest() {
 	s.TeardownTest()
 }
 
-func (s *ServerConnectionTestSuite) AssertMD(apiVersion, token string) {
+func (s *ServerConnectionTestSuite) assertMetadata(apiVersion, token string) {
 	md := s.testService.receivedMD
 	buildInfo := NewBuildInfo()
 	version := getHeaderValue(md, VersionHeader)
@@ -209,14 +209,14 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 				RequestId: "test-request-id",
 			})
 			s.NoError(err)
-			s.AssertMD(LegacyTemporalCloudAPIVersion, tc.expectedToken)
+			s.assertMetadata(LegacyTemporalCloudAPIVersion, tc.expectedToken)
 
 			cloudClient := cloudservice.NewCloudServiceClient(conn)
 			_, err = cloudClient.GetAsyncOperation(connCtx, &cloudservice.GetAsyncOperationRequest{
 				AsyncOperationId: "test-async-operation-id",
 			})
 			s.NoError(err)
-			s.AssertMD(TemporalCloudAPIVersion, tc.expectedToken)
+			s.assertMetadata(TemporalCloudAPIVersion, tc.expectedToken)
 		})
 	}
 }
