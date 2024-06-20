@@ -65,7 +65,6 @@ func UnaryVersionInterceptor(
 	invoker grpc.UnaryInvoker,
 	opts ...grpc.CallOption,
 ) error {
-	fmt.Printf("method: %s", method)
 	if TemporalCloudAPIMethodRegex.MatchString(method) {
 		ctx = metadata.AppendToOutgoingContext(ctx, TemporalCloudAPIVersionHeader, TemporalCloudAPIVersion)
 	} else {
