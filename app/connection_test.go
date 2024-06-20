@@ -114,7 +114,7 @@ func (s *ServerConnectionTestSuite) assertMetadata(apiVersion, token string) {
 	require.Len(s.T(), auth, 2)
 
 	s.Equal(strings.ToLower(credentials.AuthorizationBearer), strings.ToLower(auth[0]))
-	s.Equal(auth[1], token)
+	s.Equal(token, auth[1])
 }
 
 func (s *ServerConnectionTestSuite) TestGetServerConnection() {
