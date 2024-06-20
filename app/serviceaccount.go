@@ -280,7 +280,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							}
 							acctActionGroup = ag
 						} else if scope.Type == auth.SERVICE_ACCOUNT_SCOPE_TYPE_NAMESPACE && len(ctx.String(accountRoleFlagName)) > 0 {
-							return fmt.Errorf("account role must be empty when creating a namespace scoped service account")
+							return fmt.Errorf("namespace scoped service accounts may not have an account role")
 						}
 
 						spec := &auth.ServiceAccountSpec{
