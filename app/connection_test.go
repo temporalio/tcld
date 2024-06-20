@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/app/credentials"
+	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
+	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	"github.com/temporalio/tcld/protogen/api/requestservice/v1"
 	"github.com/urfave/cli/v2"
@@ -29,6 +31,7 @@ const (
 
 type testServer struct {
 	requestservice.UnimplementedRequestServiceServer
+	cloudservice.UnimplementedCloudServiceServer
 
 	receivedMD metadata.MD
 }
@@ -41,6 +44,18 @@ func (s *testServer) GetRequestStatus(ctx context.Context, req *requestservice.G
 		RequestStatus: &request.RequestStatus{
 			RequestId: "test-request-id",
 			State:     request.STATE_FULFILLED,
+		},
+	}, nil
+}
+
+func (s *testServer) GetAsyncOperation(ctx context.Context, req *cloudservice.GetAsyncOperationRequest) (*cloudservice.GetAsyncOperationResponse, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	s.receivedMD = md.Copy()
+
+	return &cloudservice.GetAsyncOperationResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			Id:    "test-id",
+			State: "fulfilled",
 		},
 	}, nil
 }
@@ -60,7 +75,10 @@ func (s *ServerConnectionTestSuite) SetupTest() {
 	s.listener = bufconn.Listen(1024 * 1024)
 	s.grpcSrv = grpc.NewServer()
 	s.testService = &testServer{}
+
 	requestservice.RegisterRequestServiceServer(s.grpcSrv, s.testService)
+	cloudservice.RegisterCloudServiceServer(s.grpcSrv, s.testService)
+
 	go func() {
 		err := s.grpcSrv.Serve(s.listener)
 		require.NoError(s.T(), err)
@@ -78,6 +96,25 @@ func (s *ServerConnectionTestSuite) SetupSubtest() {
 
 func (s *ServerConnectionTestSuite) TeardownSubtest() {
 	s.TeardownTest()
+}
+
+func (s *ServerConnectionTestSuite) assertMetadata(apiVersion, token string) {
+	md := s.testService.receivedMD
+	buildInfo := NewBuildInfo()
+	version := getHeaderValue(md, VersionHeader)
+	s.Equal(buildInfo.Version, version)
+
+	commit := getHeaderValue(md, CommitHeader)
+	s.Equal(buildInfo.Commit, commit)
+
+	v := getHeaderValue(md, TemporalCloudAPIVersionHeader)
+	s.Equal(apiVersion, v)
+
+	auth := strings.SplitN(getHeaderValue(md, credentials.AuthorizationHeader), " ", 2)
+	require.Len(s.T(), auth, 2)
+
+	s.Equal(strings.ToLower(credentials.AuthorizationBearer), strings.ToLower(auth[0]))
+	s.Equal(token, auth[1])
 }
 
 func (s *ServerConnectionTestSuite) TestGetServerConnection() {
@@ -172,20 +209,14 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 				RequestId: "test-request-id",
 			})
 			s.NoError(err)
-			md := s.testService.receivedMD
+			s.assertMetadata(LegacyTemporalCloudAPIVersion, tc.expectedToken)
 
-			buildInfo := NewBuildInfo()
-			version := getHeaderValue(md, VersionHeader)
-			s.Equal(buildInfo.Version, version)
-
-			commit := getHeaderValue(md, CommitHeader)
-			s.Equal(buildInfo.Commit, commit)
-
-			auth := strings.SplitN(getHeaderValue(md, credentials.AuthorizationHeader), " ", 2)
-			require.Len(s.T(), auth, 2)
-
-			s.Equal(strings.ToLower(credentials.AuthorizationBearer), strings.ToLower(auth[0]))
-			s.Equal(auth[1], tc.expectedToken)
+			cloudClient := cloudservice.NewCloudServiceClient(conn)
+			_, err = cloudClient.GetAsyncOperation(connCtx, &cloudservice.GetAsyncOperationRequest{
+				AsyncOperationId: "test-async-operation-id",
+			})
+			s.NoError(err)
+			s.assertMetadata(TemporalCloudAPIVersion, tc.expectedToken)
 		})
 	}
 }

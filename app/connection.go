@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/url"
+	"regexp"
 
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
@@ -20,7 +21,12 @@ const (
 	VersionHeader                 = "tcld-version"
 	CommitHeader                  = "tcld-commit"
 	TemporalCloudAPIVersionHeader = "temporal-cloud-api-version"
+	LegacyTemporalCloudAPIVersion = "2024-03-18-00"
 	TemporalCloudAPIVersion       = "2024-05-13-00"
+)
+
+var (
+	TemporalCloudAPIMethodRegex = regexp.MustCompile(`^\/temporal\.api\.cloud\.cloudservice\.v1\.CloudService\/[^\/]*$`)
 )
 
 func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Context, *grpc.ClientConn, error) {
@@ -47,13 +53,30 @@ func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Conte
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, VersionHeader, buildInfo.Version)
 	ctx = metadata.AppendToOutgoingContext(ctx, CommitHeader, buildInfo.Commit)
-	ctx = metadata.AppendToOutgoingContext(ctx, TemporalCloudAPIVersionHeader, TemporalCloudAPIVersion)
 
 	return ctx, conn, nil
 }
 
+func unaryVersionInterceptor(
+	ctx context.Context,
+	method string,
+	req, reply interface{},
+	cc *grpc.ClientConn,
+	invoker grpc.UnaryInvoker,
+	opts ...grpc.CallOption,
+) error {
+	if TemporalCloudAPIMethodRegex.MatchString(method) {
+		ctx = metadata.AppendToOutgoingContext(ctx, TemporalCloudAPIVersionHeader, TemporalCloudAPIVersion)
+	} else {
+		ctx = metadata.AppendToOutgoingContext(ctx, TemporalCloudAPIVersionHeader, LegacyTemporalCloudAPIVersion)
+	}
+	return invoker(ctx, method, req, reply, cc, opts...)
+}
+
 func defaultDialOptions(c *cli.Context, addr *url.URL) ([]grpc.DialOption, error) {
-	var opts []grpc.DialOption
+	opts := []grpc.DialOption{
+		grpc.WithUnaryInterceptor(unaryVersionInterceptor),
+	}
 
 	creds, err := newRPCCredential(c)
 	if err != nil {
