@@ -21,7 +21,7 @@ const (
 	VersionHeader                 = "tcld-version"
 	CommitHeader                  = "tcld-commit"
 	TemporalCloudAPIVersionHeader = "temporal-cloud-api-version"
-	TemporalAPIVersion            = "2024-03-18-00" /* legacy cloud API */
+	LegacyTemporalCloudAPIVersion = "2024-03-18-00"
 	TemporalCloudAPIVersion       = "2024-05-13-00"
 )
 
@@ -57,7 +57,7 @@ func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Conte
 	return ctx, conn, nil
 }
 
-func UnaryVersionInterceptor(
+func unaryVersionInterceptor(
 	ctx context.Context,
 	method string,
 	req, reply interface{},
@@ -68,14 +68,14 @@ func UnaryVersionInterceptor(
 	if TemporalCloudAPIMethodRegex.MatchString(method) {
 		ctx = metadata.AppendToOutgoingContext(ctx, TemporalCloudAPIVersionHeader, TemporalCloudAPIVersion)
 	} else {
-		ctx = metadata.AppendToOutgoingContext(ctx, TemporalCloudAPIVersionHeader, TemporalAPIVersion)
+		ctx = metadata.AppendToOutgoingContext(ctx, TemporalCloudAPIVersionHeader, LegacyTemporalCloudAPIVersion)
 	}
 	return invoker(ctx, method, req, reply, cc, opts...)
 }
 
 func defaultDialOptions(c *cli.Context, addr *url.URL) ([]grpc.DialOption, error) {
 	opts := []grpc.DialOption{
-		grpc.WithUnaryInterceptor(UnaryVersionInterceptor),
+		grpc.WithUnaryInterceptor(unaryVersionInterceptor),
 	}
 
 	creds, err := newRPCCredential(c)
