@@ -13,8 +13,8 @@ const (
 	serviceAccountIDFlagName          = "service-account-id"
 	serviceAccountNameFlagName        = "name"
 	serviceAccountDescriptionFlagName = "description"
-	serviceAccountScopeType           = "scope-type"
-	serviceAccountScopeID             = "scope-id"
+	serviceAccountScopeTypeFlagName   = "scope-type"
+	serviceAccountScopeIDFlagName     = "scope-id"
 )
 
 var (
@@ -236,12 +236,12 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							Aliases: []string{"np"},
 						},
 						&cli.StringFlag{
-							Name:    serviceAccountScopeType,
+							Name:    serviceAccountScopeTypeFlagName,
 							Usage:   fmt.Sprintf("The service account scope type; valid types are: %v", getScopeTypes()),
 							Aliases: []string{"st"},
 						},
 						&cli.StringFlag{
-							Name:    serviceAccountScopeID,
+							Name:    serviceAccountScopeIDFlagName,
 							Usage:   "The entity ID that the service account is scoped to (e.g. namespace ID if creating a namespace scoped service account)",
 							Aliases: []string{"sid"},
 						},
@@ -251,8 +251,8 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							return fmt.Errorf("service account name must be provided with '--%s'", serviceAccountNameFlagName)
 						}
 
-						scopeType := ctx.String(serviceAccountScopeType)
-						scopeID := ctx.String(serviceAccountScopeID)
+						scopeType := ctx.String(serviceAccountScopeTypeFlagName)
+						scopeID := ctx.String(serviceAccountScopeIDFlagName)
 						if (len(scopeType) > 0) != (len(scopeID) > 0) {
 							return fmt.Errorf("both scope type and scope ID must be provided")
 						}
