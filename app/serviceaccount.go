@@ -269,7 +269,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							}
 						}
 
-						var acctActionGroup auth.AccountActionGroup
+						var access *auth.AccountAccess
 						if scope == nil {
 							if len(ctx.String(accountRoleFlagName)) == 0 {
 								return fmt.Errorf("account role must be specified; valid types are %v", accountActionGroups)
@@ -278,7 +278,9 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							if err != nil {
 								return fmt.Errorf("failed to parse account role: %w", err)
 							}
-							acctActionGroup = ag
+							access = &auth.AccountAccess{
+								Role: ag,
+							}
 						} else if scope.Type == auth.SERVICE_ACCOUNT_SCOPE_TYPE_NAMESPACE && len(ctx.String(accountRoleFlagName)) > 0 {
 							return fmt.Errorf("namespace scoped service accounts may not have an account role")
 						}
@@ -286,9 +288,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 						spec := &auth.ServiceAccountSpec{
 							Name: ctx.String(serviceAccountNameFlagName),
 							Access: &auth.Access{
-								AccountAccess: &auth.AccountAccess{
-									Role: acctActionGroup,
-								},
+								AccountAccess:     access,
 								NamespaceAccesses: map[string]*auth.NamespaceAccess{},
 							},
 							Description: ctx.String(serviceAccountDescriptionFlagName),
