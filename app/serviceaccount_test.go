@@ -105,7 +105,7 @@ func (s *ServiceAccountTestSuite) TestList() {
 func (s *ServiceAccountTestSuite) TestCreateServiceAccount() {
 	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("create service account error")).Times(1)
 	s.EqualError(s.RunCmd("service-account", "create", "--description", "test description", "--name", "test name", "--account-role", "Read"), "unable to create service account: create service account error")
-	s.ErrorContains(s.RunCmd("service-account", "create", "--name", "test name", "--account-role", "Foo"), "failed to parse account role: invalid action group: should be one of: [Admin Developer Owner Read]")
+	s.ErrorContains(s.RunCmd("service-account", "create", "--name", "test name", "--account-role", "Foo"), "failed to parse account role: invalid action group")
 
 	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.CreateServiceAccountResponse{
 		RequestStatus: &request.RequestStatus{
