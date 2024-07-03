@@ -210,9 +210,10 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 						serviceAccountNameFlag,
 						RequestIDFlag,
 						&cli.StringFlag{
-							Name:    accountRoleFlagName,
-							Usage:   fmt.Sprintf("The account role to set on the service account; valid types are: %v", accountActionGroups),
-							Aliases: []string{"ar"},
+							Name:     accountRoleFlagName,
+							Usage:    fmt.Sprintf("The account role to set on the service account; valid types are: %v", accountActionGroups),
+							Required: true,
+							Aliases:  []string{"ar"},
 						},
 						&cli.StringSliceFlag{
 							Name:    namespacePermissionFlagName,
@@ -225,21 +226,21 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							return fmt.Errorf("service account name must be provided with '--%s'", serviceAccountNameFlagName)
 						}
 
-						var access *auth.AccountAccess
-						if len(ctx.String(accountRoleFlagName)) > 0 {
-							ag, err := toAccountActionGroup(ctx.String(accountRoleFlagName))
-							if err != nil {
-								return fmt.Errorf("failed to parse account role: %w", err)
-							}
-							access = &auth.AccountAccess{
-								Role: ag,
-							}
+						if len(ctx.String(accountRoleFlagName)) == 0 {
+							return fmt.Errorf("account role must be specified; valid types are %v", accountActionGroups)
+						}
+
+						ag, err := toAccountActionGroup(ctx.String(accountRoleFlagName))
+						if err != nil {
+							return fmt.Errorf("failed to parse account role: %w", err)
 						}
 
 						spec := &auth.ServiceAccountSpec{
 							Name: ctx.String(serviceAccountNameFlagName),
 							Access: &auth.Access{
-								AccountAccess:     access,
+								AccountAccess: &auth.AccountAccess{
+									Role: ag,
+								},
 								NamespaceAccesses: map[string]*auth.NamespaceAccess{},
 							},
 							Description: ctx.String(serviceAccountDescriptionFlagName),
