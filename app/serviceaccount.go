@@ -225,22 +225,24 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							return fmt.Errorf("service account name must be provided with '--%s'", serviceAccountNameFlagName)
 						}
 
-						spec := &auth.ServiceAccountSpec{
-							Name: ctx.String(serviceAccountNameFlagName),
-							Access: &auth.Access{
-								NamespaceAccesses: map[string]*auth.NamespaceAccess{},
-							},
-							Description: ctx.String(serviceAccountDescriptionFlagName),
-						}
-
+						var access *auth.AccountAccess
 						if len(ctx.String(accountRoleFlagName)) > 0 {
 							ag, err := toAccountActionGroup(ctx.String(accountRoleFlagName))
 							if err != nil {
 								return fmt.Errorf("failed to parse account role: %w", err)
 							}
-							spec.Access.AccountAccess = &auth.AccountAccess{
+							access = &auth.AccountAccess{
 								Role: ag,
 							}
+						}
+
+						spec := &auth.ServiceAccountSpec{
+							Name: ctx.String(serviceAccountNameFlagName),
+							Access: &auth.Access{
+								AccountAccess:     access,
+								NamespaceAccesses: map[string]*auth.NamespaceAccess{},
+							},
+							Description: ctx.String(serviceAccountDescriptionFlagName),
 						}
 
 						isAccountAdmin := ctx.String(accountRoleFlagName) == auth.AccountActionGroup_name[int32(auth.ACCOUNT_ACTION_GROUP_ADMIN)]
