@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
@@ -21,6 +22,7 @@ func getAccountActionGroups() []string {
 			rv = append(rv, n)
 		}
 	}
+	slices.Sort(rv)
 	return rv
 }
 
@@ -31,6 +33,7 @@ func getNamespaceActionGroups() []string {
 			rv = append(rv, n)
 		}
 	}
+	slices.Sort(rv)
 	return rv
 }
 
