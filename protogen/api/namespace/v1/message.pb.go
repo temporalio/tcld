@@ -235,7 +235,6 @@ func (m *NamespaceSpec) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_NamespaceSpec proto.InternalMessageInfo
 
-// Deprecated: Do not use.
 func (m *NamespaceSpec) GetRegion() string {
 	if m != nil {
 		return m.Region
@@ -292,7 +291,6 @@ func (m *NamespaceSpec) GetPassiveRegions() []string {
 	return nil
 }
 
-// Deprecated: Do not use.
 func (m *NamespaceSpec) GetCloudProvider() string {
 	if m != nil {
 		return m.CloudProvider
