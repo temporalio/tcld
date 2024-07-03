@@ -13,23 +13,7 @@ const (
 	serviceAccountIDFlagName          = "service-account-id"
 	serviceAccountNameFlagName        = "name"
 	serviceAccountDescriptionFlagName = "description"
-	serviceAccountScopeTypeFlagName   = "scope-type"
-	serviceAccountScopeIDFlagName     = "scope-id"
 )
-
-var (
-	scopeTypes = map[string]auth.ServiceAccountScopeType{
-		"namespace": auth.SERVICE_ACCOUNT_SCOPE_TYPE_NAMESPACE,
-	}
-)
-
-func getScopeTypes() []string {
-	var types []string
-	for st := range scopeTypes {
-		types = append(types, st)
-	}
-	return types
-}
 
 var (
 	serviceAccountIDFlag = &cli.StringFlag{
@@ -235,64 +219,28 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"namespace=permission\"; valid types are: %v", namespaceActionGroups),
 							Aliases: []string{"np"},
 						},
-						&cli.StringFlag{
-							Name:    serviceAccountScopeTypeFlagName,
-							Usage:   fmt.Sprintf("The service account scope type; valid types are: %v", getScopeTypes()),
-							Aliases: []string{"st"},
-						},
-						&cli.StringFlag{
-							Name:    serviceAccountScopeIDFlagName,
-							Usage:   "The entity ID that the service account is scoped to (e.g. namespace ID if creating a namespace scoped service account)",
-							Aliases: []string{"sid"},
-						},
 					},
 					Action: func(ctx *cli.Context) error {
 						if len(ctx.String(serviceAccountNameFlagName)) == 0 {
 							return fmt.Errorf("service account name must be provided with '--%s'", serviceAccountNameFlagName)
 						}
 
-						scopeType := ctx.String(serviceAccountScopeTypeFlagName)
-						scopeID := ctx.String(serviceAccountScopeIDFlagName)
-						if (len(scopeType) > 0) != (len(scopeID) > 0) {
-							return fmt.Errorf("both scope type and scope ID must be provided")
+						spec := &auth.ServiceAccountSpec{
+							Name: ctx.String(serviceAccountNameFlagName),
+							Access: &auth.Access{
+								NamespaceAccesses: map[string]*auth.NamespaceAccess{},
+							},
+							Description: ctx.String(serviceAccountDescriptionFlagName),
 						}
 
-						var scope *auth.ServiceAccountScope
-						if len(scopeType) > 0 {
-							t, ok := scopeTypes[scopeType]
-							if !ok {
-								return fmt.Errorf("invalid scope type: %s", scopeType)
-							}
-							scope = &auth.ServiceAccountScope{
-								Type: t,
-								Id:   scopeID,
-							}
-						}
-
-						var access *auth.AccountAccess
-						if scope == nil {
-							if len(ctx.String(accountRoleFlagName)) == 0 {
-								return fmt.Errorf("account role must be specified; valid types are %v", accountActionGroups)
-							}
+						if len(ctx.String(accountRoleFlagName)) > 0 {
 							ag, err := toAccountActionGroup(ctx.String(accountRoleFlagName))
 							if err != nil {
 								return fmt.Errorf("failed to parse account role: %w", err)
 							}
-							access = &auth.AccountAccess{
+							spec.Access.AccountAccess = &auth.AccountAccess{
 								Role: ag,
 							}
-						} else if scope.Type == auth.SERVICE_ACCOUNT_SCOPE_TYPE_NAMESPACE && len(ctx.String(accountRoleFlagName)) > 0 {
-							return fmt.Errorf("namespace scoped service accounts may not have an account role")
-						}
-
-						spec := &auth.ServiceAccountSpec{
-							Name: ctx.String(serviceAccountNameFlagName),
-							Access: &auth.Access{
-								AccountAccess:     access,
-								NamespaceAccesses: map[string]*auth.NamespaceAccess{},
-							},
-							Description: ctx.String(serviceAccountDescriptionFlagName),
-							Scope:       scope,
 						}
 
 						isAccountAdmin := ctx.String(accountRoleFlagName) == auth.AccountActionGroup_name[int32(auth.ACCOUNT_ACTION_GROUP_ADMIN)]

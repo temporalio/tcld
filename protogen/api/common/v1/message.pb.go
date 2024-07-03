@@ -210,6 +210,7 @@ func (m *Region) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Region proto.InternalMessageInfo
 
+// Deprecated: Do not use.
 func (m *Region) GetCloudProvider() string {
 	if m != nil {
 		return m.CloudProvider
@@ -217,6 +218,7 @@ func (m *Region) GetCloudProvider() string {
 	return ""
 }
 
+// Deprecated: Do not use.
 func (m *Region) GetName() string {
 	if m != nil {
 		return m.Name
