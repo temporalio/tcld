@@ -105,11 +105,7 @@ func (s *ServiceAccountTestSuite) TestList() {
 func (s *ServiceAccountTestSuite) TestCreateServiceAccount() {
 	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("create service account error")).Times(1)
 	s.EqualError(s.RunCmd("service-account", "create", "--description", "test description", "--name", "test name", "--account-role", "Read"), "unable to create service account: create service account error")
-	s.EqualError(s.RunCmd("service-account", "create", "--name", "test name", "--scope-type", "namespace"), "both scope type and scope ID must be provided")
-	s.EqualError(s.RunCmd("service-account", "create", "--name", "test name", "--scope-id", "test.ns"), "both scope type and scope ID must be provided")
-	s.EqualError(s.RunCmd("service-account", "create", "--name", "test name", "--scope-type", "invalid", "--scope-id", "test.ns"), "invalid scope type: invalid")
-	s.EqualError(s.RunCmd("service-account", "create", "--name", "test name", "--scope-type", "namespace", "--scope-id", "test.ns", "--account-role", "Read"), "namespace scoped service accounts may not have an account role")
-	s.ErrorContains(s.RunCmd("service-account", "create", "--name", "test name"), "account role must be specified")
+	s.EqualError(s.RunCmd("service-account", "create", "--name", "test name", "--account-role", "Foo"), "failed to parse account role: invalid action group: should be one of: [Admin Developer Read Owner]")
 
 	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.CreateServiceAccountResponse{
 		RequestStatus: &request.RequestStatus{
