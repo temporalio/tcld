@@ -125,6 +125,19 @@ func (s *ServiceAccountTestSuite) TestCreateServiceAccount() {
 	s.NoError(s.RunCmd("service-account", "create", "--description", "test description", "--name", "test name", "--account-role", "Read", "--namespace-permission", "test-namespace=Read"))
 }
 
+func (s *ServiceAccountTestSuite) TestCreateScopedServiceAccount() {
+	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("create service account error")).Times(1)
+	s.EqualError(s.RunCmd("service-account", "create-scoped", "--description", "test description", "--name", "test name", "--namespace-permission", "test-namespace=Read"), "unable to create service account: create service account error")
+	s.EqualError(s.RunCmd("service-account", "create-scoped", "--description", "test description", "--name", "test name"), "namespace permission must be specified")
+
+	s.mockAuthService.EXPECT().CreateServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.CreateServiceAccountResponse{
+		RequestStatus: &request.RequestStatus{
+			State: request.STATE_FULFILLED,
+		},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("service-account", "create-scoped", "--description", "test description", "--name", "test name", "--namespace-permission", "test-namespace=Admin"))
+}
+
 func (s *ServiceAccountTestSuite) TestDeleteServiceAccount() {
 	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("get service account error")).Times(1)
 	s.EqualError(s.RunCmd("service-account", "delete", "--service-account-id", "test-service-account-id"), "unable to get service account: get service account error")

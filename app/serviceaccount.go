@@ -13,6 +13,7 @@ const (
 	serviceAccountIDFlagName          = "service-account-id"
 	serviceAccountNameFlagName        = "name"
 	serviceAccountDescriptionFlagName = "description"
+	serviceAccountScopedFlagName      = "scoped"
 )
 
 var (
@@ -217,8 +218,12 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 						},
 						&cli.StringSliceFlag{
 							Name:    namespacePermissionFlagName,
-							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"namespace=permission\"; valid types are: %v", namespaceActionGroups),
+							Usage:   fmt.Sprintf("Value must be \"<namespace>=<permission>\"; valid types are: %v", namespaceActionGroups),
 							Aliases: []string{"np"},
+						},
+						&cli.BoolFlag{
+							Name:  serviceAccountScopedFlagName,
+							Usage: "If enabled, creates a scoped service account (a service account restricted to a single namespace)",
 						},
 					},
 					Action: func(ctx *cli.Context) error {
@@ -250,7 +255,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 						namespacePermissionsList := ctx.StringSlice(namespacePermissionFlagName)
 						if len(namespacePermissionsList) > 0 {
 							if isAccountAdmin {
-								y, err := ConfirmPrompt(ctx, "Setting admin role on service account. All existing namespace permissions will be replaced, please confirm")
+								y, err := ConfirmPrompt(ctx, "Setting admin role on service account. All existing namespace permissions will be replacedplease confirm")
 								if err != nil {
 									return err
 								}
@@ -274,6 +279,57 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 										Permission: nsActionGroup,
 									}
 								}
+							}
+						}
+
+						return c.createServiceAccount(ctx, spec, ctx.String(RequestIDFlagName))
+					},
+				},
+				{
+					Name:    "create-scoped",
+					Usage:   "Create a namespace scoped service account (a service account restricted to a single namespace)",
+					Aliases: []string{"cs"},
+					Flags: []cli.Flag{
+						serviceAccountDescriptionFlag,
+						serviceAccountNameFlag,
+						RequestIDFlag,
+						&cli.StringFlag{
+							Name:    namespacePermissionFlagName,
+							Usage:   fmt.Sprintf("Value must be \"<namespace>=<permission>\"; valid types are: %v", namespaceActionGroups),
+							Aliases: []string{"np"},
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						if len(ctx.String(serviceAccountNameFlagName)) == 0 {
+							return fmt.Errorf("service account name must be provided with '--%s'", serviceAccountNameFlagName)
+						}
+
+						scopedNamespace := ctx.String(namespacePermissionFlagName)
+						if len(scopedNamespace) == 0 {
+							return fmt.Errorf("namespace permission must be specified")
+						}
+
+						spec := &auth.ServiceAccountSpec{
+							Name: ctx.String(serviceAccountNameFlagName),
+							Access: &auth.Access{
+								NamespaceAccesses: map[string]*auth.NamespaceAccess{},
+							},
+							Description: ctx.String(serviceAccountDescriptionFlagName),
+						}
+
+						nsMap, err := toNamespacePermissionsMap([]string{scopedNamespace})
+						if err != nil {
+							return fmt.Errorf("failed to read namespace permissions: %w", err)
+						}
+
+						for ns, perm := range nsMap {
+							nsActionGroup, err := toNamespaceActionGroup(perm)
+							if err != nil {
+								return fmt.Errorf("failed to parse %q namespace permission: %w", ns, err)
+							}
+
+							spec.Access.NamespaceAccesses[ns] = &auth.NamespaceAccess{
+								Permission: nsActionGroup,
 							}
 						}
 
