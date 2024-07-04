@@ -217,12 +217,8 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 						},
 						&cli.StringSliceFlag{
 							Name:    namespacePermissionFlagName,
-							Usage:   fmt.Sprintf("Value must be \"<namespace>=<permission>\"; valid types are: %v", namespaceActionGroups),
+							Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"<namespace>=<permission>\"; valid types are: %v", namespaceActionGroups),
 							Aliases: []string{"np"},
-						},
-						&cli.BoolFlag{
-							Name:  serviceAccountScopedFlagName,
-							Usage: "If enabled, creates a scoped service account (a service account restricted to a single namespace)",
 						},
 					},
 					Action: func(ctx *cli.Context) error {
