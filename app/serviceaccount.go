@@ -282,7 +282,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 				},
 				{
 					Name:    "create-scoped",
-					Usage:   "Create a namespace scoped service account (a service account restricted to a single namespace)",
+					Usage:   "Create a scoped service account (service account restricted to a single namespace)",
 					Aliases: []string{"cs"},
 					Flags: []cli.Flag{
 						serviceAccountDescriptionFlag,
