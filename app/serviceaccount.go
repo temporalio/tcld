@@ -13,7 +13,6 @@ const (
 	serviceAccountIDFlagName          = "service-account-id"
 	serviceAccountNameFlagName        = "name"
 	serviceAccountDescriptionFlagName = "description"
-	serviceAccountScopedFlagName      = "scoped"
 )
 
 var (
