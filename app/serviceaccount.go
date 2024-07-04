@@ -255,7 +255,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 						namespacePermissionsList := ctx.StringSlice(namespacePermissionFlagName)
 						if len(namespacePermissionsList) > 0 {
 							if isAccountAdmin {
-								y, err := ConfirmPrompt(ctx, "Setting admin role on service account. All existing namespace permissions will be replacedplease confirm")
+								y, err := ConfirmPrompt(ctx, "Setting admin role on service account. All existing namespace permissions will be replaced, please confirm")
 								if err != nil {
 									return err
 								}
