@@ -84,8 +84,10 @@ func defaultDialOptions(c *cli.Context, addr *url.URL) ([]grpc.DialOption, error
 	}
 
 	opts := []grpc.DialOption{
-		grpc.WithUnaryInterceptor(unaryVersionInterceptor),
-		grpc.WithChainUnaryInterceptor(grpcretry.UnaryClientInterceptor(retryOpts...)),
+		grpc.WithChainUnaryInterceptor(
+			unaryVersionInterceptor,
+			grpcretry.UnaryClientInterceptor(retryOpts...),
+		),
 	}
 
 	creds, err := newRPCCredential(c)
