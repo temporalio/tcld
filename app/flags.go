@@ -58,7 +58,7 @@ var (
 	}
 	RegionFlag = &cli.StringFlag{
 		Name:     RegionFlagName,
-		Usage:    "The region hosted on temporal cloud",
+		Usage:    "The region to use for the request, if not set the server will use the namespace's region",
 		Aliases:  []string{"re"},
 		Required: false,
 	}
