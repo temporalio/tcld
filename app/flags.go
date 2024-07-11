@@ -18,6 +18,7 @@ const (
 	InsecureConnectionFlagName = "insecure"
 	EnableDebugLogsFlagName    = "enable-debug-logs"
 	AuthenticationFlagCategory = "Authentication:"
+	RegionFlagName             = "region"
 
 	// APIKeyVersionTag indicates the state of API keys. This should be removed when fully released.
 	APIKeyVersionTag = "preview"
@@ -54,6 +55,12 @@ var (
 		Aliases:  []string{"n"},
 		EnvVars:  []string{"TEMPORAL_CLOUD_NAMESPACE"},
 		Required: true,
+	}
+	RegionFlag = &cli.StringFlag{
+		Name:     RegionFlagName,
+		Usage:    "The region hosted on temporal cloud",
+		Aliases:  []string{"re"},
+		Required: false,
 	}
 	RequestIDFlag = &cli.StringFlag{
 		Name:    RequestIDFlagName,

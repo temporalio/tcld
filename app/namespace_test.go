@@ -1696,6 +1696,25 @@ func (s *NamespaceTestSuite) TestCreateExportS3Sink() {
 			expectErr:    true,
 			expectErrMsg: "unable to get namespace: invalid namespace returned by server",
 		},
+		{
+			name:      "uses region when provided as arg",
+			args:      []string{"namespace", "es", "s3", "create", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--region", "us-east-1"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectRequest: func(r *namespaceservice.CreateExportSinkRequest) {
+				r.Namespace = ns
+				r.Spec = &sink.ExportSinkSpec{
+					Name:            "sink1",
+					Enabled:         true,
+					DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
+					S3Sink: &sink.S3Spec{
+						RoleName:     "TestRole",
+						BucketName:   "testBucket",
+						Region:       "us-east-1",
+						AwsAccountId: "123456789012",
+					},
+				}
+			},
+		},
 	}
 
 	for _, tc := range tests {
