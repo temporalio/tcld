@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
+	"time"
 
+	grpcretry "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/retry"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -74,8 +77,17 @@ func unaryVersionInterceptor(
 }
 
 func defaultDialOptions(c *cli.Context, addr *url.URL) ([]grpc.DialOption, error) {
+	retryOpts := []grpcretry.CallOption{
+		grpcretry.WithBackoff(grpcretry.BackoffExponentialWithJitter(250*time.Millisecond, 0.1)),
+		grpcretry.WithMax(5),
+		grpcretry.WithCodes(codes.Unavailable, codes.ResourceExhausted),
+	}
+
 	opts := []grpc.DialOption{
-		grpc.WithUnaryInterceptor(unaryVersionInterceptor),
+		grpc.WithChainUnaryInterceptor(
+			unaryVersionInterceptor,
+			grpcretry.UnaryClientInterceptor(retryOpts...),
+		),
 	}
 
 	creds, err := newRPCCredential(c)
