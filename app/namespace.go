@@ -38,6 +38,7 @@ const (
 	codecEndpointFlagName            = "endpoint"
 	codecPassAccessTokenFlagName     = "pass-access-token"
 	codecIncludeCredentialsFlagName  = "include-credentials"
+	sinkRegionFlagName               = "region"
 )
 
 const (
@@ -1535,7 +1536,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					s3BucketFlagRequired,
 					RequestIDFlag,
 					kmsArnFlag,
-					RegionFlag,
+					&cli.StringFlag{
+						Name:     sinkRegionFlagName,
+						Usage:    "The region to use for the request, if not set the server will use the namespace's region",
+						Aliases:  []string{"re"},
+						Required: false,
+					},
 				},
 				Action: func(ctx *cli.Context) error {
 					awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagRequired.Name))
@@ -1544,7 +1550,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					}
 
 					namespace := ctx.String(NamespaceFlagName)
-					region := ctx.String(RegionFlag.Name)
+					region := ctx.String(sinkRegionFlagName)
 
 					if len(region) == 0 {
 						ns, err := c.getNamespace(namespace)
