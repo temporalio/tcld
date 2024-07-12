@@ -422,7 +422,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 								endpointDescriptionOptionalFlag,
 								endpointDescriptionFileOptionalFlag,
 								unsetEndpointDescriptionOptionalFlag,
-								targetNamespaceFlagOptional,
+								// targetNamespaceFlagOptional, TODO: Uncomment when we support updating target namespace
 								targetTaskQueueFlagOptional,
 								ResourceVersionFlag,
 								RequestIDFlag,
