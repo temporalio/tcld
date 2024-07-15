@@ -138,6 +138,12 @@ var (
 		Name:  "gcs-bucket",
 		Usage: "GCS bucket of the sink",
 	}
+	sinkRegionFlag = &cli.StringFlag{
+		Name:     sinkRegionFlagName,
+		Usage:    "The region to use for the request, if not set the server will use the namespace's region",
+		Aliases:  []string{"re"},
+		Required: false,
+	}
 )
 
 type NamespaceClient struct {
@@ -1536,12 +1542,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					s3BucketFlagRequired,
 					RequestIDFlag,
 					kmsArnFlag,
-					&cli.StringFlag{
-						Name:     sinkRegionFlagName,
-						Usage:    "The region to use for the request, if not set the server will use the namespace's region",
-						Aliases:  []string{"re"},
-						Required: false,
-					},
+					sinkRegionFlag,
 				},
 				Action: func(ctx *cli.Context) error {
 					awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagRequired.Name))
