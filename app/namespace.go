@@ -38,6 +38,7 @@ const (
 	codecEndpointFlagName            = "endpoint"
 	codecPassAccessTokenFlagName     = "pass-access-token"
 	codecIncludeCredentialsFlagName  = "include-credentials"
+	sinkRegionFlagName               = "region"
 )
 
 const (
@@ -136,6 +137,12 @@ var (
 	gcsBucketFlagOptional = &cli.StringFlag{
 		Name:  "gcs-bucket",
 		Usage: "GCS bucket of the sink",
+	}
+	sinkRegionFlag = &cli.StringFlag{
+		Name:     sinkRegionFlagName,
+		Usage:    "The region to use for the request, if not set the server will use the namespace's region",
+		Aliases:  []string{"re"},
+		Required: false,
 	}
 )
 
@@ -1535,6 +1542,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					s3BucketFlagRequired,
 					RequestIDFlag,
 					kmsArnFlag,
+					sinkRegionFlag,
 				},
 				Action: func(ctx *cli.Context) error {
 					awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagRequired.Name))
@@ -1543,9 +1551,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					}
 
 					namespace := ctx.String(NamespaceFlagName)
-					ns, err := c.getNamespace(namespace)
-					if err != nil {
-						return fmt.Errorf("unable to get namespace: %v", err)
+					region := ctx.String(sinkRegionFlagName)
+
+					if len(region) == 0 {
+						ns, err := c.getNamespace(namespace)
+						if err != nil {
+							return fmt.Errorf("unable to get namespace: %v", err)
+						}
+						region = ns.Spec.Region
 					}
 
 					request := &namespaceservice.CreateExportSinkRequest{
@@ -1557,7 +1570,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							S3Sink: &sink.S3Spec{
 								RoleName:     roleName,
 								BucketName:   ctx.String(s3BucketFlagRequired.Name),
-								Region:       ns.Spec.Region,
+								Region:       region,
 								KmsArn:       ctx.String(kmsArnFlag.Name),
 								AwsAccountId: awsAccountID,
 							},
@@ -1674,7 +1687,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					if c.isS3BucketChange(ctx, sink) {
 						sink.Spec.S3Sink.BucketName = ctx.String(s3BucketFlagOptional.Name)
 					}
-
 					request := &namespaceservice.UpdateExportSinkRequest{
 						Namespace:       ctx.String(NamespaceFlagName),
 						Spec:            sink.Spec,
