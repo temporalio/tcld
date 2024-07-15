@@ -298,6 +298,12 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 		Usage:    "Namespace that is allowed to call this endpoint",
 		Required: true,
 	}
+	allowNamespaceFlagOptional := &cli.StringSliceFlag{
+		Name:     allowNamespaceFlag.Name,
+		Aliases:  allowNamespaceFlag.Aliases,
+		Usage:    allowNamespaceFlag.Usage + " (optional)",
+		Required: false,
+	}
 	namespaceFlag := &cli.StringSliceFlag{
 		Name:     "namespace",
 		Aliases:  []string{"ns"},
@@ -386,7 +392,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 								endpointDescriptionFileOptionalFlag,
 								targetNamespaceFlag,
 								targetTaskQueueFlag,
-								allowNamespaceFlag,
+								allowNamespaceFlagOptional,
 								RequestIDFlag,
 							},
 							Action: func(ctx *cli.Context) error {
@@ -400,7 +406,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 									endpointDescription,
 									ctx.String(targetNamespaceFlag.Name),
 									ctx.String(targetTaskQueueFlag.Name),
-									ctx.StringSlice(allowNamespaceFlag.Name),
+									ctx.StringSlice(allowNamespaceFlagOptional.Name),
 									ctx.String(RequestIDFlag.Name),
 								)
 								if err != nil {
@@ -422,7 +428,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 								endpointDescriptionOptionalFlag,
 								endpointDescriptionFileOptionalFlag,
 								unsetEndpointDescriptionOptionalFlag,
-								targetNamespaceFlagOptional,
+								// targetNamespaceFlagOptional, TODO: Uncomment when we support updating target namespace
 								targetTaskQueueFlagOptional,
 								ResourceVersionFlag,
 								RequestIDFlag,
