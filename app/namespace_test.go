@@ -2246,6 +2246,32 @@ func (s *NamespaceTestSuite) TestValidateExportS3Sink() {
 			expectErr: true,
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		},
+		{
+			name: "Validate export sinks succeeds",
+			args: []string{"namespace", "es", "s3", "validate", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--region", "us-east-1"},
+			expectRequest: func(r *namespaceservice.ValidateExportSinkRequest) {
+				r.Namespace = ns
+				r.Spec = &sink.ExportSinkSpec{
+					Name:            "sink1",
+					DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
+					S3Sink: &sink.S3Spec{
+						RoleName:     "TestRole",
+						BucketName:   "testBucket",
+						Region:       "us-east-1",
+						AwsAccountId: "123456789012",
+					},
+				}
+			},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace = &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						Region: "us-east-1",
+					},
+				}
+			},
+			expectErr: false,
+		},
 	}
 
 	for _, tc := range tests {
@@ -2253,7 +2279,7 @@ func (s *NamespaceTestSuite) TestValidateExportS3Sink() {
 			if tc.expectGet != nil {
 				getResp := namespaceservice.GetNamespaceResponse{}
 				tc.expectGet(&getResp)
-				s.mockService.EXPECT().GetNamespace(gomock.Any(), gomock.Any()).Return(&getResp, nil).Times(1)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), gomock.Any()).Return(&getResp, nil).AnyTimes()
 			}
 
 			if tc.expectRequest != nil {

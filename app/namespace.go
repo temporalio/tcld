@@ -1596,14 +1596,18 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					sinkAssumedRoleFlagRequired,
 					s3BucketFlagRequired,
 					kmsArnFlag,
+					sinkRegionFlag,
 				},
 				Action: func(ctx *cli.Context) error {
 					namespace := ctx.String(NamespaceFlagName)
-					ns, err := c.getNamespace(namespace)
-					if err != nil {
-						return fmt.Errorf("validation failed: unable to get namespace: %v", err)
+					region := ctx.String(sinkRegionFlagName)
+					if len(region) == 0 {
+						ns, err := c.getNamespace(namespace)
+						if err != nil {
+							return fmt.Errorf("validation failed: unable to get namespace: %v", err)
+						}
+						region = ns.Spec.Region
 					}
-
 					awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagRequired.Name))
 					if err != nil {
 						return fmt.Errorf("validation failed: %v", err)
@@ -1617,7 +1621,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							S3Sink: &sink.S3Spec{
 								RoleName:     roleName,
 								BucketName:   ctx.String(s3BucketFlagRequired.Name),
-								Region:       ns.Spec.Region,
+								Region:       region,
 								KmsArn:       ctx.String(kmsArnFlag.Name),
 								AwsAccountId: awsAccountID,
 							},
