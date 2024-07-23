@@ -230,8 +230,8 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 
-	// update target-namespace success TODO: Uncomment when we support updating target namespace
-	/*s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
+	// update target-namespace success
+	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
 	s.mockCloudService.EXPECT().UpdateNexusEndpoint(gomock.Any(), gomock.Any()).Return(&cloudservice.UpdateNexusEndpointResponse{
 		AsyncOperation: &operation.AsyncOperation{
 			Id: exampleEndpoint.AsyncOperationId,
@@ -241,7 +241,7 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 		"--name", exampleEndpoint.Spec.Name,
 		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId+"-updated",
 		"--request-id", exampleEndpoint.AsyncOperationId,
-	))*/
+	))
 
 	// update description file success
 	path := "nexus_endpoint_description_test.md"
@@ -295,7 +295,7 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 	s.NoError(s.RunCmd("nexus", "endpoint", "update",
 		"--name", exampleEndpoint.Spec.Name,
 		"--description", exampleEndpoint.Spec.Description+"-updated",
-		// "--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId+"-updated",
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId+"-updated",
 		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue+"-updated",
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
