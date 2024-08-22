@@ -7,6 +7,7 @@ import (
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/nexus/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
+	"github.com/temporalio/tcld/protogen/api/cloud/resource/v1"
 	"os"
 	"testing"
 	"time"
@@ -62,27 +63,33 @@ func getExampleNexusEndpoint() *nexus.Endpoint {
 		ResourceVersion: "test-resource-version",
 		Spec: &nexus.EndpointSpec{
 			TargetSpec: &nexus.EndpointTargetSpec{
-				WorkerTargetSpec: &nexus.WorkerTargetSpec{
-					NamespaceId: "test-namespace-name.test-account-id",
-					TaskQueue:   "test-task-queue",
+				Variant: &nexus.EndpointTargetSpec_WorkerTargetSpec{
+					WorkerTargetSpec: &nexus.WorkerTargetSpec{
+						NamespaceId: "test-namespace-name.test-account-id",
+						TaskQueue:   "test-task-queue",
+					},
 				},
 			},
 			Name:        "test_name",
 			Description: "test description",
 			PolicySpecs: []*nexus.EndpointPolicySpec{
 				{
-					AllowedCloudNamespacePolicySpec: &nexus.AllowedCloudNamespacePolicySpec{
-						NamespaceId: "test-caller-namespace.test-account-id",
+					Variant: &nexus.EndpointPolicySpec_AllowedCloudNamespacePolicySpec{
+						AllowedCloudNamespacePolicySpec: &nexus.AllowedCloudNamespacePolicySpec{
+							NamespaceId: "test-caller-namespace.test-account-id",
+						},
 					},
 				},
 				{
-					AllowedCloudNamespacePolicySpec: &nexus.AllowedCloudNamespacePolicySpec{
-						NamespaceId: "test-caller-namespace-2.test-account-id",
+					Variant: &nexus.EndpointPolicySpec_AllowedCloudNamespacePolicySpec{
+						AllowedCloudNamespacePolicySpec: &nexus.AllowedCloudNamespacePolicySpec{
+							NamespaceId: "test-caller-namespace-2.test-account-id",
+						},
 					},
 				},
 			},
 		},
-		State:            "activating",
+		State:            resource.RESOURCE_STATE_ACTIVATING,
 		AsyncOperationId: "test-request-id",
 		CreatedTime:      &types.Timestamp{Seconds: time.Date(time.Now().Year(), time.April, 12, 0, 0, 0, 0, time.UTC).Unix()},
 		LastModifiedTime: &types.Timestamp{Seconds: time.Date(time.Now().Year(), time.April, 14, 0, 0, 0, 0, time.UTC).Unix()},
@@ -119,10 +126,10 @@ func (s *NexusTestSuite) TestEndpointCreate() {
 	s.EqualError(s.RunCmd("nexus", "endpoint", "create",
 		"--name", exampleEndpoint.Spec.Name,
 		"--description", exampleEndpoint.Spec.Description,
-		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId,
-		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue,
-		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
-		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId,
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().TaskQueue,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "create error")
 
@@ -136,10 +143,10 @@ func (s *NexusTestSuite) TestEndpointCreate() {
 	s.NoError(s.RunCmd("nexus", "endpoint", "create",
 		"--name", exampleEndpoint.Spec.Name,
 		"--description-file", path,
-		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId,
-		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue,
-		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
-		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId,
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().TaskQueue,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 
@@ -150,10 +157,10 @@ func (s *NexusTestSuite) TestEndpointCreate() {
 	s.NoError(s.RunCmd("nexus", "endpoint", "create",
 		"--name", exampleEndpoint.Spec.Name,
 		"--description", exampleEndpoint.Spec.Description,
-		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId,
-		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue,
-		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
-		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId,
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().TaskQueue,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 
@@ -163,10 +170,10 @@ func (s *NexusTestSuite) TestEndpointCreate() {
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("nexus", "endpoint", "create",
 		"--name", exampleEndpoint.Spec.Name,
-		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId,
-		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue,
-		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
-		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId,
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().TaskQueue,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 
@@ -175,10 +182,10 @@ func (s *NexusTestSuite) TestEndpointCreate() {
 		"--name", exampleEndpoint.Spec.Name,
 		"--description", exampleEndpoint.Spec.Description,
 		"--description-file", "nexus_endpoint_description_test.md",
-		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId,
-		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue,
-		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
-		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId,
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().TaskQueue,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "provided both --description and --description-file")
 
@@ -189,10 +196,10 @@ func (s *NexusTestSuite) TestEndpointCreate() {
 	s.EqualError(s.RunCmd("nexus", "endpoint", "create",
 		"--name", exampleEndpoint.Spec.Name,
 		"--description-file", path2,
-		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId,
-		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue,
-		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
-		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId,
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().TaskQueue,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
+		"--allow-namespace", exampleEndpoint.Spec.PolicySpecs[1].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "empty description file: \"nexus_endpoint_empty_description_test.md\"")
 }
@@ -204,7 +211,7 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{}}, nil).Times(1)
 	s.EqualError(s.RunCmd("nexus", "endpoint", "update",
 		"--name", exampleEndpoint.Spec.Name,
-		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue+"-updated",
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().TaskQueue+"-updated",
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "endpoint not found")
 
@@ -213,7 +220,7 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 	s.mockCloudService.EXPECT().UpdateNexusEndpoint(gomock.Any(), gomock.Any()).Return(nil, errors.New("update error")).Times(1)
 	s.EqualError(s.RunCmd("nexus", "endpoint", "update",
 		"--name", exampleEndpoint.Spec.Name,
-		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue+"-updated",
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().TaskQueue+"-updated",
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "update error")
 
@@ -226,7 +233,7 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("nexus", "endpoint", "update",
 		"--name", exampleEndpoint.Spec.Name,
-		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue+"-updated",
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().TaskQueue+"-updated",
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 
@@ -239,7 +246,7 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("nexus", "endpoint", "update",
 		"--name", exampleEndpoint.Spec.Name,
-		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId+"-updated",
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId+"-updated",
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 
@@ -295,8 +302,8 @@ func (s *NexusTestSuite) TestEndpointUpdate() {
 	s.NoError(s.RunCmd("nexus", "endpoint", "update",
 		"--name", exampleEndpoint.Spec.Name,
 		"--description", exampleEndpoint.Spec.Description+"-updated",
-		"--target-namespace", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId+"-updated",
-		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue+"-updated",
+		"--target-namespace", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId+"-updated",
+		"--target-task-queue", exampleEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().TaskQueue+"-updated",
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 
@@ -365,7 +372,7 @@ func (s *NexusTestSuite) TestEndpointAllowedNamespaceAdd() {
 	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{getExampleNexusEndpoint()}}, nil).Times(1)
 	s.EqualError(s.RunCmd("nexus", "endpoint", "allowed-namespace", "add",
 		"--name", exampleEndpoint.Spec.Name,
-		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "no updates to be made")
 }
@@ -376,7 +383,7 @@ func (s *NexusTestSuite) TestEndpointAllowedNamespaceSet() {
 	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{}}, nil).Times(1)
 	s.EqualError(s.RunCmd("nexus", "endpoint", "allowed-namespace", "set",
 		"--name", exampleEndpoint.Spec.Name,
-		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "endpoint not found")
 
@@ -384,7 +391,7 @@ func (s *NexusTestSuite) TestEndpointAllowedNamespaceSet() {
 	s.mockCloudService.EXPECT().UpdateNexusEndpoint(gomock.Any(), gomock.Any()).Return(nil, errors.New("update error")).Times(1)
 	s.EqualError(s.RunCmd("nexus", "endpoint", "allowed-namespace", "set",
 		"--name", exampleEndpoint.Spec.Name,
-		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "update error")
 
@@ -396,7 +403,7 @@ func (s *NexusTestSuite) TestEndpointAllowedNamespaceSet() {
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("nexus", "endpoint", "allowed-namespace", "set",
 		"--name", exampleEndpoint.Spec.Name,
-		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 }
@@ -420,7 +427,7 @@ func (s *NexusTestSuite) TestEndpointAllowedNamespaceRemove() {
 	s.mockCloudService.EXPECT().GetNexusEndpoints(gomock.Any(), gomock.Any()).Return(&cloudservice.GetNexusEndpointsResponse{Endpoints: []*nexus.Endpoint{}}, nil).Times(1)
 	s.EqualError(s.RunCmd("nexus", "endpoint", "allowed-namespace", "remove",
 		"--name", exampleEndpoint.Spec.Name,
-		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "endpoint not found")
 
@@ -428,7 +435,7 @@ func (s *NexusTestSuite) TestEndpointAllowedNamespaceRemove() {
 	s.mockCloudService.EXPECT().UpdateNexusEndpoint(gomock.Any(), gomock.Any()).Return(nil, errors.New("update error")).Times(1)
 	s.EqualError(s.RunCmd("nexus", "endpoint", "allowed-namespace", "remove",
 		"--name", exampleEndpoint.Spec.Name,
-		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	), "update error")
 
@@ -440,7 +447,7 @@ func (s *NexusTestSuite) TestEndpointAllowedNamespaceRemove() {
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("nexus", "endpoint", "allowed-namespace", "remove",
 		"--name", exampleEndpoint.Spec.Name,
-		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].AllowedCloudNamespacePolicySpec.NamespaceId,
+		"--namespace", exampleEndpoint.Spec.PolicySpecs[0].GetAllowedCloudNamespacePolicySpec().NamespaceId,
 		"--request-id", exampleEndpoint.AsyncOperationId,
 	))
 

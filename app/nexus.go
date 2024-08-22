@@ -73,8 +73,10 @@ func (c *NexusClient) createEndpoint(
 	policySpecs := make([]*nexus.EndpointPolicySpec, len(allowedNamespaceIDs))
 	for i, ns := range allowedNamespaceIDs {
 		policySpecs[i] = &nexus.EndpointPolicySpec{
-			AllowedCloudNamespacePolicySpec: &nexus.AllowedCloudNamespacePolicySpec{
-				NamespaceId: ns,
+			Variant: &nexus.EndpointPolicySpec_AllowedCloudNamespacePolicySpec{
+				AllowedCloudNamespacePolicySpec: &nexus.AllowedCloudNamespacePolicySpec{
+					NamespaceId: ns,
+				},
 			},
 		}
 	}
@@ -83,9 +85,11 @@ func (c *NexusClient) createEndpoint(
 			Name:        endpointName,
 			Description: endpointDescription,
 			TargetSpec: &nexus.EndpointTargetSpec{
-				WorkerTargetSpec: &nexus.WorkerTargetSpec{
-					NamespaceId: targetNamespaceID,
-					TaskQueue:   targetTaskQueue,
+				Variant: &nexus.EndpointTargetSpec_WorkerTargetSpec{
+					WorkerTargetSpec: &nexus.WorkerTargetSpec{
+						NamespaceId: targetNamespaceID,
+						TaskQueue:   targetTaskQueue,
+					},
 				},
 			},
 			PolicySpecs: policySpecs,
@@ -116,12 +120,12 @@ func (c *NexusClient) patchEndpoint(
 		existingEndpoint.Spec.Description = description
 		hasChanges = true
 	}
-	if targetNamespaceID != "" && targetNamespaceID != existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId {
-		existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.NamespaceId = targetNamespaceID
+	if targetNamespaceID != "" && targetNamespaceID != existingEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId {
+		existingEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId = targetNamespaceID
 		hasChanges = true
 	}
-	if targetTaskQueue != "" && targetTaskQueue != existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue {
-		existingEndpoint.Spec.TargetSpec.WorkerTargetSpec.TaskQueue = targetTaskQueue
+	if targetTaskQueue != "" && targetTaskQueue != existingEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().TaskQueue {
+		existingEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().TaskQueue = targetTaskQueue
 		hasChanges = true
 	}
 
@@ -158,7 +162,7 @@ func (c *NexusClient) addAllowedNamespaces(
 	existingPolicySpecs := existingEndpoint.Spec.PolicySpecs
 	existingAllowedNamespaceIDMap := make(map[string]struct{}, len(existingPolicySpecs))
 	for _, policySpec := range existingPolicySpecs {
-		existingAllowedNamespaceIDMap[policySpec.AllowedCloudNamespacePolicySpec.NamespaceId] = struct{}{}
+		existingAllowedNamespaceIDMap[policySpec.GetAllowedCloudNamespacePolicySpec().NamespaceId] = struct{}{}
 	}
 
 	updatedPolicySpecs := make([]*nexus.EndpointPolicySpec, len(existingPolicySpecs))
@@ -168,8 +172,10 @@ func (c *NexusClient) addAllowedNamespaces(
 		if _, ok := existingAllowedNamespaceIDMap[namespaceID]; !ok {
 			hasChange = true
 			updatedPolicySpecs = append(updatedPolicySpecs, &nexus.EndpointPolicySpec{
-				AllowedCloudNamespacePolicySpec: &nexus.AllowedCloudNamespacePolicySpec{
-					NamespaceId: namespaceID,
+				Variant: &nexus.EndpointPolicySpec_AllowedCloudNamespacePolicySpec{
+					AllowedCloudNamespacePolicySpec: &nexus.AllowedCloudNamespacePolicySpec{
+						NamespaceId: namespaceID,
+					},
 				},
 			})
 		}
@@ -191,8 +197,10 @@ func (c *NexusClient) setAllowedNamespaces(
 	updatedPolicySpecs := make([]*nexus.EndpointPolicySpec, len(namespaceIDs))
 	for i, namespaceID := range namespaceIDs {
 		updatedPolicySpecs[i] = &nexus.EndpointPolicySpec{
-			AllowedCloudNamespacePolicySpec: &nexus.AllowedCloudNamespacePolicySpec{
-				NamespaceId: namespaceID,
+			Variant: &nexus.EndpointPolicySpec_AllowedCloudNamespacePolicySpec{
+				AllowedCloudNamespacePolicySpec: &nexus.AllowedCloudNamespacePolicySpec{
+					NamespaceId: namespaceID,
+				},
 			},
 		}
 	}
@@ -215,7 +223,7 @@ func (c *NexusClient) removeAllowedNamespaces(
 
 	var updatedPolicySpecs []*nexus.EndpointPolicySpec
 	for _, existingPolicySpec := range existingPolicySpecs {
-		if _, ok := namespaceIDsToRemoveMap[existingPolicySpec.AllowedCloudNamespacePolicySpec.NamespaceId]; !ok {
+		if _, ok := namespaceIDsToRemoveMap[existingPolicySpec.GetAllowedCloudNamespacePolicySpec().NamespaceId]; !ok {
 			updatedPolicySpecs = append(updatedPolicySpecs, existingPolicySpec)
 		}
 	}
@@ -522,7 +530,7 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 										existingPolicySpecs := existingEndpoint.Spec.PolicySpecs
 										existingAllowedNamespaceIDs := make([]string, len(existingPolicySpecs))
 										for i, policySpec := range existingPolicySpecs {
-											existingAllowedNamespaceIDs[i] = policySpec.AllowedCloudNamespacePolicySpec.NamespaceId
+											existingAllowedNamespaceIDs[i] = policySpec.GetAllowedCloudNamespacePolicySpec().NamespaceId
 										}
 										return PrintObj(existingAllowedNamespaceIDs)
 									},
