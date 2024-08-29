@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/temporalio/tcld/protogen/api/common/v1"
 	"net/mail"
 	"os"
 	"strconv"
@@ -580,6 +581,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				codecEndpointFlag,
 				codecPassAccessTokenFlag,
 				codecIncludeCredentialsFlag,
+				&cli.StringFlag{
+					Name:    cloudProviderFlagName,
+					Usage:   `Cloud provider for the namespace to be created for, currently support [aws, gcp].  For this version, if not specified, we default to aws`,
+					Aliases: []string{"cp"},
+				},
 			},
 			Action: func(ctx *cli.Context) error {
 				n := &namespace.Namespace{
@@ -598,6 +604,18 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Region:         regions[0],
 					PassiveRegions: regions[1:],
 				}
+
+				cloudProvider := ctx.String(cloudProviderFlagName)
+				// this is a temporary solution, we will have a follow up version update to make the cloud provider mandatory
+				if cloudProvider == "" {
+					cloudProvider = CloudProviderAWS
+				}
+				regionId, err := getRegionId(cloudProvider, regions[0])
+				if err != nil {
+					return err
+				}
+				n.Spec.CloudProvider = cloudProvider
+				n.Spec.RegionId = &regionId
 
 				authMethod, err := toAuthMethod(ctx.String(authMethodFlagName))
 				if err != nil {
@@ -1999,6 +2017,21 @@ func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) 
 
 func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
 	return old != namespace.AUTH_METHOD_RESTRICTED && new != namespace.AUTH_METHOD_API_KEY_OR_MTLS
+}
+
+func getRegionId(cloudProvider, activeRegion string) (common.RegionID, error) {
+	var regionId common.RegionID
+	switch cloudProvider {
+	case CloudProviderAWS:
+		regionId.Provider = common.CLOUD_PROVIDER_AWS
+		regionId.Name = activeRegion
+	case CloudProviderGCP:
+		regionId.Provider = common.CLOUD_PROVIDER_GCP
+		regionId.Name = activeRegion
+	default:
+		return regionId, fmt.Errorf("unknown cloud provider specified, the supported cloud providers are aws and gcp")
+	}
+	return regionId, nil
 }
 
 func toAuthMethod(m string) (namespace.AuthMethod, error) {

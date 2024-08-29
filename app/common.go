@@ -5,6 +5,11 @@ import (
 	"regexp"
 )
 
+const (
+	CloudProviderGCP = "gcp"
+	CloudProviderAWS = "aws"
+)
+
 var (
 	assumedRolePattern = regexp.MustCompile(`^arn:aws:iam::([0-9]{12}):role/(\S+)$`)
 	saPrincipalPattern = regexp.MustCompile(`^(\S+)@(\S+).iam.gserviceaccount.com$`)
