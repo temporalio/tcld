@@ -32,11 +32,7 @@ func NewApp(params AppParams) (*cli.App, error) {
 	var commands []*cli.Command
 
 	for _, command := range params.Commands {
-		if command.Name == "service-account" {
-			if IsFeatureEnabled(ServiceAccountFeatureFlag) {
-				commands = append(commands, command)
-			}
-		} else if command.Name == "nexus" {
+		if command.Name == "nexus" {
 			if IsFeatureEnabled(NexusFeatureFlag) {
 				commands = append(commands, command)
 			}
