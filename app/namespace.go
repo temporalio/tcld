@@ -585,6 +585,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Name:    cloudProviderFlagName,
 					Usage:   `Cloud provider for the namespace to be created for, currently support [aws, gcp].  For this version, if not specified, we default to aws`,
 					Aliases: []string{"cp"},
+					// this is a temporary solution, we will have a follow up version update to make the cloud provider mandatory
+					Value: CloudProviderAWS,
 				},
 			},
 			Action: func(ctx *cli.Context) error {
@@ -606,10 +608,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 
 				cloudProvider := ctx.String(cloudProviderFlagName)
-				// this is a temporary solution, we will have a follow up version update to make the cloud provider mandatory
-				if cloudProvider == "" {
-					cloudProvider = CloudProviderAWS
-				}
 				regionId, err := getRegionId(cloudProvider, regions[0])
 				if err != nil {
 					return err
