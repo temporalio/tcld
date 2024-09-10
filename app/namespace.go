@@ -2024,13 +2024,12 @@ func getRegionId(cloudProvider, activeRegion string) (common.RegionID, error) {
 	switch cloudProvider {
 	case CloudProviderAWS:
 		regionId.Provider = common.CLOUD_PROVIDER_AWS
-		regionId.Name = activeRegion
 	case CloudProviderGCP:
 		regionId.Provider = common.CLOUD_PROVIDER_GCP
-		regionId.Name = activeRegion
 	default:
 		return regionId, fmt.Errorf("unknown cloud provider specified, the supported cloud providers are aws and gcp")
 	}
+	regionId.Name = activeRegion
 	return regionId, nil
 }
 
