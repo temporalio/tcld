@@ -30,16 +30,8 @@ func NewApp(params AppParams) (*cli.App, error) {
 	}
 
 	var commands []*cli.Command
+	commands = append(commands, params.Commands...)
 
-	for _, command := range params.Commands {
-		if command.Name == "nexus" {
-			if IsFeatureEnabled(NexusFeatureFlag) {
-				commands = append(commands, command)
-			}
-		} else {
-			commands = append(commands, command)
-		}
-	}
 	app.Commands = commands
 
 	return app, nil
