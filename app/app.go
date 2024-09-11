@@ -27,12 +27,8 @@ func NewApp(params AppParams) (*cli.App, error) {
 			InsecureConnectionFlag,
 			EnableDebugLogsFlag,
 		},
+		Commands: params.Commands,
 	}
-
-	var commands []*cli.Command
-	commands = append(commands, params.Commands...)
-
-	app.Commands = commands
 
 	return app, nil
 }
