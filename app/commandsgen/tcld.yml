@@ -1,0 +1,231 @@
+commands:
+    - name: tcld
+      summary: Temporal Cloud cli
+      description: <missing>.
+      options:
+        - name: server
+          type: string
+          description: saas-api server endpoint.
+          short: s
+        - name: config-dir
+          type: string
+          description: The config directory to use.
+        - name: auto_confirm
+          type: bool
+          description: Automatically confirm all prompts.
+        - name: api-key
+          type: string
+          description: The API Key used for authentication (preview).
+        - name: insecure
+          type: bool
+          description: Use an insecure transport for connection, recommended to avoid this option unless necessary.
+        - name: enable-debug-logs
+          type: bool
+          description: A flag to enable debug logs.
+    - name: tcld nexus
+      summary: Manage Nexus resources in Temporal Cloud
+      description: The `tcld nexus` commands manage Nexus resources in Temporal Cloud.
+      short: nxs
+    - name: tcld nexus endpoint
+      summary: Manage Nexus Endpoints in Temporal Cloud (EXPERIMENTAL)
+      description: The `tcld nexus endpoint` commands manage Nexus Endpoints in Temporal Cloud.
+      short: ep
+    - name: tcld nexus endpoint get
+      summary: Get a Nexus Endpoint by name (EXPERIMENTAL)
+      description: The `tcld nexus endpoint get` command gets a Nexus Endpoint configuration by name from the Cloud Account.
+      short: g
+      options:
+        - name: name
+          type: string
+          description: Endpoint name.
+          short: "n"
+          required: true
+    - name: tcld nexus endpoint list
+      summary: List Nexus Endpoints (EXPERIMENTAL)
+      description: The `tcld nexus endpoint list` command lists all Nexus Endpoint configurations on the Cloud Account.
+      short: l
+    - name: tcld nexus endpoint create
+      summary: Create a new Nexus Endpoint (EXPERIMENTAL)
+      description: |-
+        The `tcld nexus endpoint create` command creates a new Nexus Endpoint on the Cloud Account.
+        An endpoint name is used by in workflow code to invoke Nexus operations.
+        The endpoint target is a worker and `--target-namespace` and `--target-task-queue` must both be provided.
+        This will fail if an endpoint with the same name is already registered.
+      short: c
+      options:
+        - name: allow-namespace
+          type: string[]
+          description: Namespace that is allowed to call this endpoint (optional).
+          short: ans
+        - name: description
+          type: string
+          description: Endpoint description in markdown format (optional).
+          short: d
+        - name: description-file
+          type: string
+          description: Endpoint description file in markdown format (optional).
+          short: df
+        - name: name
+          type: string
+          description: Endpoint name.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: target-namespace
+          type: string
+          description: Namespace in which a handler worker will be polling for Nexus tasks on.
+          short: tns
+          required: true
+        - name: target-task-queue
+          type: string
+          description: Task Queue in which a handler worker will be polling for Nexus tasks on.
+          short: ttq
+          required: true
+    - name: tcld nexus endpoint update
+      summary: Update an existing Nexus Endpoint (EXPERIMENTAL)
+      description: |-
+        The `tcld nexus endpoint update` command updates an existing Nexus Endpoint on the Cloud Account.
+        An endpoint name is used by in workflow code to invoke Nexus operations.
+        The endpoint target is a worker and `--target-namespace` and `--target-task-queue` must both be provided.
+
+        The endpoint is patched leaving any existing fields for which flags are not provided as they were.
+      short: u
+      options:
+        - name: description
+          type: string
+          description: Endpoint description in markdown format (optional).
+          short: d
+        - name: description-file
+          type: string
+          description: Endpoint description file in markdown format (optional).
+          short: df
+        - name: name
+          type: string
+          description: Endpoint name.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+        - name: target-namespace
+          type: string
+          description: Namespace in which a handler worker will be polling for Nexus tasks on (optional).
+          short: tns
+        - name: target-task-queue
+          type: string
+          description: Task Queue in which a handler worker will be polling for Nexus tasks on (optional).
+          short: ttq
+        - name: unset-description
+          type: bool
+          description: Unset endpoint description.
+    - name: tcld nexus endpoint allowed-namespace
+      summary: Allowed namespace operations for a Nexus Endpoint (EXPERIMENTAL)
+      description: The `tcld nexus endpoint allowed-namespace` commands manage the allowed namespaces for a Nexus Endpoint.
+      short: an
+    - name: tcld nexus endpoint allowed-namespace add
+      summary: Add allowed namespaces to a Nexus Endpoint (EXPERIMENTAL)
+      description: The `tcld nexus endpoint allowed-namespace add` command adds allowed namespaces to a Nexus Endpoint.
+      short: a
+      options:
+        - name: name
+          type: string
+          description: Endpoint name.
+          short: "n"
+          required: true
+        - name: namespace
+          type: string[]
+          description: Namespace that is allowed to call this endpoint.
+          short: ns
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld nexus endpoint allowed-namespace list
+      summary: List allowed namespaces of a Nexus Endpoint (EXPERIMENTAL)
+      description: The `tcld nexus endpoint allowed-namespace list` command lists the allowed namespaces of a Nexus Endpoint.
+      short: l
+      options:
+        - name: name
+          type: string
+          description: Endpoint name.
+          short: "n"
+          required: true
+    - name: tcld nexus endpoint allowed-namespace set
+      summary: Set allowed namespaces of a Nexus Endpoint (EXPERIMENTAL)
+      description: The `tcld nexus endpoint allowed-namespace set` command sets the allowed namespaces of a Nexus Endpoint.
+      short: s
+      options:
+        - name: name
+          type: string
+          description: Endpoint name.
+          short: "n"
+          required: true
+        - name: namespace
+          type: string[]
+          description: Namespace that is allowed to call this endpoint.
+          short: ns
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld nexus endpoint allowed-namespace remove
+      summary: Remove allowed namespaces from a Nexus Endpoint (EXPERIMENTAL)
+      description: The `tcld nexus endpoint allowed-namespace remove` command removes allowed namespaces from a Nexus Endpoint.
+      short: r
+      options:
+        - name: name
+          type: string
+          description: Endpoint name.
+          short: "n"
+          required: true
+        - name: namespace
+          type: string[]
+          description: Namespace that is allowed to call this endpoint.
+          short: ns
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld nexus endpoint delete
+      summary: Delete a Nexus Endpoint (EXPERIMENTAL)
+      description: |-
+        The `tcld nexus endpoint delete` command deletes a Nexus Endpoint on the Cloud Account.
+        .
+      short: d
+      options:
+        - name: name
+          type: string
+          description: Endpoint name.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
