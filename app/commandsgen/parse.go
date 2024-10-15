@@ -10,41 +10,37 @@ import (
 	"strings"
 )
 
-/*
-//go:embed commands.yml
-var CommandsYAML []byte
-*/
-
 type (
 	// Option represents the structure of an option within option sets.
 	Option struct {
-		Name        string   `yaml:"name"`
-		Type        string   `yaml:"type"`
-		Description string   `yaml:"description"`
-		Short       string   `yaml:"short,omitempty"`
-		Default     string   `yaml:"default,omitempty"`
-		Env         string   `yaml:"env,omitempty"`
-		Required    bool     `yaml:"required,omitempty"`
-		Aliases     []string `yaml:"aliases,omitempty"`
-		EnumValues  []string `yaml:"enum-values,omitempty"`
+		Name         string   `yaml:"name"`
+		Type         string   `yaml:"type"`
+		Description  string   `yaml:"description"`
+		Short        string   `yaml:"short,omitempty"`
+		Default      string   `yaml:"default,omitempty"`
+		Env          string   `yaml:"env,omitempty"`
+		Required     bool     `yaml:"required,omitempty"`
+		Aliases      []string `yaml:"aliases,omitempty"`
+		EnumValues   []string `yaml:"enum-values,omitempty"`
+		Experimental bool     `yaml:"experimental,omitempty"`
 	}
 
 	// Command represents the structure of each command in the commands map.
 	Command struct {
-		FullName         string   `yaml:"name"`
-		Summary          string   `yaml:"summary"`
-		Description      string   `yaml:"description"`
-		Short            string   `yaml:"short,omitempty"`
-		HasInit          bool     `yaml:"has-init,omitempty"`
-		ExactArgs        int      `yaml:"exact-args,omitempty"`
-		MaximumArgs      int      `yaml:"maximum-args,omitempty"`
-		IgnoreMissingEnv bool     `yaml:"ignores-missing-env,omitempty"`
-		Options          []Option `yaml:"options,omitempty"`
-		//OptionSets             []string   `yaml:"option-sets,omitempty"`
-		//Docs                   Docs       `yaml:"docs,omitempty"`
+		FullName               string     `yaml:"name"`
 		NamePath               []string   `yaml:",omitempty"`
+		Summary                string     `yaml:"summary"`
+		Description            string     `yaml:"description"`
+		Short                  string     `yaml:"short,omitempty"`
 		DescriptionPlain       string     `yaml:",omitempty"`
 		DescriptionHighlighted string     `yaml:",omitempty"`
+		HasInit                bool       `yaml:"has-init,omitempty"`
+		ExactArgs              int        `yaml:"exact-args,omitempty"`
+		MaximumArgs            int        `yaml:"maximum-args,omitempty"`
+		IgnoreMissingEnv       bool       `yaml:"ignores-missing-env,omitempty"`
+		Options                []Option   `yaml:"options,omitempty"`
+		OptionSets             []string   `yaml:"option-sets,omitempty"`
+		Docs                   Docs       `yaml:"docs,omitempty"`
 		Index                  int        `yaml:",omitempty"`
 		Base                   *Command   `yaml:",omitempty"`
 		Parent                 *Command   `yaml:",omitempty"`
@@ -56,59 +52,59 @@ type (
 		MaxChildDepth          int        `yaml:",omitempty"`
 	}
 
-	/*
-		// Docs represents docs-only information that is not used in CLI generation.
-		Docs struct {
-			Keywords          []string `yaml:"keywords"`
-			DescriptionHeader string   `yaml:"description-header"`
-		}
+	// Docs represents docs-only information that is not used in CLI generation.
+	Docs struct {
+		Keywords          []string `yaml:"keywords"`
+		DescriptionHeader string   `yaml:"description-header"`
+	}
 
-		// OptionSets represents the structure of option sets.
-		OptionSets struct {
-			Name    string   `yaml:"name"`
-			Options []Option `yaml:"options"`
-		}
-	*/
+	// OptionSets represents the structure of option sets.
+	OptionSets struct {
+		Name        string   `yaml:"name"`
+		Description string   `yaml:"description"`
+		Options     []Option `yaml:"options"`
+	}
 
 	// Commands represents the top-level structure holding commands and option sets.
 	Commands struct {
-		CommandList []Command `yaml:"commands,omitempty"`
-		RootCommand *Command  `yaml:"root,omitempty"`
-		//OptionSets  []OptionSets `yaml:"option-sets"`
+		CommandList []Command    `yaml:"commands"`
+		OptionSets  []OptionSets `yaml:"option-sets"`
+		Usages      Usages
+	}
+
+	Usages struct {
+		OptionUsages                    []OptionUsages
+		OptionUsagesByOptionDescription []OptionUsagesByOptionDescription
+	}
+
+	OptionUsages struct {
+		OptionName string
+		UsageSites []OptionUsageSite
+	}
+
+	OptionUsageSite struct {
+		Option               Option
+		UsageSiteDescription string
+		UsageSiteType        UsageSiteType
+	}
+
+	UsageSiteType string
+
+	OptionUsagesByOptionDescription struct {
+		OptionName string
+		Usages     []OptionUsageByOptionDescription
+	}
+
+	OptionUsageByOptionDescription struct {
+		OptionDescription string
+		UsageSites        []OptionUsageSite
 	}
 )
 
-/*
-func ParseCommands() (Commands, error) {
-	// Fix CRLF
-	md := bytes.ReplaceAll(CommandsYAML, []byte("\r\n"), []byte("\n"))
-
-	var m Commands
-	err := yaml.Unmarshal(md, &m)
-	if err != nil {
-		return Commands{}, fmt.Errorf("failed unmarshalling yaml: %w", err)
-	}
-
-	for i, optionSet := range m.OptionSets {
-		if err := m.OptionSets[i].processSection(); err != nil {
-			return Commands{}, fmt.Errorf("failed parsing option set section %q: %w", optionSet.Name, err)
-		}
-	}
-
-	commandLookup := make(map[string]*Command)
-
-	for i, command := range m.CommandList {
-		if err := m.CommandList[i].processSection(); err != nil {
-			return Commands{}, fmt.Errorf("failed parsing command section %q: %w", command.FullName, err)
-		}
-
-		//for enrichment below
-		m.CommandList[i].Index = i
-		commandLookup[command.FullName] = &m.CommandList[i]
-	}
-	return m, nil
-}
-*/
+const (
+	UsageTypeCommand   UsageSiteType = "command"
+	UsageTypeOptionSet UsageSiteType = "optionset"
+)
 
 var markdownLinkPattern = regexp.MustCompile(`\[(.*?)\]\((.*?)\)`)
 var markdownBlockCodeRegex = regexp.MustCompile("```([\\s\\S]+?)```")
@@ -116,6 +112,20 @@ var markdownInlineCodeRegex = regexp.MustCompile("`([^`]+)`")
 
 const ansiReset = "\033[0m"
 const ansiBold = "\033[1m"
+
+func (o OptionSets) processSection() error {
+	if o.Name == "" {
+		return fmt.Errorf("missing option set name")
+	}
+
+	for i, option := range o.Options {
+		if err := o.Options[i].processSection(); err != nil {
+			return fmt.Errorf("failed parsing option '%v': %w", option.Name, err)
+		}
+	}
+
+	return nil
+}
 
 func (c *Command) processSection() error {
 	if c.FullName == "" {
@@ -138,8 +148,19 @@ func (c *Command) processSection() error {
 		return fmt.Errorf("missing description for command: %s", c.FullName)
 	}
 
+	/*
+		if len(c.NamePath) == 2 {
+			if c.Docs.Keywords == nil {
+				return fmt.Errorf("missing keywords for root command: %s", c.FullName)
+			}
+			if c.Docs.DescriptionHeader == "" {
+				return fmt.Errorf("missing description for root command: %s", c.FullName)
+			}
+		}
+	*/
+
 	// Strip trailing newline for description
-	c.Description = strings.TrimSuffix(c.Description, "\n")
+	c.Description = strings.TrimRight(c.Description, "\n")
 
 	// Strip links for long plain/highlighted
 	c.DescriptionPlain = markdownLinkPattern.ReplaceAllString(c.Description, "$1")

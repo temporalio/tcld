@@ -229,3 +229,7 @@ commands:
           type: string
           description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
           short: v
+option-sets: []
+usages:
+    optionusages: []
+    optionusagesbyoptiondescription: []

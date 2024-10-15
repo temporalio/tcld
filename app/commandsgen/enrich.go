@@ -12,6 +12,12 @@ import (
 func EnrichCommands(m Commands) (Commands, error) {
 	commandLookup := make(map[string]*Command)
 
+	for i, optionSet := range m.OptionSets {
+		if err := m.OptionSets[i].processSection(); err != nil {
+			return Commands{}, fmt.Errorf("failed parsing option set section %q: %w", optionSet.Name, err)
+		}
+	}
+
 	for i, command := range m.CommandList {
 		if err := m.CommandList[i].processSection(); err != nil {
 			return Commands{}, fmt.Errorf("failed parsing command section %q: %w", command.FullName, err)
@@ -74,26 +80,27 @@ func EnrichCommands(m Commands) (Commands, error) {
 		}
 
 		if len(subCommandName) == 0 && c.Depth == 1 {
-			//for operator base command to show up in tags, keywords, etc.
+			// for operator base command to show up in tags, keywords, etc.
 			subCommandName = c.LeafName
 		}
 
 		m.CommandList[i].SubCommandName = subCommandName
 	}
 
-	// sort children by max child depth (desc) and then full name (desc)
-	// which is how we want tcld docs pages sorted
+	// sorted ascending by full name of command (activity complete, batch list, etc)
 	sortChildrenVisitor(rootCommand)
 
 	// pull flat list in same order as sorted children
 	m.CommandList = make([]Command, 0)
 	collectCommandVisitor(*rootCommand, &m)
 
-	/*
-		for _, command := range m.CommandList {
-			fmt.Printf("sort result: %s\n", command.FullName)
-		}
-	*/
+	// option usages
+	optionUsages := getAllOptionUsages(m)
+	optionUsagesByOptionDescription := getOptionUsagesByOptionDescription(optionUsages)
+	m.Usages = Usages{
+		OptionUsages:                    optionUsages,
+		OptionUsagesByOptionDescription: optionUsagesByOptionDescription,
+	}
 
 	return m, nil
 }
@@ -109,16 +116,18 @@ func collectCommandVisitor(c Command, m *Commands) {
 
 func sortChildrenVisitor(c *Command) {
 	sort.Slice(c.Children, func(i, j int) bool {
-		if c.Children[i].MaxChildDepth != c.Children[j].MaxChildDepth {
-			return c.Children[i].MaxChildDepth < c.Children[j].MaxChildDepth
-		}
+		//option to put nested commands at end of the list
+		/*
+			if c.Children[i].MaxChildDepth != c.Children[j].MaxChildDepth {
+				return c.Children[i].MaxChildDepth < c.Children[j].MaxChildDepth
+			}
+		*/
 
 		return c.Children[i].FullName < c.Children[j].FullName
 	})
 	for _, command := range c.Children {
 		sortChildrenVisitor(command)
 	}
-
 }
 
 func setMaxChildDepthVisitor(c Command, commands *Commands) int {
@@ -135,4 +144,120 @@ func setMaxChildDepthVisitor(c Command, commands *Commands) int {
 
 	commands.CommandList[c.Index].MaxChildDepth = maxChildDepth
 	return maxChildDepth + 1
+}
+
+func getAllOptionUsages(commands Commands) []OptionUsages {
+	// map[optionName]map[usageSite]OptionUsageSite
+	var optionUsageSitesMap = make(map[string]map[string]OptionUsageSite)
+
+	// option sets
+	for i, optionSet := range commands.OptionSets {
+		usage := optionSet.Description
+		if len(usage) == 0 {
+			usage = optionSet.Name
+		}
+
+		for j, option := range optionSet.Options {
+			_, found := optionUsageSitesMap[option.Name]
+			if !found {
+				optionUsageSitesMap[option.Name] = make(map[string]OptionUsageSite)
+			}
+			optionUsageSitesMap[option.Name][optionSet.Name] = OptionUsageSite{
+				Option:               commands.OptionSets[i].Options[j],
+				UsageSiteDescription: usage,
+				UsageSiteType:        UsageTypeOptionSet,
+			}
+		}
+	}
+
+	//command options
+	for i, cmd := range commands.CommandList {
+		usage := cmd.FullName
+		if len(usage) == 0 {
+			usage = cmd.FullName
+		}
+
+		for j, option := range cmd.Options {
+			_, found := optionUsageSitesMap[option.Name]
+			if !found {
+				optionUsageSitesMap[option.Name] = make(map[string]OptionUsageSite)
+			}
+			optionUsageSitesMap[option.Name][cmd.FullName] = OptionUsageSite{
+				Option:               commands.CommandList[i].Options[j],
+				UsageSiteDescription: usage,
+				UsageSiteType:        UsageTypeOptionSet,
+			}
+		}
+	}
+
+	// all options
+	var allOptionUsages = make([]OptionUsages, 0)
+
+	for optionName, usages := range optionUsageSitesMap {
+		option := OptionUsages{
+			OptionName: optionName,
+			UsageSites: make([]OptionUsageSite, 0),
+		}
+		for _, usage := range usages {
+			option.UsageSites = append(option.UsageSites, usage)
+		}
+		allOptionUsages = append(allOptionUsages, option)
+	}
+
+	sort.Slice(allOptionUsages, func(i, j int) bool {
+		return allOptionUsages[i].OptionName < allOptionUsages[j].OptionName
+	})
+
+	for u := range allOptionUsages {
+		sort.Slice(allOptionUsages[u].UsageSites, func(i, j int) bool {
+			return allOptionUsages[u].UsageSites[i].UsageSiteDescription < allOptionUsages[u].UsageSites[j].UsageSiteDescription
+		})
+	}
+
+	return allOptionUsages
+}
+
+func getOptionUsagesByOptionDescription(allOptionUsages []OptionUsages) []OptionUsagesByOptionDescription {
+	out := make([]OptionUsagesByOptionDescription, len(allOptionUsages))
+
+	for i, optionUsages := range allOptionUsages {
+		out[i].OptionName = optionUsages.OptionName
+
+		if len(optionUsages.UsageSites) == 1 {
+			usage := allOptionUsages[i].UsageSites[0]
+			out[i].Usages = make([]OptionUsageByOptionDescription, 1)
+			out[i].Usages[0].OptionDescription = usage.Option.Description
+			out[i].Usages[0].UsageSites = []OptionUsageSite{usage}
+
+			continue
+		}
+
+		// map[optionDescription]OptionUsageByOptionDescription
+		optionUsageByOptionDescriptionMap := make(map[string]OptionUsageByOptionDescription)
+
+		// collate on option description in each usage site
+		for j, usage := range optionUsages.UsageSites {
+			_, found := optionUsageByOptionDescriptionMap[usage.Option.Description]
+			if !found {
+				optionUsageByOptionDescriptionMap[usage.Option.Description] = OptionUsageByOptionDescription{
+					OptionDescription: usage.Option.Description,
+					UsageSites:        make([]OptionUsageSite, 0),
+				}
+			}
+			u := optionUsageByOptionDescriptionMap[usage.Option.Description]
+			u.UsageSites = append(u.UsageSites, allOptionUsages[i].UsageSites[j])
+
+			// put all distinct option descriptions withing the option usages
+			optionUsageByOptionDescriptionMap[u.OptionDescription] = u
+		}
+
+		out[i].Usages = make([]OptionUsageByOptionDescription, len(optionUsageByOptionDescriptionMap))
+		j := 0
+		for _, v := range optionUsageByOptionDescriptionMap {
+			out[i].Usages[j] = v
+			j++
+		}
+	}
+
+	return out
 }

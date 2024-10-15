@@ -27,12 +27,13 @@ func run() error {
 		log.Fatalf("Error creating directory: %v", err)
 	}
 
+	// Convert existing CLI commands to docs gen model
 	cmds, err := commandsgen.ConvertCommands()
 	if err != nil {
 		return fmt.Errorf("failed converting commands: %w", err)
 	}
 
-	//Write the `temporal` CLI style YAML for easier reference
+	// Write docs gen YAML for easier reference
 	yamlData, err := yaml.Marshal(&cmds)
 
 	if err != nil {
