@@ -98,37 +98,42 @@ func (c *converter) addApp(a *cli.App) error {
 
 	c.CommandList = append(c.CommandList, Command{
 		FullName:    a.Name,
-		Summary:     formatSummary(a.Usage),
-		Description: formatDescription(a.Description, ""),
+		Summary:     formatSummary(a.Usage, a.Name),
+		Description: formatCommandDescription(a.Description, ""),
 		Options:     options,
 	})
 
 	return nil
 }
 
-func formatSummary(v string) string {
+func formatSummary(v string, site string) string {
 	if len(v) == 0 {
-		v = "<missing>"
+		site = strings.ReplaceAll(site, " ", "-")
+		v = "<missing-usage-for-site-" + site + " action=\"update in source .go file\">"
 	}
 	v = strings.TrimSuffix(v, ".")
 	return v
 }
-func formatDescription(v string, cmdName string) string {
-	if len(v) == 0 {
-		v = "<missing>"
-	}
-	if !strings.HasSuffix(v, ".") {
-		v = v + "."
-	}
 
-	if len(cmdName) == 0 {
-		return v
-	}
+func formatCommandDescription(v string, cmdName string) string {
+	v = formatDescription(v, cmdName)
 
 	if strings.Contains(v, "These commands") {
 		v = strings.Replace(v, "These commands", fmt.Sprintf("The `%s` commands", cmdName), 1)
 	} else {
 		v = strings.Replace(v, "This command", fmt.Sprintf("The `%s` command", cmdName), 1)
+	}
+
+	return v
+}
+
+func formatDescription(v string, site string) string {
+	if len(v) == 0 {
+		site = strings.ReplaceAll(site, " ", "-")
+		v = "<missing-description-for-site-" + site + " action=\"update in source .go file\">"
+	}
+	if !strings.HasSuffix(v, ".") {
+		v = v + "."
 	}
 
 	return v
@@ -156,8 +161,8 @@ func (c *converter) addCommandsVisitor(prefix string, cmd *cli.Command) error {
 
 	c.CommandList = append(c.CommandList, Command{
 		FullName:    name,
-		Summary:     formatSummary(cmd.Usage),
-		Description: formatDescription(cmd.Description, name),
+		Summary:     formatSummary(cmd.Usage, name),
+		Description: formatCommandDescription(cmd.Description, name),
 		Short:       getFirstAlias(cmd.Aliases),
 		Options:     options,
 	})
@@ -183,7 +188,7 @@ func getFirstAlias(aliases []string) string {
 func newOption(name string, usage string, required bool, aliases []string, optionType string) Option {
 	return Option{
 		Name:        name,
-		Description: formatDescription(usage, ""),
+		Description: formatDescription(usage, name),
 		Required:    required,
 		Short:       getFirstAlias(aliases),
 		Type:        optionType,
