@@ -148,6 +148,20 @@ func (c *Command) processSection() error {
 		return fmt.Errorf("missing description for command: %s", c.FullName)
 	}
 
+	/*
+		//TODO: we probably want to support roundtrip edits on tcld.yml that works
+		//      in conjunction with convert.go OR to use `cli.Command.UsageText`
+		//      for DescriptionHeader and maybe have a small set of hardcoded keywords
+		if len(c.NamePath) == 2 {
+			if c.Docs.Keywords == nil {
+				return fmt.Errorf("missing keywords for root command: %s", c.FullName)
+			}
+			if c.Docs.DescriptionHeader == "" {
+				return fmt.Errorf("missing description for root command: %s", c.FullName)
+			}
+		}
+	*/
+
 	// Strip trailing newline for description
 	c.Description = strings.TrimSuffix(c.Description, "\n")
 
