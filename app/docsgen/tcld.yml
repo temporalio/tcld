@@ -1251,7 +1251,7 @@ commands:
           short: d
         - name: expiry
           type: timestamp
-          description: 'the absolute timestamp (RFC3339) when the apikey will expire, example: ''2024-10-16T15:30:07-07:00''.'
+          description: 'the absolute timestamp (RFC3339) when the apikey will expire, example: ''2024-10-16T16:48:12-07:00''.'
           short: e
         - name: name
           type: string

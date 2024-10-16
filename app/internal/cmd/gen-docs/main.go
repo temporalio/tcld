@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/temporalio/tcld/app/commandsgen"
+	"github.com/temporalio/tcld/app/docsgen"
 	"gopkg.in/yaml.v3"
 )
 
@@ -28,7 +28,7 @@ func run() error {
 	}
 
 	// Convert existing CLI commands to docs gen model
-	cmds, err := commandsgen.ConvertCommands()
+	cmds, err := docsgen.ConvertCommands()
 	if err != nil {
 		return fmt.Errorf("failed converting commands: %w", err)
 	}
@@ -40,20 +40,20 @@ func run() error {
 		fmt.Printf("Error while Marshaling. %v", err)
 	}
 
-	filePath := filepath.Join(file, "../../../../commandsgen/tcld.yml")
+	filePath := filepath.Join(file, "../../../../docsgen/tcld.yml")
 	err = os.WriteFile(filePath, yamlData, 0644)
 	if err != nil {
 		return fmt.Errorf("unable to write command yaml into %s", filePath)
 	}
 
 	// Enrich commands
-	cmds, err = commandsgen.EnrichCommands(cmds)
+	cmds, err = docsgen.EnrichCommands(cmds)
 	if err != nil {
 		return fmt.Errorf("failed enriching commands: %w", err)
 	}
 
 	// Generate docs
-	b, err := commandsgen.GenerateDocsFiles(cmds)
+	b, err := docsgen.GenerateDocsFiles(cmds)
 	if err != nil {
 		return err
 	}

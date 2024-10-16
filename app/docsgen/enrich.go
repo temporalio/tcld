@@ -1,6 +1,6 @@
-// Package commandsgen is built to read the YAML format described in
-// temporalcli/commandsgen/commands.yml and generate code from it.
-package commandsgen
+// Package docsgen is built to convert the existing
+// cli.Commands to a docs gen model and generate tcld docs from that
+package docsgen
 
 import (
 	_ "embed"

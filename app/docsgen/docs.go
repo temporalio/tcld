@@ -1,4 +1,6 @@
-package commandsgen
+// Package docsgen is built to convert the existing
+// cli.Commands to a docs gen model and generate tcld docs from that
+package docsgen
 
 import (
 	"bytes"
