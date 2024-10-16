@@ -34,19 +34,50 @@ func ConvertCommands() (Commands, error) {
 		return Commands{}, err
 	}
 
-	/*
-		app.NewVersionCommand,
-		app.NewAccountCommand,
-		app.NewNamespaceCommand,
-		app.NewUserCommand,
-		app.NewRequestCommand,
-		app.NewLoginCommand,
-		app.NewLogoutCommand,
-		app.NewCertificatesCommand,
-		app.NewAPIKeyCommand,
-		app.NewFeatureCommand,
-		app.NewServiceAccountCommand,
-	*/
+	err = c.addCommands(asSlice(app.NewVersionCommand())[0].(app.CommandOut))
+	if err != nil {
+		return Commands{}, err
+	}
+	err = c.addCommands(asSlice(app.NewAccountCommand(nil))[0].(app.CommandOut))
+	if err != nil {
+		return Commands{}, err
+	}
+	err = c.addCommands(asSlice(app.NewNamespaceCommand(nil))[0].(app.CommandOut))
+	if err != nil {
+		return Commands{}, err
+	}
+	err = c.addCommands(asSlice(app.NewUserCommand(nil))[0].(app.CommandOut))
+	if err != nil {
+		return Commands{}, err
+	}
+	err = c.addCommands(asSlice(app.NewRequestCommand(nil))[0].(app.CommandOut))
+	if err != nil {
+		return Commands{}, err
+	}
+	err = c.addCommands(asSlice(app.NewLoginCommand())[0].(app.CommandOut))
+	if err != nil {
+		return Commands{}, err
+	}
+	err = c.addCommands(asSlice(app.NewLogoutCommand())[0].(app.CommandOut))
+	if err != nil {
+		return Commands{}, err
+	}
+	err = c.addCommands(asSlice(app.NewCertificatesCommand())[0].(app.CommandOut))
+	if err != nil {
+		return Commands{}, err
+	}
+	err = c.addCommands(asSlice(app.NewAPIKeyCommand(nil))[0].(app.CommandOut))
+	if err != nil {
+		return Commands{}, err
+	}
+	err = c.addCommands(asSlice(app.NewFeatureCommand())[0].(app.CommandOut))
+	if err != nil {
+		return Commands{}, err
+	}
+	err = c.addCommands(asSlice(app.NewServiceAccountCommand(nil))[0].(app.CommandOut))
+	if err != nil {
+		return Commands{}, err
+	}
 
 	commands := Commands{
 		CommandList: c.CommandList,
@@ -79,6 +110,7 @@ func formatSummary(v string) string {
 	if len(v) == 0 {
 		v = "<missing>"
 	}
+	v = strings.TrimSuffix(v, ".")
 	return v
 }
 func formatDescription(v string, cmdName string) string {

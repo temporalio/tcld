@@ -148,19 +148,8 @@ func (c *Command) processSection() error {
 		return fmt.Errorf("missing description for command: %s", c.FullName)
 	}
 
-	/*
-		if len(c.NamePath) == 2 {
-			if c.Docs.Keywords == nil {
-				return fmt.Errorf("missing keywords for root command: %s", c.FullName)
-			}
-			if c.Docs.DescriptionHeader == "" {
-				return fmt.Errorf("missing description for root command: %s", c.FullName)
-			}
-		}
-	*/
-
 	// Strip trailing newline for description
-	c.Description = strings.TrimRight(c.Description, "\n")
+	c.Description = strings.TrimSuffix(c.Description, "\n")
 
 	// Strip links for long plain/highlighted
 	c.DescriptionPlain = markdownLinkPattern.ReplaceAllString(c.Description, "$1")
@@ -202,7 +191,7 @@ func (o *Option) processSection() error {
 	}
 	// Strip all newline for description and trailing whitespace
 	o.Description = strings.ReplaceAll(o.Description, "\n", " ")
-	o.Description = strings.TrimRight(o.Description, " ")
+	o.Description = strings.TrimSuffix(o.Description, " ")
 
 	// Check that description ends in a "."
 	if o.Description[len(o.Description)-1] != '.' {

@@ -229,6 +229,1286 @@ commands:
           type: string
           description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
           short: v
+    - name: tcld version
+      summary: Version information
+      description: <missing>.
+      short: v
+    - name: tcld account
+      summary: Account operations
+      description: <missing>.
+      short: a
+    - name: tcld account get
+      summary: Get account information
+      description: <missing>.
+      short: g
+    - name: tcld account list-regions
+      summary: Lists all regions where the account can provision namespaces
+      description: <missing>.
+      short: l
+    - name: tcld account metrics
+      summary: Configures the metrics endpoint for the Temporal Cloud Account
+      description: <missing>.
+      short: m
+    - name: tcld account metrics enable
+      summary: Enables the metrics endpoint. CA Certificates *must* be configured prior to enabling the endpoint
+      description: <missing>.
+    - name: tcld account metrics disable
+      summary: Disables the metrics endpoint
+      description: <missing>.
+    - name: tcld account metrics accepted-client-ca
+      summary: Manages configuration of ca certificates for the external metrics endpoint
+      description: <missing>.
+      short: ca
+    - name: tcld account metrics accepted-client-ca add
+      summary: Add a new ca accepted client ca certificate
+      description: <missing>.
+      short: a
+      options:
+        - name: ca-certificate
+          type: string
+          description: The base64 encoded ca certificate.
+          short: c
+        - name: ca-certificate-file
+          type: string
+          description: The path to the ca pem file.
+          short: f
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld account metrics accepted-client-ca remove
+      summary: Remove existing certificates
+      description: <missing>.
+      short: r
+      options:
+        - name: ca-certificate
+          type: string
+          description: The base64 encoded ca certificate.
+          short: c
+        - name: ca-certificate-file
+          type: string
+          description: The path to the ca pem file.
+          short: f
+        - name: ca-certificate-fingerprint
+          type: string
+          description: The fingerprint of to the ca certificate.
+          short: fp
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld account metrics accepted-client-ca set
+      summary: Set the accepted client ca certificate
+      description: <missing>.
+      short: s
+      options:
+        - name: ca-certificate
+          type: string
+          description: The base64 encoded ca certificate.
+          short: c
+        - name: ca-certificate-file
+          type: string
+          description: The path to the ca pem file.
+          short: f
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld account metrics accepted-client-ca list
+      summary: List the accepted client ca certificates currently configured for the account metrics endpoint
+      description: <missing>.
+      short: l
+    - name: tcld namespace
+      summary: Namespace operations
+      description: <missing>.
+      short: "n"
+    - name: tcld namespace create
+      summary: Create a temporal namespace
+      description: <missing>.
+      short: c
+      options:
+        - name: auth-method
+          type: string
+          description: The authentication method to use for the namespace (e.g. 'mtls', 'api_key').
+        - name: ca-certificate
+          type: string
+          description: The base64 encoded ca certificate.
+          short: c
+        - name: ca-certificate-file
+          type: string
+          description: The path to the ca pem file.
+          short: cf
+        - name: certificate-filter-file
+          type: string
+          description: 'Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }.'
+          short: cff
+        - name: certificate-filter-input
+          type: string
+          description: 'JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }.'
+          short: cfi
+        - name: endpoint
+          type: string
+          description: The codec server endpoint to decode payloads for all users interacting with this Namespace, must be https.
+          short: e
+        - name: include-credentials
+          type: bool
+          description: Include cross-origin credentials.
+          short: ic
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: pass-access-token
+          type: bool
+          description: Pass the user access token to the remote endpoint.
+          short: pat
+        - name: region
+          type: string[]
+          description: Create namespace in specified regions; if multiple regions are selected, the first one will be the active region. See 'tcld account list-regions' to get a list of available regions for your account.
+          short: re
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: retention-days
+          type: int
+          description: The retention of the namespace in days.
+          short: rd
+        - name: search-attribute
+          type: string[]
+          description: 'Flag can be used multiple times; value must be "name=type"; valid types are: [Keyword Text Int Double Datetime Bool KeywordList].'
+          short: sa
+        - name: user-namespace-permission
+          type: string[]
+          description: 'Flag can be used multiple times; value must be "email=permission"; valid permissions are: [Admin Write Read].'
+          short: p
+    - name: tcld namespace add-region
+      summary: Add a new region to the Temporal Namespace
+      description: <missing>.
+      options:
+        - name: cloud-provider
+          type: string
+          description: 'The cloud provider of the region. Default: aws.'
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: region
+          type: string
+          description: New region to add to the namespace.
+          short: re
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+    - name: tcld namespace delete
+      summary: Delete a temporal namespace
+      description: <missing>.
+      short: d
+      options:
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld namespace list
+      summary: List all known namespaces
+      description: <missing>.
+      short: l
+    - name: tcld namespace get
+      summary: Get namespace information
+      description: <missing>.
+      short: g
+      options:
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+    - name: tcld namespace accepted-client-ca
+      summary: Manage client ca certificate used to verify client connections
+      description: <missing>.
+      short: ca
+    - name: tcld namespace accepted-client-ca list
+      summary: List the accepted client ca certificates currently configured for the namespace
+      description: <missing>.
+      short: l
+      options:
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+    - name: tcld namespace accepted-client-ca add
+      summary: Add a new ca accepted client ca certificate
+      description: <missing>.
+      short: a
+      options:
+        - name: ca-certificate
+          type: string
+          description: The base64 encoded ca certificate.
+          short: c
+        - name: ca-certificate-file
+          type: string
+          description: The path to the ca pem file.
+          short: f
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld namespace accepted-client-ca remove
+      summary: Remove existing certificates
+      description: <missing>.
+      short: r
+      options:
+        - name: ca-certificate
+          type: string
+          description: The base64 encoded ca certificate.
+          short: c
+        - name: ca-certificate-file
+          type: string
+          description: The path to the ca pem file.
+          short: f
+        - name: ca-certificate-fingerprint
+          type: string
+          description: The fingerprint of to the ca certificate.
+          short: fp
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld namespace accepted-client-ca set
+      summary: Set the accepted client ca certificate
+      description: <missing>.
+      short: s
+      options:
+        - name: ca-certificate
+          type: string
+          description: The base64 encoded ca certificate.
+          short: c
+        - name: ca-certificate-file
+          type: string
+          description: The path to the ca pem file.
+          short: f
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld namespace auth-method
+      summary: Manage the authentication method for the namespace
+      description: <missing>.
+      short: am
+    - name: tcld namespace auth-method set
+      summary: Set the authentication method for the namespace
+      description: <missing>.
+      options:
+        - name: auth-method
+          type: string
+          description: The authentication method used for the namespace (e.g. 'mtls', 'api_key').
+          required: true
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld namespace auth-method get
+      summary: Retrieve the authentication method for namespace
+      description: <missing>.
+      options:
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+    - name: tcld namespace certificate-filters
+      summary: Manage optional certificate filters used by namespace to authorize client certificates based on distinguished name fields
+      description: <missing>.
+      short: cf
+    - name: tcld namespace certificate-filters import
+      summary: Sets the certificate filters on the namespace. Existing filters will be replaced
+      description: <missing>.
+      short: imp
+      options:
+        - name: certificate-filter-file
+          type: string
+          description: 'Path to a JSON file that defines the certificate filters that will be configured on the namespace. This will replace the existing filter configuration. Sample JSON: { "filters": [ { "commonName": "test1" } ] }.'
+          short: file
+        - name: certificate-filter-input
+          type: string
+          description: 'JSON that defines the certificate filters that will be configured on the namespace. This will replace the existing filter configuration. Sample JSON: { "filters": [ { "commonName": "test1" } ] }.'
+          short: input
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld namespace certificate-filters export
+      summary: Exports existing certificate filters on the namespace
+      description: <missing>.
+      short: exp
+      options:
+        - name: certificate-filter-file
+          type: string
+          description: Path to a JSON file where tcld will export the certificate filter configuration to.
+          short: file
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld namespace certificate-filters clear
+      summary: Clears all certificate filters on the namespace. Note that this will allow *any* client certificate that chains up to a configured CA in the bundle to connect to the namespace
+      description: <missing>.
+      short: c
+      options:
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld namespace certificate-filters add
+      summary: Adds additional certificate filters to the namespace
+      description: <missing>.
+      short: a
+      options:
+        - name: certificate-filter-file
+          type: string
+          description: 'Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }.'
+          short: file
+        - name: certificate-filter-input
+          type: string
+          description: 'JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }.'
+          short: input
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld namespace update-codec-server
+      summary: Update codec server config used to decode encoded payloads through remote endpoint
+      description: <missing>.
+      short: ucs
+      options:
+        - name: endpoint
+          type: string
+          description: The codec server endpoint to decode payloads for all users interacting with this Namespace, must be https.
+          short: e
+          required: true
+        - name: include-credentials
+          type: bool
+          description: Include cross-origin credentials.
+          short: ic
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: pass-access-token
+          type: bool
+          description: Pass the user access token to the remote endpoint.
+          short: pat
+    - name: tcld namespace retention
+      summary: Manages configuration of the length of time (in days) a closed workflow will be preserved before deletion
+      description: <missing>.
+      short: r
+    - name: tcld namespace retention set
+      summary: Set the length of time (in days) a closed workflow will be preserved before deletion for a given namespace
+      description: <missing>.
+      short: s
+      options:
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+        - name: retention-days
+          type: int
+          description: The retention of the namespace in days.
+          short: rd
+          required: true
+    - name: tcld namespace retention get
+      summary: Retrieve the length of time (in days) a closed workflow will be preserved before deletion for a given namespace
+      description: <missing>.
+      short: g
+      options:
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+    - name: tcld namespace search-attributes
+      summary: Manage search attributes used by namespace
+      description: <missing>.
+      short: sa
+    - name: tcld namespace search-attributes add
+      summary: Add a new namespace custom search attribute
+      description: <missing>.
+      short: a
+      options:
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+        - name: search-attribute
+          type: string[]
+          description: 'Flag can be used multiple times; value must be "name=type"; valid types are: [Keyword Text Int Double Datetime Bool KeywordList].'
+          short: sa
+          required: true
+    - name: tcld namespace search-attributes rename
+      summary: Update the name of an existing custom search attribute
+      description: <missing>.
+      short: rn
+      options:
+        - name: existing-name
+          type: string
+          description: The name of an existing search attribute.
+          short: en
+          required: true
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: new-name
+          type: string
+          description: The new name for the search attribute.
+          short: nn
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld namespace failover
+      summary: Failover a temporal namespace
+      description: <missing>.
+      short: fo
+      options:
+        - name: cloud-provider
+          type: string
+          description: 'The cloud provider of the region. Default: aws.'
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: region
+          type: string
+          description: The region to failover to.
+          short: re
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+    - name: tcld namespace export
+      summary: Manage export
+      description: <missing>.
+      short: es
+    - name: tcld namespace export s3
+      summary: Manage S3 export sink
+      description: <missing>.
+    - name: tcld namespace export s3 create
+      summary: Create export sink
+      description: <missing>.
+      short: c
+      options:
+        - name: kms-arn
+          type: string
+          description: 'Provide the ARN of the KMS key to use for encryption. Note: If the KMS ARN needs to be added or updated, user must create the IAM Role with KMS or modify the created IAM Role accordingly.'
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: region
+          type: string
+          description: The region to use for the request, if not set the server will use the namespace's region.
+          short: re
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: role-arn
+          type: string
+          description: Provide role arn for the IAM Role.
+          required: true
+        - name: s3-bucket-name
+          type: string
+          description: Provide the name of an AWS S3 bucket that Temporal will send closed workflow histories to.
+          required: true
+        - name: sink-name
+          type: string
+          description: Provide a name for the export sink.
+          required: true
+    - name: tcld namespace export s3 validate
+      summary: Validate export sink
+      description: <missing>.
+      short: v
+      options:
+        - name: kms-arn
+          type: string
+          description: 'Provide the ARN of the KMS key to use for encryption. Note: If the KMS ARN needs to be added or updated, user must create the IAM Role with KMS or modify the created IAM Role accordingly.'
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: region
+          type: string
+          description: The region to use for the request, if not set the server will use the namespace's region.
+          short: re
+        - name: role-arn
+          type: string
+          description: Provide role arn for the IAM Role.
+          required: true
+        - name: s3-bucket-name
+          type: string
+          description: Provide the name of an AWS S3 bucket that Temporal will send closed workflow histories to.
+          required: true
+        - name: sink-name
+          type: string
+          description: Provide a name for the export sink.
+          required: true
+    - name: tcld namespace export s3 update
+      summary: Update export sink
+      description: <missing>.
+      short: u
+      options:
+        - name: enabled
+          type: string
+          description: Whether export is enabled.
+        - name: kms-arn
+          type: string
+          description: 'Provide the ARN of the KMS key to use for encryption. Note: If the KMS ARN needs to be added or updated, user must create the IAM Role with KMS or modify the created IAM Role accordingly.'
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+        - name: role-arn
+          type: string
+          description: Provide role arn for the IAM Role.
+        - name: s3-bucket-name
+          type: string
+          description: Provide the name of an AWS S3 bucket that Temporal will send closed workflow histories to.
+        - name: sink-name
+          type: string
+          description: Provide a name for the export sink.
+          required: true
+    - name: tcld namespace export s3 get
+      summary: Get export sink
+      description: <missing>.
+      short: g
+      options:
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: sink-name
+          type: string
+          description: Provide a name for the export sink.
+          required: true
+    - name: tcld namespace export s3 delete
+      summary: Delete export sink
+      description: <missing>.
+      short: d
+      options:
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+        - name: sink-name
+          type: string
+          description: Provide a name for the export sink.
+          required: true
+    - name: tcld namespace export s3 list
+      summary: List export sinks
+      description: <missing>.
+      short: l
+      options:
+        - name: namespace
+          type: string
+          description: The namespace hosted on temporal cloud.
+          short: "n"
+          required: true
+        - name: page-size
+          type: int
+          description: The page size for list operations.
+        - name: page-token
+          type: string
+          description: The page token for list operations.
+    - name: tcld user
+      summary: User management operations
+      description: <missing>.
+      short: u
+    - name: tcld user list
+      summary: List users
+      description: <missing>.
+      short: l
+      options:
+        - name: namespace
+          type: string
+          description: List users that have permissions to the namespace.
+          short: "n"
+        - name: page-size
+          type: int
+          description: Page size for paging list users request.
+          short: s
+        - name: page-token
+          type: string
+          description: Page token for paging list users request.
+          short: p
+    - name: tcld user get
+      summary: Get user information
+      description: <missing>.
+      short: g
+      options:
+        - name: user-email
+          type: string
+          description: The user email address of the user.
+          short: e
+        - name: user-id
+          type: string
+          description: The user id.
+          short: id
+    - name: tcld user invite
+      summary: Invite users to Temporal Cloud
+      description: <missing>.
+      short: i
+      options:
+        - name: account-role
+          type: string
+          description: 'The account role to set on the user; valid types are: [Admin Developer Owner Read].'
+          short: ar
+          required: true
+        - name: namespace-permission
+          type: string[]
+          description: 'Flag can be used multiple times; value must be "namespace=permission"; valid types are: [Admin Read Write].'
+          short: p
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: user-email
+          type: string[]
+          description: The email address of the user, you can supply this flag multiple times to invite multiple users in a single request.
+          short: e
+          required: true
+    - name: tcld user resend-invite
+      summary: Resend invitation to a user on Temporal Cloud
+      description: <missing>.
+      short: ri
+      options:
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: user-email
+          type: string
+          description: The user email address of the user.
+          short: e
+        - name: user-id
+          type: string
+          description: The user id.
+          short: id
+    - name: tcld user delete
+      summary: Delete user from Temporal Cloud
+      description: <missing>.
+      short: d
+      options:
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+        - name: user-email
+          type: string
+          description: The user email address of the user.
+          short: e
+        - name: user-id
+          type: string
+          description: The user id.
+          short: id
+    - name: tcld user set-account-role
+      summary: Set account role for a user
+      description: <missing>.
+      short: sar
+      options:
+        - name: account-role
+          type: string
+          description: 'The account role to set on the user; valid types are: [Admin Developer Owner Read].'
+          short: ar
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+        - name: user-email
+          type: string
+          description: The user email address of the user.
+          short: e
+        - name: user-id
+          type: string
+          description: The user id.
+          short: id
+    - name: tcld user set-namespace-permissions
+      summary: Set entirely new set of namespace permissions for a user
+      description: <missing>.
+      short: snp
+      options:
+        - name: namespace-permission
+          type: string[]
+          description: 'Flag can be used multiple times; value must be "namespace=permission"; valid types are: [Admin Read Write].'
+          short: p
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+        - name: user-email
+          type: string
+          description: The user email address of the user.
+          short: e
+        - name: user-id
+          type: string
+          description: The user id.
+          short: id
+    - name: tcld request
+      summary: Manage asynchronous requests
+      description: <missing>.
+      short: r
+    - name: tcld request get
+      summary: Get the request status
+      description: <missing>.
+      short: g
+      options:
+        - name: request-id
+          type: string
+          description: The request-id of the asynchronous request.
+          short: r
+          required: true
+    - name: tcld login
+      summary: Login as user
+      description: <missing>.
+      short: l
+      options:
+        - name: audience
+          type: string
+          description: <missing>.
+          short: a
+        - name: client-id
+          type: string
+          description: <missing>.
+          short: id
+        - name: disable-pop-up
+          type: bool
+          description: disable browser pop-up.
+        - name: domain
+          type: string
+          description: <missing>.
+          short: d
+    - name: tcld logout
+      summary: Logout current user
+      description: <missing>.
+      short: lo
+      options:
+        - name: disable-pop-up
+          type: bool
+          description: disable browser pop-up.
+        - name: domain
+          type: string
+          description: <missing>.
+          short: d
+    - name: tcld generate-certificates
+      summary: Commands for generating certificate authority and end-entity TLS certificates
+      description: <missing>.
+      short: gen
+    - name: tcld generate-certificates certificate-authority-certificate
+      summary: Generate a certificate authority certificate
+      description: <missing>.
+      short: ca
+      options:
+        - name: ca-certificate-file
+          type: string
+          description: The path where the generated x509 certificate will be stored.
+          short: ca-cert
+          required: true
+        - name: ca-key-file
+          type: string
+          description: The path where the certificate's private key will be stored.
+          short: ca-key
+          required: true
+        - name: organization
+          type: string
+          description: The name of the organization.
+          short: org
+          required: true
+        - name: rsa-algorithm
+          type: bool
+          description: Generates a 4096-bit RSA keypair instead of an ECDSA P-384 keypair (the recommended default) for the certificate (optional).
+          short: rsa
+        - name: validity-period
+          type: string
+          description: 'The duration for which the certificate is valid for. example: 30d10h (30 days and 10 hrs).'
+          short: d
+          required: true
+    - name: tcld generate-certificates end-entity-certificate
+      summary: Generate an end-entity certificate
+      description: <missing>.
+      short: leaf
+      options:
+        - name: ca-certificate-file
+          type: string
+          description: The path of the x509 certificate for the certificate authority.
+          short: ca-cert
+          required: true
+        - name: ca-key-file
+          type: string
+          description: The path of the private key for the certificate authority.
+          short: ca-key
+          required: true
+        - name: certificate-file
+          type: string
+          description: The path where the generated x509 certificate will be stored.
+          short: cert
+          required: true
+        - name: common-name
+          type: string
+          description: The common name (optional).
+        - name: key-file
+          type: string
+          description: The path where the certificate's private key will be stored.
+          short: key
+          required: true
+        - name: organization
+          type: string
+          description: The name of the organization.
+          short: org
+          required: true
+        - name: organization-unit
+          type: string
+          description: The name of the organizational unit (optional).
+        - name: validity-period
+          type: string
+          description: 'The duration for which the end entity certificate is valid for. example: 30d10h (30 days and 10 hrs). By default the generated certificate expires 24 hours before the certificate authority expires (optional).'
+          short: d
+    - name: tcld apikey
+      summary: APIKey operations
+      description: <missing>.
+      short: ak
+    - name: tcld apikey create
+      summary: Create an apikey. Make sure to copy the secret or else you will not be able to retrieve it again
+      description: <missing>.
+      short: c
+      options:
+        - name: description
+          type: string
+          description: the description of the apikey.
+          short: desc
+        - name: duration
+          type: string
+          description: 'the duration from now when the apikey will expire, will be ignored if expiry flag is set, examples: ''2.5y'', ''30d'', ''4d12h''.'
+          short: d
+        - name: expiry
+          type: timestamp
+          description: 'the absolute timestamp (RFC3339) when the apikey will expire, example: ''2024-10-15T15:43:32-07:00''.'
+          short: e
+        - name: name
+          type: string
+          description: the display name of the apikey.
+          short: "n"
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: service-account-id
+          type: string
+          description: setting this flag will create an api key for a service account, not a user.
+          short: si
+    - name: tcld apikey get
+      summary: Get an apikey
+      description: <missing>.
+      short: g
+      options:
+        - name: id
+          type: string
+          description: The id of the apikey to get.
+          short: i
+          required: true
+    - name: tcld apikey list
+      summary: List apikeys
+      description: <missing>.
+      short: l
+    - name: tcld apikey delete
+      summary: Delete an apikey
+      description: <missing>.
+      short: d
+      options:
+        - name: id
+          type: string
+          description: The id of the apikey to delete.
+          short: i
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld apikey disable
+      summary: Disable an apikey
+      description: <missing>.
+      short: da
+      options:
+        - name: id
+          type: string
+          description: The id of the apikey to disable.
+          short: i
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld apikey enable
+      summary: Enable a disabled apikey
+      description: <missing>.
+      short: ea
+      options:
+        - name: id
+          type: string
+          description: The id of the apikey to enable.
+          short: i
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+    - name: tcld feature
+      summary: feature commands
+      description: <missing>.
+      short: f
+    - name: tcld feature toggle-gcp-sink
+      summary: switch gcp sink on/off
+      description: <missing>.
+      short: tgs
+    - name: tcld feature get
+      summary: get all feature flags Value
+      description: <missing>.
+      short: g
+    - name: tcld service-account
+      summary: Service Account management operations
+      description: <missing>.
+      short: sa
+    - name: tcld service-account create
+      summary: Create a service account
+      description: <missing>.
+      short: c
+      options:
+        - name: account-role
+          type: string
+          description: 'The account role to set on the service account; valid types are: [Admin Developer Owner Read].'
+          short: ar
+          required: true
+        - name: description
+          type: string
+          description: The service account description.
+          short: d
+        - name: name
+          type: string
+          description: The service account name.
+          short: "n"
+        - name: namespace-permission
+          type: string[]
+          description: 'Flag can be used multiple times; value must be "<namespace>=<permission>"; valid types are: [Admin Read Write].'
+          short: np
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+    - name: tcld service-account create-scoped
+      summary: Create a scoped service account (service account restricted to a single namespace)
+      description: <missing>.
+      short: cs
+      options:
+        - name: description
+          type: string
+          description: The service account description.
+          short: d
+        - name: name
+          type: string
+          description: The service account name.
+          short: "n"
+        - name: namespace-permission
+          type: string
+          description: 'Value must be "<namespace>=<permission>"; valid types are: [Admin Read Write].'
+          short: np
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+    - name: tcld service-account list
+      summary: List service accounts
+      description: <missing>.
+      short: l
+      options:
+        - name: page-size
+          type: int
+          description: Page size for paging list service accounts request.
+          short: s
+        - name: page-token
+          type: string
+          description: Page token for paging list service accounts request.
+          short: p
+    - name: tcld service-account get
+      summary: Get service account information
+      description: <missing>.
+      short: g
+      options:
+        - name: service-account-id
+          type: string
+          description: The service account id.
+          short: id
+          required: true
+    - name: tcld service-account update
+      summary: Update service account from Temporal Cloud
+      description: <missing>.
+      short: u
+      options:
+        - name: description
+          type: string
+          description: The service account description.
+          short: d
+        - name: name
+          type: string
+          description: The service account name.
+          short: "n"
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+        - name: service-account-id
+          type: string
+          description: The service account id.
+          short: id
+          required: true
+    - name: tcld service-account delete
+      summary: Delete service account from Temporal Cloud
+      description: <missing>.
+      short: d
+      options:
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+        - name: service-account-id
+          type: string
+          description: The service account id.
+          short: id
+          required: true
+    - name: tcld service-account set-account-role
+      summary: Set account role for a service account
+      description: <missing>.
+      short: sar
+      options:
+        - name: account-role
+          type: string
+          description: 'The account role to set on the service account; valid types are: [Admin Developer Owner Read].'
+          short: ar
+          required: true
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+        - name: service-account-id
+          type: string
+          description: The service account id.
+          short: id
+          required: true
+    - name: tcld service-account set-namespace-permissions
+      summary: Set entirely new set of namespace permissions for a service account
+      description: <missing>.
+      short: snp
+      options:
+        - name: namespace-permission
+          type: string[]
+          description: 'Flag can be used multiple times; value must be "namespace=permission"; valid types are: [Admin Read Write].'
+          short: p
+        - name: request-id
+          type: string
+          description: The request-id to use for the asynchronous operation, if not set the server will assign one (optional).
+          short: r
+        - name: resource-version
+          type: string
+          description: The resource-version (etag) to update from, if not set the cli will use the latest (optional).
+          short: v
+        - name: service-account-id
+          type: string
+          description: The service account id.
+          short: id
+          required: true
 option-sets: []
 usages:
     optionusages: []
