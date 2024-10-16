@@ -163,7 +163,10 @@ func (c *converter) addCommandsVisitor(prefix string, cmd *cli.Command) error {
 	})
 
 	for _, sc := range cmd.Subcommands {
-		c.addCommandsVisitor(name, sc)
+		err := c.addCommandsVisitor(name, sc)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
