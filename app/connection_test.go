@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -164,6 +165,9 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 	}
 	for _, tc := range testcases {
 		s.Run(tc.name, func() {
+			// setting the env var unexpectedly interferes with the test.
+			require.NoError(s.T(), os.Unsetenv("TEMPORAL_CLOUD_API_KEY"))
+
 			app, cfgDir := NewTestApp(s.T(), nil, []cli.Flag{
 				ServerFlag,
 				ConfigDirFlag,
