@@ -49,7 +49,7 @@ tools:
 	@go install github.com/golang/mock/mockgen@latest
 
 lint:
-	golangci-lint run
+	golangci-lint run --verbose
 
 $(COVER_ROOT):
 	@mkdir -p $(COVER_ROOT)
