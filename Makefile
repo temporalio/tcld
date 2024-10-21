@@ -45,11 +45,11 @@ release:
 	$(call build,tcld,windows,amd64,.exe)
 
 tools:
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.1
 	@go install github.com/golang/mock/mockgen@latest
 
 lint:
-	golangci-lint run --verbose
+	golangci-lint run
 
 $(COVER_ROOT):
 	@mkdir -p $(COVER_ROOT)
