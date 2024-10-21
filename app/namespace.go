@@ -49,6 +49,15 @@ const (
 )
 
 var (
+	AuthMethods = []string{
+		AuthMethodRestricted,
+		AuthMethodMTLS,
+		AuthMethodAPIKey,
+		AuthMethodAPIKeyOrMTLS,
+	}
+)
+
+var (
 	CaCertificateFlag = &cli.StringFlag{
 		Name:    CaCertificateFlagName,
 		Usage:   "The base64 encoded ca certificate",
@@ -927,7 +936,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						ResourceVersionFlag,
 						&cli.StringFlag{
 							Name:     authMethodFlagName,
-							Usage:    "The authentication method used for the namespace (e.g. 'mtls', 'api_key')",
+							Aliases:  []string{"am"},
+							Usage:    fmt.Sprintf("The authentication method used for the namespace (i.e. %s)", formatAuthMethods()),
 							Required: true,
 						},
 					},
@@ -1995,6 +2005,14 @@ func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) 
 	}
 
 	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
+}
+
+func formatAuthMethods() string {
+	var methods []string
+	for _, m := range AuthMethods {
+		methods = append(methods, fmt.Sprintf("'%s'", m))
+	}
+	return strings.Join(methods, ", ")
 }
 
 func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
