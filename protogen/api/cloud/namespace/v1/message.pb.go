@@ -4,14 +4,18 @@
 package namespace
 
 import (
+	bytes "bytes"
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
 	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 	types "github.com/gogo/protobuf/types"
+	v1 "github.com/temporalio/tcld/protogen/api/cloud/resource/v1"
+	v11 "github.com/temporalio/tcld/protogen/api/cloud/sink/v1"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
+	strconv "strconv"
 	strings "strings"
 )
 
@@ -25,6 +29,105 @@ var _ = math.Inf
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
+
+type NamespaceSpec_SearchAttributeType int32
+
+const (
+	SEARCH_ATTRIBUTE_TYPE_UNSPECIFIED  NamespaceSpec_SearchAttributeType = 0
+	SEARCH_ATTRIBUTE_TYPE_TEXT         NamespaceSpec_SearchAttributeType = 1
+	SEARCH_ATTRIBUTE_TYPE_KEYWORD      NamespaceSpec_SearchAttributeType = 2
+	SEARCH_ATTRIBUTE_TYPE_INT          NamespaceSpec_SearchAttributeType = 3
+	SEARCH_ATTRIBUTE_TYPE_DOUBLE       NamespaceSpec_SearchAttributeType = 4
+	SEARCH_ATTRIBUTE_TYPE_BOOL         NamespaceSpec_SearchAttributeType = 5
+	SEARCH_ATTRIBUTE_TYPE_DATETIME     NamespaceSpec_SearchAttributeType = 6
+	SEARCH_ATTRIBUTE_TYPE_KEYWORD_LIST NamespaceSpec_SearchAttributeType = 7
+)
+
+var NamespaceSpec_SearchAttributeType_name = map[int32]string{
+	0: "SearchAttributeTypeUnspecified",
+	1: "SearchAttributeTypeText",
+	2: "SearchAttributeTypeKeyword",
+	3: "SearchAttributeTypeInt",
+	4: "SearchAttributeTypeDouble",
+	5: "SearchAttributeTypeBool",
+	6: "SearchAttributeTypeDatetime",
+	7: "SearchAttributeTypeKeywordList",
+}
+
+var NamespaceSpec_SearchAttributeType_value = map[string]int32{
+	"SearchAttributeTypeUnspecified": 0,
+	"SearchAttributeTypeText":        1,
+	"SearchAttributeTypeKeyword":     2,
+	"SearchAttributeTypeInt":         3,
+	"SearchAttributeTypeDouble":      4,
+	"SearchAttributeTypeBool":        5,
+	"SearchAttributeTypeDatetime":    6,
+	"SearchAttributeTypeKeywordList": 7,
+}
+
+func (NamespaceSpec_SearchAttributeType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{4, 0}
+}
+
+type NamespaceRegionStatus_State int32
+
+const (
+	STATE_UNSPECIFIED NamespaceRegionStatus_State = 0
+	STATE_ADDING      NamespaceRegionStatus_State = 1
+	STATE_ACTIVE      NamespaceRegionStatus_State = 2
+	STATE_PASSIVE     NamespaceRegionStatus_State = 3
+	STATE_REMOVING    NamespaceRegionStatus_State = 4
+	STATE_FAILED      NamespaceRegionStatus_State = 5
+)
+
+var NamespaceRegionStatus_State_name = map[int32]string{
+	0: "StateUnspecified",
+	1: "StateAdding",
+	2: "StateActive",
+	3: "StatePassive",
+	4: "StateRemoving",
+	5: "StateFailed",
+}
+
+var NamespaceRegionStatus_State_value = map[string]int32{
+	"StateUnspecified": 0,
+	"StateAdding":      1,
+	"StateActive":      2,
+	"StatePassive":     3,
+	"StateRemoving":    4,
+	"StateFailed":      5,
+}
+
+func (NamespaceRegionStatus_State) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{10, 0}
+}
+
+type ExportSink_Health int32
+
+const (
+	HEALTH_UNSPECIFIED              ExportSink_Health = 0
+	HEALTH_OK                       ExportSink_Health = 1
+	HEALTH_ERROR_INTERNAL           ExportSink_Health = 2
+	HEALTH_ERROR_USER_CONFIGURATION ExportSink_Health = 3
+)
+
+var ExportSink_Health_name = map[int32]string{
+	0: "HealthUnspecified",
+	1: "HealthOk",
+	2: "HealthErrorInternal",
+	3: "HealthErrorUserConfiguration",
+}
+
+var ExportSink_Health_value = map[string]int32{
+	"HealthUnspecified":            0,
+	"HealthOk":                     1,
+	"HealthErrorInternal":          2,
+	"HealthErrorUserConfiguration": 3,
+}
+
+func (ExportSink_Health) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{12, 0}
+}
 
 type CertificateFilterSpec struct {
 	// The common_name in the certificate.
@@ -104,7 +207,13 @@ func (m *CertificateFilterSpec) GetSubjectAlternativeName() string {
 type MtlsAuthSpec struct {
 	// The base64 encoded ca cert(s) in PEM format that the clients can use for authentication and authorization.
 	// This must only be one value, but the CA can have a chain.
-	AcceptedClientCa string `protobuf:"bytes,1,opt,name=accepted_client_ca,json=acceptedClientCa,proto3" json:"accepted_client_ca,omitempty"`
+	//
+	// (-- api-linter: core::0140::base64=disabled --)
+	// Deprecated: Use accepted_client_ca instead. Will be ignored when accepted_client_ca is set.
+	AcceptedClientCaDeprecated string `protobuf:"bytes,1,opt,name=accepted_client_ca_deprecated,json=acceptedClientCaDeprecated,proto3" json:"accepted_client_ca_deprecated,omitempty"`
+	// The ca cert(s) in PEM format that the clients can use for authentication and authorization.
+	// This must only be one value, but the CA can have a chain.
+	AcceptedClientCa []byte `protobuf:"bytes,4,opt,name=accepted_client_ca,json=acceptedClientCa,proto3" json:"accepted_client_ca,omitempty"`
 	// Certificate filters which, if specified, only allow connections from client certificates whose distinguished name properties match at least one of the filters.
 	// This allows limiting access to specific end-entity certificates.
 	// Optional, default is empty.
@@ -147,11 +256,18 @@ func (m *MtlsAuthSpec) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MtlsAuthSpec proto.InternalMessageInfo
 
-func (m *MtlsAuthSpec) GetAcceptedClientCa() string {
+func (m *MtlsAuthSpec) GetAcceptedClientCaDeprecated() string {
+	if m != nil {
+		return m.AcceptedClientCaDeprecated
+	}
+	return ""
+}
+
+func (m *MtlsAuthSpec) GetAcceptedClientCa() []byte {
 	if m != nil {
 		return m.AcceptedClientCa
 	}
-	return ""
+	return nil
 }
 
 func (m *MtlsAuthSpec) GetCertificateFilters() []*CertificateFilterSpec {
@@ -281,11 +397,13 @@ type NamespaceSpec struct {
 	// The name is immutable. Once set, it cannot be changed.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// The ids of the regions where the namespace should be available.
+	// The GetRegions API can be used to get the list of valid region ids.
 	// Specifying more than one region makes the namespace "global", which is currently a preview only feature with restricted access.
 	// Please reach out to Temporal support for more information on global namespaces.
 	// When provisioned the global namespace will be active on the first region in the list and passive on the rest.
 	// Number of supported regions is 2.
 	// The regions is immutable. Once set, it cannot be changed.
+	// Example: ["aws-us-west-2"].
 	Regions []string `protobuf:"bytes,2,rep,name=regions,proto3" json:"regions,omitempty"`
 	// The number of days the workflows data will be retained for.
 	// Changes to the retention period may impact your storage costs.
@@ -303,7 +421,14 @@ type NamespaceSpec struct {
 	// Supported attribute types: text, keyword, int, double, bool, datetime, keyword_list.
 	// NOTE: currently deleting a search attribute is not supported.
 	// Optional, default is empty.
-	CustomSearchAttributes map[string]string `protobuf:"bytes,5,rep,name=custom_search_attributes,json=customSearchAttributes,proto3" json:"custom_search_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// Deprecated: Use search_attributes instead.
+	CustomSearchAttributes map[string]string `protobuf:"bytes,5,rep,name=custom_search_attributes,json=customSearchAttributes,proto3" json:"custom_search_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"` // Deprecated: Do not use.
+	// The custom search attributes to use for the namespace.
+	// The name of the attribute is the key and the type is the value.
+	// Note: currently deleting a search attribute is not supported.
+	// Optional, default is empty.
+	// temporal:enums:replaces=custom_search_attributes
+	SearchAttributes map[string]NamespaceSpec_SearchAttributeType `protobuf:"bytes,8,rep,name=search_attributes,json=searchAttributes,proto3" json:"search_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3,enum=temporal.api.cloud.namespace.v1.NamespaceSpec_SearchAttributeType"`
 	// Codec server spec used by UI to decode payloads for all users interacting with this namespace.
 	// Optional, default is unset.
 	CodecServer *CodecServerSpec `protobuf:"bytes,6,opt,name=codec_server,json=codecServer,proto3" json:"codec_server,omitempty"`
@@ -376,9 +501,17 @@ func (m *NamespaceSpec) GetApiKeyAuth() *ApiKeyAuthSpec {
 	return nil
 }
 
+// Deprecated: Do not use.
 func (m *NamespaceSpec) GetCustomSearchAttributes() map[string]string {
 	if m != nil {
 		return m.CustomSearchAttributes
+	}
+	return nil
+}
+
+func (m *NamespaceSpec) GetSearchAttributes() map[string]NamespaceSpec_SearchAttributeType {
+	if m != nil {
+		return m.SearchAttributes
 	}
 	return nil
 }
@@ -613,9 +746,12 @@ type Namespace struct {
 	// The namespace specification.
 	Spec *NamespaceSpec `protobuf:"bytes,3,opt,name=spec,proto3" json:"spec,omitempty"`
 	// The current state of the namespace.
-	// Possible values: activating, activationfailed, active, updating, updatefailed, deleting, deletefailed, deleted, suspending, suspendfailed, suspended.
+	// Deprecated: Use state instead.
+	StateDeprecated string `protobuf:"bytes,4,opt,name=state_deprecated,json=stateDeprecated,proto3" json:"state_deprecated,omitempty"` // Deprecated: Do not use.
+	// The current state of the namespace.
 	// For any failed state, reach out to Temporal Cloud support for remediation.
-	State string `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
+	// temporal:enums:replaces=state_deprecated
+	State v1.ResourceState `protobuf:"varint,13,opt,name=state,proto3,enum=temporal.api.cloud.resource.v1.ResourceState" json:"state,omitempty"`
 	// The id of the async operation that is creating/updating/deleting the namespace, if any.
 	AsyncOperationId string `protobuf:"bytes,5,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
 	// The endpoints for the namespace.
@@ -689,11 +825,19 @@ func (m *Namespace) GetSpec() *NamespaceSpec {
 	return nil
 }
 
-func (m *Namespace) GetState() string {
+// Deprecated: Do not use.
+func (m *Namespace) GetStateDeprecated() string {
+	if m != nil {
+		return m.StateDeprecated
+	}
+	return ""
+}
+
+func (m *Namespace) GetState() v1.ResourceState {
 	if m != nil {
 		return m.State
 	}
-	return ""
+	return v1.RESOURCE_STATE_UNSPECIFIED
 }
 
 func (m *Namespace) GetAsyncOperationId() string {
@@ -756,7 +900,11 @@ type NamespaceRegionStatus struct {
 	// The current state of the namespace region.
 	// Possible values: adding, active, passive, removing, failed.
 	// For any failed state, reach out to Temporal Cloud support for remediation.
-	State string `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	// Deprecated: Use state instead.
+	StateDeprecated string `protobuf:"bytes,1,opt,name=state_deprecated,json=stateDeprecated,proto3" json:"state_deprecated,omitempty"` // Deprecated: Do not use.
+	// The current state of the namespace region.
+	// temporal:enums:replaces=state_deprecated
+	State NamespaceRegionStatus_State `protobuf:"varint,3,opt,name=state,proto3,enum=temporal.api.cloud.namespace.v1.NamespaceRegionStatus_State" json:"state,omitempty"`
 	// The id of the async operation that is making changes to where the namespace is available, if any.
 	AsyncOperationId string `protobuf:"bytes,2,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
 }
@@ -793,11 +941,19 @@ func (m *NamespaceRegionStatus) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_NamespaceRegionStatus proto.InternalMessageInfo
 
-func (m *NamespaceRegionStatus) GetState() string {
+// Deprecated: Do not use.
+func (m *NamespaceRegionStatus) GetStateDeprecated() string {
+	if m != nil {
+		return m.StateDeprecated
+	}
+	return ""
+}
+
+func (m *NamespaceRegionStatus) GetState() NamespaceRegionStatus_State {
 	if m != nil {
 		return m.State
 	}
-	return ""
+	return STATE_UNSPECIFIED
 }
 
 func (m *NamespaceRegionStatus) GetAsyncOperationId() string {
@@ -807,13 +963,196 @@ func (m *NamespaceRegionStatus) GetAsyncOperationId() string {
 	return ""
 }
 
+type ExportSinkSpec struct {
+	// The unique name of the export sink.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// A flag indicating whether the export sink is enabled or not.
+	Enabled bool `protobuf:"varint,2,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	// The S3 configuration details when destination_type is S3.
+	S3 *v11.S3Spec `protobuf:"bytes,3,opt,name=s3,proto3" json:"s3,omitempty"`
+	// This is a feature under development. We will allow GCS sink support for GCP Namespaces.
+	// The GCS configuration details when destination_type is GCS.
+	Gcs *v11.GCSSpec `protobuf:"bytes,4,opt,name=gcs,proto3" json:"gcs,omitempty"`
+}
+
+func (m *ExportSinkSpec) Reset()      { *m = ExportSinkSpec{} }
+func (*ExportSinkSpec) ProtoMessage() {}
+func (*ExportSinkSpec) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{11}
+}
+func (m *ExportSinkSpec) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ExportSinkSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ExportSinkSpec.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ExportSinkSpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExportSinkSpec.Merge(m, src)
+}
+func (m *ExportSinkSpec) XXX_Size() int {
+	return m.Size()
+}
+func (m *ExportSinkSpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExportSinkSpec.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExportSinkSpec proto.InternalMessageInfo
+
+func (m *ExportSinkSpec) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ExportSinkSpec) GetEnabled() bool {
+	if m != nil {
+		return m.Enabled
+	}
+	return false
+}
+
+func (m *ExportSinkSpec) GetS3() *v11.S3Spec {
+	if m != nil {
+		return m.S3
+	}
+	return nil
+}
+
+func (m *ExportSinkSpec) GetGcs() *v11.GCSSpec {
+	if m != nil {
+		return m.Gcs
+	}
+	return nil
+}
+
+type ExportSink struct {
+	// The unique name of the export sink, once set it can't be changed
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The version of the export sink resource.
+	ResourceVersion string `protobuf:"bytes,2,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	// The current state of the export sink.
+	State v1.ResourceState `protobuf:"varint,3,opt,name=state,proto3,enum=temporal.api.cloud.resource.v1.ResourceState" json:"state,omitempty"`
+	// The specification details of the export sink.
+	Spec *ExportSinkSpec `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
+	// The health status of the export sink.
+	Health ExportSink_Health `protobuf:"varint,5,opt,name=health,proto3,enum=temporal.api.cloud.namespace.v1.ExportSink_Health" json:"health,omitempty"`
+	// An error message describing any issues with the export sink, if applicable.
+	ErrorMessage string `protobuf:"bytes,6,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	// The timestamp of the latest successful data export.
+	LatestDataExportTime *types.Timestamp `protobuf:"bytes,7,opt,name=latest_data_export_time,json=latestDataExportTime,proto3" json:"latest_data_export_time,omitempty"`
+	// The timestamp of the last health check performed on the export sink.
+	LastHealthCheckTime *types.Timestamp `protobuf:"bytes,8,opt,name=last_health_check_time,json=lastHealthCheckTime,proto3" json:"last_health_check_time,omitempty"`
+}
+
+func (m *ExportSink) Reset()      { *m = ExportSink{} }
+func (*ExportSink) ProtoMessage() {}
+func (*ExportSink) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{12}
+}
+func (m *ExportSink) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ExportSink) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ExportSink.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ExportSink) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExportSink.Merge(m, src)
+}
+func (m *ExportSink) XXX_Size() int {
+	return m.Size()
+}
+func (m *ExportSink) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExportSink.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExportSink proto.InternalMessageInfo
+
+func (m *ExportSink) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ExportSink) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *ExportSink) GetState() v1.ResourceState {
+	if m != nil {
+		return m.State
+	}
+	return v1.RESOURCE_STATE_UNSPECIFIED
+}
+
+func (m *ExportSink) GetSpec() *ExportSinkSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *ExportSink) GetHealth() ExportSink_Health {
+	if m != nil {
+		return m.Health
+	}
+	return HEALTH_UNSPECIFIED
+}
+
+func (m *ExportSink) GetErrorMessage() string {
+	if m != nil {
+		return m.ErrorMessage
+	}
+	return ""
+}
+
+func (m *ExportSink) GetLatestDataExportTime() *types.Timestamp {
+	if m != nil {
+		return m.LatestDataExportTime
+	}
+	return nil
+}
+
+func (m *ExportSink) GetLastHealthCheckTime() *types.Timestamp {
+	if m != nil {
+		return m.LastHealthCheckTime
+	}
+	return nil
+}
+
 func init() {
+	proto.RegisterEnum("temporal.api.cloud.namespace.v1.NamespaceSpec_SearchAttributeType", NamespaceSpec_SearchAttributeType_name, NamespaceSpec_SearchAttributeType_value)
+	proto.RegisterEnum("temporal.api.cloud.namespace.v1.NamespaceRegionStatus_State", NamespaceRegionStatus_State_name, NamespaceRegionStatus_State_value)
+	proto.RegisterEnum("temporal.api.cloud.namespace.v1.ExportSink_Health", ExportSink_Health_name, ExportSink_Health_value)
 	proto.RegisterType((*CertificateFilterSpec)(nil), "temporal.api.cloud.namespace.v1.CertificateFilterSpec")
 	proto.RegisterType((*MtlsAuthSpec)(nil), "temporal.api.cloud.namespace.v1.MtlsAuthSpec")
 	proto.RegisterType((*ApiKeyAuthSpec)(nil), "temporal.api.cloud.namespace.v1.ApiKeyAuthSpec")
 	proto.RegisterType((*CodecServerSpec)(nil), "temporal.api.cloud.namespace.v1.CodecServerSpec")
 	proto.RegisterType((*NamespaceSpec)(nil), "temporal.api.cloud.namespace.v1.NamespaceSpec")
 	proto.RegisterMapType((map[string]string)(nil), "temporal.api.cloud.namespace.v1.NamespaceSpec.CustomSearchAttributesEntry")
+	proto.RegisterMapType((map[string]NamespaceSpec_SearchAttributeType)(nil), "temporal.api.cloud.namespace.v1.NamespaceSpec.SearchAttributesEntry")
 	proto.RegisterType((*Endpoints)(nil), "temporal.api.cloud.namespace.v1.Endpoints")
 	proto.RegisterType((*Limits)(nil), "temporal.api.cloud.namespace.v1.Limits")
 	proto.RegisterType((*AWSPrivateLinkInfo)(nil), "temporal.api.cloud.namespace.v1.AWSPrivateLinkInfo")
@@ -821,6 +1160,8 @@ func init() {
 	proto.RegisterType((*Namespace)(nil), "temporal.api.cloud.namespace.v1.Namespace")
 	proto.RegisterMapType((map[string]*NamespaceRegionStatus)(nil), "temporal.api.cloud.namespace.v1.Namespace.RegionStatusEntry")
 	proto.RegisterType((*NamespaceRegionStatus)(nil), "temporal.api.cloud.namespace.v1.NamespaceRegionStatus")
+	proto.RegisterType((*ExportSinkSpec)(nil), "temporal.api.cloud.namespace.v1.ExportSinkSpec")
+	proto.RegisterType((*ExportSink)(nil), "temporal.api.cloud.namespace.v1.ExportSink")
 }
 
 func init() {
@@ -828,86 +1169,148 @@ func init() {
 }
 
 var fileDescriptor_4ea8dce281a9b52e = []byte{
-	// 1224 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x56, 0x4b, 0x6f, 0x1c, 0xc5,
-	0x13, 0xf7, 0x38, 0xb6, 0xe3, 0xad, 0x5d, 0xc7, 0x4e, 0x27, 0xf6, 0x7f, 0xe4, 0x3f, 0x6c, 0xc2,
-	0x22, 0x44, 0x88, 0xc8, 0x2e, 0x71, 0x22, 0x88, 0x08, 0x08, 0x6d, 0x96, 0x90, 0x07, 0x79, 0x31,
-	0x1b, 0x40, 0x02, 0xa1, 0x56, 0xbb, 0xa7, 0xbc, 0x69, 0x3c, 0xd3, 0x3d, 0xea, 0xee, 0x5d, 0x6b,
-	0xe1, 0xc2, 0x01, 0x89, 0x0b, 0x07, 0x3e, 0x03, 0x27, 0xc4, 0x97, 0xe0, 0x08, 0xc7, 0x1c, 0x73,
-	0x42, 0x64, 0x73, 0xe1, 0x98, 0x8f, 0x80, 0xba, 0x67, 0x66, 0x1f, 0xc4, 0xb0, 0xe1, 0x36, 0x55,
-	0xf5, 0xab, 0x9a, 0x7a, 0xfc, 0xba, 0xba, 0xe1, 0x9c, 0xc5, 0x34, 0x53, 0x9a, 0x25, 0x2d, 0x96,
-	0x89, 0x16, 0x4f, 0x54, 0x3f, 0x6e, 0x49, 0x96, 0xa2, 0xc9, 0x18, 0xc7, 0xd6, 0xe0, 0x7c, 0x2b,
-	0x45, 0x63, 0x58, 0x0f, 0x9b, 0x99, 0x56, 0x56, 0x91, 0x53, 0x25, 0xbc, 0xc9, 0x32, 0xd1, 0xf4,
-	0xf0, 0xe6, 0x18, 0xde, 0x1c, 0x9c, 0xdf, 0x3e, 0xd5, 0x53, 0xaa, 0x97, 0x60, 0xcb, 0xc3, 0x77,
-	0xfb, 0x7b, 0x2d, 0x2b, 0x52, 0x34, 0x96, 0xa5, 0x59, 0x1e, 0xa1, 0xf1, 0x6b, 0x00, 0x9b, 0x1d,
-	0xd4, 0x56, 0xec, 0x09, 0xce, 0x2c, 0x7e, 0x20, 0x12, 0x8b, 0xba, 0x9b, 0x21, 0x27, 0xa7, 0xa0,
-	0xca, 0x55, 0x9a, 0x2a, 0x49, 0x5d, 0xc4, 0x30, 0x38, 0x1d, 0x9c, 0xa9, 0x44, 0x90, 0xab, 0xee,
-	0xb0, 0x14, 0x49, 0x03, 0x6a, 0x4a, 0xf7, 0x98, 0x14, 0x5f, 0x31, 0x2b, 0x94, 0x0c, 0x17, 0x3d,
-	0x62, 0x46, 0x47, 0x5a, 0x70, 0x62, 0x5a, 0x66, 0x09, 0xed, 0x4b, 0x61, 0xc3, 0x23, 0x1e, 0x4a,
-	0x66, 0x4d, 0x1f, 0x4b, 0x61, 0xc9, 0x25, 0x08, 0x4d, 0x7f, 0xf7, 0x4b, 0xe4, 0x96, 0x32, 0x97,
-	0x8a, 0x64, 0x56, 0x0c, 0x30, 0x4f, 0x61, 0xc9, 0x7b, 0x6d, 0x15, 0xf6, 0xf6, 0xc4, 0xec, 0xd2,
-	0x69, 0xfc, 0x12, 0x40, 0xed, 0xb6, 0x4d, 0x4c, 0xbb, 0x6f, 0x1f, 0xf8, 0x02, 0x5e, 0x07, 0xc2,
-	0x38, 0xc7, 0xcc, 0x62, 0x4c, 0x79, 0x22, 0x50, 0x5a, 0xca, 0x59, 0x51, 0xc7, 0x46, 0x69, 0xe9,
-	0x78, 0x43, 0x87, 0x91, 0x1e, 0x9c, 0xe0, 0x93, 0x3e, 0xd0, 0x3d, 0xdf, 0x08, 0x13, 0x2e, 0x9e,
-	0x3e, 0x72, 0xa6, 0xba, 0xf3, 0x66, 0x73, 0x4e, 0xa3, 0x9b, 0x87, 0xf6, 0x30, 0x22, 0xfc, 0xef,
-	0x6a, 0x43, 0x42, 0x38, 0x8a, 0x92, 0xed, 0x26, 0x18, 0xfb, 0x36, 0xac, 0x46, 0xa5, 0xd8, 0x38,
-	0x0b, 0xc7, 0xda, 0x99, 0xf8, 0x10, 0x87, 0xe3, 0x12, 0xa6, 0xb0, 0xc1, 0x2c, 0xf6, 0xc7, 0x00,
-	0xd6, 0x3b, 0x2a, 0x46, 0xde, 0x45, 0x3d, 0x28, 0x26, 0xb6, 0x0d, 0xab, 0x28, 0xe3, 0x4c, 0x09,
-	0x69, 0x8b, 0x32, 0xc7, 0x32, 0x39, 0x0b, 0xc7, 0x33, 0x66, 0x0c, 0x75, 0x75, 0x1b, 0x43, 0xad,
-	0xda, 0xc7, 0x7c, 0x62, 0xab, 0xd1, 0xba, 0x33, 0xb4, 0xbd, 0xfe, 0xbe, 0x53, 0x93, 0x6b, 0x70,
-	0x5a, 0x48, 0x9e, 0xf4, 0x63, 0xa4, 0x5c, 0x2b, 0x63, 0xa8, 0xd2, 0xa2, 0x27, 0x24, 0xe5, 0x1a,
-	0x63, 0x94, 0x56, 0xb0, 0xc4, 0x14, 0xa9, 0xbf, 0x58, 0xe0, 0x3a, 0x0e, 0x76, 0xd7, 0xa3, 0x3a,
-	0x13, 0x50, 0xe3, 0xe7, 0x25, 0x58, 0xbb, 0x53, 0x76, 0xc9, 0xa7, 0x48, 0x60, 0x69, 0x8a, 0x4d,
-	0xfe, 0xdb, 0x15, 0xa9, 0xb1, 0x27, 0x94, 0xcc, 0xbb, 0x5d, 0x89, 0x4a, 0x91, 0xbc, 0x02, 0xc7,
-	0x34, 0x5a, 0x17, 0x4d, 0x49, 0x1a, 0xb3, 0x61, 0xfe, 0xdb, 0xe5, 0x68, 0x6d, 0xac, 0x7d, 0x9f,
-	0x0d, 0x0d, 0xb9, 0x09, 0x95, 0xd4, 0x26, 0x86, 0xb2, 0xbe, 0x7d, 0xe0, 0x49, 0x52, 0xdd, 0x39,
-	0x37, 0x77, 0x60, 0xd3, 0x54, 0x89, 0x56, 0xd3, 0x42, 0x22, 0x1f, 0x41, 0x8d, 0x65, 0x82, 0xee,
-	0xe3, 0x30, 0x0f, 0x77, 0xd4, 0x87, 0x6b, 0xcd, 0x0d, 0x37, 0x3b, 0xb8, 0x08, 0xd8, 0x58, 0x26,
-	0xdf, 0x06, 0x10, 0xf2, 0xbe, 0xb1, 0x2a, 0xa5, 0x06, 0x99, 0xe6, 0x0f, 0x28, 0xb3, 0x56, 0x8b,
-	0xdd, 0xbe, 0x45, 0x13, 0x2e, 0x7b, 0x7e, 0xdd, 0x9c, 0x1b, 0x7f, 0xa6, 0x8d, 0xcd, 0x8e, 0x0f,
-	0xd7, 0xf5, 0xd1, 0xda, 0xe3, 0x60, 0x57, 0xa5, 0xd5, 0xc3, 0x68, 0x8b, 0x1f, 0x6a, 0x24, 0x5d,
-	0xa8, 0x71, 0x47, 0x18, 0x6a, 0x3c, 0x63, 0xc2, 0x15, 0x5f, 0xd9, 0x1b, 0xf3, 0x99, 0x3d, 0xcb,
-	0xb2, 0xa8, 0xca, 0x27, 0x8a, 0xed, 0x1b, 0xf0, 0xff, 0x7f, 0xc9, 0x85, 0x6c, 0xc0, 0x91, 0x7d,
-	0x1c, 0x16, 0xd3, 0x76, 0x9f, 0xe4, 0x24, 0x2c, 0x0f, 0x58, 0xd2, 0xc7, 0x62, 0x5b, 0xe4, 0xc2,
-	0xdb, 0x8b, 0x97, 0x82, 0xc6, 0xd7, 0x50, 0xb9, 0x5a, 0xb0, 0xd5, 0xb8, 0xe5, 0x73, 0x80, 0xbb,
-	0x94, 0xc5, 0xb1, 0x46, 0x63, 0xca, 0xe5, 0x73, 0x80, 0xbb, 0xed, 0x5c, 0xe3, 0xf8, 0xec, 0x67,
-	0xde, 0xd3, 0x19, 0x1f, 0xc3, 0xf2, 0x98, 0xeb, 0xce, 0x70, 0x4d, 0x67, 0xbc, 0xc4, 0xbe, 0x04,
-	0xb5, 0x19, 0x58, 0xbe, 0x7d, 0xaa, 0xbd, 0x09, 0xa4, 0xd1, 0x86, 0x95, 0x5b, 0x22, 0x15, 0xd6,
-	0x90, 0xb7, 0x20, 0x64, 0xdc, 0x51, 0xcb, 0xd0, 0x0c, 0x35, 0x35, 0xc8, 0x95, 0x8c, 0x69, 0xe2,
-	0x8c, 0x3e, 0x8d, 0xe5, 0x68, 0xb3, 0xb0, 0xdf, 0x43, 0xdd, 0xf5, 0x56, 0xef, 0xd9, 0xf8, 0x2e,
-	0x00, 0xd2, 0xfe, 0xb4, 0x7b, 0x4f, 0x8b, 0x01, 0xb3, 0x78, 0x4b, 0xc8, 0xfd, 0x1b, 0x72, 0x4f,
-	0x91, 0x8b, 0xb0, 0xc5, 0x92, 0x44, 0x1d, 0x60, 0x4c, 0x33, 0x2d, 0x24, 0x17, 0x19, 0x4b, 0x28,
-	0xd3, 0xd2, 0x15, 0xe5, 0xc8, 0x7e, 0xb2, 0xb0, 0xde, 0x2b, 0x8d, 0x6d, 0x2d, 0x0d, 0xb9, 0x0c,
-	0xdb, 0x83, 0x8c, 0xd3, 0xf2, 0xf8, 0xfa, 0x99, 0x09, 0x9e, 0xef, 0xc1, 0xf2, 0x98, 0xfc, 0x6f,
-	0x90, 0xf1, 0xb2, 0x63, 0xdd, 0xdc, 0xee, 0x59, 0xd2, 0xf8, 0x3e, 0x80, 0x13, 0x45, 0x1a, 0x1d,
-	0x25, 0x25, 0x72, 0x2b, 0x06, 0xc2, 0x0e, 0xc9, 0x16, 0xac, 0xe4, 0x27, 0xab, 0xe8, 0x67, 0x21,
-	0x91, 0x2f, 0x60, 0x83, 0x1d, 0x18, 0x97, 0x9e, 0x73, 0xa1, 0x89, 0x90, 0xfb, 0xbe, 0x95, 0xd5,
-	0x9d, 0x0b, 0xf3, 0x79, 0xff, 0x4c, 0xc5, 0xd1, 0x31, 0x76, 0x60, 0xa6, 0x74, 0x8d, 0xdf, 0x57,
-	0xa0, 0x32, 0xa6, 0x2f, 0x79, 0x01, 0x2a, 0xe3, 0x00, 0x45, 0x1e, 0x13, 0x05, 0x79, 0x0d, 0x36,
-	0x34, 0x1a, 0xd5, 0xd7, 0x1c, 0xe9, 0x00, 0xb5, 0x99, 0xdc, 0x2b, 0xeb, 0xa5, 0xfe, 0x93, 0x5c,
-	0x4d, 0xae, 0xc0, 0x92, 0xc9, 0x90, 0xfb, 0x69, 0x56, 0x77, 0x9a, 0xff, 0xed, 0x04, 0x45, 0xde,
-	0xd7, 0xb1, 0xd1, 0x58, 0x66, 0xcb, 0xab, 0x25, 0x17, 0xfc, 0xc5, 0x61, 0x86, 0x92, 0x53, 0x95,
-	0xa1, 0xf6, 0x97, 0x13, 0x15, 0x71, 0xb8, 0x5c, 0x5c, 0x1c, 0xce, 0x72, 0xb7, 0x34, 0xdc, 0x88,
-	0xc9, 0x75, 0xa8, 0x94, 0x63, 0x32, 0xc5, 0xa1, 0x3a, 0x3b, 0x37, 0x99, 0x31, 0xd3, 0xa3, 0x89,
-	0x33, 0x79, 0x19, 0xd6, 0x1c, 0xb5, 0x06, 0x48, 0x8b, 0x31, 0x1d, 0xcd, 0x6f, 0xd4, 0x5c, 0x19,
-	0xe5, 0xc3, 0x7a, 0x0f, 0x56, 0x3c, 0x19, 0x4d, 0xb8, 0xea, 0xff, 0xf5, 0xea, 0xdc, 0x7f, 0xe5,
-	0xc4, 0x8e, 0x0a, 0x37, 0xb2, 0x0f, 0x5b, 0xe5, 0xa4, 0xf9, 0x84, 0x1d, 0x02, 0x4d, 0x58, 0xf1,
-	0xbb, 0xe8, 0xe2, 0xdc, 0x80, 0x87, 0x70, 0x2b, 0xda, 0xcc, 0x9e, 0x51, 0x0a, 0x34, 0xe4, 0x5d,
-	0xa8, 0x71, 0x8d, 0xcc, 0x5d, 0xc1, 0xee, 0xe5, 0x11, 0x82, 0xcf, 0x79, 0xbb, 0x99, 0x3f, 0x4b,
-	0x9a, 0xe5, 0xb3, 0xa4, 0x79, 0xbf, 0x7c, 0x96, 0x44, 0xd5, 0x02, 0xef, 0x34, 0xe4, 0x3a, 0x90,
-	0x84, 0x19, 0x4b, 0x53, 0x15, 0x8b, 0x3d, 0x51, 0x06, 0xa9, 0xce, 0x0d, 0xb2, 0xe1, 0xbc, 0x6e,
-	0x17, 0x4e, 0x3e, 0x12, 0x83, 0xb5, 0xbc, 0xa9, 0xd4, 0xcd, 0xb8, 0x6f, 0xc2, 0x9a, 0x2f, 0xf6,
-	0x9d, 0xe7, 0xa7, 0x4d, 0x33, 0x1f, 0x40, 0xd7, 0xbb, 0xe7, 0xab, 0xb6, 0xa6, 0xa7, 0x54, 0xdb,
-	0x07, 0x70, 0xfc, 0x19, 0xc8, 0x21, 0x1b, 0xf0, 0xd6, 0xf4, 0x06, 0x7c, 0x9e, 0xa7, 0xc5, 0x38,
-	0x83, 0xe9, 0xe8, 0xd3, 0x9b, 0xf3, 0x73, 0xd8, 0x3c, 0x14, 0x33, 0xa1, 0x77, 0x30, 0x9f, 0xde,
-	0x8b, 0x87, 0xd3, 0xfb, 0x0a, 0x3e, 0x7c, 0x5c, 0x5f, 0x78, 0xf4, 0xb8, 0xbe, 0xf0, 0xf4, 0x71,
-	0x3d, 0xf8, 0x66, 0x54, 0x0f, 0x7e, 0x1a, 0xd5, 0x83, 0xdf, 0x46, 0xf5, 0xe0, 0xe1, 0xa8, 0x1e,
-	0xfc, 0x31, 0xaa, 0x07, 0x7f, 0x8e, 0xea, 0x0b, 0x4f, 0x47, 0xf5, 0xe0, 0x87, 0x27, 0xf5, 0x85,
-	0x87, 0x4f, 0xea, 0x0b, 0x8f, 0x9e, 0xd4, 0x17, 0x3e, 0x6b, 0xf5, 0xd4, 0xa4, 0x2e, 0xa1, 0xfe,
-	0xe1, 0x35, 0x7b, 0x79, 0x2c, 0xec, 0xae, 0xf8, 0x29, 0x5e, 0xf8, 0x2b, 0x00, 0x00, 0xff, 0xff,
-	0x3d, 0xd6, 0x0f, 0x4c, 0x01, 0x0b, 0x00, 0x00,
+	// 1873 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x58, 0x4f, 0x73, 0x1b, 0x49,
+	0x15, 0xf7, 0xc8, 0x7f, 0xf5, 0x2c, 0xdb, 0xe3, 0x76, 0xec, 0xd5, 0x8a, 0x8d, 0x92, 0x28, 0x15,
+	0x08, 0xa9, 0x8d, 0x44, 0xec, 0x05, 0xb6, 0xbc, 0x4b, 0x51, 0x63, 0x69, 0x62, 0x2b, 0xb1, 0x2d,
+	0xef, 0x68, 0xec, 0xdd, 0xa5, 0x8a, 0xea, 0x6a, 0x8f, 0xda, 0x72, 0xe3, 0xd1, 0xcc, 0x30, 0xdd,
+	0x92, 0x31, 0x7b, 0xa1, 0xb8, 0x2c, 0x07, 0x0e, 0x7c, 0x06, 0x4e, 0x40, 0xf1, 0x11, 0xb8, 0x52,
+	0x70, 0xcc, 0x71, 0x0b, 0x2e, 0xc4, 0x29, 0xaa, 0x28, 0x4e, 0xfb, 0x11, 0xa8, 0xee, 0x99, 0xd1,
+	0x1f, 0x7b, 0x12, 0x39, 0xcb, 0x4d, 0xfd, 0xde, 0xef, 0xbd, 0x7e, 0xfd, 0xfa, 0xbd, 0x5f, 0xbf,
+	0x11, 0x3c, 0x16, 0xb4, 0x13, 0xf8, 0x21, 0x71, 0x2b, 0x24, 0x60, 0x15, 0xc7, 0xf5, 0xbb, 0xad,
+	0x8a, 0x47, 0x3a, 0x94, 0x07, 0xc4, 0xa1, 0x95, 0xde, 0x93, 0x4a, 0x87, 0x72, 0x4e, 0xda, 0xb4,
+	0x1c, 0x84, 0xbe, 0xf0, 0xd1, 0x9d, 0x04, 0x5e, 0x26, 0x01, 0x2b, 0x2b, 0x78, 0xb9, 0x0f, 0x2f,
+	0xf7, 0x9e, 0x14, 0xde, 0x4f, 0xf1, 0x17, 0x52, 0xee, 0x77, 0xc3, 0x14, 0x77, 0x85, 0x3b, 0x6d,
+	0xdf, 0x6f, 0xbb, 0xb4, 0xa2, 0x56, 0xc7, 0xdd, 0x93, 0x8a, 0x60, 0x1d, 0xca, 0x05, 0xe9, 0x04,
+	0x31, 0xe0, 0x61, 0x8a, 0x3b, 0xce, 0xbc, 0xb3, 0x6b, 0xae, 0x4a, 0x7f, 0xd3, 0x60, 0xb5, 0x4a,
+	0x43, 0xc1, 0x4e, 0x98, 0x43, 0x04, 0x7d, 0xca, 0x5c, 0x41, 0xc3, 0x66, 0x40, 0x1d, 0x74, 0x07,
+	0xe6, 0x1d, 0xbf, 0xd3, 0xf1, 0x3d, 0x2c, 0x23, 0xcd, 0x6b, 0x77, 0xb5, 0x87, 0x59, 0x0b, 0x22,
+	0xd1, 0x3e, 0xe9, 0x50, 0x54, 0x82, 0x9c, 0x1f, 0xb6, 0x89, 0xc7, 0x7e, 0x49, 0x04, 0xf3, 0xbd,
+	0x7c, 0x46, 0x21, 0x46, 0x64, 0xa8, 0x02, 0x2b, 0xc3, 0x6b, 0xe2, 0xe2, 0xae, 0xc7, 0x44, 0x7e,
+	0x52, 0x41, 0xd1, 0xa8, 0xea, 0xd0, 0x63, 0x02, 0x7d, 0x08, 0x79, 0xde, 0x3d, 0xfe, 0x19, 0x75,
+	0x04, 0x26, 0x32, 0x14, 0x8f, 0x08, 0xd6, 0xa3, 0x51, 0x08, 0x53, 0xca, 0x6a, 0x2d, 0xd6, 0x1b,
+	0x03, 0xb5, 0x0c, 0xa7, 0xf4, 0xeb, 0x0c, 0xe4, 0xf6, 0x84, 0xcb, 0x8d, 0xae, 0x38, 0x55, 0x07,
+	0x30, 0xe0, 0x36, 0x71, 0x1c, 0x1a, 0x08, 0xda, 0xc2, 0x8e, 0xcb, 0xa8, 0x27, 0xb0, 0x43, 0x70,
+	0x8b, 0x06, 0x21, 0x95, 0x47, 0x6d, 0xc5, 0x47, 0x2a, 0x24, 0xa0, 0xaa, 0xc2, 0x54, 0x49, 0xad,
+	0x8f, 0x40, 0xef, 0x03, 0xba, 0xee, 0x42, 0xc5, 0x91, 0xb3, 0xf4, 0xab, 0x76, 0xa8, 0x0d, 0x2b,
+	0xce, 0x20, 0x95, 0xf8, 0x44, 0xe5, 0x92, 0xe7, 0x33, 0x77, 0x27, 0x1f, 0xce, 0xaf, 0xff, 0xa0,
+	0x3c, 0xa6, 0x06, 0xca, 0xa9, 0xd7, 0x60, 0x21, 0xe7, 0xaa, 0x98, 0xa3, 0x3c, 0xcc, 0x52, 0x8f,
+	0x1c, 0xbb, 0xb4, 0xa5, 0x32, 0x39, 0x67, 0x25, 0xcb, 0xd2, 0x23, 0x58, 0x34, 0x02, 0xf6, 0x9c,
+	0x5e, 0xf4, 0xb3, 0x30, 0x84, 0xd5, 0x46, 0xb1, 0xbf, 0xd7, 0x60, 0xa9, 0xea, 0xb7, 0xa8, 0xd3,
+	0xa4, 0x61, 0x2f, 0xbe, 0xf4, 0x02, 0xcc, 0x51, 0xaf, 0x15, 0xf8, 0xcc, 0x13, 0x71, 0x7a, 0xfa,
+	0x6b, 0xf4, 0x08, 0x96, 0x03, 0xc2, 0x39, 0x96, 0xe7, 0xe6, 0x1c, 0x0b, 0xff, 0x8c, 0x46, 0x97,
+	0x3e, 0x67, 0x2d, 0x49, 0x85, 0xa1, 0xe4, 0xb6, 0x14, 0xa3, 0x6d, 0xb8, 0xcb, 0x3c, 0xc7, 0xed,
+	0xb6, 0x28, 0x76, 0x42, 0x9f, 0x73, 0xec, 0x87, 0xac, 0xcd, 0x3c, 0xec, 0x84, 0xb4, 0x45, 0x3d,
+	0xc1, 0x88, 0xcb, 0xe3, 0xd0, 0x6f, 0xc7, 0xb8, 0xaa, 0x84, 0x35, 0x14, 0xaa, 0x3a, 0x00, 0x95,
+	0xfe, 0x31, 0x07, 0x0b, 0xfb, 0x49, 0x96, 0x54, 0x88, 0x08, 0xa6, 0x86, 0x0a, 0x52, 0xfd, 0x96,
+	0x87, 0x0c, 0x69, 0x9b, 0xf9, 0x5e, 0x94, 0xed, 0xac, 0x95, 0x2c, 0xd1, 0x03, 0x58, 0x0c, 0xa9,
+	0x90, 0xde, 0x7c, 0x0f, 0xb7, 0xc8, 0x45, 0xb4, 0xed, 0xb4, 0xb5, 0xd0, 0x97, 0xd6, 0xc8, 0x05,
+	0x47, 0xcf, 0x20, 0xdb, 0x11, 0x2e, 0xc7, 0xa4, 0x2b, 0x4e, 0xd5, 0xfd, 0xce, 0xaf, 0x3f, 0x1e,
+	0x7b, 0x61, 0xc3, 0xd5, 0x66, 0xcd, 0x75, 0xe2, 0x15, 0xfa, 0x04, 0x72, 0x24, 0x60, 0xf8, 0x8c,
+	0x5e, 0x44, 0xee, 0x66, 0x95, 0xbb, 0xca, 0x58, 0x77, 0xa3, 0x17, 0x67, 0x01, 0xe9, 0xaf, 0xd1,
+	0x6f, 0x34, 0xc8, 0x3b, 0x5d, 0x2e, 0xfc, 0x0e, 0xe6, 0x94, 0x84, 0xce, 0x29, 0x26, 0x42, 0x84,
+	0xec, 0xb8, 0x2b, 0x28, 0xcf, 0x4f, 0xab, 0xfa, 0x7a, 0x36, 0xd6, 0xff, 0x48, 0x1a, 0xcb, 0x55,
+	0xe5, 0xae, 0xa9, 0xbc, 0x19, 0x7d, 0x67, 0xa6, 0x27, 0xc2, 0x8b, 0xad, 0x4c, 0x5e, 0xb3, 0xd6,
+	0x9c, 0x54, 0x00, 0xfa, 0x39, 0x2c, 0x5f, 0x0f, 0x61, 0x4e, 0x85, 0x50, 0x7b, 0xcb, 0x10, 0x52,
+	0x37, 0xb7, 0x74, 0x7e, 0x75, 0xcb, 0x26, 0xe4, 0x1c, 0x59, 0xa7, 0x98, 0xab, 0x42, 0xcd, 0xcf,
+	0xa8, 0x84, 0x7e, 0x6f, 0x7c, 0x43, 0x8d, 0x16, 0xb7, 0x35, 0xef, 0x0c, 0x04, 0x85, 0x3a, 0x7c,
+	0xeb, 0x0d, 0x29, 0x40, 0x3a, 0x4c, 0x9e, 0xd1, 0x8b, 0xb8, 0xc8, 0xe4, 0x4f, 0x74, 0x0b, 0xa6,
+	0x7b, 0xc4, 0xed, 0xd2, 0x98, 0xe7, 0xa2, 0xc5, 0x66, 0xe6, 0x43, 0xad, 0xf0, 0xa5, 0x06, 0xab,
+	0x37, 0xf5, 0xf2, 0xd9, 0xb0, 0x97, 0xc5, 0xf5, 0xad, 0xff, 0x2f, 0x65, 0xf6, 0x45, 0x40, 0x87,
+	0x22, 0x29, 0xfd, 0x39, 0x03, 0x2b, 0x29, 0x10, 0xf4, 0x00, 0xee, 0x35, 0x4d, 0xc3, 0xaa, 0xee,
+	0x60, 0xc3, 0xb6, 0xad, 0xfa, 0xd6, 0xa1, 0x6d, 0x62, 0xfb, 0xf3, 0x03, 0x13, 0x1f, 0xee, 0x37,
+	0x0f, 0xcc, 0x6a, 0xfd, 0x69, 0xdd, 0xac, 0xe9, 0x13, 0xa8, 0x08, 0x85, 0x74, 0x98, 0x6d, 0x7e,
+	0x66, 0xeb, 0x1a, 0xba, 0x07, 0xb7, 0xd3, 0xf5, 0xcf, 0xcd, 0xcf, 0x3f, 0x6d, 0x58, 0x35, 0x3d,
+	0x83, 0x6e, 0xc3, 0xbb, 0xe9, 0x90, 0xfa, 0xbe, 0xad, 0x4f, 0xa2, 0xbb, 0xf0, 0x5e, 0xba, 0xba,
+	0xd6, 0x38, 0xdc, 0xda, 0x35, 0xf5, 0xa9, 0xd7, 0xc7, 0xb0, 0xd5, 0x68, 0xec, 0xea, 0xd3, 0xa8,
+	0x04, 0xc5, 0xd7, 0x78, 0x30, 0x6c, 0xd3, 0xae, 0xef, 0x99, 0xfa, 0x0c, 0xfa, 0x36, 0x94, 0xde,
+	0x18, 0x27, 0xde, 0xad, 0x37, 0x6d, 0x7d, 0xb6, 0xf4, 0x05, 0x64, 0xcd, 0x98, 0xdd, 0xb8, 0x7c,
+	0xef, 0xce, 0xe9, 0x31, 0x26, 0xad, 0x56, 0x48, 0x39, 0x4f, 0xde, 0xbb, 0x73, 0x7a, 0x6c, 0x44,
+	0x12, 0xc9, 0x7f, 0x8a, 0x23, 0xda, 0x61, 0xe0, 0xf4, 0x61, 0x51, 0x31, 0x2c, 0x49, 0xc5, 0x76,
+	0x18, 0x38, 0x09, 0xf6, 0x1e, 0xe4, 0x46, 0x60, 0xd1, 0x83, 0x37, 0xdf, 0x1e, 0x40, 0x4a, 0x06,
+	0xcc, 0xec, 0xb2, 0x0e, 0x13, 0x1c, 0xfd, 0x10, 0xf2, 0xc4, 0x91, 0x54, 0xc4, 0x71, 0x40, 0x43,
+	0xcc, 0xa9, 0xe3, 0x7b, 0x2d, 0xec, 0x4a, 0xa5, 0x0a, 0x63, 0xda, 0x5a, 0x8d, 0xf5, 0x07, 0x34,
+	0x6c, 0x2a, 0xad, 0xb2, 0x2c, 0x7d, 0xa9, 0x01, 0x32, 0x3e, 0x6d, 0x1e, 0x84, 0xac, 0x47, 0x04,
+	0xdd, 0x65, 0xde, 0x59, 0xdd, 0x3b, 0xf1, 0xd1, 0x07, 0xb0, 0x46, 0x5c, 0xd7, 0x3f, 0xa7, 0x2d,
+	0x1c, 0x84, 0xcc, 0x73, 0x58, 0x40, 0x5c, 0x4c, 0x42, 0x4f, 0x1e, 0x4a, 0x92, 0xe3, 0xad, 0x58,
+	0x7b, 0x90, 0x28, 0x8d, 0xd0, 0xe3, 0xe8, 0x23, 0x28, 0xf4, 0x02, 0x07, 0x27, 0x74, 0xaf, 0x9a,
+	0x8d, 0x39, 0xd1, 0xd3, 0x9b, 0xd0, 0xea, 0x3b, 0xbd, 0xc0, 0x49, 0x32, 0xd6, 0x8c, 0xf4, 0xaa,
+	0x3e, 0x4b, 0xbf, 0xd5, 0x60, 0x25, 0x0e, 0xa3, 0xea, 0x7b, 0x1e, 0x75, 0x04, 0xeb, 0x31, 0x71,
+	0x81, 0xd6, 0x60, 0x26, 0x62, 0xe2, 0x38, 0x9f, 0xf1, 0x0a, 0xfd, 0x14, 0x74, 0x72, 0xce, 0x65,
+	0x78, 0xd2, 0x04, 0xbb, 0xcc, 0x3b, 0x53, 0xa9, 0x9c, 0x5f, 0xdf, 0x18, 0xcf, 0x93, 0xd7, 0x4e,
+	0x6c, 0x2d, 0x92, 0x73, 0x3e, 0x24, 0x2b, 0xfd, 0x65, 0x16, 0xb2, 0xfd, 0xc6, 0x41, 0xef, 0x41,
+	0xb6, 0xef, 0x20, 0x8e, 0x63, 0x20, 0x40, 0xdf, 0x05, 0x3d, 0x99, 0xb4, 0x70, 0x8f, 0x86, 0x7c,
+	0x30, 0xca, 0x2c, 0x25, 0xf2, 0xa3, 0x48, 0x8c, 0xb6, 0x60, 0x8a, 0x07, 0xd4, 0x51, 0xb7, 0x39,
+	0xbf, 0x5e, 0x7e, 0xbb, 0xde, 0xb5, 0x94, 0x2d, 0x7a, 0x0c, 0x3a, 0x17, 0xf2, 0xcc, 0x43, 0x83,
+	0x88, 0x1a, 0x6c, 0x14, 0xeb, 0x2e, 0x29, 0xdd, 0xd0, 0x04, 0x52, 0x85, 0x69, 0x25, 0xca, 0x2f,
+	0x28, 0xbe, 0x48, 0x7d, 0x94, 0x92, 0x30, 0xe5, 0x96, 0x56, 0xfc, 0xbb, 0x29, 0x8d, 0xac, 0xc8,
+	0x56, 0x8d, 0x31, 0xfc, 0xc2, 0x73, 0xb0, 0x1f, 0xd0, 0x50, 0x4d, 0x5b, 0x98, 0xb5, 0xf2, 0xd3,
+	0xea, 0x90, 0xba, 0xd2, 0x34, 0x12, 0x45, 0xbd, 0x85, 0x76, 0x20, 0x9b, 0x14, 0x01, 0x8f, 0xb9,
+	0xf6, 0xd1, 0xd8, 0xa3, 0xf6, 0xfb, 0xc8, 0x1a, 0x18, 0xa3, 0xfb, 0xb0, 0x20, 0x0b, 0xb7, 0x47,
+	0x71, 0x5c, 0x04, 0xb3, 0xd1, 0x88, 0x18, 0x09, 0xad, 0xa8, 0x14, 0x7e, 0x0c, 0x33, 0xaa, 0xd4,
+	0xe5, 0x2b, 0x22, 0xf7, 0xfa, 0xce, 0xd8, 0xbd, 0xa2, 0xb6, 0xb1, 0x62, 0x33, 0x74, 0x06, 0x6b,
+	0x49, 0x1d, 0x39, 0x83, 0xda, 0x63, 0x94, 0xe7, 0xb3, 0xea, 0x59, 0xfa, 0x60, 0xac, 0xc3, 0x94,
+	0xca, 0xb5, 0x56, 0x83, 0x6b, 0x42, 0x46, 0x39, 0xfa, 0x11, 0xe4, 0x9c, 0x90, 0xca, 0xab, 0xc1,
+	0x72, 0xe8, 0xce, 0x83, 0x8a, 0xb9, 0x50, 0x8e, 0x26, 0xf2, 0x72, 0x32, 0x91, 0x97, 0xed, 0x64,
+	0x22, 0xb7, 0xe6, 0x63, 0xbc, 0x94, 0xa0, 0x1d, 0x40, 0x2e, 0xe1, 0x02, 0x77, 0xfc, 0x16, 0x3b,
+	0x61, 0x89, 0x93, 0xf9, 0xb1, 0x4e, 0x74, 0x69, 0xb5, 0x17, 0x1b, 0x29, 0x4f, 0x04, 0x16, 0xa2,
+	0xa4, 0x62, 0x79, 0xc7, 0x5d, 0x9e, 0xcf, 0xa9, 0xc3, 0x7e, 0x7c, 0xf3, 0xa2, 0x2c, 0x47, 0x17,
+	0xd0, 0x54, 0xe6, 0xd1, 0xdb, 0x9b, 0x0b, 0x87, 0x44, 0x85, 0x73, 0x58, 0xbe, 0x06, 0x49, 0x79,
+	0xd2, 0x76, 0x87, 0x9f, 0xb4, 0x9b, 0x0c, 0xba, 0xfd, 0x08, 0x86, 0xbd, 0x0f, 0x3f, 0x63, 0x7f,
+	0xcd, 0xc0, 0x6a, 0x2a, 0x28, 0xb5, 0x7b, 0xb4, 0xd7, 0x77, 0x8f, 0x95, 0x74, 0xcf, 0xa4, 0xea,
+	0x9e, 0x8f, 0xbf, 0x59, 0x68, 0xe5, 0x1b, 0x34, 0x53, 0x26, 0xbd, 0x99, 0x4a, 0x5f, 0xc0, 0xb4,
+	0xb2, 0x46, 0xab, 0xb0, 0xdc, 0xb4, 0x0d, 0xfb, 0xea, 0x93, 0xab, 0x43, 0x2e, 0x12, 0x1b, 0xb5,
+	0x5a, 0x7d, 0x7f, 0x5b, 0xd7, 0x86, 0x24, 0x55, 0xbb, 0x7e, 0x64, 0xea, 0x19, 0xb4, 0x0c, 0x0b,
+	0x91, 0xe4, 0xc0, 0x68, 0x36, 0xa5, 0x68, 0x12, 0x21, 0x58, 0x8c, 0x44, 0x96, 0xb9, 0xd7, 0x38,
+	0x92, 0x86, 0x53, 0x03, 0xc3, 0xa7, 0x46, 0x7d, 0xd7, 0xac, 0xe9, 0xd3, 0xa5, 0x3f, 0x6a, 0xb0,
+	0x68, 0xfe, 0x22, 0xf0, 0x43, 0xd1, 0x64, 0xde, 0xd9, 0x9b, 0xa6, 0xe7, 0xe4, 0x13, 0x21, 0x33,
+	0xf2, 0x89, 0x80, 0xd6, 0x21, 0xc3, 0x37, 0x62, 0xba, 0x2b, 0xa5, 0x25, 0x4f, 0x7e, 0x54, 0xca,
+	0xbc, 0x35, 0x37, 0x14, 0xc5, 0x65, 0xf8, 0x06, 0xfa, 0x3e, 0x4c, 0xb6, 0x1d, 0x1e, 0x0f, 0xd1,
+	0xf7, 0xdf, 0x64, 0xb4, 0x5d, 0x6d, 0x2a, 0x2b, 0x89, 0x2f, 0xfd, 0x73, 0x0a, 0x60, 0x10, 0x6b,
+	0x6a, 0x9c, 0x6f, 0xc1, 0xd4, 0xd5, 0xd1, 0x8b, 0xff, 0x66, 0xb4, 0x59, 0x8d, 0xe9, 0x7e, 0xea,
+	0x86, 0x03, 0xfc, 0x68, 0xaa, 0x63, 0xbe, 0x7f, 0x06, 0x33, 0xa7, 0x94, 0xb8, 0xe2, 0x54, 0xf1,
+	0xed, 0xe2, 0xfa, 0xfa, 0x5b, 0xb8, 0x29, 0xef, 0x28, 0x4b, 0x2b, 0xf6, 0x20, 0xf9, 0x94, 0x86,
+	0xa1, 0x1f, 0xe2, 0xf8, 0x1b, 0x5e, 0xb1, 0x73, 0xd6, 0xca, 0x29, 0xe1, 0x5e, 0x24, 0x43, 0x9f,
+	0xc0, 0x3b, 0x2e, 0x11, 0x94, 0x0b, 0xdc, 0x22, 0x82, 0x60, 0xaa, 0xbc, 0x45, 0x3c, 0x33, 0x3b,
+	0x96, 0x67, 0x6e, 0x45, 0xa6, 0x35, 0x22, 0x48, 0x14, 0x86, 0xe2, 0x9a, 0x06, 0xac, 0x29, 0xd6,
+	0x8a, 0xc2, 0xc0, 0xce, 0x29, 0x75, 0xce, 0x22, 0x8f, 0x73, 0x63, 0x3d, 0xae, 0x48, 0xcb, 0xe8,
+	0x1c, 0x55, 0x69, 0x27, 0x35, 0x25, 0x1f, 0x66, 0x22, 0x11, 0x5a, 0x03, 0xb4, 0x63, 0x1a, 0xbb,
+	0xf6, 0xce, 0x95, 0xbe, 0x58, 0x80, 0x6c, 0x2c, 0x6f, 0x3c, 0xd7, 0x35, 0xf4, 0x2e, 0xac, 0xc6,
+	0x4b, 0xd3, 0xb2, 0x1a, 0x96, 0x9c, 0x26, 0x4d, 0x6b, 0xdf, 0xd8, 0xd5, 0x33, 0xe8, 0x3e, 0xdc,
+	0x19, 0x51, 0x1d, 0x36, 0x4d, 0x0b, 0x57, 0x1b, 0xfb, 0x4f, 0xeb, 0xdb, 0x87, 0x96, 0x61, 0xd7,
+	0x1b, 0xfb, 0xfa, 0xe4, 0xd6, 0xbf, 0xb5, 0x17, 0x2f, 0x8b, 0x13, 0x5f, 0xbd, 0x2c, 0x4e, 0x7c,
+	0xfd, 0xb2, 0xa8, 0xfd, 0xea, 0xb2, 0xa8, 0xfd, 0xe1, 0xb2, 0xa8, 0xfd, 0xfd, 0xb2, 0xa8, 0xbd,
+	0xb8, 0x2c, 0x6a, 0xff, 0xba, 0x2c, 0x6a, 0xff, 0xb9, 0x2c, 0x4e, 0x7c, 0x7d, 0x59, 0xd4, 0x7e,
+	0xf7, 0xaa, 0x38, 0xf1, 0xe2, 0x55, 0x71, 0xe2, 0xab, 0x57, 0xc5, 0x09, 0x28, 0x31, 0x7f, 0xdc,
+	0x75, 0x6d, 0xe5, 0xe2, 0xc4, 0x1f, 0xc8, 0xb3, 0x1f, 0x68, 0x3f, 0xa9, 0xb4, 0x87, 0x6c, 0x98,
+	0xff, 0x9a, 0x3f, 0x88, 0x3e, 0xea, 0x2f, 0xfe, 0x94, 0xb9, 0x67, 0xc7, 0x70, 0xe6, 0xcb, 0x8f,
+	0xc0, 0x72, 0x55, 0x6d, 0x32, 0xe0, 0xe9, 0xa3, 0x27, 0xff, 0xcd, 0x3c, 0x18, 0x60, 0x36, 0x37,
+	0x8d, 0x80, 0x6d, 0x6e, 0x2a, 0xd4, 0xe6, 0x66, 0x1f, 0xb6, 0xb9, 0x79, 0xf4, 0xe4, 0x78, 0x46,
+	0xdd, 0xc0, 0xc6, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x74, 0xb8, 0xa4, 0x12, 0xa0, 0x12, 0x00,
+	0x00,
 }
 
+func (x NamespaceSpec_SearchAttributeType) String() string {
+	s, ok := NamespaceSpec_SearchAttributeType_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x NamespaceRegionStatus_State) String() string {
+	s, ok := NamespaceRegionStatus_State_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x ExportSink_Health) String() string {
+	s, ok := ExportSink_Health_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
 func (this *CertificateFilterSpec) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -960,7 +1363,10 @@ func (this *MtlsAuthSpec) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.AcceptedClientCa != that1.AcceptedClientCa {
+	if this.AcceptedClientCaDeprecated != that1.AcceptedClientCaDeprecated {
+		return false
+	}
+	if !bytes.Equal(this.AcceptedClientCa, that1.AcceptedClientCa) {
 		return false
 	}
 	if len(this.CertificateFilters) != len(that1.CertificateFilters) {
@@ -1074,6 +1480,14 @@ func (this *NamespaceSpec) Equal(that interface{}) bool {
 	}
 	for i := range this.CustomSearchAttributes {
 		if this.CustomSearchAttributes[i] != that1.CustomSearchAttributes[i] {
+			return false
+		}
+	}
+	if len(this.SearchAttributes) != len(that1.SearchAttributes) {
+		return false
+	}
+	for i := range this.SearchAttributes {
+		if this.SearchAttributes[i] != that1.SearchAttributes[i] {
 			return false
 		}
 	}
@@ -1228,6 +1642,9 @@ func (this *Namespace) Equal(that interface{}) bool {
 	if !this.Spec.Equal(that1.Spec) {
 		return false
 	}
+	if this.StateDeprecated != that1.StateDeprecated {
+		return false
+	}
 	if this.State != that1.State {
 		return false
 	}
@@ -1286,10 +1703,91 @@ func (this *NamespaceRegionStatus) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
+	if this.StateDeprecated != that1.StateDeprecated {
+		return false
+	}
 	if this.State != that1.State {
 		return false
 	}
 	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *ExportSinkSpec) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ExportSinkSpec)
+	if !ok {
+		that2, ok := that.(ExportSinkSpec)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if this.Enabled != that1.Enabled {
+		return false
+	}
+	if !this.S3.Equal(that1.S3) {
+		return false
+	}
+	if !this.Gcs.Equal(that1.Gcs) {
+		return false
+	}
+	return true
+}
+func (this *ExportSink) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ExportSink)
+	if !ok {
+		that2, ok := that.(ExportSink)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	if this.State != that1.State {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.Health != that1.Health {
+		return false
+	}
+	if this.ErrorMessage != that1.ErrorMessage {
+		return false
+	}
+	if !this.LatestDataExportTime.Equal(that1.LatestDataExportTime) {
+		return false
+	}
+	if !this.LastHealthCheckTime.Equal(that1.LastHealthCheckTime) {
 		return false
 	}
 	return true
@@ -1311,8 +1809,9 @@ func (this *MtlsAuthSpec) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 8)
 	s = append(s, "&namespace.MtlsAuthSpec{")
+	s = append(s, "AcceptedClientCaDeprecated: "+fmt.Sprintf("%#v", this.AcceptedClientCaDeprecated)+",\n")
 	s = append(s, "AcceptedClientCa: "+fmt.Sprintf("%#v", this.AcceptedClientCa)+",\n")
 	if this.CertificateFilters != nil {
 		s = append(s, "CertificateFilters: "+fmt.Sprintf("%#v", this.CertificateFilters)+",\n")
@@ -1347,7 +1846,7 @@ func (this *NamespaceSpec) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 11)
+	s := make([]string, 0, 12)
 	s = append(s, "&namespace.NamespaceSpec{")
 	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
 	s = append(s, "Regions: "+fmt.Sprintf("%#v", this.Regions)+",\n")
@@ -1370,6 +1869,19 @@ func (this *NamespaceSpec) GoString() string {
 	mapStringForCustomSearchAttributes += "}"
 	if this.CustomSearchAttributes != nil {
 		s = append(s, "CustomSearchAttributes: "+mapStringForCustomSearchAttributes+",\n")
+	}
+	keysForSearchAttributes := make([]string, 0, len(this.SearchAttributes))
+	for k, _ := range this.SearchAttributes {
+		keysForSearchAttributes = append(keysForSearchAttributes, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForSearchAttributes)
+	mapStringForSearchAttributes := "map[string]NamespaceSpec_SearchAttributeType{"
+	for _, k := range keysForSearchAttributes {
+		mapStringForSearchAttributes += fmt.Sprintf("%#v: %#v,", k, this.SearchAttributes[k])
+	}
+	mapStringForSearchAttributes += "}"
+	if this.SearchAttributes != nil {
+		s = append(s, "SearchAttributes: "+mapStringForSearchAttributes+",\n")
 	}
 	if this.CodecServer != nil {
 		s = append(s, "CodecServer: "+fmt.Sprintf("%#v", this.CodecServer)+",\n")
@@ -1427,13 +1939,14 @@ func (this *Namespace) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 16)
+	s := make([]string, 0, 17)
 	s = append(s, "&namespace.Namespace{")
 	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
 	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
 	if this.Spec != nil {
 		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
 	}
+	s = append(s, "StateDeprecated: "+fmt.Sprintf("%#v", this.StateDeprecated)+",\n")
 	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
 	if this.Endpoints != nil {
@@ -1472,10 +1985,51 @@ func (this *NamespaceRegionStatus) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 6)
+	s := make([]string, 0, 7)
 	s = append(s, "&namespace.NamespaceRegionStatus{")
+	s = append(s, "StateDeprecated: "+fmt.Sprintf("%#v", this.StateDeprecated)+",\n")
 	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ExportSinkSpec) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&namespace.ExportSinkSpec{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "Enabled: "+fmt.Sprintf("%#v", this.Enabled)+",\n")
+	if this.S3 != nil {
+		s = append(s, "S3: "+fmt.Sprintf("%#v", this.S3)+",\n")
+	}
+	if this.Gcs != nil {
+		s = append(s, "Gcs: "+fmt.Sprintf("%#v", this.Gcs)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ExportSink) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 12)
+	s = append(s, "&namespace.ExportSink{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "Health: "+fmt.Sprintf("%#v", this.Health)+",\n")
+	s = append(s, "ErrorMessage: "+fmt.Sprintf("%#v", this.ErrorMessage)+",\n")
+	if this.LatestDataExportTime != nil {
+		s = append(s, "LatestDataExportTime: "+fmt.Sprintf("%#v", this.LatestDataExportTime)+",\n")
+	}
+	if this.LastHealthCheckTime != nil {
+		s = append(s, "LastHealthCheckTime: "+fmt.Sprintf("%#v", this.LastHealthCheckTime)+",\n")
+	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -1558,6 +2112,13 @@ func (m *MtlsAuthSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.AcceptedClientCa) > 0 {
+		i -= len(m.AcceptedClientCa)
+		copy(dAtA[i:], m.AcceptedClientCa)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.AcceptedClientCa)))
+		i--
+		dAtA[i] = 0x22
+	}
 	if m.Enabled {
 		i--
 		if m.Enabled {
@@ -1582,10 +2143,10 @@ func (m *MtlsAuthSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x12
 		}
 	}
-	if len(m.AcceptedClientCa) > 0 {
-		i -= len(m.AcceptedClientCa)
-		copy(dAtA[i:], m.AcceptedClientCa)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.AcceptedClientCa)))
+	if len(m.AcceptedClientCaDeprecated) > 0 {
+		i -= len(m.AcceptedClientCaDeprecated)
+		copy(dAtA[i:], m.AcceptedClientCaDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.AcceptedClientCaDeprecated)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1695,6 +2256,23 @@ func (m *NamespaceSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.SearchAttributes) > 0 {
+		for k := range m.SearchAttributes {
+			v := m.SearchAttributes[k]
+			baseI := i
+			i = encodeVarintMessage(dAtA, i, uint64(v))
+			i--
+			dAtA[i] = 0x10
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintMessage(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintMessage(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x42
+		}
+	}
 	if m.ApiKeyAuth != nil {
 		{
 			size, err := m.ApiKeyAuth.MarshalToSizedBuffer(dAtA[:i])
@@ -1949,6 +2527,11 @@ func (m *Namespace) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x68
+	}
 	if len(m.RegionStatus) > 0 {
 		for k := range m.RegionStatus {
 			v := m.RegionStatus[k]
@@ -2051,10 +2634,10 @@ func (m *Namespace) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x2a
 	}
-	if len(m.State) > 0 {
-		i -= len(m.State)
-		copy(dAtA[i:], m.State)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.State)))
+	if len(m.StateDeprecated) > 0 {
+		i -= len(m.StateDeprecated)
+		copy(dAtA[i:], m.StateDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.StateDeprecated)))
 		i--
 		dAtA[i] = 0x22
 	}
@@ -2107,6 +2690,11 @@ func (m *NamespaceRegionStatus) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x18
+	}
 	if len(m.AsyncOperationId) > 0 {
 		i -= len(m.AsyncOperationId)
 		copy(dAtA[i:], m.AsyncOperationId)
@@ -2114,10 +2702,164 @@ func (m *NamespaceRegionStatus) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.State) > 0 {
-		i -= len(m.State)
-		copy(dAtA[i:], m.State)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.State)))
+	if len(m.StateDeprecated) > 0 {
+		i -= len(m.StateDeprecated)
+		copy(dAtA[i:], m.StateDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.StateDeprecated)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ExportSinkSpec) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ExportSinkSpec) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ExportSinkSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Gcs != nil {
+		{
+			size, err := m.Gcs.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.S3 != nil {
+		{
+			size, err := m.S3.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Enabled {
+		i--
+		if m.Enabled {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ExportSink) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ExportSink) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ExportSink) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.LastHealthCheckTime != nil {
+		{
+			size, err := m.LastHealthCheckTime.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x42
+	}
+	if m.LatestDataExportTime != nil {
+		{
+			size, err := m.LatestDataExportTime.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3a
+	}
+	if len(m.ErrorMessage) > 0 {
+		i -= len(m.ErrorMessage)
+		copy(dAtA[i:], m.ErrorMessage)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.ErrorMessage)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if m.Health != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.Health))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Name)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -2166,7 +2908,7 @@ func (m *MtlsAuthSpec) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.AcceptedClientCa)
+	l = len(m.AcceptedClientCaDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
@@ -2178,6 +2920,10 @@ func (m *MtlsAuthSpec) Size() (n int) {
 	}
 	if m.Enabled {
 		n += 2
+	}
+	l = len(m.AcceptedClientCa)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
 	}
 	return n
 }
@@ -2251,6 +2997,14 @@ func (m *NamespaceSpec) Size() (n int) {
 	if m.ApiKeyAuth != nil {
 		l = m.ApiKeyAuth.Size()
 		n += 1 + l + sovMessage(uint64(l))
+	}
+	if len(m.SearchAttributes) > 0 {
+		for k, v := range m.SearchAttributes {
+			_ = k
+			_ = v
+			mapEntrySize := 1 + len(k) + sovMessage(uint64(len(k))) + 1 + sovMessage(uint64(v))
+			n += mapEntrySize + 1 + sovMessage(uint64(mapEntrySize))
+		}
 	}
 	return n
 }
@@ -2344,7 +3098,7 @@ func (m *Namespace) Size() (n int) {
 		l = m.Spec.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
-	l = len(m.State)
+	l = len(m.StateDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
@@ -2391,6 +3145,9 @@ func (m *Namespace) Size() (n int) {
 			n += mapEntrySize + 1 + sovMessage(uint64(mapEntrySize))
 		}
 	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
 	return n
 }
 
@@ -2400,12 +3157,78 @@ func (m *NamespaceRegionStatus) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.State)
+	l = len(m.StateDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
 	l = len(m.AsyncOperationId)
 	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
+	return n
+}
+
+func (m *ExportSinkSpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Enabled {
+		n += 2
+	}
+	if m.S3 != nil {
+		l = m.S3.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Gcs != nil {
+		l = m.Gcs.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+
+func (m *ExportSink) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Health != 0 {
+		n += 1 + sovMessage(uint64(m.Health))
+	}
+	l = len(m.ErrorMessage)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.LatestDataExportTime != nil {
+		l = m.LatestDataExportTime.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.LastHealthCheckTime != nil {
+		l = m.LastHealthCheckTime.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
 	return n
@@ -2440,9 +3263,10 @@ func (this *MtlsAuthSpec) String() string {
 	}
 	repeatedStringForCertificateFilters += "}"
 	s := strings.Join([]string{`&MtlsAuthSpec{`,
-		`AcceptedClientCa:` + fmt.Sprintf("%v", this.AcceptedClientCa) + `,`,
+		`AcceptedClientCaDeprecated:` + fmt.Sprintf("%v", this.AcceptedClientCaDeprecated) + `,`,
 		`CertificateFilters:` + repeatedStringForCertificateFilters + `,`,
 		`Enabled:` + fmt.Sprintf("%v", this.Enabled) + `,`,
+		`AcceptedClientCa:` + fmt.Sprintf("%v", this.AcceptedClientCa) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2483,6 +3307,16 @@ func (this *NamespaceSpec) String() string {
 		mapStringForCustomSearchAttributes += fmt.Sprintf("%v: %v,", k, this.CustomSearchAttributes[k])
 	}
 	mapStringForCustomSearchAttributes += "}"
+	keysForSearchAttributes := make([]string, 0, len(this.SearchAttributes))
+	for k, _ := range this.SearchAttributes {
+		keysForSearchAttributes = append(keysForSearchAttributes, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForSearchAttributes)
+	mapStringForSearchAttributes := "map[string]NamespaceSpec_SearchAttributeType{"
+	for _, k := range keysForSearchAttributes {
+		mapStringForSearchAttributes += fmt.Sprintf("%v: %v,", k, this.SearchAttributes[k])
+	}
+	mapStringForSearchAttributes += "}"
 	s := strings.Join([]string{`&NamespaceSpec{`,
 		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
 		`Regions:` + fmt.Sprintf("%v", this.Regions) + `,`,
@@ -2491,6 +3325,7 @@ func (this *NamespaceSpec) String() string {
 		`CustomSearchAttributes:` + mapStringForCustomSearchAttributes + `,`,
 		`CodecServer:` + strings.Replace(this.CodecServer.String(), "CodecServerSpec", "CodecServerSpec", 1) + `,`,
 		`ApiKeyAuth:` + strings.Replace(this.ApiKeyAuth.String(), "ApiKeyAuthSpec", "ApiKeyAuthSpec", 1) + `,`,
+		`SearchAttributes:` + mapStringForSearchAttributes + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2562,7 +3397,7 @@ func (this *Namespace) String() string {
 		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
 		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
 		`Spec:` + strings.Replace(this.Spec.String(), "NamespaceSpec", "NamespaceSpec", 1) + `,`,
-		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`StateDeprecated:` + fmt.Sprintf("%v", this.StateDeprecated) + `,`,
 		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
 		`Endpoints:` + strings.Replace(this.Endpoints.String(), "Endpoints", "Endpoints", 1) + `,`,
 		`ActiveRegion:` + fmt.Sprintf("%v", this.ActiveRegion) + `,`,
@@ -2571,6 +3406,7 @@ func (this *Namespace) String() string {
 		`CreatedTime:` + strings.Replace(fmt.Sprintf("%v", this.CreatedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`LastModifiedTime:` + strings.Replace(fmt.Sprintf("%v", this.LastModifiedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`RegionStatus:` + mapStringForRegionStatus + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2580,8 +3416,39 @@ func (this *NamespaceRegionStatus) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&NamespaceRegionStatus{`,
-		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`StateDeprecated:` + fmt.Sprintf("%v", this.StateDeprecated) + `,`,
 		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ExportSinkSpec) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ExportSinkSpec{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`Enabled:` + fmt.Sprintf("%v", this.Enabled) + `,`,
+		`S3:` + strings.Replace(fmt.Sprintf("%v", this.S3), "S3Spec", "v11.S3Spec", 1) + `,`,
+		`Gcs:` + strings.Replace(fmt.Sprintf("%v", this.Gcs), "GCSSpec", "v11.GCSSpec", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ExportSink) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ExportSink{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`Spec:` + strings.Replace(this.Spec.String(), "ExportSinkSpec", "ExportSinkSpec", 1) + `,`,
+		`Health:` + fmt.Sprintf("%v", this.Health) + `,`,
+		`ErrorMessage:` + fmt.Sprintf("%v", this.ErrorMessage) + `,`,
+		`LatestDataExportTime:` + strings.Replace(fmt.Sprintf("%v", this.LatestDataExportTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`LastHealthCheckTime:` + strings.Replace(fmt.Sprintf("%v", this.LastHealthCheckTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2806,7 +3673,7 @@ func (m *MtlsAuthSpec) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AcceptedClientCa", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AcceptedClientCaDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2834,7 +3701,7 @@ func (m *MtlsAuthSpec) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.AcceptedClientCa = string(dAtA[iNdEx:postIndex])
+			m.AcceptedClientCaDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -2890,6 +3757,40 @@ func (m *MtlsAuthSpec) Unmarshal(dAtA []byte) error {
 				}
 			}
 			m.Enabled = bool(v != 0)
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AcceptedClientCa", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AcceptedClientCa = append(m.AcceptedClientCa[:0], dAtA[iNdEx:postIndex]...)
+			if m.AcceptedClientCa == nil {
+				m.AcceptedClientCa = []byte{}
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -3458,6 +4359,119 @@ func (m *NamespaceSpec) Unmarshal(dAtA []byte) error {
 			if err := m.ApiKeyAuth.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SearchAttributes", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.SearchAttributes == nil {
+				m.SearchAttributes = make(map[string]NamespaceSpec_SearchAttributeType)
+			}
+			var mapkey string
+			var mapvalue NamespaceSpec_SearchAttributeType
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowMessage
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowMessage
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthMessage
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthMessage
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowMessage
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						mapvalue |= NamespaceSpec_SearchAttributeType(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipMessage(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthMessage
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.SearchAttributes[mapkey] = mapvalue
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -4073,7 +5087,7 @@ func (m *Namespace) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StateDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -4101,7 +5115,7 @@ func (m *Namespace) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.State = string(dAtA[iNdEx:postIndex])
+			m.StateDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
@@ -4474,6 +5488,25 @@ func (m *Namespace) Unmarshal(dAtA []byte) error {
 			}
 			m.RegionStatus[mapkey] = mapvalue
 			iNdEx = postIndex
+		case 13:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= v1.ResourceState(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -4529,7 +5562,7 @@ func (m *NamespaceRegionStatus) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StateDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -4557,7 +5590,7 @@ func (m *NamespaceRegionStatus) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.State = string(dAtA[iNdEx:postIndex])
+			m.StateDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -4590,6 +5623,497 @@ func (m *NamespaceRegionStatus) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= NamespaceRegionStatus_State(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ExportSinkSpec) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ExportSinkSpec: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ExportSinkSpec: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Enabled", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Enabled = bool(v != 0)
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field S3", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.S3 == nil {
+				m.S3 = &v11.S3Spec{}
+			}
+			if err := m.S3.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Gcs", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Gcs == nil {
+				m.Gcs = &v11.GCSSpec{}
+			}
+			if err := m.Gcs.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ExportSink) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ExportSink: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ExportSink: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= v1.ResourceState(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &ExportSinkSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Health", wireType)
+			}
+			m.Health = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Health |= ExportSink_Health(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ErrorMessage", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ErrorMessage = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LatestDataExportTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.LatestDataExportTime == nil {
+				m.LatestDataExportTime = &types.Timestamp{}
+			}
+			if err := m.LatestDataExportTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastHealthCheckTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.LastHealthCheckTime == nil {
+				m.LastHealthCheckTime = &types.Timestamp{}
+			}
+			if err := m.LastHealthCheckTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

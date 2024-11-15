@@ -8,10 +8,12 @@ import (
 	proto "github.com/gogo/protobuf/proto"
 	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 	types "github.com/gogo/protobuf/types"
+	v1 "github.com/temporalio/tcld/protogen/api/cloud/resource/v1"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
+	strconv "strconv"
 	strings "strings"
 )
 
@@ -26,12 +28,102 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+type OwnerType int32
+
+const (
+	OWNER_TYPE_UNSPECIFIED     OwnerType = 0
+	OWNER_TYPE_USER            OwnerType = 1
+	OWNER_TYPE_SERVICE_ACCOUNT OwnerType = 2
+)
+
+var OwnerType_name = map[int32]string{
+	0: "Unspecified",
+	1: "User",
+	2: "ServiceAccount",
+}
+
+var OwnerType_value = map[string]int32{
+	"Unspecified":    0,
+	"User":           1,
+	"ServiceAccount": 2,
+}
+
+func (OwnerType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_0ccf9360c6d9abd3, []int{0}
+}
+
+type AccountAccess_Role int32
+
+const (
+	ROLE_UNSPECIFIED   AccountAccess_Role = 0
+	ROLE_OWNER         AccountAccess_Role = 1
+	ROLE_ADMIN         AccountAccess_Role = 2
+	ROLE_DEVELOPER     AccountAccess_Role = 3
+	ROLE_FINANCE_ADMIN AccountAccess_Role = 4
+	ROLE_READ          AccountAccess_Role = 5
+)
+
+var AccountAccess_Role_name = map[int32]string{
+	0: "RoleUnspecified",
+	1: "RoleOwner",
+	2: "RoleAdmin",
+	3: "RoleDeveloper",
+	4: "RoleFinanceAdmin",
+	5: "RoleRead",
+}
+
+var AccountAccess_Role_value = map[string]int32{
+	"RoleUnspecified":  0,
+	"RoleOwner":        1,
+	"RoleAdmin":        2,
+	"RoleDeveloper":    3,
+	"RoleFinanceAdmin": 4,
+	"RoleRead":         5,
+}
+
+func (AccountAccess_Role) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_0ccf9360c6d9abd3, []int{0, 0}
+}
+
+type NamespaceAccess_Permission int32
+
+const (
+	PERMISSION_UNSPECIFIED NamespaceAccess_Permission = 0
+	PERMISSION_ADMIN       NamespaceAccess_Permission = 1
+	PERMISSION_WRITE       NamespaceAccess_Permission = 2
+	PERMISSION_READ        NamespaceAccess_Permission = 3
+)
+
+var NamespaceAccess_Permission_name = map[int32]string{
+	0: "PermissionUnspecified",
+	1: "PermissionAdmin",
+	2: "PermissionWrite",
+	3: "PermissionRead",
+}
+
+var NamespaceAccess_Permission_value = map[string]int32{
+	"PermissionUnspecified": 0,
+	"PermissionAdmin":       1,
+	"PermissionWrite":       2,
+	"PermissionRead":        3,
+}
+
+func (NamespaceAccess_Permission) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_0ccf9360c6d9abd3, []int{1, 0}
+}
+
 type AccountAccess struct {
-	// The role on the account, should be one of [admin, developer, read]
+	// The role on the account, should be one of [owner, admin, developer, financeadmin, read]
+	// owner - gives full access to the account, including users, namespaces, and billing
 	// admin - gives full access the account, including users and namespaces
 	// developer - gives access to create namespaces on the account
+	// financeadmin - gives read only access and write access for billing
 	// read - gives read only access to the account
-	Role string `protobuf:"bytes,1,opt,name=role,proto3" json:"role,omitempty"`
+	// Deprecated: Use role field instead.
+	RoleDeprecated string `protobuf:"bytes,1,opt,name=role_deprecated,json=roleDeprecated,proto3" json:"role_deprecated,omitempty"` // Deprecated: Do not use.
+	// The role on the account.
+	// temporal:enums:replaces=role_deprecated
+	Role AccountAccess_Role `protobuf:"varint,2,opt,name=role,proto3,enum=temporal.api.cloud.identity.v1.AccountAccess_Role" json:"role,omitempty"`
 }
 
 func (m *AccountAccess) Reset()      { *m = AccountAccess{} }
@@ -66,11 +158,19 @@ func (m *AccountAccess) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AccountAccess proto.InternalMessageInfo
 
-func (m *AccountAccess) GetRole() string {
+// Deprecated: Do not use.
+func (m *AccountAccess) GetRoleDeprecated() string {
+	if m != nil {
+		return m.RoleDeprecated
+	}
+	return ""
+}
+
+func (m *AccountAccess) GetRole() AccountAccess_Role {
 	if m != nil {
 		return m.Role
 	}
-	return ""
+	return ROLE_UNSPECIFIED
 }
 
 type NamespaceAccess struct {
@@ -78,7 +178,11 @@ type NamespaceAccess struct {
 	// admin - gives full access to the namespace, including assigning namespace access to other users
 	// write - gives write access to the namespace configuration and workflows within the namespace
 	// read - gives read only access to the namespace configuration and workflows within the namespace
-	Permission string `protobuf:"bytes,1,opt,name=permission,proto3" json:"permission,omitempty"`
+	// Deprecated: Use permission field instead.
+	PermissionDeprecated string `protobuf:"bytes,1,opt,name=permission_deprecated,json=permissionDeprecated,proto3" json:"permission_deprecated,omitempty"` // Deprecated: Do not use.
+	// The permission to the namespace.
+	// temporal:enums:replaces=permission_deprecated
+	Permission NamespaceAccess_Permission `protobuf:"varint,2,opt,name=permission,proto3,enum=temporal.api.cloud.identity.v1.NamespaceAccess_Permission" json:"permission,omitempty"`
 }
 
 func (m *NamespaceAccess) Reset()      { *m = NamespaceAccess{} }
@@ -113,11 +217,19 @@ func (m *NamespaceAccess) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_NamespaceAccess proto.InternalMessageInfo
 
-func (m *NamespaceAccess) GetPermission() string {
+// Deprecated: Do not use.
+func (m *NamespaceAccess) GetPermissionDeprecated() string {
+	if m != nil {
+		return m.PermissionDeprecated
+	}
+	return ""
+}
+
+func (m *NamespaceAccess) GetPermission() NamespaceAccess_Permission {
 	if m != nil {
 		return m.Permission
 	}
-	return ""
+	return PERMISSION_UNSPECIFIED
 }
 
 type Access struct {
@@ -289,9 +401,12 @@ type User struct {
 	// The user specification
 	Spec *UserSpec `protobuf:"bytes,3,opt,name=spec,proto3" json:"spec,omitempty"`
 	// The current state of the user
-	// Possible values: activating, activationfailed, active, updating, updatefailed, deleting, deletefailed, deleted, suspending, suspendfailed, suspended.
+	// Deprecated: Use state field instead.
+	StateDeprecated string `protobuf:"bytes,4,opt,name=state_deprecated,json=stateDeprecated,proto3" json:"state_deprecated,omitempty"` // Deprecated: Do not use.
+	// The current state of the user.
 	// For any failed state, reach out to Temporal Cloud support for remediation.
-	State string `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
+	// temporal:enums:replaces=state_deprecated
+	State v1.ResourceState `protobuf:"varint,9,opt,name=state,proto3,enum=temporal.api.cloud.resource.v1.ResourceState" json:"state,omitempty"`
 	// The id of the async operation that is creating/updating/deleting the user, if any
 	AsyncOperationId string `protobuf:"bytes,5,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
 	// The details of the open invitation sent to the user, if any
@@ -356,11 +471,19 @@ func (m *User) GetSpec() *UserSpec {
 	return nil
 }
 
-func (m *User) GetState() string {
+// Deprecated: Do not use.
+func (m *User) GetStateDeprecated() string {
+	if m != nil {
+		return m.StateDeprecated
+	}
+	return ""
+}
+
+func (m *User) GetState() v1.ResourceState {
 	if m != nil {
 		return m.State
 	}
-	return ""
+	return v1.RESOURCE_STATE_UNSPECIFIED
 }
 
 func (m *User) GetAsyncOperationId() string {
@@ -391,18 +514,65 @@ func (m *User) GetLastModifiedTime() *types.Timestamp {
 	return nil
 }
 
+type GoogleGroupSpec struct {
+	// The email address of the Google group.
+	// The email address is immutable. Once set during creation, it cannot be changed.
+	EmailAddress string `protobuf:"bytes,1,opt,name=email_address,json=emailAddress,proto3" json:"email_address,omitempty"`
+}
+
+func (m *GoogleGroupSpec) Reset()      { *m = GoogleGroupSpec{} }
+func (*GoogleGroupSpec) ProtoMessage() {}
+func (*GoogleGroupSpec) Descriptor() ([]byte, []int) {
+	return fileDescriptor_0ccf9360c6d9abd3, []int{6}
+}
+func (m *GoogleGroupSpec) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GoogleGroupSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GoogleGroupSpec.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GoogleGroupSpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GoogleGroupSpec.Merge(m, src)
+}
+func (m *GoogleGroupSpec) XXX_Size() int {
+	return m.Size()
+}
+func (m *GoogleGroupSpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_GoogleGroupSpec.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GoogleGroupSpec proto.InternalMessageInfo
+
+func (m *GoogleGroupSpec) GetEmailAddress() string {
+	if m != nil {
+		return m.EmailAddress
+	}
+	return ""
+}
+
 type UserGroupSpec struct {
-	// The name of the group as defined in the customer's IdP (e.g. Google group name in Google Workspace)
-	// The name is immutable. Once set, it cannot be changed
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// The access assigned to the group
+	// The display name of the group.
+	DisplayName string `protobuf:"bytes,1,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// The access assigned to the group.
 	Access *Access `protobuf:"bytes,2,opt,name=access,proto3" json:"access,omitempty"`
+	// The specification of the google group that this group is associated with.
+	// For now only google groups are supported, and this field is required.
+	GoogleGroup *GoogleGroupSpec `protobuf:"bytes,3,opt,name=google_group,json=googleGroup,proto3" json:"google_group,omitempty"`
 }
 
 func (m *UserGroupSpec) Reset()      { *m = UserGroupSpec{} }
 func (*UserGroupSpec) ProtoMessage() {}
 func (*UserGroupSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_0ccf9360c6d9abd3, []int{6}
+	return fileDescriptor_0ccf9360c6d9abd3, []int{7}
 }
 func (m *UserGroupSpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -431,9 +601,9 @@ func (m *UserGroupSpec) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_UserGroupSpec proto.InternalMessageInfo
 
-func (m *UserGroupSpec) GetName() string {
+func (m *UserGroupSpec) GetDisplayName() string {
 	if m != nil {
-		return m.Name
+		return m.DisplayName
 	}
 	return ""
 }
@@ -441,6 +611,13 @@ func (m *UserGroupSpec) GetName() string {
 func (m *UserGroupSpec) GetAccess() *Access {
 	if m != nil {
 		return m.Access
+	}
+	return nil
+}
+
+func (m *UserGroupSpec) GetGoogleGroup() *GoogleGroupSpec {
+	if m != nil {
+		return m.GoogleGroup
 	}
 	return nil
 }
@@ -453,8 +630,13 @@ type UserGroup struct {
 	ResourceVersion string `protobuf:"bytes,2,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
 	// The group specification
 	Spec *UserGroupSpec `protobuf:"bytes,3,opt,name=spec,proto3" json:"spec,omitempty"`
-	// The current state of the group
-	State string `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
+	// The current state of the group.
+	// Deprecated: Use state field instead.
+	StateDeprecated string `protobuf:"bytes,4,opt,name=state_deprecated,json=stateDeprecated,proto3" json:"state_deprecated,omitempty"` // Deprecated: Do not use.
+	// The current state of the group.
+	// For any failed state, reach out to Temporal Cloud support for remediation.
+	// temporal:enums:replaces=state_deprecated
+	State v1.ResourceState `protobuf:"varint,8,opt,name=state,proto3,enum=temporal.api.cloud.resource.v1.ResourceState" json:"state,omitempty"`
 	// The id of the async operation that is creating/updating/deleting the group, if any
 	AsyncOperationId string `protobuf:"bytes,5,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
 	// The date and time when the group was created
@@ -467,7 +649,7 @@ type UserGroup struct {
 func (m *UserGroup) Reset()      { *m = UserGroup{} }
 func (*UserGroup) ProtoMessage() {}
 func (*UserGroup) Descriptor() ([]byte, []int) {
-	return fileDescriptor_0ccf9360c6d9abd3, []int{7}
+	return fileDescriptor_0ccf9360c6d9abd3, []int{8}
 }
 func (m *UserGroup) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -517,11 +699,19 @@ func (m *UserGroup) GetSpec() *UserGroupSpec {
 	return nil
 }
 
-func (m *UserGroup) GetState() string {
+// Deprecated: Do not use.
+func (m *UserGroup) GetStateDeprecated() string {
+	if m != nil {
+		return m.StateDeprecated
+	}
+	return ""
+}
+
+func (m *UserGroup) GetState() v1.ResourceState {
 	if m != nil {
 		return m.State
 	}
-	return ""
+	return v1.RESOURCE_STATE_UNSPECIFIED
 }
 
 func (m *UserGroup) GetAsyncOperationId() string {
@@ -556,7 +746,12 @@ type ServiceAccount struct {
 	// The current state of the service account.
 	// Possible values: activating, activationfailed, active, updating, updatefailed, deleting, deletefailed, deleted, suspending, suspendfailed, suspended.
 	// For any failed state, reach out to Temporal Cloud support for remediation.
-	State string `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
+	// Deprecated: Use state field instead.
+	StateDeprecated string `protobuf:"bytes,4,opt,name=state_deprecated,json=stateDeprecated,proto3" json:"state_deprecated,omitempty"` // Deprecated: Do not use.
+	// The current state of the service account.
+	// For any failed state, reach out to Temporal Cloud support for remediation.
+	// temporal:enums:replaces=state_deprecated
+	State v1.ResourceState `protobuf:"varint,8,opt,name=state,proto3,enum=temporal.api.cloud.resource.v1.ResourceState" json:"state,omitempty"`
 	// The id of the async operation that is creating/updating/deleting the service account, if any.
 	AsyncOperationId string `protobuf:"bytes,5,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
 	// The date and time when the service account was created.
@@ -569,7 +764,7 @@ type ServiceAccount struct {
 func (m *ServiceAccount) Reset()      { *m = ServiceAccount{} }
 func (*ServiceAccount) ProtoMessage() {}
 func (*ServiceAccount) Descriptor() ([]byte, []int) {
-	return fileDescriptor_0ccf9360c6d9abd3, []int{8}
+	return fileDescriptor_0ccf9360c6d9abd3, []int{9}
 }
 func (m *ServiceAccount) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -619,11 +814,19 @@ func (m *ServiceAccount) GetSpec() *ServiceAccountSpec {
 	return nil
 }
 
-func (m *ServiceAccount) GetState() string {
+// Deprecated: Do not use.
+func (m *ServiceAccount) GetStateDeprecated() string {
+	if m != nil {
+		return m.StateDeprecated
+	}
+	return ""
+}
+
+func (m *ServiceAccount) GetState() v1.ResourceState {
 	if m != nil {
 		return m.State
 	}
-	return ""
+	return v1.RESOURCE_STATE_UNSPECIFIED
 }
 
 func (m *ServiceAccount) GetAsyncOperationId() string {
@@ -662,7 +865,7 @@ type ServiceAccountSpec struct {
 func (m *ServiceAccountSpec) Reset()      { *m = ServiceAccountSpec{} }
 func (*ServiceAccountSpec) ProtoMessage() {}
 func (*ServiceAccountSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_0ccf9360c6d9abd3, []int{9}
+	return fileDescriptor_0ccf9360c6d9abd3, []int{10}
 }
 func (m *ServiceAccountSpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -713,22 +916,26 @@ func (m *ServiceAccountSpec) GetDescription() string {
 }
 
 type ApiKey struct {
-	// The id of the API Key
+	// The id of the API Key.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// The current version of the API key specification
-	// The next update operation will have to include this version
+	// The current version of the API key specification.
+	// The next update operation will have to include this version.
 	ResourceVersion string `protobuf:"bytes,2,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
-	// The API key specification
+	// The API key specification.
 	Spec *ApiKeySpec `protobuf:"bytes,3,opt,name=spec,proto3" json:"spec,omitempty"`
-	// The current state of the API key
+	// The current state of the API key.
 	// Possible values: activating, activationfailed, active, updating, updatefailed, deleting, deletefailed, deleted, suspending, suspendfailed, suspended.
 	// For any failed state, reach out to Temporal Cloud support for remediation.
-	State string `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
-	// The id of the async operation that is creating/updating/deleting the API key, if any
+	// Deprecated: Use state field instead.
+	StateDeprecated string `protobuf:"bytes,4,opt,name=state_deprecated,json=stateDeprecated,proto3" json:"state_deprecated,omitempty"` // Deprecated: Do not use.
+	// The current state of the API key.
+	// temporal:enums:replaces=state_deprecated
+	State v1.ResourceState `protobuf:"varint,8,opt,name=state,proto3,enum=temporal.api.cloud.resource.v1.ResourceState" json:"state,omitempty"`
+	// The id of the async operation that is creating/updating/deleting the API key, if any.
 	AsyncOperationId string `protobuf:"bytes,5,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
-	// The date and time when the API key was created
+	// The date and time when the API key was created.
 	CreatedTime *types.Timestamp `protobuf:"bytes,6,opt,name=created_time,json=createdTime,proto3" json:"created_time,omitempty"`
-	// The date and time when the API key was last modified
+	// The date and time when the API key was last modified.
 	// Will not be set if the API key has never been modified.
 	LastModifiedTime *types.Timestamp `protobuf:"bytes,7,opt,name=last_modified_time,json=lastModifiedTime,proto3" json:"last_modified_time,omitempty"`
 }
@@ -736,7 +943,7 @@ type ApiKey struct {
 func (m *ApiKey) Reset()      { *m = ApiKey{} }
 func (*ApiKey) ProtoMessage() {}
 func (*ApiKey) Descriptor() ([]byte, []int) {
-	return fileDescriptor_0ccf9360c6d9abd3, []int{10}
+	return fileDescriptor_0ccf9360c6d9abd3, []int{11}
 }
 func (m *ApiKey) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -786,11 +993,19 @@ func (m *ApiKey) GetSpec() *ApiKeySpec {
 	return nil
 }
 
-func (m *ApiKey) GetState() string {
+// Deprecated: Do not use.
+func (m *ApiKey) GetStateDeprecated() string {
+	if m != nil {
+		return m.StateDeprecated
+	}
+	return ""
+}
+
+func (m *ApiKey) GetState() v1.ResourceState {
 	if m != nil {
 		return m.State
 	}
-	return ""
+	return v1.RESOURCE_STATE_UNSPECIFIED
 }
 
 func (m *ApiKey) GetAsyncOperationId() string {
@@ -815,25 +1030,33 @@ func (m *ApiKey) GetLastModifiedTime() *types.Timestamp {
 }
 
 type ApiKeySpec struct {
-	// The id of the owner to create the API key for
+	// The id of the owner to create the API key for.
+	// The owner id is immutable. Once set during creation, it cannot be changed.
+	// The owner id is the id of the user when the owner type is user.
+	// The owner id is the id of the service account when the owner type is service account.
 	OwnerId string `protobuf:"bytes,1,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	// The type of the owner to create the API key for
-	// Possible values: user, service-account
-	OwnerType string `protobuf:"bytes,2,opt,name=owner_type,json=ownerType,proto3" json:"owner_type,omitempty"`
-	// The display name of the API key
+	// The type of the owner to create the API key for.
+	// The owner type is immutable. Once set during creation, it cannot be changed.
+	// Possible values: user, service-account.
+	// Deprecated: Use owner_type field instead.
+	OwnerTypeDeprecated string `protobuf:"bytes,2,opt,name=owner_type_deprecated,json=ownerTypeDeprecated,proto3" json:"owner_type_deprecated,omitempty"` // Deprecated: Do not use.
+	// The type of the owner to create the API key for.
+	// temporal:enums:replaces=owner_type_deprecated
+	OwnerType OwnerType `protobuf:"varint,7,opt,name=owner_type,json=ownerType,proto3,enum=temporal.api.cloud.identity.v1.OwnerType" json:"owner_type,omitempty"`
+	// The display name of the API key.
 	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	// The description of the API key
+	// The description of the API key.
 	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	// The expiry time of the API key
+	// The expiry time of the API key.
 	ExpiryTime *types.Timestamp `protobuf:"bytes,5,opt,name=expiry_time,json=expiryTime,proto3" json:"expiry_time,omitempty"`
-	// True if the API key is disabled
+	// True if the API key is disabled.
 	Disabled bool `protobuf:"varint,6,opt,name=disabled,proto3" json:"disabled,omitempty"`
 }
 
 func (m *ApiKeySpec) Reset()      { *m = ApiKeySpec{} }
 func (*ApiKeySpec) ProtoMessage() {}
 func (*ApiKeySpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_0ccf9360c6d9abd3, []int{11}
+	return fileDescriptor_0ccf9360c6d9abd3, []int{12}
 }
 func (m *ApiKeySpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -869,11 +1092,19 @@ func (m *ApiKeySpec) GetOwnerId() string {
 	return ""
 }
 
-func (m *ApiKeySpec) GetOwnerType() string {
+// Deprecated: Do not use.
+func (m *ApiKeySpec) GetOwnerTypeDeprecated() string {
+	if m != nil {
+		return m.OwnerTypeDeprecated
+	}
+	return ""
+}
+
+func (m *ApiKeySpec) GetOwnerType() OwnerType {
 	if m != nil {
 		return m.OwnerType
 	}
-	return ""
+	return OWNER_TYPE_UNSPECIFIED
 }
 
 func (m *ApiKeySpec) GetDisplayName() string {
@@ -905,6 +1136,9 @@ func (m *ApiKeySpec) GetDisabled() bool {
 }
 
 func init() {
+	proto.RegisterEnum("temporal.api.cloud.identity.v1.OwnerType", OwnerType_name, OwnerType_value)
+	proto.RegisterEnum("temporal.api.cloud.identity.v1.AccountAccess_Role", AccountAccess_Role_name, AccountAccess_Role_value)
+	proto.RegisterEnum("temporal.api.cloud.identity.v1.NamespaceAccess_Permission", NamespaceAccess_Permission_name, NamespaceAccess_Permission_value)
 	proto.RegisterType((*AccountAccess)(nil), "temporal.api.cloud.identity.v1.AccountAccess")
 	proto.RegisterType((*NamespaceAccess)(nil), "temporal.api.cloud.identity.v1.NamespaceAccess")
 	proto.RegisterType((*Access)(nil), "temporal.api.cloud.identity.v1.Access")
@@ -912,6 +1146,7 @@ func init() {
 	proto.RegisterType((*UserSpec)(nil), "temporal.api.cloud.identity.v1.UserSpec")
 	proto.RegisterType((*Invitation)(nil), "temporal.api.cloud.identity.v1.Invitation")
 	proto.RegisterType((*User)(nil), "temporal.api.cloud.identity.v1.User")
+	proto.RegisterType((*GoogleGroupSpec)(nil), "temporal.api.cloud.identity.v1.GoogleGroupSpec")
 	proto.RegisterType((*UserGroupSpec)(nil), "temporal.api.cloud.identity.v1.UserGroupSpec")
 	proto.RegisterType((*UserGroup)(nil), "temporal.api.cloud.identity.v1.UserGroup")
 	proto.RegisterType((*ServiceAccount)(nil), "temporal.api.cloud.identity.v1.ServiceAccount")
@@ -925,61 +1160,107 @@ func init() {
 }
 
 var fileDescriptor_0ccf9360c6d9abd3 = []byte{
-	// 819 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xdc, 0x56, 0x4d, 0x6f, 0xeb, 0x44,
-	0x14, 0x8d, 0x9d, 0x8f, 0xa6, 0x37, 0xaf, 0x7d, 0x61, 0x84, 0x50, 0x88, 0x84, 0x29, 0x41, 0x42,
-	0x05, 0xbd, 0xda, 0x6a, 0xd9, 0x20, 0x1e, 0xaf, 0x52, 0x91, 0x0a, 0x14, 0x04, 0x48, 0x6e, 0x61,
-	0xc1, 0xc6, 0x4c, 0xed, 0xdb, 0x68, 0x84, 0xed, 0x19, 0xcd, 0x38, 0x01, 0xef, 0x58, 0x77, 0xc5,
-	0x92, 0x9f, 0xc0, 0xff, 0x60, 0xc3, 0x32, 0x2b, 0xd4, 0x65, 0x9b, 0xb2, 0x60, 0xd9, 0x9f, 0x80,
-	0x3c, 0xb6, 0xd3, 0x26, 0xad, 0x70, 0x21, 0x7d, 0x9b, 0xee, 0x66, 0xee, 0x9c, 0x3b, 0xf7, 0xde,
-	0x73, 0x4e, 0x26, 0x86, 0x67, 0x09, 0x46, 0x82, 0x4b, 0x1a, 0x3a, 0x54, 0x30, 0xc7, 0x0f, 0xf9,
-	0x28, 0x70, 0x58, 0x80, 0x71, 0xc2, 0x92, 0xd4, 0x19, 0x6f, 0x3b, 0x11, 0x2a, 0x45, 0x87, 0x68,
-	0x0b, 0xc9, 0x13, 0x4e, 0xac, 0x12, 0x6d, 0x53, 0xc1, 0x6c, 0x8d, 0xb6, 0x4b, 0xb4, 0x3d, 0xde,
-	0xee, 0xbf, 0x39, 0xe4, 0x7c, 0x18, 0xa2, 0xa3, 0xd1, 0xc7, 0xa3, 0x13, 0x27, 0x61, 0x11, 0xaa,
-	0x84, 0x46, 0x22, 0xbf, 0x60, 0xf0, 0x36, 0xac, 0xed, 0xf9, 0x3e, 0x1f, 0xc5, 0xc9, 0x9e, 0xef,
-	0xa3, 0x52, 0x84, 0x40, 0x43, 0xf2, 0x10, 0x7b, 0xc6, 0x86, 0xb1, 0xb9, 0xea, 0xea, 0xf5, 0x60,
-	0x1b, 0x9e, 0x7e, 0x45, 0x23, 0x54, 0x82, 0xfa, 0x58, 0xc0, 0x2c, 0x00, 0x81, 0x32, 0x62, 0x4a,
-	0x31, 0x1e, 0x17, 0xe0, 0x1b, 0x91, 0xc1, 0xef, 0x26, 0xb4, 0x0a, 0xe8, 0x11, 0xac, 0xd3, 0xbc,
-	0x84, 0x47, 0x75, 0x44, 0xc3, 0x3b, 0x3b, 0x5b, 0xf6, 0xbf, 0x37, 0x6f, 0xcf, 0x35, 0xe6, 0xae,
-	0xd1, 0xb9, 0x3e, 0x43, 0x20, 0x71, 0xd9, 0x53, 0x71, 0x2f, 0xaa, 0x9e, 0xb9, 0x51, 0xdf, 0xec,
-	0xec, 0xbc, 0xb8, 0xc7, 0xcd, 0xa8, 0x94, 0xbd, 0x30, 0x14, 0xaa, 0xfd, 0x38, 0x91, 0xa9, 0xfb,
-	0x4a, 0xbc, 0x18, 0xef, 0x8f, 0xe0, 0xb5, 0xbb, 0xc1, 0xa4, 0x0b, 0xf5, 0x1f, 0x30, 0x2d, 0x18,
-	0xc8, 0x96, 0x64, 0x1f, 0x9a, 0x63, 0x1a, 0x8e, 0xb0, 0x67, 0xea, 0x31, 0x9d, 0xaa, 0x66, 0x16,
-	0x2e, 0x76, 0xf3, 0xec, 0x0f, 0xcd, 0x0f, 0x8c, 0xc1, 0xf7, 0xd0, 0xfe, 0x46, 0xa1, 0x3c, 0x14,
-	0xe8, 0x93, 0x57, 0xa1, 0x89, 0x11, 0x65, 0x61, 0x51, 0x2a, 0xdf, 0x90, 0x5d, 0x68, 0x15, 0xa4,
-	0xe6, 0xd5, 0xde, 0xb9, 0xdf, 0xe8, 0x6e, 0x91, 0x35, 0x38, 0x35, 0x00, 0x0e, 0xe2, 0x31, 0x4b,
-	0x68, 0xc2, 0x78, 0x4c, 0x5e, 0xc0, 0x13, 0x5f, 0x22, 0x4d, 0x30, 0xf0, 0x32, 0xa7, 0x14, 0x4a,
-	0xf5, 0xed, 0xdc, 0x46, 0x76, 0x69, 0x23, 0xfb, 0xa8, 0xb4, 0x91, 0xdb, 0x29, 0xf0, 0x59, 0x24,
-	0x4b, 0xc7, 0x9f, 0x04, 0x93, 0x65, 0xba, 0x59, 0x9d, 0x5e, 0xe0, 0xb3, 0xc8, 0xe0, 0xd7, 0x3a,
-	0x34, 0xb2, 0x79, 0xc9, 0x3a, 0x98, 0x2c, 0x28, 0x06, 0x35, 0x59, 0x40, 0xde, 0x85, 0xae, 0x44,
-	0xc5, 0x47, 0xd2, 0x47, 0x6f, 0x8c, 0x52, 0x7b, 0xce, 0xd4, 0xa7, 0x4f, 0xcb, 0xf8, 0xb7, 0x79,
-	0x98, 0x7c, 0x04, 0x0d, 0x25, 0xd0, 0xef, 0xd5, 0x75, 0xe9, 0xcd, 0x2a, 0x3a, 0x4a, 0x7a, 0x5d,
-	0x9d, 0x95, 0x91, 0xac, 0x12, 0x9a, 0x60, 0xaf, 0x91, 0x93, 0xac, 0x37, 0xe4, 0x19, 0x10, 0xaa,
-	0xd2, 0xd8, 0xf7, 0xb8, 0x40, 0xa9, 0x89, 0xf2, 0x58, 0xd0, 0x6b, 0x6a, 0x48, 0x57, 0x9f, 0x7c,
-	0x5d, 0x1e, 0x1c, 0x04, 0xe4, 0x73, 0x00, 0x36, 0x63, 0xb4, 0xd7, 0xd2, 0x7d, 0xbc, 0x57, 0xd5,
-	0xc7, 0xb5, 0x06, 0xee, 0x8d, 0xec, 0x5b, 0x7a, 0xac, 0xfc, 0x37, 0x3d, 0x3e, 0x03, 0x12, 0x52,
-	0x95, 0x78, 0x11, 0x0f, 0xd8, 0x09, 0x2b, 0x2f, 0x69, 0x57, 0x5e, 0xd2, 0xcd, 0xb2, 0xbe, 0x2c,
-	0x92, 0xb4, 0x34, 0x3e, 0xac, 0x65, 0x54, 0x7d, 0x2a, 0xf9, 0x48, 0x68, 0x3b, 0x12, 0x68, 0x64,
-	0x3f, 0x93, 0xf2, 0x9d, 0xc8, 0xd6, 0x4b, 0x9b, 0xf1, 0x4f, 0x13, 0x56, 0x67, 0x55, 0x96, 0x31,
-	0xc1, 0xde, 0x9c, 0x09, 0xb6, 0xee, 0x63, 0x82, 0xd9, 0x64, 0x0f, 0xe8, 0x84, 0x45, 0xf5, 0x5a,
-	0x0f, 0xa1, 0xde, 0xca, 0xff, 0x50, 0xef, 0xdc, 0x84, 0xf5, 0x43, 0x94, 0x63, 0xa6, 0x1f, 0x99,
-	0xec, 0x15, 0x5d, 0x86, 0xdd, 0x4f, 0xe6, 0xd8, 0xdd, 0xa9, 0x62, 0x77, 0xbe, 0xf0, 0x63, 0xa5,
-	0xf8, 0xd4, 0x00, 0x72, 0x7b, 0xd2, 0x97, 0xf1, 0x33, 0x21, 0x1b, 0xd0, 0x09, 0x50, 0xf9, 0x92,
-	0x09, 0xfd, 0xc2, 0xd4, 0xf5, 0xd5, 0x37, 0x43, 0x83, 0x49, 0xf6, 0xef, 0x2b, 0xd8, 0x17, 0x98,
-	0x2e, 0xa3, 0xf3, 0xee, 0x9c, 0xce, 0x95, 0x4f, 0x58, 0x5e, 0xf0, 0xb1, 0xea, 0xfb, 0x97, 0x01,
-	0x70, 0x3d, 0x21, 0x79, 0x1d, 0xda, 0xfc, 0xc7, 0x18, 0xa5, 0x37, 0x23, 0x77, 0x45, 0xef, 0x0f,
-	0x02, 0xf2, 0x06, 0x40, 0x7e, 0x94, 0xa4, 0x02, 0x0b, 0x6e, 0x57, 0x75, 0xe4, 0x28, 0x15, 0x48,
-	0xde, 0x82, 0x27, 0x01, 0x53, 0x22, 0xa4, 0xa9, 0xa7, 0x9d, 0x51, 0xca, 0x97, 0xc7, 0xb2, 0x8f,
-	0x81, 0x45, 0x81, 0x1b, 0xb7, 0x04, 0x26, 0xcf, 0x21, 0xff, 0xe3, 0x4c, 0xf3, 0x81, 0x9a, 0x95,
-	0x03, 0x41, 0x0e, 0xd7, 0xa4, 0xf4, 0xa1, 0x1d, 0x30, 0x45, 0x8f, 0x43, 0x0c, 0x34, 0x9f, 0x6d,
-	0x77, 0xb6, 0xff, 0xd8, 0x9f, 0x5c, 0x58, 0xb5, 0xb3, 0x0b, 0xab, 0x76, 0x75, 0x61, 0x19, 0x3f,
-	0x4f, 0x2d, 0xe3, 0xb7, 0xa9, 0x65, 0xfc, 0x31, 0xb5, 0x8c, 0xc9, 0xd4, 0x32, 0xce, 0xa7, 0x96,
-	0xf1, 0xf7, 0xd4, 0xaa, 0x5d, 0x4d, 0x2d, 0xe3, 0x97, 0x4b, 0xab, 0x36, 0xb9, 0xb4, 0x6a, 0x67,
-	0x97, 0x56, 0xed, 0xbb, 0xad, 0x21, 0xbf, 0x76, 0x07, 0xe3, 0x77, 0x7f, 0xba, 0x3e, 0x2f, 0xd7,
-	0xc7, 0x2d, 0xdd, 0xe0, 0xfb, 0xff, 0x04, 0x00, 0x00, 0xff, 0xff, 0x53, 0xd7, 0xa6, 0x9f, 0xec,
-	0x0a, 0x00, 0x00,
+	// 1232 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x57, 0xcf, 0x8f, 0xdb, 0x44,
+	0x14, 0x8e, 0x9d, 0xec, 0x36, 0x79, 0xd9, 0x4d, 0xcc, 0x74, 0x5b, 0x85, 0x1c, 0xcc, 0x36, 0x20,
+	0xb4, 0x2d, 0x5d, 0x47, 0x1b, 0xa4, 0x82, 0x52, 0x5a, 0x29, 0xcd, 0x7a, 0x5b, 0x43, 0x37, 0x89,
+	0x26, 0xe9, 0x56, 0x54, 0x48, 0xc6, 0xb5, 0xa7, 0xd1, 0x88, 0x24, 0xb6, 0x6c, 0x27, 0x25, 0x37,
+	0xce, 0x3d, 0xc1, 0x7f, 0x81, 0x38, 0x70, 0xe2, 0xcc, 0x05, 0x09, 0x38, 0xf6, 0xd8, 0x63, 0x9b,
+	0x5e, 0x10, 0xa7, 0x9e, 0xb8, 0x21, 0xa1, 0x19, 0xff, 0xc8, 0xaf, 0x15, 0x69, 0x1b, 0xc4, 0xa9,
+	0x37, 0xcf, 0x37, 0xef, 0xcd, 0xf3, 0xfb, 0xde, 0xf7, 0x9e, 0x3d, 0x70, 0xd9, 0x27, 0x7d, 0xc7,
+	0x76, 0x8d, 0x5e, 0xd9, 0x70, 0x68, 0xd9, 0xec, 0xd9, 0x43, 0xab, 0x4c, 0x2d, 0x32, 0xf0, 0xa9,
+	0x3f, 0x2e, 0x8f, 0x0e, 0xca, 0x7d, 0xe2, 0x79, 0x46, 0x97, 0x28, 0x8e, 0x6b, 0xfb, 0x36, 0x92,
+	0x23, 0x6b, 0xc5, 0x70, 0xa8, 0xc2, 0xad, 0x95, 0xc8, 0x5a, 0x19, 0x1d, 0x14, 0x4f, 0x3b, 0xcd,
+	0x25, 0x9e, 0x3d, 0x74, 0x4d, 0xb2, 0x74, 0x5a, 0xf1, 0x9d, 0xae, 0x6d, 0x77, 0x7b, 0xa4, 0xcc,
+	0x57, 0xf7, 0x87, 0x0f, 0xca, 0x3e, 0xed, 0x13, 0xcf, 0x37, 0xfa, 0x4e, 0x60, 0x50, 0xfa, 0x5b,
+	0x80, 0xed, 0x9a, 0x69, 0xda, 0xc3, 0x81, 0x5f, 0x33, 0x4d, 0xe2, 0x79, 0xe8, 0x03, 0xc8, 0xbb,
+	0x76, 0x8f, 0xe8, 0x16, 0x71, 0x5c, 0x62, 0x1a, 0x3e, 0xb1, 0x0a, 0xc2, 0xae, 0xb0, 0x97, 0xb9,
+	0x21, 0x16, 0x04, 0x9c, 0x63, 0x5b, 0x87, 0xf1, 0x0e, 0x3a, 0x82, 0x14, 0x43, 0x0a, 0xe2, 0xae,
+	0xb0, 0x97, 0xab, 0x54, 0x94, 0x7f, 0x7f, 0x79, 0x65, 0x2e, 0x92, 0x82, 0xed, 0x1e, 0xc1, 0xdc,
+	0xbf, 0xf4, 0x10, 0x52, 0x6c, 0x85, 0x76, 0x40, 0xc2, 0xcd, 0xdb, 0xaa, 0x7e, 0xa7, 0xd1, 0x6e,
+	0xa9, 0x75, 0xed, 0x48, 0x53, 0x0f, 0xa5, 0x04, 0xca, 0x01, 0x70, 0xb4, 0x79, 0xb7, 0xa1, 0x62,
+	0x49, 0x88, 0xd7, 0xb5, 0xc3, 0x63, 0xad, 0x21, 0x89, 0x08, 0x41, 0x8e, 0xaf, 0x0f, 0xd5, 0x13,
+	0xf5, 0x76, 0xb3, 0xa5, 0x62, 0x29, 0x89, 0xce, 0x03, 0xe2, 0xd8, 0x91, 0xd6, 0xa8, 0x35, 0xea,
+	0x91, 0x6d, 0x0a, 0x6d, 0x43, 0x86, 0xe3, 0x58, 0xad, 0x1d, 0x4a, 0x1b, 0xa5, 0xef, 0x44, 0xc8,
+	0x37, 0x8c, 0x3e, 0xf1, 0x1c, 0xc3, 0x24, 0x21, 0x03, 0x1f, 0xc1, 0x39, 0x87, 0xb8, 0x7d, 0xea,
+	0x79, 0xd4, 0x1e, 0x9c, 0xce, 0xc3, 0xce, 0xd4, 0x60, 0x86, 0x8d, 0x7b, 0x00, 0x53, 0x3c, 0xe4,
+	0xa4, 0xba, 0x8a, 0x93, 0x85, 0xe8, 0x4a, 0x2b, 0x3e, 0x01, 0xcf, 0x9c, 0x56, 0xa2, 0x00, 0xd3,
+	0x1d, 0x54, 0x84, 0xf3, 0x2d, 0x15, 0x1f, 0x6b, 0xed, 0xb6, 0xd6, 0x6c, 0x2c, 0xb0, 0xb5, 0x03,
+	0xd2, 0xcc, 0x5e, 0x90, 0xb7, 0xb0, 0x80, 0xde, 0xc5, 0x5a, 0x47, 0x95, 0x44, 0x74, 0x16, 0xf2,
+	0x33, 0x28, 0xe7, 0x24, 0x59, 0xfa, 0x45, 0x84, 0xcd, 0x90, 0x8a, 0x0e, 0xe4, 0x8c, 0xa0, 0x66,
+	0xba, 0xc1, 0x11, 0xce, 0x41, 0xb6, 0xb2, 0xff, 0x4a, 0x95, 0xc6, 0xdb, 0xc6, 0x9c, 0xc4, 0x7a,
+	0x80, 0x06, 0x51, 0xd6, 0xe1, 0xb9, 0xc4, 0x2b, 0x88, 0xbb, 0xc9, 0xbd, 0x6c, 0xe5, 0xda, 0x4b,
+	0x9c, 0xcc, 0x68, 0x5a, 0xa0, 0x8d, 0x78, 0xea, 0xc0, 0x77, 0xc7, 0xf8, 0xad, 0xc1, 0x22, 0x5e,
+	0x1c, 0xc2, 0xf9, 0xd3, 0x8d, 0x91, 0x04, 0xc9, 0xaf, 0xc8, 0x38, 0x28, 0x2b, 0x66, 0x8f, 0x48,
+	0x85, 0x8d, 0x91, 0xd1, 0x1b, 0x06, 0x82, 0xce, 0x56, 0xca, 0xaf, 0x58, 0x3c, 0x1c, 0x78, 0x57,
+	0xc5, 0x8f, 0x85, 0xd2, 0x97, 0x90, 0xbe, 0xe3, 0x11, 0xb7, 0xed, 0x10, 0x13, 0xed, 0xc0, 0x06,
+	0xe9, 0x1b, 0xb4, 0x17, 0x86, 0x0a, 0x16, 0xe8, 0x3a, 0x6c, 0x86, 0xa4, 0x06, 0xd1, 0xde, 0x7f,
+	0xb9, 0xd4, 0x71, 0xe8, 0x55, 0x7a, 0x24, 0x00, 0x68, 0x83, 0x11, 0xf5, 0x0d, 0x9f, 0x69, 0xe2,
+	0x1a, 0x6c, 0x99, 0x2e, 0x61, 0x42, 0xd4, 0x59, 0x97, 0x87, 0x95, 0x2a, 0x2a, 0xc1, 0x08, 0x50,
+	0xa2, 0x11, 0xa0, 0x74, 0xa2, 0x11, 0x80, 0xb3, 0xa1, 0x3d, 0x43, 0x98, 0x3b, 0xf9, 0xda, 0xa1,
+	0x6e, 0xe4, 0x2e, 0xae, 0x76, 0x0f, 0xed, 0x19, 0x52, 0xfa, 0x2b, 0x09, 0x29, 0x96, 0x2f, 0xca,
+	0x81, 0x48, 0xc3, 0x56, 0xc1, 0x22, 0xb5, 0xd0, 0x45, 0x90, 0xa2, 0xf9, 0xa4, 0x8f, 0x88, 0x1b,
+	0xb7, 0x46, 0x06, 0xe7, 0x23, 0xfc, 0x24, 0x80, 0xd1, 0x27, 0x90, 0xf2, 0x1c, 0x62, 0x16, 0x92,
+	0x3c, 0xf4, 0xde, 0x2a, 0x3a, 0x22, 0x7a, 0x31, 0xf7, 0x42, 0xfb, 0x20, 0x79, 0xbe, 0xe1, 0xcf,
+	0x4d, 0xae, 0x54, 0xdc, 0xb1, 0x79, 0xbe, 0x37, 0xd3, 0xac, 0x75, 0xd8, 0xe0, 0x50, 0x21, 0xc3,
+	0xfb, 0xf4, 0x54, 0x45, 0x47, 0x2f, 0xc8, 0xa2, 0xe1, 0xf0, 0xb9, 0xcd, 0x9c, 0x70, 0xe0, 0x8b,
+	0x2e, 0x03, 0x32, 0xbc, 0xf1, 0xc0, 0xd4, 0x6d, 0x87, 0xb8, 0xbc, 0x0c, 0x3a, 0xb5, 0x0a, 0x1b,
+	0x3c, 0x3d, 0x89, 0xef, 0x34, 0xa3, 0x0d, 0xcd, 0x42, 0x9f, 0x02, 0xd0, 0xb8, 0x5e, 0x85, 0x4d,
+	0x9e, 0xe5, 0xa5, 0x55, 0x59, 0x4e, 0x2b, 0x8c, 0x67, 0xbc, 0x97, 0xaa, 0x7d, 0xe6, 0xd5, 0xaa,
+	0x7d, 0x0b, 0x50, 0xcf, 0xf0, 0x7c, 0xbd, 0x6f, 0x5b, 0xf4, 0x01, 0x8d, 0x0e, 0x49, 0xaf, 0x3c,
+	0x44, 0x62, 0x5e, 0xc7, 0xa1, 0x13, 0x2f, 0xfc, 0x15, 0xc8, 0xdf, 0xe4, 0xe6, 0x37, 0x5d, 0x7b,
+	0xe8, 0x70, 0xb9, 0xbf, 0x0b, 0xdb, 0x5c, 0xe1, 0xba, 0x61, 0x59, 0x6e, 0x34, 0x34, 0x32, 0x78,
+	0x8b, 0x83, 0xb5, 0x00, 0x2b, 0xfd, 0x2a, 0xc0, 0x36, 0xab, 0xe0, 0xd4, 0xed, 0x02, 0x6c, 0x59,
+	0xd4, 0x73, 0x7a, 0xc6, 0x58, 0x67, 0x5d, 0x1c, 0x7a, 0x65, 0x43, 0x8c, 0xb5, 0xda, 0xba, 0x2d,
+	0x83, 0x30, 0x6c, 0x05, 0xb9, 0xe9, 0x5d, 0x16, 0x36, 0x54, 0xda, 0xca, 0x36, 0x5f, 0x48, 0x10,
+	0x67, 0xbb, 0x53, 0xa0, 0xf4, 0x53, 0x12, 0x32, 0x71, 0x22, 0xeb, 0xc8, 0xbf, 0x36, 0x27, 0xff,
+	0xfd, 0x97, 0x91, 0xff, 0xf4, 0x95, 0xd6, 0xeb, 0x81, 0xf4, 0xff, 0xd6, 0x03, 0x8b, 0xba, 0xdd,
+	0xfc, 0x2f, 0x74, 0x7b, 0xe6, 0x35, 0x74, 0xfb, 0x73, 0x12, 0x72, 0x6d, 0xe2, 0x8e, 0x28, 0x1f,
+	0xde, 0xec, 0xeb, 0xb4, 0x4e, 0xed, 0x8e, 0xe6, 0x6a, 0xb7, 0xf2, 0x47, 0x68, 0x3e, 0xf0, 0x9b,
+	0x02, 0xbe, 0x4e, 0x01, 0x1f, 0x09, 0x80, 0x96, 0x79, 0x44, 0x08, 0x52, 0x33, 0xd3, 0x83, 0x3f,
+	0xaf, 0x3d, 0x36, 0x76, 0x21, 0x6b, 0x11, 0xcf, 0x74, 0xa9, 0xc3, 0x27, 0x77, 0x32, 0x1c, 0x4c,
+	0x53, 0xa8, 0xf4, 0x63, 0x12, 0x36, 0x6b, 0x0e, 0xfd, 0x8c, 0x8c, 0xd7, 0x51, 0xd1, 0xf5, 0x39,
+	0x15, 0xad, 0xfc, 0x34, 0x04, 0x01, 0xdf, 0xa8, 0xe7, 0x75, 0xd4, 0xf3, 0x9b, 0x08, 0x30, 0xe5,
+	0x0f, 0xbd, 0x0d, 0x69, 0xfb, 0xe1, 0x80, 0xb8, 0x7a, 0x5c, 0xba, 0x33, 0x7c, 0xad, 0x59, 0xe8,
+	0x0a, 0x9c, 0x0b, 0xb6, 0xfc, 0xb1, 0x33, 0xc7, 0xac, 0x18, 0x33, 0x7b, 0x96, 0x1b, 0x74, 0xc6,
+	0xce, 0x2c, 0xbb, 0xb7, 0x00, 0xa6, 0x7e, 0xfc, 0x1d, 0x73, 0x95, 0x8b, 0xab, 0x4a, 0xda, 0x8c,
+	0x0e, 0xc2, 0x99, 0xf8, 0xcc, 0xa5, 0x0f, 0x63, 0x72, 0xf9, 0xc3, 0xb8, 0xa0, 0xd0, 0xd4, 0x92,
+	0x42, 0xd1, 0x55, 0x08, 0xfe, 0xd7, 0xc6, 0x01, 0x67, 0x1b, 0x2b, 0x39, 0x83, 0xc0, 0x9c, 0xf3,
+	0x5e, 0x84, 0xb4, 0x45, 0x3d, 0xe3, 0x7e, 0x8f, 0x58, 0xbc, 0x64, 0x69, 0x1c, 0xaf, 0x2f, 0x7d,
+	0x01, 0x99, 0xf8, 0xad, 0xd9, 0xc5, 0x84, 0xdf, 0xd2, 0xf4, 0xce, 0xe7, 0xad, 0xc5, 0x6b, 0xdc,
+	0x59, 0xc8, 0xcf, 0xee, 0xb5, 0xf9, 0x5d, 0x4e, 0x86, 0xe2, 0x0c, 0xd8, 0x56, 0xf1, 0x89, 0xc6,
+	0x6e, 0x6b, 0xf5, 0x7a, 0xf3, 0x4e, 0xa3, 0x23, 0x89, 0x37, 0x9e, 0x0a, 0x8f, 0x9f, 0xc9, 0x89,
+	0x27, 0xcf, 0xe4, 0xc4, 0x8b, 0x67, 0xb2, 0xf0, 0xcd, 0x44, 0x16, 0xbe, 0x9f, 0xc8, 0xc2, 0xef,
+	0x13, 0x59, 0x78, 0x3c, 0x91, 0x85, 0xa7, 0x13, 0x59, 0xf8, 0x63, 0x22, 0x27, 0x5e, 0x4c, 0x64,
+	0xe1, 0xdb, 0xe7, 0x72, 0xe2, 0xf1, 0x73, 0x39, 0xf1, 0xe4, 0xb9, 0x9c, 0x80, 0x0b, 0xd4, 0x5e,
+	0x41, 0xf5, 0x8d, 0xad, 0xe3, 0xe0, 0xaa, 0xdc, 0x62, 0xa9, 0xb7, 0x84, 0x7b, 0xfb, 0xdd, 0x19,
+	0x17, 0x6a, 0x9f, 0x7e, 0x5b, 0xbf, 0x1a, 0x3d, 0xff, 0x20, 0xee, 0x76, 0x42, 0x63, 0x6a, 0xb3,
+	0x4e, 0x54, 0xea, 0x3c, 0x82, 0x16, 0x45, 0x38, 0x39, 0xf8, 0x53, 0x7c, 0x6f, 0x6a, 0x52, 0xad,
+	0xd6, 0x1c, 0x5a, 0xad, 0x72, 0xa3, 0x6a, 0x35, 0xb2, 0xaa, 0x56, 0x4f, 0x0e, 0xee, 0x6f, 0x72,
+	0xf2, 0x3f, 0xfc, 0x27, 0x00, 0x00, 0xff, 0xff, 0x8b, 0x33, 0x67, 0xb2, 0x29, 0x10, 0x00, 0x00,
 }
 
+func (x OwnerType) String() string {
+	s, ok := OwnerType_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x AccountAccess_Role) String() string {
+	s, ok := AccountAccess_Role_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x NamespaceAccess_Permission) String() string {
+	s, ok := NamespaceAccess_Permission_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
 func (this *AccountAccess) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -997,6 +1278,9 @@ func (this *AccountAccess) Equal(that interface{}) bool {
 	if that1 == nil {
 		return this == nil
 	} else if this == nil {
+		return false
+	}
+	if this.RoleDeprecated != that1.RoleDeprecated {
 		return false
 	}
 	if this.Role != that1.Role {
@@ -1021,6 +1305,9 @@ func (this *NamespaceAccess) Equal(that interface{}) bool {
 	if that1 == nil {
 		return this == nil
 	} else if this == nil {
+		return false
+	}
+	if this.PermissionDeprecated != that1.PermissionDeprecated {
 		return false
 	}
 	if this.Permission != that1.Permission {
@@ -1142,6 +1429,9 @@ func (this *User) Equal(that interface{}) bool {
 	if !this.Spec.Equal(that1.Spec) {
 		return false
 	}
+	if this.StateDeprecated != that1.StateDeprecated {
+		return false
+	}
 	if this.State != that1.State {
 		return false
 	}
@@ -1155,6 +1445,30 @@ func (this *User) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.LastModifiedTime.Equal(that1.LastModifiedTime) {
+		return false
+	}
+	return true
+}
+func (this *GoogleGroupSpec) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GoogleGroupSpec)
+	if !ok {
+		that2, ok := that.(GoogleGroupSpec)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.EmailAddress != that1.EmailAddress {
 		return false
 	}
 	return true
@@ -1178,10 +1492,13 @@ func (this *UserGroupSpec) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.Name != that1.Name {
+	if this.DisplayName != that1.DisplayName {
 		return false
 	}
 	if !this.Access.Equal(that1.Access) {
+		return false
+	}
+	if !this.GoogleGroup.Equal(that1.GoogleGroup) {
 		return false
 	}
 	return true
@@ -1212,6 +1529,9 @@ func (this *UserGroup) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.StateDeprecated != that1.StateDeprecated {
 		return false
 	}
 	if this.State != that1.State {
@@ -1254,6 +1574,9 @@ func (this *ServiceAccount) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.StateDeprecated != that1.StateDeprecated {
 		return false
 	}
 	if this.State != that1.State {
@@ -1328,6 +1651,9 @@ func (this *ApiKey) Equal(that interface{}) bool {
 	if !this.Spec.Equal(that1.Spec) {
 		return false
 	}
+	if this.StateDeprecated != that1.StateDeprecated {
+		return false
+	}
 	if this.State != that1.State {
 		return false
 	}
@@ -1364,6 +1690,9 @@ func (this *ApiKeySpec) Equal(that interface{}) bool {
 	if this.OwnerId != that1.OwnerId {
 		return false
 	}
+	if this.OwnerTypeDeprecated != that1.OwnerTypeDeprecated {
+		return false
+	}
 	if this.OwnerType != that1.OwnerType {
 		return false
 	}
@@ -1385,8 +1714,9 @@ func (this *AccountAccess) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 5)
+	s := make([]string, 0, 6)
 	s = append(s, "&identity.AccountAccess{")
+	s = append(s, "RoleDeprecated: "+fmt.Sprintf("%#v", this.RoleDeprecated)+",\n")
 	s = append(s, "Role: "+fmt.Sprintf("%#v", this.Role)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -1395,8 +1725,9 @@ func (this *NamespaceAccess) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 5)
+	s := make([]string, 0, 6)
 	s = append(s, "&identity.NamespaceAccess{")
+	s = append(s, "PermissionDeprecated: "+fmt.Sprintf("%#v", this.PermissionDeprecated)+",\n")
 	s = append(s, "Permission: "+fmt.Sprintf("%#v", this.Permission)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -1458,13 +1789,14 @@ func (this *User) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 12)
+	s := make([]string, 0, 13)
 	s = append(s, "&identity.User{")
 	s = append(s, "Id: "+fmt.Sprintf("%#v", this.Id)+",\n")
 	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
 	if this.Spec != nil {
 		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
 	}
+	s = append(s, "StateDeprecated: "+fmt.Sprintf("%#v", this.StateDeprecated)+",\n")
 	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
 	if this.Invitation != nil {
@@ -1479,15 +1811,28 @@ func (this *User) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *GoogleGroupSpec) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&identity.GoogleGroupSpec{")
+	s = append(s, "EmailAddress: "+fmt.Sprintf("%#v", this.EmailAddress)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
 func (this *UserGroupSpec) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 6)
+	s := make([]string, 0, 7)
 	s = append(s, "&identity.UserGroupSpec{")
-	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "DisplayName: "+fmt.Sprintf("%#v", this.DisplayName)+",\n")
 	if this.Access != nil {
 		s = append(s, "Access: "+fmt.Sprintf("%#v", this.Access)+",\n")
+	}
+	if this.GoogleGroup != nil {
+		s = append(s, "GoogleGroup: "+fmt.Sprintf("%#v", this.GoogleGroup)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -1496,13 +1841,14 @@ func (this *UserGroup) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 11)
+	s := make([]string, 0, 12)
 	s = append(s, "&identity.UserGroup{")
 	s = append(s, "Id: "+fmt.Sprintf("%#v", this.Id)+",\n")
 	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
 	if this.Spec != nil {
 		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
 	}
+	s = append(s, "StateDeprecated: "+fmt.Sprintf("%#v", this.StateDeprecated)+",\n")
 	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
 	if this.CreatedTime != nil {
@@ -1518,13 +1864,14 @@ func (this *ServiceAccount) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 11)
+	s := make([]string, 0, 12)
 	s = append(s, "&identity.ServiceAccount{")
 	s = append(s, "Id: "+fmt.Sprintf("%#v", this.Id)+",\n")
 	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
 	if this.Spec != nil {
 		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
 	}
+	s = append(s, "StateDeprecated: "+fmt.Sprintf("%#v", this.StateDeprecated)+",\n")
 	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
 	if this.CreatedTime != nil {
@@ -1554,13 +1901,14 @@ func (this *ApiKey) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 11)
+	s := make([]string, 0, 12)
 	s = append(s, "&identity.ApiKey{")
 	s = append(s, "Id: "+fmt.Sprintf("%#v", this.Id)+",\n")
 	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
 	if this.Spec != nil {
 		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
 	}
+	s = append(s, "StateDeprecated: "+fmt.Sprintf("%#v", this.StateDeprecated)+",\n")
 	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
 	if this.CreatedTime != nil {
@@ -1576,9 +1924,10 @@ func (this *ApiKeySpec) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 10)
+	s := make([]string, 0, 11)
 	s = append(s, "&identity.ApiKeySpec{")
 	s = append(s, "OwnerId: "+fmt.Sprintf("%#v", this.OwnerId)+",\n")
+	s = append(s, "OwnerTypeDeprecated: "+fmt.Sprintf("%#v", this.OwnerTypeDeprecated)+",\n")
 	s = append(s, "OwnerType: "+fmt.Sprintf("%#v", this.OwnerType)+",\n")
 	s = append(s, "DisplayName: "+fmt.Sprintf("%#v", this.DisplayName)+",\n")
 	s = append(s, "Description: "+fmt.Sprintf("%#v", this.Description)+",\n")
@@ -1617,10 +1966,15 @@ func (m *AccountAccess) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Role) > 0 {
-		i -= len(m.Role)
-		copy(dAtA[i:], m.Role)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.Role)))
+	if m.Role != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.Role))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.RoleDeprecated) > 0 {
+		i -= len(m.RoleDeprecated)
+		copy(dAtA[i:], m.RoleDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.RoleDeprecated)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1647,10 +2001,15 @@ func (m *NamespaceAccess) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Permission) > 0 {
-		i -= len(m.Permission)
-		copy(dAtA[i:], m.Permission)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.Permission)))
+	if m.Permission != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.Permission))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.PermissionDeprecated) > 0 {
+		i -= len(m.PermissionDeprecated)
+		copy(dAtA[i:], m.PermissionDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.PermissionDeprecated)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1827,6 +2186,11 @@ func (m *User) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x48
+	}
 	if m.LastModifiedTime != nil {
 		{
 			size, err := m.LastModifiedTime.MarshalToSizedBuffer(dAtA[:i])
@@ -1870,10 +2234,10 @@ func (m *User) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x2a
 	}
-	if len(m.State) > 0 {
-		i -= len(m.State)
-		copy(dAtA[i:], m.State)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.State)))
+	if len(m.StateDeprecated) > 0 {
+		i -= len(m.StateDeprecated)
+		copy(dAtA[i:], m.StateDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.StateDeprecated)))
 		i--
 		dAtA[i] = 0x22
 	}
@@ -1906,6 +2270,36 @@ func (m *User) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *GoogleGroupSpec) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GoogleGroupSpec) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GoogleGroupSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.EmailAddress) > 0 {
+		i -= len(m.EmailAddress)
+		copy(dAtA[i:], m.EmailAddress)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.EmailAddress)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *UserGroupSpec) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1926,6 +2320,18 @@ func (m *UserGroupSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.GoogleGroup != nil {
+		{
+			size, err := m.GoogleGroup.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
 	if m.Access != nil {
 		{
 			size, err := m.Access.MarshalToSizedBuffer(dAtA[:i])
@@ -1938,10 +2344,10 @@ func (m *UserGroupSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Name) > 0 {
-		i -= len(m.Name)
-		copy(dAtA[i:], m.Name)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.Name)))
+	if len(m.DisplayName) > 0 {
+		i -= len(m.DisplayName)
+		copy(dAtA[i:], m.DisplayName)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.DisplayName)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1968,6 +2374,11 @@ func (m *UserGroup) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x40
+	}
 	if m.LastModifiedTime != nil {
 		{
 			size, err := m.LastModifiedTime.MarshalToSizedBuffer(dAtA[:i])
@@ -1999,10 +2410,10 @@ func (m *UserGroup) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x2a
 	}
-	if len(m.State) > 0 {
-		i -= len(m.State)
-		copy(dAtA[i:], m.State)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.State)))
+	if len(m.StateDeprecated) > 0 {
+		i -= len(m.StateDeprecated)
+		copy(dAtA[i:], m.StateDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.StateDeprecated)))
 		i--
 		dAtA[i] = 0x22
 	}
@@ -2055,6 +2466,11 @@ func (m *ServiceAccount) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x40
+	}
 	if m.LastModifiedTime != nil {
 		{
 			size, err := m.LastModifiedTime.MarshalToSizedBuffer(dAtA[:i])
@@ -2086,10 +2502,10 @@ func (m *ServiceAccount) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x2a
 	}
-	if len(m.State) > 0 {
-		i -= len(m.State)
-		copy(dAtA[i:], m.State)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.State)))
+	if len(m.StateDeprecated) > 0 {
+		i -= len(m.StateDeprecated)
+		copy(dAtA[i:], m.StateDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.StateDeprecated)))
 		i--
 		dAtA[i] = 0x22
 	}
@@ -2191,6 +2607,11 @@ func (m *ApiKey) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x40
+	}
 	if m.LastModifiedTime != nil {
 		{
 			size, err := m.LastModifiedTime.MarshalToSizedBuffer(dAtA[:i])
@@ -2222,10 +2643,10 @@ func (m *ApiKey) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x2a
 	}
-	if len(m.State) > 0 {
-		i -= len(m.State)
-		copy(dAtA[i:], m.State)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.State)))
+	if len(m.StateDeprecated) > 0 {
+		i -= len(m.StateDeprecated)
+		copy(dAtA[i:], m.StateDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.StateDeprecated)))
 		i--
 		dAtA[i] = 0x22
 	}
@@ -2278,6 +2699,11 @@ func (m *ApiKeySpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.OwnerType != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.OwnerType))
+		i--
+		dAtA[i] = 0x38
+	}
 	if m.Disabled {
 		i--
 		if m.Disabled {
@@ -2314,10 +2740,10 @@ func (m *ApiKeySpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x1a
 	}
-	if len(m.OwnerType) > 0 {
-		i -= len(m.OwnerType)
-		copy(dAtA[i:], m.OwnerType)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.OwnerType)))
+	if len(m.OwnerTypeDeprecated) > 0 {
+		i -= len(m.OwnerTypeDeprecated)
+		copy(dAtA[i:], m.OwnerTypeDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.OwnerTypeDeprecated)))
 		i--
 		dAtA[i] = 0x12
 	}
@@ -2348,9 +2774,12 @@ func (m *AccountAccess) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Role)
+	l = len(m.RoleDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Role != 0 {
+		n += 1 + sovMessage(uint64(m.Role))
 	}
 	return n
 }
@@ -2361,9 +2790,12 @@ func (m *NamespaceAccess) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Permission)
+	l = len(m.PermissionDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Permission != 0 {
+		n += 1 + sovMessage(uint64(m.Permission))
 	}
 	return n
 }
@@ -2446,7 +2878,7 @@ func (m *User) Size() (n int) {
 		l = m.Spec.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
-	l = len(m.State)
+	l = len(m.StateDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
@@ -2466,6 +2898,22 @@ func (m *User) Size() (n int) {
 		l = m.LastModifiedTime.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
+	return n
+}
+
+func (m *GoogleGroupSpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.EmailAddress)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
 	return n
 }
 
@@ -2475,12 +2923,16 @@ func (m *UserGroupSpec) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Name)
+	l = len(m.DisplayName)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
 	if m.Access != nil {
 		l = m.Access.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.GoogleGroup != nil {
+		l = m.GoogleGroup.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
 	return n
@@ -2504,7 +2956,7 @@ func (m *UserGroup) Size() (n int) {
 		l = m.Spec.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
-	l = len(m.State)
+	l = len(m.StateDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
@@ -2519,6 +2971,9 @@ func (m *UserGroup) Size() (n int) {
 	if m.LastModifiedTime != nil {
 		l = m.LastModifiedTime.Size()
 		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
 	}
 	return n
 }
@@ -2541,7 +2996,7 @@ func (m *ServiceAccount) Size() (n int) {
 		l = m.Spec.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
-	l = len(m.State)
+	l = len(m.StateDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
@@ -2556,6 +3011,9 @@ func (m *ServiceAccount) Size() (n int) {
 	if m.LastModifiedTime != nil {
 		l = m.LastModifiedTime.Size()
 		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
 	}
 	return n
 }
@@ -2599,7 +3057,7 @@ func (m *ApiKey) Size() (n int) {
 		l = m.Spec.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
-	l = len(m.State)
+	l = len(m.StateDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
@@ -2615,6 +3073,9 @@ func (m *ApiKey) Size() (n int) {
 		l = m.LastModifiedTime.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
 	return n
 }
 
@@ -2628,7 +3089,7 @@ func (m *ApiKeySpec) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
-	l = len(m.OwnerType)
+	l = len(m.OwnerTypeDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
@@ -2647,6 +3108,9 @@ func (m *ApiKeySpec) Size() (n int) {
 	if m.Disabled {
 		n += 2
 	}
+	if m.OwnerType != 0 {
+		n += 1 + sovMessage(uint64(m.OwnerType))
+	}
 	return n
 }
 
@@ -2661,6 +3125,7 @@ func (this *AccountAccess) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&AccountAccess{`,
+		`RoleDeprecated:` + fmt.Sprintf("%v", this.RoleDeprecated) + `,`,
 		`Role:` + fmt.Sprintf("%v", this.Role) + `,`,
 		`}`,
 	}, "")
@@ -2671,6 +3136,7 @@ func (this *NamespaceAccess) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&NamespaceAccess{`,
+		`PermissionDeprecated:` + fmt.Sprintf("%v", this.PermissionDeprecated) + `,`,
 		`Permission:` + fmt.Sprintf("%v", this.Permission) + `,`,
 		`}`,
 	}, "")
@@ -2727,11 +3193,22 @@ func (this *User) String() string {
 		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
 		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
 		`Spec:` + strings.Replace(this.Spec.String(), "UserSpec", "UserSpec", 1) + `,`,
-		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`StateDeprecated:` + fmt.Sprintf("%v", this.StateDeprecated) + `,`,
 		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
 		`Invitation:` + strings.Replace(this.Invitation.String(), "Invitation", "Invitation", 1) + `,`,
 		`CreatedTime:` + strings.Replace(fmt.Sprintf("%v", this.CreatedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`LastModifiedTime:` + strings.Replace(fmt.Sprintf("%v", this.LastModifiedTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GoogleGroupSpec) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GoogleGroupSpec{`,
+		`EmailAddress:` + fmt.Sprintf("%v", this.EmailAddress) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2741,8 +3218,9 @@ func (this *UserGroupSpec) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&UserGroupSpec{`,
-		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`DisplayName:` + fmt.Sprintf("%v", this.DisplayName) + `,`,
 		`Access:` + strings.Replace(this.Access.String(), "Access", "Access", 1) + `,`,
+		`GoogleGroup:` + strings.Replace(this.GoogleGroup.String(), "GoogleGroupSpec", "GoogleGroupSpec", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2755,10 +3233,11 @@ func (this *UserGroup) String() string {
 		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
 		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
 		`Spec:` + strings.Replace(this.Spec.String(), "UserGroupSpec", "UserGroupSpec", 1) + `,`,
-		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`StateDeprecated:` + fmt.Sprintf("%v", this.StateDeprecated) + `,`,
 		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
 		`CreatedTime:` + strings.Replace(fmt.Sprintf("%v", this.CreatedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`LastModifiedTime:` + strings.Replace(fmt.Sprintf("%v", this.LastModifiedTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2771,10 +3250,11 @@ func (this *ServiceAccount) String() string {
 		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
 		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
 		`Spec:` + strings.Replace(this.Spec.String(), "ServiceAccountSpec", "ServiceAccountSpec", 1) + `,`,
-		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`StateDeprecated:` + fmt.Sprintf("%v", this.StateDeprecated) + `,`,
 		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
 		`CreatedTime:` + strings.Replace(fmt.Sprintf("%v", this.CreatedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`LastModifiedTime:` + strings.Replace(fmt.Sprintf("%v", this.LastModifiedTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2799,10 +3279,11 @@ func (this *ApiKey) String() string {
 		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
 		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
 		`Spec:` + strings.Replace(this.Spec.String(), "ApiKeySpec", "ApiKeySpec", 1) + `,`,
-		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`StateDeprecated:` + fmt.Sprintf("%v", this.StateDeprecated) + `,`,
 		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
 		`CreatedTime:` + strings.Replace(fmt.Sprintf("%v", this.CreatedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`LastModifiedTime:` + strings.Replace(fmt.Sprintf("%v", this.LastModifiedTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2813,11 +3294,12 @@ func (this *ApiKeySpec) String() string {
 	}
 	s := strings.Join([]string{`&ApiKeySpec{`,
 		`OwnerId:` + fmt.Sprintf("%v", this.OwnerId) + `,`,
-		`OwnerType:` + fmt.Sprintf("%v", this.OwnerType) + `,`,
+		`OwnerTypeDeprecated:` + fmt.Sprintf("%v", this.OwnerTypeDeprecated) + `,`,
 		`DisplayName:` + fmt.Sprintf("%v", this.DisplayName) + `,`,
 		`Description:` + fmt.Sprintf("%v", this.Description) + `,`,
 		`ExpiryTime:` + strings.Replace(fmt.Sprintf("%v", this.ExpiryTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`Disabled:` + fmt.Sprintf("%v", this.Disabled) + `,`,
+		`OwnerType:` + fmt.Sprintf("%v", this.OwnerType) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2861,7 +3343,7 @@ func (m *AccountAccess) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Role", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field RoleDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2889,8 +3371,27 @@ func (m *AccountAccess) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Role = string(dAtA[iNdEx:postIndex])
+			m.RoleDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Role", wireType)
+			}
+			m.Role = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Role |= AccountAccess_Role(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -2946,7 +3447,7 @@ func (m *NamespaceAccess) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Permission", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PermissionDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2974,8 +3475,27 @@ func (m *NamespaceAccess) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Permission = string(dAtA[iNdEx:postIndex])
+			m.PermissionDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Permission", wireType)
+			}
+			m.Permission = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Permission |= NamespaceAccess_Permission(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -3595,7 +4115,7 @@ func (m *User) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StateDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -3623,7 +4143,7 @@ func (m *User) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.State = string(dAtA[iNdEx:postIndex])
+			m.StateDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
@@ -3765,6 +4285,110 @@ func (m *User) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 9:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= v1.ResourceState(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GoogleGroupSpec) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GoogleGroupSpec: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GoogleGroupSpec: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EmailAddress", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EmailAddress = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -3820,7 +4444,7 @@ func (m *UserGroupSpec) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field DisplayName", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -3848,7 +4472,7 @@ func (m *UserGroupSpec) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Name = string(dAtA[iNdEx:postIndex])
+			m.DisplayName = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -3883,6 +4507,42 @@ func (m *UserGroupSpec) Unmarshal(dAtA []byte) error {
 				m.Access = &Access{}
 			}
 			if err := m.Access.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field GoogleGroup", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.GoogleGroup == nil {
+				m.GoogleGroup = &GoogleGroupSpec{}
+			}
+			if err := m.GoogleGroup.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -4041,7 +4701,7 @@ func (m *UserGroup) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StateDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -4069,7 +4729,7 @@ func (m *UserGroup) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.State = string(dAtA[iNdEx:postIndex])
+			m.StateDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
@@ -4175,6 +4835,25 @@ func (m *UserGroup) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 8:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= v1.ResourceState(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -4330,7 +5009,7 @@ func (m *ServiceAccount) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StateDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -4358,7 +5037,7 @@ func (m *ServiceAccount) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.State = string(dAtA[iNdEx:postIndex])
+			m.StateDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
@@ -4464,6 +5143,25 @@ func (m *ServiceAccount) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 8:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= v1.ResourceState(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -4772,7 +5470,7 @@ func (m *ApiKey) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StateDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -4800,7 +5498,7 @@ func (m *ApiKey) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.State = string(dAtA[iNdEx:postIndex])
+			m.StateDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
@@ -4906,6 +5604,25 @@ func (m *ApiKey) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 8:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= v1.ResourceState(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -4993,7 +5710,7 @@ func (m *ApiKeySpec) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field OwnerType", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field OwnerTypeDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -5021,7 +5738,7 @@ func (m *ApiKeySpec) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.OwnerType = string(dAtA[iNdEx:postIndex])
+			m.OwnerTypeDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
@@ -5143,6 +5860,25 @@ func (m *ApiKeySpec) Unmarshal(dAtA []byte) error {
 				}
 			}
 			m.Disabled = bool(v != 0)
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OwnerType", wireType)
+			}
+			m.OwnerType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.OwnerType |= OwnerType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
