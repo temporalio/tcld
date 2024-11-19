@@ -74,7 +74,7 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("temporal/temporal/api/cloud/resource/v1/message.proto", fileDescriptor_1f9ad71e764361c3)
+	proto.RegisterFile("temporal/api/cloud/resource/v1/message.proto", fileDescriptor_1f9ad71e764361c3)
 }
 
 var fileDescriptor_1f9ad71e764361c3 = []byte{

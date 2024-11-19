@@ -2009,5 +2009,5 @@ var _CloudService_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/cloud/cloudservice/v1/service.proto",
+	Metadata: "temporal/api/cloud/cloudservice/v1/service.proto",
 }

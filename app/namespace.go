@@ -1397,8 +1397,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			},
 			Action: func(ctx *cli.Context) error {
 				getExportSinkRes, err := c.cloudAPIClient.GetNamespaceExportSink(c.ctx, &cloudservice.GetNamespaceExportSinkRequest{
-					Namespace: ctx.String("namespace"),
-					Name:      ctx.String("sink-name"),
+					Namespace: ctx.String(NamespaceFlag.Name),
+					Name:      ctx.String(sinkNameFlag.Name),
 				})
 				if err != nil {
 					return fmt.Errorf("unable to get export sink: %v", err)
@@ -1458,7 +1458,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				request := &cloudservice.GetNamespaceExportSinksRequest{
 					Namespace: ctx.String(NamespaceFlag.Name),
 					PageSize:  int32(ctx.Int(pageSizeFlag.Name)),
-					PageToken: ctx.String("page-token"),
+					PageToken: ctx.String(pageTokenFlag.Name),
 				}
 				resp, err := c.cloudAPIClient.GetNamespaceExportSinks(c.ctx, request)
 				if err != nil {
