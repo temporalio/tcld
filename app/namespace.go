@@ -14,7 +14,6 @@ import (
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
-	"github.com/temporalio/tcld/protogen/api/sink/v1"
 	"github.com/temporalio/tcld/utils"
 
 	"github.com/kylelemons/godebug/diff"
@@ -22,6 +21,8 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
+	cloudNamespace "github.com/temporalio/tcld/protogen/api/cloud/namespace/v1"
+	cloudSink "github.com/temporalio/tcld/protogen/api/cloud/sink/v1"
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 )
@@ -181,69 +182,7 @@ func GetNamespaceClient(ctx *cli.Context) (*NamespaceClient, error) {
 	return NewNamespaceClient(ct, conn), nil
 }
 
-func (c *NamespaceClient) getExportSink(ctx *cli.Context, namespaceName, sinkName string) (*sink.ExportSink, error) {
-	getRequest := &namespaceservice.GetExportSinkRequest{
-		Namespace: namespaceName,
-		SinkName:  sinkName,
-	}
-
-	getResp, err := c.client.GetExportSink(c.ctx, getRequest)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get export sink: %w", err)
-	}
-	return getResp.Sink, nil
-}
-
-func (c *NamespaceClient) selectExportSinkResourceVersion(ctx *cli.Context, sink *sink.ExportSink) string {
-	if ctx.String(ResourceVersionFlagName) != "" {
-		return ctx.String(ResourceVersionFlagName)
-	}
-	return sink.ResourceVersion
-}
-
-func (c *NamespaceClient) isS3BucketChange(ctx *cli.Context, sink *sink.ExportSink) bool {
-	if !ctx.IsSet(s3BucketFlagOptional.Name) {
-		return false
-	}
-
-	return sink.GetSpec().GetS3Sink().GetBucketName() != ctx.String(s3BucketFlagOptional.Name)
-}
-
-func (c *NamespaceClient) isAssumedRoleChange(ctx *cli.Context, sink *sink.ExportSink) bool {
-	if !ctx.IsSet(sinkAssumedRoleFlagOptional.Name) {
-		return false
-	}
-
-	roleArn := getAssumedRoleArn(sink.GetSpec().GetS3Sink().GetAwsAccountId(), sink.GetSpec().GetS3Sink().GetRoleName())
-	return roleArn != ctx.String(sinkAssumedRoleFlagOptional.Name)
-}
-
-func (c *NamespaceClient) isKmsArnChange(ctx *cli.Context, sink *sink.ExportSink) bool {
-	if !ctx.IsSet(kmsArnFlag.Name) {
-		return false
-	}
-
-	return sink.GetSpec().GetS3Sink().GetKmsArn() != ctx.String(kmsArnFlag.Name)
-}
-
-func (c *NamespaceClient) isGCSBucketChange(ctx *cli.Context, sink *sink.ExportSink) bool {
-	if !ctx.IsSet(gcsBucketFlagOptional.Name) {
-		return false
-	}
-
-	return sink.GetSpec().GetGcsSink().GetBucketName() != ctx.String(gcsBucketFlagOptional.Name)
-}
-
-func (c *NamespaceClient) isSAPrincipalChange(ctx *cli.Context, sink *sink.ExportSink) bool {
-	if !ctx.IsSet(saPrincipalFlagOptional.Name) {
-		return false
-	}
-
-	saPrincipal := getSAPrincipal(sink.GetSpec().GetGcsSink().GetSaId(), sink.GetSpec().GetGcsSink().GetGcpProjectId())
-	return saPrincipal != ctx.String(saPrincipalFlagOptional.Name)
-}
-
-func (c *NamespaceClient) isSinkToggleChange(ctx *cli.Context, sink *sink.ExportSink) (bool, error) {
+func (c *NamespaceClient) isSinkToggleChange(ctx *cli.Context, sink *cloudNamespace.ExportSink) (bool, error) {
 	if !ctx.IsSet(sinkEnabledFlag.Name) {
 		return false, nil
 	}
@@ -257,17 +196,6 @@ func (c *NamespaceClient) isSinkToggleChange(ctx *cli.Context, sink *sink.Export
 		return false, nil
 	}
 	return true, nil
-}
-
-func (c *NamespaceClient) getExportSinkResourceVersion(ctx *cli.Context, namespaceName, sinkName string) (string, error) {
-	sink, err := c.getExportSink(ctx, namespaceName, sinkName)
-	if err != nil {
-		return "", err
-	}
-
-	resourceVersion := c.selectExportSinkResourceVersion(ctx, sink)
-
-	return resourceVersion, nil
 }
 
 func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespace) error {
@@ -1458,7 +1386,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		Usage:   "Manage export",
 		Aliases: []string{"es"},
 	}
-
 	exportGeneralCommands := []*cli.Command{
 		{
 			Name:    "get",
@@ -1469,13 +1396,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				sinkNameFlag,
 			},
 			Action: func(ctx *cli.Context) error {
-				sink, err := c.getExportSink(ctx, ctx.String(NamespaceFlagName), ctx.String(sinkNameFlag.Name))
-
+				getExportSinkRes, err := c.cloudAPIClient.GetNamespaceExportSink(c.ctx, &cloudservice.GetNamespaceExportSinkRequest{
+					Namespace: ctx.String(NamespaceFlag.Name),
+					Name:      ctx.String(sinkNameFlag.Name),
+				})
 				if err != nil {
-					return err
+					return fmt.Errorf("unable to get export sink: %v", err)
 				}
-
-				return PrintProto(sink)
+				return PrintProto(getExportSinkRes)
 			},
 		},
 		{
@@ -1489,26 +1417,32 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				RequestIDFlag,
 			},
 			Action: func(ctx *cli.Context) error {
-				namespaceName := ctx.String(NamespaceFlagName)
+				namespaceName := ctx.String(NamespaceFlag.Name)
 				sinkName := ctx.String(sinkNameFlag.Name)
-				resourceVersion, err := c.getExportSinkResourceVersion(ctx, namespaceName, sinkName)
-				if err != nil {
-					return err
+				resourceVersion := ctx.String(ResourceVersionFlag.Name)
+
+				if resourceVersion == "" {
+					getExportSinkRes, err := c.cloudAPIClient.GetNamespaceExportSink(c.ctx, &cloudservice.GetNamespaceExportSinkRequest{
+						Namespace: namespaceName,
+						Name:      sinkName,
+					})
+					if err != nil {
+						return fmt.Errorf("unable to get export sink: %v", err)
+					}
+					resourceVersion = getExportSinkRes.GetSink().GetResourceVersion()
 				}
 
-				deleteRequest := &namespaceservice.DeleteExportSinkRequest{
+				deleteRequest := &cloudservice.DeleteNamespaceExportSinkRequest{
 					Namespace:       namespaceName,
-					SinkName:        sinkName,
+					Name:            sinkName,
 					ResourceVersion: resourceVersion,
-					RequestId:       ctx.String(RequestIDFlagName),
 				}
 
-				deleteResp, err := c.client.DeleteExportSink(c.ctx, deleteRequest)
+				deleteResp, err := c.cloudAPIClient.DeleteNamespaceExportSink(c.ctx, deleteRequest)
 				if err != nil {
 					return err
 				}
-
-				return PrintProto(deleteResp.RequestStatus)
+				return PrintProto(deleteResp.GetAsyncOperation())
 			},
 		},
 		{
@@ -1521,17 +1455,15 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				pageTokenFlag,
 			},
 			Action: func(ctx *cli.Context) error {
-				request := &namespaceservice.ListExportSinksRequest{
-					Namespace: ctx.String(NamespaceFlagName),
-					PageSize:  int32(pageSizeFlag.Value),
+				request := &cloudservice.GetNamespaceExportSinksRequest{
+					Namespace: ctx.String(NamespaceFlag.Name),
+					PageSize:  int32(ctx.Int(pageSizeFlag.Name)),
 					PageToken: ctx.String(pageTokenFlag.Name),
 				}
-
-				resp, err := c.client.ListExportSinks(c.ctx, request)
+				resp, err := c.cloudAPIClient.GetNamespaceExportSinks(c.ctx, request)
 				if err != nil {
 					return err
 				}
-
 				return PrintProto(resp)
 			},
 		},
@@ -1550,7 +1482,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					sinkNameFlag,
 					sinkAssumedRoleFlagRequired,
 					s3BucketFlagRequired,
-					RequestIDFlag,
 					kmsArnFlag,
 					sinkRegionFlag,
 				},
@@ -1559,7 +1490,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					if err != nil {
 						return err
 					}
-
 					namespace := ctx.String(NamespaceFlagName)
 					region := ctx.String(sinkRegionFlagName)
 
@@ -1571,29 +1501,27 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						region = ns.Spec.Region
 					}
 
-					request := &namespaceservice.CreateExportSinkRequest{
-						Namespace: namespace,
-						Spec: &sink.ExportSinkSpec{
-							Name:            ctx.String(sinkNameFlag.Name),
-							Enabled:         true,
-							DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
-							S3Sink: &sink.S3Spec{
-								RoleName:     roleName,
+					createRequest := &cloudservice.CreateNamespaceExportSinkRequest{
+						Namespace: ctx.String(NamespaceFlag.Name),
+						Spec: &cloudNamespace.ExportSinkSpec{
+							Name:    ctx.String(sinkNameFlag.Name),
+							Enabled: true,
+							S3: &cloudSink.S3Spec{
 								BucketName:   ctx.String(s3BucketFlagRequired.Name),
-								Region:       region,
-								KmsArn:       ctx.String(kmsArnFlag.Name),
+								RoleName:     roleName,
 								AwsAccountId: awsAccountID,
+								KmsArn:       ctx.String(kmsArnFlag.Name),
+								Region:       region,
 							},
 						},
-						RequestId: ctx.String(RequestIDFlagName),
 					}
 
-					res, err := c.client.CreateExportSink(c.ctx, request)
+					createResp, err := c.cloudAPIClient.CreateNamespaceExportSink(c.ctx, createRequest)
 					if err != nil {
 						return err
 					}
 
-					return PrintProto(res.RequestStatus)
+					return PrintProto(createResp.GetAsyncOperation())
 				},
 			},
 			{
@@ -1623,29 +1551,28 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						return fmt.Errorf("validation failed: %v", err)
 					}
 
-					validateRequest := &namespaceservice.ValidateExportSinkRequest{
-						Namespace: ctx.String(NamespaceFlagName),
-						Spec: &sink.ExportSinkSpec{
-							Name:            ctx.String(sinkNameFlag.Name),
-							DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
-							S3Sink: &sink.S3Spec{
-								RoleName:     roleName,
+					validateRequest := &cloudservice.ValidateNamespaceExportSinkRequest{
+						Namespace: ctx.String(NamespaceFlag.Name),
+						Spec: &cloudNamespace.ExportSinkSpec{
+							Name: ctx.String(sinkNameFlag.Name),
+							S3: &cloudSink.S3Spec{
 								BucketName:   ctx.String(s3BucketFlagRequired.Name),
+								RoleName:     roleName,
 								Region:       region,
-								KmsArn:       ctx.String(kmsArnFlag.Name),
 								AwsAccountId: awsAccountID,
+								KmsArn:       ctx.String(kmsArnFlag.Name),
 							},
 						},
 					}
 
-					_, err = c.client.ValidateExportSink(c.ctx, validateRequest)
-
+					_, err = c.cloudAPIClient.ValidateNamespaceExportSink(c.ctx, validateRequest)
 					if err != nil {
 						return fmt.Errorf("validation failed with error %v", err)
 					}
 
 					fmt.Println("Temporal Cloud was able to write test data to the sink")
 					return nil
+
 				},
 			},
 			{
@@ -1660,60 +1587,68 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					s3BucketFlagOptional,
 					ResourceVersionFlag,
 					kmsArnFlag,
-					RequestIDFlag,
 				},
 				Action: func(ctx *cli.Context) error {
-					namespaceName := ctx.String(NamespaceFlagName)
+					namespaceName := ctx.String(NamespaceFlag.Name)
 					sinkName := ctx.String(sinkNameFlag.Name)
-					sink, err := c.getExportSink(ctx, namespaceName, sinkName)
+					getExportSinkRes, err := c.cloudAPIClient.GetNamespaceExportSink(c.ctx, &cloudservice.GetNamespaceExportSinkRequest{
+						Namespace: namespaceName,
+						Name:      sinkName,
+					})
+
+					if err != nil {
+						return fmt.Errorf("unable to get export sink: %v", err)
+					}
+
+					resourceVersion := ctx.String(ResourceVersionFlag.Name)
+					if resourceVersion == "" {
+						resourceVersion = getExportSinkRes.GetSink().GetResourceVersion()
+					}
+
+					spec := getExportSinkRes.GetSink().GetSpec()
+					isToggleChanged, err := c.isSinkToggleChange(ctx, getExportSinkRes.GetSink())
 					if err != nil {
 						return err
 					}
-					resourceVersion := c.selectExportSinkResourceVersion(ctx, sink)
 
-					isToggleChanged, err := c.isSinkToggleChange(ctx, sink)
-					if err != nil {
-						return err
-					}
-
-					if !isToggleChanged && !c.isAssumedRoleChange(ctx, sink) && !c.isKmsArnChange(ctx, sink) && !c.isS3BucketChange(ctx, sink) {
+					if !isToggleChanged && !ctx.IsSet(saPrincipalFlagOptional.Name) && !ctx.IsSet(gcsBucketFlagOptional.Name) {
 						fmt.Println("nothing to update")
 						return nil
 					}
 
 					if isToggleChanged {
-						sink.Spec.Enabled = !sink.Spec.Enabled
+						spec.Enabled = !spec.Enabled
 					}
 
-					if c.isAssumedRoleChange(ctx, sink) {
-						awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagOptional.Name))
+					if ctx.IsSet(sinkAssumedRoleFlagOptional.Name) {
+						awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagRequired.Name))
 						if err != nil {
 							return err
 						}
-						sink.Spec.S3Sink.RoleName = roleName
-						sink.Spec.S3Sink.AwsAccountId = awsAccountID
+
+						spec.S3.RoleName = roleName
+						spec.S3.AwsAccountId = awsAccountID
 					}
 
-					if c.isKmsArnChange(ctx, sink) {
-						sink.Spec.S3Sink.KmsArn = ctx.String(kmsArnFlag.Name)
+					if ctx.IsSet(s3BucketFlagOptional.Name) {
+						spec.S3.BucketName = ctx.String(s3BucketFlagOptional.Name)
 					}
 
-					if c.isS3BucketChange(ctx, sink) {
-						sink.Spec.S3Sink.BucketName = ctx.String(s3BucketFlagOptional.Name)
+					if ctx.IsSet(kmsArnFlag.Name) {
+						spec.S3.KmsArn = ctx.String(kmsArnFlag.Name)
 					}
-					request := &namespaceservice.UpdateExportSinkRequest{
-						Namespace:       ctx.String(NamespaceFlagName),
-						Spec:            sink.Spec,
+
+					updateRequest := &cloudservice.UpdateNamespaceExportSinkRequest{
+						Namespace:       namespaceName,
 						ResourceVersion: resourceVersion,
-						RequestId:       ctx.String(RequestIDFlagName),
+						Spec:            spec,
 					}
 
-					resp, err := c.client.UpdateExportSink(c.ctx, request)
+					updateResp, err := c.cloudAPIClient.UpdateNamespaceExportSink(c.ctx, updateRequest)
 					if err != nil {
 						return err
 					}
-
-					return PrintProto(resp.RequestStatus)
+					return PrintProto(updateResp.GetAsyncOperation())
 				},
 			},
 		},
@@ -1736,36 +1671,32 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				Action: func(ctx *cli.Context) error {
 					SaId, projectName, err := parseSAPrincipal(ctx.String(saPrincipalFlagRequired.Name))
 					if err != nil {
-						return fmt.Errorf("validation failed: %v", err)
+						return err
 					}
-
 					namespace := ctx.String(NamespaceFlagName)
 					_, err = c.getNamespace(namespace)
 					if err != nil {
 						return fmt.Errorf("unable to get namespace: %v", err)
 					}
-
-					request := &namespaceservice.CreateExportSinkRequest{
-						Namespace: namespace,
-						Spec: &sink.ExportSinkSpec{
-							Name:            ctx.String(sinkNameFlag.Name),
-							Enabled:         true,
-							DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
-							GcsSink: &sink.GCSSpec{
+					createRequest := &cloudservice.CreateNamespaceExportSinkRequest{
+						Namespace: ctx.String(NamespaceFlag.Name),
+						Spec: &cloudNamespace.ExportSinkSpec{
+							Name:    ctx.String(sinkNameFlag.Name),
+							Enabled: true,
+							Gcs: &cloudSink.GCSSpec{
 								GcpProjectId: projectName,
 								BucketName:   ctx.String(gcsBucketFlagRequired.Name),
 								SaId:         SaId,
 							},
 						},
-						RequestId: ctx.String(RequestIDFlagName),
 					}
 
-					res, err := c.client.CreateExportSink(c.ctx, request)
+					createResp, err := c.cloudAPIClient.CreateNamespaceExportSink(c.ctx, createRequest)
 					if err != nil {
 						return err
 					}
 
-					return PrintProto(res.RequestStatus)
+					return PrintProto(createResp.GetAsyncOperation())
 				},
 			},
 			{
@@ -1779,68 +1710,65 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					saPrincipalFlagOptional,
 					gcsBucketFlagOptional,
 					ResourceVersionFlag,
-					RequestIDFlag,
 				},
 				Action: func(ctx *cli.Context) error {
-					namespaceName := ctx.String(NamespaceFlagName)
+					namespaceName := ctx.String(NamespaceFlag.Name)
 					sinkName := ctx.String(sinkNameFlag.Name)
-					sink, err := c.getExportSink(ctx, namespaceName, sinkName)
+					getExportSinkRes, err := c.cloudAPIClient.GetNamespaceExportSink(c.ctx, &cloudservice.GetNamespaceExportSinkRequest{
+						Namespace: namespaceName,
+						Name:      sinkName,
+					})
+
+					if err != nil {
+						return fmt.Errorf("unable to get export sink: %v", err)
+					}
+
+					resourceVersion := ctx.String(ResourceVersionFlag.Name)
+					if resourceVersion == "" {
+						resourceVersion = getExportSinkRes.GetSink().GetResourceVersion()
+					}
+
+					spec := getExportSinkRes.GetSink().GetSpec()
+					isToggleChanged, err := c.isSinkToggleChange(ctx, getExportSinkRes.GetSink())
 					if err != nil {
 						return err
 					}
-					resourceVersion := c.selectExportSinkResourceVersion(ctx, sink)
-
-					isToggleChanged, err := c.isSinkToggleChange(ctx, sink)
-					if err != nil {
-						return err
+					if isToggleChanged {
+						spec.Enabled = !spec.Enabled
 					}
 
-					if !isToggleChanged && !c.isSAPrincipalChange(ctx, sink) && !c.isGCSBucketChange(ctx, sink) {
+					if !isToggleChanged && !ctx.IsSet(saPrincipalFlagOptional.Name) && !ctx.IsSet(gcsBucketFlagOptional.Name) {
 						fmt.Println("nothing to update")
 						return nil
 					}
 
-					if isToggleChanged {
-						sink.Spec.Enabled = !sink.Spec.Enabled
+					if ctx.IsSet(saPrincipalFlagOptional.Name) {
+						SaId, GcpProjectId, _ := parseSAPrincipal(ctx.String(saPrincipalFlagRequired.Name))
+						spec.Gcs.SaId = SaId
+						spec.Gcs.GcpProjectId = GcpProjectId
 					}
 
-					if c.isSAPrincipalChange(ctx, sink) {
-						SaId, GcpProjectId, err := parseSAPrincipal(ctx.String(saPrincipalFlagOptional.Name))
-						if err != nil {
-							return err
-						}
-
-						sink.Spec.GcsSink.SaId = SaId
-						sink.Spec.GcsSink.GcpProjectId = GcpProjectId
+					if ctx.IsSet(gcsBucketFlagOptional.Name) {
+						spec.Gcs.BucketName = ctx.String(gcsBucketFlagOptional.Name)
 					}
 
-					if c.isS3BucketChange(ctx, sink) {
-						sink.Spec.S3Sink.BucketName = ctx.String(s3BucketFlagOptional.Name)
-					}
-
-					if c.isGCSBucketChange(ctx, sink) {
-						sink.Spec.GcsSink.BucketName = ctx.String(gcsBucketFlagOptional.Name)
-					}
-
-					request := &namespaceservice.UpdateExportSinkRequest{
-						Namespace:       ctx.String(NamespaceFlagName),
-						Spec:            sink.Spec,
+					updateRequest := &cloudservice.UpdateNamespaceExportSinkRequest{
+						Namespace:       namespaceName,
 						ResourceVersion: resourceVersion,
-						RequestId:       ctx.String(RequestIDFlagName),
+						Spec:            spec,
 					}
 
-					resp, err := c.client.UpdateExportSink(c.ctx, request)
+					updateResp, err := c.cloudAPIClient.UpdateNamespaceExportSink(c.ctx, updateRequest)
 					if err != nil {
 						return err
 					}
-
-					return PrintProto(resp.RequestStatus)
+					return PrintProto(updateResp.GetAsyncOperation())
 				},
 			},
 			{
 				Name:    "validate",
-				Aliases: []string{"v"},
 				Usage:   "Validate export sink",
+				Aliases: []string{"v"},
 				Flags: []cli.Flag{
 					NamespaceFlag,
 					sinkNameFlag,
@@ -1856,15 +1784,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 					SaId, projectName, err := parseSAPrincipal(ctx.String(saPrincipalFlagRequired.Name))
 					if err != nil {
-						return fmt.Errorf("validation failed: %v", err)
+						return err
 					}
 
-					validateRequest := &namespaceservice.ValidateExportSinkRequest{
-						Namespace: namespace,
-						Spec: &sink.ExportSinkSpec{
-							Name:            ctx.String(sinkNameFlag.Name),
-							DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
-							GcsSink: &sink.GCSSpec{
+					validateRequest := &cloudservice.ValidateNamespaceExportSinkRequest{
+						Namespace: ctx.String(NamespaceFlag.Name),
+						Spec: &cloudNamespace.ExportSinkSpec{
+							Name: ctx.String(sinkNameFlag.Name),
+							Gcs: &cloudSink.GCSSpec{
 								GcpProjectId: projectName,
 								BucketName:   ctx.String(gcsBucketFlagRequired.Name),
 								SaId:         SaId,
@@ -1872,14 +1799,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						},
 					}
 
-					_, err = c.client.ValidateExportSink(c.ctx, validateRequest)
-
+					_, err = c.cloudAPIClient.ValidateNamespaceExportSink(c.ctx, validateRequest)
 					if err != nil {
 						return fmt.Errorf("validation failed with error %v", err)
 					}
 
 					fmt.Println("Temporal Cloud was able to write test data to the sink")
 					return nil
+
 				},
 			},
 		},

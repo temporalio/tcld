@@ -56,7 +56,7 @@ func (s *testServer) GetAsyncOperation(ctx context.Context, req *cloudservice.Ge
 	return &cloudservice.GetAsyncOperationResponse{
 		AsyncOperation: &operation.AsyncOperation{
 			Id:    "test-id",
-			State: "fulfilled",
+			State: operation.STATE_FULFILLED,
 		},
 	}, nil
 }
