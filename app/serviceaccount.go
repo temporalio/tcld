@@ -307,9 +307,15 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 						spec := &auth.ServiceAccountSpec{
 							Name: ctx.String(serviceAccountNameFlagName),
 							Access: &auth.Access{
+								AccountAccess: &auth.AccountAccess{
+									Role: auth.ACCOUNT_ACTION_GROUP_READ,
+								},
 								NamespaceAccesses: map[string]*auth.NamespaceAccess{},
 							},
 							Description: ctx.String(serviceAccountDescriptionFlagName),
+							Scope: &auth.ServiceAccountScope{
+								Type: auth.SERVICE_ACCOUNT_SCOPE_TYPE_NAMESPACE,
+							},
 						}
 
 						nsMap, err := toNamespacePermissionsMap([]string{scopedNamespace})
