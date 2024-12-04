@@ -182,6 +182,11 @@ func (s *NamespaceTestSuite) TestDeleteProtection() {
 			expectErr: true,
 		},
 		{
+			name:      "both bool flags incorrectly set",
+			args:      []string{"n", "dp", "-n", ns, "--edp", "--ddp"},
+			expectErr: true,
+		},
+		{
 			name:      "success enable",
 			args:      []string{"n", "dp", "-n", ns, "--edp"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
