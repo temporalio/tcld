@@ -149,6 +149,111 @@ func (s *NamespaceTestSuite) TestList() {
 	s.NoError(s.RunCmd("namespace", "list"))
 }
 
+func (s *NamespaceTestSuite) TestDeleteProtection() {
+	ns := "ns1"
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)
+
+	tests := []struct {
+		name         string
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{
+		{
+			name:      "help",
+			args:      []string{"namespace", "delete-protection"},
+			expectErr: true,
+		},
+		{
+			name:      "no args",
+			args:      []string{"namespace", "delete-protection", "enable-delete-protection"},
+			expectErr: true,
+		},
+		{
+			name:      "alias with no args",
+			args:      []string{"n", "dp"},
+			expectErr: true,
+		},
+		{
+			name:      "missing bool flag",
+			args:      []string{"n", "dp", "-n", ns},
+			expectErr: true,
+		},
+		{
+			name:      "success enable",
+			args:      []string{"n", "dp", "-n", ns, "--edp"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.DeleteProtection = &namespace.DeleteProtectionSpec{
+					EnableDeleteProtection: true,
+				}
+			},
+		},
+		{
+			name:      "no change already disabled",
+			args:      []string{"n", "dp", "-n", ns, "--ddp"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectErr: true,
+		},
+		{
+			name: "missing namespace",
+			args: []string{"n", "dp", "-n", ns, "--edp"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace = nil
+			},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						SearchAttributes: map[string]namespace.SearchAttributeType{
+							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
+						},
+						RetentionDays: 7,
+						AuthMethod:    namespace.AUTH_METHOD_RESTRICTED,
+					},
+					State:           namespace.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Namespace.Spec)
+				req := namespaceservice.UpdateNamespaceRequest{
+					Namespace:       ns,
+					Spec:            &spec,
+					ResourceVersion: getResp.Namespace.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.UpdateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
 func (s *NamespaceTestSuite) TestUpdateAuthMethod() {
 	ns := "ns1"
 	type morphGetResp func(*namespaceservice.GetNamespaceResponse)

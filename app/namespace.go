@@ -41,6 +41,7 @@ const (
 	codecIncludeCredentialsFlagName  = "include-credentials"
 	sinkRegionFlagName               = "region"
 	enableDeleteProtectionFlagName   = "enable-delete-protection"
+	disableDeleteProtectionFlagName  = "disable-delete-protection"
 )
 
 const (
@@ -676,21 +677,48 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Required: true,
 				},
 				&cli.BoolFlag{
-					Name:     enableDeleteProtectionFlagName,
-					Usage:    "Enable delete protection on the namespace",
-					Aliases:  []string{"edp"},
-					Required: true,
+					Name:    enableDeleteProtectionFlagName,
+					Usage:   "Enable delete protection on the namespace",
+					Aliases: []string{"edp"},
+				},
+				&cli.BoolFlag{
+					Name:    disableDeleteProtectionFlagName,
+					Usage:   "Enable delete protection on the namespace",
+					Aliases: []string{"ddp"},
 				},
 			},
 			Action: func(ctx *cli.Context) error {
+				enable := ctx.Bool(enableDeleteProtectionFlagName)
+				disable := ctx.Bool(disableDeleteProtectionFlagName)
+				if !enable && !disable {
+					return errors.New("either enable or disable delete protection is required")
+				}
+				if enable && disable {
+					return errors.New("cannot set both enable and disable delete protection flags")
+				}
+
 				namespaceName := ctx.String(NamespaceFlagName)
 				n, err := c.getNamespace(namespaceName)
 				if err != nil {
 					return err
 				}
-				n.Spec.DeleteProtection = &namespace.DeleteProtectionSpec{
-					EnableDeleteProtection: ctx.Bool(enableDeleteProtectionFlagName),
+
+				if enable {
+					if n.Spec.DeleteProtection != nil && n.Spec.DeleteProtection.EnableDeleteProtection {
+						return errors.New("delete protection is already enabled")
+					}
+					n.Spec.DeleteProtection = &namespace.DeleteProtectionSpec{
+						EnableDeleteProtection: true,
+					}
+				} else if disable {
+					if n.Spec.DeleteProtection == nil || !n.Spec.DeleteProtection.EnableDeleteProtection {
+						return errors.New("delete protection is already disabled")
+					}
+					n.Spec.DeleteProtection = &namespace.DeleteProtectionSpec{
+						EnableDeleteProtection: false,
+					}
 				}
+
 				return c.updateNamespace(ctx, n)
 			},
 		},
