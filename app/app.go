@@ -27,20 +27,8 @@ func NewApp(params AppParams) (*cli.App, error) {
 			InsecureConnectionFlag,
 			EnableDebugLogsFlag,
 		},
+		Commands: params.Commands,
 	}
-
-	var commands []*cli.Command
-
-	for _, command := range params.Commands {
-		if command.Name == "nexus" {
-			if IsFeatureEnabled(NexusFeatureFlag) {
-				commands = append(commands, command)
-			}
-		} else {
-			commands = append(commands, command)
-		}
-	}
-	app.Commands = commands
 
 	return app, nil
 }
