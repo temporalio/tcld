@@ -661,7 +661,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				&cli.StringFlag{
 					Name:  cloudProviderFlagName,
 					Usage: "The cloud provider of the region. Default: aws",
-					Value: "aws",
+					Value: CloudProviderAWS,
 				},
 			},
 			Action: func(ctx *cli.Context) error {
@@ -1372,7 +1372,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				&cli.StringFlag{
 					Name:  cloudProviderFlagName,
 					Usage: "The cloud provider of the region. Default: aws",
-					Value: "aws",
+					Value: CloudProviderAWS,
 				},
 			},
 			Action: func(ctx *cli.Context) error {
