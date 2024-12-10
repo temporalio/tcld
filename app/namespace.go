@@ -1964,7 +1964,7 @@ func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
 
 func getRegionId(cloudProvider, activeRegion string) (common.RegionID, error) {
 	var regionId common.RegionID
-	switch cloudProvider {
+	switch strings.ToLower(cloudProvider) {
 	case CloudProviderAWS:
 		regionId.Provider = common.CLOUD_PROVIDER_AWS
 	case CloudProviderGCP:
