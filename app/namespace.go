@@ -1970,7 +1970,7 @@ func getRegionId(cloudProvider, activeRegion string) (common.RegionID, error) {
 	case CloudProviderGCP:
 		regionId.Provider = common.CLOUD_PROVIDER_GCP
 	default:
-		return regionId, fmt.Errorf("unknown cloud provider specified, the supported cloud providers are aws and gcp")
+		return regionId, fmt.Errorf("unknown cloud provider specified, the supported cloud providers: [%s]", strings.Join([]string{CloudProviderAWS, CloudProviderGCP}, ","))
 	}
 	regionId.Name = activeRegion
 	return regionId, nil
