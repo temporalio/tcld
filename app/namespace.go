@@ -41,6 +41,8 @@ const (
 	codecPassAccessTokenFlagName     = "pass-access-token"
 	codecIncludeCredentialsFlagName  = "include-credentials"
 	sinkRegionFlagName               = "region"
+	enableDeleteProtectionFlagName   = "enable-delete-protection"
+	disableDeleteProtectionFlagName  = "disable-delete-protection"
 )
 
 const (
@@ -515,6 +517,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
 					Aliases: []string{"p"},
 				},
+				&cli.BoolFlag{
+					Name:    enableDeleteProtectionFlagName,
+					Usage:   "Enable delete protection on the namespace",
+					Aliases: []string{"edp"},
+				},
 				codecEndpointFlag,
 				codecPassAccessTokenFlag,
 				codecIncludeCredentialsFlag,
@@ -638,6 +645,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					}
 				}
 
+				n.Spec.DeleteProtection = &namespace.DeleteProtectionSpec{
+					EnableDeleteProtection: ctx.Bool(enableDeleteProtectionFlagName),
+				}
+
 				return c.createNamespace(n, unp)
 			},
 		},
@@ -666,6 +677,65 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			},
 			Action: func(ctx *cli.Context) error {
 				return c.addRegion(ctx)
+			},
+		},
+		{
+			Name:    "delete-protection",
+			Usage:   "Enable delete protection on a temporal namespace",
+			Aliases: []string{"dp"},
+			Flags: []cli.Flag{
+				RequestIDFlag,
+				ResourceVersionFlag,
+				&cli.StringFlag{
+					Name:     NamespaceFlagName,
+					Usage:    "The namespace hosted on temporal cloud",
+					Aliases:  []string{"n"},
+					Required: true,
+				},
+				&cli.BoolFlag{
+					Name:    enableDeleteProtectionFlagName,
+					Usage:   "Enable delete protection on the namespace",
+					Aliases: []string{"edp"},
+				},
+				&cli.BoolFlag{
+					Name:    disableDeleteProtectionFlagName,
+					Usage:   "Enable delete protection on the namespace",
+					Aliases: []string{"ddp"},
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				enable := ctx.Bool(enableDeleteProtectionFlagName)
+				disable := ctx.Bool(disableDeleteProtectionFlagName)
+				if !enable && !disable {
+					return errors.New("either enable or disable delete protection is required")
+				}
+				if enable && disable {
+					return errors.New("cannot set both enable and disable delete protection flags")
+				}
+
+				namespaceName := ctx.String(NamespaceFlagName)
+				n, err := c.getNamespace(namespaceName)
+				if err != nil {
+					return err
+				}
+
+				if enable {
+					if n.Spec.DeleteProtection != nil && n.Spec.DeleteProtection.EnableDeleteProtection {
+						return errors.New("delete protection is already enabled")
+					}
+					n.Spec.DeleteProtection = &namespace.DeleteProtectionSpec{
+						EnableDeleteProtection: true,
+					}
+				} else if disable {
+					if n.Spec.DeleteProtection == nil || !n.Spec.DeleteProtection.EnableDeleteProtection {
+						return errors.New("delete protection is already disabled")
+					}
+					n.Spec.DeleteProtection = &namespace.DeleteProtectionSpec{
+						EnableDeleteProtection: false,
+					}
+				}
+
+				return c.updateNamespace(ctx, n)
 			},
 		},
 		{
