@@ -69,6 +69,7 @@ func login(ctx *cli.Context, tokenConfig *TokenConfig) (*TokenConfig, error) {
 func defaultTokenConfig(ctx *cli.Context) (*TokenConfig, error) {
 	domainURLStr := ctx.String(domainFlagName)
 	if domainURLStr == "" {
+		// the domain flag was not set on the command, fallback to the default value set in the flag definition
 		domainURLStr = domainFlag.Value
 	}
 	domainURL, err := parseURL(domainURLStr)
@@ -78,11 +79,13 @@ func defaultTokenConfig(ctx *cli.Context) (*TokenConfig, error) {
 
 	audience := ctx.String(audienceFlagName)
 	if audience == "" {
+		// the audience flag is not set on the command, fallback to the default value set in the flag definition
 		audience = audienceFlag.Value
 	}
 
 	clientID := ctx.String(clientIDFlagName)
 	if clientID == "" {
+		// the clientID flag is not set on the command, fallback to the default value set in the flag definition
 		clientID = clientIDFlag.Value
 	}
 
