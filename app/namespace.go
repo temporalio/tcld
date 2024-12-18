@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/temporalio/tcld/protogen/api/common/v1"
 	"net/mail"
 	"os"
 	"strconv"
@@ -524,6 +525,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				codecEndpointFlag,
 				codecPassAccessTokenFlag,
 				codecIncludeCredentialsFlag,
+				&cli.StringFlag{
+					Name:    cloudProviderFlagName,
+					Usage:   `Cloud provider for the namespace to be created for, currently support [aws, gcp].  For this version, if not specified, we default to aws`,
+					Aliases: []string{"cp"},
+					// this is a temporary solution, we will have a follow up version update to make the cloud provider mandatory
+					Value: CloudProviderAWS,
+				},
 			},
 			Action: func(ctx *cli.Context) error {
 				n := &namespace.Namespace{
@@ -542,6 +550,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Region:         regions[0],
 					PassiveRegions: regions[1:],
 				}
+
+				cloudProvider := ctx.String(cloudProviderFlagName)
+				regionId, err := getRegionId(cloudProvider, regions[0])
+				if err != nil {
+					return err
+				}
+				n.Spec.CloudProvider = cloudProvider
+				n.Spec.RegionId = &regionId
 
 				authMethod, err := toAuthMethod(ctx.String(authMethodFlagName))
 				if err != nil {
@@ -656,7 +672,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				&cli.StringFlag{
 					Name:  cloudProviderFlagName,
 					Usage: "The cloud provider of the region. Default: aws",
-					Value: "aws",
+					Value: CloudProviderAWS,
 				},
 			},
 			Action: func(ctx *cli.Context) error {
@@ -1426,7 +1442,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				&cli.StringFlag{
 					Name:  cloudProviderFlagName,
 					Usage: "The cloud provider of the region. Default: aws",
-					Value: "aws",
+					Value: CloudProviderAWS,
 				},
 			},
 			Action: func(ctx *cli.Context) error {
@@ -2014,6 +2030,20 @@ func formatAuthMethods() string {
 
 func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
 	return old != namespace.AUTH_METHOD_RESTRICTED && new != namespace.AUTH_METHOD_API_KEY_OR_MTLS
+}
+
+func getRegionId(cloudProvider, activeRegion string) (common.RegionID, error) {
+	var regionId common.RegionID
+	switch strings.ToLower(cloudProvider) {
+	case CloudProviderAWS:
+		regionId.Provider = common.CLOUD_PROVIDER_AWS
+	case CloudProviderGCP:
+		regionId.Provider = common.CLOUD_PROVIDER_GCP
+	default:
+		return regionId, fmt.Errorf("unknown cloud provider specified, the supported cloud providers: [%s]", strings.Join([]string{CloudProviderAWS, CloudProviderGCP}, ","))
+	}
+	regionId.Name = activeRegion
+	return regionId, nil
 }
 
 func toAuthMethod(m string) (namespace.AuthMethod, error) {
