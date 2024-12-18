@@ -197,6 +197,20 @@ func (s *NamespaceTestSuite) TestDeleteProtection() {
 			},
 		},
 		{
+			name: "success disable",
+			args: []string{"n", "dp", "-n", ns, "--ddp"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: true,
+				}
+			},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: false,
+				}
+			},
+		},
+		{
 			name:      "no change already disabled",
 			args:      []string{"n", "dp", "-n", ns, "--ddp"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},

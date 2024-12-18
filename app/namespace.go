@@ -730,6 +730,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					if n.Spec.Lifecycle == nil || !n.Spec.Lifecycle.EnableDeleteProtection {
 						return errors.New("delete protection is already disabled")
 					}
+					y, err := ConfirmPrompt(ctx, "disabling namespace delete protection may be prone to accidental deletion. confirm?")
+					if err != nil || !y {
+						return err
+					}
 					n.Spec.Lifecycle = &namespace.LifecycleSpec{
 						EnableDeleteProtection: false,
 					}

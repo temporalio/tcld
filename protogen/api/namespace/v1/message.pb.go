@@ -9,13 +9,13 @@ import (
 	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 	types "github.com/gogo/protobuf/types"
 	descriptor "github.com/golang/protobuf/protoc-gen-go/descriptor"
+	v1 "github.com/temporalio/tcld/protogen/api/common/v1"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strconv "strconv"
 	strings "strings"
-	v1 "github.com/temporalio/tcld/protogen/api/common/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
