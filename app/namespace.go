@@ -645,7 +645,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					}
 				}
 
-				n.Spec.DeleteProtection = &namespace.DeleteProtectionSpec{
+				n.Spec.Lifecycle = &namespace.LifecycleSpec{
 					EnableDeleteProtection: ctx.Bool(enableDeleteProtectionFlagName),
 				}
 
@@ -720,17 +720,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 
 				if enable {
-					if n.Spec.DeleteProtection != nil && n.Spec.DeleteProtection.EnableDeleteProtection {
+					if n.Spec.Lifecycle != nil && n.Spec.Lifecycle.EnableDeleteProtection {
 						return errors.New("delete protection is already enabled")
 					}
-					n.Spec.DeleteProtection = &namespace.DeleteProtectionSpec{
+					n.Spec.Lifecycle = &namespace.LifecycleSpec{
 						EnableDeleteProtection: true,
 					}
 				} else if disable {
-					if n.Spec.DeleteProtection == nil || !n.Spec.DeleteProtection.EnableDeleteProtection {
+					if n.Spec.Lifecycle == nil || !n.Spec.Lifecycle.EnableDeleteProtection {
 						return errors.New("delete protection is already disabled")
 					}
-					n.Spec.DeleteProtection = &namespace.DeleteProtectionSpec{
+					n.Spec.Lifecycle = &namespace.LifecycleSpec{
 						EnableDeleteProtection: false,
 					}
 				}

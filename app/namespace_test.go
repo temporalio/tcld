@@ -191,7 +191,7 @@ func (s *NamespaceTestSuite) TestDeleteProtection() {
 			args:      []string{"n", "dp", "-n", ns, "--edp"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
-				r.Spec.DeleteProtection = &namespace.DeleteProtectionSpec{
+				r.Spec.Lifecycle = &namespace.LifecycleSpec{
 					EnableDeleteProtection: true,
 				}
 			},
