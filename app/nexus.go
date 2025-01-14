@@ -126,15 +126,6 @@ func (c *NexusClient) patchEndpoint(
 		existingEndpoint.Spec.Description = endpointDescription
 		hasChanges = true
 	}
-
-	/*if unsetDescription && existingEndpoint.Spec.Description != "" {
-		existingEndpoint.Spec.Description = ""
-		hasChanges = true
-	}
-	if !unsetDescription && description != "" && description != existingEndpoint.Spec.Description {
-		existingEndpoint.Spec.Description = description
-		hasChanges = true
-	}*/
 	if targetNamespaceID != "" && targetNamespaceID != existingEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId {
 		existingEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId = targetNamespaceID
 		hasChanges = true
