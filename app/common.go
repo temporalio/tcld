@@ -1,8 +1,11 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
+
+	apipayload "github.com/temporalio/tcld/protogen/temporal/api/common/v1"
 )
 
 const (
@@ -59,4 +62,18 @@ func parseSAPrincipal(saPrincipal string) (string, string, error) {
 	gcpProjectId = submatch[2]
 
 	return saId, gcpProjectId, nil
+}
+
+func newAPIPayloadFromString(str string) *apipayload.Payload {
+	// Alternatively, use "go.temporal.io/sdk/converter" package
+	// converter.GetDefaultDataConverter().ToPayload(data)
+	data, err := json.Marshal(str)
+	if err != nil {
+		panic(fmt.Errorf("failed to marshal description to JSON: %w", err))
+	}
+
+	return &apipayload.Payload{
+		Metadata: map[string][]byte{"encoding": []byte("json/plain")},
+		Data:     data,
+	}
 }
