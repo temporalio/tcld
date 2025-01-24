@@ -560,7 +560,7 @@ func (m *DisasterRecoverySpec) GetDisableManagedFailover() bool {
 
 type NamespaceSpec struct {
 	// The name to use for the namespace.
-	// This will create a namespace that's available at '<name>.<account>.github.com/temporalio/saas-proto/protogen:7233'.
+	// This will create a namespace that's available at '<name>.<account>.github.com/temporalio/tcld/protogen:7233'.
 	// The name is immutable. Once set, it cannot be changed.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// The ids of the regions where the namespace should be available.
