@@ -1459,31 +1459,38 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 		{
 			Name:  "disaster-recovery-setting",
-			Usage: "Disaster Recovery Settings",
-			Flags: []cli.Flag{
-				RequestIDFlag,
-				&cli.StringFlag{
-					Name:     NamespaceFlagName,
-					Usage:    "The namespace hosted on temporal cloud",
-					Aliases:  []string{"n"},
-					Required: true,
-				},
-				&cli.BoolFlag{
-					Name:  disableFailoverFlagName,
-					Usage: "Disable Temporal managed failover on this multi replicas namespace.",
-					Value: false,
-				},
-			},
-			Action: func(ctx *cli.Context) error {
-				n, err := c.getNamespace(ctx.String(NamespaceFlagName))
-				if err != nil {
-					return err
-				}
+			Usage: "Disaster Recovery Settings for Multi Region Namespace",
+			Subcommands: []*cli.Command{
+				{
+					Name:    "update",
+					Usage:   "Update namespace disaster recovery setting",
+					Aliases: []string{"u"},
+					Flags: []cli.Flag{
+						RequestIDFlag,
+						&cli.StringFlag{
+							Name:     NamespaceFlagName,
+							Usage:    "The namespace hosted on temporal cloud",
+							Aliases:  []string{"n"},
+							Required: true,
+						},
+						&cli.BoolFlag{
+							Name:  disableFailoverFlagName,
+							Usage: "Disable Temporal managed failover on this multi replicas namespace.",
+							Value: false,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						if err != nil {
+							return err
+						}
 
-				disableFailover := ctx.Bool(disableFailoverFlagName)
-				n.Spec.DisasterRecovery.DisableManagedFailover = disableFailover
+						disableFailover := ctx.Bool(disableFailoverFlagName)
+						n.Spec.DisasterRecovery.DisableManagedFailover = disableFailover
 
-				return c.updateNamespace(ctx, n)
+						return c.updateNamespace(ctx, n)
+					},
+				},
 			},
 		},
 	}
