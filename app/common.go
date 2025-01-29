@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strings"
 
 	apipayload "github.com/temporalio/tcld/protogen/temporal/api/common/v1"
 )
@@ -76,4 +77,15 @@ func newAPIPayloadFromString(str string) *apipayload.Payload {
 		Metadata: map[string][]byte{"encoding": []byte("json/plain")},
 		Data:     data,
 	}
+}
+
+func formatStringSlice(slice []string) string {
+	if len(slice) == 0 {
+		return ""
+	}
+	var elements []string
+	for _, s := range slice {
+		elements = append(elements, fmt.Sprintf("'%s'", s))
+	}
+	return strings.Join(elements, ", ")
 }
