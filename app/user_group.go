@@ -18,22 +18,22 @@ const (
 )
 
 type (
-	GroupClient struct {
+	UserGroupClient struct {
 		client     cloudsvc.CloudServiceClient
 		authClient authservice.AuthServiceClient
 		ctx        context.Context
 	}
 
-	GetGroupClientFn func(ctx *cli.Context) (*GroupClient, error)
+	GetGroupClientFn func(ctx *cli.Context) (*UserGroupClient, error)
 )
 
-// GetGroupClient builds a group client with cloud services connection and auth client
-func GetGroupClient(ctx *cli.Context) (*GroupClient, error) {
+// GetUserGroupClient builds a group client with cloud services connection and auth client
+func GetUserGroupClient(ctx *cli.Context) (*UserGroupClient, error) {
 	ct, conn, err := GetServerConnection(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &GroupClient{
+	return &UserGroupClient{
 		client:     cloudsvc.NewCloudServiceClient(conn),
 		authClient: authservice.NewAuthServiceClient(conn),
 		ctx:        ct,
@@ -41,7 +41,7 @@ func GetGroupClient(ctx *cli.Context) (*GroupClient, error) {
 }
 
 // listGroups lists the groups for the current user using the cloud services API
-func (c *GroupClient) listGroups(
+func (c *UserGroupClient) listGroups(
 	pageToken string,
 	pageSize int,
 ) error {
@@ -58,7 +58,7 @@ func (c *GroupClient) listGroups(
 }
 
 // getGroup gets a group by ID using the cloud services API
-func (c *GroupClient) getGroup(_ *cli.Context, groupID string) error {
+func (c *UserGroupClient) getGroup(_ *cli.Context, groupID string) error {
 	group, err := c.client.GetUserGroup(c.ctx, &cloudsvc.GetUserGroupRequest{
 		GroupId: groupID,
 	})
@@ -127,7 +127,7 @@ func nsRoleToAccess(role string) (string, *identity.NamespaceAccess) {
 }
 
 // setAccess sets the access for a group using the cloud services API
-func (c *GroupClient) setAccess(_ *cli.Context, groupID string, accountRole string, nsRoles []string) error {
+func (c *UserGroupClient) setAccess(_ *cli.Context, groupID string, accountRole string, nsRoles []string) error {
 	group, err := c.client.GetUserGroup(c.ctx, &cloudsvc.GetUserGroupRequest{
 		GroupId: groupID,
 	})
@@ -168,14 +168,14 @@ func (c *GroupClient) setAccess(_ *cli.Context, groupID string, accountRole stri
 	return PrintProto(resp.GetAsyncOperation())
 }
 
-// NewGroupCommand creates a new command for group management
-func NewGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) {
-	var c *GroupClient
+// NewUserGroupCommand creates a new command for group management
+func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) {
+	var c *UserGroupClient
 	return CommandOut{
 		Command: &cli.Command{
-			Name:    "group",
-			Aliases: []string{"g"},
-			Usage:   "Group management operations",
+			Name:    "user-group",
+			Aliases: []string{"ug"},
+			Usage:   "User group management operations",
 			Before: func(ctx *cli.Context) error {
 				var err error
 				c, err = GetGroupClientFn(ctx)
