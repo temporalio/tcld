@@ -1,6 +1,6 @@
 module github.com/temporalio/tcld
 
-go 1.22
+go 1.22.0
 
 require (
 	github.com/go-playground/validator/v10 v10.13.0
@@ -14,7 +14,7 @@ require (
 	github.com/urfave/cli/v2 v2.25.7
 	go.uber.org/fx v1.20.1
 	go.uber.org/multierr v1.11.0
-	golang.org/x/mod v0.17.0
+	golang.org/x/mod v0.22.0
 	golang.org/x/oauth2 v0.24.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20241202173237-19429a94021a
 	google.golang.org/grpc v1.70.0
