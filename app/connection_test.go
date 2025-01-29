@@ -198,7 +198,6 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 					return s.listener.Dial()
 				}),
 				grpc.WithTransportCredentials(insecure.NewCredentials()),
-				grpc.WithBlock(),
 			}
 			connCtx, conn, err := GetServerConnection(cCtx, opts...)
 			if tc.expectedErr != nil {
