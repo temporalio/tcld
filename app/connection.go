@@ -43,7 +43,7 @@ func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Conte
 		return nil, nil, fmt.Errorf("failed to generate default dial options: %s", err)
 	}
 
-	conn, err := grpc.NewClient(
+	conn, err := grpc.Dial( //nolint:all this is supported for now, ignore deprecation
 		addr.String(),
 		append(defaultOpts, opts...)...,
 	)
