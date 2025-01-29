@@ -41,6 +41,7 @@ const (
 	codecPassAccessTokenFlagName     = "pass-access-token"
 	codecIncludeCredentialsFlagName  = "include-credentials"
 	sinkRegionFlagName               = "region"
+	enableDeleteProtectionFlagName   = "enable-delete-protection"
 )
 
 const (
@@ -515,6 +516,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
 					Aliases: []string{"p"},
 				},
+				&cli.BoolFlag{
+					Name:    enableDeleteProtectionFlagName,
+					Usage:   "Enable delete protection on the namespace",
+					Aliases: []string{"edp"},
+				},
 				codecEndpointFlag,
 				codecPassAccessTokenFlag,
 				codecIncludeCredentialsFlag,
@@ -638,6 +644,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					}
 				}
 
+				n.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: ctx.Bool(enableDeleteProtectionFlagName),
+				}
+
 				return c.createNamespace(n, unp)
 			},
 		},
@@ -666,6 +676,91 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			},
 			Action: func(ctx *cli.Context) error {
 				return c.addRegion(ctx)
+			},
+		},
+		{
+			Name:    "lifecycle",
+			Usage:   "Enable delete protection on a temporal namespace",
+			Aliases: []string{"lc"},
+			Subcommands: []*cli.Command{
+				{
+					Name:  "get",
+					Usage: "Get the lifecycle spec for the namespace",
+					Flags: []cli.Flag{
+						RequestIDFlag,
+						ResourceVersionFlag,
+						&cli.StringFlag{
+							Name:     NamespaceFlagName,
+							Usage:    "The namespace hosted on temporal cloud",
+							Aliases:  []string{"n"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						if err != nil {
+							return err
+						}
+						return PrintProto(n.Spec.Lifecycle)
+					},
+				},
+				{
+					Name:  "set",
+					Usage: "Set the lifecycle spec for the namespace",
+					Flags: []cli.Flag{
+						RequestIDFlag,
+						ResourceVersionFlag,
+						&cli.StringFlag{
+							Name:     NamespaceFlagName,
+							Usage:    "The namespace hosted on temporal cloud",
+							Aliases:  []string{"n"},
+							Required: true,
+						},
+						&cli.StringFlag{
+							Name:    enableDeleteProtectionFlagName,
+							Usage:   "Enable delete protection on the namespace, value must be true or false",
+							Aliases: []string{"edp"},
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						// for now this is the only option but add more here in the future
+						if !ctx.IsSet(enableDeleteProtectionFlagName) {
+							return errors.New("at least one option for lifecycle spec must be set")
+						}
+
+						enable, err := strconv.ParseBool(ctx.String(enableDeleteProtectionFlagName))
+						if err != nil {
+							return fmt.Errorf("not a valid boolean: %s", err.Error())
+						}
+
+						namespaceName := ctx.String(NamespaceFlagName)
+						n, err := c.getNamespace(namespaceName)
+						if err != nil {
+							return err
+						}
+
+						if enable {
+							if n.Spec.Lifecycle != nil && n.Spec.Lifecycle.EnableDeleteProtection {
+								return errors.New("delete protection is already enabled")
+							}
+							n.Spec.Lifecycle = &namespace.LifecycleSpec{
+								EnableDeleteProtection: true,
+							}
+						} else {
+							if n.Spec.Lifecycle == nil || !n.Spec.Lifecycle.EnableDeleteProtection {
+								return errors.New("delete protection is already disabled")
+							}
+							y, err := ConfirmPrompt(ctx, "disabling namespace delete protection may be prone to accidental deletion. confirm?")
+							if err != nil || !y {
+								return err
+							}
+							n.Spec.Lifecycle = &namespace.LifecycleSpec{
+								EnableDeleteProtection: false,
+							}
+						}
+						return c.updateNamespace(ctx, n)
+					},
+				},
 			},
 		},
 		{
