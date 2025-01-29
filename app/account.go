@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/temporalio/tcld/protogen/api/account/v1"
 	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
+	"github.com/temporalio/tcld/protogen/api/common/v1"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 )
@@ -62,8 +64,8 @@ func (c *AccountClient) listRegions() ([]regionInfo, error) {
 	var regions []regionInfo
 	for _, r := range resp.Regions {
 		regions = append(regions, regionInfo{
-			CloudProviderRegion: r.GetName(),
-			CloudProvider:       r.GetCloudProvider(),
+			CloudProviderRegion: r.GetRegionId().GetName(),
+			CloudProvider:       strings.ToLower(strings.TrimPrefix(common.RegionID_CloudProvider_name[int32(r.GetRegionId().GetProvider())], "CloudProvider")),
 		})
 	}
 

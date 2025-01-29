@@ -1,8 +1,16 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
+
+	apipayload "github.com/temporalio/tcld/protogen/temporal/api/common/v1"
+)
+
+const (
+	CloudProviderGCP = "gcp"
+	CloudProviderAWS = "aws"
 )
 
 var (
@@ -56,10 +64,16 @@ func parseSAPrincipal(saPrincipal string) (string, string, error) {
 	return saId, gcpProjectId, nil
 }
 
-func getAssumedRoleArn(awsAccountId string, awsRoleName string) string {
-	return fmt.Sprintf("arn:aws:iam::%s:role/%s", awsAccountId, awsRoleName)
-}
+func newAPIPayloadFromString(str string) *apipayload.Payload {
+	// Alternatively, use "go.temporal.io/sdk/converter" package
+	// converter.GetDefaultDataConverter().ToPayload(data)
+	data, err := json.Marshal(str)
+	if err != nil {
+		panic(fmt.Errorf("failed to marshal description to JSON: %w", err))
+	}
 
-func getSAPrincipal(saId string, gcpProjectId string) string {
-	return fmt.Sprintf("%s@%s.iam.gserviceaccount.com", saId, gcpProjectId)
+	return &apipayload.Payload{
+		Metadata: map[string][]byte{"encoding": []byte("json/plain")},
+		Data:     data,
+	}
 }

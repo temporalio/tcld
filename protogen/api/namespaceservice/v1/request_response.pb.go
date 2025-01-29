@@ -14,10 +14,10 @@ import (
 	reflect "reflect"
 	strings "strings"
 	v11 "github.com/temporalio/tcld/protogen/api/auth/v1"
-	v14 "github.com/temporalio/tcld/protogen/api/common/v1"
+	v13 "github.com/temporalio/tcld/protogen/api/common/v1"
 	v1 "github.com/temporalio/tcld/protogen/api/namespace/v1"
 	v12 "github.com/temporalio/tcld/protogen/api/request/v1"
-	v13 "github.com/temporalio/tcld/protogen/api/sink/v1"
+	v14 "github.com/temporalio/tcld/protogen/api/sink/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -157,17 +157,63 @@ func (m *CreateNamespaceResponse) GetRequestStatus() *v12.RequestStatus {
 	return nil
 }
 
+type ListNamespacesFilter struct {
+	// Cloud provider filter
+	CloudProviders []v13.RegionID_CloudProvider `protobuf:"varint,1,rep,packed,name=cloud_providers,json=cloudProviders,proto3,enum=api.common.v1.RegionID_CloudProvider" json:"cloud_providers,omitempty"`
+}
+
+func (m *ListNamespacesFilter) Reset()      { *m = ListNamespacesFilter{} }
+func (*ListNamespacesFilter) ProtoMessage() {}
+func (*ListNamespacesFilter) Descriptor() ([]byte, []int) {
+	return fileDescriptor_667e39c23eb47b7c, []int{2}
+}
+func (m *ListNamespacesFilter) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListNamespacesFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListNamespacesFilter.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListNamespacesFilter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListNamespacesFilter.Merge(m, src)
+}
+func (m *ListNamespacesFilter) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListNamespacesFilter) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListNamespacesFilter.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListNamespacesFilter proto.InternalMessageInfo
+
+func (m *ListNamespacesFilter) GetCloudProviders() []v13.RegionID_CloudProvider {
+	if m != nil {
+		return m.CloudProviders
+	}
+	return nil
+}
+
 type ListNamespacesRequest struct {
 	// the requested size of the page to retrieve
 	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// the page token
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// the filter for listing the namespaces
+	Filter *ListNamespacesFilter `protobuf:"bytes,3,opt,name=filter,proto3" json:"filter,omitempty"`
 }
 
 func (m *ListNamespacesRequest) Reset()      { *m = ListNamespacesRequest{} }
 func (*ListNamespacesRequest) ProtoMessage() {}
 func (*ListNamespacesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{2}
+	return fileDescriptor_667e39c23eb47b7c, []int{3}
 }
 func (m *ListNamespacesRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -210,6 +256,13 @@ func (m *ListNamespacesRequest) GetPageToken() string {
 	return ""
 }
 
+func (m *ListNamespacesRequest) GetFilter() *ListNamespacesFilter {
+	if m != nil {
+		return m.Filter
+	}
+	return nil
+}
+
 type ListNamespacesResponse struct {
 	// the list of namespaces
 	Namespaces []string `protobuf:"bytes,1,rep,name=namespaces,proto3" json:"namespaces,omitempty"`
@@ -220,7 +273,7 @@ type ListNamespacesResponse struct {
 func (m *ListNamespacesResponse) Reset()      { *m = ListNamespacesResponse{} }
 func (*ListNamespacesResponse) ProtoMessage() {}
 func (*ListNamespacesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{3}
+	return fileDescriptor_667e39c23eb47b7c, []int{4}
 }
 func (m *ListNamespacesResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -273,7 +326,7 @@ type GetNamespacesRequest struct {
 func (m *GetNamespacesRequest) Reset()      { *m = GetNamespacesRequest{} }
 func (*GetNamespacesRequest) ProtoMessage() {}
 func (*GetNamespacesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{4}
+	return fileDescriptor_667e39c23eb47b7c, []int{5}
 }
 func (m *GetNamespacesRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -326,7 +379,7 @@ type GetNamespacesResponse struct {
 func (m *GetNamespacesResponse) Reset()      { *m = GetNamespacesResponse{} }
 func (*GetNamespacesResponse) ProtoMessage() {}
 func (*GetNamespacesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{5}
+	return fileDescriptor_667e39c23eb47b7c, []int{6}
 }
 func (m *GetNamespacesResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -377,7 +430,7 @@ type GetNamespaceRequest struct {
 func (m *GetNamespaceRequest) Reset()      { *m = GetNamespaceRequest{} }
 func (*GetNamespaceRequest) ProtoMessage() {}
 func (*GetNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{6}
+	return fileDescriptor_667e39c23eb47b7c, []int{7}
 }
 func (m *GetNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -421,7 +474,7 @@ type GetNamespaceResponse struct {
 func (m *GetNamespaceResponse) Reset()      { *m = GetNamespaceResponse{} }
 func (*GetNamespaceResponse) ProtoMessage() {}
 func (*GetNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{7}
+	return fileDescriptor_667e39c23eb47b7c, []int{8}
 }
 func (m *GetNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -472,7 +525,7 @@ type UpdateNamespaceRequest struct {
 func (m *UpdateNamespaceRequest) Reset()      { *m = UpdateNamespaceRequest{} }
 func (*UpdateNamespaceRequest) ProtoMessage() {}
 func (*UpdateNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{8}
+	return fileDescriptor_667e39c23eb47b7c, []int{9}
 }
 func (m *UpdateNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -537,7 +590,7 @@ type UpdateNamespaceResponse struct {
 func (m *UpdateNamespaceResponse) Reset()      { *m = UpdateNamespaceResponse{} }
 func (*UpdateNamespaceResponse) ProtoMessage() {}
 func (*UpdateNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{9}
+	return fileDescriptor_667e39c23eb47b7c, []int{10}
 }
 func (m *UpdateNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -590,7 +643,7 @@ type RenameCustomSearchAttributeRequest struct {
 func (m *RenameCustomSearchAttributeRequest) Reset()      { *m = RenameCustomSearchAttributeRequest{} }
 func (*RenameCustomSearchAttributeRequest) ProtoMessage() {}
 func (*RenameCustomSearchAttributeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{10}
+	return fileDescriptor_667e39c23eb47b7c, []int{11}
 }
 func (m *RenameCustomSearchAttributeRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -662,7 +715,7 @@ type RenameCustomSearchAttributeResponse struct {
 func (m *RenameCustomSearchAttributeResponse) Reset()      { *m = RenameCustomSearchAttributeResponse{} }
 func (*RenameCustomSearchAttributeResponse) ProtoMessage() {}
 func (*RenameCustomSearchAttributeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{11}
+	return fileDescriptor_667e39c23eb47b7c, []int{12}
 }
 func (m *RenameCustomSearchAttributeResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -711,7 +764,7 @@ type DeleteNamespaceRequest struct {
 func (m *DeleteNamespaceRequest) Reset()      { *m = DeleteNamespaceRequest{} }
 func (*DeleteNamespaceRequest) ProtoMessage() {}
 func (*DeleteNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{12}
+	return fileDescriptor_667e39c23eb47b7c, []int{13}
 }
 func (m *DeleteNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -769,7 +822,7 @@ type DeleteNamespaceResponse struct {
 func (m *DeleteNamespaceResponse) Reset()      { *m = DeleteNamespaceResponse{} }
 func (*DeleteNamespaceResponse) ProtoMessage() {}
 func (*DeleteNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{13}
+	return fileDescriptor_667e39c23eb47b7c, []int{14}
 }
 func (m *DeleteNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -809,7 +862,7 @@ type CreateExportSinkRequest struct {
 	// the namespace the sink is configured under
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	// the spec for the sink
-	Spec *v13.ExportSinkSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	Spec *v14.ExportSinkSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
 	// the request id to use for this operation - optional
 	RequestId string `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 }
@@ -817,7 +870,7 @@ type CreateExportSinkRequest struct {
 func (m *CreateExportSinkRequest) Reset()      { *m = CreateExportSinkRequest{} }
 func (*CreateExportSinkRequest) ProtoMessage() {}
 func (*CreateExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{14}
+	return fileDescriptor_667e39c23eb47b7c, []int{15}
 }
 func (m *CreateExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -853,7 +906,7 @@ func (m *CreateExportSinkRequest) GetNamespace() string {
 	return ""
 }
 
-func (m *CreateExportSinkRequest) GetSpec() *v13.ExportSinkSpec {
+func (m *CreateExportSinkRequest) GetSpec() *v14.ExportSinkSpec {
 	if m != nil {
 		return m.Spec
 	}
@@ -875,7 +928,7 @@ type CreateExportSinkResponse struct {
 func (m *CreateExportSinkResponse) Reset()      { *m = CreateExportSinkResponse{} }
 func (*CreateExportSinkResponse) ProtoMessage() {}
 func (*CreateExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{15}
+	return fileDescriptor_667e39c23eb47b7c, []int{16}
 }
 func (m *CreateExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -921,7 +974,7 @@ type GetExportSinkRequest struct {
 func (m *GetExportSinkRequest) Reset()      { *m = GetExportSinkRequest{} }
 func (*GetExportSinkRequest) ProtoMessage() {}
 func (*GetExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{16}
+	return fileDescriptor_667e39c23eb47b7c, []int{17}
 }
 func (m *GetExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -966,13 +1019,13 @@ func (m *GetExportSinkRequest) GetSinkName() string {
 
 type GetExportSinkResponse struct {
 	// the sink
-	Sink *v13.ExportSink `protobuf:"bytes,1,opt,name=sink,proto3" json:"sink,omitempty"`
+	Sink *v14.ExportSink `protobuf:"bytes,1,opt,name=sink,proto3" json:"sink,omitempty"`
 }
 
 func (m *GetExportSinkResponse) Reset()      { *m = GetExportSinkResponse{} }
 func (*GetExportSinkResponse) ProtoMessage() {}
 func (*GetExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{17}
+	return fileDescriptor_667e39c23eb47b7c, []int{18}
 }
 func (m *GetExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1001,7 +1054,7 @@ func (m *GetExportSinkResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetExportSinkResponse proto.InternalMessageInfo
 
-func (m *GetExportSinkResponse) GetSink() *v13.ExportSink {
+func (m *GetExportSinkResponse) GetSink() *v14.ExportSink {
 	if m != nil {
 		return m.Sink
 	}
@@ -1023,7 +1076,7 @@ type DeleteExportSinkRequest struct {
 func (m *DeleteExportSinkRequest) Reset()      { *m = DeleteExportSinkRequest{} }
 func (*DeleteExportSinkRequest) ProtoMessage() {}
 func (*DeleteExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{18}
+	return fileDescriptor_667e39c23eb47b7c, []int{19}
 }
 func (m *DeleteExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1088,7 +1141,7 @@ type DeleteExportSinkResponse struct {
 func (m *DeleteExportSinkResponse) Reset()      { *m = DeleteExportSinkResponse{} }
 func (*DeleteExportSinkResponse) ProtoMessage() {}
 func (*DeleteExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{19}
+	return fileDescriptor_667e39c23eb47b7c, []int{20}
 }
 func (m *DeleteExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1128,7 +1181,7 @@ type UpdateExportSinkRequest struct {
 	// the namespace the sink is scoped to
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	// the updated sink specification
-	Spec *v13.ExportSinkSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	Spec *v14.ExportSinkSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
 	// the version of the sink for which this update is intended for
 	// the latest version can be found by getting the sink
 	ResourceVersion string `protobuf:"bytes,3,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
@@ -1139,7 +1192,7 @@ type UpdateExportSinkRequest struct {
 func (m *UpdateExportSinkRequest) Reset()      { *m = UpdateExportSinkRequest{} }
 func (*UpdateExportSinkRequest) ProtoMessage() {}
 func (*UpdateExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{20}
+	return fileDescriptor_667e39c23eb47b7c, []int{21}
 }
 func (m *UpdateExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1175,7 +1228,7 @@ func (m *UpdateExportSinkRequest) GetNamespace() string {
 	return ""
 }
 
-func (m *UpdateExportSinkRequest) GetSpec() *v13.ExportSinkSpec {
+func (m *UpdateExportSinkRequest) GetSpec() *v14.ExportSinkSpec {
 	if m != nil {
 		return m.Spec
 	}
@@ -1204,7 +1257,7 @@ type UpdateExportSinkResponse struct {
 func (m *UpdateExportSinkResponse) Reset()      { *m = UpdateExportSinkResponse{} }
 func (*UpdateExportSinkResponse) ProtoMessage() {}
 func (*UpdateExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{21}
+	return fileDescriptor_667e39c23eb47b7c, []int{22}
 }
 func (m *UpdateExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1251,7 +1304,7 @@ type ListExportSinksRequest struct {
 func (m *ListExportSinksRequest) Reset()      { *m = ListExportSinksRequest{} }
 func (*ListExportSinksRequest) ProtoMessage() {}
 func (*ListExportSinksRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{22}
+	return fileDescriptor_667e39c23eb47b7c, []int{23}
 }
 func (m *ListExportSinksRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1311,7 +1364,7 @@ type ListExportSinksResponse struct {
 func (m *ListExportSinksResponse) Reset()      { *m = ListExportSinksResponse{} }
 func (*ListExportSinksResponse) ProtoMessage() {}
 func (*ListExportSinksResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{23}
+	return fileDescriptor_667e39c23eb47b7c, []int{24}
 }
 func (m *ListExportSinksResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1365,7 +1418,7 @@ type GetExportSinksRequest struct {
 func (m *GetExportSinksRequest) Reset()      { *m = GetExportSinksRequest{} }
 func (*GetExportSinksRequest) ProtoMessage() {}
 func (*GetExportSinksRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{24}
+	return fileDescriptor_667e39c23eb47b7c, []int{25}
 }
 func (m *GetExportSinksRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1417,7 +1470,7 @@ func (m *GetExportSinksRequest) GetPageToken() string {
 
 type GetExportSinksResponse struct {
 	// the list of export sinks
-	Sinks []*v13.ExportSink `protobuf:"bytes,1,rep,name=sinks,proto3" json:"sinks,omitempty"`
+	Sinks []*v14.ExportSink `protobuf:"bytes,1,rep,name=sinks,proto3" json:"sinks,omitempty"`
 	// the next page's token
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 }
@@ -1425,7 +1478,7 @@ type GetExportSinksResponse struct {
 func (m *GetExportSinksResponse) Reset()      { *m = GetExportSinksResponse{} }
 func (*GetExportSinksResponse) ProtoMessage() {}
 func (*GetExportSinksResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{25}
+	return fileDescriptor_667e39c23eb47b7c, []int{26}
 }
 func (m *GetExportSinksResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1454,7 +1507,7 @@ func (m *GetExportSinksResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetExportSinksResponse proto.InternalMessageInfo
 
-func (m *GetExportSinksResponse) GetSinks() []*v13.ExportSink {
+func (m *GetExportSinksResponse) GetSinks() []*v14.ExportSink {
 	if m != nil {
 		return m.Sinks
 	}
@@ -1472,13 +1525,13 @@ type ValidateExportSinkRequest struct {
 	// the namespace the sink is scoped to
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	// the sink specification needs to be validated
-	Spec *v13.ExportSinkSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	Spec *v14.ExportSinkSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
 }
 
 func (m *ValidateExportSinkRequest) Reset()      { *m = ValidateExportSinkRequest{} }
 func (*ValidateExportSinkRequest) ProtoMessage() {}
 func (*ValidateExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{26}
+	return fileDescriptor_667e39c23eb47b7c, []int{27}
 }
 func (m *ValidateExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1514,7 +1567,7 @@ func (m *ValidateExportSinkRequest) GetNamespace() string {
 	return ""
 }
 
-func (m *ValidateExportSinkRequest) GetSpec() *v13.ExportSinkSpec {
+func (m *ValidateExportSinkRequest) GetSpec() *v14.ExportSinkSpec {
 	if m != nil {
 		return m.Spec
 	}
@@ -1527,7 +1580,7 @@ type ValidateExportSinkResponse struct {
 func (m *ValidateExportSinkResponse) Reset()      { *m = ValidateExportSinkResponse{} }
 func (*ValidateExportSinkResponse) ProtoMessage() {}
 func (*ValidateExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{27}
+	return fileDescriptor_667e39c23eb47b7c, []int{28}
 }
 func (m *ValidateExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1562,7 +1615,7 @@ type FailoverNamespaceRequest struct {
 	// the request id to use for this operation - optional
 	RequestId string `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	// The target region is the region to be primary after the failover.
-	TargetRegion *v14.RegionID `protobuf:"bytes,3,opt,name=target_region,json=targetRegion,proto3" json:"target_region,omitempty"`
+	TargetRegion *v13.RegionID `protobuf:"bytes,3,opt,name=target_region,json=targetRegion,proto3" json:"target_region,omitempty"`
 	// This will skip graceful failover and fail over namespace without any condition.
 	SkipGracefulFailover bool `protobuf:"varint,4,opt,name=skip_graceful_failover,json=skipGracefulFailover,proto3" json:"skip_graceful_failover,omitempty"`
 }
@@ -1570,7 +1623,7 @@ type FailoverNamespaceRequest struct {
 func (m *FailoverNamespaceRequest) Reset()      { *m = FailoverNamespaceRequest{} }
 func (*FailoverNamespaceRequest) ProtoMessage() {}
 func (*FailoverNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{28}
+	return fileDescriptor_667e39c23eb47b7c, []int{29}
 }
 func (m *FailoverNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1613,7 +1666,7 @@ func (m *FailoverNamespaceRequest) GetRequestId() string {
 	return ""
 }
 
-func (m *FailoverNamespaceRequest) GetTargetRegion() *v14.RegionID {
+func (m *FailoverNamespaceRequest) GetTargetRegion() *v13.RegionID {
 	if m != nil {
 		return m.TargetRegion
 	}
@@ -1635,7 +1688,7 @@ type FailoverNamespaceResponse struct {
 func (m *FailoverNamespaceResponse) Reset()      { *m = FailoverNamespaceResponse{} }
 func (*FailoverNamespaceResponse) ProtoMessage() {}
 func (*FailoverNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{29}
+	return fileDescriptor_667e39c23eb47b7c, []int{30}
 }
 func (m *FailoverNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1679,7 +1732,7 @@ type GetReplicationStatusRequest struct {
 func (m *GetReplicationStatusRequest) Reset()      { *m = GetReplicationStatusRequest{} }
 func (*GetReplicationStatusRequest) ProtoMessage() {}
 func (*GetReplicationStatusRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{30}
+	return fileDescriptor_667e39c23eb47b7c, []int{31}
 }
 func (m *GetReplicationStatusRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1725,7 +1778,7 @@ type GetReplicationStatusResponse struct {
 func (m *GetReplicationStatusResponse) Reset()      { *m = GetReplicationStatusResponse{} }
 func (*GetReplicationStatusResponse) ProtoMessage() {}
 func (*GetReplicationStatusResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{31}
+	return fileDescriptor_667e39c23eb47b7c, []int{32}
 }
 func (m *GetReplicationStatusResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1770,9 +1823,9 @@ func (m *GetReplicationStatusResponse) GetNextPollTime() *types.Timestamp {
 
 type ReplicationStatus struct {
 	// The region data is replicating from.
-	SourceRegion *v14.RegionID `protobuf:"bytes,1,opt,name=source_region,json=sourceRegion,proto3" json:"source_region,omitempty"`
+	SourceRegion *v13.RegionID `protobuf:"bytes,1,opt,name=source_region,json=sourceRegion,proto3" json:"source_region,omitempty"`
 	// The region data is replicating to.
-	TargetRegion *v14.RegionID `protobuf:"bytes,2,opt,name=target_region,json=targetRegion,proto3" json:"target_region,omitempty"`
+	TargetRegion *v13.RegionID `protobuf:"bytes,2,opt,name=target_region,json=targetRegion,proto3" json:"target_region,omitempty"`
 	// The max replication lag.
 	ReplicationLag *types.Duration `protobuf:"bytes,3,opt,name=replication_lag,json=replicationLag,proto3" json:"replication_lag,omitempty"`
 }
@@ -1780,7 +1833,7 @@ type ReplicationStatus struct {
 func (m *ReplicationStatus) Reset()      { *m = ReplicationStatus{} }
 func (*ReplicationStatus) ProtoMessage() {}
 func (*ReplicationStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{32}
+	return fileDescriptor_667e39c23eb47b7c, []int{33}
 }
 func (m *ReplicationStatus) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1809,14 +1862,14 @@ func (m *ReplicationStatus) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ReplicationStatus proto.InternalMessageInfo
 
-func (m *ReplicationStatus) GetSourceRegion() *v14.RegionID {
+func (m *ReplicationStatus) GetSourceRegion() *v13.RegionID {
 	if m != nil {
 		return m.SourceRegion
 	}
 	return nil
 }
 
-func (m *ReplicationStatus) GetTargetRegion() *v14.RegionID {
+func (m *ReplicationStatus) GetTargetRegion() *v13.RegionID {
 	if m != nil {
 		return m.TargetRegion
 	}
@@ -1842,7 +1895,7 @@ type ListFailoverHistoryByNamespaceRequest struct {
 func (m *ListFailoverHistoryByNamespaceRequest) Reset()      { *m = ListFailoverHistoryByNamespaceRequest{} }
 func (*ListFailoverHistoryByNamespaceRequest) ProtoMessage() {}
 func (*ListFailoverHistoryByNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{33}
+	return fileDescriptor_667e39c23eb47b7c, []int{34}
 }
 func (m *ListFailoverHistoryByNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1904,7 +1957,7 @@ func (m *ListFailoverHistoryByNamespaceResponse) Reset() {
 }
 func (*ListFailoverHistoryByNamespaceResponse) ProtoMessage() {}
 func (*ListFailoverHistoryByNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{34}
+	return fileDescriptor_667e39c23eb47b7c, []int{35}
 }
 func (m *ListFailoverHistoryByNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1948,19 +2001,20 @@ func (m *ListFailoverHistoryByNamespaceResponse) GetNextPageToken() []byte {
 }
 
 type FailoverRecord struct {
-	FailoverType v14.FailoverType   `protobuf:"varint,1,opt,name=failover_type,json=failoverType,proto3,enum=api.common.v1.FailoverType" json:"failover_type,omitempty"`
-	SourceRegion *v14.RegionID      `protobuf:"bytes,2,opt,name=source_region,json=sourceRegion,proto3" json:"source_region,omitempty"`
-	TargetRegion *v14.RegionID      `protobuf:"bytes,3,opt,name=target_region,json=targetRegion,proto3" json:"target_region,omitempty"`
+	FailoverType v13.FailoverType   `protobuf:"varint,1,opt,name=failover_type,json=failoverType,proto3,enum=api.common.v1.FailoverType" json:"failover_type,omitempty"`
+	SourceRegion *v13.RegionID      `protobuf:"bytes,2,opt,name=source_region,json=sourceRegion,proto3" json:"source_region,omitempty"`
+	TargetRegion *v13.RegionID      `protobuf:"bytes,3,opt,name=target_region,json=targetRegion,proto3" json:"target_region,omitempty"`
 	StartTimeUtc *types.Timestamp   `protobuf:"bytes,4,opt,name=start_time_utc,json=startTimeUtc,proto3" json:"start_time_utc,omitempty"`
 	EndTimeUtc   *types.Timestamp   `protobuf:"bytes,5,opt,name=end_time_utc,json=endTimeUtc,proto3" json:"end_time_utc,omitempty"`
-	Status       v14.FailoverStatus `protobuf:"varint,6,opt,name=status,proto3,enum=api.common.v1.FailoverStatus" json:"status,omitempty"`
+	Status       v13.FailoverStatus `protobuf:"varint,6,opt,name=status,proto3,enum=api.common.v1.FailoverStatus" json:"status,omitempty"`
 	Operator     string             `protobuf:"bytes,7,opt,name=operator,proto3" json:"operator,omitempty"`
+	Reason       string             `protobuf:"bytes,8,opt,name=reason,proto3" json:"reason,omitempty"`
 }
 
 func (m *FailoverRecord) Reset()      { *m = FailoverRecord{} }
 func (*FailoverRecord) ProtoMessage() {}
 func (*FailoverRecord) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{35}
+	return fileDescriptor_667e39c23eb47b7c, []int{36}
 }
 func (m *FailoverRecord) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1989,21 +2043,21 @@ func (m *FailoverRecord) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_FailoverRecord proto.InternalMessageInfo
 
-func (m *FailoverRecord) GetFailoverType() v14.FailoverType {
+func (m *FailoverRecord) GetFailoverType() v13.FailoverType {
 	if m != nil {
 		return m.FailoverType
 	}
-	return v14.FAILOVER_TYPE_UNSPECIFIED
+	return v13.FAILOVER_TYPE_UNSPECIFIED
 }
 
-func (m *FailoverRecord) GetSourceRegion() *v14.RegionID {
+func (m *FailoverRecord) GetSourceRegion() *v13.RegionID {
 	if m != nil {
 		return m.SourceRegion
 	}
 	return nil
 }
 
-func (m *FailoverRecord) GetTargetRegion() *v14.RegionID {
+func (m *FailoverRecord) GetTargetRegion() *v13.RegionID {
 	if m != nil {
 		return m.TargetRegion
 	}
@@ -2024,16 +2078,23 @@ func (m *FailoverRecord) GetEndTimeUtc() *types.Timestamp {
 	return nil
 }
 
-func (m *FailoverRecord) GetStatus() v14.FailoverStatus {
+func (m *FailoverRecord) GetStatus() v13.FailoverStatus {
 	if m != nil {
 		return m.Status
 	}
-	return v14.FAILOVER_STATUS_UNSPECIFIED
+	return v13.FAILOVER_STATUS_UNSPECIFIED
 }
 
 func (m *FailoverRecord) GetOperator() string {
 	if m != nil {
 		return m.Operator
+	}
+	return ""
+}
+
+func (m *FailoverRecord) GetReason() string {
+	if m != nil {
+		return m.Reason
 	}
 	return ""
 }
@@ -2044,7 +2105,7 @@ type GlobalizeNamespaceRequest struct {
 	// The request id to use for this operation - optional
 	RequestId string `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	// The target region to be added into global namespace.
-	TargetRegion *v14.RegionID `protobuf:"bytes,3,opt,name=target_region,json=targetRegion,proto3" json:"target_region,omitempty"`
+	TargetRegion *v13.RegionID `protobuf:"bytes,3,opt,name=target_region,json=targetRegion,proto3" json:"target_region,omitempty"`
 	// the version of the namespace for which this update is intended for
 	// the latest version can be found in the namespace status.
 	ResourceVersion string `protobuf:"bytes,4,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
@@ -2053,7 +2114,7 @@ type GlobalizeNamespaceRequest struct {
 func (m *GlobalizeNamespaceRequest) Reset()      { *m = GlobalizeNamespaceRequest{} }
 func (*GlobalizeNamespaceRequest) ProtoMessage() {}
 func (*GlobalizeNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{36}
+	return fileDescriptor_667e39c23eb47b7c, []int{37}
 }
 func (m *GlobalizeNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2096,7 +2157,7 @@ func (m *GlobalizeNamespaceRequest) GetRequestId() string {
 	return ""
 }
 
-func (m *GlobalizeNamespaceRequest) GetTargetRegion() *v14.RegionID {
+func (m *GlobalizeNamespaceRequest) GetTargetRegion() *v13.RegionID {
 	if m != nil {
 		return m.TargetRegion
 	}
@@ -2118,7 +2179,7 @@ type GlobalizeNamespaceResponse struct {
 func (m *GlobalizeNamespaceResponse) Reset()      { *m = GlobalizeNamespaceResponse{} }
 func (*GlobalizeNamespaceResponse) ProtoMessage() {}
 func (*GlobalizeNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{37}
+	return fileDescriptor_667e39c23eb47b7c, []int{38}
 }
 func (m *GlobalizeNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2162,7 +2223,7 @@ type ValidateGlobalizeNamespaceRequest struct {
 func (m *ValidateGlobalizeNamespaceRequest) Reset()      { *m = ValidateGlobalizeNamespaceRequest{} }
 func (*ValidateGlobalizeNamespaceRequest) ProtoMessage() {}
 func (*ValidateGlobalizeNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{38}
+	return fileDescriptor_667e39c23eb47b7c, []int{39}
 }
 func (m *ValidateGlobalizeNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2208,7 +2269,7 @@ type ValidateGlobalizeNamespaceResponse struct {
 func (m *ValidateGlobalizeNamespaceResponse) Reset()      { *m = ValidateGlobalizeNamespaceResponse{} }
 func (*ValidateGlobalizeNamespaceResponse) ProtoMessage() {}
 func (*ValidateGlobalizeNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{39}
+	return fileDescriptor_667e39c23eb47b7c, []int{40}
 }
 func (m *ValidateGlobalizeNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2263,7 +2324,7 @@ type ListReplicaStatusRequest struct {
 func (m *ListReplicaStatusRequest) Reset()      { *m = ListReplicaStatusRequest{} }
 func (*ListReplicaStatusRequest) ProtoMessage() {}
 func (*ListReplicaStatusRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{40}
+	return fileDescriptor_667e39c23eb47b7c, []int{41}
 }
 func (m *ListReplicaStatusRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2315,7 +2376,7 @@ func (m *ListReplicaStatusRequest) GetPageToken() []byte {
 
 type ListReplicaStatusResponse struct {
 	// A list of replica status group by region
-	Statuses []*v14.ReplicaStatus `protobuf:"bytes,1,rep,name=statuses,proto3" json:"statuses,omitempty"`
+	Statuses []*v13.ReplicaStatus `protobuf:"bytes,1,rep,name=statuses,proto3" json:"statuses,omitempty"`
 	// the page token
 	PageToken []byte `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 }
@@ -2323,7 +2384,7 @@ type ListReplicaStatusResponse struct {
 func (m *ListReplicaStatusResponse) Reset()      { *m = ListReplicaStatusResponse{} }
 func (*ListReplicaStatusResponse) ProtoMessage() {}
 func (*ListReplicaStatusResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_667e39c23eb47b7c, []int{41}
+	return fileDescriptor_667e39c23eb47b7c, []int{42}
 }
 func (m *ListReplicaStatusResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2352,7 +2413,7 @@ func (m *ListReplicaStatusResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ListReplicaStatusResponse proto.InternalMessageInfo
 
-func (m *ListReplicaStatusResponse) GetStatuses() []*v14.ReplicaStatus {
+func (m *ListReplicaStatusResponse) GetStatuses() []*v13.ReplicaStatus {
 	if m != nil {
 		return m.Statuses
 	}
@@ -2369,6 +2430,7 @@ func (m *ListReplicaStatusResponse) GetPageToken() []byte {
 func init() {
 	proto.RegisterType((*CreateNamespaceRequest)(nil), "api.namespaceservice.v1.CreateNamespaceRequest")
 	proto.RegisterType((*CreateNamespaceResponse)(nil), "api.namespaceservice.v1.CreateNamespaceResponse")
+	proto.RegisterType((*ListNamespacesFilter)(nil), "api.namespaceservice.v1.ListNamespacesFilter")
 	proto.RegisterType((*ListNamespacesRequest)(nil), "api.namespaceservice.v1.ListNamespacesRequest")
 	proto.RegisterType((*ListNamespacesResponse)(nil), "api.namespaceservice.v1.ListNamespacesResponse")
 	proto.RegisterType((*GetNamespacesRequest)(nil), "api.namespaceservice.v1.GetNamespacesRequest")
@@ -2416,98 +2478,103 @@ func init() {
 }
 
 var fileDescriptor_667e39c23eb47b7c = []byte{
-	// 1445 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x58, 0x4f, 0x6f, 0xd4, 0x46,
-	0x14, 0x8f, 0x37, 0x09, 0x24, 0x2f, 0xc9, 0x06, 0x5c, 0x48, 0x36, 0x9b, 0x8d, 0x09, 0xae, 0x42,
-	0x43, 0xab, 0x7a, 0x45, 0xa0, 0x52, 0x2b, 0x38, 0xf0, 0x27, 0x25, 0x45, 0x42, 0x15, 0x75, 0x00,
-	0xa9, 0xbd, 0x18, 0xc7, 0x3b, 0x59, 0x86, 0x78, 0x6d, 0x33, 0x33, 0x0e, 0x04, 0xf5, 0xc0, 0xad,
-	0x52, 0x4f, 0xfd, 0x04, 0x95, 0x2a, 0x55, 0x55, 0xcf, 0x95, 0x7a, 0xea, 0xa9, 0xb7, 0x4a, 0xbd,
-	0x20, 0xf5, 0xc2, 0x11, 0x96, 0x4b, 0x8f, 0x7c, 0x84, 0x6a, 0xc6, 0x33, 0xfb, 0xc7, 0xf6, 0x6e,
-	0x76, 0xe9, 0x16, 0xf5, 0x38, 0xf3, 0xde, 0xbc, 0xf7, 0x7b, 0xef, 0xfd, 0xde, 0xf3, 0x8c, 0xc1,
-	0x72, 0x23, 0x5c, 0x0d, 0xdc, 0x06, 0xa2, 0x91, 0xeb, 0x21, 0x8a, 0xc8, 0x3e, 0xf6, 0x50, 0x75,
-	0xff, 0x5c, 0x95, 0xa0, 0x87, 0x31, 0xa2, 0xcc, 0x21, 0x88, 0x46, 0x61, 0x40, 0x91, 0x15, 0x91,
-	0x90, 0x85, 0xfa, 0xa2, 0x1b, 0x61, 0x2b, 0xad, 0x6f, 0xed, 0x9f, 0x2b, 0x2f, 0x71, 0x43, 0x6e,
-	0xcc, 0xee, 0xf3, 0xc3, 0x0d, 0x44, 0xa9, 0x5b, 0x97, 0x67, 0xca, 0xcb, 0x5c, 0xe4, 0x85, 0x8d,
-	0x46, 0x18, 0x64, 0x85, 0x46, 0x17, 0x80, 0xac, 0xbc, 0xc2, 0xe5, 0x12, 0x4c, 0x56, 0x2a, 0xbc,
-	0x52, 0x1c, 0xec, 0x65, 0x45, 0xa7, 0xea, 0x61, 0x58, 0xf7, 0x51, 0x55, 0xac, 0x76, 0xe2, 0xdd,
-	0x2a, 0xc3, 0x0d, 0x44, 0x99, 0xdb, 0x88, 0x94, 0xe7, 0xb4, 0x42, 0x2d, 0x26, 0x2e, 0xc3, 0x61,
-	0x90, 0xc8, 0xcd, 0x17, 0x05, 0x58, 0xb8, 0x46, 0x90, 0xcb, 0xd0, 0xe7, 0x0a, 0x9e, 0x9d, 0xe0,
-	0xd0, 0x2b, 0x30, 0xdd, 0x82, 0x5c, 0xd2, 0x56, 0xb5, 0xf5, 0x69, 0xbb, 0xbd, 0xa1, 0x9f, 0x87,
-	0x09, 0x1a, 0x21, 0xaf, 0x54, 0x58, 0xd5, 0xd6, 0x67, 0x36, 0x4e, 0x59, 0x5d, 0x29, 0xb3, 0xf6,
-	0xcf, 0x59, 0x2d, 0x7b, 0xdb, 0x11, 0xf2, 0x6c, 0xa1, 0xac, 0xaf, 0x00, 0xa8, 0x94, 0xe3, 0x5a,
-	0x69, 0x3c, 0xb1, 0x29, 0x77, 0x6e, 0xd4, 0x74, 0x0f, 0xca, 0x31, 0x45, 0xc4, 0x69, 0xd9, 0x71,
-	0x22, 0x44, 0x1a, 0x98, 0x52, 0x1c, 0x06, 0xb4, 0x34, 0xb1, 0x3a, 0xbe, 0x3e, 0xb3, 0xb1, 0x26,
-	0x3c, 0xf1, 0x1a, 0x70, 0x27, 0x77, 0x28, 0x22, 0x2d, 0x47, 0xb7, 0xda, 0xca, 0x76, 0x29, 0xee,
-	0x21, 0xd1, 0x43, 0x30, 0x70, 0x0d, 0x05, 0x0c, 0xb3, 0x83, 0x1e, 0x8e, 0x26, 0x85, 0xa3, 0xb3,
-	0x5d, 0x8e, 0x6e, 0xc8, 0x23, 0xb9, 0xce, 0x2a, 0xb8, 0x8f, 0xd4, 0x74, 0x60, 0x31, 0x93, 0xe1,
-	0x84, 0x6e, 0xfa, 0x26, 0x14, 0x55, 0x3e, 0x28, 0x73, 0x59, 0x4c, 0x45, 0x9e, 0x67, 0x36, 0x56,
-	0x84, 0x6f, 0x29, 0xe2, 0xee, 0x65, 0x4d, 0xb6, 0x85, 0x92, 0x3d, 0x47, 0x3a, 0x97, 0xe6, 0x36,
-	0x9c, 0xbc, 0x89, 0x29, 0x6b, 0x99, 0xa7, 0xaa, 0x82, 0xcb, 0x30, 0x1d, 0xb9, 0x75, 0xe4, 0x50,
-	0xfc, 0x24, 0xa9, 0xe0, 0xa4, 0x3d, 0xc5, 0x37, 0xb6, 0xf1, 0x13, 0xc4, 0x6b, 0x21, 0x84, 0x2c,
-	0xdc, 0x43, 0x81, 0x28, 0xe3, 0xb4, 0x2d, 0xd4, 0x6f, 0xf3, 0x0d, 0xf3, 0x1e, 0x2c, 0xa4, 0x8d,
-	0x4a, 0xd0, 0x06, 0x40, 0xbb, 0x37, 0x4a, 0xda, 0xea, 0xf8, 0xfa, 0xb4, 0xdd, 0xb1, 0xa3, 0x9f,
-	0x81, 0xf9, 0x00, 0x3d, 0x66, 0x4e, 0xc6, 0xfa, 0x1c, 0xdf, 0xbe, 0xd5, 0xf2, 0x60, 0xc3, 0x89,
-	0x2d, 0x34, 0x62, 0xd4, 0x5f, 0xc3, 0xc9, 0x94, 0x4d, 0x09, 0xfa, 0x62, 0x06, 0xf4, 0xcc, 0xc6,
-	0x72, 0x1f, 0xd2, 0xbe, 0x51, 0x44, 0xe7, 0xe1, 0x9d, 0x4e, 0xef, 0x03, 0x35, 0x92, 0xf9, 0x45,
-	0x77, 0x1a, 0x5a, 0x88, 0x3f, 0x49, 0x9f, 0x3a, 0x04, 0x70, 0x87, 0xc9, 0x5f, 0x35, 0x58, 0xb8,
-	0x13, 0xd5, 0xde, 0x52, 0x53, 0x9f, 0x85, 0x63, 0x04, 0xd1, 0x30, 0x26, 0x1e, 0x72, 0xf6, 0x11,
-	0xe1, 0xa4, 0x97, 0xad, 0x3d, 0xaf, 0xf6, 0xef, 0x26, 0xdb, 0xa9, 0xfe, 0x9f, 0x48, 0xf5, 0x3f,
-	0xef, 0x94, 0x0c, 0xec, 0x91, 0x76, 0xca, 0x4f, 0x05, 0x30, 0x6d, 0xc4, 0x23, 0xba, 0x16, 0x53,
-	0x16, 0x36, 0xb6, 0x91, 0x4b, 0xbc, 0xfb, 0x57, 0x18, 0x23, 0x78, 0x27, 0x66, 0x03, 0x26, 0xe9,
-	0x16, 0xac, 0xa1, 0xc7, 0x98, 0x32, 0x1c, 0xd4, 0x1d, 0x4f, 0x98, 0x71, 0xa8, 0xb0, 0xe3, 0xb8,
-	0xca, 0x90, 0x18, 0x2c, 0x92, 0x23, 0xa7, 0x95, 0x72, 0xae, 0x4b, 0x1e, 0xa9, 0x7e, 0x1d, 0x56,
-	0x03, 0xf4, 0xa8, 0xbf, 0xb1, 0x24, 0xa3, 0x95, 0x00, 0x3d, 0xea, 0x6d, 0x27, 0xaf, 0x12, 0x13,
-	0x83, 0x54, 0x62, 0x32, 0x5d, 0x89, 0x3d, 0x78, 0xb7, 0x6f, 0x9e, 0x46, 0x5a, 0x95, 0xa7, 0x1a,
-	0x2c, 0x6c, 0x22, 0x1f, 0x0d, 0x4d, 0xd7, 0xbc, 0x78, 0x0b, 0x83, 0xc4, 0x3b, 0x9e, 0xc3, 0xbc,
-	0x0c, 0x82, 0x91, 0xc6, 0xf8, 0x8d, 0xa6, 0xbe, 0x02, 0x9f, 0x3e, 0x8e, 0x42, 0xc2, 0xb6, 0x71,
-	0xb0, 0x37, 0x58, 0x90, 0xd5, 0xae, 0x9e, 0x4c, 0x46, 0x00, 0xbf, 0x0c, 0x70, 0x97, 0x6d, 0x5b,
-	0x03, 0x7f, 0x64, 0xcd, 0x7b, 0x50, 0xca, 0x02, 0x19, 0x69, 0xac, 0xc9, 0x44, 0x1b, 0x36, 0xce,
-	0x65, 0x98, 0xe6, 0x61, 0x75, 0xb6, 0xce, 0x14, 0xdf, 0xe0, 0x15, 0x31, 0x37, 0xc5, 0x5c, 0xcf,
-	0x41, 0xfc, 0x01, 0x4c, 0x70, 0x25, 0x89, 0x73, 0xb1, 0x47, 0x76, 0x6c, 0xa1, 0x64, 0x7e, 0xaf,
-	0xa9, 0x32, 0x8f, 0x12, 0xdc, 0x08, 0x07, 0xe0, 0x3d, 0x28, 0x65, 0xf1, 0x8d, 0xb4, 0x36, 0xbf,
-	0x68, 0x6a, 0xc6, 0xfe, 0xe7, 0x3c, 0x1c, 0x69, 0x5a, 0xb2, 0x98, 0x47, 0x9a, 0x16, 0x92, 0xdc,
-	0x76, 0xda, 0xf6, 0xe9, 0xc0, 0xbc, 0x68, 0xdf, 0x55, 0x0a, 0x7d, 0xef, 0x2a, 0xe3, 0xd9, 0x1b,
-	0xd6, 0x62, 0xc6, 0xa7, 0x0c, 0x6a, 0x05, 0xa0, 0x45, 0x37, 0x75, 0xc5, 0x9a, 0x56, 0x7c, 0x1b,
-	0xfc, 0x3e, 0xf2, 0x30, 0xd5, 0x35, 0x6f, 0x21, 0xa8, 0x10, 0x16, 0xd2, 0x2e, 0x65, 0x4c, 0x1f,
-	0xc2, 0x24, 0x8f, 0x40, 0x5d, 0xbe, 0x7a, 0xb6, 0x6a, 0xa2, 0x35, 0x70, 0x8c, 0x0f, 0x60, 0xe9,
-	0xae, 0xeb, 0xe3, 0xb7, 0xc1, 0x68, 0xb3, 0x02, 0xe5, 0x3c, 0x5f, 0x49, 0x80, 0xe6, 0x9f, 0x1a,
-	0x94, 0xae, 0xbb, 0xd8, 0x0f, 0xf7, 0x3b, 0x5e, 0x1e, 0x83, 0x21, 0xe9, 0xe6, 0x7f, 0x21, 0xfd,
-	0x2e, 0xba, 0x04, 0x73, 0xcc, 0x25, 0x75, 0xc4, 0x1f, 0xaa, 0x75, 0xd5, 0x46, 0x2a, 0x85, 0xc9,
-	0x9b, 0x33, 0x61, 0x38, 0x17, 0xde, 0xd8, 0xb4, 0x67, 0x13, 0xed, 0x64, 0xad, 0x5f, 0x80, 0x05,
-	0xba, 0x87, 0x23, 0xa7, 0x4e, 0x5c, 0x0f, 0xed, 0xc6, 0xbe, 0xb3, 0x2b, 0x41, 0x8a, 0x46, 0x9b,
-	0xb2, 0x4f, 0x70, 0xe9, 0x96, 0x14, 0xaa, 0x00, 0x4c, 0x17, 0x96, 0x72, 0x82, 0x19, 0x69, 0xd3,
-	0x5d, 0x84, 0xe5, 0x2d, 0x8e, 0x32, 0xf2, 0xb1, 0x27, 0xde, 0xa4, 0x52, 0x6d, 0xa0, 0x6b, 0xf3,
-	0x6f, 0x1a, 0x54, 0xf2, 0x4f, 0x4b, 0x8c, 0x5f, 0x82, 0x4e, 0xda, 0xc2, 0x36, 0x4e, 0x4e, 0xbe,
-	0xf7, 0xad, 0x1e, 0x2f, 0x7c, 0x2b, 0x6b, 0xef, 0x38, 0x49, 0x6f, 0xe9, 0x97, 0xa1, 0x98, 0x70,
-	0x33, 0xf4, 0x7d, 0x87, 0xbf, 0xb8, 0x25, 0x85, 0xca, 0x56, 0xf2, 0xda, 0xb6, 0xd4, 0x6b, 0xdb,
-	0xba, 0xad, 0x9e, 0xe3, 0xf6, 0xac, 0xa0, 0x6d, 0xe8, 0xfb, 0x7c, 0xcb, 0xfc, 0x4b, 0x83, 0xe3,
-	0x19, 0x57, 0xbc, 0xce, 0x72, 0x5e, 0xca, 0x3a, 0x6b, 0x87, 0xd4, 0x39, 0xd1, 0x96, 0x75, 0xce,
-	0xb0, 0xa4, 0x30, 0x0c, 0x4b, 0xae, 0xc2, 0x7c, 0x67, 0xba, 0x7c, 0xb7, 0x2e, 0x59, 0xb6, 0x94,
-	0x09, 0x6a, 0x53, 0xfe, 0x42, 0xb0, 0x8b, 0x1d, 0x27, 0x6e, 0xba, 0x75, 0xf3, 0x5b, 0x0d, 0xd6,
-	0xf8, 0x48, 0x53, 0xc4, 0xf9, 0x0c, 0x53, 0x16, 0x92, 0x83, 0xab, 0x07, 0x43, 0xb6, 0x43, 0xdf,
-	0x01, 0x94, 0x33, 0x18, 0x38, 0xd0, 0xd9, 0xf4, 0x60, 0xf8, 0x51, 0x83, 0x33, 0x87, 0x81, 0x91,
-	0x54, 0xb1, 0xe1, 0x98, 0xea, 0x09, 0xe7, 0x7e, 0xa2, 0x26, 0x89, 0xf2, 0x5e, 0x4f, 0xa2, 0x28,
-	0xb3, 0x36, 0xf2, 0x42, 0x52, 0xb3, 0xe7, 0x77, 0xbb, 0xdd, 0xf4, 0x9a, 0x5f, 0x19, 0x98, 0x3f,
-	0x8c, 0x43, 0xb1, 0xdb, 0x96, 0x7e, 0x19, 0xe6, 0x5a, 0x70, 0xd8, 0x41, 0x94, 0x24, 0xa8, 0x28,
-	0x07, 0x54, 0xbb, 0x90, 0xea, 0xd4, 0xed, 0x83, 0x08, 0xd9, 0xb3, 0xbb, 0x1d, 0xab, 0x2c, 0x91,
-	0x0a, 0xff, 0x8a, 0x48, 0x43, 0x8d, 0x9b, 0xcb, 0x50, 0xa4, 0xcc, 0x25, 0x4c, 0x34, 0x86, 0x13,
-	0x33, 0x4f, 0x8c, 0x99, 0x43, 0x9a, 0x43, 0x9c, 0xe0, 0xeb, 0x3b, 0xcc, 0xd3, 0x2f, 0xc1, 0x2c,
-	0x0a, 0x6a, 0xed, 0xf3, 0x93, 0x87, 0x9e, 0x07, 0x14, 0xd4, 0xd4, 0xe9, 0x8f, 0xe0, 0x88, 0xec,
-	0xf5, 0x23, 0x22, 0x6d, 0x2b, 0x3d, 0xd2, 0x26, 0xdb, 0x5b, 0x2a, 0xeb, 0x65, 0x98, 0x0a, 0x23,
-	0x44, 0x5c, 0x16, 0x92, 0xd2, 0xd1, 0xe4, 0x82, 0xa7, 0xd6, 0xe6, 0xef, 0x1a, 0x2c, 0x6d, 0xf9,
-	0xe1, 0x8e, 0xeb, 0xe3, 0x27, 0xe8, 0xff, 0x34, 0xda, 0x07, 0x7f, 0xf0, 0x99, 0x3b, 0x50, 0xce,
-	0x0b, 0x61, 0xa4, 0x03, 0xfd, 0x0a, 0x9c, 0x56, 0xdf, 0xc7, 0x37, 0x4c, 0x97, 0x89, 0xc0, 0xec,
-	0x67, 0x42, 0xc2, 0x2d, 0xc1, 0x51, 0x1a, 0x7b, 0x1e, 0xa2, 0x09, 0xce, 0x29, 0x5b, 0x2d, 0xf5,
-	0x35, 0x28, 0xf2, 0x4e, 0x88, 0x09, 0xa7, 0xbe, 0x4b, 0x5b, 0x0f, 0xc2, 0x39, 0xb9, 0x6b, 0x8b,
-	0x4d, 0x93, 0x41, 0x89, 0xcf, 0x06, 0x39, 0x82, 0x87, 0xf8, 0xee, 0x0c, 0x7b, 0x39, 0x9a, 0xed,
-	0xbc, 0x1c, 0x31, 0x58, 0xca, 0xf1, 0x2a, 0x63, 0xfa, 0x18, 0xa6, 0x92, 0xd4, 0xb7, 0xfe, 0x4f,
-	0x55, 0x32, 0x24, 0xe8, 0x3c, 0xd7, 0xd2, 0xce, 0xf9, 0x27, 0xd6, 0xe9, 0xf5, 0xea, 0x83, 0x67,
-	0x2f, 0x8d, 0xb1, 0xe7, 0x2f, 0x8d, 0xb1, 0xd7, 0x2f, 0x0d, 0xed, 0x69, 0xd3, 0xd0, 0x7e, 0x6e,
-	0x1a, 0xda, 0x1f, 0x4d, 0x43, 0x7b, 0xd6, 0x34, 0xb4, 0x17, 0x4d, 0x43, 0xfb, 0xbb, 0x69, 0x8c,
-	0xbd, 0x6e, 0x1a, 0xda, 0x77, 0xaf, 0x8c, 0xb1, 0x67, 0xaf, 0x8c, 0xb1, 0xe7, 0xaf, 0x8c, 0xb1,
-	0xaf, 0x2e, 0xb0, 0x46, 0x44, 0x7c, 0xcb, 0xf3, 0xc3, 0xb8, 0x56, 0xed, 0xf1, 0xff, 0xfc, 0x62,
-	0x7a, 0x6f, 0xe7, 0x88, 0x68, 0xce, 0xf3, 0xff, 0x04, 0x00, 0x00, 0xff, 0xff, 0x34, 0xae, 0xed,
-	0xb9, 0x72, 0x17, 0x00, 0x00,
+	// 1526 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x59, 0xcb, 0x6f, 0x14, 0x47,
+	0x13, 0xf7, 0xac, 0x1f, 0xd8, 0x65, 0x7b, 0x0d, 0xf3, 0x81, 0xbd, 0x7e, 0x0d, 0x66, 0x3e, 0x99,
+	0xcf, 0x7c, 0x11, 0x63, 0x61, 0x88, 0x94, 0x08, 0x0e, 0x3c, 0x0c, 0x0e, 0x12, 0x42, 0xce, 0x18,
+	0x90, 0x92, 0xcb, 0x78, 0x3c, 0xdb, 0x5e, 0x1a, 0xcf, 0xce, 0x0c, 0xdd, 0x3d, 0x0b, 0x46, 0x39,
+	0x70, 0x8b, 0x94, 0x53, 0xce, 0x39, 0xe4, 0x14, 0x45, 0x39, 0x47, 0xca, 0x21, 0xca, 0x29, 0xb7,
+	0x48, 0xb9, 0x20, 0xe5, 0xc2, 0x11, 0x96, 0x4b, 0x8e, 0xfc, 0x09, 0x51, 0xf7, 0x74, 0xef, 0x63,
+	0x66, 0x76, 0xbd, 0x4b, 0x36, 0x28, 0xc7, 0xee, 0xaa, 0xae, 0xfa, 0x55, 0xd5, 0xaf, 0x6a, 0x7b,
+	0x7a, 0xc1, 0x72, 0x23, 0xbc, 0x1e, 0xb8, 0x55, 0x44, 0x23, 0xd7, 0x43, 0x14, 0x91, 0x1a, 0xf6,
+	0xd0, 0x7a, 0xed, 0xc2, 0x3a, 0x41, 0x8f, 0x63, 0x44, 0x99, 0x43, 0x10, 0x8d, 0xc2, 0x80, 0x22,
+	0x2b, 0x22, 0x21, 0x0b, 0xf5, 0x39, 0x37, 0xc2, 0x56, 0x5a, 0xdf, 0xaa, 0x5d, 0x58, 0x98, 0xe7,
+	0x86, 0xdc, 0x98, 0x3d, 0xe4, 0x87, 0xab, 0x88, 0x52, 0xb7, 0x22, 0xcf, 0x2c, 0x2c, 0x72, 0x91,
+	0x17, 0x56, 0xab, 0x61, 0x90, 0x15, 0x1a, 0x6d, 0x00, 0xb2, 0xf2, 0x25, 0x2e, 0x97, 0x60, 0xb2,
+	0x52, 0xe1, 0x95, 0xe2, 0xe0, 0x20, 0x2b, 0x3a, 0x5d, 0x09, 0xc3, 0x8a, 0x8f, 0xd6, 0xc5, 0x6a,
+	0x2f, 0xde, 0x5f, 0x67, 0xb8, 0x8a, 0x28, 0x73, 0xab, 0x91, 0xf2, 0x9c, 0x56, 0x28, 0xc7, 0xc4,
+	0x65, 0x38, 0x0c, 0x12, 0xb9, 0xf9, 0xaa, 0x00, 0xb3, 0x37, 0x08, 0x72, 0x19, 0xba, 0xab, 0xe0,
+	0xd9, 0x09, 0x0e, 0x7d, 0x09, 0x26, 0x1a, 0x90, 0x4b, 0xda, 0x8a, 0xb6, 0x36, 0x61, 0x37, 0x37,
+	0xf4, 0x8b, 0x30, 0x42, 0x23, 0xe4, 0x95, 0x0a, 0x2b, 0xda, 0xda, 0xe4, 0xc6, 0x69, 0xab, 0x2d,
+	0x65, 0x56, 0xed, 0x82, 0xd5, 0xb0, 0xb7, 0x13, 0x21, 0xcf, 0x16, 0xca, 0xfa, 0x32, 0x80, 0x4a,
+	0x39, 0x2e, 0x97, 0x86, 0x13, 0x9b, 0x72, 0xe7, 0x76, 0x59, 0xf7, 0x60, 0x21, 0xa6, 0x88, 0x38,
+	0x0d, 0x3b, 0x4e, 0x84, 0x48, 0x15, 0x53, 0x8a, 0xc3, 0x80, 0x96, 0x46, 0x56, 0x86, 0xd7, 0x26,
+	0x37, 0x56, 0x85, 0x27, 0x5e, 0x03, 0xee, 0xe4, 0x3e, 0x45, 0xa4, 0xe1, 0x68, 0xbb, 0xa9, 0x6c,
+	0x97, 0xe2, 0x0e, 0x12, 0x3d, 0x04, 0x03, 0x97, 0x51, 0xc0, 0x30, 0x3b, 0xec, 0xe0, 0x68, 0x54,
+	0x38, 0x3a, 0xd7, 0xe6, 0xe8, 0xb6, 0x3c, 0x92, 0xeb, 0x6c, 0x09, 0x77, 0x91, 0x9a, 0x0e, 0xcc,
+	0x65, 0x32, 0x9c, 0xd0, 0x4d, 0xdf, 0x84, 0xa2, 0xca, 0x07, 0x65, 0x2e, 0x8b, 0xa9, 0xc8, 0xf3,
+	0xe4, 0xc6, 0xb2, 0xf0, 0x2d, 0x45, 0xdc, 0xbd, 0xac, 0xc9, 0x8e, 0x50, 0xb2, 0xa7, 0x49, 0xeb,
+	0xd2, 0xdc, 0x87, 0x93, 0x77, 0x30, 0x65, 0x0d, 0xf3, 0xf4, 0x16, 0xf6, 0x19, 0x22, 0xfa, 0x5d,
+	0x98, 0xf1, 0xfc, 0x30, 0x2e, 0x3b, 0x11, 0x09, 0x6b, 0xb8, 0x8c, 0x08, 0x37, 0x3f, 0xbc, 0x56,
+	0x94, 0x39, 0x4c, 0xc8, 0x9a, 0x58, 0xaf, 0xe0, 0x30, 0xb8, 0xbd, 0x69, 0xdd, 0xe0, 0xea, 0xdb,
+	0x52, 0xdb, 0x2e, 0x7a, 0xad, 0x4b, 0x6a, 0x7e, 0xa3, 0xc1, 0xa9, 0x76, 0x47, 0x8a, 0x2a, 0x8b,
+	0x30, 0x11, 0xb9, 0x15, 0xe4, 0x50, 0xfc, 0x2c, 0xa1, 0xca, 0xa8, 0x3d, 0xce, 0x37, 0x76, 0xf0,
+	0x33, 0xc4, 0x8b, 0x2e, 0x84, 0x2c, 0x3c, 0x40, 0x81, 0xe0, 0xcb, 0x84, 0x2d, 0xd4, 0xef, 0xf1,
+	0x0d, 0xfd, 0x26, 0x8c, 0xed, 0x0b, 0xbc, 0x82, 0x0f, 0x93, 0x1b, 0xe7, 0xad, 0x0e, 0xdd, 0x67,
+	0xe5, 0x05, 0x69, 0xcb, 0xc3, 0xe6, 0x2e, 0xcc, 0xa6, 0xb1, 0xc9, 0x24, 0x1b, 0x00, 0x4d, 0x6b,
+	0x22, 0x03, 0x13, 0x76, 0xcb, 0x8e, 0x7e, 0x16, 0x66, 0x02, 0xf4, 0x94, 0x39, 0x19, 0x90, 0xd3,
+	0x7c, 0x7b, 0x5b, 0x01, 0x35, 0x6d, 0x38, 0xb9, 0x85, 0x06, 0x1b, 0xbc, 0xf9, 0x05, 0x9c, 0x4a,
+	0xd9, 0x94, 0xa0, 0x2f, 0x67, 0x40, 0x4f, 0x6e, 0x2c, 0x76, 0x69, 0xb2, 0x77, 0x8a, 0xe8, 0x22,
+	0xfc, 0xa7, 0xd5, 0x7b, 0x4f, 0x8d, 0x6f, 0x7e, 0xda, 0x9e, 0x86, 0x06, 0xe2, 0x8f, 0xd3, 0xa7,
+	0x8e, 0x00, 0xdc, 0x62, 0xf2, 0x27, 0x0d, 0x66, 0xef, 0x47, 0xe5, 0xf7, 0x34, 0x84, 0xce, 0xc1,
+	0x71, 0x82, 0x68, 0x18, 0x13, 0x0f, 0x39, 0x35, 0x44, 0x78, 0x93, 0xca, 0x51, 0x34, 0xa3, 0xf6,
+	0x1f, 0x24, 0xdb, 0xa9, 0x79, 0x35, 0x92, 0x9a, 0x57, 0xbc, 0xb3, 0x33, 0xb0, 0x07, 0xda, 0xd9,
+	0xdf, 0x17, 0xc0, 0xb4, 0x11, 0x8f, 0xe8, 0x46, 0x4c, 0x59, 0x58, 0xdd, 0x41, 0x2e, 0xf1, 0x1e,
+	0x5e, 0x63, 0x8c, 0xe0, 0xbd, 0x98, 0xf5, 0x98, 0xa4, 0x6d, 0x58, 0x45, 0x4f, 0x31, 0x65, 0x38,
+	0xa8, 0x38, 0x9e, 0x30, 0xe3, 0x50, 0x61, 0xc7, 0x71, 0x95, 0x21, 0x31, 0x08, 0x25, 0x47, 0xce,
+	0x28, 0xe5, 0x5c, 0x97, 0x3c, 0x52, 0xfd, 0x16, 0xac, 0x04, 0xe8, 0x49, 0x77, 0x63, 0x49, 0x46,
+	0x97, 0x02, 0xf4, 0xa4, 0xb3, 0x9d, 0xbc, 0x4a, 0x8c, 0xf4, 0x52, 0x89, 0xd1, 0x74, 0x25, 0x0e,
+	0xe0, 0xbf, 0x5d, 0xf3, 0x34, 0xd0, 0xaa, 0x3c, 0xd7, 0x60, 0x76, 0x13, 0xf9, 0xa8, 0x6f, 0xba,
+	0xe6, 0xc5, 0x5b, 0xe8, 0x25, 0xde, 0xe1, 0x1c, 0xe6, 0x65, 0x10, 0x0c, 0x34, 0xc6, 0x2f, 0x35,
+	0xf5, 0xab, 0x75, 0xf3, 0x69, 0x14, 0x12, 0xb6, 0x83, 0x83, 0x83, 0xde, 0x82, 0x5c, 0x6f, 0xeb,
+	0xc9, 0x64, 0x04, 0xf0, 0xcb, 0x0b, 0x77, 0xd9, 0xb4, 0xd5, 0xf3, 0xa5, 0xc0, 0xdc, 0x85, 0x52,
+	0x16, 0xc8, 0x40, 0x63, 0x4d, 0x26, 0x5a, 0xbf, 0x71, 0x2e, 0xc2, 0x04, 0x0f, 0xab, 0xb5, 0x75,
+	0xc6, 0xf9, 0x06, 0xaf, 0x88, 0xb9, 0x29, 0xe6, 0x7a, 0x0e, 0xe2, 0x0f, 0x60, 0x84, 0x2b, 0x49,
+	0x9c, 0x73, 0x1d, 0xb2, 0x63, 0x0b, 0x25, 0xf3, 0x5b, 0x4d, 0x95, 0x79, 0x90, 0xe0, 0x06, 0x38,
+	0x00, 0x77, 0xa1, 0x94, 0xc5, 0x37, 0xd0, 0xda, 0xfc, 0xa8, 0xa9, 0x19, 0xfb, 0x8f, 0xf3, 0x70,
+	0xa0, 0x69, 0xc9, 0x62, 0x1e, 0x68, 0x5a, 0x48, 0x72, 0xdb, 0x69, 0xda, 0xa7, 0x3d, 0xf3, 0xa2,
+	0x79, 0x57, 0x29, 0x74, 0xbd, 0xab, 0x0c, 0xa7, 0xef, 0x2a, 0xbb, 0x30, 0x97, 0xf1, 0x29, 0x83,
+	0x5a, 0x06, 0x68, 0xd0, 0x4d, 0x5d, 0xb1, 0x26, 0x14, 0xdf, 0x7a, 0xbf, 0x8f, 0x3c, 0x4e, 0x75,
+	0xcd, 0x7b, 0x08, 0x2a, 0x84, 0xd9, 0xb4, 0x4b, 0x19, 0xd3, 0x79, 0x18, 0xe5, 0x11, 0xa8, 0xcb,
+	0x57, 0xc7, 0x56, 0x4d, 0xb4, 0x7a, 0x8e, 0xf1, 0x11, 0xcc, 0x3f, 0x70, 0x7d, 0xfc, 0x3e, 0x18,
+	0x6d, 0x2e, 0xc1, 0x42, 0x9e, 0xaf, 0x24, 0x40, 0xf3, 0x77, 0x0d, 0x4a, 0xb7, 0x5c, 0xec, 0x87,
+	0xb5, 0x96, 0x2f, 0xa5, 0xde, 0x90, 0xb4, 0xf3, 0xbf, 0x90, 0xfe, 0x8e, 0xbb, 0x02, 0xd3, 0xcc,
+	0x25, 0x15, 0xc4, 0x3f, 0xac, 0x2b, 0xaa, 0x8d, 0x54, 0x0a, 0xb3, 0x9f, 0x1d, 0xf6, 0x54, 0xa2,
+	0x9d, 0xac, 0xf5, 0x4b, 0x30, 0x4b, 0x0f, 0x70, 0xe4, 0x54, 0x88, 0xeb, 0xa1, 0xfd, 0xd8, 0x77,
+	0xf6, 0x25, 0x48, 0xd1, 0x68, 0xe3, 0xf6, 0x49, 0x2e, 0xdd, 0x92, 0x42, 0x15, 0x80, 0xe9, 0xc2,
+	0x7c, 0x4e, 0x30, 0x03, 0x6d, 0xba, 0xcb, 0xb0, 0xb8, 0xc5, 0x51, 0x46, 0x3e, 0xf6, 0xc4, 0x37,
+	0xb4, 0x54, 0xeb, 0xe9, 0xda, 0xfc, 0x8b, 0x06, 0x4b, 0xf9, 0xa7, 0x25, 0xc6, 0xcf, 0x40, 0x27,
+	0x4d, 0x61, 0x13, 0x27, 0x27, 0xdf, 0xff, 0x3b, 0x7e, 0x13, 0x65, 0xed, 0x9d, 0x20, 0xe9, 0x2d,
+	0xfd, 0x2a, 0x14, 0x13, 0x6e, 0x86, 0xbe, 0xef, 0x30, 0x2c, 0x7f, 0x12, 0x26, 0x37, 0x16, 0xac,
+	0xe4, 0x75, 0xc0, 0x52, 0xaf, 0x03, 0xd6, 0x3d, 0xf5, 0x7c, 0x60, 0x4f, 0x09, 0xda, 0x86, 0xbe,
+	0xcf, 0xb7, 0xcc, 0x3f, 0x34, 0x38, 0x91, 0x71, 0xc5, 0xeb, 0x2c, 0xe7, 0xa5, 0xac, 0xb3, 0x76,
+	0x44, 0x9d, 0x13, 0x6d, 0x59, 0xe7, 0x0c, 0x4b, 0x0a, 0xfd, 0xb0, 0xe4, 0x3a, 0xcc, 0xb4, 0xa6,
+	0xcb, 0x77, 0x2b, 0x92, 0x65, 0xf3, 0x99, 0xa0, 0x36, 0xe5, 0x93, 0x87, 0x5d, 0x6c, 0x39, 0x71,
+	0xc7, 0xad, 0x98, 0x5f, 0x69, 0xb0, 0xca, 0x47, 0x9a, 0x22, 0xce, 0x27, 0x98, 0xb2, 0x90, 0x1c,
+	0x5e, 0x3f, 0xec, 0xb3, 0x1d, 0xba, 0x0e, 0xa0, 0x9c, 0xc1, 0xc0, 0x81, 0x4e, 0xa5, 0x07, 0xc3,
+	0x77, 0x1a, 0x9c, 0x3d, 0x0a, 0x8c, 0xa4, 0x8a, 0x0d, 0xc7, 0x55, 0x4f, 0x38, 0x0f, 0x13, 0x35,
+	0x49, 0x94, 0xff, 0x75, 0x24, 0x8a, 0x32, 0x6b, 0x23, 0x2f, 0x24, 0x65, 0x7b, 0x66, 0xbf, 0xdd,
+	0x4d, 0xa7, 0xf9, 0x95, 0x81, 0xf9, 0xf3, 0x30, 0x14, 0xdb, 0x6d, 0xe9, 0x57, 0x61, 0xba, 0x01,
+	0x87, 0x1d, 0x46, 0x49, 0x82, 0x8a, 0x72, 0x40, 0x35, 0x0b, 0xa9, 0x4e, 0xdd, 0x3b, 0x8c, 0x90,
+	0x3d, 0xb5, 0xdf, 0xb2, 0xca, 0x12, 0xa9, 0xf0, 0xb7, 0x88, 0xd4, 0xd7, 0xb8, 0xb9, 0x0a, 0x45,
+	0xca, 0x5c, 0xc2, 0x44, 0x63, 0x38, 0x31, 0xf3, 0xc4, 0x98, 0x39, 0xa2, 0x39, 0xc4, 0x09, 0xbe,
+	0xbe, 0xcf, 0x3c, 0xfd, 0x0a, 0x4c, 0xa1, 0xa0, 0xdc, 0x3c, 0x3f, 0x7a, 0xe4, 0x79, 0x40, 0x41,
+	0x59, 0x9d, 0xfe, 0x10, 0xc6, 0x64, 0xaf, 0x8f, 0x89, 0xb4, 0x2d, 0x77, 0x48, 0x9b, 0x6c, 0x6f,
+	0xa9, 0xac, 0x2f, 0xc0, 0x78, 0x18, 0x21, 0xe2, 0xb2, 0x90, 0x94, 0x8e, 0x25, 0x17, 0x3c, 0xb5,
+	0xd6, 0x67, 0x61, 0x8c, 0x20, 0x97, 0x86, 0x41, 0x69, 0x5c, 0x48, 0xe4, 0xca, 0xfc, 0x55, 0x83,
+	0xf9, 0x2d, 0x3f, 0xdc, 0x73, 0x7d, 0xfc, 0x0c, 0xfd, 0x9b, 0x46, 0x7e, 0xef, 0x1f, 0x82, 0xe6,
+	0x1e, 0x2c, 0xe4, 0x85, 0x30, 0xd0, 0x41, 0x7f, 0x0d, 0xce, 0xa8, 0xdf, 0xcd, 0x77, 0x4c, 0x97,
+	0x89, 0xc0, 0xec, 0x66, 0x42, 0xc2, 0x2d, 0xc1, 0x31, 0x1a, 0x7b, 0x1e, 0xa2, 0x09, 0xce, 0x71,
+	0x5b, 0x2d, 0xf5, 0x55, 0x28, 0xf2, 0x0e, 0x89, 0x09, 0x6f, 0x09, 0x51, 0x4a, 0x79, 0x9b, 0x90,
+	0xbb, 0x76, 0x52, 0x51, 0x06, 0x25, 0x3e, 0x33, 0xe4, 0x68, 0xee, 0xe3, 0xf7, 0xa8, 0xdf, 0x4b,
+	0xd3, 0x54, 0xeb, 0xa5, 0x89, 0xc1, 0x7c, 0x8e, 0x57, 0x19, 0xd3, 0x47, 0x30, 0x9e, 0xa4, 0xbe,
+	0xf1, 0x6e, 0xb5, 0x94, 0x21, 0x41, 0xeb, 0xb9, 0x86, 0x76, 0xce, 0x5b, 0x59, 0xab, 0xd7, 0xeb,
+	0x8f, 0x5e, 0xbc, 0x36, 0x86, 0x5e, 0xbe, 0x36, 0x86, 0xde, 0xbe, 0x36, 0xb4, 0xe7, 0x75, 0x43,
+	0xfb, 0xa1, 0x6e, 0x68, 0xbf, 0xd5, 0x0d, 0xed, 0x45, 0xdd, 0xd0, 0x5e, 0xd5, 0x0d, 0xed, 0xcf,
+	0xba, 0x31, 0xf4, 0xb6, 0x6e, 0x68, 0x5f, 0xbf, 0x31, 0x86, 0x5e, 0xbc, 0x31, 0x86, 0x5e, 0xbe,
+	0x31, 0x86, 0x3e, 0xbf, 0xc4, 0xaa, 0x11, 0xf1, 0x2d, 0xf1, 0x94, 0xb9, 0xde, 0xe1, 0x7f, 0x80,
+	0xcb, 0xe9, 0xbd, 0xbd, 0x31, 0xd1, 0xb4, 0x17, 0xff, 0x0a, 0x00, 0x00, 0xff, 0xff, 0x9e, 0xa9,
+	0x72, 0x97, 0x3a, 0x18, 0x00, 0x00,
 }
 
 func (this *CreateNamespaceRequest) Equal(that interface{}) bool {
@@ -2580,6 +2647,35 @@ func (this *CreateNamespaceResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *ListNamespacesFilter) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ListNamespacesFilter)
+	if !ok {
+		that2, ok := that.(ListNamespacesFilter)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.CloudProviders) != len(that1.CloudProviders) {
+		return false
+	}
+	for i := range this.CloudProviders {
+		if this.CloudProviders[i] != that1.CloudProviders[i] {
+			return false
+		}
+	}
+	return true
+}
 func (this *ListNamespacesRequest) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -2603,6 +2699,9 @@ func (this *ListNamespacesRequest) Equal(that interface{}) bool {
 		return false
 	}
 	if this.PageToken != that1.PageToken {
+		return false
+	}
+	if !this.Filter.Equal(that1.Filter) {
 		return false
 	}
 	return true
@@ -3553,6 +3652,9 @@ func (this *FailoverRecord) Equal(that interface{}) bool {
 	if this.Operator != that1.Operator {
 		return false
 	}
+	if this.Reason != that1.Reason {
+		return false
+	}
 	return true
 }
 func (this *GlobalizeNamespaceRequest) Equal(that interface{}) bool {
@@ -3757,14 +3859,27 @@ func (this *CreateNamespaceResponse) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *ListNamespacesFilter) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespaceservice.ListNamespacesFilter{")
+	s = append(s, "CloudProviders: "+fmt.Sprintf("%#v", this.CloudProviders)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
 func (this *ListNamespacesRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 6)
+	s := make([]string, 0, 7)
 	s = append(s, "&namespaceservice.ListNamespacesRequest{")
 	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
 	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	if this.Filter != nil {
+		s = append(s, "Filter: "+fmt.Sprintf("%#v", this.Filter)+",\n")
+	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -4172,7 +4287,7 @@ func (this *FailoverRecord) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 11)
+	s := make([]string, 0, 12)
 	s = append(s, "&namespaceservice.FailoverRecord{")
 	s = append(s, "FailoverType: "+fmt.Sprintf("%#v", this.FailoverType)+",\n")
 	if this.SourceRegion != nil {
@@ -4189,6 +4304,7 @@ func (this *FailoverRecord) GoString() string {
 	}
 	s = append(s, "Status: "+fmt.Sprintf("%#v", this.Status)+",\n")
 	s = append(s, "Operator: "+fmt.Sprintf("%#v", this.Operator)+",\n")
+	s = append(s, "Reason: "+fmt.Sprintf("%#v", this.Reason)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -4385,6 +4501,47 @@ func (m *CreateNamespaceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
+func (m *ListNamespacesFilter) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListNamespacesFilter) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListNamespacesFilter) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.CloudProviders) > 0 {
+		dAtA4 := make([]byte, len(m.CloudProviders)*10)
+		var j3 int
+		for _, num := range m.CloudProviders {
+			for num >= 1<<7 {
+				dAtA4[j3] = uint8(uint64(num)&0x7f | 0x80)
+				num >>= 7
+				j3++
+			}
+			dAtA4[j3] = uint8(num)
+			j3++
+		}
+		i -= j3
+		copy(dAtA[i:], dAtA4[:j3])
+		i = encodeVarintRequestResponse(dAtA, i, uint64(j3))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *ListNamespacesRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -4405,6 +4562,18 @@ func (m *ListNamespacesRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.Filter != nil {
+		{
+			size, err := m.Filter.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
 	if len(m.PageToken) > 0 {
 		i -= len(m.PageToken)
 		copy(dAtA[i:], m.PageToken)
@@ -5769,6 +5938,13 @@ func (m *FailoverRecord) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.Reason) > 0 {
+		i -= len(m.Reason)
+		copy(dAtA[i:], m.Reason)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Reason)))
+		i--
+		dAtA[i] = 0x42
+	}
 	if len(m.Operator) > 0 {
 		i -= len(m.Operator)
 		copy(dAtA[i:], m.Operator)
@@ -6141,6 +6317,22 @@ func (m *CreateNamespaceResponse) Size() (n int) {
 	return n
 }
 
+func (m *ListNamespacesFilter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.CloudProviders) > 0 {
+		l = 0
+		for _, e := range m.CloudProviders {
+			l += sovRequestResponse(uint64(e))
+		}
+		n += 1 + sovRequestResponse(uint64(l)) + l
+	}
+	return n
+}
+
 func (m *ListNamespacesRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -6152,6 +6344,10 @@ func (m *ListNamespacesRequest) Size() (n int) {
 	}
 	l = len(m.PageToken)
 	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.Filter != nil {
+		l = m.Filter.Size()
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
 	return n
@@ -6756,6 +6952,10 @@ func (m *FailoverRecord) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
+	l = len(m.Reason)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
 	return n
 }
 
@@ -6905,6 +7105,16 @@ func (this *CreateNamespaceResponse) String() string {
 	}, "")
 	return s
 }
+func (this *ListNamespacesFilter) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ListNamespacesFilter{`,
+		`CloudProviders:` + fmt.Sprintf("%v", this.CloudProviders) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *ListNamespacesRequest) String() string {
 	if this == nil {
 		return "nil"
@@ -6912,6 +7122,7 @@ func (this *ListNamespacesRequest) String() string {
 	s := strings.Join([]string{`&ListNamespacesRequest{`,
 		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
 		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`Filter:` + strings.Replace(this.Filter.String(), "ListNamespacesFilter", "ListNamespacesFilter", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -7049,7 +7260,7 @@ func (this *CreateExportSinkRequest) String() string {
 	}
 	s := strings.Join([]string{`&CreateExportSinkRequest{`,
 		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
-		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ExportSinkSpec", "v13.ExportSinkSpec", 1) + `,`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ExportSinkSpec", "v14.ExportSinkSpec", 1) + `,`,
 		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
 		`}`,
 	}, "")
@@ -7081,7 +7292,7 @@ func (this *GetExportSinkResponse) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&GetExportSinkResponse{`,
-		`Sink:` + strings.Replace(fmt.Sprintf("%v", this.Sink), "ExportSink", "v13.ExportSink", 1) + `,`,
+		`Sink:` + strings.Replace(fmt.Sprintf("%v", this.Sink), "ExportSink", "v14.ExportSink", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -7115,7 +7326,7 @@ func (this *UpdateExportSinkRequest) String() string {
 	}
 	s := strings.Join([]string{`&UpdateExportSinkRequest{`,
 		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
-		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ExportSinkSpec", "v13.ExportSinkSpec", 1) + `,`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ExportSinkSpec", "v14.ExportSinkSpec", 1) + `,`,
 		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
 		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
 		`}`,
@@ -7173,7 +7384,7 @@ func (this *GetExportSinksResponse) String() string {
 	}
 	repeatedStringForSinks := "[]*ExportSink{"
 	for _, f := range this.Sinks {
-		repeatedStringForSinks += strings.Replace(fmt.Sprintf("%v", f), "ExportSink", "v13.ExportSink", 1) + ","
+		repeatedStringForSinks += strings.Replace(fmt.Sprintf("%v", f), "ExportSink", "v14.ExportSink", 1) + ","
 	}
 	repeatedStringForSinks += "}"
 	s := strings.Join([]string{`&GetExportSinksResponse{`,
@@ -7189,7 +7400,7 @@ func (this *ValidateExportSinkRequest) String() string {
 	}
 	s := strings.Join([]string{`&ValidateExportSinkRequest{`,
 		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
-		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ExportSinkSpec", "v13.ExportSinkSpec", 1) + `,`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ExportSinkSpec", "v14.ExportSinkSpec", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -7210,7 +7421,7 @@ func (this *FailoverNamespaceRequest) String() string {
 	s := strings.Join([]string{`&FailoverNamespaceRequest{`,
 		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
 		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
-		`TargetRegion:` + strings.Replace(fmt.Sprintf("%v", this.TargetRegion), "RegionID", "v14.RegionID", 1) + `,`,
+		`TargetRegion:` + strings.Replace(fmt.Sprintf("%v", this.TargetRegion), "RegionID", "v13.RegionID", 1) + `,`,
 		`SkipGracefulFailover:` + fmt.Sprintf("%v", this.SkipGracefulFailover) + `,`,
 		`}`,
 	}, "")
@@ -7257,8 +7468,8 @@ func (this *ReplicationStatus) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&ReplicationStatus{`,
-		`SourceRegion:` + strings.Replace(fmt.Sprintf("%v", this.SourceRegion), "RegionID", "v14.RegionID", 1) + `,`,
-		`TargetRegion:` + strings.Replace(fmt.Sprintf("%v", this.TargetRegion), "RegionID", "v14.RegionID", 1) + `,`,
+		`SourceRegion:` + strings.Replace(fmt.Sprintf("%v", this.SourceRegion), "RegionID", "v13.RegionID", 1) + `,`,
+		`TargetRegion:` + strings.Replace(fmt.Sprintf("%v", this.TargetRegion), "RegionID", "v13.RegionID", 1) + `,`,
 		`ReplicationLag:` + strings.Replace(fmt.Sprintf("%v", this.ReplicationLag), "Duration", "types.Duration", 1) + `,`,
 		`}`,
 	}, "")
@@ -7298,12 +7509,13 @@ func (this *FailoverRecord) String() string {
 	}
 	s := strings.Join([]string{`&FailoverRecord{`,
 		`FailoverType:` + fmt.Sprintf("%v", this.FailoverType) + `,`,
-		`SourceRegion:` + strings.Replace(fmt.Sprintf("%v", this.SourceRegion), "RegionID", "v14.RegionID", 1) + `,`,
-		`TargetRegion:` + strings.Replace(fmt.Sprintf("%v", this.TargetRegion), "RegionID", "v14.RegionID", 1) + `,`,
+		`SourceRegion:` + strings.Replace(fmt.Sprintf("%v", this.SourceRegion), "RegionID", "v13.RegionID", 1) + `,`,
+		`TargetRegion:` + strings.Replace(fmt.Sprintf("%v", this.TargetRegion), "RegionID", "v13.RegionID", 1) + `,`,
 		`StartTimeUtc:` + strings.Replace(fmt.Sprintf("%v", this.StartTimeUtc), "Timestamp", "types.Timestamp", 1) + `,`,
 		`EndTimeUtc:` + strings.Replace(fmt.Sprintf("%v", this.EndTimeUtc), "Timestamp", "types.Timestamp", 1) + `,`,
 		`Status:` + fmt.Sprintf("%v", this.Status) + `,`,
 		`Operator:` + fmt.Sprintf("%v", this.Operator) + `,`,
+		`Reason:` + fmt.Sprintf("%v", this.Reason) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -7315,7 +7527,7 @@ func (this *GlobalizeNamespaceRequest) String() string {
 	s := strings.Join([]string{`&GlobalizeNamespaceRequest{`,
 		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
 		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
-		`TargetRegion:` + strings.Replace(fmt.Sprintf("%v", this.TargetRegion), "RegionID", "v14.RegionID", 1) + `,`,
+		`TargetRegion:` + strings.Replace(fmt.Sprintf("%v", this.TargetRegion), "RegionID", "v13.RegionID", 1) + `,`,
 		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
 		`}`,
 	}, "")
@@ -7370,7 +7582,7 @@ func (this *ListReplicaStatusResponse) String() string {
 	}
 	repeatedStringForStatuses := "[]*ReplicaStatus{"
 	for _, f := range this.Statuses {
-		repeatedStringForStatuses += strings.Replace(fmt.Sprintf("%v", f), "ReplicaStatus", "v14.ReplicaStatus", 1) + ","
+		repeatedStringForStatuses += strings.Replace(fmt.Sprintf("%v", f), "ReplicaStatus", "v13.ReplicaStatus", 1) + ","
 	}
 	repeatedStringForStatuses += "}"
 	s := strings.Join([]string{`&ListReplicaStatusResponse{`,
@@ -7698,6 +7910,128 @@ func (m *CreateNamespaceResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *ListNamespacesFilter) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListNamespacesFilter: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListNamespacesFilter: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType == 0 {
+				var v v13.RegionID_CloudProvider
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowRequestResponse
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					v |= v13.RegionID_CloudProvider(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				m.CloudProviders = append(m.CloudProviders, v)
+			} else if wireType == 2 {
+				var packedLen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowRequestResponse
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					packedLen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if packedLen < 0 {
+					return ErrInvalidLengthRequestResponse
+				}
+				postIndex := iNdEx + packedLen
+				if postIndex < 0 {
+					return ErrInvalidLengthRequestResponse
+				}
+				if postIndex > l {
+					return io.ErrUnexpectedEOF
+				}
+				var elementCount int
+				if elementCount != 0 && len(m.CloudProviders) == 0 {
+					m.CloudProviders = make([]v13.RegionID_CloudProvider, 0, elementCount)
+				}
+				for iNdEx < postIndex {
+					var v v13.RegionID_CloudProvider
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowRequestResponse
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						v |= v13.RegionID_CloudProvider(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					m.CloudProviders = append(m.CloudProviders, v)
+				}
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field CloudProviders", wireType)
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *ListNamespacesRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -7777,6 +8111,42 @@ func (m *ListNamespacesRequest) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.PageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Filter", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Filter == nil {
+				m.Filter = &ListNamespacesFilter{}
+			}
+			if err := m.Filter.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -9221,7 +9591,7 @@ func (m *CreateExportSinkRequest) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Spec == nil {
-				m.Spec = &v13.ExportSinkSpec{}
+				m.Spec = &v14.ExportSinkSpec{}
 			}
 			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -9548,7 +9918,7 @@ func (m *GetExportSinkResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Sink == nil {
-				m.Sink = &v13.ExportSink{}
+				m.Sink = &v14.ExportSink{}
 			}
 			if err := m.Sink.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -9939,7 +10309,7 @@ func (m *UpdateExportSinkRequest) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Spec == nil {
-				m.Spec = &v13.ExportSinkSpec{}
+				m.Spec = &v14.ExportSinkSpec{}
 			}
 			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -10569,7 +10939,7 @@ func (m *GetExportSinksResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Sinks = append(m.Sinks, &v13.ExportSink{})
+			m.Sinks = append(m.Sinks, &v14.ExportSink{})
 			if err := m.Sinks[len(m.Sinks)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -10721,7 +11091,7 @@ func (m *ValidateExportSinkRequest) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Spec == nil {
-				m.Spec = &v13.ExportSinkSpec{}
+				m.Spec = &v14.ExportSinkSpec{}
 			}
 			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -10927,7 +11297,7 @@ func (m *FailoverNamespaceRequest) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.TargetRegion == nil {
-				m.TargetRegion = &v14.RegionID{}
+				m.TargetRegion = &v13.RegionID{}
 			}
 			if err := m.TargetRegion.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -11333,7 +11703,7 @@ func (m *ReplicationStatus) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.SourceRegion == nil {
-				m.SourceRegion = &v14.RegionID{}
+				m.SourceRegion = &v13.RegionID{}
 			}
 			if err := m.SourceRegion.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -11369,7 +11739,7 @@ func (m *ReplicationStatus) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.TargetRegion == nil {
-				m.TargetRegion = &v14.RegionID{}
+				m.TargetRegion = &v13.RegionID{}
 			}
 			if err := m.TargetRegion.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -11737,7 +12107,7 @@ func (m *FailoverRecord) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.FailoverType |= v14.FailoverType(b&0x7F) << shift
+				m.FailoverType |= v13.FailoverType(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -11772,7 +12142,7 @@ func (m *FailoverRecord) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.SourceRegion == nil {
-				m.SourceRegion = &v14.RegionID{}
+				m.SourceRegion = &v13.RegionID{}
 			}
 			if err := m.SourceRegion.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -11808,7 +12178,7 @@ func (m *FailoverRecord) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.TargetRegion == nil {
-				m.TargetRegion = &v14.RegionID{}
+				m.TargetRegion = &v13.RegionID{}
 			}
 			if err := m.TargetRegion.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -11900,7 +12270,7 @@ func (m *FailoverRecord) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Status |= v14.FailoverStatus(b&0x7F) << shift
+				m.Status |= v13.FailoverStatus(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -11936,6 +12306,38 @@ func (m *FailoverRecord) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Operator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Reason", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Reason = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -12084,7 +12486,7 @@ func (m *GlobalizeNamespaceRequest) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.TargetRegion == nil {
-				m.TargetRegion = &v14.RegionID{}
+				m.TargetRegion = &v13.RegionID{}
 			}
 			if err := m.TargetRegion.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -12621,7 +13023,7 @@ func (m *ListReplicaStatusResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Statuses = append(m.Statuses, &v14.ReplicaStatus{})
+			m.Statuses = append(m.Statuses, &v13.ReplicaStatus{})
 			if err := m.Statuses[len(m.Statuses)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}

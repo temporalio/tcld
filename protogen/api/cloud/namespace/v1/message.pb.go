@@ -4,14 +4,18 @@
 package namespace
 
 import (
+	bytes "bytes"
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
 	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 	types "github.com/gogo/protobuf/types"
+	v1 "github.com/temporalio/tcld/protogen/api/cloud/resource/v1"
+	v11 "github.com/temporalio/tcld/protogen/api/cloud/sink/v1"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
+	strconv "strconv"
 	strings "strings"
 )
 
@@ -25,6 +29,184 @@ var _ = math.Inf
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
+
+type NamespaceSpec_SearchAttributeType int32
+
+const (
+	SEARCH_ATTRIBUTE_TYPE_UNSPECIFIED  NamespaceSpec_SearchAttributeType = 0
+	SEARCH_ATTRIBUTE_TYPE_TEXT         NamespaceSpec_SearchAttributeType = 1
+	SEARCH_ATTRIBUTE_TYPE_KEYWORD      NamespaceSpec_SearchAttributeType = 2
+	SEARCH_ATTRIBUTE_TYPE_INT          NamespaceSpec_SearchAttributeType = 3
+	SEARCH_ATTRIBUTE_TYPE_DOUBLE       NamespaceSpec_SearchAttributeType = 4
+	SEARCH_ATTRIBUTE_TYPE_BOOL         NamespaceSpec_SearchAttributeType = 5
+	SEARCH_ATTRIBUTE_TYPE_DATETIME     NamespaceSpec_SearchAttributeType = 6
+	SEARCH_ATTRIBUTE_TYPE_KEYWORD_LIST NamespaceSpec_SearchAttributeType = 7
+)
+
+var NamespaceSpec_SearchAttributeType_name = map[int32]string{
+	0: "SearchAttributeTypeUnspecified",
+	1: "SearchAttributeTypeText",
+	2: "SearchAttributeTypeKeyword",
+	3: "SearchAttributeTypeInt",
+	4: "SearchAttributeTypeDouble",
+	5: "SearchAttributeTypeBool",
+	6: "SearchAttributeTypeDatetime",
+	7: "SearchAttributeTypeKeywordList",
+}
+
+var NamespaceSpec_SearchAttributeType_value = map[string]int32{
+	"SearchAttributeTypeUnspecified": 0,
+	"SearchAttributeTypeText":        1,
+	"SearchAttributeTypeKeyword":     2,
+	"SearchAttributeTypeInt":         3,
+	"SearchAttributeTypeDouble":      4,
+	"SearchAttributeTypeBool":        5,
+	"SearchAttributeTypeDatetime":    6,
+	"SearchAttributeTypeKeywordList": 7,
+}
+
+func (NamespaceSpec_SearchAttributeType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{6, 0}
+}
+
+type NamespaceRegionStatus_State int32
+
+const (
+	STATE_UNSPECIFIED NamespaceRegionStatus_State = 0
+	STATE_ADDING      NamespaceRegionStatus_State = 1
+	STATE_ACTIVE      NamespaceRegionStatus_State = 2
+	STATE_PASSIVE     NamespaceRegionStatus_State = 3
+	STATE_REMOVING    NamespaceRegionStatus_State = 4
+	STATE_FAILED      NamespaceRegionStatus_State = 5
+)
+
+var NamespaceRegionStatus_State_name = map[int32]string{
+	0: "StateUnspecified",
+	1: "StateAdding",
+	2: "StateActive",
+	3: "StatePassive",
+	4: "StateRemoving",
+	5: "StateFailed",
+}
+
+var NamespaceRegionStatus_State_value = map[string]int32{
+	"StateUnspecified": 0,
+	"StateAdding":      1,
+	"StateActive":      2,
+	"StatePassive":     3,
+	"StateRemoving":    4,
+	"StateFailed":      5,
+}
+
+func (NamespaceRegionStatus_State) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{12, 0}
+}
+
+type ExportSink_Health int32
+
+const (
+	HEALTH_UNSPECIFIED              ExportSink_Health = 0
+	HEALTH_OK                       ExportSink_Health = 1
+	HEALTH_ERROR_INTERNAL           ExportSink_Health = 2
+	HEALTH_ERROR_USER_CONFIGURATION ExportSink_Health = 3
+)
+
+var ExportSink_Health_name = map[int32]string{
+	0: "HealthUnspecified",
+	1: "HealthOk",
+	2: "HealthErrorInternal",
+	3: "HealthErrorUserConfiguration",
+}
+
+var ExportSink_Health_value = map[string]int32{
+	"HealthUnspecified":            0,
+	"HealthOk":                     1,
+	"HealthErrorInternal":          2,
+	"HealthErrorUserConfiguration": 3,
+}
+
+func (ExportSink_Health) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{14, 0}
+}
+
+type Migration_State int32
+
+const (
+	MIGRATION_STATE_UNSPECIFIED             Migration_State = 0
+	MIGRATION_STATE_MIGRATION_STARTED       Migration_State = 1
+	MIGRATION_STATE_REPLICATION_IN_PROGRESS Migration_State = 2
+	MIGRATION_STATE_WAITING_FOR_HANDOVER    Migration_State = 3
+	MIGRATION_STATE_HANDOVER_IN_PROGRESS    Migration_State = 4
+	MIGRATION_STATE_READY_FOR_CONFIRMATION  Migration_State = 5
+	MIGRATION_STATE_COMPLETE                Migration_State = 6
+	MIGRATION_STATE_FAILED                  Migration_State = 7
+	MIGRATION_STATE_ABORT_IN_PROGRESS       Migration_State = 8
+	MIGRATION_STATE_ABORTED                 Migration_State = 9
+	MIGRATION_STATE_CONFIRM_IN_PROGRESS     Migration_State = 10
+)
+
+var Migration_State_name = map[int32]string{
+	0:  "MigrationStateUnspecified",
+	1:  "MigrationStateMigrationStarted",
+	2:  "MigrationStateReplicationInProgress",
+	3:  "MigrationStateWaitingForHandover",
+	4:  "MigrationStateHandoverInProgress",
+	5:  "MigrationStateReadyForConfirmation",
+	6:  "MigrationStateComplete",
+	7:  "MigrationStateFailed",
+	8:  "MigrationStateAbortInProgress",
+	9:  "MigrationStateAborted",
+	10: "MigrationStateConfirmInProgress",
+}
+
+var Migration_State_value = map[string]int32{
+	"MigrationStateUnspecified":           0,
+	"MigrationStateMigrationStarted":      1,
+	"MigrationStateReplicationInProgress": 2,
+	"MigrationStateWaitingForHandover":    3,
+	"MigrationStateHandoverInProgress":    4,
+	"MigrationStateReadyForConfirmation":  5,
+	"MigrationStateComplete":              6,
+	"MigrationStateFailed":                7,
+	"MigrationStateAbortInProgress":       8,
+	"MigrationStateAborted":               9,
+	"MigrationStateConfirmInProgress":     10,
+}
+
+func (Migration_State) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{17, 0}
+}
+
+type MigrationReplica_State int32
+
+const (
+	REPLICA_STATE_UNSPECIFIED         MigrationReplica_State = 0
+	REPLICA_STATE_ACTIVE              MigrationReplica_State = 1
+	REPLICA_STATE_PASSIVE_OUT_OF_SYNC MigrationReplica_State = 2
+	REPLICA_STATE_PASSIVE_IN_SYNC     MigrationReplica_State = 3
+	// If aborted migration, or if replication failed.
+	REPLICA_STATE_ABANDONED MigrationReplica_State = 4
+)
+
+var MigrationReplica_State_name = map[int32]string{
+	0: "ReplicaStateUnspecified",
+	1: "ReplicaStateActive",
+	2: "ReplicaStatePassiveOutOfSync",
+	3: "ReplicaStatePassiveInSync",
+	4: "ReplicaStateAbandoned",
+}
+
+var MigrationReplica_State_value = map[string]int32{
+	"ReplicaStateUnspecified":      0,
+	"ReplicaStateActive":           1,
+	"ReplicaStatePassiveOutOfSync": 2,
+	"ReplicaStatePassiveInSync":    3,
+	"ReplicaStateAbandoned":        4,
+}
+
+func (MigrationReplica_State) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{18, 0}
+}
 
 type CertificateFilterSpec struct {
 	// The common_name in the certificate.
@@ -104,14 +286,20 @@ func (m *CertificateFilterSpec) GetSubjectAlternativeName() string {
 type MtlsAuthSpec struct {
 	// The base64 encoded ca cert(s) in PEM format that the clients can use for authentication and authorization.
 	// This must only be one value, but the CA can have a chain.
-	AcceptedClientCa string `protobuf:"bytes,1,opt,name=accepted_client_ca,json=acceptedClientCa,proto3" json:"accepted_client_ca,omitempty"`
+	//
+	// (-- api-linter: core::0140::base64=disabled --)
+	// Deprecated: Use accepted_client_ca instead. Will be ignored when accepted_client_ca is set.
+	AcceptedClientCaDeprecated string `protobuf:"bytes,1,opt,name=accepted_client_ca_deprecated,json=acceptedClientCaDeprecated,proto3" json:"accepted_client_ca_deprecated,omitempty"`
+	// The ca cert(s) in PEM format that the clients can use for authentication and authorization.
+	// This must only be one value, but the CA can have a chain.
+	AcceptedClientCa []byte `protobuf:"bytes,4,opt,name=accepted_client_ca,json=acceptedClientCa,proto3" json:"accepted_client_ca,omitempty"`
 	// Certificate filters which, if specified, only allow connections from client certificates whose distinguished name properties match at least one of the filters.
 	// This allows limiting access to specific end-entity certificates.
 	// Optional, default is empty.
 	CertificateFilters []*CertificateFilterSpec `protobuf:"bytes,2,rep,name=certificate_filters,json=certificateFilters,proto3" json:"certificate_filters,omitempty"`
 	// Flag to enable mTLS auth (default: disabled).
 	// Note: disabling mTLS auth will cause existing mTLS connections to fail.
-	// temporal:versioning:min_version=2024-05-13-00
+	// temporal:versioning:min_version=v0.2.0
 	Enabled bool `protobuf:"varint,3,opt,name=enabled,proto3" json:"enabled,omitempty"`
 }
 
@@ -147,11 +335,18 @@ func (m *MtlsAuthSpec) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MtlsAuthSpec proto.InternalMessageInfo
 
-func (m *MtlsAuthSpec) GetAcceptedClientCa() string {
+func (m *MtlsAuthSpec) GetAcceptedClientCaDeprecated() string {
+	if m != nil {
+		return m.AcceptedClientCaDeprecated
+	}
+	return ""
+}
+
+func (m *MtlsAuthSpec) GetAcceptedClientCa() []byte {
 	if m != nil {
 		return m.AcceptedClientCa
 	}
-	return ""
+	return nil
 }
 
 func (m *MtlsAuthSpec) GetCertificateFilters() []*CertificateFilterSpec {
@@ -213,6 +408,50 @@ func (m *ApiKeyAuthSpec) GetEnabled() bool {
 	return false
 }
 
+type LifecycleSpec struct {
+	// Flag to enable delete protection for the namespace.
+	EnableDeleteProtection bool `protobuf:"varint,1,opt,name=enable_delete_protection,json=enableDeleteProtection,proto3" json:"enable_delete_protection,omitempty"`
+}
+
+func (m *LifecycleSpec) Reset()      { *m = LifecycleSpec{} }
+func (*LifecycleSpec) ProtoMessage() {}
+func (*LifecycleSpec) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{3}
+}
+func (m *LifecycleSpec) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *LifecycleSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_LifecycleSpec.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *LifecycleSpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LifecycleSpec.Merge(m, src)
+}
+func (m *LifecycleSpec) XXX_Size() int {
+	return m.Size()
+}
+func (m *LifecycleSpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_LifecycleSpec.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LifecycleSpec proto.InternalMessageInfo
+
+func (m *LifecycleSpec) GetEnableDeleteProtection() bool {
+	if m != nil {
+		return m.EnableDeleteProtection
+	}
+	return false
+}
+
 type CodecServerSpec struct {
 	// The codec server endpoint.
 	Endpoint string `protobuf:"bytes,1,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
@@ -225,7 +464,7 @@ type CodecServerSpec struct {
 func (m *CodecServerSpec) Reset()      { *m = CodecServerSpec{} }
 func (*CodecServerSpec) ProtoMessage() {}
 func (*CodecServerSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ea8dce281a9b52e, []int{3}
+	return fileDescriptor_4ea8dce281a9b52e, []int{4}
 }
 func (m *CodecServerSpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -275,17 +514,63 @@ func (m *CodecServerSpec) GetIncludeCrossOriginCredentials() bool {
 	return false
 }
 
+type DisasterRecoverySpec struct {
+	// Flag to disable managed failover for the namespace.
+	DisableManagedFailover bool `protobuf:"varint,1,opt,name=disable_managed_failover,json=disableManagedFailover,proto3" json:"disable_managed_failover,omitempty"`
+}
+
+func (m *DisasterRecoverySpec) Reset()      { *m = DisasterRecoverySpec{} }
+func (*DisasterRecoverySpec) ProtoMessage() {}
+func (*DisasterRecoverySpec) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{5}
+}
+func (m *DisasterRecoverySpec) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DisasterRecoverySpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DisasterRecoverySpec.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DisasterRecoverySpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DisasterRecoverySpec.Merge(m, src)
+}
+func (m *DisasterRecoverySpec) XXX_Size() int {
+	return m.Size()
+}
+func (m *DisasterRecoverySpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_DisasterRecoverySpec.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DisasterRecoverySpec proto.InternalMessageInfo
+
+func (m *DisasterRecoverySpec) GetDisableManagedFailover() bool {
+	if m != nil {
+		return m.DisableManagedFailover
+	}
+	return false
+}
+
 type NamespaceSpec struct {
 	// The name to use for the namespace.
 	// This will create a namespace that's available at '<name>.<account>.github.com/temporalio/tcld/protogen:7233'.
 	// The name is immutable. Once set, it cannot be changed.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// The ids of the regions where the namespace should be available.
+	// The GetRegions API can be used to get the list of valid region ids.
 	// Specifying more than one region makes the namespace "global", which is currently a preview only feature with restricted access.
 	// Please reach out to Temporal support for more information on global namespaces.
 	// When provisioned the global namespace will be active on the first region in the list and passive on the rest.
 	// Number of supported regions is 2.
 	// The regions is immutable. Once set, it cannot be changed.
+	// Example: ["aws-us-west-2"].
 	Regions []string `protobuf:"bytes,2,rep,name=regions,proto3" json:"regions,omitempty"`
 	// The number of days the workflows data will be retained for.
 	// Changes to the retention period may impact your storage costs.
@@ -296,23 +581,36 @@ type NamespaceSpec struct {
 	MtlsAuth *MtlsAuthSpec `protobuf:"bytes,4,opt,name=mtls_auth,json=mtlsAuth,proto3" json:"mtls_auth,omitempty"`
 	// The API key auth configuration for the namespace.
 	// If unspecified, API keys will be disabled.
-	// temporal:versioning:min_version=2024-05-13-00
+	// temporal:versioning:min_version=v0.2.0
 	ApiKeyAuth *ApiKeyAuthSpec `protobuf:"bytes,7,opt,name=api_key_auth,json=apiKeyAuth,proto3" json:"api_key_auth,omitempty"`
 	// The custom search attributes to use for the namespace.
 	// The name of the attribute is the key and the type is the value.
 	// Supported attribute types: text, keyword, int, double, bool, datetime, keyword_list.
 	// NOTE: currently deleting a search attribute is not supported.
 	// Optional, default is empty.
-	CustomSearchAttributes map[string]string `protobuf:"bytes,5,rep,name=custom_search_attributes,json=customSearchAttributes,proto3" json:"custom_search_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// Deprecated: Use search_attributes instead.
+	CustomSearchAttributes map[string]string `protobuf:"bytes,5,rep,name=custom_search_attributes,json=customSearchAttributes,proto3" json:"custom_search_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"` // Deprecated: Do not use.
+	// The custom search attributes to use for the namespace.
+	// The name of the attribute is the key and the type is the value.
+	// Note: currently deleting a search attribute is not supported.
+	// Optional, default is empty.
+	// temporal:enums:replaces=custom_search_attributes
+	SearchAttributes map[string]NamespaceSpec_SearchAttributeType `protobuf:"bytes,8,rep,name=search_attributes,json=searchAttributes,proto3" json:"search_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3,enum=temporal.api.cloud.namespace.v1.NamespaceSpec_SearchAttributeType"`
 	// Codec server spec used by UI to decode payloads for all users interacting with this namespace.
 	// Optional, default is unset.
 	CodecServer *CodecServerSpec `protobuf:"bytes,6,opt,name=codec_server,json=codecServer,proto3" json:"codec_server,omitempty"`
+	// The lifecycle configuration for the namespace.
+	// temporal:versioning:min_version=v0.4.0
+	Lifecycle *LifecycleSpec `protobuf:"bytes,9,opt,name=lifecycle,proto3" json:"lifecycle,omitempty"`
+	// The disaster recovery configuration for the namespace.
+	// temporal:versioning:min_version=v0.4.0
+	DisasterRecovery *DisasterRecoverySpec `protobuf:"bytes,10,opt,name=disaster_recovery,json=disasterRecovery,proto3" json:"disaster_recovery,omitempty"`
 }
 
 func (m *NamespaceSpec) Reset()      { *m = NamespaceSpec{} }
 func (*NamespaceSpec) ProtoMessage() {}
 func (*NamespaceSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ea8dce281a9b52e, []int{4}
+	return fileDescriptor_4ea8dce281a9b52e, []int{6}
 }
 func (m *NamespaceSpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -376,6 +674,7 @@ func (m *NamespaceSpec) GetApiKeyAuth() *ApiKeyAuthSpec {
 	return nil
 }
 
+// Deprecated: Do not use.
 func (m *NamespaceSpec) GetCustomSearchAttributes() map[string]string {
 	if m != nil {
 		return m.CustomSearchAttributes
@@ -383,9 +682,30 @@ func (m *NamespaceSpec) GetCustomSearchAttributes() map[string]string {
 	return nil
 }
 
+func (m *NamespaceSpec) GetSearchAttributes() map[string]NamespaceSpec_SearchAttributeType {
+	if m != nil {
+		return m.SearchAttributes
+	}
+	return nil
+}
+
 func (m *NamespaceSpec) GetCodecServer() *CodecServerSpec {
 	if m != nil {
 		return m.CodecServer
+	}
+	return nil
+}
+
+func (m *NamespaceSpec) GetLifecycle() *LifecycleSpec {
+	if m != nil {
+		return m.Lifecycle
+	}
+	return nil
+}
+
+func (m *NamespaceSpec) GetDisasterRecovery() *DisasterRecoverySpec {
+	if m != nil {
+		return m.DisasterRecovery
 	}
 	return nil
 }
@@ -402,7 +722,7 @@ type Endpoints struct {
 func (m *Endpoints) Reset()      { *m = Endpoints{} }
 func (*Endpoints) ProtoMessage() {}
 func (*Endpoints) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ea8dce281a9b52e, []int{5}
+	return fileDescriptor_4ea8dce281a9b52e, []int{7}
 }
 func (m *Endpoints) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -461,7 +781,7 @@ type Limits struct {
 func (m *Limits) Reset()      { *m = Limits{} }
 func (*Limits) ProtoMessage() {}
 func (*Limits) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ea8dce281a9b52e, []int{6}
+	return fileDescriptor_4ea8dce281a9b52e, []int{8}
 }
 func (m *Limits) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -507,7 +827,7 @@ type AWSPrivateLinkInfo struct {
 func (m *AWSPrivateLinkInfo) Reset()      { *m = AWSPrivateLinkInfo{} }
 func (*AWSPrivateLinkInfo) ProtoMessage() {}
 func (*AWSPrivateLinkInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ea8dce281a9b52e, []int{7}
+	return fileDescriptor_4ea8dce281a9b52e, []int{9}
 }
 func (m *AWSPrivateLinkInfo) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -561,7 +881,7 @@ type PrivateConnectivity struct {
 func (m *PrivateConnectivity) Reset()      { *m = PrivateConnectivity{} }
 func (*PrivateConnectivity) ProtoMessage() {}
 func (*PrivateConnectivity) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ea8dce281a9b52e, []int{8}
+	return fileDescriptor_4ea8dce281a9b52e, []int{10}
 }
 func (m *PrivateConnectivity) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -613,9 +933,12 @@ type Namespace struct {
 	// The namespace specification.
 	Spec *NamespaceSpec `protobuf:"bytes,3,opt,name=spec,proto3" json:"spec,omitempty"`
 	// The current state of the namespace.
-	// Possible values: activating, activationfailed, active, updating, updatefailed, deleting, deletefailed, deleted, suspending, suspendfailed, suspended.
+	// Deprecated: Use state instead.
+	StateDeprecated string `protobuf:"bytes,4,opt,name=state_deprecated,json=stateDeprecated,proto3" json:"state_deprecated,omitempty"` // Deprecated: Do not use.
+	// The current state of the namespace.
 	// For any failed state, reach out to Temporal Cloud support for remediation.
-	State string `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
+	// temporal:enums:replaces=state_deprecated
+	State v1.ResourceState `protobuf:"varint,13,opt,name=state,proto3,enum=temporal.api.cloud.resource.v1.ResourceState" json:"state,omitempty"`
 	// The id of the async operation that is creating/updating/deleting the namespace, if any.
 	AsyncOperationId string `protobuf:"bytes,5,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
 	// The endpoints for the namespace.
@@ -639,7 +962,7 @@ type Namespace struct {
 func (m *Namespace) Reset()      { *m = Namespace{} }
 func (*Namespace) ProtoMessage() {}
 func (*Namespace) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ea8dce281a9b52e, []int{9}
+	return fileDescriptor_4ea8dce281a9b52e, []int{11}
 }
 func (m *Namespace) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -689,11 +1012,19 @@ func (m *Namespace) GetSpec() *NamespaceSpec {
 	return nil
 }
 
-func (m *Namespace) GetState() string {
+// Deprecated: Do not use.
+func (m *Namespace) GetStateDeprecated() string {
+	if m != nil {
+		return m.StateDeprecated
+	}
+	return ""
+}
+
+func (m *Namespace) GetState() v1.ResourceState {
 	if m != nil {
 		return m.State
 	}
-	return ""
+	return v1.RESOURCE_STATE_UNSPECIFIED
 }
 
 func (m *Namespace) GetAsyncOperationId() string {
@@ -756,7 +1087,11 @@ type NamespaceRegionStatus struct {
 	// The current state of the namespace region.
 	// Possible values: adding, active, passive, removing, failed.
 	// For any failed state, reach out to Temporal Cloud support for remediation.
-	State string `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	// Deprecated: Use state instead.
+	StateDeprecated string `protobuf:"bytes,1,opt,name=state_deprecated,json=stateDeprecated,proto3" json:"state_deprecated,omitempty"` // Deprecated: Do not use.
+	// The current state of the namespace region.
+	// temporal:enums:replaces=state_deprecated
+	State NamespaceRegionStatus_State `protobuf:"varint,3,opt,name=state,proto3,enum=temporal.api.cloud.namespace.v1.NamespaceRegionStatus_State" json:"state,omitempty"`
 	// The id of the async operation that is making changes to where the namespace is available, if any.
 	AsyncOperationId string `protobuf:"bytes,2,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
 }
@@ -764,7 +1099,7 @@ type NamespaceRegionStatus struct {
 func (m *NamespaceRegionStatus) Reset()      { *m = NamespaceRegionStatus{} }
 func (*NamespaceRegionStatus) ProtoMessage() {}
 func (*NamespaceRegionStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ea8dce281a9b52e, []int{10}
+	return fileDescriptor_4ea8dce281a9b52e, []int{12}
 }
 func (m *NamespaceRegionStatus) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -793,11 +1128,19 @@ func (m *NamespaceRegionStatus) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_NamespaceRegionStatus proto.InternalMessageInfo
 
-func (m *NamespaceRegionStatus) GetState() string {
+// Deprecated: Do not use.
+func (m *NamespaceRegionStatus) GetStateDeprecated() string {
+	if m != nil {
+		return m.StateDeprecated
+	}
+	return ""
+}
+
+func (m *NamespaceRegionStatus) GetState() NamespaceRegionStatus_State {
 	if m != nil {
 		return m.State
 	}
-	return ""
+	return STATE_UNSPECIFIED
 }
 
 func (m *NamespaceRegionStatus) GetAsyncOperationId() string {
@@ -807,13 +1150,488 @@ func (m *NamespaceRegionStatus) GetAsyncOperationId() string {
 	return ""
 }
 
+type ExportSinkSpec struct {
+	// The unique name of the export sink.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// A flag indicating whether the export sink is enabled or not.
+	Enabled bool `protobuf:"varint,2,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	// The S3 configuration details when destination_type is S3.
+	S3 *v11.S3Spec `protobuf:"bytes,3,opt,name=s3,proto3" json:"s3,omitempty"`
+	// This is a feature under development. We will allow GCS sink support for GCP Namespaces.
+	// The GCS configuration details when destination_type is GCS.
+	Gcs *v11.GCSSpec `protobuf:"bytes,4,opt,name=gcs,proto3" json:"gcs,omitempty"`
+}
+
+func (m *ExportSinkSpec) Reset()      { *m = ExportSinkSpec{} }
+func (*ExportSinkSpec) ProtoMessage() {}
+func (*ExportSinkSpec) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{13}
+}
+func (m *ExportSinkSpec) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ExportSinkSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ExportSinkSpec.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ExportSinkSpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExportSinkSpec.Merge(m, src)
+}
+func (m *ExportSinkSpec) XXX_Size() int {
+	return m.Size()
+}
+func (m *ExportSinkSpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExportSinkSpec.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExportSinkSpec proto.InternalMessageInfo
+
+func (m *ExportSinkSpec) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ExportSinkSpec) GetEnabled() bool {
+	if m != nil {
+		return m.Enabled
+	}
+	return false
+}
+
+func (m *ExportSinkSpec) GetS3() *v11.S3Spec {
+	if m != nil {
+		return m.S3
+	}
+	return nil
+}
+
+func (m *ExportSinkSpec) GetGcs() *v11.GCSSpec {
+	if m != nil {
+		return m.Gcs
+	}
+	return nil
+}
+
+type ExportSink struct {
+	// The unique name of the export sink, once set it can't be changed
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The version of the export sink resource.
+	ResourceVersion string `protobuf:"bytes,2,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	// The current state of the export sink.
+	State v1.ResourceState `protobuf:"varint,3,opt,name=state,proto3,enum=temporal.api.cloud.resource.v1.ResourceState" json:"state,omitempty"`
+	// The specification details of the export sink.
+	Spec *ExportSinkSpec `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
+	// The health status of the export sink.
+	Health ExportSink_Health `protobuf:"varint,5,opt,name=health,proto3,enum=temporal.api.cloud.namespace.v1.ExportSink_Health" json:"health,omitempty"`
+	// An error message describing any issues with the export sink, if applicable.
+	ErrorMessage string `protobuf:"bytes,6,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	// The timestamp of the latest successful data export.
+	LatestDataExportTime *types.Timestamp `protobuf:"bytes,7,opt,name=latest_data_export_time,json=latestDataExportTime,proto3" json:"latest_data_export_time,omitempty"`
+	// The timestamp of the last health check performed on the export sink.
+	LastHealthCheckTime *types.Timestamp `protobuf:"bytes,8,opt,name=last_health_check_time,json=lastHealthCheckTime,proto3" json:"last_health_check_time,omitempty"`
+}
+
+func (m *ExportSink) Reset()      { *m = ExportSink{} }
+func (*ExportSink) ProtoMessage() {}
+func (*ExportSink) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{14}
+}
+func (m *ExportSink) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ExportSink) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ExportSink.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ExportSink) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExportSink.Merge(m, src)
+}
+func (m *ExportSink) XXX_Size() int {
+	return m.Size()
+}
+func (m *ExportSink) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExportSink.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExportSink proto.InternalMessageInfo
+
+func (m *ExportSink) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ExportSink) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *ExportSink) GetState() v1.ResourceState {
+	if m != nil {
+		return m.State
+	}
+	return v1.RESOURCE_STATE_UNSPECIFIED
+}
+
+func (m *ExportSink) GetSpec() *ExportSinkSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *ExportSink) GetHealth() ExportSink_Health {
+	if m != nil {
+		return m.Health
+	}
+	return HEALTH_UNSPECIFIED
+}
+
+func (m *ExportSink) GetErrorMessage() string {
+	if m != nil {
+		return m.ErrorMessage
+	}
+	return ""
+}
+
+func (m *ExportSink) GetLatestDataExportTime() *types.Timestamp {
+	if m != nil {
+		return m.LatestDataExportTime
+	}
+	return nil
+}
+
+func (m *ExportSink) GetLastHealthCheckTime() *types.Timestamp {
+	if m != nil {
+		return m.LastHealthCheckTime
+	}
+	return nil
+}
+
+type MigrationSpec struct {
+	// The id of the migration endpoint used for connecting
+	// the self-hosted Temporal cluster to Temporal cloud.
+	MigrationEndpointId string `protobuf:"bytes,1,opt,name=migration_endpoint_id,json=migrationEndpointId,proto3" json:"migration_endpoint_id,omitempty"`
+	// Types that are valid to be assigned to Spec:
+	//
+	//	*MigrationSpec_ToCloudSpec
+	Spec isMigrationSpec_Spec `protobuf_oneof:"spec"`
+}
+
+func (m *MigrationSpec) Reset()      { *m = MigrationSpec{} }
+func (*MigrationSpec) ProtoMessage() {}
+func (*MigrationSpec) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{15}
+}
+func (m *MigrationSpec) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MigrationSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MigrationSpec.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MigrationSpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MigrationSpec.Merge(m, src)
+}
+func (m *MigrationSpec) XXX_Size() int {
+	return m.Size()
+}
+func (m *MigrationSpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_MigrationSpec.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MigrationSpec proto.InternalMessageInfo
+
+type isMigrationSpec_Spec interface {
+	isMigrationSpec_Spec()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type MigrationSpec_ToCloudSpec struct {
+	ToCloudSpec *MigrationToCloudSpec `protobuf:"bytes,2,opt,name=to_cloud_spec,json=toCloudSpec,proto3,oneof" json:"to_cloud_spec,omitempty"`
+}
+
+func (*MigrationSpec_ToCloudSpec) isMigrationSpec_Spec() {}
+
+func (m *MigrationSpec) GetSpec() isMigrationSpec_Spec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *MigrationSpec) GetMigrationEndpointId() string {
+	if m != nil {
+		return m.MigrationEndpointId
+	}
+	return ""
+}
+
+func (m *MigrationSpec) GetToCloudSpec() *MigrationToCloudSpec {
+	if x, ok := m.GetSpec().(*MigrationSpec_ToCloudSpec); ok {
+		return x.ToCloudSpec
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*MigrationSpec) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*MigrationSpec_ToCloudSpec)(nil),
+	}
+}
+
+type MigrationToCloudSpec struct {
+	// The source namespace name for the migration.
+	SourceNamespace string `protobuf:"bytes,1,opt,name=source_namespace,json=sourceNamespace,proto3" json:"source_namespace,omitempty"`
+	// Details for the namespace that will be created as a result of the migration.
+	TargetNamespaceSpec *NamespaceSpec `protobuf:"bytes,2,opt,name=target_namespace_spec,json=targetNamespaceSpec,proto3" json:"target_namespace_spec,omitempty"`
+}
+
+func (m *MigrationToCloudSpec) Reset()      { *m = MigrationToCloudSpec{} }
+func (*MigrationToCloudSpec) ProtoMessage() {}
+func (*MigrationToCloudSpec) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{16}
+}
+func (m *MigrationToCloudSpec) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MigrationToCloudSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MigrationToCloudSpec.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MigrationToCloudSpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MigrationToCloudSpec.Merge(m, src)
+}
+func (m *MigrationToCloudSpec) XXX_Size() int {
+	return m.Size()
+}
+func (m *MigrationToCloudSpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_MigrationToCloudSpec.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MigrationToCloudSpec proto.InternalMessageInfo
+
+func (m *MigrationToCloudSpec) GetSourceNamespace() string {
+	if m != nil {
+		return m.SourceNamespace
+	}
+	return ""
+}
+
+func (m *MigrationToCloudSpec) GetTargetNamespaceSpec() *NamespaceSpec {
+	if m != nil {
+		return m.TargetNamespaceSpec
+	}
+	return nil
+}
+
+type Migration struct {
+	// The unique id of this migration.
+	MigrationId string `protobuf:"bytes,1,opt,name=migration_id,json=migrationId,proto3" json:"migration_id,omitempty"`
+	// The MigrationSpec provided in the StartMigrationRequest.
+	Spec *MigrationSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	// The state of the migration.
+	State Migration_State `protobuf:"varint,3,opt,name=state,proto3,enum=temporal.api.cloud.namespace.v1.Migration_State" json:"state,omitempty"`
+	// The source and destination replicas involved in the migration.
+	Replicas []*MigrationReplica `protobuf:"bytes,4,rep,name=replicas,proto3" json:"replicas,omitempty"`
+	// The number of workflows replicated.
+	ReplicatedWorkflows int64 `protobuf:"varint,5,opt,name=replicated_workflows,json=replicatedWorkflows,proto3" json:"replicated_workflows,omitempty"`
+	// The number of workflows remaining.
+	ReplicatedWorkflowsRemaining int64 `protobuf:"varint,6,opt,name=replicated_workflows_remaining,json=replicatedWorkflowsRemaining,proto3" json:"replicated_workflows_remaining,omitempty"`
+	// An error message if the migration failed.
+	FailureMessage string `protobuf:"bytes,7,opt,name=failure_message,json=failureMessage,proto3" json:"failure_message,omitempty"`
+}
+
+func (m *Migration) Reset()      { *m = Migration{} }
+func (*Migration) ProtoMessage() {}
+func (*Migration) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{17}
+}
+func (m *Migration) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Migration) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Migration.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Migration) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Migration.Merge(m, src)
+}
+func (m *Migration) XXX_Size() int {
+	return m.Size()
+}
+func (m *Migration) XXX_DiscardUnknown() {
+	xxx_messageInfo_Migration.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Migration proto.InternalMessageInfo
+
+func (m *Migration) GetMigrationId() string {
+	if m != nil {
+		return m.MigrationId
+	}
+	return ""
+}
+
+func (m *Migration) GetSpec() *MigrationSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *Migration) GetState() Migration_State {
+	if m != nil {
+		return m.State
+	}
+	return MIGRATION_STATE_UNSPECIFIED
+}
+
+func (m *Migration) GetReplicas() []*MigrationReplica {
+	if m != nil {
+		return m.Replicas
+	}
+	return nil
+}
+
+func (m *Migration) GetReplicatedWorkflows() int64 {
+	if m != nil {
+		return m.ReplicatedWorkflows
+	}
+	return 0
+}
+
+func (m *Migration) GetReplicatedWorkflowsRemaining() int64 {
+	if m != nil {
+		return m.ReplicatedWorkflowsRemaining
+	}
+	return 0
+}
+
+func (m *Migration) GetFailureMessage() string {
+	if m != nil {
+		return m.FailureMessage
+	}
+	return ""
+}
+
+type MigrationReplica struct {
+	// The id of this replica. Indicates whether the replica is on the source
+	// or destination side of the migration.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The state of this replica.
+	State MigrationReplica_State `protobuf:"varint,2,opt,name=state,proto3,enum=temporal.api.cloud.namespace.v1.MigrationReplica_State" json:"state,omitempty"`
+}
+
+func (m *MigrationReplica) Reset()      { *m = MigrationReplica{} }
+func (*MigrationReplica) ProtoMessage() {}
+func (*MigrationReplica) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ea8dce281a9b52e, []int{18}
+}
+func (m *MigrationReplica) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MigrationReplica) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MigrationReplica.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MigrationReplica) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MigrationReplica.Merge(m, src)
+}
+func (m *MigrationReplica) XXX_Size() int {
+	return m.Size()
+}
+func (m *MigrationReplica) XXX_DiscardUnknown() {
+	xxx_messageInfo_MigrationReplica.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MigrationReplica proto.InternalMessageInfo
+
+func (m *MigrationReplica) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *MigrationReplica) GetState() MigrationReplica_State {
+	if m != nil {
+		return m.State
+	}
+	return REPLICA_STATE_UNSPECIFIED
+}
+
 func init() {
+	proto.RegisterEnum("temporal.api.cloud.namespace.v1.NamespaceSpec_SearchAttributeType", NamespaceSpec_SearchAttributeType_name, NamespaceSpec_SearchAttributeType_value)
+	proto.RegisterEnum("temporal.api.cloud.namespace.v1.NamespaceRegionStatus_State", NamespaceRegionStatus_State_name, NamespaceRegionStatus_State_value)
+	proto.RegisterEnum("temporal.api.cloud.namespace.v1.ExportSink_Health", ExportSink_Health_name, ExportSink_Health_value)
+	proto.RegisterEnum("temporal.api.cloud.namespace.v1.Migration_State", Migration_State_name, Migration_State_value)
+	proto.RegisterEnum("temporal.api.cloud.namespace.v1.MigrationReplica_State", MigrationReplica_State_name, MigrationReplica_State_value)
 	proto.RegisterType((*CertificateFilterSpec)(nil), "temporal.api.cloud.namespace.v1.CertificateFilterSpec")
 	proto.RegisterType((*MtlsAuthSpec)(nil), "temporal.api.cloud.namespace.v1.MtlsAuthSpec")
 	proto.RegisterType((*ApiKeyAuthSpec)(nil), "temporal.api.cloud.namespace.v1.ApiKeyAuthSpec")
+	proto.RegisterType((*LifecycleSpec)(nil), "temporal.api.cloud.namespace.v1.LifecycleSpec")
 	proto.RegisterType((*CodecServerSpec)(nil), "temporal.api.cloud.namespace.v1.CodecServerSpec")
+	proto.RegisterType((*DisasterRecoverySpec)(nil), "temporal.api.cloud.namespace.v1.DisasterRecoverySpec")
 	proto.RegisterType((*NamespaceSpec)(nil), "temporal.api.cloud.namespace.v1.NamespaceSpec")
 	proto.RegisterMapType((map[string]string)(nil), "temporal.api.cloud.namespace.v1.NamespaceSpec.CustomSearchAttributesEntry")
+	proto.RegisterMapType((map[string]NamespaceSpec_SearchAttributeType)(nil), "temporal.api.cloud.namespace.v1.NamespaceSpec.SearchAttributesEntry")
 	proto.RegisterType((*Endpoints)(nil), "temporal.api.cloud.namespace.v1.Endpoints")
 	proto.RegisterType((*Limits)(nil), "temporal.api.cloud.namespace.v1.Limits")
 	proto.RegisterType((*AWSPrivateLinkInfo)(nil), "temporal.api.cloud.namespace.v1.AWSPrivateLinkInfo")
@@ -821,6 +1639,12 @@ func init() {
 	proto.RegisterType((*Namespace)(nil), "temporal.api.cloud.namespace.v1.Namespace")
 	proto.RegisterMapType((map[string]*NamespaceRegionStatus)(nil), "temporal.api.cloud.namespace.v1.Namespace.RegionStatusEntry")
 	proto.RegisterType((*NamespaceRegionStatus)(nil), "temporal.api.cloud.namespace.v1.NamespaceRegionStatus")
+	proto.RegisterType((*ExportSinkSpec)(nil), "temporal.api.cloud.namespace.v1.ExportSinkSpec")
+	proto.RegisterType((*ExportSink)(nil), "temporal.api.cloud.namespace.v1.ExportSink")
+	proto.RegisterType((*MigrationSpec)(nil), "temporal.api.cloud.namespace.v1.MigrationSpec")
+	proto.RegisterType((*MigrationToCloudSpec)(nil), "temporal.api.cloud.namespace.v1.MigrationToCloudSpec")
+	proto.RegisterType((*Migration)(nil), "temporal.api.cloud.namespace.v1.Migration")
+	proto.RegisterType((*MigrationReplica)(nil), "temporal.api.cloud.namespace.v1.MigrationReplica")
 }
 
 func init() {
@@ -828,86 +1652,198 @@ func init() {
 }
 
 var fileDescriptor_4ea8dce281a9b52e = []byte{
-	// 1224 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x56, 0x4b, 0x6f, 0x1c, 0xc5,
-	0x13, 0xf7, 0x38, 0xb6, 0xe3, 0xad, 0x5d, 0xc7, 0x4e, 0x27, 0xf6, 0x7f, 0xe4, 0x3f, 0x6c, 0xc2,
-	0x22, 0x44, 0x88, 0xc8, 0x2e, 0x71, 0x22, 0x88, 0x08, 0x08, 0x6d, 0x96, 0x90, 0x07, 0x79, 0x31,
-	0x1b, 0x40, 0x02, 0xa1, 0x56, 0xbb, 0xa7, 0xbc, 0x69, 0x3c, 0xd3, 0x3d, 0xea, 0xee, 0x5d, 0x6b,
-	0xe1, 0xc2, 0x01, 0x89, 0x0b, 0x07, 0x3e, 0x03, 0x27, 0xc4, 0x97, 0xe0, 0x08, 0xc7, 0x1c, 0x73,
-	0x42, 0x64, 0x73, 0xe1, 0x98, 0x8f, 0x80, 0xba, 0x67, 0x66, 0x1f, 0xc4, 0xb0, 0xe1, 0x36, 0x55,
-	0xf5, 0xab, 0x9a, 0x7a, 0xfc, 0xba, 0xba, 0xe1, 0x9c, 0xc5, 0x34, 0x53, 0x9a, 0x25, 0x2d, 0x96,
-	0x89, 0x16, 0x4f, 0x54, 0x3f, 0x6e, 0x49, 0x96, 0xa2, 0xc9, 0x18, 0xc7, 0xd6, 0xe0, 0x7c, 0x2b,
-	0x45, 0x63, 0x58, 0x0f, 0x9b, 0x99, 0x56, 0x56, 0x91, 0x53, 0x25, 0xbc, 0xc9, 0x32, 0xd1, 0xf4,
-	0xf0, 0xe6, 0x18, 0xde, 0x1c, 0x9c, 0xdf, 0x3e, 0xd5, 0x53, 0xaa, 0x97, 0x60, 0xcb, 0xc3, 0x77,
-	0xfb, 0x7b, 0x2d, 0x2b, 0x52, 0x34, 0x96, 0xa5, 0x59, 0x1e, 0xa1, 0xf1, 0x6b, 0x00, 0x9b, 0x1d,
-	0xd4, 0x56, 0xec, 0x09, 0xce, 0x2c, 0x7e, 0x20, 0x12, 0x8b, 0xba, 0x9b, 0x21, 0x27, 0xa7, 0xa0,
-	0xca, 0x55, 0x9a, 0x2a, 0x49, 0x5d, 0xc4, 0x30, 0x38, 0x1d, 0x9c, 0xa9, 0x44, 0x90, 0xab, 0xee,
-	0xb0, 0x14, 0x49, 0x03, 0x6a, 0x4a, 0xf7, 0x98, 0x14, 0x5f, 0x31, 0x2b, 0x94, 0x0c, 0x17, 0x3d,
-	0x62, 0x46, 0x47, 0x5a, 0x70, 0x62, 0x5a, 0x66, 0x09, 0xed, 0x4b, 0x61, 0xc3, 0x23, 0x1e, 0x4a,
-	0x66, 0x4d, 0x1f, 0x4b, 0x61, 0xc9, 0x25, 0x08, 0x4d, 0x7f, 0xf7, 0x4b, 0xe4, 0x96, 0x32, 0x97,
-	0x8a, 0x64, 0x56, 0x0c, 0x30, 0x4f, 0x61, 0xc9, 0x7b, 0x6d, 0x15, 0xf6, 0xf6, 0xc4, 0xec, 0xd2,
-	0x69, 0xfc, 0x12, 0x40, 0xed, 0xb6, 0x4d, 0x4c, 0xbb, 0x6f, 0x1f, 0xf8, 0x02, 0x5e, 0x07, 0xc2,
-	0x38, 0xc7, 0xcc, 0x62, 0x4c, 0x79, 0x22, 0x50, 0x5a, 0xca, 0x59, 0x51, 0xc7, 0x46, 0x69, 0xe9,
-	0x78, 0x43, 0x87, 0x91, 0x1e, 0x9c, 0xe0, 0x93, 0x3e, 0xd0, 0x3d, 0xdf, 0x08, 0x13, 0x2e, 0x9e,
-	0x3e, 0x72, 0xa6, 0xba, 0xf3, 0x66, 0x73, 0x4e, 0xa3, 0x9b, 0x87, 0xf6, 0x30, 0x22, 0xfc, 0xef,
-	0x6a, 0x43, 0x42, 0x38, 0x8a, 0x92, 0xed, 0x26, 0x18, 0xfb, 0x36, 0xac, 0x46, 0xa5, 0xd8, 0x38,
-	0x0b, 0xc7, 0xda, 0x99, 0xf8, 0x10, 0x87, 0xe3, 0x12, 0xa6, 0xb0, 0xc1, 0x2c, 0xf6, 0xc7, 0x00,
-	0xd6, 0x3b, 0x2a, 0x46, 0xde, 0x45, 0x3d, 0x28, 0x26, 0xb6, 0x0d, 0xab, 0x28, 0xe3, 0x4c, 0x09,
-	0x69, 0x8b, 0x32, 0xc7, 0x32, 0x39, 0x0b, 0xc7, 0x33, 0x66, 0x0c, 0x75, 0x75, 0x1b, 0x43, 0xad,
-	0xda, 0xc7, 0x7c, 0x62, 0xab, 0xd1, 0xba, 0x33, 0xb4, 0xbd, 0xfe, 0xbe, 0x53, 0x93, 0x6b, 0x70,
-	0x5a, 0x48, 0x9e, 0xf4, 0x63, 0xa4, 0x5c, 0x2b, 0x63, 0xa8, 0xd2, 0xa2, 0x27, 0x24, 0xe5, 0x1a,
-	0x63, 0x94, 0x56, 0xb0, 0xc4, 0x14, 0xa9, 0xbf, 0x58, 0xe0, 0x3a, 0x0e, 0x76, 0xd7, 0xa3, 0x3a,
-	0x13, 0x50, 0xe3, 0xe7, 0x25, 0x58, 0xbb, 0x53, 0x76, 0xc9, 0xa7, 0x48, 0x60, 0x69, 0x8a, 0x4d,
-	0xfe, 0xdb, 0x15, 0xa9, 0xb1, 0x27, 0x94, 0xcc, 0xbb, 0x5d, 0x89, 0x4a, 0x91, 0xbc, 0x02, 0xc7,
-	0x34, 0x5a, 0x17, 0x4d, 0x49, 0x1a, 0xb3, 0x61, 0xfe, 0xdb, 0xe5, 0x68, 0x6d, 0xac, 0x7d, 0x9f,
-	0x0d, 0x0d, 0xb9, 0x09, 0x95, 0xd4, 0x26, 0x86, 0xb2, 0xbe, 0x7d, 0xe0, 0x49, 0x52, 0xdd, 0x39,
-	0x37, 0x77, 0x60, 0xd3, 0x54, 0x89, 0x56, 0xd3, 0x42, 0x22, 0x1f, 0x41, 0x8d, 0x65, 0x82, 0xee,
-	0xe3, 0x30, 0x0f, 0x77, 0xd4, 0x87, 0x6b, 0xcd, 0x0d, 0x37, 0x3b, 0xb8, 0x08, 0xd8, 0x58, 0x26,
-	0xdf, 0x06, 0x10, 0xf2, 0xbe, 0xb1, 0x2a, 0xa5, 0x06, 0x99, 0xe6, 0x0f, 0x28, 0xb3, 0x56, 0x8b,
-	0xdd, 0xbe, 0x45, 0x13, 0x2e, 0x7b, 0x7e, 0xdd, 0x9c, 0x1b, 0x7f, 0xa6, 0x8d, 0xcd, 0x8e, 0x0f,
-	0xd7, 0xf5, 0xd1, 0xda, 0xe3, 0x60, 0x57, 0xa5, 0xd5, 0xc3, 0x68, 0x8b, 0x1f, 0x6a, 0x24, 0x5d,
-	0xa8, 0x71, 0x47, 0x18, 0x6a, 0x3c, 0x63, 0xc2, 0x15, 0x5f, 0xd9, 0x1b, 0xf3, 0x99, 0x3d, 0xcb,
-	0xb2, 0xa8, 0xca, 0x27, 0x8a, 0xed, 0x1b, 0xf0, 0xff, 0x7f, 0xc9, 0x85, 0x6c, 0xc0, 0x91, 0x7d,
-	0x1c, 0x16, 0xd3, 0x76, 0x9f, 0xe4, 0x24, 0x2c, 0x0f, 0x58, 0xd2, 0xc7, 0x62, 0x5b, 0xe4, 0xc2,
-	0xdb, 0x8b, 0x97, 0x82, 0xc6, 0xd7, 0x50, 0xb9, 0x5a, 0xb0, 0xd5, 0xb8, 0xe5, 0x73, 0x80, 0xbb,
-	0x94, 0xc5, 0xb1, 0x46, 0x63, 0xca, 0xe5, 0x73, 0x80, 0xbb, 0xed, 0x5c, 0xe3, 0xf8, 0xec, 0x67,
-	0xde, 0xd3, 0x19, 0x1f, 0xc3, 0xf2, 0x98, 0xeb, 0xce, 0x70, 0x4d, 0x67, 0xbc, 0xc4, 0xbe, 0x04,
-	0xb5, 0x19, 0x58, 0xbe, 0x7d, 0xaa, 0xbd, 0x09, 0xa4, 0xd1, 0x86, 0x95, 0x5b, 0x22, 0x15, 0xd6,
-	0x90, 0xb7, 0x20, 0x64, 0xdc, 0x51, 0xcb, 0xd0, 0x0c, 0x35, 0x35, 0xc8, 0x95, 0x8c, 0x69, 0xe2,
-	0x8c, 0x3e, 0x8d, 0xe5, 0x68, 0xb3, 0xb0, 0xdf, 0x43, 0xdd, 0xf5, 0x56, 0xef, 0xd9, 0xf8, 0x2e,
-	0x00, 0xd2, 0xfe, 0xb4, 0x7b, 0x4f, 0x8b, 0x01, 0xb3, 0x78, 0x4b, 0xc8, 0xfd, 0x1b, 0x72, 0x4f,
-	0x91, 0x8b, 0xb0, 0xc5, 0x92, 0x44, 0x1d, 0x60, 0x4c, 0x33, 0x2d, 0x24, 0x17, 0x19, 0x4b, 0x28,
-	0xd3, 0xd2, 0x15, 0xe5, 0xc8, 0x7e, 0xb2, 0xb0, 0xde, 0x2b, 0x8d, 0x6d, 0x2d, 0x0d, 0xb9, 0x0c,
-	0xdb, 0x83, 0x8c, 0xd3, 0xf2, 0xf8, 0xfa, 0x99, 0x09, 0x9e, 0xef, 0xc1, 0xf2, 0x98, 0xfc, 0x6f,
-	0x90, 0xf1, 0xb2, 0x63, 0xdd, 0xdc, 0xee, 0x59, 0xd2, 0xf8, 0x3e, 0x80, 0x13, 0x45, 0x1a, 0x1d,
-	0x25, 0x25, 0x72, 0x2b, 0x06, 0xc2, 0x0e, 0xc9, 0x16, 0xac, 0xe4, 0x27, 0xab, 0xe8, 0x67, 0x21,
-	0x91, 0x2f, 0x60, 0x83, 0x1d, 0x18, 0x97, 0x9e, 0x73, 0xa1, 0x89, 0x90, 0xfb, 0xbe, 0x95, 0xd5,
-	0x9d, 0x0b, 0xf3, 0x79, 0xff, 0x4c, 0xc5, 0xd1, 0x31, 0x76, 0x60, 0xa6, 0x74, 0x8d, 0xdf, 0x57,
-	0xa0, 0x32, 0xa6, 0x2f, 0x79, 0x01, 0x2a, 0xe3, 0x00, 0x45, 0x1e, 0x13, 0x05, 0x79, 0x0d, 0x36,
-	0x34, 0x1a, 0xd5, 0xd7, 0x1c, 0xe9, 0x00, 0xb5, 0x99, 0xdc, 0x2b, 0xeb, 0xa5, 0xfe, 0x93, 0x5c,
-	0x4d, 0xae, 0xc0, 0x92, 0xc9, 0x90, 0xfb, 0x69, 0x56, 0x77, 0x9a, 0xff, 0xed, 0x04, 0x45, 0xde,
-	0xd7, 0xb1, 0xd1, 0x58, 0x66, 0xcb, 0xab, 0x25, 0x17, 0xfc, 0xc5, 0x61, 0x86, 0x92, 0x53, 0x95,
-	0xa1, 0xf6, 0x97, 0x13, 0x15, 0x71, 0xb8, 0x5c, 0x5c, 0x1c, 0xce, 0x72, 0xb7, 0x34, 0xdc, 0x88,
-	0xc9, 0x75, 0xa8, 0x94, 0x63, 0x32, 0xc5, 0xa1, 0x3a, 0x3b, 0x37, 0x99, 0x31, 0xd3, 0xa3, 0x89,
-	0x33, 0x79, 0x19, 0xd6, 0x1c, 0xb5, 0x06, 0x48, 0x8b, 0x31, 0x1d, 0xcd, 0x6f, 0xd4, 0x5c, 0x19,
-	0xe5, 0xc3, 0x7a, 0x0f, 0x56, 0x3c, 0x19, 0x4d, 0xb8, 0xea, 0xff, 0xf5, 0xea, 0xdc, 0x7f, 0xe5,
-	0xc4, 0x8e, 0x0a, 0x37, 0xb2, 0x0f, 0x5b, 0xe5, 0xa4, 0xf9, 0x84, 0x1d, 0x02, 0x4d, 0x58, 0xf1,
-	0xbb, 0xe8, 0xe2, 0xdc, 0x80, 0x87, 0x70, 0x2b, 0xda, 0xcc, 0x9e, 0x51, 0x0a, 0x34, 0xe4, 0x5d,
-	0xa8, 0x71, 0x8d, 0xcc, 0x5d, 0xc1, 0xee, 0xe5, 0x11, 0x82, 0xcf, 0x79, 0xbb, 0x99, 0x3f, 0x4b,
-	0x9a, 0xe5, 0xb3, 0xa4, 0x79, 0xbf, 0x7c, 0x96, 0x44, 0xd5, 0x02, 0xef, 0x34, 0xe4, 0x3a, 0x90,
-	0x84, 0x19, 0x4b, 0x53, 0x15, 0x8b, 0x3d, 0x51, 0x06, 0xa9, 0xce, 0x0d, 0xb2, 0xe1, 0xbc, 0x6e,
-	0x17, 0x4e, 0x3e, 0x12, 0x83, 0xb5, 0xbc, 0xa9, 0xd4, 0xcd, 0xb8, 0x6f, 0xc2, 0x9a, 0x2f, 0xf6,
-	0x9d, 0xe7, 0xa7, 0x4d, 0x33, 0x1f, 0x40, 0xd7, 0xbb, 0xe7, 0xab, 0xb6, 0xa6, 0xa7, 0x54, 0xdb,
-	0x07, 0x70, 0xfc, 0x19, 0xc8, 0x21, 0x1b, 0xf0, 0xd6, 0xf4, 0x06, 0x7c, 0x9e, 0xa7, 0xc5, 0x38,
-	0x83, 0xe9, 0xe8, 0xd3, 0x9b, 0xf3, 0x73, 0xd8, 0x3c, 0x14, 0x33, 0xa1, 0x77, 0x30, 0x9f, 0xde,
-	0x8b, 0x87, 0xd3, 0xfb, 0x0a, 0x3e, 0x7c, 0x5c, 0x5f, 0x78, 0xf4, 0xb8, 0xbe, 0xf0, 0xf4, 0x71,
-	0x3d, 0xf8, 0x66, 0x54, 0x0f, 0x7e, 0x1a, 0xd5, 0x83, 0xdf, 0x46, 0xf5, 0xe0, 0xe1, 0xa8, 0x1e,
-	0xfc, 0x31, 0xaa, 0x07, 0x7f, 0x8e, 0xea, 0x0b, 0x4f, 0x47, 0xf5, 0xe0, 0x87, 0x27, 0xf5, 0x85,
-	0x87, 0x4f, 0xea, 0x0b, 0x8f, 0x9e, 0xd4, 0x17, 0x3e, 0x6b, 0xf5, 0xd4, 0xa4, 0x2e, 0xa1, 0xfe,
-	0xe1, 0x35, 0x7b, 0x79, 0x2c, 0xec, 0xae, 0xf8, 0x29, 0x5e, 0xf8, 0x2b, 0x00, 0x00, 0xff, 0xff,
-	0x3d, 0xd6, 0x0f, 0x4c, 0x01, 0x0b, 0x00, 0x00,
+	// 2457 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x59, 0x4d, 0x73, 0xdb, 0xc6,
+	0xf9, 0x17, 0x48, 0xbd, 0xf1, 0xd1, 0x1b, 0xbc, 0x7a, 0x09, 0xa3, 0xd8, 0xb4, 0x0d, 0xff, 0x1d,
+	0xfb, 0xef, 0x26, 0x54, 0x2c, 0x27, 0x4d, 0x46, 0x49, 0xa7, 0x03, 0x91, 0x90, 0xc4, 0x84, 0x22,
+	0x99, 0x25, 0x65, 0xc7, 0xed, 0x74, 0x76, 0x56, 0xc0, 0x8a, 0xda, 0x0a, 0x04, 0x50, 0x00, 0x94,
+	0xaa, 0xe6, 0xd2, 0xe9, 0x25, 0x3d, 0xe4, 0xd0, 0x7b, 0x6f, 0xed, 0x74, 0x9a, 0x76, 0xfa, 0x11,
+	0x7a, 0xed, 0xb4, 0xc7, 0xf4, 0x96, 0x99, 0x5e, 0x1a, 0x79, 0x3a, 0xd3, 0xe9, 0x29, 0x1f, 0xa1,
+	0xb3, 0x0b, 0x80, 0x6f, 0x82, 0x4d, 0x39, 0xbd, 0x71, 0x9f, 0xe7, 0xf7, 0xfc, 0xf0, 0xec, 0xee,
+	0xf3, 0xb6, 0x12, 0xbc, 0x19, 0xb2, 0x8e, 0xe7, 0xfa, 0xd4, 0xde, 0xa0, 0x1e, 0xdf, 0x30, 0x6d,
+	0xb7, 0x6b, 0x6d, 0x38, 0xb4, 0xc3, 0x02, 0x8f, 0x9a, 0x6c, 0xe3, 0xf4, 0xe1, 0x46, 0x87, 0x05,
+	0x01, 0x6d, 0xb3, 0xa2, 0xe7, 0xbb, 0xa1, 0x8b, 0x6e, 0x26, 0xf0, 0x22, 0xf5, 0x78, 0x51, 0xc2,
+	0x8b, 0x3d, 0x78, 0xf1, 0xf4, 0xe1, 0xfa, 0x1b, 0x29, 0x7c, 0x3e, 0x0b, 0xdc, 0xae, 0x9f, 0x42,
+	0xb7, 0x7e, 0xb3, 0xed, 0xba, 0x6d, 0x9b, 0x6d, 0xc8, 0xd5, 0x61, 0xf7, 0x68, 0x23, 0xe4, 0x1d,
+	0x16, 0x84, 0xb4, 0xe3, 0xc5, 0x80, 0xfb, 0x29, 0x74, 0x01, 0x77, 0x4e, 0x2e, 0x51, 0x69, 0x7f,
+	0x55, 0x60, 0xb5, 0xc4, 0xfc, 0x90, 0x1f, 0x71, 0x93, 0x86, 0x6c, 0x87, 0xdb, 0x21, 0xf3, 0x9b,
+	0x1e, 0x33, 0xd1, 0x4d, 0x98, 0x33, 0xdd, 0x4e, 0xc7, 0x75, 0x88, 0xf0, 0x34, 0xaf, 0xdc, 0x52,
+	0xee, 0xe7, 0x30, 0x44, 0xa2, 0x1a, 0xed, 0x30, 0xa4, 0xc1, 0xbc, 0xeb, 0xb7, 0xa9, 0xc3, 0x7f,
+	0x46, 0x43, 0xee, 0x3a, 0xf9, 0x8c, 0x44, 0x0c, 0xc9, 0xd0, 0x06, 0x2c, 0x0f, 0xae, 0xa9, 0x4d,
+	0xba, 0x0e, 0x0f, 0xf3, 0x59, 0x09, 0x45, 0xc3, 0xaa, 0x03, 0x87, 0x87, 0xe8, 0x3d, 0xc8, 0x07,
+	0xdd, 0xc3, 0x1f, 0x33, 0x33, 0x24, 0x54, 0xb8, 0xe2, 0xd0, 0x90, 0x9f, 0xb2, 0xc8, 0x85, 0x49,
+	0x69, 0xb5, 0x16, 0xeb, 0xf5, 0xbe, 0x5a, 0xb8, 0xa3, 0xfd, 0x22, 0x03, 0xf3, 0xfb, 0xa1, 0x1d,
+	0xe8, 0xdd, 0xf0, 0x58, 0x6e, 0x40, 0x87, 0x1b, 0xd4, 0x34, 0x99, 0x17, 0x32, 0x8b, 0x98, 0x36,
+	0x67, 0x4e, 0x48, 0x4c, 0x4a, 0x2c, 0xe6, 0xf9, 0x4c, 0x6c, 0xd5, 0x8a, 0xb7, 0xb4, 0x9e, 0x80,
+	0x4a, 0x12, 0x53, 0xa2, 0xe5, 0x1e, 0x02, 0xbd, 0x01, 0xe8, 0x32, 0x85, 0xf4, 0x63, 0x1e, 0xab,
+	0xa3, 0x76, 0xa8, 0x0d, 0xcb, 0x66, 0xff, 0x28, 0xc9, 0x91, 0x3c, 0xcb, 0x20, 0x9f, 0xb9, 0x95,
+	0xbd, 0x3f, 0xb7, 0xf9, 0xdd, 0xe2, 0x98, 0x18, 0x28, 0xa6, 0x5e, 0x03, 0x46, 0xe6, 0xa8, 0x38,
+	0x40, 0x79, 0x98, 0x61, 0x0e, 0x3d, 0xb4, 0x99, 0x25, 0x4f, 0x72, 0x16, 0x27, 0x4b, 0xed, 0x01,
+	0x2c, 0xea, 0x1e, 0xff, 0x88, 0x9d, 0xf7, 0x4e, 0x61, 0x00, 0xab, 0x0c, 0x63, 0x2b, 0xb0, 0x50,
+	0xe5, 0x47, 0xcc, 0x3c, 0x37, 0x6d, 0x26, 0xa1, 0xef, 0x41, 0x3e, 0xd2, 0x11, 0x8b, 0xd9, 0x2c,
+	0x64, 0x44, 0x84, 0x08, 0x33, 0xe5, 0xe5, 0x46, 0xb6, 0x6b, 0x91, 0xbe, 0x2c, 0xd5, 0x8d, 0x9e,
+	0x56, 0xfb, 0x8d, 0x02, 0x4b, 0x25, 0xd7, 0x62, 0x66, 0x93, 0xf9, 0xa7, 0x71, 0xfc, 0xac, 0xc3,
+	0x2c, 0x73, 0x2c, 0xcf, 0xe5, 0x4e, 0x18, 0x9f, 0x74, 0x6f, 0x8d, 0x1e, 0xc0, 0x35, 0x8f, 0x06,
+	0x01, 0x11, 0x47, 0x18, 0x04, 0x24, 0x74, 0x4f, 0x58, 0x14, 0x3f, 0xb3, 0x78, 0x49, 0x28, 0x74,
+	0x29, 0x6f, 0x09, 0x31, 0xda, 0x85, 0x5b, 0xdc, 0x31, 0xed, 0xae, 0xc5, 0x88, 0xe9, 0xbb, 0x41,
+	0x40, 0x5c, 0x9f, 0xb7, 0xb9, 0x43, 0x4c, 0x9f, 0x59, 0xcc, 0x09, 0x39, 0xb5, 0x83, 0xf8, 0x14,
+	0x6e, 0xc4, 0xb8, 0x92, 0x80, 0xd5, 0x25, 0xaa, 0xd4, 0x07, 0x69, 0x0d, 0x58, 0x29, 0xf3, 0x80,
+	0x06, 0x21, 0xf3, 0x31, 0x33, 0xdd, 0x53, 0xe6, 0x9f, 0x27, 0xdb, 0xb6, 0x78, 0x20, 0xf7, 0xdd,
+	0xa1, 0x0e, 0x6d, 0x33, 0x8b, 0x1c, 0x51, 0x6e, 0x0b, 0x40, 0xb2, 0xed, 0x58, 0xbf, 0x1f, 0xa9,
+	0x77, 0x62, 0xad, 0xf6, 0x39, 0xc0, 0x42, 0x2d, 0xb9, 0x42, 0xc9, 0x85, 0x60, 0x72, 0x20, 0x5b,
+	0xe4, 0x6f, 0x71, 0x03, 0x3e, 0x6b, 0x73, 0xd7, 0x89, 0x42, 0x21, 0x87, 0x93, 0x25, 0xba, 0x0b,
+	0x8b, 0x3e, 0x0b, 0x85, 0x7f, 0xae, 0x43, 0x2c, 0x7a, 0x1e, 0x6d, 0x64, 0x0a, 0x2f, 0xf4, 0xa4,
+	0x65, 0x7a, 0x1e, 0xa0, 0x0f, 0x21, 0xd7, 0x09, 0xed, 0x80, 0xd0, 0x6e, 0x78, 0x2c, 0x83, 0x6f,
+	0x6e, 0xf3, 0xcd, 0xb1, 0xd1, 0x34, 0x98, 0x0a, 0x78, 0xb6, 0x13, 0xaf, 0xd0, 0xc7, 0x30, 0x4f,
+	0x3d, 0x4e, 0x4e, 0xd8, 0x79, 0x44, 0x37, 0x23, 0xe9, 0x36, 0xc6, 0xd2, 0x0d, 0x47, 0x15, 0x06,
+	0xda, 0x5b, 0xa3, 0x5f, 0x2a, 0x90, 0x37, 0xbb, 0x41, 0xe8, 0x76, 0x48, 0xc0, 0xa8, 0x6f, 0x1e,
+	0x13, 0x1a, 0x86, 0x3e, 0x3f, 0xec, 0x86, 0x2c, 0xc8, 0x4f, 0xc9, 0xe0, 0xff, 0x70, 0x2c, 0xff,
+	0xd0, 0x31, 0x16, 0x4b, 0x92, 0xae, 0x29, 0xd9, 0xf4, 0x1e, 0x99, 0xe1, 0x84, 0xfe, 0xf9, 0x76,
+	0x26, 0xaf, 0xe0, 0x35, 0x33, 0x15, 0x80, 0x7e, 0x02, 0xd7, 0x2e, 0xbb, 0x30, 0x2b, 0x5d, 0x28,
+	0xbf, 0xa4, 0x0b, 0xa9, 0x1f, 0xc7, 0x6a, 0x30, 0xfa, 0xc9, 0x26, 0xcc, 0x9b, 0x22, 0xf2, 0x49,
+	0x20, 0x43, 0x3f, 0x3f, 0x2d, 0x0f, 0xf4, 0xad, 0xf1, 0xd9, 0x3e, 0x9c, 0x2e, 0x78, 0xce, 0xec,
+	0x0b, 0x50, 0x15, 0x72, 0x76, 0x92, 0x9a, 0xf9, 0x9c, 0x64, 0x2c, 0x8e, 0x65, 0x1c, 0x4a, 0x66,
+	0xdc, 0x27, 0x40, 0x87, 0x70, 0xcd, 0x8a, 0x03, 0x9f, 0xf8, 0x71, 0xe4, 0xe7, 0x41, 0xb2, 0xbe,
+	0x33, 0x96, 0x35, 0x2d, 0x65, 0xb0, 0x6a, 0x8d, 0x48, 0xd7, 0x2b, 0xf0, 0xda, 0x0b, 0x2e, 0x0d,
+	0xa9, 0x90, 0x3d, 0x61, 0xe7, 0x71, 0x5a, 0x88, 0x9f, 0x68, 0x05, 0xa6, 0x4e, 0xa9, 0xdd, 0x65,
+	0x71, 0xdb, 0x88, 0x16, 0x5b, 0x99, 0xf7, 0x94, 0xf5, 0xcf, 0x14, 0x58, 0xbd, 0x2a, 0xcb, 0x27,
+	0x83, 0x2c, 0x8b, 0x9b, 0xdb, 0xff, 0xdb, 0x25, 0xb7, 0xce, 0x3d, 0x36, 0xe0, 0x89, 0xf6, 0xa7,
+	0x0c, 0x2c, 0xa7, 0x40, 0xd0, 0x5d, 0xb8, 0xdd, 0x34, 0x74, 0x5c, 0xda, 0x23, 0x7a, 0xab, 0x85,
+	0x2b, 0xdb, 0x07, 0x2d, 0x83, 0xb4, 0x9e, 0x36, 0x0c, 0x72, 0x50, 0x6b, 0x36, 0x8c, 0x52, 0x65,
+	0xa7, 0x62, 0x94, 0xd5, 0x09, 0x54, 0x80, 0xf5, 0x74, 0x58, 0xcb, 0xf8, 0xa4, 0xa5, 0x2a, 0xe8,
+	0x36, 0xdc, 0x48, 0xd7, 0x7f, 0x64, 0x3c, 0x7d, 0x52, 0xc7, 0x65, 0x35, 0x83, 0x6e, 0xc0, 0xab,
+	0xe9, 0x90, 0x4a, 0xad, 0xa5, 0x66, 0xd1, 0x2d, 0xb8, 0x9e, 0xae, 0x2e, 0xd7, 0x0f, 0xb6, 0xab,
+	0x86, 0x3a, 0xf9, 0x7c, 0x1f, 0xb6, 0xeb, 0xf5, 0xaa, 0x3a, 0x85, 0x34, 0x28, 0x3c, 0x87, 0x41,
+	0x6f, 0x19, 0xad, 0xca, 0xbe, 0xa1, 0x4e, 0xa3, 0xd7, 0x41, 0x7b, 0xa1, 0x9f, 0xa4, 0x5a, 0x69,
+	0xb6, 0xd4, 0x19, 0xed, 0x53, 0xc8, 0x19, 0x71, 0x85, 0x0f, 0xc4, 0xf8, 0x70, 0xc6, 0x0e, 0x09,
+	0xb5, 0x2c, 0x9f, 0x05, 0x41, 0x32, 0x3e, 0x9c, 0xb1, 0x43, 0x3d, 0x92, 0x88, 0x1e, 0x20, 0xab,
+	0x5a, 0xdb, 0xf7, 0xcc, 0x1e, 0x2c, 0x0a, 0x86, 0x25, 0xa1, 0xd8, 0xf5, 0x3d, 0x33, 0xc1, 0xde,
+	0x86, 0xf9, 0x21, 0x58, 0x34, 0x3f, 0xcc, 0xb5, 0xfb, 0x10, 0x4d, 0x87, 0xe9, 0x2a, 0xef, 0xf0,
+	0x30, 0x40, 0xef, 0x42, 0x9e, 0xca, 0xb6, 0x14, 0x10, 0x8f, 0xf9, 0x24, 0x60, 0xa6, 0xeb, 0x58,
+	0xc4, 0x16, 0x4a, 0xe9, 0xc6, 0x14, 0x5e, 0x8d, 0xf5, 0x0d, 0xe6, 0x37, 0xa5, 0x56, 0x5a, 0x6a,
+	0x9f, 0x29, 0x80, 0xf4, 0x27, 0xcd, 0x86, 0xcf, 0x4f, 0x69, 0xc8, 0xaa, 0xdc, 0x39, 0xa9, 0x38,
+	0x47, 0x2e, 0x7a, 0x1b, 0xd6, 0xa8, 0x6d, 0xbb, 0x67, 0xcc, 0x22, 0x9e, 0xcf, 0x1d, 0x93, 0x7b,
+	0xd4, 0x26, 0xd4, 0x77, 0xc4, 0xa6, 0x44, 0x39, 0x5f, 0x89, 0xb5, 0x8d, 0x44, 0xa9, 0xfb, 0x4e,
+	0x80, 0xde, 0x87, 0xf5, 0x53, 0xcf, 0x24, 0x49, 0xcb, 0x93, 0xe5, 0x81, 0x9b, 0xd1, 0x24, 0x93,
+	0x34, 0x82, 0x57, 0x4e, 0x3d, 0x33, 0x39, 0xb1, 0x66, 0xa4, 0x97, 0xf1, 0xa9, 0x7d, 0xae, 0xc0,
+	0x72, 0xec, 0x46, 0xc9, 0x75, 0x1c, 0xd1, 0x65, 0x4f, 0x79, 0x78, 0x8e, 0xd6, 0x60, 0x3a, 0xea,
+	0x1d, 0xf1, 0x79, 0xc6, 0x2b, 0xf4, 0x23, 0x50, 0xe9, 0x59, 0x20, 0xdc, 0x13, 0x26, 0xc4, 0xe6,
+	0xce, 0x89, 0x3c, 0xca, 0xb9, 0xcd, 0x47, 0xe3, 0x2b, 0xfb, 0xa5, 0x1d, 0xe3, 0x45, 0x7a, 0x16,
+	0x0c, 0xc8, 0xb4, 0x3f, 0xcf, 0x40, 0xae, 0x97, 0x38, 0xe8, 0x3a, 0xe4, 0x7a, 0x04, 0xb1, 0x1f,
+	0x7d, 0x01, 0xfa, 0x7f, 0x50, 0x93, 0xc1, 0x95, 0x9c, 0x32, 0x3f, 0xe8, 0x4f, 0x86, 0x4b, 0x89,
+	0xfc, 0x71, 0x24, 0x46, 0xdb, 0x30, 0x19, 0x78, 0xcc, 0x94, 0xb7, 0x79, 0x95, 0x02, 0x37, 0x94,
+	0xbb, 0x58, 0xda, 0xa2, 0x37, 0x41, 0x0d, 0x42, 0xb1, 0xe7, 0x81, 0xb9, 0x4e, 0xce, 0x89, 0xb2,
+	0x4f, 0x2c, 0x49, 0xdd, 0xc0, 0x40, 0x57, 0x82, 0x29, 0x29, 0xca, 0x2f, 0xc8, 0x7a, 0x91, 0xda,
+	0x46, 0x13, 0x37, 0xc5, 0x27, 0x71, 0xfc, 0xbb, 0x29, 0x8c, 0x70, 0x64, 0x2b, 0xa7, 0xc2, 0xe0,
+	0xdc, 0x31, 0x89, 0xeb, 0x31, 0x5f, 0x0e, 0xaf, 0x84, 0x5b, 0xf9, 0x29, 0xb9, 0x49, 0x55, 0x6a,
+	0xea, 0x89, 0xa2, 0x62, 0xa1, 0x3d, 0xc8, 0x25, 0x41, 0x10, 0xc4, 0xdd, 0xe1, 0xc1, 0xd8, 0xad,
+	0xf6, 0xf2, 0x08, 0xf7, 0x8d, 0xd1, 0x1d, 0x58, 0x10, 0x81, 0x7b, 0xca, 0x48, 0x1c, 0x04, 0x33,
+	0xd1, 0xc4, 0x1d, 0x09, 0x71, 0x14, 0x0a, 0xdf, 0x87, 0x69, 0x19, 0xea, 0xa2, 0xef, 0x89, 0x6f,
+	0xdd, 0xbb, 0x42, 0xdf, 0x10, 0x70, 0x1c, 0x9b, 0xa1, 0x13, 0x58, 0x4b, 0xe2, 0xc8, 0xec, 0xc7,
+	0x1e, 0x67, 0x41, 0x3e, 0x27, 0x1b, 0xe9, 0xdb, 0x63, 0x09, 0x53, 0x22, 0x17, 0xaf, 0x7a, 0x97,
+	0x84, 0x9c, 0x05, 0xe8, 0x7b, 0x30, 0x6f, 0xfa, 0x4c, 0x5c, 0x0d, 0x11, 0x6f, 0x98, 0xb8, 0x2b,
+	0xad, 0x17, 0xa3, 0x07, 0x4e, 0x31, 0x79, 0xe0, 0x14, 0x5b, 0xc9, 0x03, 0x07, 0xcf, 0xc5, 0x78,
+	0x21, 0x41, 0x7b, 0x80, 0x6c, 0x1a, 0x84, 0xa4, 0xe3, 0x5a, 0xfc, 0x88, 0x27, 0x24, 0x73, 0x63,
+	0x49, 0x54, 0x61, 0xb5, 0x1f, 0x1b, 0x49, 0x26, 0x0a, 0x0b, 0xd1, 0xa1, 0x12, 0x71, 0xc7, 0xdd,
+	0x20, 0x3f, 0x2f, 0x37, 0xfb, 0xc1, 0xd5, 0x83, 0xb2, 0x18, 0x5d, 0x40, 0x53, 0x9a, 0x47, 0xd3,
+	0xc2, 0xbc, 0x3f, 0x20, 0x5a, 0x3f, 0x83, 0x6b, 0x97, 0x20, 0x29, 0x2d, 0xad, 0x3a, 0xd8, 0xd2,
+	0xae, 0xf2, 0x6e, 0xe8, 0x79, 0x30, 0xc8, 0x3e, 0xd8, 0xc6, 0xfe, 0x92, 0x81, 0xd5, 0x54, 0x50,
+	0x6a, 0xf6, 0x28, 0xcf, 0xcf, 0x1e, 0x9c, 0x64, 0x4f, 0x56, 0x66, 0xcf, 0x07, 0xdf, 0xce, 0xb5,
+	0xe2, 0x15, 0x92, 0x29, 0x93, 0x9e, 0x4c, 0xda, 0xa7, 0x30, 0x25, 0xad, 0xd1, 0x2a, 0x5c, 0x6b,
+	0xb6, 0xf4, 0xd6, 0x68, 0xcb, 0x55, 0x61, 0x3e, 0x12, 0xeb, 0xe5, 0x72, 0xa5, 0xb6, 0xab, 0x2a,
+	0x03, 0x92, 0x52, 0xab, 0xf2, 0xd8, 0x50, 0x33, 0xe8, 0x1a, 0x2c, 0x44, 0x92, 0x86, 0xde, 0x6c,
+	0x0a, 0x51, 0x16, 0x21, 0x58, 0x8c, 0x44, 0xd8, 0xd8, 0xaf, 0x3f, 0x16, 0x86, 0x93, 0x7d, 0xc3,
+	0x1d, 0xbd, 0x52, 0x35, 0xca, 0xea, 0x94, 0xf6, 0x07, 0x05, 0x16, 0x8d, 0x9f, 0x7a, 0xae, 0x1f,
+	0x36, 0xb9, 0x73, 0xf2, 0xa2, 0x79, 0x3f, 0x79, 0x71, 0x65, 0x86, 0x5e, 0x5c, 0x68, 0x13, 0x32,
+	0xc1, 0xa3, 0xb8, 0xdc, 0x69, 0x69, 0x87, 0x27, 0xde, 0xe8, 0xe2, 0xdc, 0x9a, 0x8f, 0x64, 0x89,
+	0xcb, 0x04, 0x8f, 0xd0, 0x3b, 0x90, 0x6d, 0x9b, 0x41, 0x3c, 0xf6, 0xdf, 0x79, 0x91, 0xd1, 0x6e,
+	0xa9, 0x29, 0xad, 0x04, 0x5e, 0xfb, 0xc7, 0x24, 0x40, 0xdf, 0xd7, 0x54, 0x3f, 0x5f, 0xa2, 0x52,
+	0x97, 0x86, 0x2f, 0xfe, 0xdb, 0x95, 0xcd, 0x52, 0x5c, 0xee, 0x27, 0xaf, 0xf8, 0xe4, 0x18, 0x3e,
+	0xea, 0xb8, 0xde, 0x7f, 0x08, 0xd3, 0xc7, 0x8c, 0xda, 0xe1, 0xb1, 0xac, 0xb7, 0x8b, 0x9b, 0x9b,
+	0x2f, 0x41, 0x53, 0xdc, 0x93, 0x96, 0x38, 0x66, 0x10, 0xf5, 0x94, 0xf9, 0xbe, 0xeb, 0x93, 0xf8,
+	0x4f, 0x22, 0xb2, 0x3a, 0xe7, 0xf0, 0xbc, 0x14, 0xee, 0x47, 0x32, 0xf4, 0x31, 0xbc, 0x62, 0xd3,
+	0x90, 0x05, 0x21, 0xb1, 0x68, 0x48, 0x09, 0x93, 0x6c, 0x51, 0x9d, 0x99, 0x19, 0x5b, 0x67, 0x56,
+	0x22, 0xd3, 0x32, 0x0d, 0x69, 0xe4, 0x86, 0xac, 0x35, 0x75, 0x58, 0x93, 0x55, 0x2b, 0x72, 0x83,
+	0x98, 0xc7, 0xcc, 0x3c, 0x89, 0x18, 0x67, 0xc7, 0x32, 0x2e, 0x0b, 0xcb, 0x68, 0x1f, 0x25, 0x61,
+	0x27, 0x34, 0x9a, 0x0b, 0xd3, 0x91, 0x08, 0xad, 0x01, 0xda, 0x33, 0xf4, 0x6a, 0x6b, 0x6f, 0x24,
+	0x2f, 0x16, 0x20, 0x17, 0xcb, 0xeb, 0x1f, 0xa9, 0x0a, 0x7a, 0x15, 0x56, 0xe3, 0xa5, 0x81, 0x71,
+	0x1d, 0x8b, 0x69, 0xd2, 0xc0, 0x35, 0xbd, 0xaa, 0x66, 0xd0, 0x1d, 0xb8, 0x39, 0xa4, 0x3a, 0x68,
+	0x1a, 0x98, 0x94, 0xea, 0xb5, 0x9d, 0xca, 0xee, 0x01, 0xd6, 0x5b, 0x95, 0x7a, 0x4d, 0xcd, 0x6a,
+	0x5f, 0x28, 0xb0, 0xb0, 0xcf, 0xdb, 0x51, 0x5a, 0xca, 0x44, 0xd8, 0x84, 0xd5, 0x4e, 0x22, 0xe8,
+	0x0f, 0x3d, 0x3c, 0xf9, 0x23, 0xcb, 0x72, 0x4f, 0x99, 0x74, 0xb6, 0x8a, 0x85, 0x7e, 0x08, 0x0b,
+	0xa1, 0x4b, 0xe4, 0x95, 0x11, 0x19, 0x19, 0x99, 0x2b, 0xbe, 0x49, 0x7a, 0x9f, 0x6e, 0xb9, 0x25,
+	0xa1, 0x15, 0x1e, 0xec, 0x4d, 0xe0, 0xb9, 0xb0, 0xbf, 0xdc, 0x9e, 0x8e, 0xa2, 0x4d, 0xfb, 0x9d,
+	0x02, 0x2b, 0x69, 0x78, 0x11, 0xfe, 0x71, 0xf0, 0x8f, 0x4e, 0x33, 0x4b, 0x91, 0xbc, 0x3f, 0xf1,
+	0x1c, 0xc2, 0x6a, 0x48, 0xfd, 0x36, 0x0b, 0xfb, 0xd0, 0x41, 0x87, 0x5f, 0x76, 0x72, 0x59, 0x8e,
+	0xc8, 0x86, 0x84, 0xda, 0xdf, 0xa7, 0x21, 0xd7, 0xf3, 0x53, 0x0c, 0xbc, 0xfd, 0xe3, 0xec, 0x9d,
+	0xe2, 0x5c, 0x4f, 0x56, 0xb1, 0x7a, 0xd3, 0xd3, 0x55, 0x7d, 0x18, 0xba, 0xaf, 0x38, 0x9b, 0x76,
+	0x86, 0xf3, 0xfa, 0xad, 0xab, 0x93, 0x0c, 0x17, 0xf1, 0x7d, 0x98, 0xf5, 0x99, 0x67, 0x73, 0x93,
+	0x8a, 0x4a, 0x25, 0x1a, 0xe7, 0xc3, 0xab, 0x53, 0xe1, 0xc8, 0x12, 0xf7, 0x28, 0xd0, 0x43, 0x58,
+	0x89, 0x7f, 0x8b, 0xc1, 0xe0, 0xcc, 0xf5, 0x4f, 0x8e, 0x6c, 0xf7, 0x2c, 0x90, 0x29, 0x9f, 0xc5,
+	0xcb, 0x7d, 0xdd, 0x93, 0x44, 0x85, 0xca, 0x50, 0x48, 0x33, 0x21, 0x3e, 0xeb, 0x50, 0xee, 0x70,
+	0xa7, 0x2d, 0x93, 0x3b, 0x8b, 0xaf, 0xa7, 0x18, 0xe3, 0x04, 0x83, 0xee, 0xc1, 0xd2, 0x11, 0xe5,
+	0x76, 0xd7, 0x67, 0xbd, 0x9a, 0x10, 0xcd, 0x58, 0x8b, 0xb1, 0x38, 0xae, 0x0a, 0xda, 0x6f, 0xb3,
+	0x49, 0x23, 0xba, 0x09, 0xaf, 0xed, 0x57, 0x76, 0xa3, 0xcc, 0x20, 0x69, 0x2d, 0xe9, 0x2e, 0xdc,
+	0x1e, 0x05, 0x0c, 0xad, 0x71, 0xcb, 0x28, 0xab, 0x0a, 0xfa, 0x0e, 0xdc, 0x1b, 0x85, 0x61, 0xa3,
+	0x51, 0xad, 0x94, 0x22, 0x49, 0xa5, 0x46, 0x1a, 0xb8, 0xbe, 0x8b, 0x8d, 0x66, 0x53, 0xcd, 0xa0,
+	0xfb, 0xf0, 0x7f, 0xa3, 0xe0, 0x27, 0x7a, 0xa5, 0x55, 0xa9, 0xed, 0x92, 0x9d, 0x3a, 0x26, 0x7b,
+	0x7a, 0xad, 0x5c, 0x7f, 0x6c, 0x60, 0x35, 0x9b, 0x86, 0x4c, 0xb4, 0x43, 0x9c, 0x93, 0xe8, 0x01,
+	0xbc, 0x7e, 0xd9, 0x01, 0xbd, 0xfc, 0x54, 0x32, 0xca, 0x02, 0x80, 0xf7, 0xa3, 0xfc, 0x9f, 0x42,
+	0xd7, 0x21, 0x3f, 0x8a, 0x2d, 0xd5, 0xf7, 0x1b, 0x55, 0xa3, 0x25, 0xde, 0x8b, 0xeb, 0xb0, 0x36,
+	0xaa, 0x8d, 0x7b, 0xe8, 0x4c, 0xda, 0x69, 0xe8, 0xdb, 0x75, 0xdc, 0x1a, 0x72, 0x66, 0x16, 0xbd,
+	0x06, 0xaf, 0xa4, 0xc2, 0x8c, 0xb2, 0x9a, 0x43, 0xf7, 0xe0, 0xce, 0xe5, 0xaf, 0x4b, 0xff, 0x86,
+	0x58, 0x40, 0xfb, 0x75, 0x06, 0xd4, 0xd1, 0x30, 0x43, 0x8b, 0x90, 0xe9, 0x25, 0x54, 0x86, 0x5b,
+	0x68, 0x3f, 0xc9, 0x81, 0xe8, 0x4f, 0x08, 0xef, 0xbe, 0x74, 0xe0, 0x0e, 0xa5, 0x82, 0xf6, 0x7b,
+	0x25, 0x89, 0x8c, 0x1b, 0xf0, 0x6a, 0x7c, 0x83, 0xa9, 0x71, 0x91, 0x87, 0x95, 0x61, 0x75, 0x3c,
+	0xa0, 0x28, 0xe2, 0x8c, 0x86, 0x35, 0xf1, 0xa0, 0x42, 0xea, 0x07, 0x2d, 0x52, 0xdf, 0x21, 0xcd,
+	0xa7, 0xb5, 0x92, 0x9a, 0x41, 0xb7, 0xe1, 0x46, 0x3a, 0xac, 0x52, 0x8b, 0x20, 0x59, 0x71, 0x8c,
+	0x23, 0xdf, 0xd8, 0x16, 0x97, 0x5f, 0x33, 0xca, 0xea, 0xe4, 0xf6, 0xbf, 0x94, 0x2f, 0xbf, 0x2e,
+	0x4c, 0x7c, 0xf5, 0x75, 0x61, 0xe2, 0x9b, 0xaf, 0x0b, 0xca, 0xcf, 0x2f, 0x0a, 0xca, 0x17, 0x17,
+	0x05, 0xe5, 0x6f, 0x17, 0x05, 0xe5, 0xcb, 0x8b, 0x82, 0xf2, 0xcf, 0x8b, 0x82, 0xf2, 0xef, 0x8b,
+	0xc2, 0xc4, 0x37, 0x17, 0x05, 0xe5, 0x57, 0xcf, 0x0a, 0x13, 0x5f, 0x3e, 0x2b, 0x4c, 0x7c, 0xf5,
+	0xac, 0x30, 0x01, 0x1a, 0x77, 0xc7, 0x1d, 0xd1, 0xf6, 0x7c, 0x9c, 0x27, 0x0d, 0xd1, 0xc0, 0x1a,
+	0xca, 0x0f, 0x36, 0xda, 0x03, 0x36, 0xdc, 0x7d, 0xce, 0x3f, 0x4d, 0xde, 0xef, 0x2d, 0xfe, 0x98,
+	0xb9, 0xdd, 0x8a, 0xe1, 0xdc, 0x2d, 0xea, 0x1e, 0x2f, 0xca, 0xba, 0x3d, 0x30, 0x6c, 0x3f, 0x7e,
+	0xf8, 0x9f, 0xcc, 0xdd, 0x3e, 0x66, 0x6b, 0x4b, 0xf7, 0xf8, 0xd6, 0x96, 0x44, 0x6d, 0x6d, 0xf5,
+	0x60, 0x5b, 0x5b, 0x8f, 0x1f, 0x1e, 0x4e, 0xcb, 0x36, 0xfa, 0xe8, 0xbf, 0x01, 0x00, 0x00, 0xff,
+	0xff, 0xef, 0xb8, 0x91, 0x6d, 0xb4, 0x19, 0x00, 0x00,
 }
 
+func (x NamespaceSpec_SearchAttributeType) String() string {
+	s, ok := NamespaceSpec_SearchAttributeType_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x NamespaceRegionStatus_State) String() string {
+	s, ok := NamespaceRegionStatus_State_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x ExportSink_Health) String() string {
+	s, ok := ExportSink_Health_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x Migration_State) String() string {
+	s, ok := Migration_State_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x MigrationReplica_State) String() string {
+	s, ok := MigrationReplica_State_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
 func (this *CertificateFilterSpec) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -960,7 +1896,10 @@ func (this *MtlsAuthSpec) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.AcceptedClientCa != that1.AcceptedClientCa {
+	if this.AcceptedClientCaDeprecated != that1.AcceptedClientCaDeprecated {
+		return false
+	}
+	if !bytes.Equal(this.AcceptedClientCa, that1.AcceptedClientCa) {
 		return false
 	}
 	if len(this.CertificateFilters) != len(that1.CertificateFilters) {
@@ -1000,6 +1939,30 @@ func (this *ApiKeyAuthSpec) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *LifecycleSpec) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*LifecycleSpec)
+	if !ok {
+		that2, ok := that.(LifecycleSpec)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.EnableDeleteProtection != that1.EnableDeleteProtection {
+		return false
+	}
+	return true
+}
 func (this *CodecServerSpec) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -1026,6 +1989,30 @@ func (this *CodecServerSpec) Equal(that interface{}) bool {
 		return false
 	}
 	if this.IncludeCrossOriginCredentials != that1.IncludeCrossOriginCredentials {
+		return false
+	}
+	return true
+}
+func (this *DisasterRecoverySpec) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DisasterRecoverySpec)
+	if !ok {
+		that2, ok := that.(DisasterRecoverySpec)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.DisableManagedFailover != that1.DisableManagedFailover {
 		return false
 	}
 	return true
@@ -1077,7 +2064,21 @@ func (this *NamespaceSpec) Equal(that interface{}) bool {
 			return false
 		}
 	}
+	if len(this.SearchAttributes) != len(that1.SearchAttributes) {
+		return false
+	}
+	for i := range this.SearchAttributes {
+		if this.SearchAttributes[i] != that1.SearchAttributes[i] {
+			return false
+		}
+	}
 	if !this.CodecServer.Equal(that1.CodecServer) {
+		return false
+	}
+	if !this.Lifecycle.Equal(that1.Lifecycle) {
+		return false
+	}
+	if !this.DisasterRecovery.Equal(that1.DisasterRecovery) {
 		return false
 	}
 	return true
@@ -1228,6 +2229,9 @@ func (this *Namespace) Equal(that interface{}) bool {
 	if !this.Spec.Equal(that1.Spec) {
 		return false
 	}
+	if this.StateDeprecated != that1.StateDeprecated {
+		return false
+	}
 	if this.State != that1.State {
 		return false
 	}
@@ -1286,10 +2290,249 @@ func (this *NamespaceRegionStatus) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
+	if this.StateDeprecated != that1.StateDeprecated {
+		return false
+	}
 	if this.State != that1.State {
 		return false
 	}
 	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *ExportSinkSpec) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ExportSinkSpec)
+	if !ok {
+		that2, ok := that.(ExportSinkSpec)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if this.Enabled != that1.Enabled {
+		return false
+	}
+	if !this.S3.Equal(that1.S3) {
+		return false
+	}
+	if !this.Gcs.Equal(that1.Gcs) {
+		return false
+	}
+	return true
+}
+func (this *ExportSink) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ExportSink)
+	if !ok {
+		that2, ok := that.(ExportSink)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	if this.State != that1.State {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.Health != that1.Health {
+		return false
+	}
+	if this.ErrorMessage != that1.ErrorMessage {
+		return false
+	}
+	if !this.LatestDataExportTime.Equal(that1.LatestDataExportTime) {
+		return false
+	}
+	if !this.LastHealthCheckTime.Equal(that1.LastHealthCheckTime) {
+		return false
+	}
+	return true
+}
+func (this *MigrationSpec) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*MigrationSpec)
+	if !ok {
+		that2, ok := that.(MigrationSpec)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.MigrationEndpointId != that1.MigrationEndpointId {
+		return false
+	}
+	if that1.Spec == nil {
+		if this.Spec != nil {
+			return false
+		}
+	} else if this.Spec == nil {
+		return false
+	} else if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	return true
+}
+func (this *MigrationSpec_ToCloudSpec) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*MigrationSpec_ToCloudSpec)
+	if !ok {
+		that2, ok := that.(MigrationSpec_ToCloudSpec)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ToCloudSpec.Equal(that1.ToCloudSpec) {
+		return false
+	}
+	return true
+}
+func (this *MigrationToCloudSpec) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*MigrationToCloudSpec)
+	if !ok {
+		that2, ok := that.(MigrationToCloudSpec)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.SourceNamespace != that1.SourceNamespace {
+		return false
+	}
+	if !this.TargetNamespaceSpec.Equal(that1.TargetNamespaceSpec) {
+		return false
+	}
+	return true
+}
+func (this *Migration) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Migration)
+	if !ok {
+		that2, ok := that.(Migration)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.MigrationId != that1.MigrationId {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.State != that1.State {
+		return false
+	}
+	if len(this.Replicas) != len(that1.Replicas) {
+		return false
+	}
+	for i := range this.Replicas {
+		if !this.Replicas[i].Equal(that1.Replicas[i]) {
+			return false
+		}
+	}
+	if this.ReplicatedWorkflows != that1.ReplicatedWorkflows {
+		return false
+	}
+	if this.ReplicatedWorkflowsRemaining != that1.ReplicatedWorkflowsRemaining {
+		return false
+	}
+	if this.FailureMessage != that1.FailureMessage {
+		return false
+	}
+	return true
+}
+func (this *MigrationReplica) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*MigrationReplica)
+	if !ok {
+		that2, ok := that.(MigrationReplica)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Id != that1.Id {
+		return false
+	}
+	if this.State != that1.State {
 		return false
 	}
 	return true
@@ -1311,8 +2554,9 @@ func (this *MtlsAuthSpec) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 8)
 	s = append(s, "&namespace.MtlsAuthSpec{")
+	s = append(s, "AcceptedClientCaDeprecated: "+fmt.Sprintf("%#v", this.AcceptedClientCaDeprecated)+",\n")
 	s = append(s, "AcceptedClientCa: "+fmt.Sprintf("%#v", this.AcceptedClientCa)+",\n")
 	if this.CertificateFilters != nil {
 		s = append(s, "CertificateFilters: "+fmt.Sprintf("%#v", this.CertificateFilters)+",\n")
@@ -1331,6 +2575,16 @@ func (this *ApiKeyAuthSpec) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *LifecycleSpec) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespace.LifecycleSpec{")
+	s = append(s, "EnableDeleteProtection: "+fmt.Sprintf("%#v", this.EnableDeleteProtection)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
 func (this *CodecServerSpec) GoString() string {
 	if this == nil {
 		return "nil"
@@ -1343,11 +2597,21 @@ func (this *CodecServerSpec) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *DisasterRecoverySpec) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespace.DisasterRecoverySpec{")
+	s = append(s, "DisableManagedFailover: "+fmt.Sprintf("%#v", this.DisableManagedFailover)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
 func (this *NamespaceSpec) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 11)
+	s := make([]string, 0, 14)
 	s = append(s, "&namespace.NamespaceSpec{")
 	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
 	s = append(s, "Regions: "+fmt.Sprintf("%#v", this.Regions)+",\n")
@@ -1371,8 +2635,27 @@ func (this *NamespaceSpec) GoString() string {
 	if this.CustomSearchAttributes != nil {
 		s = append(s, "CustomSearchAttributes: "+mapStringForCustomSearchAttributes+",\n")
 	}
+	keysForSearchAttributes := make([]string, 0, len(this.SearchAttributes))
+	for k, _ := range this.SearchAttributes {
+		keysForSearchAttributes = append(keysForSearchAttributes, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForSearchAttributes)
+	mapStringForSearchAttributes := "map[string]NamespaceSpec_SearchAttributeType{"
+	for _, k := range keysForSearchAttributes {
+		mapStringForSearchAttributes += fmt.Sprintf("%#v: %#v,", k, this.SearchAttributes[k])
+	}
+	mapStringForSearchAttributes += "}"
+	if this.SearchAttributes != nil {
+		s = append(s, "SearchAttributes: "+mapStringForSearchAttributes+",\n")
+	}
 	if this.CodecServer != nil {
 		s = append(s, "CodecServer: "+fmt.Sprintf("%#v", this.CodecServer)+",\n")
+	}
+	if this.Lifecycle != nil {
+		s = append(s, "Lifecycle: "+fmt.Sprintf("%#v", this.Lifecycle)+",\n")
+	}
+	if this.DisasterRecovery != nil {
+		s = append(s, "DisasterRecovery: "+fmt.Sprintf("%#v", this.DisasterRecovery)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -1427,13 +2710,14 @@ func (this *Namespace) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 16)
+	s := make([]string, 0, 17)
 	s = append(s, "&namespace.Namespace{")
 	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
 	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
 	if this.Spec != nil {
 		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
 	}
+	s = append(s, "StateDeprecated: "+fmt.Sprintf("%#v", this.StateDeprecated)+",\n")
 	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
 	if this.Endpoints != nil {
@@ -1472,10 +2756,116 @@ func (this *NamespaceRegionStatus) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 6)
+	s := make([]string, 0, 7)
 	s = append(s, "&namespace.NamespaceRegionStatus{")
+	s = append(s, "StateDeprecated: "+fmt.Sprintf("%#v", this.StateDeprecated)+",\n")
 	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ExportSinkSpec) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&namespace.ExportSinkSpec{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "Enabled: "+fmt.Sprintf("%#v", this.Enabled)+",\n")
+	if this.S3 != nil {
+		s = append(s, "S3: "+fmt.Sprintf("%#v", this.S3)+",\n")
+	}
+	if this.Gcs != nil {
+		s = append(s, "Gcs: "+fmt.Sprintf("%#v", this.Gcs)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ExportSink) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 12)
+	s = append(s, "&namespace.ExportSink{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "Health: "+fmt.Sprintf("%#v", this.Health)+",\n")
+	s = append(s, "ErrorMessage: "+fmt.Sprintf("%#v", this.ErrorMessage)+",\n")
+	if this.LatestDataExportTime != nil {
+		s = append(s, "LatestDataExportTime: "+fmt.Sprintf("%#v", this.LatestDataExportTime)+",\n")
+	}
+	if this.LastHealthCheckTime != nil {
+		s = append(s, "LastHealthCheckTime: "+fmt.Sprintf("%#v", this.LastHealthCheckTime)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *MigrationSpec) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespace.MigrationSpec{")
+	s = append(s, "MigrationEndpointId: "+fmt.Sprintf("%#v", this.MigrationEndpointId)+",\n")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *MigrationSpec_ToCloudSpec) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&namespace.MigrationSpec_ToCloudSpec{` +
+		`ToCloudSpec:` + fmt.Sprintf("%#v", this.ToCloudSpec) + `}`}, ", ")
+	return s
+}
+func (this *MigrationToCloudSpec) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespace.MigrationToCloudSpec{")
+	s = append(s, "SourceNamespace: "+fmt.Sprintf("%#v", this.SourceNamespace)+",\n")
+	if this.TargetNamespaceSpec != nil {
+		s = append(s, "TargetNamespaceSpec: "+fmt.Sprintf("%#v", this.TargetNamespaceSpec)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *Migration) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 11)
+	s = append(s, "&namespace.Migration{")
+	s = append(s, "MigrationId: "+fmt.Sprintf("%#v", this.MigrationId)+",\n")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
+	if this.Replicas != nil {
+		s = append(s, "Replicas: "+fmt.Sprintf("%#v", this.Replicas)+",\n")
+	}
+	s = append(s, "ReplicatedWorkflows: "+fmt.Sprintf("%#v", this.ReplicatedWorkflows)+",\n")
+	s = append(s, "ReplicatedWorkflowsRemaining: "+fmt.Sprintf("%#v", this.ReplicatedWorkflowsRemaining)+",\n")
+	s = append(s, "FailureMessage: "+fmt.Sprintf("%#v", this.FailureMessage)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *MigrationReplica) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&namespace.MigrationReplica{")
+	s = append(s, "Id: "+fmt.Sprintf("%#v", this.Id)+",\n")
+	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -1558,6 +2948,13 @@ func (m *MtlsAuthSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.AcceptedClientCa) > 0 {
+		i -= len(m.AcceptedClientCa)
+		copy(dAtA[i:], m.AcceptedClientCa)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.AcceptedClientCa)))
+		i--
+		dAtA[i] = 0x22
+	}
 	if m.Enabled {
 		i--
 		if m.Enabled {
@@ -1582,10 +2979,10 @@ func (m *MtlsAuthSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x12
 		}
 	}
-	if len(m.AcceptedClientCa) > 0 {
-		i -= len(m.AcceptedClientCa)
-		copy(dAtA[i:], m.AcceptedClientCa)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.AcceptedClientCa)))
+	if len(m.AcceptedClientCaDeprecated) > 0 {
+		i -= len(m.AcceptedClientCaDeprecated)
+		copy(dAtA[i:], m.AcceptedClientCaDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.AcceptedClientCaDeprecated)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1615,6 +3012,39 @@ func (m *ApiKeyAuthSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	if m.Enabled {
 		i--
 		if m.Enabled {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *LifecycleSpec) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *LifecycleSpec) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *LifecycleSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.EnableDeleteProtection {
+		i--
+		if m.EnableDeleteProtection {
 			dAtA[i] = 1
 		} else {
 			dAtA[i] = 0
@@ -1675,6 +3105,39 @@ func (m *CodecServerSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *DisasterRecoverySpec) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DisasterRecoverySpec) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DisasterRecoverySpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.DisableManagedFailover {
+		i--
+		if m.DisableManagedFailover {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *NamespaceSpec) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1695,6 +3158,47 @@ func (m *NamespaceSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.DisasterRecovery != nil {
+		{
+			size, err := m.DisasterRecovery.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x52
+	}
+	if m.Lifecycle != nil {
+		{
+			size, err := m.Lifecycle.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x4a
+	}
+	if len(m.SearchAttributes) > 0 {
+		for k := range m.SearchAttributes {
+			v := m.SearchAttributes[k]
+			baseI := i
+			i = encodeVarintMessage(dAtA, i, uint64(v))
+			i--
+			dAtA[i] = 0x10
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintMessage(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintMessage(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x42
+		}
+	}
 	if m.ApiKeyAuth != nil {
 		{
 			size, err := m.ApiKeyAuth.MarshalToSizedBuffer(dAtA[:i])
@@ -1949,6 +3453,11 @@ func (m *Namespace) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x68
+	}
 	if len(m.RegionStatus) > 0 {
 		for k := range m.RegionStatus {
 			v := m.RegionStatus[k]
@@ -2051,10 +3560,10 @@ func (m *Namespace) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x2a
 	}
-	if len(m.State) > 0 {
-		i -= len(m.State)
-		copy(dAtA[i:], m.State)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.State)))
+	if len(m.StateDeprecated) > 0 {
+		i -= len(m.StateDeprecated)
+		copy(dAtA[i:], m.StateDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.StateDeprecated)))
 		i--
 		dAtA[i] = 0x22
 	}
@@ -2107,6 +3616,11 @@ func (m *NamespaceRegionStatus) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x18
+	}
 	if len(m.AsyncOperationId) > 0 {
 		i -= len(m.AsyncOperationId)
 		copy(dAtA[i:], m.AsyncOperationId)
@@ -2114,10 +3628,379 @@ func (m *NamespaceRegionStatus) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.State) > 0 {
-		i -= len(m.State)
-		copy(dAtA[i:], m.State)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.State)))
+	if len(m.StateDeprecated) > 0 {
+		i -= len(m.StateDeprecated)
+		copy(dAtA[i:], m.StateDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.StateDeprecated)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ExportSinkSpec) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ExportSinkSpec) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ExportSinkSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Gcs != nil {
+		{
+			size, err := m.Gcs.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.S3 != nil {
+		{
+			size, err := m.S3.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Enabled {
+		i--
+		if m.Enabled {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ExportSink) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ExportSink) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ExportSink) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.LastHealthCheckTime != nil {
+		{
+			size, err := m.LastHealthCheckTime.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x42
+	}
+	if m.LatestDataExportTime != nil {
+		{
+			size, err := m.LatestDataExportTime.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3a
+	}
+	if len(m.ErrorMessage) > 0 {
+		i -= len(m.ErrorMessage)
+		copy(dAtA[i:], m.ErrorMessage)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.ErrorMessage)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if m.Health != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.Health))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MigrationSpec) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MigrationSpec) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MigrationSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Spec != nil {
+		{
+			size := m.Spec.Size()
+			i -= size
+			if _, err := m.Spec.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if len(m.MigrationEndpointId) > 0 {
+		i -= len(m.MigrationEndpointId)
+		copy(dAtA[i:], m.MigrationEndpointId)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.MigrationEndpointId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MigrationSpec_ToCloudSpec) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MigrationSpec_ToCloudSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ToCloudSpec != nil {
+		{
+			size, err := m.ToCloudSpec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *MigrationToCloudSpec) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MigrationToCloudSpec) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MigrationToCloudSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.TargetNamespaceSpec != nil {
+		{
+			size, err := m.TargetNamespaceSpec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.SourceNamespace) > 0 {
+		i -= len(m.SourceNamespace)
+		copy(dAtA[i:], m.SourceNamespace)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.SourceNamespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Migration) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Migration) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Migration) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.FailureMessage) > 0 {
+		i -= len(m.FailureMessage)
+		copy(dAtA[i:], m.FailureMessage)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.FailureMessage)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.ReplicatedWorkflowsRemaining != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.ReplicatedWorkflowsRemaining))
+		i--
+		dAtA[i] = 0x30
+	}
+	if m.ReplicatedWorkflows != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.ReplicatedWorkflows))
+		i--
+		dAtA[i] = 0x28
+	}
+	if len(m.Replicas) > 0 {
+		for iNdEx := len(m.Replicas) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Replicas[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintMessage(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.MigrationId) > 0 {
+		i -= len(m.MigrationId)
+		copy(dAtA[i:], m.MigrationId)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.MigrationId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MigrationReplica) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MigrationReplica) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MigrationReplica) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Id)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -2166,7 +4049,7 @@ func (m *MtlsAuthSpec) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.AcceptedClientCa)
+	l = len(m.AcceptedClientCaDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
@@ -2179,6 +4062,10 @@ func (m *MtlsAuthSpec) Size() (n int) {
 	if m.Enabled {
 		n += 2
 	}
+	l = len(m.AcceptedClientCa)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
 	return n
 }
 
@@ -2189,6 +4076,18 @@ func (m *ApiKeyAuthSpec) Size() (n int) {
 	var l int
 	_ = l
 	if m.Enabled {
+		n += 2
+	}
+	return n
+}
+
+func (m *LifecycleSpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.EnableDeleteProtection {
 		n += 2
 	}
 	return n
@@ -2208,6 +4107,18 @@ func (m *CodecServerSpec) Size() (n int) {
 		n += 2
 	}
 	if m.IncludeCrossOriginCredentials {
+		n += 2
+	}
+	return n
+}
+
+func (m *DisasterRecoverySpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.DisableManagedFailover {
 		n += 2
 	}
 	return n
@@ -2250,6 +4161,22 @@ func (m *NamespaceSpec) Size() (n int) {
 	}
 	if m.ApiKeyAuth != nil {
 		l = m.ApiKeyAuth.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if len(m.SearchAttributes) > 0 {
+		for k, v := range m.SearchAttributes {
+			_ = k
+			_ = v
+			mapEntrySize := 1 + len(k) + sovMessage(uint64(len(k))) + 1 + sovMessage(uint64(v))
+			n += mapEntrySize + 1 + sovMessage(uint64(mapEntrySize))
+		}
+	}
+	if m.Lifecycle != nil {
+		l = m.Lifecycle.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.DisasterRecovery != nil {
+		l = m.DisasterRecovery.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
 	return n
@@ -2344,7 +4271,7 @@ func (m *Namespace) Size() (n int) {
 		l = m.Spec.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
-	l = len(m.State)
+	l = len(m.StateDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
@@ -2391,6 +4318,9 @@ func (m *Namespace) Size() (n int) {
 			n += mapEntrySize + 1 + sovMessage(uint64(mapEntrySize))
 		}
 	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
 	return n
 }
 
@@ -2400,13 +4330,176 @@ func (m *NamespaceRegionStatus) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.State)
+	l = len(m.StateDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
 	l = len(m.AsyncOperationId)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
+	return n
+}
+
+func (m *ExportSinkSpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Enabled {
+		n += 2
+	}
+	if m.S3 != nil {
+		l = m.S3.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Gcs != nil {
+		l = m.Gcs.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+
+func (m *ExportSink) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Health != 0 {
+		n += 1 + sovMessage(uint64(m.Health))
+	}
+	l = len(m.ErrorMessage)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.LatestDataExportTime != nil {
+		l = m.LatestDataExportTime.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.LastHealthCheckTime != nil {
+		l = m.LastHealthCheckTime.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+
+func (m *MigrationSpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.MigrationEndpointId)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Spec != nil {
+		n += m.Spec.Size()
+	}
+	return n
+}
+
+func (m *MigrationSpec_ToCloudSpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ToCloudSpec != nil {
+		l = m.ToCloudSpec.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+func (m *MigrationToCloudSpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.SourceNamespace)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.TargetNamespaceSpec != nil {
+		l = m.TargetNamespaceSpec.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+
+func (m *Migration) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.MigrationId)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
+	if len(m.Replicas) > 0 {
+		for _, e := range m.Replicas {
+			l = e.Size()
+			n += 1 + l + sovMessage(uint64(l))
+		}
+	}
+	if m.ReplicatedWorkflows != 0 {
+		n += 1 + sovMessage(uint64(m.ReplicatedWorkflows))
+	}
+	if m.ReplicatedWorkflowsRemaining != 0 {
+		n += 1 + sovMessage(uint64(m.ReplicatedWorkflowsRemaining))
+	}
+	l = len(m.FailureMessage)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+
+func (m *MigrationReplica) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Id)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
 	}
 	return n
 }
@@ -2440,9 +4533,10 @@ func (this *MtlsAuthSpec) String() string {
 	}
 	repeatedStringForCertificateFilters += "}"
 	s := strings.Join([]string{`&MtlsAuthSpec{`,
-		`AcceptedClientCa:` + fmt.Sprintf("%v", this.AcceptedClientCa) + `,`,
+		`AcceptedClientCaDeprecated:` + fmt.Sprintf("%v", this.AcceptedClientCaDeprecated) + `,`,
 		`CertificateFilters:` + repeatedStringForCertificateFilters + `,`,
 		`Enabled:` + fmt.Sprintf("%v", this.Enabled) + `,`,
+		`AcceptedClientCa:` + fmt.Sprintf("%v", this.AcceptedClientCa) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2457,6 +4551,16 @@ func (this *ApiKeyAuthSpec) String() string {
 	}, "")
 	return s
 }
+func (this *LifecycleSpec) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&LifecycleSpec{`,
+		`EnableDeleteProtection:` + fmt.Sprintf("%v", this.EnableDeleteProtection) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *CodecServerSpec) String() string {
 	if this == nil {
 		return "nil"
@@ -2465,6 +4569,16 @@ func (this *CodecServerSpec) String() string {
 		`Endpoint:` + fmt.Sprintf("%v", this.Endpoint) + `,`,
 		`PassAccessToken:` + fmt.Sprintf("%v", this.PassAccessToken) + `,`,
 		`IncludeCrossOriginCredentials:` + fmt.Sprintf("%v", this.IncludeCrossOriginCredentials) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DisasterRecoverySpec) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DisasterRecoverySpec{`,
+		`DisableManagedFailover:` + fmt.Sprintf("%v", this.DisableManagedFailover) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2483,6 +4597,16 @@ func (this *NamespaceSpec) String() string {
 		mapStringForCustomSearchAttributes += fmt.Sprintf("%v: %v,", k, this.CustomSearchAttributes[k])
 	}
 	mapStringForCustomSearchAttributes += "}"
+	keysForSearchAttributes := make([]string, 0, len(this.SearchAttributes))
+	for k, _ := range this.SearchAttributes {
+		keysForSearchAttributes = append(keysForSearchAttributes, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForSearchAttributes)
+	mapStringForSearchAttributes := "map[string]NamespaceSpec_SearchAttributeType{"
+	for _, k := range keysForSearchAttributes {
+		mapStringForSearchAttributes += fmt.Sprintf("%v: %v,", k, this.SearchAttributes[k])
+	}
+	mapStringForSearchAttributes += "}"
 	s := strings.Join([]string{`&NamespaceSpec{`,
 		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
 		`Regions:` + fmt.Sprintf("%v", this.Regions) + `,`,
@@ -2491,6 +4615,9 @@ func (this *NamespaceSpec) String() string {
 		`CustomSearchAttributes:` + mapStringForCustomSearchAttributes + `,`,
 		`CodecServer:` + strings.Replace(this.CodecServer.String(), "CodecServerSpec", "CodecServerSpec", 1) + `,`,
 		`ApiKeyAuth:` + strings.Replace(this.ApiKeyAuth.String(), "ApiKeyAuthSpec", "ApiKeyAuthSpec", 1) + `,`,
+		`SearchAttributes:` + mapStringForSearchAttributes + `,`,
+		`Lifecycle:` + strings.Replace(this.Lifecycle.String(), "LifecycleSpec", "LifecycleSpec", 1) + `,`,
+		`DisasterRecovery:` + strings.Replace(this.DisasterRecovery.String(), "DisasterRecoverySpec", "DisasterRecoverySpec", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2562,7 +4689,7 @@ func (this *Namespace) String() string {
 		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
 		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
 		`Spec:` + strings.Replace(this.Spec.String(), "NamespaceSpec", "NamespaceSpec", 1) + `,`,
-		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`StateDeprecated:` + fmt.Sprintf("%v", this.StateDeprecated) + `,`,
 		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
 		`Endpoints:` + strings.Replace(this.Endpoints.String(), "Endpoints", "Endpoints", 1) + `,`,
 		`ActiveRegion:` + fmt.Sprintf("%v", this.ActiveRegion) + `,`,
@@ -2571,6 +4698,7 @@ func (this *Namespace) String() string {
 		`CreatedTime:` + strings.Replace(fmt.Sprintf("%v", this.CreatedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`LastModifiedTime:` + strings.Replace(fmt.Sprintf("%v", this.LastModifiedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`RegionStatus:` + mapStringForRegionStatus + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2580,8 +4708,103 @@ func (this *NamespaceRegionStatus) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&NamespaceRegionStatus{`,
-		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`StateDeprecated:` + fmt.Sprintf("%v", this.StateDeprecated) + `,`,
 		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ExportSinkSpec) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ExportSinkSpec{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`Enabled:` + fmt.Sprintf("%v", this.Enabled) + `,`,
+		`S3:` + strings.Replace(fmt.Sprintf("%v", this.S3), "S3Spec", "v11.S3Spec", 1) + `,`,
+		`Gcs:` + strings.Replace(fmt.Sprintf("%v", this.Gcs), "GCSSpec", "v11.GCSSpec", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ExportSink) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ExportSink{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`Spec:` + strings.Replace(this.Spec.String(), "ExportSinkSpec", "ExportSinkSpec", 1) + `,`,
+		`Health:` + fmt.Sprintf("%v", this.Health) + `,`,
+		`ErrorMessage:` + fmt.Sprintf("%v", this.ErrorMessage) + `,`,
+		`LatestDataExportTime:` + strings.Replace(fmt.Sprintf("%v", this.LatestDataExportTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`LastHealthCheckTime:` + strings.Replace(fmt.Sprintf("%v", this.LastHealthCheckTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *MigrationSpec) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&MigrationSpec{`,
+		`MigrationEndpointId:` + fmt.Sprintf("%v", this.MigrationEndpointId) + `,`,
+		`Spec:` + fmt.Sprintf("%v", this.Spec) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *MigrationSpec_ToCloudSpec) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&MigrationSpec_ToCloudSpec{`,
+		`ToCloudSpec:` + strings.Replace(fmt.Sprintf("%v", this.ToCloudSpec), "MigrationToCloudSpec", "MigrationToCloudSpec", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *MigrationToCloudSpec) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&MigrationToCloudSpec{`,
+		`SourceNamespace:` + fmt.Sprintf("%v", this.SourceNamespace) + `,`,
+		`TargetNamespaceSpec:` + strings.Replace(this.TargetNamespaceSpec.String(), "NamespaceSpec", "NamespaceSpec", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Migration) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForReplicas := "[]*MigrationReplica{"
+	for _, f := range this.Replicas {
+		repeatedStringForReplicas += strings.Replace(f.String(), "MigrationReplica", "MigrationReplica", 1) + ","
+	}
+	repeatedStringForReplicas += "}"
+	s := strings.Join([]string{`&Migration{`,
+		`MigrationId:` + fmt.Sprintf("%v", this.MigrationId) + `,`,
+		`Spec:` + strings.Replace(this.Spec.String(), "MigrationSpec", "MigrationSpec", 1) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`Replicas:` + repeatedStringForReplicas + `,`,
+		`ReplicatedWorkflows:` + fmt.Sprintf("%v", this.ReplicatedWorkflows) + `,`,
+		`ReplicatedWorkflowsRemaining:` + fmt.Sprintf("%v", this.ReplicatedWorkflowsRemaining) + `,`,
+		`FailureMessage:` + fmt.Sprintf("%v", this.FailureMessage) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *MigrationReplica) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&MigrationReplica{`,
+		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2806,7 +5029,7 @@ func (m *MtlsAuthSpec) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AcceptedClientCa", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AcceptedClientCaDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2834,7 +5057,7 @@ func (m *MtlsAuthSpec) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.AcceptedClientCa = string(dAtA[iNdEx:postIndex])
+			m.AcceptedClientCaDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -2890,6 +5113,40 @@ func (m *MtlsAuthSpec) Unmarshal(dAtA []byte) error {
 				}
 			}
 			m.Enabled = bool(v != 0)
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AcceptedClientCa", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AcceptedClientCa = append(m.AcceptedClientCa[:0], dAtA[iNdEx:postIndex]...)
+			if m.AcceptedClientCa == nil {
+				m.AcceptedClientCa = []byte{}
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -2963,6 +5220,79 @@ func (m *ApiKeyAuthSpec) Unmarshal(dAtA []byte) error {
 				}
 			}
 			m.Enabled = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *LifecycleSpec) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: LifecycleSpec: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: LifecycleSpec: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EnableDeleteProtection", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.EnableDeleteProtection = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -3088,6 +5418,79 @@ func (m *CodecServerSpec) Unmarshal(dAtA []byte) error {
 				}
 			}
 			m.IncludeCrossOriginCredentials = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DisasterRecoverySpec) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DisasterRecoverySpec: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DisasterRecoverySpec: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DisableManagedFailover", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.DisableManagedFailover = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -3456,6 +5859,191 @@ func (m *NamespaceSpec) Unmarshal(dAtA []byte) error {
 				m.ApiKeyAuth = &ApiKeyAuthSpec{}
 			}
 			if err := m.ApiKeyAuth.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SearchAttributes", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.SearchAttributes == nil {
+				m.SearchAttributes = make(map[string]NamespaceSpec_SearchAttributeType)
+			}
+			var mapkey string
+			var mapvalue NamespaceSpec_SearchAttributeType
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowMessage
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowMessage
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthMessage
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthMessage
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowMessage
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						mapvalue |= NamespaceSpec_SearchAttributeType(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipMessage(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthMessage
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.SearchAttributes[mapkey] = mapvalue
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Lifecycle", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Lifecycle == nil {
+				m.Lifecycle = &LifecycleSpec{}
+			}
+			if err := m.Lifecycle.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DisasterRecovery", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.DisasterRecovery == nil {
+				m.DisasterRecovery = &DisasterRecoverySpec{}
+			}
+			if err := m.DisasterRecovery.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -4073,7 +6661,7 @@ func (m *Namespace) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StateDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -4101,7 +6689,7 @@ func (m *Namespace) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.State = string(dAtA[iNdEx:postIndex])
+			m.StateDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
@@ -4474,6 +7062,25 @@ func (m *Namespace) Unmarshal(dAtA []byte) error {
 			}
 			m.RegionStatus[mapkey] = mapvalue
 			iNdEx = postIndex
+		case 13:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= v1.ResourceState(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])
@@ -4529,7 +7136,7 @@ func (m *NamespaceRegionStatus) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StateDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -4557,7 +7164,7 @@ func (m *NamespaceRegionStatus) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.State = string(dAtA[iNdEx:postIndex])
+			m.StateDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -4591,6 +7198,1086 @@ func (m *NamespaceRegionStatus) Unmarshal(dAtA []byte) error {
 			}
 			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= NamespaceRegionStatus_State(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ExportSinkSpec) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ExportSinkSpec: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ExportSinkSpec: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Enabled", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Enabled = bool(v != 0)
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field S3", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.S3 == nil {
+				m.S3 = &v11.S3Spec{}
+			}
+			if err := m.S3.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Gcs", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Gcs == nil {
+				m.Gcs = &v11.GCSSpec{}
+			}
+			if err := m.Gcs.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ExportSink) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ExportSink: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ExportSink: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= v1.ResourceState(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &ExportSinkSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Health", wireType)
+			}
+			m.Health = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Health |= ExportSink_Health(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ErrorMessage", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ErrorMessage = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LatestDataExportTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.LatestDataExportTime == nil {
+				m.LatestDataExportTime = &types.Timestamp{}
+			}
+			if err := m.LatestDataExportTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastHealthCheckTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.LastHealthCheckTime == nil {
+				m.LastHealthCheckTime = &types.Timestamp{}
+			}
+			if err := m.LastHealthCheckTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MigrationSpec) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MigrationSpec: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MigrationSpec: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MigrationEndpointId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MigrationEndpointId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ToCloudSpec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &MigrationToCloudSpec{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Spec = &MigrationSpec_ToCloudSpec{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MigrationToCloudSpec) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MigrationToCloudSpec: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MigrationToCloudSpec: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SourceNamespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SourceNamespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TargetNamespaceSpec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.TargetNamespaceSpec == nil {
+				m.TargetNamespaceSpec = &NamespaceSpec{}
+			}
+			if err := m.TargetNamespaceSpec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Migration) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Migration: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Migration: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MigrationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MigrationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &MigrationSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= Migration_State(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Replicas", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Replicas = append(m.Replicas, &MigrationReplica{})
+			if err := m.Replicas[len(m.Replicas)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReplicatedWorkflows", wireType)
+			}
+			m.ReplicatedWorkflows = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ReplicatedWorkflows |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReplicatedWorkflowsRemaining", wireType)
+			}
+			m.ReplicatedWorkflowsRemaining = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ReplicatedWorkflowsRemaining |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FailureMessage", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.FailureMessage = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MigrationReplica) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MigrationReplica: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MigrationReplica: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Id = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= MigrationReplica_State(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMessage(dAtA[iNdEx:])

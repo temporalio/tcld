@@ -17,6 +17,7 @@ func fxOptions() fx.Option {
 			app.NewAccountCommand,
 			app.NewNamespaceCommand,
 			app.NewUserCommand,
+			app.NewUserGroupCommand,
 			app.NewRequestCommand,
 			app.NewLoginCommand,
 			app.NewLogoutCommand,
@@ -36,6 +37,9 @@ func fxOptions() fx.Option {
 			},
 			func() app.GetUserClientFn {
 				return app.GetUserClient
+			},
+			func() app.GetGroupClientFn {
+				return app.GetUserGroupClient
 			},
 			func() app.GetAPIKeyClientFn {
 				return app.GetAPIKeyClient
