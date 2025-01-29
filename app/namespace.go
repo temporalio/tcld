@@ -680,9 +680,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			},
 		},
 		{
-			Name:    "delete-protection",
+			Name:    "lifecycle",
 			Usage:   "Enable delete protection on a temporal namespace",
-			Aliases: []string{"dp"},
+			Aliases: []string{"lc"},
 			Flags: []cli.Flag{
 				RequestIDFlag,
 				ResourceVersionFlag,
