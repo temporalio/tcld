@@ -42,7 +42,6 @@ const (
 	codecIncludeCredentialsFlagName  = "include-credentials"
 	sinkRegionFlagName               = "region"
 	enableDeleteProtectionFlagName   = "enable-delete-protection"
-	disableDeleteProtectionFlagName  = "disable-delete-protection"
 )
 
 const (
