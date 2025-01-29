@@ -162,33 +162,36 @@ func (s *NamespaceTestSuite) TestDeleteProtection() {
 		expectUpdate morphUpdateReq
 	}{
 		{
-			name:      "help",
-			args:      []string{"namespace", "delete-protection"},
+			name: "no sub command help",
+			args: []string{"namespace", "lifecycle"},
+		},
+		{
+			name: "alias with no args help",
+			args: []string{"n", "lc"},
+		},
+		{
+			name:      "no flags",
+			args:      []string{"namespace", "lifecycle", "set"},
 			expectErr: true,
 		},
 		{
-			name:      "no args",
-			args:      []string{"namespace", "delete-protection", "enable-delete-protection"},
+			name:      "no flag value",
+			args:      []string{"namespace", "lifecycle", "set", "enable-delete-protection"},
 			expectErr: true,
 		},
 		{
-			name:      "alias with no args",
-			args:      []string{"n", "dp"},
+			name:      "missing string flag",
+			args:      []string{"n", "lc", "set", "-n", ns},
 			expectErr: true,
 		},
 		{
-			name:      "missing bool flag",
-			args:      []string{"n", "dp", "-n", ns},
-			expectErr: true,
-		},
-		{
-			name:      "both bool flags incorrectly set",
-			args:      []string{"n", "dp", "-n", ns, "--edp", "--ddp"},
+			name:      "string flag value missing",
+			args:      []string{"n", "lc", "set", "-n", ns, "--edp"},
 			expectErr: true,
 		},
 		{
 			name:      "success enable",
-			args:      []string{"n", "dp", "-n", ns, "--edp"},
+			args:      []string{"n", "lc", "set", "-n", ns, "--edp", "true"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 				r.Spec.Lifecycle = &namespace.LifecycleSpec{
@@ -198,7 +201,7 @@ func (s *NamespaceTestSuite) TestDeleteProtection() {
 		},
 		{
 			name: "success disable",
-			args: []string{"n", "dp", "-n", ns, "--ddp"},
+			args: []string{"n", "lc", "set", "-n", ns, "--edp", "false"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
 				g.Namespace.Spec.Lifecycle = &namespace.LifecycleSpec{
 					EnableDeleteProtection: true,
@@ -211,18 +214,38 @@ func (s *NamespaceTestSuite) TestDeleteProtection() {
 			},
 		},
 		{
+			name: "no change already enabled",
+			args: []string{"n", "lc", "set", "-n", ns, "--edp", "true"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: true,
+				}
+			},
+			expectErr: true,
+		},
+		{
 			name:      "no change already disabled",
-			args:      []string{"n", "dp", "-n", ns, "--ddp"},
+			args:      []string{"n", "lc", "set", "-n", ns, "--edp", "false"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 			expectErr: true,
 		},
 		{
 			name: "missing namespace",
-			args: []string{"n", "dp", "-n", ns, "--edp"},
+			args: []string{"n", "lc", "set", "-n", ns, "--edp", "true"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
 				g.Namespace = nil
 			},
 			expectErr: true,
+		},
+		{
+			name: "get lifecycle success",
+			args: []string{"n", "lc", "get", "-n", ns},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: true,
+				}
+			},
+			expectErr: false,
 		},
 	}
 
