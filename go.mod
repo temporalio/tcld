@@ -1,7 +1,6 @@
 module github.com/temporalio/tcld
 
-go 1.22
-toolchain go1.22.5
+go 1.22.0
 
 require (
 	github.com/go-playground/validator/v10 v10.13.0
