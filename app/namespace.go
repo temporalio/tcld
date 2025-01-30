@@ -5,11 +5,12 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/temporalio/tcld/protogen/api/common/v1"
 	"net/mail"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/temporalio/tcld/protogen/api/common/v1"
 
 	"go.uber.org/multierr"
 
@@ -976,7 +977,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						&cli.StringFlag{
 							Name:     authMethodFlagName,
 							Aliases:  []string{"am"},
-							Usage:    fmt.Sprintf("The authentication method used for the namespace (i.e. %s)", formatAuthMethods()),
+							Usage:    fmt.Sprintf("The authentication method used for the namespace (i.e. %s)", formatStringSlice(AuthMethods)),
 							Required: true,
 						},
 					},
@@ -2043,14 +2044,6 @@ func compareCodecSpec(existing, replacement *namespace.CodecServerPropertySpec) 
 	}
 
 	return diff.Diff(string(existingBytes), string(replacementBytes)), nil
-}
-
-func formatAuthMethods() string {
-	var methods []string
-	for _, m := range AuthMethods {
-		methods = append(methods, fmt.Sprintf("'%s'", m))
-	}
-	return strings.Join(methods, ", ")
 }
 
 func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
