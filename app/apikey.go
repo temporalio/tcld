@@ -112,7 +112,7 @@ func (s *APIKeyClient) createServiceAccountAPIKey(
 	return PrintProto(resp)
 }
 
-func (s *APIKeyClient) listAPIKey(ownerID, ownerType, userEmail string) error {
+func (s *APIKeyClient) listAPIKey(ownerID, ownerType string) error {
 	totalRes := &authservice.GetAPIKeysResponse{}
 	pageToken := ""
 	for {
@@ -120,7 +120,6 @@ func (s *APIKeyClient) listAPIKey(ownerID, ownerType, userEmail string) error {
 			PageToken: pageToken,
 			OwnerId:   ownerID,
 			OwnerType: ownerType,
-			UserEmail: userEmail,
 		})
 		if err != nil {
 			return err
@@ -298,11 +297,6 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 							Usage:   fmt.Sprintf("Filter API keys by owner type (i.e. %s)", formatStringSlice(OwnerTypes)),
 							Aliases: []string{"ot"},
 						},
-						&cli.StringFlag{
-							Name:    userEmailFlagName,
-							Usage:   "Filter API keys by user email",
-							Aliases: []string{"e"},
-						},
 					},
 					Action: func(ctx *cli.Context) error {
 						ownerType := ctx.String(ownerTypeFlagName)
@@ -312,7 +306,6 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 						return c.listAPIKey(
 							ctx.String(ownerIDFlagName),
 							ownerType,
-							ctx.String(userEmailFlagName),
 						)
 					},
 				},

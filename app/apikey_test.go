@@ -94,11 +94,10 @@ func (s *APIKeyTestSuite) TestList() {
 				Id: "test-apikey-id-1",
 			},
 		},
-	}, nil).Times(4)
+	}, nil).Times(3)
 	s.NoError(s.RunCmd("apikey", "list", "--owner-id", "ownerID"))
 	s.NoError(s.RunCmd("apikey", "list", "--owner-type", "user"))
-	s.NoError(s.RunCmd("apikey", "list", "--user-email", "foo@gmail.com"))
-	s.NoError(s.RunCmd("apikey", "list", "--owner-id", "ownerID", "--owner-type", "service-account", "--user-email", "foo@gmail.com"))
+	s.NoError(s.RunCmd("apikey", "list", "--owner-id", "ownerID", "--owner-type", "service-account"))
 
 }
 
