@@ -1566,7 +1566,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 				&cli.BoolFlag{
 					Name:  disableFailoverFlagName,
-					Usage: "Disable Temporal managed failover on this multi replicas namespace.",
+					Usage: "Disable Temporal-managed failover on this multi-replica namespace",
 				},
 			},
 			Action: func(ctx *cli.Context) error {
@@ -1584,7 +1584,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				if nsUpdated {
 					return c.updateNamespace(ctx, n)
 				}
-				fmt.Println("No update to namespace:", ctx.String(NamespaceFlagName))
+				fmt.Println("No changes to apply to Namespace:", ctx.String(NamespaceFlagName))
 				return nil
 			},
 		},
