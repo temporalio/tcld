@@ -689,7 +689,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 		{
 			Name:  "add-region",
-			Usage: "Add a new region to the Temporal Namespace",
+			Usage: "Add a new region to a namespace",
 			Flags: []cli.Flag{
 				RequestIDFlag,
 				&cli.StringFlag{
@@ -716,7 +716,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 		{
 			Name:  "delete-region",
-			Usage: "Delete a region from the Temporal Namespace",
+			Usage: "Delete a region from a namespace",
 			Flags: []cli.Flag{
 				RequestIDFlag,
 				&cli.StringFlag{
@@ -727,7 +727,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 				&cli.StringFlag{
 					Name:     namespaceRegionFlagName,
-					Usage:    "New region to add to the namespace.",
+					Usage:    "The region to remove from a namespace.",
 					Aliases:  []string{"re"},
 					Required: true,
 				},
@@ -741,7 +741,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				return c.deleteRegion(ctx)
 			},
 		},
-    {
+		{
 			Name:    "lifecycle",
 			Usage:   "Enable delete protection on a temporal namespace",
 			Aliases: []string{"lc"},
