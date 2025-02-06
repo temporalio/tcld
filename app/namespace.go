@@ -1574,11 +1574,18 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				if err != nil {
 					return err
 				}
+				nsUpdated := false
+				if ctx.IsSet(disableFailoverFlagName) {
+					disableAutoFailover := ctx.Bool(disableFailoverFlagName)
+					n.Spec.DisasterRecovery.DisableManagedFailover = disableAutoFailover
+					nsUpdated = true
+				}
 
-				disableAutoFailover := ctx.Bool(disableFailoverFlagName)
-				n.Spec.DisasterRecovery.DisableManagedFailover = disableAutoFailover
-
-				return c.updateNamespace(ctx, n)
+				if nsUpdated {
+					return c.updateNamespace(ctx, n)
+				}
+				fmt.Println("No update to namespace:", ctx.String(NamespaceFlagName))
+				return nil
 			},
 		},
 	}
