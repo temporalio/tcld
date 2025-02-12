@@ -5,16 +5,15 @@ package nexus
 
 import (
 	fmt "fmt"
+	proto "github.com/gogo/protobuf/proto"
+	types "github.com/gogo/protobuf/types"
+	v11 "github.com/temporalio/tcld/protogen/api/cloud/resource/v1"
+	v1 "github.com/temporalio/tcld/protogen/temporal/api/common/v1"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
-
-	proto "github.com/gogo/protobuf/proto"
-	types "github.com/gogo/protobuf/types"
-	v11 "github.com/temporalio/tcld/protogen/api/cloud/resource/v1"
-	v1 "github.com/temporalio/tcld/protogen/temporal/api/common/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

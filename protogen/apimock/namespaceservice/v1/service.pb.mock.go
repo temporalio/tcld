@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	namespaceservice "github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
+	namespaceservice "github.com/temporalio/saas-proto/protogen/api/namespaceservice/v1"
 	grpc "google.golang.org/grpc"
 )
 

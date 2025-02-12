@@ -1553,9 +1553,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			},
 		},
 		{
-			Name:    "update",
-			Usage:   "Update Temporal namespace attributes",
-			Aliases: []string{"u"},
+			Name:    "update-high-availability",
+			Usage:   "Update Temporal namespace high availability setting",
+			Aliases: []string{"uha"},
 			Flags: []cli.Flag{
 				RequestIDFlag,
 				&cli.StringFlag{
@@ -1566,7 +1566,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 				&cli.BoolFlag{
 					Name:  disableFailoverFlagName,
-					Usage: "Disable Temporal-managed failover on this multi-replica namespace",
+					Usage: "Disable Temporal-managed failover on this replicated namespace",
 				},
 			},
 			Action: func(ctx *cli.Context) error {
@@ -1577,7 +1577,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				nsUpdated := false
 				if ctx.IsSet(disableFailoverFlagName) {
 					disableAutoFailover := ctx.Bool(disableFailoverFlagName)
-					n.Spec.DisasterRecovery.DisableManagedFailover = disableAutoFailover
+					n.Spec.HighAvailability.DisableManagedFailover = disableAutoFailover
 					nsUpdated = true
 				}
 
