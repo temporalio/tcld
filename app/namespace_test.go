@@ -2632,3 +2632,79 @@ func (s *NamespaceTestSuite) TestUpdateExportS3Sink() {
 		})
 	}
 }
+
+func (s *NamespaceTestSuite) TestRemoveNamespaceRegion() {
+	ns := "namespace"
+	type expectReq func(*cloudservice.DeleteNamespaceRegionRequest)
+
+	tests := []struct {
+		name string
+
+		args          []string
+		expectRequest expectReq
+		expectErr     bool
+	}{
+		{
+			name: "Validate default cloud provider",
+			args: []string{"namespace", "delete-region", "--namespace", ns, "--region", "us-west-2"},
+			expectRequest: func(r *cloudservice.DeleteNamespaceRegionRequest) {
+				r.Namespace = ns
+				r.Region = "aws-us-west-2"
+				r.ResourceVersion = "ver1"
+			},
+			expectErr: false,
+		},
+		{
+			name: "Validate GCP cloud provider",
+			args: []string{"namespace", "delete-region", "--namespace", ns, "--region", "us-central1", "--cloud-provider", "gcp"},
+			expectRequest: func(r *cloudservice.DeleteNamespaceRegionRequest) {
+				r.Namespace = ns
+				r.Region = "gcp-us-central1"
+				r.ResourceVersion = "ver1"
+			},
+			expectErr: false,
+		},
+		{
+			name:      "Invalid Argument: missing namespace",
+			args:      []string{"namespace", "delete-region", "--region", "us-west-2"},
+			expectErr: true,
+		},
+		{
+			name:      "Invalid Argument: missing region",
+			args:      []string{"namespace", "delete-region", "--namespace", ns},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+
+			if tc.expectRequest != nil {
+				req := cloudservice.DeleteNamespaceRegionRequest{}
+				tc.expectRequest(&req)
+				s.mockCloudApiClient.EXPECT().DeleteNamespaceRegion(gomock.Any(), &req).
+					Return(&cloudservice.DeleteNamespaceRegionResponse{
+						AsyncOperation: &operation.AsyncOperation{Id: tc.name},
+					}, nil).Times(1)
+			}
+			if !tc.expectErr {
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&namespaceservice.GetNamespaceResponse{
+					Namespace: &namespace.Namespace{
+						Namespace:       ns,
+						State:           namespace.STATE_UPDATING,
+						ResourceVersion: "ver1",
+					},
+				}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}

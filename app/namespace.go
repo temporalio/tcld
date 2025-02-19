@@ -42,6 +42,7 @@ const (
 	codecPassAccessTokenFlagName     = "pass-access-token"
 	codecIncludeCredentialsFlagName  = "include-credentials"
 	sinkRegionFlagName               = "region"
+	disableFailoverFlagName          = "disable-auto-failover"
 	enableDeleteProtectionFlagName   = "enable-delete-protection"
 )
 
@@ -260,6 +261,40 @@ func (c *NamespaceClient) addRegion(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	return PrintProto(res.GetAsyncOperation())
+}
+
+func (c *NamespaceClient) deleteRegion(ctx *cli.Context) error {
+	ns, err := c.getNamespace(ctx.String(NamespaceFlagName))
+	if err != nil {
+		return err
+	}
+
+	region := ctx.String(namespaceRegionFlagName)
+	if len(region) == 0 {
+		return fmt.Errorf("namespace region is required")
+	}
+
+	cloudProvider := ctx.String(cloudProviderFlagName)
+	if len(cloudProvider) == 0 {
+		return fmt.Errorf("namespace cloud provider is required")
+	}
+
+	deleteRegion := fmt.Sprintf("%s-%s", cloudProvider, region)
+	if err := utils.ValidateCloudProviderAndRegion(deleteRegion); err != nil {
+		return err
+	}
+
+	res, err := c.cloudAPIClient.DeleteNamespaceRegion(c.ctx, &cloudservice.DeleteNamespaceRegionRequest{
+		Namespace:        ns.GetNamespace(),
+		Region:           deleteRegion,
+		ResourceVersion:  ns.GetResourceVersion(),
+		AsyncOperationId: ctx.String(RequestIDFlagName),
+	})
+	if err != nil {
+		return err
+	}
+
 	return PrintProto(res.GetAsyncOperation())
 }
 
@@ -654,7 +689,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 		{
 			Name:  "add-region",
-			Usage: "Add a new region to the Temporal Namespace",
+			Usage: "Add a new region to a namespace",
 			Flags: []cli.Flag{
 				RequestIDFlag,
 				&cli.StringFlag{
@@ -677,6 +712,33 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			},
 			Action: func(ctx *cli.Context) error {
 				return c.addRegion(ctx)
+			},
+		},
+		{
+			Name:  "delete-region",
+			Usage: "Delete a region from a namespace",
+			Flags: []cli.Flag{
+				RequestIDFlag,
+				&cli.StringFlag{
+					Name:     NamespaceFlagName,
+					Usage:    "The namespace hosted on temporal cloud",
+					Aliases:  []string{"n"},
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:     namespaceRegionFlagName,
+					Usage:    "The region to remove from a namespace.",
+					Aliases:  []string{"re"},
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:  cloudProviderFlagName,
+					Usage: "The cloud provider of the region. Default: aws",
+					Value: CloudProviderAWS,
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				return c.deleteRegion(ctx)
 			},
 		},
 		{
@@ -1488,6 +1550,42 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					return nil
 				}
 				return c.failoverNamespace(ctx)
+			},
+		},
+		{
+			Name:    "update-high-availability",
+			Usage:   "Update Temporal namespace high availability setting",
+			Aliases: []string{"uha"},
+			Flags: []cli.Flag{
+				RequestIDFlag,
+				&cli.StringFlag{
+					Name:     NamespaceFlagName,
+					Usage:    "The namespace hosted on temporal cloud",
+					Aliases:  []string{"n"},
+					Required: true,
+				},
+				&cli.BoolFlag{
+					Name:  disableFailoverFlagName,
+					Usage: "Disable Temporal-managed failover on this replicated namespace",
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+				if err != nil {
+					return err
+				}
+				nsUpdated := false
+				if ctx.IsSet(disableFailoverFlagName) {
+					disableAutoFailover := ctx.Bool(disableFailoverFlagName)
+					n.Spec.HighAvailability.DisableManagedFailover = disableAutoFailover
+					nsUpdated = true
+				}
+
+				if nsUpdated {
+					return c.updateNamespace(ctx, n)
+				}
+				fmt.Println("No changes to apply to Namespace:", ctx.String(NamespaceFlagName))
+				return nil
 			},
 		},
 	}
