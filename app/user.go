@@ -146,7 +146,7 @@ func (c *UserClient) inviteUsers(
 	var roleIDs []string
 
 	// first get the required account role
-	role, err := getAccountRole(c.ctx, c.client, accountRole)
+	role, err := getAccountRole(c.ctx, c.client, accountRole, false)
 	if err != nil {
 		return err
 	}
@@ -257,11 +257,21 @@ func (c *UserClient) setAccountRole(
 		return err
 	}
 	var newRoleIDs []string
-	accountRoleToSet, err := getAccountRole(c.ctx, c.client, accountRole)
+	accountRoleToSet, err := getAccountRole(c.ctx, c.client, accountRole, true)
 	if err != nil {
 		return err
 	}
-	if accountRoleToSet.Spec.AccountRole.ActionGroup == auth.ACCOUNT_ACTION_GROUP_ADMIN {
+	if accountRoleToSet == nil {
+		// Setting account role to none.
+		for _, r := range userRoles {
+			// remove any account roles
+			if r.Type == auth.ROLE_TYPE_PREDEFINED && r.Spec.AccountRole != nil {
+				continue
+			} else {
+				newRoleIDs = append(newRoleIDs, r.Id)
+			}
+		}
+	} else if accountRoleToSet.Spec.AccountRole.ActionGroup == auth.ACCOUNT_ACTION_GROUP_ADMIN {
 		// set the user account admin role
 		y, err := ConfirmPrompt(ctx, "Setting admin role on user. All existing namespace permissions will be replaced, please confirm")
 		if err != nil {

@@ -15,6 +15,10 @@ var (
 	namespaceActionGroups = getNamespaceActionGroups()
 )
 
+const (
+	accountActionGroupNone = "none"
+)
+
 func getAccountActionGroups() []string {
 	var rv []string
 	for n, v := range auth.AccountActionGroup_value {
@@ -63,7 +67,10 @@ func getNamespaceRolesBatch(ctx context.Context, client authservice.AuthServiceC
 	return res.Roles, nil
 }
 
-func getAccountRole(ctx context.Context, client authservice.AuthServiceClient, actionGroup string) (*auth.Role, error) {
+func getAccountRole(ctx context.Context, client authservice.AuthServiceClient, actionGroup string, allowNone bool) (*auth.Role, error) {
+	if allowNone && strings.ToLower(strings.TrimSpace(actionGroup)) == accountActionGroupNone {
+		return nil, nil
+	}
 	ag, err := toAccountActionGroup(actionGroup)
 	if err != nil {
 		return nil, err
