@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
+	"github.com/temporalio/tcld/protogen/api/common/v1"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
@@ -1843,7 +1844,10 @@ func (s *NamespaceTestSuite) TestCreateExportS3Sink() {
 				g.Namespace = &namespace.Namespace{
 					Namespace: "",
 					Spec: &namespace.NamespaceSpec{
-						Region: "us-west-2",
+						RegionId: &common.RegionID{
+							Name:     "us-west-2",
+							Provider: common.CLOUD_PROVIDER_AWS,
+						},
 					},
 				}
 			},
@@ -1875,7 +1879,10 @@ func (s *NamespaceTestSuite) TestCreateExportS3Sink() {
 				Namespace: &namespace.Namespace{
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
-						Region: "us-west-2",
+						RegionId: &common.RegionID{
+							Name:     "us-west-2",
+							Provider: common.CLOUD_PROVIDER_AWS,
+						},
 					},
 				},
 			}
@@ -2081,7 +2088,10 @@ func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
 				g.Namespace = &namespace.Namespace{
 					Namespace: "",
 					Spec: &namespace.NamespaceSpec{
-						Region: "us-west-2",
+						RegionId: &common.RegionID{
+							Name:     "us-west-2",
+							Provider: common.CLOUD_PROVIDER_AWS,
+						},
 					},
 				}
 			},
@@ -2096,7 +2106,10 @@ func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
 				Namespace: &namespace.Namespace{
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
-						Region: "us-west-2",
+						RegionId: &common.RegionID{
+							Name:     "us-west-2",
+							Provider: common.CLOUD_PROVIDER_AWS,
+						},
 					},
 				},
 			}
@@ -2368,7 +2381,10 @@ func (s *NamespaceTestSuite) TestValidateExportS3Sink() {
 				g.Namespace = &namespace.Namespace{
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
-						Region: "us-west-2",
+						RegionId: &common.RegionID{
+							Name:     "us-west-2",
+							Provider: common.CLOUD_PROVIDER_AWS,
+						},
 					},
 				}
 			},
@@ -2399,7 +2415,10 @@ func (s *NamespaceTestSuite) TestValidateExportS3Sink() {
 				g.Namespace = &namespace.Namespace{
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
-						Region: "us-east-1",
+						RegionId: &common.RegionID{
+							Name:     "us-west-2",
+							Provider: common.CLOUD_PROVIDER_AWS,
+						},
 					},
 				}
 			},
