@@ -582,7 +582,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					return fmt.Errorf("namespace can only be replicated up to 2 regions")
 				}
 				n.Spec = &namespace.NamespaceSpec{
-					Region:         regions[0],
 					PassiveRegions: regions[1:],
 				}
 
@@ -591,7 +590,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				if err != nil {
 					return err
 				}
-				n.Spec.CloudProvider = cloudProvider
 				n.Spec.RegionId = &regionId
 
 				authMethod, err := toAuthMethod(ctx.String(authMethodFlagName))
@@ -1708,7 +1706,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if err != nil {
 							return fmt.Errorf("unable to get namespace: %v", err)
 						}
-						region = ns.Spec.Region
+						region = ns.Spec.RegionId.Name
 					}
 
 					createRequest := &cloudservice.CreateNamespaceExportSinkRequest{
@@ -1754,7 +1752,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if err != nil {
 							return fmt.Errorf("validation failed: unable to get namespace: %v", err)
 						}
-						region = ns.Spec.Region
+						region = ns.Spec.RegionId.Name
 					}
 					awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagRequired.Name))
 					if err != nil {
