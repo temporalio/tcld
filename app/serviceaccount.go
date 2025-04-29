@@ -211,7 +211,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 						RequestIDFlag,
 						&cli.StringFlag{
 							Name:     accountRoleFlagName,
-							Usage:    fmt.Sprintf("The account role to set on the service account; valid types are: %v", accountActionGroups),
+							Usage:    fmt.Sprintf("The account role to set on the service account; valid types are: %v", allAccountActionGroups),
 							Required: true,
 							Aliases:  []string{"ar"},
 						},
@@ -227,7 +227,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 						}
 
 						if len(ctx.String(accountRoleFlagName)) == 0 {
-							return fmt.Errorf("account role must be specified; valid types are %v", accountActionGroups)
+							return fmt.Errorf("account role must be specified; valid types are %v", allAccountActionGroups)
 						}
 
 						ag, err := toAccountActionGroup(ctx.String(accountRoleFlagName))
@@ -425,7 +425,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 						ResourceVersionFlag,
 						&cli.StringFlag{
 							Name:     accountRoleFlagName,
-							Usage:    fmt.Sprintf("The account role to set on the service account; valid types are: %v", accountActionGroups),
+							Usage:    fmt.Sprintf("The account role to set on the service account; valid types are: %v", allAccountActionGroups),
 							Required: true,
 							Aliases:  []string{"ar"},
 						},
@@ -433,7 +433,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 					Action: func(ctx *cli.Context) error {
 						// validate input role
 						if _, ok := auth.AccountActionGroup_value[ctx.String(accountRoleFlagName)]; !ok {
-							return fmt.Errorf("invalid account role %v; valid types are: %v", ctx.String(accountRoleFlagName), accountActionGroups)
+							return fmt.Errorf("invalid account role %v; valid types are: %v", ctx.String(accountRoleFlagName), allAccountActionGroups)
 						}
 						// if account role is admin unset the namespace permissions
 						var namespacePermissions map[string]string

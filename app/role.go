@@ -11,11 +11,24 @@ import (
 )
 
 var (
-	accountActionGroups   = getAccountActionGroups()
-	namespaceActionGroups = getNamespaceActionGroups()
+	userAccountActionGroups = getUserAccountActionGroups()
+	allAccountActionGroups  = getAllAccountActionGroups()
+	namespaceActionGroups   = getNamespaceActionGroups()
 )
 
-func getAccountActionGroups() []string {
+func getUserAccountActionGroups() []string {
+	var rv []string
+	for n, v := range auth.AccountActionGroup_value {
+		if v != int32(auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED) &&
+			v != int32(auth.ACCOUNT_ACTION_GROUP_METRICS_READ) {
+			rv = append(rv, n)
+		}
+	}
+	slices.Sort(rv)
+	return rv
+}
+
+func getAllAccountActionGroups() []string {
 	var rv []string
 	for n, v := range auth.AccountActionGroup_value {
 		if v != int32(auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED) {
@@ -98,7 +111,7 @@ func toAccountActionGroup(actionGroup string) (auth.AccountActionGroup, error) {
 	}
 	if ag == auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
 		return auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED,
-			fmt.Errorf("invalid action group: should be one of: %s", accountActionGroups)
+			fmt.Errorf("invalid action group: should be one of: %s", userAccountActionGroups)
 	}
 	return ag, nil
 }

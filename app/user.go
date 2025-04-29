@@ -150,6 +150,10 @@ func (c *UserClient) inviteUsers(
 	if err != nil {
 		return err
 	}
+	if role.Spec.AccountRole.ActionGroup == auth.ACCOUNT_ACTION_GROUP_METRICS_READ {
+		return errors.New("metrics read role is not allowed for users")
+	}
+
 	roleIDs = append(roleIDs, role.GetId())
 
 	// get any optional namespace permissions
@@ -261,6 +265,10 @@ func (c *UserClient) setAccountRole(
 	if err != nil {
 		return err
 	}
+	if accountRoleToSet.Spec.AccountRole.ActionGroup == auth.ACCOUNT_ACTION_GROUP_METRICS_READ {
+		return errors.New("metrics read role is not allowed for users")
+	}
+
 	if accountRoleToSet.Spec.AccountRole.ActionGroup == auth.ACCOUNT_ACTION_GROUP_ADMIN {
 		// set the user account admin role
 		y, err := ConfirmPrompt(ctx, "Setting admin role on user. All existing namespace permissions will be replaced, please confirm")
@@ -465,7 +473,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:     accountRoleFlagName,
-							Usage:    fmt.Sprintf("The account role to set on the user; valid types are: %v", accountActionGroups),
+							Usage:    fmt.Sprintf("The account role to set on the user; valid types are: %v", userAccountActionGroups),
 							Aliases:  []string{"ar"},
 							Required: true,
 						},
@@ -531,7 +539,7 @@ func NewUserCommand(getUserClientFn GetUserClientFn) (CommandOut, error) {
 						ResourceVersionFlag,
 						&cli.StringFlag{
 							Name:     accountRoleFlagName,
-							Usage:    fmt.Sprintf("The account role to set on the user; valid types are: %v", accountActionGroups),
+							Usage:    fmt.Sprintf("The account role to set on the user; valid types are: %v", userAccountActionGroups),
 							Required: true,
 							Aliases:  []string{"ar"},
 						},
