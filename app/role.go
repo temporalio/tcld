@@ -111,7 +111,7 @@ func toAccountActionGroup(actionGroup string) (auth.AccountActionGroup, error) {
 	}
 	if ag == auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
 		return auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED,
-			fmt.Errorf("invalid action group: should be one of: %s", userAccountActionGroups)
+			fmt.Errorf("invalid action group: should be one of: %s", allAccountActionGroups[])
 	}
 	return ag, nil
 }
