@@ -3,6 +3,9 @@ package app
 import (
 	"context"
 	"errors"
+	"reflect"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
@@ -10,8 +13,6 @@ import (
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	authservicemock "github.com/temporalio/tcld/protogen/apimock/authservice/v1"
 	"github.com/urfave/cli/v2"
-	"reflect"
-	"testing"
 )
 
 func TestUser(t *testing.T) {
@@ -154,6 +155,11 @@ func (s *UserTestSuite) TestInviteErrors() {
 		Roles: []*auth.Role{{
 			Id:   "account-admin-role",
 			Type: auth.ROLE_TYPE_PREDEFINED,
+			Spec: &auth.RoleSpec{
+				AccountRole: &auth.AccountRoleSpec{
+					ActionGroup: auth.ACCOUNT_ACTION_GROUP_ADMIN,
+				},
+			},
 		}},
 	}, nil)
 	s.mockAuthService.EXPECT().InviteUsers(gomock.Any(), gomock.Any()).Return(nil, errors.New("invite users error")).Times(1)
@@ -162,6 +168,11 @@ func (s *UserTestSuite) TestInviteErrors() {
 		Roles: []*auth.Role{{
 			Id:   "account-dev-role",
 			Type: auth.ROLE_TYPE_PREDEFINED,
+			Spec: &auth.RoleSpec{
+				AccountRole: &auth.AccountRoleSpec{
+					ActionGroup: auth.ACCOUNT_ACTION_GROUP_DEVELOPER,
+				},
+			},
 		}},
 	}, nil).Times(1)
 	s.mockAuthService.EXPECT().GetRolesByPermissions(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesByPermissionsResponse{
@@ -205,6 +216,11 @@ func (s *UserTestSuite) TestInviteSuccess() {
 		Roles: []*auth.Role{{
 			Id:   "account-dev-role",
 			Type: auth.ROLE_TYPE_PREDEFINED,
+			Spec: &auth.RoleSpec{
+				AccountRole: &auth.AccountRoleSpec{
+					ActionGroup: auth.ACCOUNT_ACTION_GROUP_DEVELOPER,
+				},
+			},
 		}},
 	}, nil).Times(1)
 	s.mockAuthService.EXPECT().GetRolesByPermissions(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesByPermissionsResponse{

@@ -189,12 +189,12 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 					Flags: []cli.Flag{
 						&cli.StringFlag{
 							Name:    pageTokenFlagName,
-							Usage:   "list groups starting from this page token",
+							Usage:   "List groups starting from this page token",
 							Aliases: []string{"p"},
 						},
 						&cli.IntFlag{
 							Name:    pageSizeFlagName,
-							Usage:   "number of groups to list",
+							Usage:   "Number of groups to list",
 							Aliases: []string{"s"},
 						},
 					},
@@ -208,9 +208,10 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 					Aliases: []string{"g"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
-							Name:    groupIDFlagName,
-							Usage:   "group ID",
-							Aliases: []string{"id"},
+							Name:     groupIDFlagName,
+							Usage:    "The ID of the group",
+							Required: true,
+							Aliases:  []string{"id"},
 						},
 					},
 					Action: func(ctx *cli.Context) error {
@@ -223,18 +224,19 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 					Aliases: []string{"sa"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
-							Name:    groupIDFlagName,
-							Usage:   "group ID",
-							Aliases: []string{"id"},
+							Name:     groupIDFlagName,
+							Usage:    "The ID of the group",
+							Required: true,
+							Aliases:  []string{"id"},
 						},
 						&cli.StringFlag{
 							Name:    accountRoleFlagName,
-							Usage:   "account role",
+							Usage:   fmt.Sprintf("The account role to set on the group; valid types are: %v", userAccountActionGroups),
 							Aliases: []string{"ar"},
 						},
 						&cli.StringSliceFlag{
 							Name:    namespaceRoleFlagName,
-							Usage:   "namespace roles",
+							Usage:   "Flag can be used multiple times",
 							Aliases: []string{"nr"},
 						},
 					},
