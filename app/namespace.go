@@ -582,7 +582,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					return fmt.Errorf("namespace can only be replicated up to 2 regions")
 				}
 				n.Spec = &namespace.NamespaceSpec{
-					Region:         regions[0],
 					PassiveRegions: regions[1:],
 				}
 
@@ -591,7 +590,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				if err != nil {
 					return err
 				}
-				n.Spec.CloudProvider = cloudProvider
 				n.Spec.RegionId = &regionId
 
 				authMethod, err := toAuthMethod(ctx.String(authMethodFlagName))
@@ -1465,6 +1463,34 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					},
 				},
 				{
+					Name:    "remove",
+					Usage:   "Remove an existing namespace custom search attribute",
+					Aliases: []string{"rm"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RequestIDFlag,
+						ResourceVersionFlag,
+						&cli.StringFlag{
+							Name:     "search-attribute",
+							Usage:    "The name of the search attribute to remove",
+							Aliases:  []string{"sa"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						if err != nil {
+							return err
+						}
+						attrName := ctx.String("search-attribute")
+						if _, exists := n.Spec.SearchAttributes[attrName]; !exists {
+							return fmt.Errorf("search attribute with name '%s' does not exist", attrName)
+						}
+						delete(n.Spec.SearchAttributes, attrName)
+						return c.updateNamespace(ctx, n)
+					},
+				},
+				{
 					Name:    "rename",
 					Usage:   "Update the name of an existing custom search attribute",
 					Aliases: []string{"rn"},
@@ -1708,7 +1734,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if err != nil {
 							return fmt.Errorf("unable to get namespace: %v", err)
 						}
-						region = ns.Spec.Region
+						region = ns.Spec.RegionId.Name
 					}
 
 					createRequest := &cloudservice.CreateNamespaceExportSinkRequest{
@@ -1754,7 +1780,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						if err != nil {
 							return fmt.Errorf("validation failed: unable to get namespace: %v", err)
 						}
-						region = ns.Spec.Region
+						region = ns.Spec.RegionId.Name
 					}
 					awsAccountID, roleName, err := parseAssumedRole(ctx.String(sinkAssumedRoleFlagRequired.Name))
 					if err != nil {
