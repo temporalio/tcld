@@ -227,7 +227,7 @@ type AsyncOperation_ApprovalStatus struct {
 	// The current state of the approval.
 	State AsyncOperation_ApprovalStatus_State `protobuf:"varint,1,opt,name=state,proto3,enum=temporal.api.cloud.operation.v1.AsyncOperation_ApprovalStatus_State" json:"state,omitempty"`
 	// The outcome of the approval.
-	// Will elaborate more on why the required approvals were approved, rejected or expired.
+	// Explains why the required approvals were approved, rejected or expired.
 	Outcome string `protobuf:"bytes,2,opt,name=outcome,proto3" json:"outcome,omitempty"`
 }
 
