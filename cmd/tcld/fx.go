@@ -26,6 +26,7 @@ func fxOptions() fx.Option {
 			app.NewFeatureCommand,
 			app.NewServiceAccountCommand,
 			app.NewNexusCommand,
+			app.NewMigrationCommand,
 			func() app.GetNamespaceClientFn {
 				return app.GetNamespaceClient
 			},
@@ -49,6 +50,9 @@ func fxOptions() fx.Option {
 			},
 			func() app.GetNexusClientFn {
 				return app.GetNexusClient
+			},
+			func() app.GetMigrationClientFn {
+				return app.GetMigrationClient
 			},
 		),
 		fx.Invoke(func(app *cli.App, shutdowner fx.Shutdowner) error {
