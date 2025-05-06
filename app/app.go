@@ -28,6 +28,7 @@ func NewApp(params AppParams) (*cli.App, error) {
 			EnableDebugLogsFlag,
 		},
 		Commands: params.Commands,
+		EnableBashCompletion: true,
 	}
 
 	return app, nil
