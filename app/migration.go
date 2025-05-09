@@ -37,10 +37,13 @@ func (c *MigrationClient) getMigration(migrationId string) (*namespace.Migration
 	resp, err := c.client.GetMigration(c.ctx, &cloudservice.GetMigrationRequest{
 		MigrationId: migrationId,
 	})
-	return resp.Migration, err
+	if err != nil {
+		return nil, err
+	}
+	return resp.Migration, nil
 }
 
-func (c *MigrationClient) listMigration() error {
+func (c *MigrationClient) listMigrations() error {
 	totalRes := &cloudservice.GetMigrationsResponse{}
 	pageToken := ""
 	for {
@@ -139,7 +142,7 @@ func NewMigrationCommand(getMigrationClient GetMigrationClientFn) (CommandOut, e
 	}
 	toReplicaIdFlag := &cli.StringFlag{
 		Name:     "to-replica-id",
-		Aliases:  []string{"r"},
+		Aliases:  []string{"rp"},
 		Usage:    "Migration replica id",
 		Required: true,
 	}
@@ -153,7 +156,7 @@ func NewMigrationCommand(getMigrationClient GetMigrationClientFn) (CommandOut, e
 				c, err = getMigrationClient(ctx)
 				return err
 			},
-			Usage: "Commands for managing namespace migrations",
+			Usage: "(private preview) Manage migrations between self-hosted Temporal and Temporal cloud",
 			Subcommands: []*cli.Command{
 				{
 					Name:    "get",
@@ -177,7 +180,7 @@ func NewMigrationCommand(getMigrationClient GetMigrationClientFn) (CommandOut, e
 					Usage:   "List migrations",
 					Flags:   []cli.Flag{},
 					Action: func(ctx *cli.Context) error {
-						return c.listMigration()
+						return c.listMigrations()
 					},
 				},
 				{
