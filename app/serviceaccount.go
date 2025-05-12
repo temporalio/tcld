@@ -183,6 +183,10 @@ func (c *ServiceAccountClient) performUpdate(
 
 	resp, err := c.client.UpdateServiceAccount(c.ctx, req)
 	if err != nil {
+		if isNothingChangedErr(err) {
+			fmt.Println("nothing to change")
+			return nil
+		}
 		return fmt.Errorf("unable to update service account: %w", err)
 	}
 	return PrintProto(resp.RequestStatus)

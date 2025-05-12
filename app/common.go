@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	apipayload "github.com/temporalio/tcld/protogen/temporal/api/common/v1"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -33,6 +35,14 @@ func IsFeatureEnabled(feature string) bool {
 	}
 
 	return false
+}
+
+func isNothingChangedErr(e error) bool {
+	s, ok := status.FromError(e)
+	if !ok {
+		return false
+	}
+	return s.Code() == codes.InvalidArgument && s.Message() == "nothing to change"
 }
 
 func parseAssumedRole(assumedRole string) (string, string, error) {
