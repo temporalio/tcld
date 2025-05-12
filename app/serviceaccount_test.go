@@ -13,6 +13,8 @@ import (
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	authservicemock "github.com/temporalio/tcld/protogen/apimock/authservice/v1"
 	"github.com/urfave/cli/v2"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestServiceAccount(t *testing.T) {
@@ -353,4 +355,42 @@ func (s *ServiceAccountTestSuite) TestSetNamespacePermissionsEmpty() {
 		},
 	}, nil)
 	s.NoError(s.RunCmd("service-account", "set-namespace-permissions", "--service-account-id", "test-service-account-id"))
+}
+
+func (s *ServiceAccountTestSuite) TestSetNamespacePermissionsNoChange() {
+	s.mockAuthService.EXPECT().GetServiceAccount(gomock.Any(), gomock.Any()).Return(&authservice.GetServiceAccountResponse{
+		ServiceAccount: &auth.ServiceAccount{
+			Id: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
+				Access: &auth.Access{
+					AccountAccess: &auth.AccountAccess{
+						Role: auth.ACCOUNT_ACTION_GROUP_READ,
+					},
+					NamespaceAccesses: map[string]*auth.NamespaceAccess{},
+				},
+			},
+		},
+	}, nil).Times(1)
+	s.mockAuthService.EXPECT().UpdateServiceAccount(gomock.Any(), gomock.All(&updateServiceAccountRequestMatcher{
+		request: &authservice.UpdateServiceAccountRequest{
+			ServiceAccountId: "test-service-account-id",
+			Spec: &auth.ServiceAccountSpec{
+				Name:        "test-service-account-name",
+				Description: "test-service-account-desc",
+				Access: &auth.Access{
+					AccountAccess: &auth.AccountAccess{
+						Role: auth.ACCOUNT_ACTION_GROUP_READ,
+					},
+					NamespaceAccesses: map[string]*auth.NamespaceAccess{
+						"test-namespace-1": {
+							Permission: auth.NAMESPACE_ACTION_GROUP_READ,
+						},
+					},
+				},
+			},
+		},
+	})).Return(nil, status.Error(codes.InvalidArgument, "nothing to change")).Times(1)
+	s.NoError(s.RunCmd("service-account", "set-namespace-permissions", "--service-account-id", "test-service-account-id", "-p", "test-namespace-1=Read"))
 }
