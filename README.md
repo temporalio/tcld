@@ -243,7 +243,7 @@ Migrations provide a way to migrate a namespace and its workflow between a self-
 ### Start a migration
 
 To start a migration, provide the migration endpoint id and the source and target namespace names.
-Start the migration enables active/passive namespace replication.
+Starting the migration enables active/passive namespace replication.
 
 ```
 tcld migration start --endpoint-id <endpoint-id> --source-namespace <source-namespace> --target-namespace <target-namespace>
