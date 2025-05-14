@@ -125,25 +125,25 @@ func NewMigrationCommand(getMigrationClient GetMigrationClientFn) (CommandOut, e
 	migrationEndpointIdFlag := &cli.StringFlag{
 		Name:     "endpoint-id",
 		Aliases:  []string{"e"},
-		Usage:    "Migration id",
+		Usage:    "Migration endpoint id",
 		Required: true,
 	}
 	sourceNamespaceFlag := &cli.StringFlag{
 		Name:     "source-namespace",
 		Aliases:  []string{"s"},
-		Usage:    "Migration id",
+		Usage:    "Source namespace name",
 		Required: true,
 	}
 	targetNamespaceFlag := &cli.StringFlag{
 		Name:     "target-namespace",
 		Aliases:  []string{"t"},
-		Usage:    "Migration id",
+		Usage:    "Target namespace name",
 		Required: true,
 	}
 	toReplicaIdFlag := &cli.StringFlag{
 		Name:     "to-replica-id",
 		Aliases:  []string{"rp"},
-		Usage:    "Migration replica id",
+		Usage:    "The id of the replica to make active",
 		Required: true,
 	}
 
