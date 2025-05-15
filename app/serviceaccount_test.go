@@ -44,6 +44,7 @@ func (s *ServiceAccountTestSuite) SetupTest() {
 		Commands: []*cli.Command{out.Command},
 		Flags: []cli.Flag{
 			AutoConfirmFlag,
+			IdempotentFlag,
 		},
 	}
 }
@@ -392,5 +393,5 @@ func (s *ServiceAccountTestSuite) TestSetNamespacePermissionsNoChange() {
 			},
 		},
 	})).Return(nil, status.Error(codes.InvalidArgument, "nothing to change")).Times(1)
-	s.NoError(s.RunCmd("service-account", "set-namespace-permissions", "--service-account-id", "test-service-account-id", "-p", "test-namespace-1=Read"))
+	s.NoError(s.RunCmd("--idempotent", "service-account", "set-namespace-permissions", "--service-account-id", "test-service-account-id", "-p", "test-namespace-1=Read"))
 }

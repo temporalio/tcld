@@ -44,6 +44,7 @@ func (s *UserTestSuite) SetupTest() {
 	}
 	flags := []cli.Flag{
 		AutoConfirmFlag,
+		IdempotentFlag,
 	}
 	s.cliApp, _ = NewTestApp(s.T(), cmds, flags)
 }
@@ -597,5 +598,5 @@ func (s *UserTestSuite) TestSetNamespacePermissionsNoChanges() {
 			},
 		},
 	})).Return(nil, status.Error(codes.InvalidArgument, "nothing to change")).Times(1)
-	s.NoError(s.RunCmd("user", "set-namespace-permissions", "--user-email", "test@example.com", "-p", "ns1=Admin", "-p", "ns2=Write", "-p", "ns3=Read"))
+	s.NoError(s.RunCmd("--idempotent", "user", "set-namespace-permissions", "--user-email", "test@example.com", "-p", "ns1=Admin", "-p", "ns2=Write", "-p", "ns3=Read"))
 }
