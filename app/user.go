@@ -241,8 +241,7 @@ func (c *UserClient) performUpdate(ctx *cli.Context, user *auth.User) error {
 	}
 	resp, err := c.client.UpdateUser(c.ctx, req)
 	if err != nil {
-		if isNothingChangedErr(err) {
-			fmt.Println("nothing to change")
+		if isNothingChangedErr(ctx, err) {
 			return nil
 		}
 		return fmt.Errorf("unable to update user: %w", err)
