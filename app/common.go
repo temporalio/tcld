@@ -48,7 +48,7 @@ func isNothingChangedErr(ctx *cli.Context, e error) bool {
 	if !ok {
 		return false
 	}
-	return s.Code() == codes.InvalidArgument && s.Message() == "nothing to change"
+	return s.Code() == codes.InvalidArgument && strings.Contains(s.Message(), "nothing to change")
 }
 
 func parseAssumedRole(assumedRole string) (string, string, error) {
