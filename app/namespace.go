@@ -344,6 +344,9 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 		Spec:            n.Spec,
 	})
 	if err != nil {
+		if isNothingChangedErr(ctx, err) {
+			return nil
+		}
 		return err
 	}
 
@@ -802,6 +805,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 						if enable {
 							if n.Spec.Lifecycle != nil && n.Spec.Lifecycle.EnableDeleteProtection {
+								if ctx.Bool(IdempotentFlagName) {
+									return nil
+								}
+
 								return errors.New("delete protection is already enabled")
 							}
 							n.Spec.Lifecycle = &namespace.LifecycleSpec{
@@ -809,6 +816,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							}
 						} else {
 							if n.Spec.Lifecycle == nil || !n.Spec.Lifecycle.EnableDeleteProtection {
+								if ctx.Bool(IdempotentFlagName) {
+									return nil
+								}
 								return errors.New("delete protection is already disabled")
 							}
 							y, err := ConfirmPrompt(ctx, "disabling namespace delete protection may be prone to accidental deletion. confirm?")
@@ -936,6 +946,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 						if n.Spec.AcceptedClientCa == bundle {
+							if ctx.Bool(IdempotentFlagName) {
+								return nil
+							}
 							return errors.New("nothing to change")
 						}
 						n.Spec.AcceptedClientCa = bundle
@@ -983,6 +996,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 						if n.Spec.AcceptedClientCa == bundle {
+							if ctx.Bool(IdempotentFlagName) {
+								return nil
+							}
 							return errors.New("nothing to change")
 						}
 						n.Spec.AcceptedClientCa = bundle
@@ -1014,6 +1030,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 						if n.Spec.AcceptedClientCa == cert {
+							if ctx.Bool(IdempotentFlagName) {
+								return nil
+							}
 							return errors.New("nothing to change")
 						}
 						n.Spec.AcceptedClientCa = cert
@@ -1051,6 +1070,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 						if n.Spec.AuthMethod == authMethod {
+							if ctx.Bool(IdempotentFlagName) {
+								return nil
+							}
 							return errors.New("nothing to change")
 						}
 						if disruptiveChange(n.Spec.AuthMethod, authMethod) {
