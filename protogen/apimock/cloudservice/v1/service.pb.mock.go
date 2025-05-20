@@ -76,6 +76,26 @@ func (mr *MockCloudServiceClientMockRecorder) AddNamespaceRegion(ctx, in interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNamespaceRegion", reflect.TypeOf((*MockCloudServiceClient)(nil).AddNamespaceRegion), varargs...)
 }
 
+// AddUserGroupMember mocks base method.
+func (m *MockCloudServiceClient) AddUserGroupMember(ctx context.Context, in *cloudservice.AddUserGroupMemberRequest, opts ...grpc.CallOption) (*cloudservice.AddUserGroupMemberResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AddUserGroupMember", varargs...)
+	ret0, _ := ret[0].(*cloudservice.AddUserGroupMemberResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AddUserGroupMember indicates an expected call of AddUserGroupMember.
+func (mr *MockCloudServiceClientMockRecorder) AddUserGroupMember(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUserGroupMember", reflect.TypeOf((*MockCloudServiceClient)(nil).AddUserGroupMember), varargs...)
+}
+
 // ConfirmMigration mocks base method.
 func (m *MockCloudServiceClient) ConfirmMigration(ctx context.Context, in *cloudservice.ConfirmMigrationRequest, opts ...grpc.CallOption) (*cloudservice.ConfirmMigrationResponse, error) {
 	m.ctrl.T.Helper()
@@ -114,6 +134,26 @@ func (mr *MockCloudServiceClientMockRecorder) CreateApiKey(ctx, in interface{}, 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApiKey", reflect.TypeOf((*MockCloudServiceClient)(nil).CreateApiKey), varargs...)
+}
+
+// CreateConnectivityRule mocks base method.
+func (m *MockCloudServiceClient) CreateConnectivityRule(ctx context.Context, in *cloudservice.CreateConnectivityRuleRequest, opts ...grpc.CallOption) (*cloudservice.CreateConnectivityRuleResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateConnectivityRule", varargs...)
+	ret0, _ := ret[0].(*cloudservice.CreateConnectivityRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateConnectivityRule indicates an expected call of CreateConnectivityRule.
+func (mr *MockCloudServiceClientMockRecorder) CreateConnectivityRule(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateConnectivityRule", reflect.TypeOf((*MockCloudServiceClient)(nil).CreateConnectivityRule), varargs...)
 }
 
 // CreateNamespace mocks base method.
@@ -254,6 +294,26 @@ func (mr *MockCloudServiceClientMockRecorder) DeleteApiKey(ctx, in interface{}, 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApiKey", reflect.TypeOf((*MockCloudServiceClient)(nil).DeleteApiKey), varargs...)
+}
+
+// DeleteConnectivityRule mocks base method.
+func (m *MockCloudServiceClient) DeleteConnectivityRule(ctx context.Context, in *cloudservice.DeleteConnectivityRuleRequest, opts ...grpc.CallOption) (*cloudservice.DeleteConnectivityRuleResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteConnectivityRule", varargs...)
+	ret0, _ := ret[0].(*cloudservice.DeleteConnectivityRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteConnectivityRule indicates an expected call of DeleteConnectivityRule.
+func (mr *MockCloudServiceClientMockRecorder) DeleteConnectivityRule(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteConnectivityRule", reflect.TypeOf((*MockCloudServiceClient)(nil).DeleteConnectivityRule), varargs...)
 }
 
 // DeleteNamespace mocks base method.
@@ -514,6 +574,46 @@ func (mr *MockCloudServiceClientMockRecorder) GetAuditLogs(ctx, in interface{}, 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuditLogs", reflect.TypeOf((*MockCloudServiceClient)(nil).GetAuditLogs), varargs...)
+}
+
+// GetConnectivityRule mocks base method.
+func (m *MockCloudServiceClient) GetConnectivityRule(ctx context.Context, in *cloudservice.GetConnectivityRuleRequest, opts ...grpc.CallOption) (*cloudservice.GetConnectivityRuleResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetConnectivityRule", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetConnectivityRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetConnectivityRule indicates an expected call of GetConnectivityRule.
+func (mr *MockCloudServiceClientMockRecorder) GetConnectivityRule(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConnectivityRule", reflect.TypeOf((*MockCloudServiceClient)(nil).GetConnectivityRule), varargs...)
+}
+
+// GetConnectivityRules mocks base method.
+func (m *MockCloudServiceClient) GetConnectivityRules(ctx context.Context, in *cloudservice.GetConnectivityRulesRequest, opts ...grpc.CallOption) (*cloudservice.GetConnectivityRulesResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetConnectivityRules", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetConnectivityRulesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetConnectivityRules indicates an expected call of GetConnectivityRules.
+func (mr *MockCloudServiceClientMockRecorder) GetConnectivityRules(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConnectivityRules", reflect.TypeOf((*MockCloudServiceClient)(nil).GetConnectivityRules), varargs...)
 }
 
 // GetMigration mocks base method.
@@ -816,6 +916,26 @@ func (mr *MockCloudServiceClientMockRecorder) GetUserGroup(ctx, in interface{}, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserGroup", reflect.TypeOf((*MockCloudServiceClient)(nil).GetUserGroup), varargs...)
 }
 
+// GetUserGroupMembers mocks base method.
+func (m *MockCloudServiceClient) GetUserGroupMembers(ctx context.Context, in *cloudservice.GetUserGroupMembersRequest, opts ...grpc.CallOption) (*cloudservice.GetUserGroupMembersResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetUserGroupMembers", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetUserGroupMembersResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserGroupMembers indicates an expected call of GetUserGroupMembers.
+func (mr *MockCloudServiceClientMockRecorder) GetUserGroupMembers(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserGroupMembers", reflect.TypeOf((*MockCloudServiceClient)(nil).GetUserGroupMembers), varargs...)
+}
+
 // GetUserGroups mocks base method.
 func (m *MockCloudServiceClient) GetUserGroups(ctx context.Context, in *cloudservice.GetUserGroupsRequest, opts ...grpc.CallOption) (*cloudservice.GetUserGroupsResponse, error) {
 	m.ctrl.T.Helper()
@@ -874,6 +994,26 @@ func (mr *MockCloudServiceClientMockRecorder) HandoverNamespace(ctx, in interfac
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandoverNamespace", reflect.TypeOf((*MockCloudServiceClient)(nil).HandoverNamespace), varargs...)
+}
+
+// RemoveUserGroupMember mocks base method.
+func (m *MockCloudServiceClient) RemoveUserGroupMember(ctx context.Context, in *cloudservice.RemoveUserGroupMemberRequest, opts ...grpc.CallOption) (*cloudservice.RemoveUserGroupMemberResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RemoveUserGroupMember", varargs...)
+	ret0, _ := ret[0].(*cloudservice.RemoveUserGroupMemberResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RemoveUserGroupMember indicates an expected call of RemoveUserGroupMember.
+func (mr *MockCloudServiceClientMockRecorder) RemoveUserGroupMember(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveUserGroupMember", reflect.TypeOf((*MockCloudServiceClient)(nil).RemoveUserGroupMember), varargs...)
 }
 
 // RenameCustomSearchAttribute mocks base method.
@@ -994,6 +1134,26 @@ func (mr *MockCloudServiceClientMockRecorder) UpdateApiKey(ctx, in interface{}, 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApiKey", reflect.TypeOf((*MockCloudServiceClient)(nil).UpdateApiKey), varargs...)
+}
+
+// UpdateConnectivityRule mocks base method.
+func (m *MockCloudServiceClient) UpdateConnectivityRule(ctx context.Context, in *cloudservice.UpdateConnectivityRuleRequest, opts ...grpc.CallOption) (*cloudservice.UpdateConnectivityRuleResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateConnectivityRule", varargs...)
+	ret0, _ := ret[0].(*cloudservice.UpdateConnectivityRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateConnectivityRule indicates an expected call of UpdateConnectivityRule.
+func (mr *MockCloudServiceClientMockRecorder) UpdateConnectivityRule(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConnectivityRule", reflect.TypeOf((*MockCloudServiceClient)(nil).UpdateConnectivityRule), varargs...)
 }
 
 // UpdateNamespace mocks base method.
@@ -1189,6 +1349,21 @@ func (mr *MockCloudServiceServerMockRecorder) AddNamespaceRegion(arg0, arg1 inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNamespaceRegion", reflect.TypeOf((*MockCloudServiceServer)(nil).AddNamespaceRegion), arg0, arg1)
 }
 
+// AddUserGroupMember mocks base method.
+func (m *MockCloudServiceServer) AddUserGroupMember(arg0 context.Context, arg1 *cloudservice.AddUserGroupMemberRequest) (*cloudservice.AddUserGroupMemberResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddUserGroupMember", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.AddUserGroupMemberResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AddUserGroupMember indicates an expected call of AddUserGroupMember.
+func (mr *MockCloudServiceServerMockRecorder) AddUserGroupMember(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUserGroupMember", reflect.TypeOf((*MockCloudServiceServer)(nil).AddUserGroupMember), arg0, arg1)
+}
+
 // ConfirmMigration mocks base method.
 func (m *MockCloudServiceServer) ConfirmMigration(arg0 context.Context, arg1 *cloudservice.ConfirmMigrationRequest) (*cloudservice.ConfirmMigrationResponse, error) {
 	m.ctrl.T.Helper()
@@ -1217,6 +1392,21 @@ func (m *MockCloudServiceServer) CreateApiKey(arg0 context.Context, arg1 *clouds
 func (mr *MockCloudServiceServerMockRecorder) CreateApiKey(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApiKey", reflect.TypeOf((*MockCloudServiceServer)(nil).CreateApiKey), arg0, arg1)
+}
+
+// CreateConnectivityRule mocks base method.
+func (m *MockCloudServiceServer) CreateConnectivityRule(arg0 context.Context, arg1 *cloudservice.CreateConnectivityRuleRequest) (*cloudservice.CreateConnectivityRuleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateConnectivityRule", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.CreateConnectivityRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateConnectivityRule indicates an expected call of CreateConnectivityRule.
+func (mr *MockCloudServiceServerMockRecorder) CreateConnectivityRule(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateConnectivityRule", reflect.TypeOf((*MockCloudServiceServer)(nil).CreateConnectivityRule), arg0, arg1)
 }
 
 // CreateNamespace mocks base method.
@@ -1322,6 +1512,21 @@ func (m *MockCloudServiceServer) DeleteApiKey(arg0 context.Context, arg1 *clouds
 func (mr *MockCloudServiceServerMockRecorder) DeleteApiKey(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApiKey", reflect.TypeOf((*MockCloudServiceServer)(nil).DeleteApiKey), arg0, arg1)
+}
+
+// DeleteConnectivityRule mocks base method.
+func (m *MockCloudServiceServer) DeleteConnectivityRule(arg0 context.Context, arg1 *cloudservice.DeleteConnectivityRuleRequest) (*cloudservice.DeleteConnectivityRuleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteConnectivityRule", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.DeleteConnectivityRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteConnectivityRule indicates an expected call of DeleteConnectivityRule.
+func (mr *MockCloudServiceServerMockRecorder) DeleteConnectivityRule(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteConnectivityRule", reflect.TypeOf((*MockCloudServiceServer)(nil).DeleteConnectivityRule), arg0, arg1)
 }
 
 // DeleteNamespace mocks base method.
@@ -1517,6 +1722,36 @@ func (m *MockCloudServiceServer) GetAuditLogs(arg0 context.Context, arg1 *clouds
 func (mr *MockCloudServiceServerMockRecorder) GetAuditLogs(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuditLogs", reflect.TypeOf((*MockCloudServiceServer)(nil).GetAuditLogs), arg0, arg1)
+}
+
+// GetConnectivityRule mocks base method.
+func (m *MockCloudServiceServer) GetConnectivityRule(arg0 context.Context, arg1 *cloudservice.GetConnectivityRuleRequest) (*cloudservice.GetConnectivityRuleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetConnectivityRule", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetConnectivityRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetConnectivityRule indicates an expected call of GetConnectivityRule.
+func (mr *MockCloudServiceServerMockRecorder) GetConnectivityRule(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConnectivityRule", reflect.TypeOf((*MockCloudServiceServer)(nil).GetConnectivityRule), arg0, arg1)
+}
+
+// GetConnectivityRules mocks base method.
+func (m *MockCloudServiceServer) GetConnectivityRules(arg0 context.Context, arg1 *cloudservice.GetConnectivityRulesRequest) (*cloudservice.GetConnectivityRulesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetConnectivityRules", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetConnectivityRulesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetConnectivityRules indicates an expected call of GetConnectivityRules.
+func (mr *MockCloudServiceServerMockRecorder) GetConnectivityRules(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConnectivityRules", reflect.TypeOf((*MockCloudServiceServer)(nil).GetConnectivityRules), arg0, arg1)
 }
 
 // GetMigration mocks base method.
@@ -1744,6 +1979,21 @@ func (mr *MockCloudServiceServerMockRecorder) GetUserGroup(arg0, arg1 interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserGroup", reflect.TypeOf((*MockCloudServiceServer)(nil).GetUserGroup), arg0, arg1)
 }
 
+// GetUserGroupMembers mocks base method.
+func (m *MockCloudServiceServer) GetUserGroupMembers(arg0 context.Context, arg1 *cloudservice.GetUserGroupMembersRequest) (*cloudservice.GetUserGroupMembersResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserGroupMembers", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetUserGroupMembersResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserGroupMembers indicates an expected call of GetUserGroupMembers.
+func (mr *MockCloudServiceServerMockRecorder) GetUserGroupMembers(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserGroupMembers", reflect.TypeOf((*MockCloudServiceServer)(nil).GetUserGroupMembers), arg0, arg1)
+}
+
 // GetUserGroups mocks base method.
 func (m *MockCloudServiceServer) GetUserGroups(arg0 context.Context, arg1 *cloudservice.GetUserGroupsRequest) (*cloudservice.GetUserGroupsResponse, error) {
 	m.ctrl.T.Helper()
@@ -1787,6 +2037,21 @@ func (m *MockCloudServiceServer) HandoverNamespace(arg0 context.Context, arg1 *c
 func (mr *MockCloudServiceServerMockRecorder) HandoverNamespace(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandoverNamespace", reflect.TypeOf((*MockCloudServiceServer)(nil).HandoverNamespace), arg0, arg1)
+}
+
+// RemoveUserGroupMember mocks base method.
+func (m *MockCloudServiceServer) RemoveUserGroupMember(arg0 context.Context, arg1 *cloudservice.RemoveUserGroupMemberRequest) (*cloudservice.RemoveUserGroupMemberResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveUserGroupMember", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.RemoveUserGroupMemberResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RemoveUserGroupMember indicates an expected call of RemoveUserGroupMember.
+func (mr *MockCloudServiceServerMockRecorder) RemoveUserGroupMember(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveUserGroupMember", reflect.TypeOf((*MockCloudServiceServer)(nil).RemoveUserGroupMember), arg0, arg1)
 }
 
 // RenameCustomSearchAttribute mocks base method.
@@ -1877,6 +2142,21 @@ func (m *MockCloudServiceServer) UpdateApiKey(arg0 context.Context, arg1 *clouds
 func (mr *MockCloudServiceServerMockRecorder) UpdateApiKey(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApiKey", reflect.TypeOf((*MockCloudServiceServer)(nil).UpdateApiKey), arg0, arg1)
+}
+
+// UpdateConnectivityRule mocks base method.
+func (m *MockCloudServiceServer) UpdateConnectivityRule(arg0 context.Context, arg1 *cloudservice.UpdateConnectivityRuleRequest) (*cloudservice.UpdateConnectivityRuleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateConnectivityRule", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.UpdateConnectivityRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateConnectivityRule indicates an expected call of UpdateConnectivityRule.
+func (mr *MockCloudServiceServerMockRecorder) UpdateConnectivityRule(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConnectivityRule", reflect.TypeOf((*MockCloudServiceServer)(nil).UpdateConnectivityRule), arg0, arg1)
 }
 
 // UpdateNamespace mocks base method.

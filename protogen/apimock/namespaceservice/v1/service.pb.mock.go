@@ -216,26 +216,6 @@ func (mr *MockNamespaceServiceClientMockRecorder) GetNamespaces(ctx, in interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaces", reflect.TypeOf((*MockNamespaceServiceClient)(nil).GetNamespaces), varargs...)
 }
 
-// GetReplicationStatus mocks base method.
-func (m *MockNamespaceServiceClient) GetReplicationStatus(ctx context.Context, in *namespaceservice.GetReplicationStatusRequest, opts ...grpc.CallOption) (*namespaceservice.GetReplicationStatusResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetReplicationStatus", varargs...)
-	ret0, _ := ret[0].(*namespaceservice.GetReplicationStatusResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetReplicationStatus indicates an expected call of GetReplicationStatus.
-func (mr *MockNamespaceServiceClientMockRecorder) GetReplicationStatus(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReplicationStatus", reflect.TypeOf((*MockNamespaceServiceClient)(nil).GetReplicationStatus), varargs...)
-}
-
 // GlobalizeNamespace mocks base method.
 func (m *MockNamespaceServiceClient) GlobalizeNamespace(ctx context.Context, in *namespaceservice.GlobalizeNamespaceRequest, opts ...grpc.CallOption) (*namespaceservice.GlobalizeNamespaceResponse, error) {
 	m.ctrl.T.Helper()
@@ -592,21 +572,6 @@ func (m *MockNamespaceServiceServer) GetNamespaces(arg0 context.Context, arg1 *n
 func (mr *MockNamespaceServiceServerMockRecorder) GetNamespaces(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaces", reflect.TypeOf((*MockNamespaceServiceServer)(nil).GetNamespaces), arg0, arg1)
-}
-
-// GetReplicationStatus mocks base method.
-func (m *MockNamespaceServiceServer) GetReplicationStatus(arg0 context.Context, arg1 *namespaceservice.GetReplicationStatusRequest) (*namespaceservice.GetReplicationStatusResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetReplicationStatus", arg0, arg1)
-	ret0, _ := ret[0].(*namespaceservice.GetReplicationStatusResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetReplicationStatus indicates an expected call of GetReplicationStatus.
-func (mr *MockNamespaceServiceServerMockRecorder) GetReplicationStatus(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReplicationStatus", reflect.TypeOf((*MockNamespaceServiceServer)(nil).GetReplicationStatus), arg0, arg1)
 }
 
 // GlobalizeNamespace mocks base method.

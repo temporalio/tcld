@@ -9,6 +9,7 @@ import (
 	types "github.com/gogo/protobuf/types"
 	v15 "github.com/temporalio/tcld/protogen/api/cloud/account/v1"
 	v16 "github.com/temporalio/tcld/protogen/api/cloud/auditlog/v1"
+	v18 "github.com/temporalio/tcld/protogen/api/cloud/connectivityrule/v1"
 	v1 "github.com/temporalio/tcld/protogen/api/cloud/identity/v1"
 	v12 "github.com/temporalio/tcld/protogen/api/cloud/namespace/v1"
 	v14 "github.com/temporalio/tcld/protogen/api/cloud/nexus/v1"
@@ -3400,6 +3401,336 @@ func (m *SetUserGroupNamespaceAccessResponse) GetAsyncOperation() *v11.AsyncOper
 	return nil
 }
 
+type AddUserGroupMemberRequest struct {
+	// The id of the group to add the member for.
+	GroupId string `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	// The member id to add to the group.
+	MemberId *v1.UserGroupMemberId `protobuf:"bytes,2,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
+	// The id to use for this async operation.
+	// Optional, if not provided a random id will be generated.
+	AsyncOperationId string `protobuf:"bytes,3,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *AddUserGroupMemberRequest) Reset()      { *m = AddUserGroupMemberRequest{} }
+func (*AddUserGroupMemberRequest) ProtoMessage() {}
+func (*AddUserGroupMemberRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{60}
+}
+func (m *AddUserGroupMemberRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AddUserGroupMemberRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AddUserGroupMemberRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AddUserGroupMemberRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddUserGroupMemberRequest.Merge(m, src)
+}
+func (m *AddUserGroupMemberRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *AddUserGroupMemberRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddUserGroupMemberRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddUserGroupMemberRequest proto.InternalMessageInfo
+
+func (m *AddUserGroupMemberRequest) GetGroupId() string {
+	if m != nil {
+		return m.GroupId
+	}
+	return ""
+}
+
+func (m *AddUserGroupMemberRequest) GetMemberId() *v1.UserGroupMemberId {
+	if m != nil {
+		return m.MemberId
+	}
+	return nil
+}
+
+func (m *AddUserGroupMemberRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+type AddUserGroupMemberResponse struct {
+	// The async operation.
+	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *AddUserGroupMemberResponse) Reset()      { *m = AddUserGroupMemberResponse{} }
+func (*AddUserGroupMemberResponse) ProtoMessage() {}
+func (*AddUserGroupMemberResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{61}
+}
+func (m *AddUserGroupMemberResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AddUserGroupMemberResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AddUserGroupMemberResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AddUserGroupMemberResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddUserGroupMemberResponse.Merge(m, src)
+}
+func (m *AddUserGroupMemberResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *AddUserGroupMemberResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddUserGroupMemberResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddUserGroupMemberResponse proto.InternalMessageInfo
+
+func (m *AddUserGroupMemberResponse) GetAsyncOperation() *v11.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+type RemoveUserGroupMemberRequest struct {
+	// The id of the group to add the member for.
+	GroupId string `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	// The member id to add to the group.
+	MemberId *v1.UserGroupMemberId `protobuf:"bytes,2,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
+	// The id to use for this async operation.
+	// Optional, if not provided a random id will be generated.
+	AsyncOperationId string `protobuf:"bytes,3,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *RemoveUserGroupMemberRequest) Reset()      { *m = RemoveUserGroupMemberRequest{} }
+func (*RemoveUserGroupMemberRequest) ProtoMessage() {}
+func (*RemoveUserGroupMemberRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{62}
+}
+func (m *RemoveUserGroupMemberRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *RemoveUserGroupMemberRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_RemoveUserGroupMemberRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *RemoveUserGroupMemberRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveUserGroupMemberRequest.Merge(m, src)
+}
+func (m *RemoveUserGroupMemberRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *RemoveUserGroupMemberRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveUserGroupMemberRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RemoveUserGroupMemberRequest proto.InternalMessageInfo
+
+func (m *RemoveUserGroupMemberRequest) GetGroupId() string {
+	if m != nil {
+		return m.GroupId
+	}
+	return ""
+}
+
+func (m *RemoveUserGroupMemberRequest) GetMemberId() *v1.UserGroupMemberId {
+	if m != nil {
+		return m.MemberId
+	}
+	return nil
+}
+
+func (m *RemoveUserGroupMemberRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+type RemoveUserGroupMemberResponse struct {
+	// The async operation.
+	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *RemoveUserGroupMemberResponse) Reset()      { *m = RemoveUserGroupMemberResponse{} }
+func (*RemoveUserGroupMemberResponse) ProtoMessage() {}
+func (*RemoveUserGroupMemberResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{63}
+}
+func (m *RemoveUserGroupMemberResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *RemoveUserGroupMemberResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_RemoveUserGroupMemberResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *RemoveUserGroupMemberResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveUserGroupMemberResponse.Merge(m, src)
+}
+func (m *RemoveUserGroupMemberResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *RemoveUserGroupMemberResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveUserGroupMemberResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RemoveUserGroupMemberResponse proto.InternalMessageInfo
+
+func (m *RemoveUserGroupMemberResponse) GetAsyncOperation() *v11.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+type GetUserGroupMembersRequest struct {
+	// The requested size of the page to retrieve - optional.
+	// Cannot exceed 1000. Defaults to 100.
+	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// The page token if this is continuing from another response - optional.
+	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// The group id to list members of.
+	GroupId string `protobuf:"bytes,3,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+}
+
+func (m *GetUserGroupMembersRequest) Reset()      { *m = GetUserGroupMembersRequest{} }
+func (*GetUserGroupMembersRequest) ProtoMessage() {}
+func (*GetUserGroupMembersRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{64}
+}
+func (m *GetUserGroupMembersRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetUserGroupMembersRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetUserGroupMembersRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetUserGroupMembersRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetUserGroupMembersRequest.Merge(m, src)
+}
+func (m *GetUserGroupMembersRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetUserGroupMembersRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetUserGroupMembersRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetUserGroupMembersRequest proto.InternalMessageInfo
+
+func (m *GetUserGroupMembersRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *GetUserGroupMembersRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
+func (m *GetUserGroupMembersRequest) GetGroupId() string {
+	if m != nil {
+		return m.GroupId
+	}
+	return ""
+}
+
+type GetUserGroupMembersResponse struct {
+	// The list of group members
+	Members []*v1.UserGroupMember `protobuf:"bytes,1,rep,name=members,proto3" json:"members,omitempty"`
+	// The next page's token.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (m *GetUserGroupMembersResponse) Reset()      { *m = GetUserGroupMembersResponse{} }
+func (*GetUserGroupMembersResponse) ProtoMessage() {}
+func (*GetUserGroupMembersResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{65}
+}
+func (m *GetUserGroupMembersResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetUserGroupMembersResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetUserGroupMembersResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetUserGroupMembersResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetUserGroupMembersResponse.Merge(m, src)
+}
+func (m *GetUserGroupMembersResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetUserGroupMembersResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetUserGroupMembersResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetUserGroupMembersResponse proto.InternalMessageInfo
+
+func (m *GetUserGroupMembersResponse) GetMembers() []*v1.UserGroupMember {
+	if m != nil {
+		return m.Members
+	}
+	return nil
+}
+
+func (m *GetUserGroupMembersResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
+
 type CreateServiceAccountRequest struct {
 	// The spec of the service account to create.
 	Spec *v1.ServiceAccountSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
@@ -3410,7 +3741,7 @@ type CreateServiceAccountRequest struct {
 func (m *CreateServiceAccountRequest) Reset()      { *m = CreateServiceAccountRequest{} }
 func (*CreateServiceAccountRequest) ProtoMessage() {}
 func (*CreateServiceAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{60}
+	return fileDescriptor_d04330087ace166d, []int{66}
 }
 func (m *CreateServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3463,7 +3794,7 @@ type CreateServiceAccountResponse struct {
 func (m *CreateServiceAccountResponse) Reset()      { *m = CreateServiceAccountResponse{} }
 func (*CreateServiceAccountResponse) ProtoMessage() {}
 func (*CreateServiceAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{61}
+	return fileDescriptor_d04330087ace166d, []int{67}
 }
 func (m *CreateServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3514,7 +3845,7 @@ type GetServiceAccountRequest struct {
 func (m *GetServiceAccountRequest) Reset()      { *m = GetServiceAccountRequest{} }
 func (*GetServiceAccountRequest) ProtoMessage() {}
 func (*GetServiceAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{62}
+	return fileDescriptor_d04330087ace166d, []int{68}
 }
 func (m *GetServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3558,7 +3889,7 @@ type GetServiceAccountResponse struct {
 func (m *GetServiceAccountResponse) Reset()      { *m = GetServiceAccountResponse{} }
 func (*GetServiceAccountResponse) ProtoMessage() {}
 func (*GetServiceAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{63}
+	return fileDescriptor_d04330087ace166d, []int{69}
 }
 func (m *GetServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3605,7 +3936,7 @@ type GetServiceAccountsRequest struct {
 func (m *GetServiceAccountsRequest) Reset()      { *m = GetServiceAccountsRequest{} }
 func (*GetServiceAccountsRequest) ProtoMessage() {}
 func (*GetServiceAccountsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{64}
+	return fileDescriptor_d04330087ace166d, []int{70}
 }
 func (m *GetServiceAccountsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3658,7 +3989,7 @@ type GetServiceAccountsResponse struct {
 func (m *GetServiceAccountsResponse) Reset()      { *m = GetServiceAccountsResponse{} }
 func (*GetServiceAccountsResponse) ProtoMessage() {}
 func (*GetServiceAccountsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{65}
+	return fileDescriptor_d04330087ace166d, []int{71}
 }
 func (m *GetServiceAccountsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3716,7 +4047,7 @@ type UpdateServiceAccountRequest struct {
 func (m *UpdateServiceAccountRequest) Reset()      { *m = UpdateServiceAccountRequest{} }
 func (*UpdateServiceAccountRequest) ProtoMessage() {}
 func (*UpdateServiceAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{66}
+	return fileDescriptor_d04330087ace166d, []int{72}
 }
 func (m *UpdateServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3781,7 +4112,7 @@ type UpdateServiceAccountResponse struct {
 func (m *UpdateServiceAccountResponse) Reset()      { *m = UpdateServiceAccountResponse{} }
 func (*UpdateServiceAccountResponse) ProtoMessage() {}
 func (*UpdateServiceAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{67}
+	return fileDescriptor_d04330087ace166d, []int{73}
 }
 func (m *UpdateServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3830,7 +4161,7 @@ type DeleteServiceAccountRequest struct {
 func (m *DeleteServiceAccountRequest) Reset()      { *m = DeleteServiceAccountRequest{} }
 func (*DeleteServiceAccountRequest) ProtoMessage() {}
 func (*DeleteServiceAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{68}
+	return fileDescriptor_d04330087ace166d, []int{74}
 }
 func (m *DeleteServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3888,7 +4219,7 @@ type DeleteServiceAccountResponse struct {
 func (m *DeleteServiceAccountResponse) Reset()      { *m = DeleteServiceAccountResponse{} }
 func (*DeleteServiceAccountResponse) ProtoMessage() {}
 func (*DeleteServiceAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{69}
+	return fileDescriptor_d04330087ace166d, []int{75}
 }
 func (m *DeleteServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3943,7 +4274,7 @@ type GetApiKeysRequest struct {
 func (m *GetApiKeysRequest) Reset()      { *m = GetApiKeysRequest{} }
 func (*GetApiKeysRequest) ProtoMessage() {}
 func (*GetApiKeysRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{70}
+	return fileDescriptor_d04330087ace166d, []int{76}
 }
 func (m *GetApiKeysRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4018,7 +4349,7 @@ type GetApiKeysResponse struct {
 func (m *GetApiKeysResponse) Reset()      { *m = GetApiKeysResponse{} }
 func (*GetApiKeysResponse) ProtoMessage() {}
 func (*GetApiKeysResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{71}
+	return fileDescriptor_d04330087ace166d, []int{77}
 }
 func (m *GetApiKeysResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4069,7 +4400,7 @@ type GetApiKeyRequest struct {
 func (m *GetApiKeyRequest) Reset()      { *m = GetApiKeyRequest{} }
 func (*GetApiKeyRequest) ProtoMessage() {}
 func (*GetApiKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{72}
+	return fileDescriptor_d04330087ace166d, []int{78}
 }
 func (m *GetApiKeyRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4113,7 +4444,7 @@ type GetApiKeyResponse struct {
 func (m *GetApiKeyResponse) Reset()      { *m = GetApiKeyResponse{} }
 func (*GetApiKeyResponse) ProtoMessage() {}
 func (*GetApiKeyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{73}
+	return fileDescriptor_d04330087ace166d, []int{79}
 }
 func (m *GetApiKeyResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4160,7 +4491,7 @@ type CreateApiKeyRequest struct {
 func (m *CreateApiKeyRequest) Reset()      { *m = CreateApiKeyRequest{} }
 func (*CreateApiKeyRequest) ProtoMessage() {}
 func (*CreateApiKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{74}
+	return fileDescriptor_d04330087ace166d, []int{80}
 }
 func (m *CreateApiKeyRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4217,7 +4548,7 @@ type CreateApiKeyResponse struct {
 func (m *CreateApiKeyResponse) Reset()      { *m = CreateApiKeyResponse{} }
 func (*CreateApiKeyResponse) ProtoMessage() {}
 func (*CreateApiKeyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{75}
+	return fileDescriptor_d04330087ace166d, []int{81}
 }
 func (m *CreateApiKeyResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4282,7 +4613,7 @@ type UpdateApiKeyRequest struct {
 func (m *UpdateApiKeyRequest) Reset()      { *m = UpdateApiKeyRequest{} }
 func (*UpdateApiKeyRequest) ProtoMessage() {}
 func (*UpdateApiKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{76}
+	return fileDescriptor_d04330087ace166d, []int{82}
 }
 func (m *UpdateApiKeyRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4347,7 +4678,7 @@ type UpdateApiKeyResponse struct {
 func (m *UpdateApiKeyResponse) Reset()      { *m = UpdateApiKeyResponse{} }
 func (*UpdateApiKeyResponse) ProtoMessage() {}
 func (*UpdateApiKeyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{77}
+	return fileDescriptor_d04330087ace166d, []int{83}
 }
 func (m *UpdateApiKeyResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4396,7 +4727,7 @@ type DeleteApiKeyRequest struct {
 func (m *DeleteApiKeyRequest) Reset()      { *m = DeleteApiKeyRequest{} }
 func (*DeleteApiKeyRequest) ProtoMessage() {}
 func (*DeleteApiKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{78}
+	return fileDescriptor_d04330087ace166d, []int{84}
 }
 func (m *DeleteApiKeyRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4454,7 +4785,7 @@ type DeleteApiKeyResponse struct {
 func (m *DeleteApiKeyResponse) Reset()      { *m = DeleteApiKeyResponse{} }
 func (*DeleteApiKeyResponse) ProtoMessage() {}
 func (*DeleteApiKeyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{79}
+	return fileDescriptor_d04330087ace166d, []int{85}
 }
 func (m *DeleteApiKeyResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4505,7 +4836,7 @@ type GetAuditLogsRequest struct {
 func (m *GetAuditLogsRequest) Reset()      { *m = GetAuditLogsRequest{} }
 func (*GetAuditLogsRequest) ProtoMessage() {}
 func (*GetAuditLogsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{80}
+	return fileDescriptor_d04330087ace166d, []int{86}
 }
 func (m *GetAuditLogsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4572,7 +4903,7 @@ type GetAuditLogsResponse struct {
 func (m *GetAuditLogsResponse) Reset()      { *m = GetAuditLogsResponse{} }
 func (*GetAuditLogsResponse) ProtoMessage() {}
 func (*GetAuditLogsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{81}
+	return fileDescriptor_d04330087ace166d, []int{87}
 }
 func (m *GetAuditLogsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4637,7 +4968,7 @@ type GetUsageRequest struct {
 func (m *GetUsageRequest) Reset()      { *m = GetUsageRequest{} }
 func (*GetUsageRequest) ProtoMessage() {}
 func (*GetUsageRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{82}
+	return fileDescriptor_d04330087ace166d, []int{88}
 }
 func (m *GetUsageRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4705,7 +5036,7 @@ type GetUsageResponse struct {
 func (m *GetUsageResponse) Reset()      { *m = GetUsageResponse{} }
 func (*GetUsageResponse) ProtoMessage() {}
 func (*GetUsageResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{83}
+	return fileDescriptor_d04330087ace166d, []int{89}
 }
 func (m *GetUsageResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4754,7 +5085,7 @@ type GetAccountRequest struct {
 func (m *GetAccountRequest) Reset()      { *m = GetAccountRequest{} }
 func (*GetAccountRequest) ProtoMessage() {}
 func (*GetAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{84}
+	return fileDescriptor_d04330087ace166d, []int{90}
 }
 func (m *GetAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4791,7 +5122,7 @@ type GetAccountResponse struct {
 func (m *GetAccountResponse) Reset()      { *m = GetAccountResponse{} }
 func (*GetAccountResponse) ProtoMessage() {}
 func (*GetAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{85}
+	return fileDescriptor_d04330087ace166d, []int{91}
 }
 func (m *GetAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4839,7 +5170,7 @@ type CreateNamespaceExportSinkRequest struct {
 func (m *CreateNamespaceExportSinkRequest) Reset()      { *m = CreateNamespaceExportSinkRequest{} }
 func (*CreateNamespaceExportSinkRequest) ProtoMessage() {}
 func (*CreateNamespaceExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{86}
+	return fileDescriptor_d04330087ace166d, []int{92}
 }
 func (m *CreateNamespaceExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4897,7 +5228,7 @@ type CreateNamespaceExportSinkResponse struct {
 func (m *CreateNamespaceExportSinkResponse) Reset()      { *m = CreateNamespaceExportSinkResponse{} }
 func (*CreateNamespaceExportSinkResponse) ProtoMessage() {}
 func (*CreateNamespaceExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{87}
+	return fileDescriptor_d04330087ace166d, []int{93}
 }
 func (m *CreateNamespaceExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4943,7 +5274,7 @@ type GetNamespaceExportSinkRequest struct {
 func (m *GetNamespaceExportSinkRequest) Reset()      { *m = GetNamespaceExportSinkRequest{} }
 func (*GetNamespaceExportSinkRequest) ProtoMessage() {}
 func (*GetNamespaceExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{88}
+	return fileDescriptor_d04330087ace166d, []int{94}
 }
 func (m *GetNamespaceExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4994,7 +5325,7 @@ type GetNamespaceExportSinkResponse struct {
 func (m *GetNamespaceExportSinkResponse) Reset()      { *m = GetNamespaceExportSinkResponse{} }
 func (*GetNamespaceExportSinkResponse) ProtoMessage() {}
 func (*GetNamespaceExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{89}
+	return fileDescriptor_d04330087ace166d, []int{95}
 }
 func (m *GetNamespaceExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5043,7 +5374,7 @@ type GetNamespaceExportSinksRequest struct {
 func (m *GetNamespaceExportSinksRequest) Reset()      { *m = GetNamespaceExportSinksRequest{} }
 func (*GetNamespaceExportSinksRequest) ProtoMessage() {}
 func (*GetNamespaceExportSinksRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{90}
+	return fileDescriptor_d04330087ace166d, []int{96}
 }
 func (m *GetNamespaceExportSinksRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5103,7 +5434,7 @@ type GetNamespaceExportSinksResponse struct {
 func (m *GetNamespaceExportSinksResponse) Reset()      { *m = GetNamespaceExportSinksResponse{} }
 func (*GetNamespaceExportSinksResponse) ProtoMessage() {}
 func (*GetNamespaceExportSinksResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{91}
+	return fileDescriptor_d04330087ace166d, []int{97}
 }
 func (m *GetNamespaceExportSinksResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5161,7 +5492,7 @@ type UpdateNamespaceExportSinkRequest struct {
 func (m *UpdateNamespaceExportSinkRequest) Reset()      { *m = UpdateNamespaceExportSinkRequest{} }
 func (*UpdateNamespaceExportSinkRequest) ProtoMessage() {}
 func (*UpdateNamespaceExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{92}
+	return fileDescriptor_d04330087ace166d, []int{98}
 }
 func (m *UpdateNamespaceExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5226,7 +5557,7 @@ type UpdateNamespaceExportSinkResponse struct {
 func (m *UpdateNamespaceExportSinkResponse) Reset()      { *m = UpdateNamespaceExportSinkResponse{} }
 func (*UpdateNamespaceExportSinkResponse) ProtoMessage() {}
 func (*UpdateNamespaceExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{93}
+	return fileDescriptor_d04330087ace166d, []int{99}
 }
 func (m *UpdateNamespaceExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5277,7 +5608,7 @@ type DeleteNamespaceExportSinkRequest struct {
 func (m *DeleteNamespaceExportSinkRequest) Reset()      { *m = DeleteNamespaceExportSinkRequest{} }
 func (*DeleteNamespaceExportSinkRequest) ProtoMessage() {}
 func (*DeleteNamespaceExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{94}
+	return fileDescriptor_d04330087ace166d, []int{100}
 }
 func (m *DeleteNamespaceExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5342,7 +5673,7 @@ type DeleteNamespaceExportSinkResponse struct {
 func (m *DeleteNamespaceExportSinkResponse) Reset()      { *m = DeleteNamespaceExportSinkResponse{} }
 func (*DeleteNamespaceExportSinkResponse) ProtoMessage() {}
 func (*DeleteNamespaceExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{95}
+	return fileDescriptor_d04330087ace166d, []int{101}
 }
 func (m *DeleteNamespaceExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5388,7 +5719,7 @@ type ValidateNamespaceExportSinkRequest struct {
 func (m *ValidateNamespaceExportSinkRequest) Reset()      { *m = ValidateNamespaceExportSinkRequest{} }
 func (*ValidateNamespaceExportSinkRequest) ProtoMessage() {}
 func (*ValidateNamespaceExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{96}
+	return fileDescriptor_d04330087ace166d, []int{102}
 }
 func (m *ValidateNamespaceExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5437,7 +5768,7 @@ type ValidateNamespaceExportSinkResponse struct {
 func (m *ValidateNamespaceExportSinkResponse) Reset()      { *m = ValidateNamespaceExportSinkResponse{} }
 func (*ValidateNamespaceExportSinkResponse) ProtoMessage() {}
 func (*ValidateNamespaceExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{97}
+	return fileDescriptor_d04330087ace166d, []int{103}
 }
 func (m *ValidateNamespaceExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5477,7 +5808,7 @@ type StartMigrationRequest struct {
 func (m *StartMigrationRequest) Reset()      { *m = StartMigrationRequest{} }
 func (*StartMigrationRequest) ProtoMessage() {}
 func (*StartMigrationRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{98}
+	return fileDescriptor_d04330087ace166d, []int{104}
 }
 func (m *StartMigrationRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5530,7 +5861,7 @@ type StartMigrationResponse struct {
 func (m *StartMigrationResponse) Reset()      { *m = StartMigrationResponse{} }
 func (*StartMigrationResponse) ProtoMessage() {}
 func (*StartMigrationResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{99}
+	return fileDescriptor_d04330087ace166d, []int{105}
 }
 func (m *StartMigrationResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5581,7 +5912,7 @@ type GetMigrationRequest struct {
 func (m *GetMigrationRequest) Reset()      { *m = GetMigrationRequest{} }
 func (*GetMigrationRequest) ProtoMessage() {}
 func (*GetMigrationRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{100}
+	return fileDescriptor_d04330087ace166d, []int{106}
 }
 func (m *GetMigrationRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5625,7 +5956,7 @@ type GetMigrationResponse struct {
 func (m *GetMigrationResponse) Reset()      { *m = GetMigrationResponse{} }
 func (*GetMigrationResponse) ProtoMessage() {}
 func (*GetMigrationResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{101}
+	return fileDescriptor_d04330087ace166d, []int{107}
 }
 func (m *GetMigrationResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5674,7 +6005,7 @@ type GetMigrationsRequest struct {
 func (m *GetMigrationsRequest) Reset()      { *m = GetMigrationsRequest{} }
 func (*GetMigrationsRequest) ProtoMessage() {}
 func (*GetMigrationsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{102}
+	return fileDescriptor_d04330087ace166d, []int{108}
 }
 func (m *GetMigrationsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5727,7 +6058,7 @@ type GetMigrationsResponse struct {
 func (m *GetMigrationsResponse) Reset()      { *m = GetMigrationsResponse{} }
 func (*GetMigrationsResponse) ProtoMessage() {}
 func (*GetMigrationsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{103}
+	return fileDescriptor_d04330087ace166d, []int{109}
 }
 func (m *GetMigrationsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5783,7 +6114,7 @@ type HandoverNamespaceRequest struct {
 func (m *HandoverNamespaceRequest) Reset()      { *m = HandoverNamespaceRequest{} }
 func (*HandoverNamespaceRequest) ProtoMessage() {}
 func (*HandoverNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{104}
+	return fileDescriptor_d04330087ace166d, []int{110}
 }
 func (m *HandoverNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5841,7 +6172,7 @@ type HandoverNamespaceResponse struct {
 func (m *HandoverNamespaceResponse) Reset()      { *m = HandoverNamespaceResponse{} }
 func (*HandoverNamespaceResponse) ProtoMessage() {}
 func (*HandoverNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{105}
+	return fileDescriptor_d04330087ace166d, []int{111}
 }
 func (m *HandoverNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5888,7 +6219,7 @@ type ConfirmMigrationRequest struct {
 func (m *ConfirmMigrationRequest) Reset()      { *m = ConfirmMigrationRequest{} }
 func (*ConfirmMigrationRequest) ProtoMessage() {}
 func (*ConfirmMigrationRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{106}
+	return fileDescriptor_d04330087ace166d, []int{112}
 }
 func (m *ConfirmMigrationRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5939,7 +6270,7 @@ type ConfirmMigrationResponse struct {
 func (m *ConfirmMigrationResponse) Reset()      { *m = ConfirmMigrationResponse{} }
 func (*ConfirmMigrationResponse) ProtoMessage() {}
 func (*ConfirmMigrationResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{107}
+	return fileDescriptor_d04330087ace166d, []int{113}
 }
 func (m *ConfirmMigrationResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5986,7 +6317,7 @@ type AbortMigrationRequest struct {
 func (m *AbortMigrationRequest) Reset()      { *m = AbortMigrationRequest{} }
 func (*AbortMigrationRequest) ProtoMessage() {}
 func (*AbortMigrationRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{108}
+	return fileDescriptor_d04330087ace166d, []int{114}
 }
 func (m *AbortMigrationRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6037,7 +6368,7 @@ type AbortMigrationResponse struct {
 func (m *AbortMigrationResponse) Reset()      { *m = AbortMigrationResponse{} }
 func (*AbortMigrationResponse) ProtoMessage() {}
 func (*AbortMigrationResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{109}
+	return fileDescriptor_d04330087ace166d, []int{115}
 }
 func (m *AbortMigrationResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6067,6 +6398,537 @@ func (m *AbortMigrationResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_AbortMigrationResponse proto.InternalMessageInfo
 
 func (m *AbortMigrationResponse) GetAsyncOperation() *v11.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+type CreateConnectivityRuleRequest struct {
+	Spec *v18.ConnectivityRuleSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
+	// The id to use for this async operation.
+	// Optional, if not provided a random id will be generated.
+	AsyncOperationId string `protobuf:"bytes,2,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *CreateConnectivityRuleRequest) Reset()      { *m = CreateConnectivityRuleRequest{} }
+func (*CreateConnectivityRuleRequest) ProtoMessage() {}
+func (*CreateConnectivityRuleRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{116}
+}
+func (m *CreateConnectivityRuleRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CreateConnectivityRuleRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CreateConnectivityRuleRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CreateConnectivityRuleRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateConnectivityRuleRequest.Merge(m, src)
+}
+func (m *CreateConnectivityRuleRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *CreateConnectivityRuleRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateConnectivityRuleRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateConnectivityRuleRequest proto.InternalMessageInfo
+
+func (m *CreateConnectivityRuleRequest) GetSpec() *v18.ConnectivityRuleSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *CreateConnectivityRuleRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+type CreateConnectivityRuleResponse struct {
+	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
+	// The async operation
+	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,2,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *CreateConnectivityRuleResponse) Reset()      { *m = CreateConnectivityRuleResponse{} }
+func (*CreateConnectivityRuleResponse) ProtoMessage() {}
+func (*CreateConnectivityRuleResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{117}
+}
+func (m *CreateConnectivityRuleResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CreateConnectivityRuleResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CreateConnectivityRuleResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CreateConnectivityRuleResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateConnectivityRuleResponse.Merge(m, src)
+}
+func (m *CreateConnectivityRuleResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *CreateConnectivityRuleResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateConnectivityRuleResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateConnectivityRuleResponse proto.InternalMessageInfo
+
+func (m *CreateConnectivityRuleResponse) GetConnectivityRuleId() string {
+	if m != nil {
+		return m.ConnectivityRuleId
+	}
+	return ""
+}
+
+func (m *CreateConnectivityRuleResponse) GetAsyncOperation() *v11.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+type GetConnectivityRuleRequest struct {
+	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
+}
+
+func (m *GetConnectivityRuleRequest) Reset()      { *m = GetConnectivityRuleRequest{} }
+func (*GetConnectivityRuleRequest) ProtoMessage() {}
+func (*GetConnectivityRuleRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{118}
+}
+func (m *GetConnectivityRuleRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetConnectivityRuleRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetConnectivityRuleRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetConnectivityRuleRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetConnectivityRuleRequest.Merge(m, src)
+}
+func (m *GetConnectivityRuleRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetConnectivityRuleRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetConnectivityRuleRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetConnectivityRuleRequest proto.InternalMessageInfo
+
+func (m *GetConnectivityRuleRequest) GetConnectivityRuleId() string {
+	if m != nil {
+		return m.ConnectivityRuleId
+	}
+	return ""
+}
+
+type GetConnectivityRuleResponse struct {
+	ConnectivityRule *v18.ConnectivityRule `protobuf:"bytes,1,opt,name=connectivity_rule,json=connectivityRule,proto3" json:"connectivity_rule,omitempty"`
+}
+
+func (m *GetConnectivityRuleResponse) Reset()      { *m = GetConnectivityRuleResponse{} }
+func (*GetConnectivityRuleResponse) ProtoMessage() {}
+func (*GetConnectivityRuleResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{119}
+}
+func (m *GetConnectivityRuleResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetConnectivityRuleResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetConnectivityRuleResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetConnectivityRuleResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetConnectivityRuleResponse.Merge(m, src)
+}
+func (m *GetConnectivityRuleResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetConnectivityRuleResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetConnectivityRuleResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetConnectivityRuleResponse proto.InternalMessageInfo
+
+func (m *GetConnectivityRuleResponse) GetConnectivityRule() *v18.ConnectivityRule {
+	if m != nil {
+		return m.ConnectivityRule
+	}
+	return nil
+}
+
+type GetConnectivityRulesRequest struct {
+	// The requested size of the page to retrieve.
+	// Optional, defaults to 100.
+	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// The page token if this is continuing from another response.
+	// Optional, defaults to empty.
+	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// Accept group of connectivity rule ids
+	ConnectivityRuleIds []string `protobuf:"bytes,3,rep,name=connectivity_rule_ids,json=connectivityRuleIds,proto3" json:"connectivity_rule_ids,omitempty"`
+}
+
+func (m *GetConnectivityRulesRequest) Reset()      { *m = GetConnectivityRulesRequest{} }
+func (*GetConnectivityRulesRequest) ProtoMessage() {}
+func (*GetConnectivityRulesRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{120}
+}
+func (m *GetConnectivityRulesRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetConnectivityRulesRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetConnectivityRulesRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetConnectivityRulesRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetConnectivityRulesRequest.Merge(m, src)
+}
+func (m *GetConnectivityRulesRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetConnectivityRulesRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetConnectivityRulesRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetConnectivityRulesRequest proto.InternalMessageInfo
+
+func (m *GetConnectivityRulesRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *GetConnectivityRulesRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
+func (m *GetConnectivityRulesRequest) GetConnectivityRuleIds() []string {
+	if m != nil {
+		return m.ConnectivityRuleIds
+	}
+	return nil
+}
+
+type GetConnectivityRulesResponse struct {
+	// connectivity_rules returned
+	ConnectivityRules []*v18.ConnectivityRule `protobuf:"bytes,1,rep,name=connectivity_rules,json=connectivityRules,proto3" json:"connectivity_rules,omitempty"`
+	// The next page token
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (m *GetConnectivityRulesResponse) Reset()      { *m = GetConnectivityRulesResponse{} }
+func (*GetConnectivityRulesResponse) ProtoMessage() {}
+func (*GetConnectivityRulesResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{121}
+}
+func (m *GetConnectivityRulesResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetConnectivityRulesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetConnectivityRulesResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetConnectivityRulesResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetConnectivityRulesResponse.Merge(m, src)
+}
+func (m *GetConnectivityRulesResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetConnectivityRulesResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetConnectivityRulesResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetConnectivityRulesResponse proto.InternalMessageInfo
+
+func (m *GetConnectivityRulesResponse) GetConnectivityRules() []*v18.ConnectivityRule {
+	if m != nil {
+		return m.ConnectivityRules
+	}
+	return nil
+}
+
+func (m *GetConnectivityRulesResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
+
+type UpdateConnectivityRuleRequest struct {
+	// The ID of the connectivity rule that need be updated, required.
+	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
+	// The spec of the connectivity rule that needs to be applied as the update, required.
+	Spec *v18.ConnectivityRuleSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	// The resource version which should be the same from the the db, required
+	ResourceVersion string `protobuf:"bytes,3,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	// The id to use for this async operation.
+	// Optional, if not provided a random id will be generated.
+	AsyncOperationId string `protobuf:"bytes,4,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *UpdateConnectivityRuleRequest) Reset()      { *m = UpdateConnectivityRuleRequest{} }
+func (*UpdateConnectivityRuleRequest) ProtoMessage() {}
+func (*UpdateConnectivityRuleRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{122}
+}
+func (m *UpdateConnectivityRuleRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateConnectivityRuleRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateConnectivityRuleRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateConnectivityRuleRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateConnectivityRuleRequest.Merge(m, src)
+}
+func (m *UpdateConnectivityRuleRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateConnectivityRuleRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateConnectivityRuleRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateConnectivityRuleRequest proto.InternalMessageInfo
+
+func (m *UpdateConnectivityRuleRequest) GetConnectivityRuleId() string {
+	if m != nil {
+		return m.ConnectivityRuleId
+	}
+	return ""
+}
+
+func (m *UpdateConnectivityRuleRequest) GetSpec() *v18.ConnectivityRuleSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *UpdateConnectivityRuleRequest) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *UpdateConnectivityRuleRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+type UpdateConnectivityRuleResponse struct {
+	// The async operation
+	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *UpdateConnectivityRuleResponse) Reset()      { *m = UpdateConnectivityRuleResponse{} }
+func (*UpdateConnectivityRuleResponse) ProtoMessage() {}
+func (*UpdateConnectivityRuleResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{123}
+}
+func (m *UpdateConnectivityRuleResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateConnectivityRuleResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateConnectivityRuleResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateConnectivityRuleResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateConnectivityRuleResponse.Merge(m, src)
+}
+func (m *UpdateConnectivityRuleResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateConnectivityRuleResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateConnectivityRuleResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateConnectivityRuleResponse proto.InternalMessageInfo
+
+func (m *UpdateConnectivityRuleResponse) GetAsyncOperation() *v11.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+type DeleteConnectivityRuleRequest struct {
+	// The ID of the connectivity rule that need be deleted, required.
+	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
+	// The resource version which should be the same from the the db, required
+	ResourceVersion string `protobuf:"bytes,2,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	// The id to use for this async operation.
+	// Optional, if not provided a random id will be generated.
+	AsyncOperationId string `protobuf:"bytes,3,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *DeleteConnectivityRuleRequest) Reset()      { *m = DeleteConnectivityRuleRequest{} }
+func (*DeleteConnectivityRuleRequest) ProtoMessage() {}
+func (*DeleteConnectivityRuleRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{124}
+}
+func (m *DeleteConnectivityRuleRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DeleteConnectivityRuleRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DeleteConnectivityRuleRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DeleteConnectivityRuleRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteConnectivityRuleRequest.Merge(m, src)
+}
+func (m *DeleteConnectivityRuleRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *DeleteConnectivityRuleRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteConnectivityRuleRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteConnectivityRuleRequest proto.InternalMessageInfo
+
+func (m *DeleteConnectivityRuleRequest) GetConnectivityRuleId() string {
+	if m != nil {
+		return m.ConnectivityRuleId
+	}
+	return ""
+}
+
+func (m *DeleteConnectivityRuleRequest) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *DeleteConnectivityRuleRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+type DeleteConnectivityRuleResponse struct {
+	// The async operation
+	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *DeleteConnectivityRuleResponse) Reset()      { *m = DeleteConnectivityRuleResponse{} }
+func (*DeleteConnectivityRuleResponse) ProtoMessage() {}
+func (*DeleteConnectivityRuleResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{125}
+}
+func (m *DeleteConnectivityRuleResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DeleteConnectivityRuleResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DeleteConnectivityRuleResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DeleteConnectivityRuleResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteConnectivityRuleResponse.Merge(m, src)
+}
+func (m *DeleteConnectivityRuleResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *DeleteConnectivityRuleResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteConnectivityRuleResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteConnectivityRuleResponse proto.InternalMessageInfo
+
+func (m *DeleteConnectivityRuleResponse) GetAsyncOperation() *v11.AsyncOperation {
 	if m != nil {
 		return m.AsyncOperation
 	}
@@ -6136,6 +6998,12 @@ func init() {
 	proto.RegisterType((*DeleteUserGroupResponse)(nil), "temporal.api.cloud.cloudservice.v1.DeleteUserGroupResponse")
 	proto.RegisterType((*SetUserGroupNamespaceAccessRequest)(nil), "temporal.api.cloud.cloudservice.v1.SetUserGroupNamespaceAccessRequest")
 	proto.RegisterType((*SetUserGroupNamespaceAccessResponse)(nil), "temporal.api.cloud.cloudservice.v1.SetUserGroupNamespaceAccessResponse")
+	proto.RegisterType((*AddUserGroupMemberRequest)(nil), "temporal.api.cloud.cloudservice.v1.AddUserGroupMemberRequest")
+	proto.RegisterType((*AddUserGroupMemberResponse)(nil), "temporal.api.cloud.cloudservice.v1.AddUserGroupMemberResponse")
+	proto.RegisterType((*RemoveUserGroupMemberRequest)(nil), "temporal.api.cloud.cloudservice.v1.RemoveUserGroupMemberRequest")
+	proto.RegisterType((*RemoveUserGroupMemberResponse)(nil), "temporal.api.cloud.cloudservice.v1.RemoveUserGroupMemberResponse")
+	proto.RegisterType((*GetUserGroupMembersRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetUserGroupMembersRequest")
+	proto.RegisterType((*GetUserGroupMembersResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetUserGroupMembersResponse")
 	proto.RegisterType((*CreateServiceAccountRequest)(nil), "temporal.api.cloud.cloudservice.v1.CreateServiceAccountRequest")
 	proto.RegisterType((*CreateServiceAccountResponse)(nil), "temporal.api.cloud.cloudservice.v1.CreateServiceAccountResponse")
 	proto.RegisterType((*GetServiceAccountRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetServiceAccountRequest")
@@ -6186,6 +7054,16 @@ func init() {
 	proto.RegisterType((*ConfirmMigrationResponse)(nil), "temporal.api.cloud.cloudservice.v1.ConfirmMigrationResponse")
 	proto.RegisterType((*AbortMigrationRequest)(nil), "temporal.api.cloud.cloudservice.v1.AbortMigrationRequest")
 	proto.RegisterType((*AbortMigrationResponse)(nil), "temporal.api.cloud.cloudservice.v1.AbortMigrationResponse")
+	proto.RegisterType((*CreateConnectivityRuleRequest)(nil), "temporal.api.cloud.cloudservice.v1.CreateConnectivityRuleRequest")
+	proto.RegisterType((*CreateConnectivityRuleResponse)(nil), "temporal.api.cloud.cloudservice.v1.CreateConnectivityRuleResponse")
+	proto.RegisterType((*GetConnectivityRuleRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetConnectivityRuleRequest")
+	proto.RegisterType((*GetConnectivityRuleResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetConnectivityRuleResponse")
+	proto.RegisterType((*GetConnectivityRulesRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetConnectivityRulesRequest")
+	proto.RegisterType((*GetConnectivityRulesResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetConnectivityRulesResponse")
+	proto.RegisterType((*UpdateConnectivityRuleRequest)(nil), "temporal.api.cloud.cloudservice.v1.UpdateConnectivityRuleRequest")
+	proto.RegisterType((*UpdateConnectivityRuleResponse)(nil), "temporal.api.cloud.cloudservice.v1.UpdateConnectivityRuleResponse")
+	proto.RegisterType((*DeleteConnectivityRuleRequest)(nil), "temporal.api.cloud.cloudservice.v1.DeleteConnectivityRuleRequest")
+	proto.RegisterType((*DeleteConnectivityRuleResponse)(nil), "temporal.api.cloud.cloudservice.v1.DeleteConnectivityRuleResponse")
 }
 
 func init() {
@@ -6193,172 +7071,191 @@ func init() {
 }
 
 var fileDescriptor_d04330087ace166d = []byte{
-	// 2627 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x5b, 0xdd, 0x6f, 0x1c, 0x57,
-	0x15, 0xf7, 0x5d, 0x7f, 0xc5, 0xc7, 0x49, 0x1c, 0x8f, 0x3f, 0xe3, 0x24, 0x1b, 0x67, 0xd2, 0x44,
-	0x4e, 0x9a, 0xae, 0x49, 0x2a, 0x50, 0x30, 0x6d, 0x61, 0xed, 0x26, 0xf6, 0xb6, 0x69, 0x9b, 0x8c,
-	0x9d, 0x04, 0x21, 0xa1, 0x61, 0xb2, 0x73, 0xb3, 0x1d, 0xbc, 0x3b, 0x33, 0x99, 0x99, 0x75, 0xbc,
-	0x41, 0x21, 0x7c, 0xaa, 0x14, 0x2a, 0x0a, 0x42, 0x20, 0x5e, 0xfa, 0x86, 0x10, 0xaa, 0x84, 0x78,
-	0x40, 0xfc, 0x05, 0x08, 0xc4, 0x5b, 0x23, 0x21, 0xa4, 0x3e, 0x21, 0xe2, 0x08, 0x09, 0x50, 0x1f,
-	0xfa, 0xc8, 0x03, 0x12, 0xd5, 0xdc, 0x8f, 0xf9, 0xda, 0xd9, 0xdd, 0xd9, 0xed, 0xde, 0xb4, 0x2f,
-	0xce, 0xce, 0x9d, 0x7b, 0xce, 0xf9, 0x9d, 0xdf, 0xbd, 0xf7, 0xdc, 0x73, 0xcf, 0xdc, 0xc0, 0xe7,
-	0x3d, 0x5c, 0xb3, 0x2d, 0x47, 0xab, 0x2e, 0x6b, 0xb6, 0xb1, 0x5c, 0xae, 0x5a, 0x75, 0x9d, 0xfe,
-	0x75, 0xb1, 0xb3, 0x63, 0x94, 0xf1, 0xf2, 0xce, 0xf9, 0x65, 0x07, 0xdf, 0xa9, 0x63, 0xd7, 0x53,
-	0x1d, 0xec, 0xda, 0x96, 0xe9, 0xe2, 0x82, 0xed, 0x58, 0x9e, 0x25, 0xc9, 0x5c, 0xb4, 0xa0, 0xd9,
-	0x46, 0x81, 0x08, 0x15, 0xa2, 0xa2, 0x85, 0x9d, 0xf3, 0x0b, 0xc7, 0x2b, 0x96, 0x55, 0xa9, 0xe2,
-	0x65, 0x22, 0x71, 0xab, 0x7e, 0x7b, 0xd9, 0x33, 0x6a, 0xd8, 0xf5, 0xb4, 0x9a, 0x4d, 0x95, 0x2c,
-	0x3c, 0x93, 0x62, 0xdf, 0xb2, 0xb1, 0xa3, 0x79, 0x86, 0x65, 0xfa, 0xc6, 0x6b, 0xd8, 0x75, 0xb5,
-	0x0a, 0xb3, 0xb9, 0x70, 0x2e, 0xa5, 0xbb, 0xa1, 0x63, 0xd3, 0x33, 0xbc, 0x46, 0x73, 0xef, 0x34,
-	0xe5, 0xa6, 0x56, 0xc3, 0xae, 0xad, 0x51, 0xcf, 0xe2, 0xdd, 0xcf, 0xa4, 0x75, 0xc7, 0xbb, 0x75,
-	0xb7, 0xb9, 0xeb, 0xd9, 0x94, 0xae, 0x0e, 0xae, 0xa4, 0x62, 0x7e, 0x3a, 0xa5, 0xaf, 0x56, 0x2e,
-	0x5b, 0x75, 0xd3, 0xcb, 0xe6, 0xa0, 0x56, 0xd7, 0x0d, 0xaf, 0x6a, 0x55, 0xb2, 0x21, 0xae, 0xfb,
-	0xef, 0x9b, 0xba, 0xca, 0xdf, 0x46, 0x30, 0xb1, 0x8e, 0xbd, 0xeb, 0x2e, 0x76, 0x5c, 0x85, 0x0e,
-	0xa8, 0x74, 0x04, 0xc6, 0x6c, 0xad, 0x82, 0x55, 0xd7, 0xb8, 0x87, 0xe7, 0xd1, 0x22, 0x5a, 0x1a,
-	0x56, 0xf6, 0xf9, 0x0d, 0x9b, 0xc6, 0x3d, 0x2c, 0x1d, 0x03, 0x20, 0x2f, 0x3d, 0x6b, 0x1b, 0x9b,
-	0xf3, 0xb9, 0x45, 0xb4, 0x34, 0xa6, 0x90, 0xee, 0x5b, 0x7e, 0x83, 0x34, 0x0d, 0xc3, 0xb8, 0xa6,
-	0x19, 0xd5, 0xf9, 0x41, 0xf2, 0x86, 0x3e, 0x48, 0x47, 0x61, 0x2c, 0x20, 0x78, 0x7e, 0x88, 0xca,
-	0x04, 0x0d, 0xf2, 0x0e, 0x1c, 0x0a, 0x21, 0xd0, 0xb9, 0x24, 0xad, 0xc0, 0x70, 0xdd, 0x6f, 0x98,
-	0x47, 0x8b, 0x83, 0x4b, 0xe3, 0x17, 0x9e, 0x2a, 0xa4, 0xcc, 0x2a, 0x3e, 0xc2, 0x85, 0x9d, 0xf3,
-	0x05, 0x5f, 0x5a, 0xa1, 0x22, 0xd2, 0x69, 0x98, 0x30, 0xf1, 0xae, 0xa7, 0x36, 0xe1, 0x3c, 0xe0,
-	0x37, 0x5f, 0xe5, 0x58, 0xe5, 0x33, 0x70, 0x90, 0xd9, 0xe5, 0x9e, 0xcf, 0xc1, 0xa8, 0xaf, 0x42,
-	0x35, 0x74, 0xe2, 0xf7, 0x98, 0x32, 0xe2, 0x3f, 0x96, 0x74, 0xf9, 0xe5, 0x80, 0xa5, 0x00, 0xe1,
-	0x45, 0x18, 0xf2, 0x5f, 0x92, 0x8e, 0x59, 0x01, 0x12, 0x09, 0xf9, 0x01, 0x4c, 0xae, 0x39, 0x58,
-	0xf3, 0x70, 0xd4, 0xf4, 0x73, 0x30, 0xe4, 0xda, 0xb8, 0xcc, 0xd4, 0x2d, 0x65, 0x51, 0xb7, 0x69,
-	0xe3, 0xb2, 0x42, 0xa4, 0xa4, 0x73, 0x20, 0x69, 0x6e, 0xc3, 0x2c, 0xab, 0xc1, 0x22, 0xf1, 0x7d,
-	0xa0, 0x5e, 0x1f, 0x22, 0x6f, 0x5e, 0xe3, 0x2f, 0x4a, 0xba, 0xfc, 0x06, 0x02, 0x29, 0x8a, 0x80,
-	0x79, 0xd4, 0xca, 0x7b, 0xe9, 0xcb, 0x30, 0x91, 0xd0, 0x4e, 0x54, 0x8f, 0x5f, 0x58, 0x4e, 0x83,
-	0x19, 0x74, 0xf2, 0x71, 0x16, 0x63, 0xb6, 0x95, 0x83, 0x71, 0x2c, 0xf2, 0x1f, 0x11, 0x4c, 0x5e,
-	0xb7, 0xf5, 0x04, 0x17, 0x2d, 0x81, 0x70, 0x92, 0x72, 0x3d, 0x91, 0x74, 0x06, 0x0e, 0x39, 0xd8,
-	0xb5, 0xea, 0x4e, 0x19, 0xab, 0x3b, 0xd8, 0x71, 0x7d, 0x3f, 0xe8, 0x34, 0x9d, 0xe0, 0xed, 0x37,
-	0x68, 0x73, 0x0b, 0x3e, 0x87, 0x5a, 0xf0, 0x69, 0x82, 0x14, 0x75, 0x82, 0xd1, 0x99, 0xc2, 0x1a,
-	0xea, 0x0f, 0x6b, 0xdf, 0x47, 0x30, 0xf9, 0x22, 0xae, 0xe2, 0x8c, 0xac, 0xa5, 0xf9, 0x9d, 0xeb,
-	0xc6, 0xef, 0xc1, 0xd6, 0x7e, 0x47, 0x61, 0x08, 0xf7, 0xfb, 0xbf, 0x08, 0x8e, 0x6d, 0xd2, 0x65,
-	0xf8, 0x2a, 0x8f, 0x1e, 0xc5, 0x72, 0x19, 0xbb, 0x41, 0xe8, 0x8a, 0x05, 0x1a, 0x94, 0x08, 0x34,
-	0x51, 0x86, 0x72, 0x31, 0x86, 0xd6, 0x61, 0x44, 0x23, 0x7a, 0x88, 0xab, 0x2d, 0x90, 0x46, 0x67,
-	0x56, 0xd2, 0x3c, 0x13, 0x4f, 0xa5, 0x7a, 0xa8, 0x1b, 0xaa, 0x87, 0x5b, 0x50, 0x7d, 0x0f, 0xf2,
-	0xad, 0x3c, 0x17, 0x4e, 0xfb, 0x06, 0xcc, 0xaf, 0x63, 0x2f, 0xd1, 0x89, 0x11, 0x9e, 0xee, 0x05,
-	0x6a, 0xe1, 0x45, 0x1d, 0x0e, 0xa7, 0x68, 0x12, 0xee, 0xc0, 0x0f, 0x11, 0xcc, 0xd2, 0x78, 0x17,
-	0x90, 0xc7, 0xf1, 0xaf, 0xc6, 0x22, 0x4a, 0x21, 0xcd, 0x52, 0x30, 0x7f, 0x62, 0x03, 0xdf, 0x31,
-	0xf8, 0xb6, 0x5a, 0x34, 0x3f, 0x45, 0x30, 0xd7, 0x04, 0x86, 0x51, 0xd0, 0x7e, 0xfa, 0x8a, 0x0b,
-	0xc3, 0xb7, 0x61, 0x7a, 0x1d, 0x7b, 0x01, 0x9e, 0xbe, 0x64, 0x02, 0x12, 0x0c, 0xf9, 0xd0, 0x19,
-	0x0f, 0xe4, 0xb7, 0xfc, 0x23, 0x04, 0x33, 0x09, 0x43, 0xcc, 0xf3, 0x97, 0x00, 0x02, 0x47, 0xf9,
-	0xa6, 0x7f, 0x36, 0xfb, 0x68, 0x28, 0x11, 0xe9, 0xcc, 0xfb, 0xff, 0xb3, 0x30, 0x15, 0x05, 0x93,
-	0x29, 0x86, 0xc8, 0x5f, 0x8b, 0x53, 0x15, 0x38, 0xb0, 0x91, 0x94, 0xea, 0x0e, 0x7f, 0xc4, 0xc2,
-	0x5f, 0x11, 0xcc, 0xd2, 0xed, 0xa4, 0x3b, 0x68, 0x7d, 0x99, 0xcb, 0xc2, 0xf6, 0x48, 0x17, 0xe6,
-	0x9a, 0x9c, 0x12, 0xbe, 0xf0, 0xff, 0x90, 0x03, 0x59, 0xc1, 0xbe, 0xd3, 0x6b, 0x75, 0xd7, 0xb3,
-	0x6a, 0x9b, 0x58, 0x73, 0xca, 0xaf, 0x17, 0x3d, 0xcf, 0x31, 0x6e, 0xd5, 0xbd, 0x8c, 0xb4, 0x5e,
-	0x85, 0x53, 0x78, 0xd7, 0x70, 0x3d, 0xc3, 0xac, 0xa8, 0x65, 0xa2, 0x46, 0x75, 0x89, 0x1e, 0x55,
-	0xe3, 0x8a, 0x54, 0x32, 0xd3, 0xe9, 0x24, 0x3b, 0xc1, 0x3b, 0xa7, 0x9a, 0xf4, 0xbd, 0x97, 0x2e,
-	0xc3, 0xa2, 0x89, 0xef, 0xb6, 0x57, 0x46, 0x49, 0x3f, 0x6a, 0xe2, 0xbb, 0xad, 0xf5, 0x08, 0xdb,
-	0x6d, 0x1e, 0xc0, 0xc9, 0xb6, 0xb4, 0x09, 0x1f, 0xb8, 0xb7, 0x11, 0xcc, 0xd2, 0xd4, 0xa2, 0xcb,
-	0x35, 0x20, 0x2c, 0xd7, 0x71, 0x61, 0xae, 0x09, 0x90, 0x70, 0x1a, 0xbe, 0x87, 0x20, 0x7f, 0x59,
-	0x33, 0xaa, 0xd6, 0x4e, 0x64, 0xdf, 0x57, 0xc8, 0x81, 0x32, 0x1b, 0x1d, 0xb3, 0x30, 0x42, 0xcf,
-	0x9f, 0x3c, 0xe1, 0xa1, 0x4f, 0x5d, 0xfa, 0xfe, 0x0d, 0x38, 0xde, 0x12, 0x85, 0x70, 0x0e, 0xde,
-	0x45, 0x70, 0xb8, 0xa8, 0xeb, 0x7d, 0x75, 0x5f, 0x58, 0x94, 0xdb, 0x81, 0x85, 0x34, 0xac, 0xc2,
-	0x49, 0xfa, 0x2d, 0x82, 0xa3, 0x4d, 0xd3, 0xf3, 0x53, 0xcc, 0x53, 0x03, 0x8e, 0xb5, 0x80, 0x2b,
-	0x9c, 0xaa, 0x29, 0x98, 0x5c, 0xc7, 0x1e, 0x35, 0xc7, 0x13, 0x1d, 0x79, 0x0b, 0xa4, 0x68, 0x23,
-	0x03, 0xf1, 0x02, 0x8c, 0x52, 0x22, 0xda, 0x96, 0x21, 0x68, 0x17, 0xdf, 0x32, 0xf3, 0x81, 0x0b,
-	0xc9, 0x67, 0x49, 0x61, 0x23, 0x3e, 0x10, 0x21, 0xd5, 0x28, 0x4a, 0xb5, 0x7c, 0x2d, 0x02, 0x2b,
-	0x00, 0xf0, 0x5c, 0xac, 0x73, 0x56, 0xfb, 0x5c, 0xe5, 0x9f, 0x11, 0x49, 0xdc, 0x5f, 0xc5, 0xbb,
-	0x75, 0xf7, 0x92, 0xa9, 0xdb, 0x96, 0x61, 0x7a, 0x7d, 0x49, 0xed, 0x0a, 0x30, 0xe5, 0x69, 0x4e,
-	0x05, 0x7b, 0x6a, 0x30, 0x85, 0xc2, 0xf0, 0x31, 0x49, 0x5f, 0x05, 0x03, 0x5b, 0xd2, 0xa5, 0xb3,
-	0xc0, 0x1a, 0x55, 0x4f, 0x73, 0xb7, 0xd5, 0x3b, 0x75, 0x5c, 0xe7, 0x65, 0xa0, 0x09, 0xfa, 0x62,
-	0x4b, 0x73, 0xb7, 0xaf, 0xf9, 0xcd, 0x41, 0xda, 0x38, 0x1c, 0x49, 0x1b, 0x7f, 0x80, 0xc8, 0xb9,
-	0x21, 0xe9, 0x08, 0x23, 0x69, 0x0d, 0xc6, 0x30, 0x6f, 0x64, 0xe3, 0x74, 0x2a, 0x35, 0xf7, 0xf1,
-	0xc5, 0x7d, 0x9a, 0xb8, 0x0a, 0x25, 0x94, 0xcb, 0x9c, 0x33, 0xae, 0xc0, 0x5c, 0x12, 0x09, 0x67,
-	0xf4, 0x38, 0x8c, 0x73, 0x7d, 0xe1, 0x19, 0x08, 0x78, 0x53, 0x49, 0x97, 0xbf, 0xda, 0x3c, 0x1c,
-	0x81, 0x13, 0x45, 0xd8, 0xc7, 0x7b, 0xb2, 0xb1, 0xce, 0xe8, 0x43, 0x20, 0x26, 0xbf, 0x89, 0x60,
-	0x81, 0x1d, 0x2c, 0xd2, 0xe0, 0x3d, 0x1f, 0x2b, 0x30, 0x9d, 0xc9, 0xa4, 0xbd, 0xe7, 0x0a, 0xd3,
-	0x2f, 0x11, 0x1c, 0x49, 0xc5, 0xc2, 0xdc, 0xed, 0xc4, 0x95, 0xc0, 0xb3, 0xce, 0xdf, 0x10, 0x2c,
-	0xb0, 0x4c, 0xb4, 0x97, 0x51, 0x0c, 0x78, 0xcc, 0xf5, 0xc6, 0xa3, 0xb0, 0x90, 0x7a, 0x17, 0x8e,
-	0xa4, 0xba, 0x25, 0x3c, 0xa0, 0xfe, 0x02, 0xc1, 0x02, 0x0b, 0xe6, 0x3d, 0x11, 0x2a, 0x2c, 0x65,
-	0xbb, 0x0b, 0x47, 0x52, 0x71, 0x09, 0x67, 0xe4, 0x77, 0x08, 0xa6, 0xe9, 0x58, 0x14, 0x69, 0x41,
-	0x9f, 0x73, 0xf1, 0x42, 0x6c, 0x0d, 0xa6, 0x9e, 0x0f, 0xd9, 0x27, 0x00, 0x62, 0x85, 0xfe, 0xec,
-	0x30, 0x79, 0xfa, 0x42, 0xd5, 0x1d, 0x98, 0x49, 0x00, 0x16, 0x4e, 0xd2, 0x7b, 0x83, 0xe4, 0x24,
-	0x7d, 0xdd, 0xc5, 0xce, 0xba, 0x63, 0xd5, 0xed, 0xbe, 0xec, 0x4c, 0xb1, 0x34, 0x67, 0x30, 0x99,
-	0xe6, 0x9c, 0x80, 0xfd, 0xba, 0xe1, 0xda, 0x55, 0xad, 0x41, 0xcf, 0x58, 0x74, 0x29, 0x8d, 0xb3,
-	0x36, 0x72, 0xa4, 0xaa, 0xc1, 0x7e, 0xfa, 0x6d, 0x4a, 0xad, 0xf8, 0xa0, 0xc8, 0x36, 0x34, 0x7e,
-	0xe1, 0xa5, 0x42, 0xe7, 0x8f, 0x5a, 0x85, 0x34, 0x67, 0x0a, 0xeb, 0x44, 0x19, 0x69, 0xbb, 0x6c,
-	0x54, 0x3d, 0xec, 0x28, 0xe3, 0x95, 0xb0, 0x49, 0xaa, 0x00, 0xb8, 0x65, 0xa3, 0xc6, 0x8c, 0x8d,
-	0x10, 0x63, 0x1b, 0x3d, 0x1b, 0xdb, 0x5c, 0x2b, 0xbd, 0x12, 0x35, 0x35, 0xe6, 0xeb, 0x26, 0x0d,
-	0x0b, 0x17, 0x61, 0xb2, 0x09, 0x8a, 0x74, 0x12, 0x0e, 0x90, 0xef, 0x33, 0xaa, 0xa6, 0xeb, 0x0e,
-	0x76, 0x5d, 0xb6, 0x38, 0xf7, 0x93, 0xc6, 0x22, 0x6d, 0x5b, 0x58, 0x82, 0x89, 0x84, 0x5e, 0x69,
-	0x06, 0x46, 0x0c, 0xdd, 0x0e, 0x57, 0xf3, 0xb0, 0xa1, 0xdb, 0x25, 0x5d, 0xfe, 0x0e, 0xad, 0xee,
-	0x44, 0x71, 0x05, 0xbb, 0xdb, 0x08, 0xf1, 0x90, 0xef, 0xcf, 0x67, 0xb2, 0x54, 0xee, 0x89, 0x0e,
-	0x85, 0x09, 0x66, 0xde, 0xa0, 0x3f, 0x43, 0x8a, 0x3a, 0xa1, 0x3c, 0x9b, 0x54, 0x87, 0x61, 0x1f,
-	0x51, 0x14, 0x82, 0x1e, 0x25, 0xcf, 0x25, 0x5d, 0xbe, 0x19, 0x9f, 0x87, 0x01, 0xe8, 0x2f, 0xc2,
-	0x30, 0x1d, 0x96, 0x36, 0x3b, 0x66, 0x3a, 0x66, 0x2a, 0xe7, 0x6f, 0xc8, 0xb3, 0xe1, 0x67, 0x96,
-	0x18, 0x9c, 0x62, 0x2c, 0x10, 0x3c, 0x93, 0x59, 0x75, 0xcf, 0x1b, 0xf2, 0x8f, 0x83, 0xaa, 0x63,
-	0xb3, 0xa3, 0xad, 0xb9, 0x11, 0xb8, 0x0d, 0xbf, 0x17, 0x54, 0xb9, 0xba, 0x18, 0xab, 0x80, 0xb7,
-	0x5c, 0xef, 0xbc, 0x89, 0xaf, 0x70, 0x35, 0x33, 0x2c, 0x2e, 0x8a, 0xbe, 0x15, 0x14, 0x4a, 0xba,
-	0xa1, 0x51, 0x7c, 0x95, 0xe4, 0x49, 0x72, 0xf0, 0x7f, 0x04, 0xf2, 0x66, 0x64, 0x05, 0xf7, 0xf4,
-	0x6d, 0x28, 0xca, 0x56, 0x2e, 0xce, 0xd6, 0xa7, 0xff, 0xeb, 0xd0, 0x03, 0x38, 0xd9, 0x96, 0x00,
-	0xe1, 0x43, 0xf0, 0xb3, 0x20, 0xdf, 0xdf, 0xa4, 0x7b, 0x54, 0x22, 0xf1, 0xb9, 0x1c, 0x8b, 0x77,
-	0x17, 0x3a, 0x11, 0x18, 0x57, 0xd2, 0x73, 0xd0, 0xfb, 0x35, 0x82, 0xa3, 0xe9, 0xa8, 0x18, 0x21,
-	0xe7, 0x40, 0x62, 0x7b, 0xaa, 0xca, 0xf2, 0xae, 0xc8, 0xd7, 0x2b, 0x37, 0x26, 0x23, 0x34, 0x18,
-	0xd2, 0x2f, 0x6c, 0xe9, 0xd4, 0x75, 0x85, 0x51, 0xf6, 0xc8, 0x49, 0xb9, 0x85, 0xbb, 0x37, 0x61,
-	0x22, 0xa1, 0x8a, 0x0d, 0x48, 0xa1, 0xbb, 0x01, 0x51, 0x0e, 0xc6, 0xed, 0xca, 0x37, 0x53, 0xac,
-	0xf6, 0x23, 0x9f, 0x93, 0xdf, 0x41, 0xb0, 0x90, 0xa6, 0xb9, 0x9d, 0x43, 0x83, 0x1f, 0xdf, 0xa1,
-	0xcc, 0xd9, 0xc6, 0x07, 0x88, 0x9f, 0xba, 0xfa, 0x30, 0x78, 0xc1, 0x2a, 0xc9, 0x7d, 0xcc, 0x55,
-	0x22, 0x6c, 0x8b, 0xdb, 0x85, 0xa3, 0xe9, 0xde, 0x0a, 0x0f, 0x30, 0xbf, 0x42, 0xfc, 0x30, 0xd7,
-	0x0f, 0xa2, 0x85, 0xed, 0x7f, 0xbb, 0xbc, 0x0c, 0xfb, 0xc4, 0x09, 0xfa, 0x00, 0x91, 0x02, 0x62,
-	0xd1, 0x36, 0x5e, 0xc6, 0x8d, 0xbe, 0x9c, 0xa5, 0x0e, 0xc3, 0x3e, 0xeb, 0xae, 0x49, 0xaf, 0x4b,
-	0x50, 0x7f, 0x47, 0xc9, 0x73, 0x49, 0x97, 0x3e, 0x07, 0x33, 0xf4, 0x95, 0xd7, 0xb0, 0xb1, 0xaa,
-	0x63, 0xdb, 0xc1, 0x65, 0xcd, 0xc3, 0x6c, 0xe2, 0xac, 0xe6, 0xe6, 0x91, 0x32, 0x45, 0x3a, 0x6c,
-	0x35, 0x6c, 0xfc, 0x62, 0xf0, 0x5a, 0xda, 0x00, 0x08, 0xe5, 0xc8, 0x6e, 0x76, 0xb0, 0x73, 0x5e,
-	0xfd, 0x1a, 0x57, 0xa4, 0x8c, 0x05, 0x3a, 0xe5, 0x07, 0xa4, 0x60, 0x1b, 0x78, 0x1b, 0x56, 0xd1,
-	0x34, 0xdb, 0x50, 0xb7, 0x71, 0x83, 0x9f, 0x34, 0x4e, 0x77, 0xd2, 0x4e, 0x55, 0x28, 0xa3, 0x1a,
-	0x55, 0xd5, 0xc5, 0xe5, 0xb1, 0x43, 0x01, 0x00, 0xce, 0xf6, 0x0c, 0x8c, 0x6c, 0xe3, 0x46, 0xe4,
-	0x5c, 0xb4, 0x8d, 0x1b, 0x25, 0x5d, 0xde, 0x8a, 0x8c, 0x4c, 0xe4, 0x74, 0x31, 0xca, 0xa0, 0xb2,
-	0x19, 0x90, 0x15, 0xe9, 0x08, 0x45, 0x2a, 0x7f, 0x17, 0xc1, 0x14, 0xdd, 0xdc, 0xe2, 0x20, 0x32,
-	0xd4, 0x18, 0x9a, 0xb5, 0xf6, 0xbc, 0xc5, 0xbe, 0x83, 0x60, 0x3a, 0x8e, 0x82, 0xf9, 0x97, 0xce,
-	0x85, 0x34, 0x0d, 0xc3, 0x51, 0x52, 0xe9, 0x43, 0xda, 0xb2, 0x18, 0xec, 0xcf, 0xb2, 0xf8, 0x13,
-	0x82, 0x29, 0x56, 0xd9, 0xc8, 0x30, 0x54, 0x01, 0x79, 0xb9, 0x1e, 0xc9, 0x13, 0x16, 0x79, 0xed,
-	0xa0, 0xa2, 0x14, 0xa7, 0x59, 0xe8, 0x25, 0xb3, 0x29, 0x1a, 0xcb, 0x32, 0x31, 0x27, 0x2c, 0xa4,
-	0xda, 0x30, 0x1d, 0x87, 0x21, 0xdc, 0xf3, 0x7f, 0x23, 0x52, 0x43, 0x28, 0xd6, 0x75, 0xc3, 0xbb,
-	0x62, 0x55, 0xfa, 0x12, 0x4c, 0xaf, 0xc0, 0xb4, 0xeb, 0x69, 0x8e, 0xa7, 0x7a, 0x46, 0x0d, 0xab,
-	0x86, 0x59, 0xae, 0xd6, 0x5d, 0x63, 0x07, 0xb3, 0x69, 0xbe, 0x50, 0xa0, 0x45, 0xa1, 0x02, 0xbf,
-	0x10, 0x5d, 0xd8, 0xe2, 0x17, 0xa2, 0x15, 0x89, 0xc8, 0xf9, 0xcf, 0x25, 0x2e, 0x25, 0x6d, 0x80,
-	0x84, 0x4d, 0x9d, 0xea, 0xc2, 0xbb, 0x5c, 0xd7, 0x50, 0x47, 0x5d, 0x87, 0xb0, 0xa9, 0xfb, 0x4f,
-	0x97, 0xb8, 0x8c, 0x7c, 0x9f, 0x14, 0x3f, 0x22, 0xae, 0x32, 0x76, 0x9f, 0x87, 0xa1, 0xaa, 0x55,
-	0x69, 0x5b, 0xaf, 0xe1, 0xf7, 0x8f, 0x7d, 0x46, 0xaf, 0x58, 0x15, 0x05, 0x97, 0x2d, 0x47, 0x57,
-	0x88, 0x58, 0xe6, 0x28, 0xfa, 0x4f, 0x7e, 0xfd, 0x58, 0xab, 0x04, 0x1f, 0xf8, 0x5b, 0x51, 0x85,
-	0xfa, 0x48, 0x55, 0xae, 0x7b, 0xaa, 0xe2, 0xc3, 0x3f, 0xd8, 0x76, 0xf8, 0x87, 0x92, 0x79, 0xec,
-	0x37, 0xd9, 0x15, 0x67, 0xe2, 0x26, 0xa3, 0x78, 0x15, 0xc6, 0xdc, 0x7a, 0xad, 0xa6, 0x39, 0x06,
-	0x6e, 0xfb, 0x7d, 0x91, 0xdc, 0xdc, 0x26, 0xf9, 0x1e, 0xe9, 0xdd, 0x50, 0x42, 0xb1, 0xcc, 0x3c,
-	0xd3, 0x8f, 0x9e, 0xf1, 0x9c, 0x49, 0xbe, 0x41, 0xf7, 0xd0, 0x44, 0x8a, 0xf2, 0x25, 0x18, 0x8d,
-	0x1f, 0x0e, 0x4e, 0x67, 0x2b, 0x53, 0x2b, 0x5c, 0x4c, 0xfe, 0x3d, 0x82, 0xc5, 0xc4, 0x0d, 0xb7,
-	0x4b, 0xbb, 0xb6, 0xe5, 0x78, 0x9b, 0x86, 0xb9, 0x9d, 0xed, 0x34, 0xbe, 0x16, 0x8b, 0xc3, 0xcb,
-	0x1d, 0xaf, 0x32, 0x85, 0xfa, 0x7b, 0xbe, 0x97, 0x77, 0x1f, 0x4e, 0xb4, 0x01, 0x2d, 0x3c, 0xe8,
-	0x5c, 0x83, 0x63, 0xd1, 0x7b, 0x65, 0xdd, 0x12, 0xc6, 0x3f, 0x9b, 0xe6, 0x22, 0x9f, 0x4d, 0x35,
-	0xc8, 0xb7, 0x52, 0x19, 0x24, 0x21, 0x43, 0xae, 0x61, 0x6e, 0x33, 0x1f, 0x9e, 0xee, 0x82, 0x66,
-	0x85, 0x08, 0xca, 0xf7, 0x5a, 0x99, 0xc8, 0x58, 0x75, 0x89, 0xad, 0xa9, 0x5c, 0xdb, 0x35, 0x35,
-	0x98, 0x5c, 0x53, 0x6f, 0x21, 0x38, 0xde, 0xd2, 0x78, 0x90, 0x10, 0x0e, 0xfb, 0x38, 0xf9, 0xfa,
-	0xea, 0xca, 0x43, 0x2a, 0x99, 0x79, 0x89, 0xfd, 0x1d, 0xc1, 0x62, 0xe2, 0x86, 0xdb, 0x27, 0x32,
-	0xeb, 0x85, 0xa5, 0x20, 0xf7, 0xe1, 0x44, 0x1b, 0xff, 0x9e, 0xc4, 0x15, 0x97, 0xc5, 0xc4, 0x9d,
-	0x91, 0x3e, 0x2c, 0x12, 0xa1, 0x74, 0xb5, 0x81, 0x2b, 0x9c, 0xae, 0x37, 0x10, 0xc8, 0x37, 0xb4,
-	0xaa, 0xf1, 0x89, 0x4f, 0x48, 0xf9, 0x14, 0x9c, 0x6c, 0x0b, 0x84, 0x52, 0x21, 0xbf, 0x89, 0x60,
-	0x66, 0xd3, 0xdf, 0xbf, 0x5f, 0x31, 0x2a, 0xf1, 0x3b, 0xe6, 0xab, 0xb1, 0x13, 0x4d, 0xe7, 0x7b,
-	0xad, 0x81, 0x82, 0x9e, 0x4f, 0x35, 0x3f, 0x47, 0x30, 0x9b, 0xc4, 0xc2, 0x46, 0xec, 0x04, 0xec,
-	0xaf, 0xf1, 0xc6, 0x30, 0x09, 0x1e, 0x0f, 0xda, 0x84, 0xd6, 0x09, 0x2f, 0x92, 0xc4, 0xb4, 0x89,
-	0xa0, 0xce, 0x98, 0xd8, 0xb5, 0xe5, 0x66, 0x77, 0x36, 0x60, 0x2c, 0xe8, 0x96, 0xf9, 0xda, 0x72,
-	0xa8, 0x26, 0x14, 0x96, 0x95, 0xb8, 0x85, 0xbe, 0x94, 0xff, 0xd8, 0x7d, 0xf1, 0xa8, 0xd2, 0xf0,
-	0xbe, 0x78, 0x60, 0x3a, 0xfb, 0x7d, 0xf1, 0x10, 0x78, 0x44, 0x3a, 0x73, 0x84, 0x7f, 0x1b, 0xc1,
-	0xfc, 0x86, 0x66, 0xea, 0x89, 0x7b, 0x90, 0x59, 0xc7, 0x40, 0x92, 0xe1, 0x80, 0x67, 0xa9, 0x0e,
-	0xb6, 0xab, 0x46, 0x59, 0x0b, 0xa7, 0xdf, 0xb8, 0x67, 0x29, 0xb4, 0xad, 0xa4, 0x77, 0x99, 0xb3,
-	0xd4, 0xe1, 0x70, 0x0a, 0x20, 0xe1, 0xb1, 0xe5, 0xeb, 0x30, 0xb7, 0x66, 0x99, 0xb7, 0x0d, 0xa7,
-	0xd6, 0xc3, 0x54, 0xec, 0x72, 0x29, 0x7a, 0x30, 0xdf, 0x6c, 0x4b, 0xb8, 0x87, 0xaf, 0xc3, 0x4c,
-	0xf1, 0x96, 0xe5, 0x78, 0xe2, 0xfd, 0x73, 0x60, 0x36, 0x69, 0x49, 0xb4, 0x77, 0xab, 0xff, 0x43,
-	0x0f, 0x1f, 0xe5, 0x07, 0xde, 0x7f, 0x94, 0x1f, 0xf8, 0xf0, 0x51, 0x1e, 0x7d, 0x6b, 0x2f, 0x8f,
-	0x7e, 0xb3, 0x97, 0x47, 0x7f, 0xd9, 0xcb, 0xa3, 0x87, 0x7b, 0x79, 0xf4, 0x8f, 0xbd, 0x3c, 0xfa,
-	0xd7, 0x5e, 0x7e, 0xe0, 0xc3, 0xbd, 0x3c, 0xfa, 0xc9, 0xe3, 0xfc, 0xc0, 0xc3, 0xc7, 0xf9, 0x81,
-	0xf7, 0x1f, 0xe7, 0x07, 0xe0, 0x94, 0x61, 0x65, 0xb8, 0x9a, 0xb0, 0x3a, 0xcd, 0xb8, 0xe2, 0x8e,
-	0x5c, 0xf5, 0x0f, 0x57, 0x57, 0xd1, 0x57, 0x3e, 0x5b, 0x89, 0x88, 0x1b, 0x56, 0xeb, 0xff, 0x59,
-	0xfc, 0x85, 0xe8, 0xf3, 0xbb, 0xb9, 0xa7, 0xb6, 0x98, 0x90, 0x61, 0x15, 0x8a, 0xb6, 0x51, 0x58,
-	0x23, 0x56, 0xc9, 0x5f, 0x56, 0x65, 0x2d, 0xdc, 0x38, 0xff, 0x9f, 0xdc, 0x52, 0xd8, 0x6d, 0x65,
-	0xa5, 0x68, 0x1b, 0x2b, 0x2b, 0xa4, 0x0b, 0xfb, 0x87, 0xf5, 0x5c, 0x59, 0xb9, 0x71, 0xfe, 0xd6,
-	0x08, 0x39, 0xee, 0x3d, 0xfb, 0x51, 0x00, 0x00, 0x00, 0xff, 0xff, 0xc1, 0x9e, 0x99, 0x5e, 0xe5,
-	0x3c, 0x00, 0x00,
+	// 2929 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x5c, 0xdd, 0x6f, 0x1c, 0x57,
+	0xd9, 0xf7, 0xd9, 0xf5, 0x47, 0xfc, 0x38, 0x8d, 0xed, 0xf1, 0x67, 0x1c, 0x7b, 0xe3, 0x4c, 0x9a,
+	0xca, 0x49, 0xdb, 0x75, 0xed, 0xbe, 0x2f, 0x0a, 0xa6, 0x2d, 0xac, 0xdd, 0xc6, 0xde, 0x7e, 0xa4,
+	0xe9, 0xd8, 0x4d, 0x11, 0x12, 0x5a, 0x26, 0x3b, 0xa7, 0xdb, 0xc1, 0xbb, 0x33, 0xd3, 0x99, 0x59,
+	0xc7, 0x6b, 0x14, 0xc2, 0x47, 0x51, 0x29, 0x14, 0x5a, 0x84, 0x40, 0xdc, 0x54, 0xdc, 0x20, 0x84,
+	0x2a, 0x50, 0x2f, 0x00, 0xf1, 0x07, 0x20, 0x10, 0x77, 0x8d, 0x84, 0x90, 0x7a, 0x85, 0x88, 0x23,
+	0x24, 0x40, 0xbd, 0xe8, 0x25, 0x17, 0x95, 0x40, 0x73, 0x3e, 0x66, 0x67, 0x66, 0x67, 0xd6, 0xb3,
+	0xdb, 0x3d, 0x69, 0xb9, 0x71, 0x76, 0xce, 0x9c, 0xe7, 0x79, 0x7e, 0xcf, 0xef, 0x7c, 0x3d, 0xe7,
+	0x39, 0x67, 0x02, 0x9f, 0x76, 0x71, 0xcd, 0x32, 0x6d, 0xb5, 0xba, 0xac, 0x5a, 0xfa, 0x72, 0xb9,
+	0x6a, 0xd6, 0x35, 0xfa, 0xd7, 0xc1, 0xf6, 0x9e, 0x5e, 0xc6, 0xcb, 0x7b, 0x2b, 0xcb, 0x36, 0x7e,
+	0xb9, 0x8e, 0x1d, 0xb7, 0x64, 0x63, 0xc7, 0x32, 0x0d, 0x07, 0xe7, 0x2d, 0xdb, 0x74, 0x4d, 0x49,
+	0xe6, 0xa2, 0x79, 0xd5, 0xd2, 0xf3, 0x44, 0x28, 0x1f, 0x14, 0xcd, 0xef, 0xad, 0xcc, 0x9d, 0xae,
+	0x98, 0x66, 0xa5, 0x8a, 0x97, 0x89, 0xc4, 0xb5, 0xfa, 0x8b, 0xcb, 0xae, 0x5e, 0xc3, 0x8e, 0xab,
+	0xd6, 0x2c, 0xaa, 0x64, 0xee, 0xc1, 0x18, 0xfb, 0xa6, 0x85, 0x6d, 0xd5, 0xd5, 0x4d, 0xc3, 0x33,
+	0x5e, 0xc3, 0x8e, 0xa3, 0x56, 0x98, 0xcd, 0xb9, 0x07, 0x62, 0xaa, 0xeb, 0x1a, 0x36, 0x5c, 0xdd,
+	0x6d, 0xb4, 0xd6, 0x8e, 0x53, 0x6e, 0xa8, 0x35, 0xec, 0x58, 0x2a, 0xf5, 0x2c, 0x5c, 0xfd, 0x7c,
+	0x5c, 0x75, 0xbc, 0x5f, 0x77, 0x5a, 0xab, 0x5e, 0x88, 0xa9, 0x6a, 0xe3, 0x4a, 0x2c, 0xe6, 0xfb,
+	0x63, 0xea, 0xaa, 0xe5, 0xb2, 0x59, 0x37, 0xdc, 0x74, 0x0e, 0xaa, 0x75, 0x4d, 0x77, 0xab, 0x66,
+	0x25, 0x1d, 0xe2, 0xba, 0xf7, 0xbe, 0xb5, 0xea, 0xff, 0xc5, 0x35, 0xb4, 0x69, 0x18, 0xb8, 0xec,
+	0xea, 0x7b, 0xba, 0xdb, 0xb0, 0xeb, 0xd5, 0x56, 0x29, 0xf9, 0xeb, 0x08, 0x46, 0x37, 0xb1, 0xfb,
+	0xbc, 0x83, 0x6d, 0x47, 0xa1, 0xdd, 0x40, 0x3a, 0x05, 0xc3, 0x96, 0x5a, 0xc1, 0x25, 0x47, 0x3f,
+	0xc0, 0xb3, 0x68, 0x11, 0x2d, 0x0d, 0x28, 0xc7, 0xbc, 0x82, 0x6d, 0xfd, 0x00, 0x4b, 0x0b, 0x00,
+	0xe4, 0xa5, 0x6b, 0xee, 0x62, 0x63, 0x36, 0xb3, 0x88, 0x96, 0x86, 0x15, 0x52, 0x7d, 0xc7, 0x2b,
+	0x90, 0x26, 0x61, 0x00, 0xd7, 0x54, 0xbd, 0x3a, 0x9b, 0x25, 0x6f, 0xe8, 0x83, 0x34, 0x0f, 0xc3,
+	0x7e, 0xb3, 0xcc, 0xf6, 0x53, 0x19, 0xbf, 0x40, 0xde, 0x83, 0xb1, 0x26, 0x04, 0xda, 0x03, 0xa5,
+	0x35, 0x18, 0xa8, 0x7b, 0x05, 0xb3, 0x68, 0x31, 0xbb, 0x34, 0xb2, 0x7a, 0x6f, 0x3e, 0xa6, 0x2f,
+	0xf2, 0x7e, 0x91, 0xdf, 0x5b, 0xc9, 0x7b, 0xd2, 0x0a, 0x15, 0x91, 0xee, 0x83, 0x51, 0x03, 0xef,
+	0xbb, 0xa5, 0x16, 0x9c, 0xf7, 0x78, 0xc5, 0x57, 0x38, 0x56, 0xf9, 0x3c, 0x9c, 0x60, 0x76, 0xb9,
+	0xe7, 0x33, 0x30, 0xe4, 0xa9, 0x28, 0xe9, 0x1a, 0xf1, 0x7b, 0x58, 0x19, 0xf4, 0x1e, 0x8b, 0x9a,
+	0xfc, 0x94, 0xcf, 0x92, 0x8f, 0xf0, 0x22, 0xf4, 0x7b, 0x2f, 0x49, 0xc5, 0xb4, 0x00, 0x89, 0x84,
+	0x7c, 0x13, 0xc6, 0x37, 0x6c, 0xac, 0xba, 0x38, 0x68, 0xfa, 0x11, 0xe8, 0x77, 0x2c, 0x5c, 0x66,
+	0xea, 0x96, 0xd2, 0xa8, 0xdb, 0xb6, 0x70, 0x59, 0x21, 0x52, 0xd2, 0x03, 0x20, 0xa9, 0x4e, 0xc3,
+	0x28, 0x97, 0xfc, 0xa1, 0xe5, 0xf9, 0x40, 0xbd, 0x1e, 0x23, 0x6f, 0x9e, 0xe5, 0x2f, 0x8a, 0x9a,
+	0xfc, 0x2a, 0x02, 0x29, 0x88, 0x80, 0x79, 0x94, 0xe4, 0xbd, 0xf4, 0x79, 0x18, 0x8d, 0x68, 0x27,
+	0xaa, 0x47, 0x56, 0x97, 0xe3, 0x60, 0xfa, 0x95, 0x3c, 0x9c, 0x85, 0x90, 0x6d, 0xe5, 0x44, 0x18,
+	0x8b, 0xfc, 0x7b, 0x04, 0xe3, 0xcf, 0x5b, 0x5a, 0x84, 0x8b, 0x44, 0x20, 0x9c, 0xa4, 0x4c, 0x57,
+	0x24, 0x9d, 0x87, 0x31, 0x1b, 0x3b, 0x66, 0xdd, 0x2e, 0xe3, 0xd2, 0x1e, 0xb6, 0x1d, 0xcf, 0x0f,
+	0xda, 0x4d, 0x47, 0x79, 0xf9, 0x55, 0x5a, 0x9c, 0xc0, 0x67, 0x7f, 0x02, 0x9f, 0x06, 0x48, 0x41,
+	0x27, 0x18, 0x9d, 0x31, 0xac, 0xa1, 0xde, 0xb0, 0xf6, 0x2d, 0x04, 0xe3, 0x8f, 0xe3, 0x2a, 0x4e,
+	0xc9, 0x5a, 0x9c, 0xdf, 0x99, 0x4e, 0xfc, 0xce, 0x26, 0xfb, 0x1d, 0x84, 0x21, 0xdc, 0xef, 0x7f,
+	0x23, 0x58, 0xd8, 0xa6, 0xc3, 0xf0, 0x32, 0x9f, 0x3d, 0x0a, 0xe5, 0x32, 0x76, 0xfc, 0xa9, 0x2b,
+	0x34, 0xd1, 0xa0, 0xc8, 0x44, 0x13, 0x64, 0x28, 0x13, 0x62, 0x68, 0x13, 0x06, 0x55, 0xa2, 0x87,
+	0xb8, 0x9a, 0x80, 0x34, 0xd8, 0xb3, 0xa2, 0xe6, 0x99, 0x78, 0x2c, 0xd5, 0xfd, 0x9d, 0x50, 0x3d,
+	0x90, 0x40, 0xf5, 0x01, 0xe4, 0x92, 0x3c, 0x17, 0x4e, 0xfb, 0x16, 0xcc, 0x6e, 0x62, 0x37, 0x52,
+	0x89, 0x11, 0x1e, 0xef, 0x05, 0x4a, 0xf0, 0xa2, 0x0e, 0x27, 0x63, 0x34, 0x09, 0x77, 0xe0, 0x3b,
+	0x08, 0xa6, 0xe9, 0x7c, 0xe7, 0x93, 0xc7, 0xf1, 0xaf, 0x87, 0x66, 0x94, 0x7c, 0x9c, 0x25, 0xbf,
+	0xff, 0x84, 0x1a, 0xfe, 0xc8, 0xc9, 0x37, 0x69, 0xd0, 0xfc, 0x00, 0xc1, 0x4c, 0x0b, 0x18, 0x46,
+	0x41, 0xfb, 0xee, 0x2b, 0x6e, 0x1a, 0x7e, 0x11, 0x26, 0x37, 0xb1, 0xeb, 0xe3, 0xe9, 0x49, 0x24,
+	0x20, 0x41, 0xbf, 0x07, 0x9d, 0xf1, 0x40, 0x7e, 0xcb, 0xdf, 0x45, 0x30, 0x15, 0x31, 0xc4, 0x3c,
+	0x7f, 0x12, 0xc0, 0x77, 0x94, 0x2f, 0xfa, 0x17, 0xd2, 0xb7, 0x86, 0x12, 0x90, 0x4e, 0xbd, 0xfe,
+	0x3f, 0x0c, 0x13, 0x41, 0x30, 0xa9, 0xe6, 0x10, 0xf9, 0x4b, 0x61, 0xaa, 0x7c, 0x07, 0xb6, 0xa2,
+	0x52, 0x9d, 0xe1, 0x0f, 0x58, 0xf8, 0x33, 0x82, 0x69, 0xba, 0x9c, 0x74, 0x06, 0xad, 0x27, 0x7d,
+	0x59, 0xd8, 0x1a, 0xe9, 0xc0, 0x4c, 0x8b, 0x53, 0xc2, 0x07, 0xfe, 0x6f, 0x33, 0x20, 0x2b, 0xd8,
+	0x73, 0x7a, 0xa3, 0xee, 0xb8, 0x66, 0x6d, 0x1b, 0xab, 0x76, 0xf9, 0xa5, 0x82, 0xeb, 0xda, 0xfa,
+	0xb5, 0xba, 0x9b, 0x92, 0xd6, 0x2b, 0x70, 0x0e, 0xef, 0xeb, 0x8e, 0xab, 0x1b, 0x95, 0x52, 0x99,
+	0xa8, 0x29, 0x39, 0x44, 0x4f, 0x49, 0xe5, 0x8a, 0x4a, 0xa4, 0xa7, 0xd3, 0x4e, 0x76, 0x86, 0x57,
+	0x8e, 0x35, 0xe9, 0x79, 0x2f, 0x5d, 0x82, 0x45, 0x03, 0x5f, 0x6f, 0xaf, 0x8c, 0x92, 0x3e, 0x6f,
+	0xe0, 0xeb, 0xc9, 0x7a, 0x84, 0xad, 0x36, 0x37, 0xe1, 0x6c, 0x5b, 0xda, 0x84, 0x37, 0xdc, 0x1b,
+	0x08, 0xa6, 0x69, 0x68, 0xd1, 0xe1, 0x18, 0x10, 0x16, 0xeb, 0x38, 0x30, 0xd3, 0x02, 0x48, 0x38,
+	0x0d, 0xaf, 0x20, 0xc8, 0x5d, 0x52, 0xf5, 0xaa, 0xb9, 0x17, 0x58, 0xf7, 0x15, 0xb2, 0x0d, 0x4d,
+	0x47, 0xc7, 0x34, 0x0c, 0xd2, 0x5d, 0x2b, 0x0f, 0x78, 0xe8, 0x53, 0x87, 0xbe, 0x7f, 0x05, 0x4e,
+	0x27, 0xa2, 0x10, 0xce, 0xc1, 0xdb, 0x08, 0x4e, 0x16, 0x34, 0xad, 0xa7, 0xee, 0x0b, 0x9b, 0xe5,
+	0xf6, 0x60, 0x2e, 0x0e, 0xab, 0x70, 0x92, 0x7e, 0x85, 0x60, 0xbe, 0xa5, 0x7b, 0x7e, 0x82, 0x79,
+	0x6a, 0xc0, 0x42, 0x02, 0x5c, 0xe1, 0x54, 0x4d, 0xc0, 0xf8, 0x26, 0x76, 0xa9, 0x39, 0x1e, 0xe8,
+	0xc8, 0x3b, 0x20, 0x05, 0x0b, 0x19, 0x88, 0xc7, 0x60, 0x88, 0x12, 0xd1, 0x36, 0x0d, 0x41, 0xab,
+	0x78, 0x96, 0x99, 0x0f, 0x5c, 0x48, 0xbe, 0x40, 0x12, 0x1b, 0xe1, 0x86, 0x68, 0x52, 0x8d, 0x82,
+	0x54, 0xcb, 0xcf, 0x05, 0x60, 0xf9, 0x00, 0x1e, 0x09, 0x55, 0x4e, 0x6b, 0x9f, 0xab, 0xfc, 0x23,
+	0x22, 0x81, 0xfb, 0x65, 0xbc, 0x5f, 0x77, 0x9e, 0x30, 0x34, 0xcb, 0xd4, 0x0d, 0xb7, 0x27, 0xa1,
+	0x5d, 0x1e, 0x26, 0x5c, 0xd5, 0xae, 0x60, 0xb7, 0xe4, 0x77, 0xa1, 0xe6, 0xf4, 0x31, 0x4e, 0x5f,
+	0xf9, 0x0d, 0x5b, 0xd4, 0xa4, 0x0b, 0xc0, 0x0a, 0x4b, 0xae, 0xea, 0xec, 0x96, 0x5e, 0xae, 0xe3,
+	0x3a, 0x4f, 0x03, 0x8d, 0xd2, 0x17, 0x3b, 0xaa, 0xb3, 0xfb, 0x9c, 0x57, 0xec, 0x87, 0x8d, 0x03,
+	0x81, 0xb0, 0xf1, 0xdb, 0x88, 0xec, 0x1b, 0xa2, 0x8e, 0x30, 0x92, 0x36, 0x60, 0x18, 0xf3, 0x42,
+	0xd6, 0x4e, 0xe7, 0x62, 0x63, 0x1f, 0x4f, 0xdc, 0xa3, 0x89, 0xab, 0x50, 0x9a, 0x72, 0xa9, 0x63,
+	0xc6, 0x35, 0x98, 0x89, 0x22, 0xe1, 0x8c, 0x9e, 0x86, 0x11, 0xae, 0xaf, 0xb9, 0x07, 0x02, 0x5e,
+	0x54, 0xd4, 0xe4, 0x2f, 0xb6, 0x36, 0x87, 0xef, 0x44, 0x01, 0x8e, 0xf1, 0x9a, 0xac, 0xad, 0x53,
+	0xfa, 0xe0, 0x8b, 0xc9, 0xaf, 0x21, 0x98, 0x63, 0x1b, 0x8b, 0x38, 0x78, 0x8f, 0x86, 0x12, 0x4c,
+	0xe7, 0x53, 0x69, 0xef, 0x3a, 0xc3, 0xf4, 0x13, 0x04, 0xa7, 0x62, 0xb1, 0x30, 0x77, 0x8f, 0xe2,
+	0x4a, 0xe0, 0x5e, 0xe7, 0x2f, 0x08, 0xe6, 0x58, 0x24, 0xda, 0x4d, 0x2b, 0xfa, 0x3c, 0x66, 0xba,
+	0xe3, 0x51, 0xd8, 0x94, 0x7a, 0x1d, 0x4e, 0xc5, 0xba, 0x25, 0x7c, 0x42, 0xfd, 0x31, 0x82, 0x39,
+	0x36, 0x99, 0x77, 0x45, 0xa8, 0xb0, 0x90, 0xed, 0x3a, 0x9c, 0x8a, 0xc5, 0x25, 0x9c, 0x91, 0x77,
+	0x10, 0x4c, 0xd2, 0xb6, 0x28, 0xd0, 0x63, 0x00, 0xce, 0xc5, 0x63, 0xa1, 0x31, 0x18, 0xbb, 0x3f,
+	0x64, 0x07, 0x07, 0xc4, 0x0a, 0xfd, 0x79, 0x44, 0xe7, 0xe9, 0x09, 0x55, 0x2f, 0xc3, 0x54, 0x04,
+	0xb0, 0x70, 0x92, 0xde, 0xcd, 0x92, 0x9d, 0xf4, 0xf3, 0x0e, 0xb6, 0x37, 0x6d, 0xb3, 0x6e, 0xf5,
+	0x64, 0x65, 0x0a, 0x85, 0x39, 0xd9, 0x68, 0x98, 0x73, 0x06, 0x8e, 0x6b, 0xba, 0x63, 0x55, 0xd5,
+	0x06, 0xdd, 0x63, 0xd1, 0xa1, 0x34, 0xc2, 0xca, 0xc8, 0x96, 0xaa, 0x06, 0xc7, 0xe9, 0x89, 0x56,
+	0xa9, 0xe2, 0x81, 0x22, 0xcb, 0xd0, 0xc8, 0xea, 0x93, 0xf9, 0xa3, 0x8f, 0xc2, 0xf2, 0x71, 0xce,
+	0xe4, 0x37, 0x89, 0x32, 0x52, 0x76, 0x49, 0xaf, 0xba, 0xd8, 0x56, 0x46, 0x2a, 0xcd, 0x22, 0xa9,
+	0x02, 0xe0, 0x94, 0xf5, 0x1a, 0x33, 0x36, 0x48, 0x8c, 0x6d, 0x75, 0x6d, 0x6c, 0x7b, 0xa3, 0xf8,
+	0x4c, 0xd0, 0xd4, 0xb0, 0xa7, 0x9b, 0x14, 0xcc, 0x5d, 0x84, 0xf1, 0x16, 0x28, 0xd2, 0x59, 0xb8,
+	0x87, 0x9c, 0xcf, 0x94, 0x54, 0x4d, 0xb3, 0xb1, 0xe3, 0xb0, 0xc1, 0x79, 0x9c, 0x14, 0x16, 0x68,
+	0xd9, 0xdc, 0x12, 0x8c, 0x46, 0xf4, 0x4a, 0x53, 0x30, 0xa8, 0x6b, 0x56, 0x73, 0x34, 0x0f, 0xe8,
+	0x9a, 0x55, 0xd4, 0xe4, 0x6f, 0xd0, 0xec, 0x4e, 0x10, 0x97, 0xbf, 0xba, 0x0d, 0x12, 0x0f, 0xf9,
+	0xfa, 0x7c, 0x3e, 0x4d, 0xe6, 0x9e, 0xe8, 0x50, 0x98, 0x60, 0xea, 0x05, 0xfa, 0x21, 0x92, 0xd4,
+	0x69, 0xca, 0xb3, 0x4e, 0x75, 0x12, 0x8e, 0x11, 0x45, 0x4d, 0xd0, 0x43, 0xe4, 0xb9, 0xa8, 0xc9,
+	0x2f, 0x84, 0xfb, 0xa1, 0x0f, 0xfa, 0xb3, 0x30, 0x40, 0x9b, 0xa5, 0xcd, 0x8a, 0x19, 0x8f, 0x99,
+	0xca, 0x79, 0x0b, 0xf2, 0x74, 0xf3, 0x98, 0x25, 0x04, 0xa7, 0x10, 0x9a, 0x08, 0x1e, 0x4c, 0xad,
+	0xba, 0xeb, 0x05, 0xf9, 0xfb, 0x7e, 0xd6, 0xb1, 0xd5, 0xd1, 0x64, 0x6e, 0x04, 0x2e, 0xc3, 0xef,
+	0xfa, 0x59, 0xae, 0x0e, 0xda, 0xca, 0xe7, 0x2d, 0xd3, 0x3d, 0x6f, 0xe2, 0x33, 0x5c, 0xad, 0x0c,
+	0x8b, 0x9b, 0x45, 0x5f, 0xf7, 0x13, 0x25, 0x9d, 0xd0, 0x28, 0x3e, 0x4b, 0x72, 0x37, 0x39, 0xf8,
+	0x0f, 0x02, 0x79, 0x3b, 0x30, 0x82, 0xbb, 0x3a, 0x1b, 0x0a, 0xb2, 0x95, 0x09, 0xb3, 0xf5, 0xc9,
+	0x3f, 0x1d, 0xba, 0x09, 0x67, 0xdb, 0x12, 0x20, 0xbc, 0x09, 0x7e, 0x43, 0x93, 0x34, 0x3e, 0x82,
+	0x67, 0x70, 0xed, 0x5a, 0xf3, 0x64, 0xb2, 0x4d, 0x4f, 0xbc, 0x0c, 0xc3, 0x35, 0x52, 0x97, 0xf3,
+	0x3e, 0xb2, 0xba, 0x92, 0x7a, 0x54, 0x53, 0x2b, 0x45, 0x4d, 0x39, 0x56, 0x63, 0xbf, 0x3a, 0xec,
+	0xae, 0x34, 0x5d, 0xd3, 0x82, 0x5a, 0x38, 0x5d, 0xbf, 0x43, 0x30, 0xaf, 0xe0, 0x9a, 0xb9, 0x87,
+	0xff, 0xd7, 0x18, 0x6b, 0xc0, 0x42, 0x02, 0x70, 0xe1, 0xa4, 0x39, 0x30, 0x17, 0x5c, 0xa7, 0xa9,
+	0xdd, 0x9e, 0x44, 0x8d, 0x41, 0xb6, 0xb3, 0xe1, 0xe0, 0xe0, 0x4d, 0x04, 0xa7, 0x62, 0xad, 0x32,
+	0x77, 0x8b, 0x30, 0x44, 0x99, 0xe4, 0xa1, 0xcd, 0x72, 0x87, 0x6d, 0xa1, 0x70, 0xf9, 0xd4, 0x11,
+	0xce, 0x0f, 0xfd, 0xbd, 0xf5, 0x36, 0x8d, 0x07, 0x23, 0x9b, 0x8c, 0x4b, 0xa1, 0xd8, 0x62, 0xf5,
+	0x28, 0x3c, 0x61, 0x25, 0x5d, 0x07, 0x18, 0x3f, 0x47, 0x30, 0x1f, 0x8f, 0x8a, 0x31, 0xf5, 0x00,
+	0x48, 0x2c, 0x7e, 0x2d, 0xb1, 0x3d, 0x4e, 0xe0, 0xa4, 0xd8, 0x09, 0xc9, 0x08, 0x0d, 0x3c, 0xe8,
+	0x69, 0x76, 0x3c, 0x75, 0x1d, 0x61, 0x94, 0x5d, 0x92, 0x95, 0x4a, 0x70, 0xf7, 0x05, 0x18, 0x8d,
+	0xa8, 0x62, 0x0d, 0x92, 0xef, 0xac, 0x41, 0x94, 0x13, 0x61, 0xbb, 0xf2, 0x0b, 0x31, 0x56, 0x7b,
+	0x31, 0x0a, 0xe4, 0xb7, 0x10, 0x19, 0x60, 0x2d, 0x9a, 0xdb, 0x39, 0x94, 0xfd, 0xe8, 0x0e, 0xa5,
+	0xee, 0xf7, 0xef, 0x23, 0x9e, 0xe1, 0xe8, 0x41, 0xe3, 0xf9, 0xa3, 0x24, 0xf3, 0x11, 0x47, 0x89,
+	0xb0, 0x70, 0x72, 0x1f, 0xe6, 0xe3, 0xbd, 0x15, 0x3e, 0xd1, 0xfe, 0x0c, 0xf1, 0xc4, 0x49, 0x2f,
+	0x88, 0x16, 0x16, 0x6b, 0xee, 0xf3, 0x23, 0x8f, 0xbb, 0x4e, 0xd0, 0xfb, 0x88, 0x24, 0xeb, 0x0b,
+	0x96, 0xfe, 0x14, 0x6e, 0xf4, 0x6a, 0x05, 0x32, 0xaf, 0x1b, 0x74, 0x4d, 0x67, 0x2b, 0x10, 0x79,
+	0x2e, 0x6a, 0xd2, 0xa7, 0x60, 0x8a, 0xbe, 0x72, 0x1b, 0x16, 0x2e, 0x69, 0xd8, 0xb2, 0x71, 0x59,
+	0x75, 0x31, 0xeb, 0x38, 0xeb, 0x99, 0x59, 0xa4, 0x4c, 0x90, 0x0a, 0x3b, 0x0d, 0x0b, 0x3f, 0xee,
+	0xbf, 0x96, 0xb6, 0x00, 0x9a, 0x72, 0x24, 0x72, 0x3c, 0x71, 0xf4, 0x1e, 0xf6, 0x59, 0xae, 0x48,
+	0x19, 0xf6, 0x75, 0xca, 0x37, 0xc9, 0xe1, 0x88, 0xef, 0x6d, 0x33, 0x63, 0xad, 0x5a, 0x7a, 0x69,
+	0x17, 0x37, 0xf8, 0xd2, 0x77, 0xdf, 0x51, 0xda, 0xa9, 0x0a, 0x65, 0x48, 0xa5, 0xaa, 0x3a, 0xb8,
+	0xa8, 0x39, 0xe6, 0x03, 0xe0, 0x6c, 0x4f, 0xc1, 0xe0, 0x2e, 0x6e, 0x04, 0x72, 0x10, 0xbb, 0xb8,
+	0x51, 0xd4, 0xe4, 0x9d, 0x40, 0xcb, 0x04, 0x76, 0xf2, 0x43, 0x0c, 0x2a, 0xeb, 0x01, 0x69, 0x91,
+	0x0e, 0x52, 0xa4, 0xf2, 0x37, 0x11, 0x4c, 0xd0, 0xc5, 0x2d, 0x0c, 0x22, 0x45, 0x3e, 0xaf, 0x55,
+	0x6b, 0xd7, 0x4b, 0xec, 0x5b, 0x08, 0x26, 0xc3, 0x28, 0x98, 0x7f, 0xf1, 0x5c, 0x48, 0x93, 0x30,
+	0x10, 0x24, 0x95, 0x3e, 0xc4, 0x0d, 0x8b, 0x6c, 0x6f, 0x86, 0xc5, 0x1f, 0x10, 0x4c, 0xb0, 0x2c,
+	0x62, 0x8a, 0xa6, 0xf2, 0xc9, 0xcb, 0x74, 0x49, 0x9e, 0xb0, 0x99, 0xd7, 0xf2, 0xb3, 0xb7, 0x61,
+	0x9a, 0x85, 0x5e, 0xe8, 0x9c, 0xa0, 0x73, 0x59, 0x2a, 0xe6, 0x84, 0x4d, 0xa9, 0x16, 0x4c, 0x86,
+	0x61, 0x08, 0xf7, 0xfc, 0x9f, 0x88, 0xe4, 0xeb, 0x0a, 0x75, 0x4d, 0x77, 0x9f, 0x36, 0x2b, 0x3d,
+	0x99, 0x4c, 0x9f, 0x86, 0x49, 0xc7, 0x55, 0x6d, 0xb7, 0xe4, 0xea, 0x35, 0x5c, 0xd2, 0x8d, 0x72,
+	0xb5, 0xee, 0xe8, 0x7b, 0x98, 0x75, 0xf3, 0xb9, 0x3c, 0x4d, 0xc0, 0xe6, 0xf9, 0x27, 0x0b, 0xf9,
+	0x1d, 0xfe, 0xc9, 0x82, 0x22, 0x11, 0x39, 0xef, 0xb9, 0xc8, 0xa5, 0xa4, 0x2d, 0x90, 0xb0, 0xa1,
+	0x51, 0x5d, 0x78, 0x9f, 0xeb, 0xea, 0x3f, 0x52, 0xd7, 0x18, 0x36, 0x34, 0xef, 0xe9, 0x09, 0x2e,
+	0x23, 0xdf, 0x20, 0x89, 0xc6, 0x80, 0xab, 0x8c, 0xdd, 0x47, 0xa1, 0xbf, 0x6a, 0x56, 0xda, 0xe6,
+	0x46, 0xf9, 0x17, 0x02, 0x1e, 0xa3, 0x4f, 0x9b, 0x15, 0x05, 0x97, 0x4d, 0x5b, 0x53, 0x88, 0x58,
+	0xea, 0x59, 0xf4, 0xef, 0xfc, 0xaa, 0xbf, 0x5a, 0xf1, 0x2f, 0xd3, 0x24, 0x51, 0x85, 0x7a, 0x48,
+	0x55, 0xa6, 0x73, 0xaa, 0xc2, 0xcd, 0x9f, 0x6d, 0xdb, 0xfc, 0xfd, 0xd1, 0x38, 0xf6, 0xab, 0xec,
+	0x73, 0x02, 0xe2, 0x26, 0xa3, 0x78, 0x1d, 0x86, 0x9d, 0x7a, 0xad, 0xa6, 0xda, 0x3a, 0x6e, 0x7b,
+	0x96, 0x4f, 0xbe, 0xad, 0x20, 0xf1, 0x1e, 0xa9, 0xdd, 0x50, 0x9a, 0x62, 0xa9, 0x79, 0xa6, 0x17,
+	0x0c, 0xc2, 0x31, 0x93, 0x7c, 0x95, 0xae, 0xa1, 0x91, 0x10, 0xe5, 0x73, 0x30, 0x14, 0xde, 0x1c,
+	0xdc, 0x97, 0xee, 0x48, 0x48, 0xe1, 0x62, 0xf2, 0xaf, 0x11, 0x2c, 0x46, 0x6e, 0x93, 0x3e, 0xb1,
+	0x6f, 0x99, 0xb6, 0xbb, 0xad, 0x1b, 0xbb, 0xe9, 0x32, 0x5f, 0x1b, 0xa1, 0x79, 0x78, 0xf9, 0xc8,
+	0x6b, 0x83, 0x4d, 0xfd, 0x5d, 0xdf, 0x81, 0xbd, 0x01, 0x67, 0xda, 0x80, 0x16, 0x3e, 0xe9, 0x3c,
+	0x07, 0x0b, 0xc1, 0x3b, 0x9c, 0x9d, 0x12, 0xc6, 0xaf, 0x28, 0x64, 0x02, 0x57, 0x14, 0x54, 0xc8,
+	0x25, 0xa9, 0xf4, 0x83, 0x90, 0x7e, 0x47, 0x37, 0x76, 0x99, 0x0f, 0xf7, 0x77, 0x40, 0xb3, 0x42,
+	0x04, 0xe5, 0x83, 0x24, 0x13, 0x29, 0x33, 0x9c, 0xa1, 0x31, 0x95, 0x69, 0x3b, 0xa6, 0xb2, 0xd1,
+	0x31, 0xf5, 0x3a, 0x82, 0xd3, 0x89, 0xc6, 0xfd, 0x80, 0x70, 0xc0, 0xc3, 0xc9, 0xc7, 0x57, 0x47,
+	0x1e, 0x52, 0xc9, 0xd4, 0x43, 0xec, 0xaf, 0x08, 0x16, 0x23, 0xb7, 0x49, 0x3f, 0x96, 0x5e, 0x2f,
+	0x2c, 0x04, 0xb9, 0x01, 0x67, 0xda, 0xf8, 0x77, 0x37, 0xae, 0x93, 0x2d, 0x46, 0xee, 0x67, 0xf5,
+	0x60, 0x90, 0x08, 0xa5, 0xab, 0x0d, 0x5c, 0xe1, 0x74, 0xbd, 0x8a, 0x40, 0xbe, 0xaa, 0x56, 0xf5,
+	0x8f, 0xbd, 0x43, 0xca, 0xe7, 0xe0, 0x6c, 0x5b, 0x20, 0x94, 0x0a, 0xf9, 0x35, 0x04, 0x53, 0xdb,
+	0xde, 0xfa, 0xfd, 0x8c, 0x5e, 0x09, 0x7f, 0xcf, 0xb1, 0x1e, 0xda, 0xd1, 0x1c, 0x7d, 0x87, 0xdc,
+	0x57, 0xd0, 0xf5, 0xae, 0xe6, 0x47, 0x08, 0xa6, 0xa3, 0x58, 0x58, 0x8b, 0x9d, 0x81, 0xe3, 0x35,
+	0x5e, 0xd8, 0x0c, 0x82, 0x47, 0xfc, 0x32, 0xa1, 0x79, 0xc2, 0x8b, 0x24, 0x30, 0x6d, 0x21, 0xe8,
+	0x68, 0x4c, 0xec, 0x13, 0x81, 0x56, 0x77, 0xb6, 0x60, 0xd8, 0xaf, 0x96, 0xfa, 0x13, 0x81, 0xa6,
+	0x9a, 0xa6, 0xb0, 0xac, 0x84, 0x2d, 0xf4, 0x24, 0xfd, 0xc7, 0xbe, 0xcd, 0x08, 0x2a, 0x6d, 0x7e,
+	0x9b, 0xe1, 0x9b, 0x4e, 0xff, 0x6d, 0x46, 0x13, 0x78, 0x40, 0x3a, 0xf5, 0x0c, 0xff, 0x06, 0x82,
+	0xd9, 0x2d, 0xd5, 0xd0, 0x22, 0x77, 0x8e, 0xd3, 0xb6, 0x81, 0x24, 0xc3, 0x3d, 0xae, 0x59, 0xb2,
+	0xb1, 0x55, 0xd5, 0xcb, 0x6a, 0xb3, 0xfb, 0x8d, 0xb8, 0xa6, 0x42, 0xcb, 0x3a, 0x3e, 0xf9, 0xa8,
+	0xc3, 0xc9, 0x18, 0x40, 0xc2, 0xe7, 0x96, 0x2f, 0xc3, 0xcc, 0x86, 0x69, 0xbc, 0xa8, 0xdb, 0xb5,
+	0x2e, 0xba, 0x62, 0x87, 0x43, 0xd1, 0x85, 0xd9, 0x56, 0x5b, 0xc2, 0x3d, 0x7c, 0x09, 0xa6, 0x0a,
+	0xd7, 0x4c, 0xdb, 0x15, 0xef, 0x9f, 0x0d, 0xd3, 0x51, 0x4b, 0xc2, 0xbd, 0xfb, 0x29, 0x82, 0x05,
+	0x1a, 0xeb, 0x6e, 0x04, 0x3e, 0xc6, 0x56, 0xea, 0x55, 0xbf, 0x37, 0x5f, 0x09, 0x4d, 0xb9, 0x8f,
+	0xc4, 0xde, 0xfe, 0x89, 0x7c, 0xc7, 0xed, 0xd9, 0x8d, 0xaa, 0xeb, 0x7a, 0x02, 0xfe, 0x25, 0x82,
+	0x5c, 0x12, 0x42, 0x46, 0xcf, 0x43, 0x30, 0x19, 0x84, 0x50, 0xf2, 0x30, 0x34, 0x5b, 0x44, 0x2a,
+	0x47, 0xe4, 0x84, 0xce, 0xcb, 0x97, 0xc9, 0x29, 0x45, 0x12, 0x99, 0x1d, 0x23, 0x95, 0x5f, 0xa1,
+	0x27, 0x7c, 0x89, 0xbe, 0x63, 0x18, 0x6f, 0xd1, 0xc8, 0xda, 0xea, 0x62, 0xb7, 0x6d, 0xa5, 0x8c,
+	0x45, 0x81, 0xc8, 0xdf, 0x8b, 0x87, 0xd1, 0x93, 0x84, 0xc8, 0x2a, 0x4c, 0xc5, 0x91, 0xe2, 0xcc,
+	0x66, 0x17, 0xb3, 0x4b, 0xc3, 0xca, 0x44, 0x2b, 0x2b, 0x8e, 0xfc, 0x0e, 0x82, 0xf9, 0x78, 0x3c,
+	0x8c, 0x97, 0x0a, 0x48, 0x2d, 0x4a, 0xf9, 0xea, 0xd0, 0x3d, 0x31, 0xe3, 0x51, 0x2c, 0xe9, 0x97,
+	0x8c, 0x0f, 0x11, 0x2c, 0xd0, 0xa0, 0xb9, 0x67, 0x9d, 0xc3, 0x1f, 0x9b, 0x99, 0x9e, 0x8d, 0x4d,
+	0x61, 0x31, 0xf0, 0x01, 0xe4, 0x92, 0xbc, 0xbf, 0x1b, 0xdf, 0xe8, 0xb0, 0xef, 0x39, 0x7a, 0x47,
+	0xbd, 0xb0, 0x24, 0xe7, 0x01, 0xe4, 0x92, 0xb0, 0x8a, 0x26, 0x6a, 0xfd, 0x43, 0x74, 0xeb, 0x76,
+	0xae, 0xef, 0xbd, 0xdb, 0xb9, 0xbe, 0x0f, 0x6e, 0xe7, 0xd0, 0xd7, 0x0e, 0x73, 0xe8, 0x17, 0x87,
+	0x39, 0xf4, 0xa7, 0xc3, 0x1c, 0xba, 0x75, 0x98, 0x43, 0x7f, 0x3b, 0xcc, 0xa1, 0x7f, 0x1c, 0xe6,
+	0xfa, 0x3e, 0x38, 0xcc, 0xa1, 0x37, 0xef, 0xe4, 0xfa, 0x6e, 0xdd, 0xc9, 0xf5, 0xbd, 0x77, 0x27,
+	0xd7, 0x07, 0xe7, 0x74, 0x33, 0xc5, 0xa5, 0xd0, 0xf5, 0x49, 0xc6, 0x36, 0x77, 0xe4, 0x8a, 0x6d,
+	0xba, 0xe6, 0x15, 0xf4, 0x85, 0xff, 0xaf, 0x04, 0xc4, 0x75, 0x33, 0xf9, 0x7f, 0x82, 0xf9, 0x4c,
+	0xf0, 0xf9, 0xed, 0xcc, 0xbd, 0x3b, 0x4c, 0x48, 0x37, 0xf3, 0x05, 0x4b, 0xcf, 0x6f, 0x10, 0xab,
+	0xe4, 0x2f, 0x3b, 0x73, 0xcb, 0x5f, 0x5d, 0xf9, 0x57, 0x66, 0xa9, 0x59, 0x6d, 0x6d, 0xad, 0x60,
+	0xe9, 0x6b, 0x6b, 0xa4, 0x0a, 0xfb, 0x87, 0xd5, 0x5c, 0x5b, 0xbb, 0xba, 0x72, 0x6d, 0x90, 0x24,
+	0xff, 0x1e, 0xfe, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x5b, 0x1d, 0xf5, 0xd7, 0x95, 0x46, 0x00,
+	0x00,
 }
 
 func (this *GetUsersRequest) Equal(that interface{}) bool {
@@ -8075,6 +8972,176 @@ func (this *SetUserGroupNamespaceAccessResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *AddUserGroupMemberRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AddUserGroupMemberRequest)
+	if !ok {
+		that2, ok := that.(AddUserGroupMemberRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.GroupId != that1.GroupId {
+		return false
+	}
+	if !this.MemberId.Equal(that1.MemberId) {
+		return false
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *AddUserGroupMemberResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AddUserGroupMemberResponse)
+	if !ok {
+		that2, ok := that.(AddUserGroupMemberResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
+		return false
+	}
+	return true
+}
+func (this *RemoveUserGroupMemberRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*RemoveUserGroupMemberRequest)
+	if !ok {
+		that2, ok := that.(RemoveUserGroupMemberRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.GroupId != that1.GroupId {
+		return false
+	}
+	if !this.MemberId.Equal(that1.MemberId) {
+		return false
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *RemoveUserGroupMemberResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*RemoveUserGroupMemberResponse)
+	if !ok {
+		that2, ok := that.(RemoveUserGroupMemberResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
+		return false
+	}
+	return true
+}
+func (this *GetUserGroupMembersRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetUserGroupMembersRequest)
+	if !ok {
+		that2, ok := that.(GetUserGroupMembersRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.PageSize != that1.PageSize {
+		return false
+	}
+	if this.PageToken != that1.PageToken {
+		return false
+	}
+	if this.GroupId != that1.GroupId {
+		return false
+	}
+	return true
+}
+func (this *GetUserGroupMembersResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetUserGroupMembersResponse)
+	if !ok {
+		that2, ok := that.(GetUserGroupMembersResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Members) != len(that1.Members) {
+		return false
+	}
+	for i := range this.Members {
+		if !this.Members[i].Equal(that1.Members[i]) {
+			return false
+		}
+	}
+	if this.NextPageToken != that1.NextPageToken {
+		return false
+	}
+	return true
+}
 func (this *CreateServiceAccountRequest) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -9452,6 +10519,286 @@ func (this *AbortMigrationResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *CreateConnectivityRuleRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateConnectivityRuleRequest)
+	if !ok {
+		that2, ok := that.(CreateConnectivityRuleRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *CreateConnectivityRuleResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateConnectivityRuleResponse)
+	if !ok {
+		that2, ok := that.(CreateConnectivityRuleResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ConnectivityRuleId != that1.ConnectivityRuleId {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
+		return false
+	}
+	return true
+}
+func (this *GetConnectivityRuleRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetConnectivityRuleRequest)
+	if !ok {
+		that2, ok := that.(GetConnectivityRuleRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ConnectivityRuleId != that1.ConnectivityRuleId {
+		return false
+	}
+	return true
+}
+func (this *GetConnectivityRuleResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetConnectivityRuleResponse)
+	if !ok {
+		that2, ok := that.(GetConnectivityRuleResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ConnectivityRule.Equal(that1.ConnectivityRule) {
+		return false
+	}
+	return true
+}
+func (this *GetConnectivityRulesRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetConnectivityRulesRequest)
+	if !ok {
+		that2, ok := that.(GetConnectivityRulesRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.PageSize != that1.PageSize {
+		return false
+	}
+	if this.PageToken != that1.PageToken {
+		return false
+	}
+	if len(this.ConnectivityRuleIds) != len(that1.ConnectivityRuleIds) {
+		return false
+	}
+	for i := range this.ConnectivityRuleIds {
+		if this.ConnectivityRuleIds[i] != that1.ConnectivityRuleIds[i] {
+			return false
+		}
+	}
+	return true
+}
+func (this *GetConnectivityRulesResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetConnectivityRulesResponse)
+	if !ok {
+		that2, ok := that.(GetConnectivityRulesResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.ConnectivityRules) != len(that1.ConnectivityRules) {
+		return false
+	}
+	for i := range this.ConnectivityRules {
+		if !this.ConnectivityRules[i].Equal(that1.ConnectivityRules[i]) {
+			return false
+		}
+	}
+	if this.NextPageToken != that1.NextPageToken {
+		return false
+	}
+	return true
+}
+func (this *UpdateConnectivityRuleRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateConnectivityRuleRequest)
+	if !ok {
+		that2, ok := that.(UpdateConnectivityRuleRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ConnectivityRuleId != that1.ConnectivityRuleId {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *UpdateConnectivityRuleResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateConnectivityRuleResponse)
+	if !ok {
+		that2, ok := that.(UpdateConnectivityRuleResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
+		return false
+	}
+	return true
+}
+func (this *DeleteConnectivityRuleRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DeleteConnectivityRuleRequest)
+	if !ok {
+		that2, ok := that.(DeleteConnectivityRuleRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ConnectivityRuleId != that1.ConnectivityRuleId {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *DeleteConnectivityRuleResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DeleteConnectivityRuleResponse)
+	if !ok {
+		that2, ok := that.(DeleteConnectivityRuleResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
+		return false
+	}
+	return true
+}
 func (this *GetUsersRequest) GoString() string {
 	if this == nil {
 		return "nil"
@@ -10225,6 +11572,83 @@ func (this *SetUserGroupNamespaceAccessResponse) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *AddUserGroupMemberRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&cloudservice.AddUserGroupMemberRequest{")
+	s = append(s, "GroupId: "+fmt.Sprintf("%#v", this.GroupId)+",\n")
+	if this.MemberId != nil {
+		s = append(s, "MemberId: "+fmt.Sprintf("%#v", this.MemberId)+",\n")
+	}
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *AddUserGroupMemberResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.AddUserGroupMemberResponse{")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *RemoveUserGroupMemberRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&cloudservice.RemoveUserGroupMemberRequest{")
+	s = append(s, "GroupId: "+fmt.Sprintf("%#v", this.GroupId)+",\n")
+	if this.MemberId != nil {
+		s = append(s, "MemberId: "+fmt.Sprintf("%#v", this.MemberId)+",\n")
+	}
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *RemoveUserGroupMemberResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.RemoveUserGroupMemberResponse{")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetUserGroupMembersRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&cloudservice.GetUserGroupMembersRequest{")
+	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
+	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	s = append(s, "GroupId: "+fmt.Sprintf("%#v", this.GroupId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetUserGroupMembersResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&cloudservice.GetUserGroupMembersResponse{")
+	if this.Members != nil {
+		s = append(s, "Members: "+fmt.Sprintf("%#v", this.Members)+",\n")
+	}
+	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
 func (this *CreateServiceAccountRequest) GoString() string {
 	if this == nil {
 		return "nil"
@@ -10840,6 +12264,130 @@ func (this *AbortMigrationResponse) GoString() string {
 	}
 	s := make([]string, 0, 5)
 	s = append(s, "&cloudservice.AbortMigrationResponse{")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CreateConnectivityRuleRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&cloudservice.CreateConnectivityRuleRequest{")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CreateConnectivityRuleResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&cloudservice.CreateConnectivityRuleResponse{")
+	s = append(s, "ConnectivityRuleId: "+fmt.Sprintf("%#v", this.ConnectivityRuleId)+",\n")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetConnectivityRuleRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.GetConnectivityRuleRequest{")
+	s = append(s, "ConnectivityRuleId: "+fmt.Sprintf("%#v", this.ConnectivityRuleId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetConnectivityRuleResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.GetConnectivityRuleResponse{")
+	if this.ConnectivityRule != nil {
+		s = append(s, "ConnectivityRule: "+fmt.Sprintf("%#v", this.ConnectivityRule)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetConnectivityRulesRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&cloudservice.GetConnectivityRulesRequest{")
+	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
+	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	s = append(s, "ConnectivityRuleIds: "+fmt.Sprintf("%#v", this.ConnectivityRuleIds)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetConnectivityRulesResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&cloudservice.GetConnectivityRulesResponse{")
+	if this.ConnectivityRules != nil {
+		s = append(s, "ConnectivityRules: "+fmt.Sprintf("%#v", this.ConnectivityRules)+",\n")
+	}
+	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UpdateConnectivityRuleRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&cloudservice.UpdateConnectivityRuleRequest{")
+	s = append(s, "ConnectivityRuleId: "+fmt.Sprintf("%#v", this.ConnectivityRuleId)+",\n")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UpdateConnectivityRuleResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.UpdateConnectivityRuleResponse{")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DeleteConnectivityRuleRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&cloudservice.DeleteConnectivityRuleRequest{")
+	s = append(s, "ConnectivityRuleId: "+fmt.Sprintf("%#v", this.ConnectivityRuleId)+",\n")
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DeleteConnectivityRuleResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.DeleteConnectivityRuleResponse{")
 	if this.AsyncOperation != nil {
 		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
 	}
@@ -13400,6 +14948,260 @@ func (m *SetUserGroupNamespaceAccessResponse) MarshalToSizedBuffer(dAtA []byte) 
 	return len(dAtA) - i, nil
 }
 
+func (m *AddUserGroupMemberRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AddUserGroupMemberRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AddUserGroupMemberRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.MemberId != nil {
+		{
+			size, err := m.MemberId.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.GroupId) > 0 {
+		i -= len(m.GroupId)
+		copy(dAtA[i:], m.GroupId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.GroupId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *AddUserGroupMemberResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AddUserGroupMemberResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AddUserGroupMemberResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *RemoveUserGroupMemberRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *RemoveUserGroupMemberRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *RemoveUserGroupMemberRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.MemberId != nil {
+		{
+			size, err := m.MemberId.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.GroupId) > 0 {
+		i -= len(m.GroupId)
+		copy(dAtA[i:], m.GroupId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.GroupId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *RemoveUserGroupMemberResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *RemoveUserGroupMemberResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *RemoveUserGroupMemberResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetUserGroupMembersRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetUserGroupMembersRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetUserGroupMembersRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.GroupId) > 0 {
+		i -= len(m.GroupId)
+		copy(dAtA[i:], m.GroupId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.GroupId)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.PageToken) > 0 {
+		i -= len(m.PageToken)
+		copy(dAtA[i:], m.PageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.PageSize != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetUserGroupMembersResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetUserGroupMembersResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetUserGroupMembersResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextPageToken) > 0 {
+		i -= len(m.NextPageToken)
+		copy(dAtA[i:], m.NextPageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Members) > 0 {
+		for iNdEx := len(m.Members) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Members[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *CreateServiceAccountRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -15421,6 +17223,413 @@ func (m *AbortMigrationResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	return len(dAtA) - i, nil
 }
 
+func (m *CreateConnectivityRuleRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CreateConnectivityRuleRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateConnectivityRuleRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CreateConnectivityRuleResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CreateConnectivityRuleResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateConnectivityRuleResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ConnectivityRuleId) > 0 {
+		i -= len(m.ConnectivityRuleId)
+		copy(dAtA[i:], m.ConnectivityRuleId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ConnectivityRuleId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetConnectivityRuleRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetConnectivityRuleRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetConnectivityRuleRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ConnectivityRuleId) > 0 {
+		i -= len(m.ConnectivityRuleId)
+		copy(dAtA[i:], m.ConnectivityRuleId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ConnectivityRuleId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetConnectivityRuleResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetConnectivityRuleResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetConnectivityRuleResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ConnectivityRule != nil {
+		{
+			size, err := m.ConnectivityRule.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetConnectivityRulesRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetConnectivityRulesRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetConnectivityRulesRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ConnectivityRuleIds) > 0 {
+		for iNdEx := len(m.ConnectivityRuleIds) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.ConnectivityRuleIds[iNdEx])
+			copy(dAtA[i:], m.ConnectivityRuleIds[iNdEx])
+			i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ConnectivityRuleIds[iNdEx])))
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.PageToken) > 0 {
+		i -= len(m.PageToken)
+		copy(dAtA[i:], m.PageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.PageSize != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetConnectivityRulesResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetConnectivityRulesResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetConnectivityRulesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextPageToken) > 0 {
+		i -= len(m.NextPageToken)
+		copy(dAtA[i:], m.NextPageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ConnectivityRules) > 0 {
+		for iNdEx := len(m.ConnectivityRules) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ConnectivityRules[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateConnectivityRuleRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateConnectivityRuleRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateConnectivityRuleRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ConnectivityRuleId) > 0 {
+		i -= len(m.ConnectivityRuleId)
+		copy(dAtA[i:], m.ConnectivityRuleId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ConnectivityRuleId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateConnectivityRuleResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateConnectivityRuleResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateConnectivityRuleResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteConnectivityRuleRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteConnectivityRuleRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteConnectivityRuleRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ConnectivityRuleId) > 0 {
+		i -= len(m.ConnectivityRuleId)
+		copy(dAtA[i:], m.ConnectivityRuleId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ConnectivityRuleId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteConnectivityRuleResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteConnectivityRuleResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteConnectivityRuleResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintRequestResponse(dAtA []byte, offset int, v uint64) int {
 	offset -= sovRequestResponse(v)
 	base := offset
@@ -16512,6 +18721,113 @@ func (m *SetUserGroupNamespaceAccessResponse) Size() (n int) {
 	return n
 }
 
+func (m *AddUserGroupMemberRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.GroupId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.MemberId != nil {
+		l = m.MemberId.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.AsyncOperationId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *AddUserGroupMemberResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *RemoveUserGroupMemberRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.GroupId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.MemberId != nil {
+		l = m.MemberId.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.AsyncOperationId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *RemoveUserGroupMemberResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetUserGroupMembersRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PageSize != 0 {
+		n += 1 + sovRequestResponse(uint64(m.PageSize))
+	}
+	l = len(m.PageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.GroupId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetUserGroupMembersResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Members) > 0 {
+		for _, e := range m.Members {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.NextPageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
 func (m *CreateServiceAccountRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -17363,6 +19679,179 @@ func (m *AbortMigrationResponse) Size() (n int) {
 	return n
 }
 
+func (m *CreateConnectivityRuleRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.AsyncOperationId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *CreateConnectivityRuleResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ConnectivityRuleId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetConnectivityRuleRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ConnectivityRuleId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetConnectivityRuleResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ConnectivityRule != nil {
+		l = m.ConnectivityRule.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetConnectivityRulesRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PageSize != 0 {
+		n += 1 + sovRequestResponse(uint64(m.PageSize))
+	}
+	l = len(m.PageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if len(m.ConnectivityRuleIds) > 0 {
+		for _, s := range m.ConnectivityRuleIds {
+			l = len(s)
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *GetConnectivityRulesResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.ConnectivityRules) > 0 {
+		for _, e := range m.ConnectivityRules {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.NextPageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *UpdateConnectivityRuleRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ConnectivityRuleId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.AsyncOperationId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *UpdateConnectivityRuleResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *DeleteConnectivityRuleRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ConnectivityRuleId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.AsyncOperationId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *DeleteConnectivityRuleResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
 func sovRequestResponse(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
@@ -18081,6 +20570,78 @@ func (this *SetUserGroupNamespaceAccessResponse) String() string {
 	}, "")
 	return s
 }
+func (this *AddUserGroupMemberRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AddUserGroupMemberRequest{`,
+		`GroupId:` + fmt.Sprintf("%v", this.GroupId) + `,`,
+		`MemberId:` + strings.Replace(fmt.Sprintf("%v", this.MemberId), "UserGroupMemberId", "v1.UserGroupMemberId", 1) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AddUserGroupMemberResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AddUserGroupMemberResponse{`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *RemoveUserGroupMemberRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&RemoveUserGroupMemberRequest{`,
+		`GroupId:` + fmt.Sprintf("%v", this.GroupId) + `,`,
+		`MemberId:` + strings.Replace(fmt.Sprintf("%v", this.MemberId), "UserGroupMemberId", "v1.UserGroupMemberId", 1) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *RemoveUserGroupMemberResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&RemoveUserGroupMemberResponse{`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetUserGroupMembersRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetUserGroupMembersRequest{`,
+		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
+		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`GroupId:` + fmt.Sprintf("%v", this.GroupId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetUserGroupMembersResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForMembers := "[]*UserGroupMember{"
+	for _, f := range this.Members {
+		repeatedStringForMembers += strings.Replace(fmt.Sprintf("%v", f), "UserGroupMember", "v1.UserGroupMember", 1) + ","
+	}
+	repeatedStringForMembers += "}"
+	s := strings.Join([]string{`&GetUserGroupMembersResponse{`,
+		`Members:` + repeatedStringForMembers + `,`,
+		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *CreateServiceAccountRequest) String() string {
 	if this == nil {
 		return "nil"
@@ -18655,6 +21216,121 @@ func (this *AbortMigrationResponse) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&AbortMigrationResponse{`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateConnectivityRuleRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateConnectivityRuleRequest{`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ConnectivityRuleSpec", "v18.ConnectivityRuleSpec", 1) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateConnectivityRuleResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateConnectivityRuleResponse{`,
+		`ConnectivityRuleId:` + fmt.Sprintf("%v", this.ConnectivityRuleId) + `,`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetConnectivityRuleRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetConnectivityRuleRequest{`,
+		`ConnectivityRuleId:` + fmt.Sprintf("%v", this.ConnectivityRuleId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetConnectivityRuleResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetConnectivityRuleResponse{`,
+		`ConnectivityRule:` + strings.Replace(fmt.Sprintf("%v", this.ConnectivityRule), "ConnectivityRule", "v18.ConnectivityRule", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetConnectivityRulesRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetConnectivityRulesRequest{`,
+		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
+		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`ConnectivityRuleIds:` + fmt.Sprintf("%v", this.ConnectivityRuleIds) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetConnectivityRulesResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForConnectivityRules := "[]*ConnectivityRule{"
+	for _, f := range this.ConnectivityRules {
+		repeatedStringForConnectivityRules += strings.Replace(fmt.Sprintf("%v", f), "ConnectivityRule", "v18.ConnectivityRule", 1) + ","
+	}
+	repeatedStringForConnectivityRules += "}"
+	s := strings.Join([]string{`&GetConnectivityRulesResponse{`,
+		`ConnectivityRules:` + repeatedStringForConnectivityRules + `,`,
+		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateConnectivityRuleRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateConnectivityRuleRequest{`,
+		`ConnectivityRuleId:` + fmt.Sprintf("%v", this.ConnectivityRuleId) + `,`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ConnectivityRuleSpec", "v18.ConnectivityRuleSpec", 1) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateConnectivityRuleResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateConnectivityRuleResponse{`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DeleteConnectivityRuleRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DeleteConnectivityRuleRequest{`,
+		`ConnectivityRuleId:` + fmt.Sprintf("%v", this.ConnectivityRuleId) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DeleteConnectivityRuleResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DeleteConnectivityRuleResponse{`,
 		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
 		`}`,
 	}, "")
@@ -26192,6 +28868,745 @@ func (m *SetUserGroupNamespaceAccessResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *AddUserGroupMemberRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AddUserGroupMemberRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AddUserGroupMemberRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field GroupId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.GroupId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MemberId", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.MemberId == nil {
+				m.MemberId = &v1.UserGroupMemberId{}
+			}
+			if err := m.MemberId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AddUserGroupMemberResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AddUserGroupMemberResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AddUserGroupMemberResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v11.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *RemoveUserGroupMemberRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: RemoveUserGroupMemberRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: RemoveUserGroupMemberRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field GroupId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.GroupId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MemberId", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.MemberId == nil {
+				m.MemberId = &v1.UserGroupMemberId{}
+			}
+			if err := m.MemberId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *RemoveUserGroupMemberResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: RemoveUserGroupMemberResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: RemoveUserGroupMemberResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v11.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetUserGroupMembersRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetUserGroupMembersRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetUserGroupMembersRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
+			}
+			m.PageSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PageSize |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field GroupId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.GroupId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetUserGroupMembersResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetUserGroupMembersResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetUserGroupMembersResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Members", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Members = append(m.Members, &v1.UserGroupMember{})
+			if err := m.Members[len(m.Members)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextPageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *CreateServiceAccountRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -31989,6 +35404,1189 @@ func (m *AbortMigrationResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: AbortMigrationResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v11.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CreateConnectivityRuleRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CreateConnectivityRuleRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CreateConnectivityRuleRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &v18.ConnectivityRuleSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CreateConnectivityRuleResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CreateConnectivityRuleResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CreateConnectivityRuleResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConnectivityRuleId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ConnectivityRuleId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v11.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetConnectivityRuleRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetConnectivityRuleRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetConnectivityRuleRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConnectivityRuleId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ConnectivityRuleId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetConnectivityRuleResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetConnectivityRuleResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetConnectivityRuleResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConnectivityRule", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ConnectivityRule == nil {
+				m.ConnectivityRule = &v18.ConnectivityRule{}
+			}
+			if err := m.ConnectivityRule.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetConnectivityRulesRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetConnectivityRulesRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetConnectivityRulesRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
+			}
+			m.PageSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PageSize |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConnectivityRuleIds", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ConnectivityRuleIds = append(m.ConnectivityRuleIds, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetConnectivityRulesResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetConnectivityRulesResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetConnectivityRulesResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConnectivityRules", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ConnectivityRules = append(m.ConnectivityRules, &v18.ConnectivityRule{})
+			if err := m.ConnectivityRules[len(m.ConnectivityRules)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextPageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateConnectivityRuleRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateConnectivityRuleRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateConnectivityRuleRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConnectivityRuleId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ConnectivityRuleId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &v18.ConnectivityRuleSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateConnectivityRuleResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateConnectivityRuleResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateConnectivityRuleResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v11.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteConnectivityRuleRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteConnectivityRuleRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteConnectivityRuleRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConnectivityRuleId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ConnectivityRuleId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteConnectivityRuleResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteConnectivityRuleResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteConnectivityRuleResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
