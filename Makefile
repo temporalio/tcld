@@ -1,4 +1,4 @@
-.PHONY: clean test bins lint tools
+.PHONY: clean test bins lint tools tcld
 PROJECT_ROOT = github.com/temporalio/tcld
 
 # default target
