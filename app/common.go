@@ -7,6 +7,9 @@ import (
 	"strings"
 
 	apipayload "github.com/temporalio/tcld/protogen/temporal/api/common/v1"
+	"github.com/urfave/cli/v2"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -33,6 +36,19 @@ func IsFeatureEnabled(feature string) bool {
 	}
 
 	return false
+}
+
+func isNothingChangedErr(ctx *cli.Context, e error) bool {
+	// If we are not idempotent, we should error on nothing to change
+	if !ctx.Bool(IdempotentFlagName) {
+		return false
+	}
+
+	s, ok := status.FromError(e)
+	if !ok {
+		return false
+	}
+	return s.Code() == codes.InvalidArgument && strings.Contains(s.Message(), "nothing to change")
 }
 
 func parseAssumedRole(assumedRole string) (string, string, error) {

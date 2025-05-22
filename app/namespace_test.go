@@ -65,6 +65,7 @@ func (s *NamespaceTestSuite) SetupTest() {
 	}
 	flags := []cli.Flag{
 		AutoConfirmFlag,
+		IdempotentFlag,
 	}
 
 	s.cliApp, _ = NewTestApp(s.T(), cmds, flags)
@@ -223,6 +224,16 @@ func (s *NamespaceTestSuite) TestDeleteProtection() {
 				}
 			},
 			expectErr: true,
+		},
+		{
+			name: "no change already enabled, idempotent",
+			args: []string{"--idempotent", "n", "lc", "set", "-n", ns, "--edp", "true"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: true,
+				}
+			},
+			expectErr: false,
 		},
 		{
 			name:      "no change already disabled",

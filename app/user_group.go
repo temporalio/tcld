@@ -127,7 +127,7 @@ func nsRoleToAccess(role string) (string, *identity.NamespaceAccess) {
 }
 
 // setAccess sets the access for a group using the cloud services API
-func (c *UserGroupClient) setAccess(_ *cli.Context, groupID string, accountRole string, nsRoles []string) error {
+func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string, accountRole string, nsRoles []string) error {
 	group, err := c.client.GetUserGroup(c.ctx, &cloudsvc.GetUserGroupRequest{
 		GroupId: groupID,
 	})
@@ -162,6 +162,9 @@ func (c *UserGroupClient) setAccess(_ *cli.Context, groupID string, accountRole 
 
 	resp, err := c.client.UpdateUserGroup(c.ctx, req)
 	if err != nil {
+		if isNothingChangedErr(ctx, err) {
+			return nil
+		}
 		return err
 	}
 

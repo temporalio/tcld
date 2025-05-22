@@ -17,6 +17,7 @@ const (
 	APIKeyFlagName             = "api-key"
 	InsecureConnectionFlagName = "insecure"
 	EnableDebugLogsFlagName    = "enable-debug-logs"
+	IdempotentFlagName         = "idempotent"
 	AuthenticationFlagCategory = "Authentication:"
 
 	// APIKeyVersionTag indicates the state of API keys. This should be removed when fully released.
@@ -85,5 +86,10 @@ var (
 		Name:    EnableDebugLogsFlagName,
 		Usage:   "A flag to enable debug logs",
 		EnvVars: []string{"TEMPORAL_CLOUD_ENABLE_DEBUG_LOGS"},
+	}
+	IdempotentFlag = &cli.BoolFlag{
+		Name:    IdempotentFlagName,
+		Usage:   "A flag to not error if there are no changes to the resource",
+		EnvVars: []string{"TEMPORAL_CLOUD_IDEMPOTENT"},
 	}
 )
