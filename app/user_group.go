@@ -136,7 +136,7 @@ func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string, accountRol
 	}
 	aRole := accountRoleToAccess(accountRole)
 	if aRole == nil {
-		return cli.Exit(fmt.Sprintf("Invalid account role: %s", accountRole), 1)
+		return fmt.Errorf("Invalid account role: %s", accountRole)
 	}
 	group.Group.Spec.Access.AccountAccess = aRole
 	if accountRole == "none" {
@@ -147,7 +147,7 @@ func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string, accountRol
 	for _, role := range nsRoles {
 		name, access := nsRoleToAccess(role)
 		if access == nil {
-			return cli.Exit(fmt.Sprintf("Invalid namespace role: %s", role), 1)
+			return fmt.Errorf("Invalid namespace role: %s", role)
 		}
 		nsAccess[name] = access
 	}
@@ -175,7 +175,7 @@ func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string, accountRol
 func (c *UserGroupClient) createGroup(_ *cli.Context, displayName string, accountRole string) error {
 	aRole := accountRoleToAccess(accountRole)
 	if aRole == nil {
-		return cli.Exit(fmt.Sprintf("Invalid account role: %s", accountRole), 1)
+		return fmt.Errorf("Invalid account role: %s", accountRole)
 	}
 
 	spec := &identity.UserGroupSpec{
@@ -341,6 +341,7 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 						&cli.IntFlag{
 							Name:    pageSizeFlagName,
 							Usage:   "number of groups to list",
+							Value:   10,
 							Aliases: []string{"s"},
 						},
 					},
@@ -360,6 +361,9 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 						},
 					},
 					Action: func(ctx *cli.Context) error {
+						if ctx.String(groupIDFlagName) == "" {
+							return fmt.Errorf("group ID is required")
+						}
 						return c.getGroup(ctx, ctx.String(groupIDFlagName))
 					},
 				},
@@ -389,9 +393,10 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 					Aliases: []string{"sa"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
-							Name:    groupIDFlagName,
-							Usage:   "group ID",
-							Aliases: []string{"id"},
+							Name:     groupIDFlagName,
+							Usage:    "group ID",
+							Required: true,
+							Aliases:  []string{"id"},
 						},
 						&cli.StringFlag{
 							Name:    accountRoleFlagName,
@@ -460,9 +465,10 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 					Aliases: []string{"lm"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
-							Name:    groupIDFlagName,
-							Usage:   "group ID",
-							Aliases: []string{"id"},
+							Name:     groupIDFlagName,
+							Usage:    "group ID",
+							Required: true,
+							Aliases:  []string{"id"},
 						},
 						&cli.StringFlag{
 							Name:    pageTokenFlagName,
@@ -472,6 +478,7 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 						&cli.IntFlag{
 							Name:    pageSizeFlagName,
 							Usage:   "number of members to list",
+							Value:   10,
 							Aliases: []string{"s"},
 						},
 					},
