@@ -291,6 +291,29 @@ func (c *UserGroupClient) listGroupMembers(
 	return PrintProto(members)
 }
 
+// deleteGroup deletes a user group using the cloud services API
+func (c *UserGroupClient) deleteGroup(ctx *cli.Context, groupID string) error {
+	group, err := c.client.GetUserGroup(c.ctx, &cloudsvc.GetUserGroupRequest{
+		GroupId: groupID,
+	})
+	if err != nil {
+		return err
+	}
+
+	req := &cloudsvc.DeleteUserGroupRequest{
+		GroupId:          groupID,
+		ResourceVersion:  group.Group.ResourceVersion,
+		AsyncOperationId: ctx.String(RequestIDFlagName),
+	}
+
+	resp, err := c.client.DeleteUserGroup(c.ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return PrintProto(resp.GetAsyncOperation())
+}
+
 // NewUserGroupCommand creates a new command for group management
 func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) {
 	var c *UserGroupClient
@@ -454,6 +477,23 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 					},
 					Action: func(ctx *cli.Context) error {
 						return c.listGroupMembers(ctx.String(pageTokenFlagName), ctx.Int(pageSizeFlagName), ctx.String(groupIDFlagName))
+					},
+				},
+				{
+					Name:    "delete",
+					Usage:   "Delete a user group",
+					Aliases: []string{"d"},
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:     groupIDFlagName,
+							Usage:    "group ID",
+							Aliases:  []string{"id"},
+							Required: true,
+						},
+						RequestIDFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						return c.deleteGroup(ctx, ctx.String(groupIDFlagName))
 					},
 				},
 			},
