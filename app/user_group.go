@@ -171,6 +171,33 @@ func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string, accountRol
 	return PrintProto(resp.GetAsyncOperation())
 }
 
+// createGroup creates a new user group with the specified display name and account role
+func (c *UserGroupClient) createGroup(_ *cli.Context, displayName string, accountRole string) error {
+	aRole := accountRoleToAccess(accountRole)
+	if aRole == nil {
+		return cli.Exit(fmt.Sprintf("Invalid account role: %s", accountRole), 1)
+	}
+
+	spec := &identity.UserGroupSpec{
+		DisplayName: displayName,
+		Access: &identity.Access{
+			AccountAccess: aRole,
+		},
+		GroupType: &identity.UserGroupSpec_CloudGroup{
+			CloudGroup: &identity.CloudGroupSpec{},
+		},
+	}
+
+	resp, err := c.client.CreateUserGroup(c.ctx, &cloudsvc.CreateUserGroupRequest{
+		Spec: spec,
+	})
+	if err != nil {
+		return err
+	}
+
+	return PrintProto(resp.GetAsyncOperation())
+}
+
 // NewUserGroupCommand creates a new command for group management
 func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) {
 	var c *UserGroupClient
@@ -218,6 +245,26 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 					},
 					Action: func(ctx *cli.Context) error {
 						return c.getGroup(ctx, ctx.String(groupIDFlagName))
+					},
+				},
+				{
+					Name:    "create",
+					Usage:   "Create a new user group",
+					Aliases: []string{"c"},
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:     "display-name",
+							Usage:    "display name for the group",
+							Required: true,
+						},
+						&cli.StringFlag{
+							Name:     accountRoleFlagName,
+							Usage:    "account role (admin, read, developer, owner, financeadmin, none)",
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						return c.createGroup(ctx, ctx.String("display-name"), ctx.String(accountRoleFlagName))
 					},
 				},
 				{
