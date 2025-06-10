@@ -353,6 +353,24 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 	return PrintProto(res)
 }
 
+func (c *NamespaceClient) updateNamespaceTags(ctx *cli.Context, tagsToAdd map[string]string, tagsToRemove []string) error {
+	namespace := ctx.String(NamespaceFlagName)
+	if len(namespace) == 0 {
+		return fmt.Errorf("namespace is required")
+	}
+
+	res, err := c.cloudAPIClient.UpdateNamespaceTags(c.ctx, &cloudservice.UpdateNamespaceTagsRequest{
+		Namespace:        namespace,
+		TagsToAdd:        tagsToAdd,
+		TagsToRemove:     tagsToRemove,
+		AsyncOperationId: ctx.String(RequestIDFlagName),
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res.GetAsyncOperation())
+}
+
 func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *namespace.Namespace, existingName string, newName string) error {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
@@ -1634,6 +1652,45 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 				fmt.Println("No changes to apply to Namespace:", ctx.String(NamespaceFlagName))
 				return nil
+			},
+		},
+		{
+			Name:    "update-tags",
+			Usage:   "Add new tags, remove existing tags or update the value of an existing tag key",
+			Aliases: []string{"ut"},
+			Flags: []cli.Flag{
+				NamespaceFlag,
+				RequestIDFlag,
+				ResourceVersionFlag,
+				&cli.StringSliceFlag{
+					Name:    "tag-to-add",
+					Usage:   "Add new or update existing namespace tags (format: key=value). Flag can be used multiple times.",
+					Aliases: []string{"ta"},
+				},
+				&cli.StringSliceFlag{
+					Name:    "tag-to-remove",
+					Usage:   "Remove namespace tags by key. Flag can be used multiple times.",
+					Aliases: []string{"tr"},
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				tagsToAdd := ctx.StringSlice("tag-to-add")
+				tagsToRemove := ctx.StringSlice("tag-to-remove")
+
+				if len(tagsToAdd) == 0 && len(tagsToRemove) == 0 {
+					return fmt.Errorf("at least one --tag-to-add or --tag-to-remove must be specified")
+				}
+
+				tagsToAddMap := make(map[string]string)
+				for _, tag := range tagsToAdd {
+					parts := strings.Split(tag, "=")
+					if len(parts) != 2 {
+						return fmt.Errorf("invalid tag format '%s', must be 'key=value'", tag)
+					}
+					tagsToAddMap[parts[0]] = parts[1]
+				}
+
+				return c.updateNamespaceTags(ctx, tagsToAddMap, tagsToRemove)
 			},
 		},
 	}
