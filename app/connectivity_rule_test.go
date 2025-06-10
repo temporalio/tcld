@@ -83,6 +83,8 @@ func (s *ConnectivityRuleTestSuite) TestGetConnectivityRule() {
 	s.NoError(s.RunCmd("connectivity-rule", "get", "--id", "test-rule-id"))
 }
 
+// Note, anything after the bool flag will be ignored, and i think that's something we discussed earlier with ocld cmd
+// will need to test real cmd to see how it goes.
 func (s *ConnectivityRuleTestSuite) TestCreateConnectivityRule() {
 
 	// Test create error
