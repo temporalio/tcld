@@ -1661,7 +1661,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Flags: []cli.Flag{
 				NamespaceFlag,
 				RequestIDFlag,
-				ResourceVersionFlag,
 				&cli.StringSliceFlag{
 					Name:    "tag-to-add",
 					Usage:   "Add new or update existing namespace tags (format: key=value). Flag can be used multiple times.",
