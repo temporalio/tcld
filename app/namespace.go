@@ -621,17 +621,14 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 				// Set passive regions if any
 				if len(regions) > 1 {
-					passiveRegions := make([]string, len(regionIDs)-1)
 					passiveRegionIDs := make([]*common.RegionID, len(regionIDs)-1)
 					for i, regionID := range regionIDs[1:] {
-						passiveRegions[i] = regionID
 						passiveRegionID, err := regionIDFromString(regionID)
 						if err != nil {
 							return err
 						}
 						passiveRegionIDs[i] = passiveRegionID
 					}
-					n.Spec.PassiveRegions = passiveRegions
 					n.Spec.PassiveRegionIds = passiveRegionIDs
 				}
 
