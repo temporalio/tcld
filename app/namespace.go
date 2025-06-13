@@ -599,7 +599,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return fmt.Errorf("namespace cloud provider is required when regions don't have cloud provider prefix")
 						}
 						regionIDs = append(regionIDs, fmt.Sprintf("%s-%s", cloudProvider, region))
-						break
 					}
 				}
 
