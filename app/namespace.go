@@ -2230,21 +2230,7 @@ func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
 	return old != namespace.AUTH_METHOD_RESTRICTED && new != namespace.AUTH_METHOD_API_KEY_OR_MTLS
 }
 
-func getRegionId(cloudProvider, activeRegion string) (common.RegionID, error) {
-	var regionId common.RegionID
-	switch strings.ToLower(cloudProvider) {
-	case CloudProviderAWS:
-		regionId.Provider = common.CLOUD_PROVIDER_AWS
-	case CloudProviderGCP:
-		regionId.Provider = common.CLOUD_PROVIDER_GCP
-	default:
-		return regionId, fmt.Errorf("unknown cloud provider specified, the supported cloud providers: [%s]", strings.Join([]string{CloudProviderAWS, CloudProviderGCP}, ","))
-	}
-	regionId.Name = activeRegion
-	return regionId, nil
-}
-
-// RegionIDFromString parses a region string and returns a RegionID. It must be in the format "<provider>-<region>".
+// regionIDFromString parses a region string and returns a RegionID. It must be in the format "<provider>-<region>".
 func regionIDFromString(region string) (*common.RegionID, error) {
 	switch {
 	case strings.HasPrefix(region, CloudProviderAWS+"-"):
