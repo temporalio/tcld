@@ -125,14 +125,15 @@ func NewFeatureCommand() (CommandOut, error) {
 			Usage:   "feature commands",
 			Hidden:  true,
 			Subcommands: []*cli.Command{
-				{
-					Name:    "toggle-gcp-sink",
-					Aliases: []string{"tgs"},
-					Usage:   "switch gcp sink on/off",
-					Action: func(c *cli.Context) error {
-						return toggleFeature(GCPSinkFeatureFlag)
-					},
-				},
+				// Leave here as an example
+				// {
+				// 	Name:    "toggle-gcp-sink",
+				// 	Aliases: []string{"tgs"},
+				// 	Usage:   "switch gcp sink on/off",
+				// 	Action: func(c *cli.Context) error {
+				// 		return toggleFeature(GCPSinkFeatureFlag)
+				// 	},
+				// },
 				{
 					Name:    "toggle-connectivity-rule",
 					Aliases: []string{"tcr"},
