@@ -46,6 +46,16 @@ func (c *ConnectivityRuleClient) getConnectivityRule(connectivityRuleId string) 
 	return resp, nil
 }
 
+func (c *ConnectivityRuleClient) deleteConnectivityRule(connectivityRuleId string) (*cloudservice.DeleteConnectivityRuleResponse, error) {
+	resp, err := c.client.DeleteConnectivityRule(c.ctx, &cloudservice.DeleteConnectivityRuleRequest{
+		ConnectivityRuleId: connectivityRuleId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 func (c *ConnectivityRuleClient) createConnectivityRule(isPrivate bool, connectionId, region, gcpProjectId string, cloudProvider regionpb.Region_CloudProvider) (*cloudservice.CreateConnectivityRuleResponse, error) {
 	spec := connectivityrule.ConnectivityRuleSpec{}
 	if isPrivate {
@@ -166,6 +176,22 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 					},
 					Action: func(ctx *cli.Context) error {
 						resp, err := c.getConnectivityRule(ctx.String(connectivityRuleIdFlag.Name))
+						if err != nil {
+							return err
+						}
+						return PrintProto(resp)
+					},
+				},
+				{
+					Name:        "delete",
+					Aliases:     []string{"d"},
+					Usage:       "Delete a connectivity rule",
+					Description: "This command deletes a connectivity rule",
+					Flags: []cli.Flag{
+						connectivityRuleIdFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						resp, err := c.deleteConnectivityRule(ctx.String(connectivityRuleIdFlag.Name))
 						if err != nil {
 							return err
 						}
