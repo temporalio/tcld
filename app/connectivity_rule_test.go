@@ -126,3 +126,18 @@ func (s *ConnectivityRuleTestSuite) TestCreateConnectivityRule() {
 	s.NoError(s.RunCmd("connectivity-rule", "create"))
 
 }
+
+func (s *ConnectivityRuleTestSuite) TestDeleteConnectivityRule() {
+	// Test missing required flag (id)
+	s.Error(s.RunCmd("connectivity-rule", "delete"))
+
+	// Test delete error
+	s.mockCloudService.EXPECT().DeleteConnectivityRule(gomock.Any(), gomock.Any()).
+		Return(nil, errors.New("delete error")).Times(1)
+	s.Error(s.RunCmd("connectivity-rule", "delete", "--id", "test-rule-id"))
+
+	// Test successful delete
+	s.mockCloudService.EXPECT().DeleteConnectivityRule(gomock.Any(), gomock.Any()).
+		Return(&cloudservice.DeleteConnectivityRuleResponse{}, nil).Times(1)
+	s.NoError(s.RunCmd("connectivity-rule", "delete", "--id", "test-rule-id"))
+}
