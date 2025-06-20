@@ -70,6 +70,24 @@ func getExampleConnectivityRule() *cloudservice.GetConnectivityRuleResponse {
 	}
 }
 
+func getExampleConnectivityRules() *cloudservice.GetConnectivityRulesResponse {
+	return &cloudservice.GetConnectivityRulesResponse{
+		ConnectivityRules: []*connectivityrule.ConnectivityRule{&connectivityrule.ConnectivityRule{
+			Id: "test-rule-id",
+			Spec: &connectivityrule.ConnectivityRuleSpec{
+				ConnectionType: &connectivityrule.ConnectivityRuleSpec_PrivateRule{
+					PrivateRule: &connectivityrule.PrivateConnectivityRule{
+						ConnectionId:  "test-connection-id",
+						Region:        "us-west-2",
+						CloudProvider: regionpb.CLOUD_PROVIDER_AWS,
+					},
+				},
+			},
+		},
+		},
+	}
+}
+
 func (s *ConnectivityRuleTestSuite) TestGetConnectivityRule() {
 	// Test missing required flag
 	s.Error(s.RunCmd("connectivity-rule", "get"))
@@ -81,6 +99,23 @@ func (s *ConnectivityRuleTestSuite) TestGetConnectivityRule() {
 	// Test successful get
 	s.mockCloudService.EXPECT().GetConnectivityRule(gomock.Any(), gomock.Any()).Return(getExampleConnectivityRule(), nil).Times(1)
 	s.NoError(s.RunCmd("connectivity-rule", "get", "--id", "test-rule-id"))
+}
+
+func (s *ConnectivityRuleTestSuite) TestGetConnectivityRules() {
+	// Test missing required flag
+	s.Error(s.RunCmd("connectivity-rule", "list"))
+
+	// Test invalid flag provided
+	s.Error(s.RunCmd("connectivity-rule", "list", "--namespace", "test-namespace", "--connectivity-rule-ids", "test-rule-id"))
+
+	// Test get error
+	s.mockCloudService.EXPECT().GetConnectivityRules(gomock.Any(), gomock.Any()).Return(nil, errors.New("not found")).Times(1)
+	s.Error(s.RunCmd("connectivity-rule", "list", "--namespace", "test-namespace"))
+
+	// Test successful get
+
+	s.mockCloudService.EXPECT().GetConnectivityRules(gomock.Any(), gomock.Any()).Return(getExampleConnectivityRules(), nil).Times(1)
+	s.NoError(s.RunCmd("connectivity-rule", "list", "--namespace", "test-namespace"))
 }
 
 // Note, anything after the bool flag will be ignored, and i think that's something we discussed earlier with ocld cmd

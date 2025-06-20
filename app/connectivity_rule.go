@@ -10,11 +10,12 @@ import (
 )
 
 const (
-	connectionIdFlagName       = "connection-id"
-	connectivityTypeFlagName   = "connectivity-type"
-	regionFlagName             = "region"
-	gcpProjectIdFlagName       = "gcp-project-id"
-	connectivityRuleIdFlagName = "connectivity-rule-id"
+	connectionIdFlagName        = "connection-id"
+	connectivityTypeFlagName    = "connectivity-type"
+	regionFlagName              = "region"
+	gcpProjectIdFlagName        = "gcp-project-id"
+	connectivityRuleIdFlagName  = "connectivity-rule-id"
+	connectivityRuleIdsFlagName = "connectivity-rule-ids"
 )
 
 type (
@@ -46,7 +47,7 @@ func (c *ConnectivityRuleClient) getConnectivityRule(connectivityRuleId string) 
 	return resp, nil
 }
 
-func (c *ConnectivityRuleClient) getConnectivityRules(connectivityRuleId string) (*cloudservice.GetConnectivityRulesResponse, error) {
+func (c *ConnectivityRuleClient) listConnectivityRules(namespaceId string, connectivityRuleIds []string) (*cloudservice.GetConnectivityRulesResponse, error) {
 	resp, err := c.client.GetConnectivityRules(c.ctx, &cloudservice.GetConnectivityRulesRequest{})
 	if err != nil {
 		return nil, err
@@ -132,6 +133,19 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 		Usage:    "The connectivity rule ID",
 		Required: true,
 	}
+	connectivityRuleIdsFlag := &cli.StringSliceFlag{
+		Name:     connectivityRuleIdsFlagName,
+		Aliases:  []string{"ids"},
+		Usage:    "The connectivity rule IDs",
+		Required: false,
+	}
+	OptionalNamespaceFlag := &cli.StringFlag{
+		Name:     NamespaceFlagName,
+		Usage:    "The namespace hosted on temporal cloud",
+		Aliases:  []string{"n"},
+		EnvVars:  []string{"TEMPORAL_CLOUD_NAMESPACE"},
+		Required: false,
+	}
 	return CommandOut{
 		Command: &cli.Command{
 			Name:    "connectivity-rule",
@@ -199,10 +213,17 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 					Usage:       "list connectivity rules",
 					Description: "This command to list connectivity rules",
 					Flags: []cli.Flag{
-						NamespaceFlag,
+						OptionalNamespaceFlag,
+						connectivityRuleIdsFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						resp, err := c.listConnectivityRules(ctx.String(NamespaceFlagName))
+						if ctx.String(NamespaceFlagName) == "" && len(ctx.StringSlice(connectivityRuleIdsFlagName)) == 0 {
+							return fmt.Errorf("must provide namespace or connectivity rule ids")
+						}
+						if ctx.String(NamespaceFlagName) != "" && len(ctx.StringSlice(connectivityRuleIdsFlagName)) > 0 {
+							return fmt.Errorf("cannot provide namespace and connectivity rule ids")
+						}
+						resp, err := c.listConnectivityRules(ctx.String(NamespaceFlagName), ctx.StringSlice(connectivityRuleIdFlagName))
 						if err != nil {
 							return err
 						}
