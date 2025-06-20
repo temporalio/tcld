@@ -48,7 +48,8 @@ func (c *ConnectivityRuleClient) getConnectivityRule(connectivityRuleId string) 
 }
 
 func (c *ConnectivityRuleClient) listConnectivityRules(namespaceId string, connectivityRuleIds []string) (*cloudservice.GetConnectivityRulesResponse, error) {
-	resp, err := c.client.GetConnectivityRules(c.ctx, &cloudservice.GetConnectivityRulesRequest{})
+	resp, err := c.client.GetConnectivityRules(c.ctx, &cloudservice.GetConnectivityRulesRequest{
+		ConnectivityRuleIds: connectivityRuleIds, NamespaceId: namespaceId})
 	if err != nil {
 		return nil, err
 	}
