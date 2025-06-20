@@ -158,6 +158,12 @@ var (
 		Aliases:  []string{"re"},
 		Required: false,
 	}
+	connectivityRuleIdsFlag = &cli.StringSliceFlag{
+		Name:     connectivityRuleIdsFlagName,
+		Usage:    "The list of connectivity rule IDs for the namespace to be created, make usre these rules exist",
+		Aliases:  []string{"cr"},
+		Required: false,
+	}
 )
 
 type NamespaceClient struct {
@@ -570,6 +576,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					// this is a temporary solution, we will have a follow up version update to make the cloud provider mandatory
 					Value: CloudProviderAWS,
 				},
+				connectivityRuleIdsFlag,
 			},
 			Action: func(ctx *cli.Context) error {
 				n := &namespace.Namespace{
@@ -588,6 +595,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					PassiveRegions: regions[1:],
 				}
 
+				connectivityRuleIds := ctx.StringSlice(connectivityRuleIdsFlagName)
+				if len(connectivityRuleIds) > 5 {
+					return fmt.Errorf("maximum of 5 connectivity rules can be specified")
+				}
+				n.Spec.ConnectivityRuleIds = connectivityRuleIds
+				
 				cloudProvider := ctx.String(cloudProviderFlagName)
 				regionId, err := getRegionId(cloudProvider, regions[0])
 				if err != nil {
