@@ -11,7 +11,7 @@ import (
 
 const (
 	connectionIdFlagName       = "connection-id"
-	isPrivateFlagName          = "is-private"
+	connectivityTypeFlagName   = "connectivity-type"
 	regionFlagName             = "region"
 	gcpProjectIdFlagName       = "gcp-project-id"
 	connectivityRuleIdFlagName = "connectivity-rule-id"
@@ -46,6 +46,14 @@ func (c *ConnectivityRuleClient) getConnectivityRule(connectivityRuleId string) 
 	return resp, nil
 }
 
+func (c *ConnectivityRuleClient) getConnectivityRules(connectivityRuleId string) (*cloudservice.GetConnectivityRulesResponse, error) {
+	resp, err := c.client.GetConnectivityRules(c.ctx, &cloudservice.GetConnectivityRulesRequest{})
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 func (c *ConnectivityRuleClient) deleteConnectivityRule(connectivityRuleId string) (*cloudservice.DeleteConnectivityRuleResponse, error) {
 	resp, err := c.client.DeleteConnectivityRule(c.ctx, &cloudservice.DeleteConnectivityRuleRequest{
 		ConnectivityRuleId: connectivityRuleId,
@@ -56,9 +64,10 @@ func (c *ConnectivityRuleClient) deleteConnectivityRule(connectivityRuleId strin
 	return resp, nil
 }
 
-func (c *ConnectivityRuleClient) createConnectivityRule(isPrivate bool, connectionId, region, gcpProjectId string, cloudProvider regionpb.Region_CloudProvider) (*cloudservice.CreateConnectivityRuleResponse, error) {
+func (c *ConnectivityRuleClient) createConnectivityRule(connectivityType, connectionId, region, gcpProjectId string, cloudProvider regionpb.Region_CloudProvider) (*cloudservice.CreateConnectivityRuleResponse, error) {
 	spec := connectivityrule.ConnectivityRuleSpec{}
-	if isPrivate {
+	switch connectivityType {
+	case "private":
 		spec = connectivityrule.ConnectivityRuleSpec{
 			ConnectionType: &connectivityrule.ConnectivityRuleSpec_PrivateRule{
 				PrivateRule: &connectivityrule.PrivateConnectivityRule{
@@ -69,12 +78,14 @@ func (c *ConnectivityRuleClient) createConnectivityRule(isPrivate bool, connecti
 				},
 			},
 		}
-	} else {
+	case "public":
 		spec = connectivityrule.ConnectivityRuleSpec{
 			ConnectionType: &connectivityrule.ConnectivityRuleSpec_PublicRule{
 				PublicRule: &connectivityrule.PublicConnectivityRule{},
 			},
 		}
+	default:
+		return nil, fmt.Errorf("unknown connectivity type: %s", connectivityType)
 	}
 
 	return c.client.CreateConnectivityRule(c.ctx, &cloudservice.CreateConnectivityRuleRequest{
@@ -91,11 +102,11 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 		Usage:    "The connection ID of the private connection",
 		Required: false,
 	}
-	isPrivateFlag := &cli.BoolFlag{
-		Name:     isPrivateFlagName,
-		Aliases:  []string{"ip"},
-		Usage:    "Whether or not the connectivity rule is private, if specified true, it's a private connectivity rule, and required to have connection id, region, cloud provider, gcp project id (if it's gcp) specified.  If specified false or not set, it's a public connectivity rule",
-		Required: false,
+	connectivityTypeFlag := &cli.StringFlag{
+		Name:     connectivityTypeFlagName,
+		Aliases:  []string{"ct"},
+		Usage:    "The type of connectivity, currently only support 'private' and 'public'",
+		Required: true,
 	}
 	regionFlag := &cli.StringFlag{
 		Name:     regionFlagName,
@@ -137,7 +148,7 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 					Usage:       "Create a connectivity rule",
 					Description: "This command creates a connectivity rule",
 					Flags: []cli.Flag{
-						isPrivateFlag,
+						connectivityTypeFlag,
 						connectionIdFlag,
 						regionFlag,
 						cloudProviderFlag,
@@ -145,7 +156,7 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 					},
 					Action: func(ctx *cli.Context) error {
 						provider, gcpProjectID, err := validateParamAndConvert(
-							ctx.Bool(isPrivateFlagName),
+							ctx.String(connectivityTypeFlagName),
 							ctx.String(connectionIdFlagName),
 							ctx.String(regionFlagName),
 							ctx.String(cloudProviderFlagName),
@@ -155,7 +166,7 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 						}
 
 						resp, err := c.createConnectivityRule(
-							ctx.Bool(isPrivateFlag.Name),
+							ctx.String(connectivityTypeFlagName),
 							ctx.String(connectionIdFlag.Name),
 							ctx.String(regionFlag.Name),
 							gcpProjectID,
@@ -183,6 +194,22 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 					},
 				},
 				{
+					Name:        "list",
+					Aliases:     []string{"l"},
+					Usage:       "list connectivity rules",
+					Description: "This command to list connectivity rules",
+					Flags: []cli.Flag{
+						NamespaceFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						resp, err := c.listConnectivityRules(ctx.String(NamespaceFlagName))
+						if err != nil {
+							return err
+						}
+						return PrintProto(resp)
+					},
+				},
+				{
 					Name:        "delete",
 					Aliases:     []string{"d"},
 					Usage:       "Delete a connectivity rule",
@@ -203,8 +230,9 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 	}, nil
 }
 
-func validateParamAndConvert(isPrivate bool, connectionId, region, cloudProvider, gcpProjectId string) (regionpb.Region_CloudProvider, string, error) {
-	if isPrivate {
+func validateParamAndConvert(connectivityType, connectionId, region, cloudProvider, gcpProjectId string) (regionpb.Region_CloudProvider, string, error) {
+	switch connectivityType {
+	case "private":
 		if connectionId == "" {
 			return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", fmt.Errorf("must provide connection id for private connectivity rule")
 		}
@@ -228,7 +256,10 @@ func validateParamAndConvert(isPrivate bool, connectionId, region, cloudProvider
 			return cp, "", fmt.Errorf("gcp project ID is required if the cloud provider is 'gcp'")
 		}
 		return cp, gcpProjectId, nil
+	case "public":
+		return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", nil
+	default:
+		return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", fmt.Errorf("unknown connectivity type: %s. only support 'public' and 'private'", connectivityType)
 	}
 
-	return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", nil
 }
