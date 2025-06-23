@@ -5,6 +5,12 @@ package cloudservice
 
 import (
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	proto "github.com/gogo/protobuf/proto"
 	types "github.com/gogo/protobuf/types"
 	v15 "github.com/temporalio/tcld/protogen/api/cloud/account/v1"
@@ -17,11 +23,6 @@ import (
 	v19 "github.com/temporalio/tcld/protogen/api/cloud/project/v1"
 	v13 "github.com/temporalio/tcld/protogen/api/cloud/region/v1"
 	v17 "github.com/temporalio/tcld/protogen/api/cloud/usage/v1"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -13168,7 +13169,7 @@ func (this *GetConnectivityRulesRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 8)
 	s = append(s, "&cloudservice.GetConnectivityRulesRequest{")
 	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
 	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
@@ -21118,6 +21119,10 @@ func (m *GetConnectivityRulesRequest) Size() (n int) {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
 	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.NamespaceId)
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
@@ -37637,6 +37642,38 @@ func (m *GetConnectivityRulesRequest) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NamespaceId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NamespaceId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
