@@ -160,7 +160,7 @@ var (
 	}
 	connectivityRuleIdsFlag = &cli.StringSliceFlag{
 		Name:     connectivityRuleIdsFlagName,
-		Usage:    "The list of connectivity rule IDs for the namespace to be created, make usre these rules exist",
+		Usage:    "The list of connectivity rule IDs, can be used in create namespace, update namespace and get list of connectivity rules. example: --ids id1 --ids id2 --ids id3",
 		Aliases:  []string{"cr"},
 		Required: false,
 	}
@@ -600,7 +600,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					return fmt.Errorf("maximum of 5 connectivity rules can be specified")
 				}
 				n.Spec.ConnectivityRuleIds = connectivityRuleIds
-				
+
 				cloudProvider := ctx.String(cloudProviderFlagName)
 				regionId, err := getRegionId(cloudProvider, regions[0])
 				if err != nil {
