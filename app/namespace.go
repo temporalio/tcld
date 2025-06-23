@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/mail"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -1678,6 +1679,30 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 				fmt.Println("No changes to apply to Namespace:", ctx.String(NamespaceFlagName))
 				return nil
+			},
+		},
+		{
+			Name:    "set-connectivity-rules",
+			Usage:   "set the connectivity rules for a namespace",
+			Aliases: []string{"scrs"},
+			Flags: []cli.Flag{
+				NamespaceFlag,
+				connectivityRuleIdsFlag,
+			},
+			Action: func(ctx *cli.Context) error {
+				n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+				if err != nil {
+					return err
+				}
+				connectivityRuleIds := ctx.StringSlice(connectivityRuleIdsFlagName)
+				if len(connectivityRuleIds) == 0 {
+					return fmt.Errorf("connectivity rule ids must be provided")
+				}
+				if reflect.DeepEqual(n.Spec.ConnectivityRuleIds, connectivityRuleIds) {
+					return fmt.Errorf("no connectivity rule changes to apply")
+				}
+				n.Spec.ConnectivityRuleIds = connectivityRuleIds
+				return c.updateNamespace(ctx, n)
 			},
 		},
 	}
