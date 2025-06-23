@@ -134,12 +134,6 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 		Usage:    "The connectivity rule ID",
 		Required: true,
 	}
-	connectivityRuleIdsFlag := &cli.StringSliceFlag{
-		Name:     connectivityRuleIdsFlagName,
-		Aliases:  []string{"ids"},
-		Usage:    "The connectivity rule IDs",
-		Required: false,
-	}
 	OptionalNamespaceFlag := &cli.StringFlag{
 		Name:     NamespaceFlagName,
 		Usage:    "The namespace hosted on temporal cloud",
