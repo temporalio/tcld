@@ -216,6 +216,26 @@ func (mr *MockCloudServiceClientMockRecorder) CreateNexusEndpoint(ctx, in interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNexusEndpoint", reflect.TypeOf((*MockCloudServiceClient)(nil).CreateNexusEndpoint), varargs...)
 }
 
+// CreateProject mocks base method.
+func (m *MockCloudServiceClient) CreateProject(ctx context.Context, in *cloudservice.CreateProjectRequest, opts ...grpc.CallOption) (*cloudservice.CreateProjectResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateProject", varargs...)
+	ret0, _ := ret[0].(*cloudservice.CreateProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateProject indicates an expected call of CreateProject.
+func (mr *MockCloudServiceClientMockRecorder) CreateProject(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProject", reflect.TypeOf((*MockCloudServiceClient)(nil).CreateProject), varargs...)
+}
+
 // CreateServiceAccount mocks base method.
 func (m *MockCloudServiceClient) CreateServiceAccount(ctx context.Context, in *cloudservice.CreateServiceAccountRequest, opts ...grpc.CallOption) (*cloudservice.CreateServiceAccountResponse, error) {
 	m.ctrl.T.Helper()
@@ -394,6 +414,26 @@ func (mr *MockCloudServiceClientMockRecorder) DeleteNexusEndpoint(ctx, in interf
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNexusEndpoint", reflect.TypeOf((*MockCloudServiceClient)(nil).DeleteNexusEndpoint), varargs...)
+}
+
+// DeleteProject mocks base method.
+func (m *MockCloudServiceClient) DeleteProject(ctx context.Context, in *cloudservice.DeleteProjectRequest, opts ...grpc.CallOption) (*cloudservice.DeleteProjectResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteProject", varargs...)
+	ret0, _ := ret[0].(*cloudservice.DeleteProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteProject indicates an expected call of DeleteProject.
+func (mr *MockCloudServiceClientMockRecorder) DeleteProject(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProject", reflect.TypeOf((*MockCloudServiceClient)(nil).DeleteProject), varargs...)
 }
 
 // DeleteServiceAccount mocks base method.
@@ -774,6 +814,46 @@ func (mr *MockCloudServiceClientMockRecorder) GetNexusEndpoints(ctx, in interfac
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNexusEndpoints", reflect.TypeOf((*MockCloudServiceClient)(nil).GetNexusEndpoints), varargs...)
+}
+
+// GetProject mocks base method.
+func (m *MockCloudServiceClient) GetProject(ctx context.Context, in *cloudservice.GetProjectRequest, opts ...grpc.CallOption) (*cloudservice.GetProjectResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetProject", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProject indicates an expected call of GetProject.
+func (mr *MockCloudServiceClientMockRecorder) GetProject(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProject", reflect.TypeOf((*MockCloudServiceClient)(nil).GetProject), varargs...)
+}
+
+// GetProjects mocks base method.
+func (m *MockCloudServiceClient) GetProjects(ctx context.Context, in *cloudservice.GetProjectsRequest, opts ...grpc.CallOption) (*cloudservice.GetProjectsResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetProjects", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetProjectsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProjects indicates an expected call of GetProjects.
+func (mr *MockCloudServiceClientMockRecorder) GetProjects(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjects", reflect.TypeOf((*MockCloudServiceClient)(nil).GetProjects), varargs...)
 }
 
 // GetRegion mocks base method.
@@ -1216,6 +1296,26 @@ func (mr *MockCloudServiceClientMockRecorder) UpdateNexusEndpoint(ctx, in interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNexusEndpoint", reflect.TypeOf((*MockCloudServiceClient)(nil).UpdateNexusEndpoint), varargs...)
 }
 
+// UpdateProject mocks base method.
+func (m *MockCloudServiceClient) UpdateProject(ctx context.Context, in *cloudservice.UpdateProjectRequest, opts ...grpc.CallOption) (*cloudservice.UpdateProjectResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateProject", varargs...)
+	ret0, _ := ret[0].(*cloudservice.UpdateProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateProject indicates an expected call of UpdateProject.
+func (mr *MockCloudServiceClientMockRecorder) UpdateProject(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProject", reflect.TypeOf((*MockCloudServiceClient)(nil).UpdateProject), varargs...)
+}
+
 // UpdateServiceAccount mocks base method.
 func (m *MockCloudServiceClient) UpdateServiceAccount(ctx context.Context, in *cloudservice.UpdateServiceAccountRequest, opts ...grpc.CallOption) (*cloudservice.UpdateServiceAccountResponse, error) {
 	m.ctrl.T.Helper()
@@ -1454,6 +1554,21 @@ func (mr *MockCloudServiceServerMockRecorder) CreateNexusEndpoint(arg0, arg1 int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNexusEndpoint", reflect.TypeOf((*MockCloudServiceServer)(nil).CreateNexusEndpoint), arg0, arg1)
 }
 
+// CreateProject mocks base method.
+func (m *MockCloudServiceServer) CreateProject(arg0 context.Context, arg1 *cloudservice.CreateProjectRequest) (*cloudservice.CreateProjectResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateProject", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.CreateProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateProject indicates an expected call of CreateProject.
+func (mr *MockCloudServiceServerMockRecorder) CreateProject(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProject", reflect.TypeOf((*MockCloudServiceServer)(nil).CreateProject), arg0, arg1)
+}
+
 // CreateServiceAccount mocks base method.
 func (m *MockCloudServiceServer) CreateServiceAccount(arg0 context.Context, arg1 *cloudservice.CreateServiceAccountRequest) (*cloudservice.CreateServiceAccountResponse, error) {
 	m.ctrl.T.Helper()
@@ -1587,6 +1702,21 @@ func (m *MockCloudServiceServer) DeleteNexusEndpoint(arg0 context.Context, arg1 
 func (mr *MockCloudServiceServerMockRecorder) DeleteNexusEndpoint(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNexusEndpoint", reflect.TypeOf((*MockCloudServiceServer)(nil).DeleteNexusEndpoint), arg0, arg1)
+}
+
+// DeleteProject mocks base method.
+func (m *MockCloudServiceServer) DeleteProject(arg0 context.Context, arg1 *cloudservice.DeleteProjectRequest) (*cloudservice.DeleteProjectResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteProject", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.DeleteProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteProject indicates an expected call of DeleteProject.
+func (mr *MockCloudServiceServerMockRecorder) DeleteProject(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProject", reflect.TypeOf((*MockCloudServiceServer)(nil).DeleteProject), arg0, arg1)
 }
 
 // DeleteServiceAccount mocks base method.
@@ -1872,6 +2002,36 @@ func (m *MockCloudServiceServer) GetNexusEndpoints(arg0 context.Context, arg1 *c
 func (mr *MockCloudServiceServerMockRecorder) GetNexusEndpoints(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNexusEndpoints", reflect.TypeOf((*MockCloudServiceServer)(nil).GetNexusEndpoints), arg0, arg1)
+}
+
+// GetProject mocks base method.
+func (m *MockCloudServiceServer) GetProject(arg0 context.Context, arg1 *cloudservice.GetProjectRequest) (*cloudservice.GetProjectResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProject", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProject indicates an expected call of GetProject.
+func (mr *MockCloudServiceServerMockRecorder) GetProject(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProject", reflect.TypeOf((*MockCloudServiceServer)(nil).GetProject), arg0, arg1)
+}
+
+// GetProjects mocks base method.
+func (m *MockCloudServiceServer) GetProjects(arg0 context.Context, arg1 *cloudservice.GetProjectsRequest) (*cloudservice.GetProjectsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProjects", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetProjectsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProjects indicates an expected call of GetProjects.
+func (mr *MockCloudServiceServerMockRecorder) GetProjects(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjects", reflect.TypeOf((*MockCloudServiceServer)(nil).GetProjects), arg0, arg1)
 }
 
 // GetRegion mocks base method.
@@ -2202,6 +2362,21 @@ func (m *MockCloudServiceServer) UpdateNexusEndpoint(arg0 context.Context, arg1 
 func (mr *MockCloudServiceServerMockRecorder) UpdateNexusEndpoint(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNexusEndpoint", reflect.TypeOf((*MockCloudServiceServer)(nil).UpdateNexusEndpoint), arg0, arg1)
+}
+
+// UpdateProject mocks base method.
+func (m *MockCloudServiceServer) UpdateProject(arg0 context.Context, arg1 *cloudservice.UpdateProjectRequest) (*cloudservice.UpdateProjectResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateProject", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.UpdateProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateProject indicates an expected call of UpdateProject.
+func (mr *MockCloudServiceServerMockRecorder) UpdateProject(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProject", reflect.TypeOf((*MockCloudServiceServer)(nil).UpdateProject), arg0, arg1)
 }
 
 // UpdateServiceAccount mocks base method.
