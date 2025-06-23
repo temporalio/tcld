@@ -218,7 +218,8 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 						if ctx.String(NamespaceFlagName) != "" && len(ctx.StringSlice(connectivityRuleIdsFlagName)) > 0 {
 							return fmt.Errorf("cannot provide namespace and connectivity rule ids")
 						}
-						resp, err := c.listConnectivityRules(ctx.String(NamespaceFlagName), ctx.StringSlice(connectivityRuleIdFlagName))
+						ruleIds := ctx.StringSlice(connectivityRuleIdsFlagName)
+						resp, err := c.listConnectivityRules(ctx.String(NamespaceFlagName), ruleIds)
 						if err != nil {
 							return err
 						}

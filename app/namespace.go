@@ -162,7 +162,7 @@ var (
 	connectivityRuleIdsFlag = &cli.StringSliceFlag{
 		Name:     connectivityRuleIdsFlagName,
 		Usage:    "The list of connectivity rule IDs, can be used in create namespace, update namespace and get list of connectivity rules. example: --ids id1 --ids id2 --ids id3",
-		Aliases:  []string{"cr"},
+		Aliases:  []string{"ids"},
 		Required: false,
 	}
 )
