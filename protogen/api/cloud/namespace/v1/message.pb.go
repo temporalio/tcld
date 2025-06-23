@@ -6,18 +6,19 @@ package namespace
 import (
 	bytes "bytes"
 	fmt "fmt"
-	proto "github.com/gogo/protobuf/proto"
-	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
-	types "github.com/gogo/protobuf/types"
-	v11 "github.com/temporalio/tcld/protogen/api/cloud/connectivityrule/v1"
-	v1 "github.com/temporalio/tcld/protogen/api/cloud/resource/v1"
-	v12 "github.com/temporalio/tcld/protogen/api/cloud/sink/v1"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strconv "strconv"
 	strings "strings"
+
+	proto "github.com/gogo/protobuf/proto"
+	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
+	types "github.com/gogo/protobuf/types"
+	v11 "github.com/temporalio/tcld/protogen/api/cloud/connectivityrule/v1"
+	v1 "github.com/temporalio/tcld/protogen/api/cloud/resource/v1"
+	v12 "github.com/temporalio/tcld/protogen/api/cloud/sink/v1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
