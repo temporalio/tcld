@@ -49,7 +49,7 @@ tools:
 	@go install github.com/golang/mock/mockgen@latest
 
 lint:
-	golangci-lint run --disable-all --enable=govet --enable=golint ./app/...
+	golangci-lint run
 
 $(COVER_ROOT):
 	@mkdir -p $(COVER_ROOT)
