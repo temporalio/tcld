@@ -14,8 +14,10 @@ jobs:
       - name: Show Go version
         run: go version
 
-      - name: Clean Go cache
+      - name: Remove all Go caches
         run: |
+          rm -rf $GOPATH/pkg/mod
+          rm -rf ~/.cache/go-build
           go clean -cache -modcache -testcache -x
 
       - name: run tests and build
