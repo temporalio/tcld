@@ -575,6 +575,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				n := &namespace.Namespace{
 					RequestId: ctx.String(RequestIDFlagName),
 					Namespace: ctx.String(NamespaceFlagName),
+					Spec:      &namespace.NamespaceSpec{},
 				}
 
 				regions := ctx.StringSlice(namespaceRegionFlagName)
@@ -584,16 +585,52 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				if len(regions) > 2 {
 					return fmt.Errorf("namespace can only be replicated up to 2 regions")
 				}
-				n.Spec = &namespace.NamespaceSpec{
-					PassiveRegions: regions[1:],
+
+				// Check if any region has cloud provider prefix
+				hasCloudPrefix := false
+				var regionIDs []string
+				for _, region := range regions {
+					if strings.HasPrefix(region, CloudProviderAWS) || strings.HasPrefix(region, CloudProviderGCP) {
+						hasCloudPrefix = true
+						regionIDs = append(regionIDs, region)
+					} else {
+						cloudProvider := ctx.String(cloudProviderFlagName)
+						if len(cloudProvider) == 0 {
+							return fmt.Errorf("namespace cloud provider is required when regions don't have cloud provider prefix")
+						}
+						regionIDs = append(regionIDs, fmt.Sprintf("%s-%s", cloudProvider, region))
+					}
 				}
 
-				cloudProvider := ctx.String(cloudProviderFlagName)
-				regionId, err := getRegionId(cloudProvider, regions[0])
+				// If any region has cloud prefix, validate all regions have the same prefix
+				if hasCloudPrefix {
+					for _, region := range regions {
+						if !strings.HasPrefix(region, CloudProviderAWS) && !strings.HasPrefix(region, CloudProviderGCP) {
+							return fmt.Errorf("all regions must have the same cloud provider prefix. Found %s ", region)
+						}
+					}
+				}
+
+				// Set active region
+				activeRegionID := regionIDs[0]
+				activeRegion, err := regionIDFromString(activeRegionID)
 				if err != nil {
 					return err
 				}
-				n.Spec.RegionId = &regionId
+				n.Spec.RegionId = activeRegion
+
+				// Set passive regions if any
+				if len(regions) > 1 {
+					passiveRegionIDs := make([]*common.RegionID, len(regionIDs)-1)
+					for i, regionID := range regionIDs[1:] {
+						passiveRegionID, err := regionIDFromString(regionID)
+						if err != nil {
+							return err
+						}
+						passiveRegionIDs[i] = passiveRegionID
+					}
+					n.Spec.PassiveRegionIds = passiveRegionIDs
+				}
 
 				authMethod, err := toAuthMethod(ctx.String(authMethodFlagName))
 				if err != nil {
@@ -2193,18 +2230,24 @@ func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
 	return old != namespace.AUTH_METHOD_RESTRICTED && new != namespace.AUTH_METHOD_API_KEY_OR_MTLS
 }
 
-func getRegionId(cloudProvider, activeRegion string) (common.RegionID, error) {
-	var regionId common.RegionID
-	switch strings.ToLower(cloudProvider) {
-	case CloudProviderAWS:
-		regionId.Provider = common.CLOUD_PROVIDER_AWS
-	case CloudProviderGCP:
-		regionId.Provider = common.CLOUD_PROVIDER_GCP
+// regionIDFromString parses a region string and returns a RegionID. It must be in the format "<provider>-<region>".
+func regionIDFromString(region string) (*common.RegionID, error) {
+	switch {
+	case strings.HasPrefix(region, CloudProviderAWS+"-"):
+		awsRegion := region[len(CloudProviderAWS)+1:]
+		return &common.RegionID{
+			Provider: common.CLOUD_PROVIDER_AWS,
+			Name:     awsRegion,
+		}, nil
+	case strings.HasPrefix(region, CloudProviderGCP+"-"):
+		gcpRegion := region[len(CloudProviderGCP)+1:]
+		return &common.RegionID{
+			Provider: common.CLOUD_PROVIDER_GCP,
+			Name:     gcpRegion,
+		}, nil
 	default:
-		return regionId, fmt.Errorf("unknown cloud provider specified, the supported cloud providers: [%s]", strings.Join([]string{CloudProviderAWS, CloudProviderGCP}, ","))
+		return nil, fmt.Errorf("invalid region: %s", region)
 	}
-	regionId.Name = activeRegion
-	return regionId, nil
 }
 
 func toAuthMethod(m string) (namespace.AuthMethod, error) {
