@@ -6,13 +6,20 @@ jobs:
     name: sanity checks - pull request
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-go@v5
         with:
           go-version: '^1.22'
+
+      - name: Show Go version
+        run: go version
+
       - name: Clean Go cache
         run: |
           go clean -cache -modcache -testcache -x
+
       - name: run tests and build
         run: make clean test bins
+
       - name: lint
         run: make tools lint
