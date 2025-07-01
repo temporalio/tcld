@@ -5,6 +5,9 @@ jobs:
     runs-on: ubuntu-latest
     name: sanity checks - pull request
     steps:
+      - name: Clean Go cache
+        run: |
+          go clean -cache -modcache -testcache -x
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
