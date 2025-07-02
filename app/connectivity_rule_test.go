@@ -43,6 +43,11 @@ func (s *ConnectivityRuleTestSuite) SetupTest() {
 			AutoConfirmFlag,
 		},
 	}
+
+	if !IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
+		err := toggleFeature(ConnectivityRuleFeatureFlag)
+		s.Require().NoError(err)
+	}
 }
 
 func (s *ConnectivityRuleTestSuite) RunCmd(args ...string) error {
