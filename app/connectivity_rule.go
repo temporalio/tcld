@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/connectivityrule/v1"
 	regionpb "github.com/temporalio/tcld/protogen/api/cloud/region/v1"
@@ -47,9 +48,16 @@ func (c *ConnectivityRuleClient) getConnectivityRule(connectivityRuleId string) 
 	return resp, nil
 }
 
-func (c *ConnectivityRuleClient) listConnectivityRules(namespaceId string, connectivityRuleIds []string) (*cloudservice.GetConnectivityRulesResponse, error) {
-	resp, err := c.client.GetConnectivityRules(c.ctx, &cloudservice.GetConnectivityRulesRequest{
-		ConnectivityRuleIds: connectivityRuleIds, NamespaceId: namespaceId})
+func (c *ConnectivityRuleClient) listConnectivityRules(namespaceId string) (*cloudservice.GetConnectivityRulesResponse, error) {
+	var resp *cloudservice.GetConnectivityRulesResponse
+	var err error
+	if namespaceId == "" {
+		resp, err = c.client.GetConnectivityRules(c.ctx, &cloudservice.GetConnectivityRulesRequest{})
+	} else {
+		resp, err = c.client.GetConnectivityRules(c.ctx, &cloudservice.GetConnectivityRulesRequest{
+			NamespaceId: namespaceId,
+		})
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +95,7 @@ func (c *ConnectivityRuleClient) createConnectivityRule(connectivityType, connec
 			},
 		}
 	default:
-		return nil, fmt.Errorf("unknown connectivity type: %s", connectivityType)
+		return nil, fmt.Errorf("unknown connectivity type: %s. only supports 'public' and 'private'", connectivityType)
 	}
 
 	return c.client.CreateConnectivityRule(c.ctx, &cloudservice.CreateConnectivityRuleRequest{
@@ -141,10 +149,18 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 		EnvVars:  []string{"TEMPORAL_CLOUD_NAMESPACE"},
 		Required: false,
 	}
+
+	if !IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
+		return CommandOut{
+			Command: &cli.Command{},
+		}, nil
+	}
+
 	return CommandOut{
 		Command: &cli.Command{
 			Name:    "connectivity-rule",
 			Aliases: []string{"cr"},
+			Usage:   "Connectivity rule operations",
 			Before: func(ctx *cli.Context) error {
 				var err error
 				c, err = getConnectivityRuleClientFn(ctx)
@@ -176,8 +192,8 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 
 						resp, err := c.createConnectivityRule(
 							ctx.String(connectivityTypeFlagName),
-							ctx.String(connectionIdFlag.Name),
-							ctx.String(regionFlag.Name),
+							ctx.String(connectionIdFlagName),
+							ctx.String(regionFlagName),
 							gcpProjectID,
 							provider)
 						if err != nil {
@@ -195,7 +211,7 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 						connectivityRuleIdFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						resp, err := c.getConnectivityRule(ctx.String(connectivityRuleIdFlag.Name))
+						resp, err := c.getConnectivityRule(ctx.String(connectivityRuleIdFlagName))
 						if err != nil {
 							return err
 						}
@@ -209,17 +225,9 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 					Description: "This command to list connectivity rules",
 					Flags: []cli.Flag{
 						OptionalNamespaceFlag,
-						connectivityRuleIdsFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						if ctx.String(NamespaceFlagName) == "" && len(ctx.StringSlice(connectivityRuleIdsFlagName)) == 0 {
-							return fmt.Errorf("must provide namespace or connectivity rule ids")
-						}
-						if ctx.String(NamespaceFlagName) != "" && len(ctx.StringSlice(connectivityRuleIdsFlagName)) > 0 {
-							return fmt.Errorf("cannot provide namespace and connectivity rule ids")
-						}
-						ruleIds := ctx.StringSlice(connectivityRuleIdsFlagName)
-						resp, err := c.listConnectivityRules(ctx.String(NamespaceFlagName), ruleIds)
+						resp, err := c.listConnectivityRules(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
@@ -235,7 +243,11 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 						connectivityRuleIdFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						resp, err := c.deleteConnectivityRule(ctx.String(connectivityRuleIdFlag.Name))
+						if _, err := c.getConnectivityRule(ctx.String(connectivityRuleIdFlagName)); err != nil {
+							return fmt.Errorf("failed to get connectivity rule: %w", err)
+						}
+
+						resp, err := c.deleteConnectivityRule(ctx.String(connectivityRuleIdFlagName))
 						if err != nil {
 							return err
 						}
@@ -265,18 +277,17 @@ func validateParamAndConvert(connectivityType, connectionId, region, cloudProvid
 		case "aws":
 			cp = regionpb.CLOUD_PROVIDER_AWS
 		case "gcp":
+			if gcpProjectId == "" {
+				return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", fmt.Errorf("gcp project ID is required if the cloud provider is 'gcp'")
+			}
 			cp = regionpb.CLOUD_PROVIDER_GCP
 		default:
 			return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", fmt.Errorf("unknown or unsupported cloud provider: %s", cloudProvider)
-		}
-		if cloudProvider == "gcp" && gcpProjectId == "" {
-			return cp, "", fmt.Errorf("gcp project ID is required if the cloud provider is 'gcp'")
 		}
 		return cp, gcpProjectId, nil
 	case "public":
 		return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", nil
 	default:
-		return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", fmt.Errorf("unknown connectivity type: %s. only support 'public' and 'private'", connectivityType)
+		return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", fmt.Errorf("unknown connectivity type: %s. only supports 'public' and 'private'", connectivityType)
 	}
-
 }

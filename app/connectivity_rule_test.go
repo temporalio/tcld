@@ -102,20 +102,17 @@ func (s *ConnectivityRuleTestSuite) TestGetConnectivityRule() {
 }
 
 func (s *ConnectivityRuleTestSuite) TestGetConnectivityRules() {
-	// Test missing required flag
-	s.Error(s.RunCmd("connectivity-rule", "list"))
-
-	// Test invalid flag provided
-	s.Error(s.RunCmd("connectivity-rule", "list", "--namespace", "test-namespace", "--connectivity-rule-ids", "test-rule-id"))
-
 	// Test get error
 	s.mockCloudService.EXPECT().GetConnectivityRules(gomock.Any(), gomock.Any()).Return(nil, errors.New("not found")).Times(1)
 	s.Error(s.RunCmd("connectivity-rule", "list", "--namespace", "test-namespace"))
 
 	// Test successful get
-
 	s.mockCloudService.EXPECT().GetConnectivityRules(gomock.Any(), gomock.Any()).Return(getExampleConnectivityRules(), nil).Times(1)
 	s.NoError(s.RunCmd("connectivity-rule", "list", "--namespace", "test-namespace"))
+
+	// Test successful get without namespace
+	s.mockCloudService.EXPECT().GetConnectivityRules(gomock.Any(), gomock.Any()).Return(getExampleConnectivityRules(), nil).Times(1)
+	s.NoError(s.RunCmd("connectivity-rule", "list"))
 }
 
 // Note, anything after the bool flag will be ignored, and i think that's something we discussed earlier with ocld cmd
@@ -166,12 +163,21 @@ func (s *ConnectivityRuleTestSuite) TestDeleteConnectivityRule() {
 	// Test missing required flag (id)
 	s.Error(s.RunCmd("connectivity-rule", "delete"))
 
-	// Test delete error
+	// Test delete error - first call getConnectivityRule succeeds, then delete fails
+	s.mockCloudService.EXPECT().GetConnectivityRule(gomock.Any(), gomock.Any()).
+		Return(getExampleConnectivityRule(), nil).Times(1)
 	s.mockCloudService.EXPECT().DeleteConnectivityRule(gomock.Any(), gomock.Any()).
 		Return(nil, errors.New("delete error")).Times(1)
 	s.Error(s.RunCmd("connectivity-rule", "delete", "--id", "test-rule-id"))
 
+	// Test get connectivity rule fails before delete
+	s.mockCloudService.EXPECT().GetConnectivityRule(gomock.Any(), gomock.Any()).
+		Return(nil, errors.New("not found")).Times(1)
+	s.Error(s.RunCmd("connectivity-rule", "delete", "--id", "test-rule-id"))
+
 	// Test successful delete
+	s.mockCloudService.EXPECT().GetConnectivityRule(gomock.Any(), gomock.Any()).
+		Return(getExampleConnectivityRule(), nil).Times(1)
 	s.mockCloudService.EXPECT().DeleteConnectivityRule(gomock.Any(), gomock.Any()).
 		Return(&cloudservice.DeleteConnectivityRuleResponse{}, nil).Times(1)
 	s.NoError(s.RunCmd("connectivity-rule", "delete", "--id", "test-rule-id"))
