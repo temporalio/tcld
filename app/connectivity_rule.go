@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/connectivityrule/v1"
 	regionpb "github.com/temporalio/tcld/protogen/api/cloud/region/v1"
@@ -47,9 +48,10 @@ func (c *ConnectivityRuleClient) getConnectivityRule(connectivityRuleId string) 
 	return resp, nil
 }
 
-func (c *ConnectivityRuleClient) listConnectivityRules(namespaceId string, connectivityRuleIds []string) (*cloudservice.GetConnectivityRulesResponse, error) {
+func (c *ConnectivityRuleClient) listConnectivityRules(namespaceId string) (*cloudservice.GetConnectivityRulesResponse, error) {
 	resp, err := c.client.GetConnectivityRules(c.ctx, &cloudservice.GetConnectivityRulesRequest{
-		ConnectivityRuleIds: connectivityRuleIds, NamespaceId: namespaceId})
+		NamespaceId: namespaceId,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -209,17 +211,12 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 					Description: "This command to list connectivity rules",
 					Flags: []cli.Flag{
 						OptionalNamespaceFlag,
-						connectivityRuleIdsFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						if ctx.String(NamespaceFlagName) == "" && len(ctx.StringSlice(connectivityRuleIdsFlagName)) == 0 {
-							return fmt.Errorf("must provide namespace or connectivity rule ids")
+						if ctx.String(NamespaceFlagName) == "" {
+							return fmt.Errorf("must provide namespace")
 						}
-						if ctx.String(NamespaceFlagName) != "" && len(ctx.StringSlice(connectivityRuleIdsFlagName)) > 0 {
-							return fmt.Errorf("cannot provide namespace and connectivity rule ids")
-						}
-						ruleIds := ctx.StringSlice(connectivityRuleIdsFlagName)
-						resp, err := c.listConnectivityRules(ctx.String(NamespaceFlagName), ruleIds)
+						resp, err := c.listConnectivityRules(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
