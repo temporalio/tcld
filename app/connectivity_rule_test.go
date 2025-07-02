@@ -102,9 +102,6 @@ func (s *ConnectivityRuleTestSuite) TestGetConnectivityRule() {
 }
 
 func (s *ConnectivityRuleTestSuite) TestGetConnectivityRules() {
-	// Test missing required flag
-	s.Error(s.RunCmd("connectivity-rule", "list"))
-
 	// Test invalid flag provided
 	s.Error(s.RunCmd("connectivity-rule", "list", "--namespace", "test-namespace", "--connectivity-rule-ids", "test-rule-id"))
 
@@ -116,6 +113,9 @@ func (s *ConnectivityRuleTestSuite) TestGetConnectivityRules() {
 
 	s.mockCloudService.EXPECT().GetConnectivityRules(gomock.Any(), gomock.Any()).Return(getExampleConnectivityRules(), nil).Times(1)
 	s.NoError(s.RunCmd("connectivity-rule", "list", "--namespace", "test-namespace"))
+
+	s.mockCloudService.EXPECT().GetConnectivityRules(gomock.Any(), gomock.Any()).Return(getExampleConnectivityRules(), nil).Times(1)
+	s.NoError(s.RunCmd("connectivity-rule", "list"))
 }
 
 // Note, anything after the bool flag will be ignored, and i think that's something we discussed earlier with ocld cmd
