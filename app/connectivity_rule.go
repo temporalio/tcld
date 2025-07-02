@@ -48,32 +48,6 @@ func (c *ConnectivityRuleClient) getConnectivityRule(connectivityRuleId string) 
 	return resp, nil
 }
 
-func (c *ConnectivityRuleClient) listConnectivityRules(namespaceId string) (*cloudservice.GetConnectivityRulesResponse, error) {
-	var resp *cloudservice.GetConnectivityRulesResponse
-	var err error
-	if namespaceId == "" {
-		resp, err = c.client.GetConnectivityRules(c.ctx, &cloudservice.GetConnectivityRulesRequest{})
-	} else {
-		resp, err = c.client.GetConnectivityRules(c.ctx, &cloudservice.GetConnectivityRulesRequest{
-			NamespaceId: namespaceId,
-		})
-	}
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (c *ConnectivityRuleClient) deleteConnectivityRule(connectivityRuleId string) (*cloudservice.DeleteConnectivityRuleResponse, error) {
-	resp, err := c.client.DeleteConnectivityRule(c.ctx, &cloudservice.DeleteConnectivityRuleRequest{
-		ConnectivityRuleId: connectivityRuleId,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
 func (c *ConnectivityRuleClient) createConnectivityRule(connectivityType, connectionId, region, gcpProjectId string, cloudProvider regionpb.Region_CloudProvider) (*cloudservice.CreateConnectivityRuleResponse, error) {
 	spec := connectivityrule.ConnectivityRuleSpec{}
 	switch connectivityType {
@@ -222,12 +196,14 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 					Name:        "list",
 					Aliases:     []string{"l"},
 					Usage:       "list connectivity rules",
-					Description: "This command to list connectivity rules",
+					Description: "This command lists connectivity rules",
 					Flags: []cli.Flag{
 						OptionalNamespaceFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						resp, err := c.listConnectivityRules(ctx.String(NamespaceFlagName))
+						resp, err := c.client.GetConnectivityRules(c.ctx, &cloudservice.GetConnectivityRulesRequest{
+							Namespace: ctx.String(NamespaceFlagName),
+						})
 						if err != nil {
 							return err
 						}
@@ -247,7 +223,9 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 							return fmt.Errorf("failed to get connectivity rule: %w", err)
 						}
 
-						resp, err := c.deleteConnectivityRule(ctx.String(connectivityRuleIdFlagName))
+						resp, err := c.client.DeleteConnectivityRule(c.ctx, &cloudservice.DeleteConnectivityRuleRequest{
+							ConnectivityRuleId: ctx.String(connectivityRuleIdFlagName),
+						})
 						if err != nil {
 							return err
 						}
