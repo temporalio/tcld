@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/mail"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -156,6 +157,12 @@ var (
 		Name:     sinkRegionFlagName,
 		Usage:    "The region to use for the request, if not set the server will use the namespace's region",
 		Aliases:  []string{"re"},
+		Required: false,
+	}
+	connectivityRuleIdsFlag = &cli.StringSliceFlag{
+		Name:     connectivityRuleIdsFlagName,
+		Usage:    "The list of connectivity rule IDs, can be used in create namespace, update namespace and get list of connectivity rules. example: --ids id1 --ids id2 --ids id3",
+		Aliases:  []string{"ids"},
 		Required: false,
 	}
 )
@@ -570,6 +577,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					// this is a temporary solution, we will have a follow up version update to make the cloud provider mandatory
 					Value: CloudProviderAWS,
 				},
+				connectivityRuleIdsFlag,
 			},
 			Action: func(ctx *cli.Context) error {
 				n := &namespace.Namespace{
@@ -611,9 +619,16 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					}
 				}
 
+				connectivityRuleIds := ctx.StringSlice(connectivityRuleIdsFlagName)
+				if len(connectivityRuleIds) > 5 {
+					return fmt.Errorf("maximum of 5 connectivity rules can be specified")
+				}
+				n.Spec.ConnectivityRuleIds = connectivityRuleIds
+
 				// Set active region
 				activeRegionID := regionIDs[0]
 				activeRegion, err := regionIDFromString(activeRegionID)
+
 				if err != nil {
 					return err
 				}
@@ -1671,6 +1686,30 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 				fmt.Println("No changes to apply to Namespace:", ctx.String(NamespaceFlagName))
 				return nil
+			},
+		},
+		{
+			Name:    "set-connectivity-rules",
+			Usage:   "set the connectivity rules for a namespace",
+			Aliases: []string{"scrs"},
+			Flags: []cli.Flag{
+				NamespaceFlag,
+				connectivityRuleIdsFlag,
+			},
+			Action: func(ctx *cli.Context) error {
+				n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+				if err != nil {
+					return err
+				}
+				connectivityRuleIds := ctx.StringSlice(connectivityRuleIdsFlagName)
+				if len(connectivityRuleIds) == 0 {
+					return fmt.Errorf("connectivity rule ids must be provided")
+				}
+				if reflect.DeepEqual(n.Spec.ConnectivityRuleIds, connectivityRuleIds) {
+					return fmt.Errorf("no connectivity rule changes to apply")
+				}
+				n.Spec.ConnectivityRuleIds = connectivityRuleIds
+				return c.updateNamespace(ctx, n)
 			},
 		},
 	}

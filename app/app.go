@@ -28,8 +28,17 @@ func NewApp(params AppParams) (*cli.App, error) {
 			InsecureConnectionFlag,
 			EnableDebugLogsFlag,
 		},
-		Commands: params.Commands,
 	}
-
+	var commands []*cli.Command
+	for _, command := range params.Commands {
+		if command.Name == "connectivity-rule" {
+			if IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
+				commands = append(commands, command)
+			}
+		} else {
+			commands = append(commands, command)
+		}
+	}
+	app.Commands = commands
 	return app, nil
 }
