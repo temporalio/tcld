@@ -213,9 +213,6 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 						OptionalNamespaceFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						if ctx.String(NamespaceFlagName) == "" {
-							return fmt.Errorf("must provide namespace")
-						}
 						resp, err := c.listConnectivityRules(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
