@@ -5,12 +5,6 @@ package cloudservice
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
-
 	proto "github.com/gogo/protobuf/proto"
 	types "github.com/gogo/protobuf/types"
 	v15 "github.com/temporalio/tcld/protogen/api/cloud/account/v1"
@@ -23,6 +17,11 @@ import (
 	v19 "github.com/temporalio/tcld/protogen/api/cloud/project/v1"
 	v13 "github.com/temporalio/tcld/protogen/api/cloud/region/v1"
 	v17 "github.com/temporalio/tcld/protogen/api/cloud/usage/v1"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -4823,6 +4822,7 @@ func (m *DeleteApiKeyResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
+// temporal:dev
 type GetAuditLogsRequest struct {
 	// The requested size of the page to retrieve - optional.
 	// Cannot exceed 1000. Defaults to 100.
@@ -4895,6 +4895,7 @@ func (m *GetAuditLogsRequest) GetEndTimeExclusive() *types.Timestamp {
 	return nil
 }
 
+// temporal:dev
 type GetAuditLogsResponse struct {
 	// The list of audit logs ordered by inserted time, emit time, log_id
 	Logs []*v16.LogRecord `protobuf:"bytes,1,rep,name=logs,proto3" json:"logs,omitempty"`
@@ -5799,6 +5800,7 @@ func (m *ValidateNamespaceExportSinkResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ValidateNamespaceExportSinkResponse proto.InternalMessageInfo
 
+// temporal:dev
 type StartMigrationRequest struct {
 	// The migration specification.
 	Spec *v12.MigrationSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
@@ -5853,6 +5855,7 @@ func (m *StartMigrationRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type StartMigrationResponse struct {
 	// The migration id.
 	MigrationId string `protobuf:"bytes,1,opt,name=migration_id,json=migrationId,proto3" json:"migration_id,omitempty"`
@@ -5906,6 +5909,7 @@ func (m *StartMigrationResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
+// temporal:dev
 type GetMigrationRequest struct {
 	// The migration id.
 	MigrationId string `protobuf:"bytes,1,opt,name=migration_id,json=migrationId,proto3" json:"migration_id,omitempty"`
@@ -5950,6 +5954,7 @@ func (m *GetMigrationRequest) GetMigrationId() string {
 	return ""
 }
 
+// temporal:dev
 type GetMigrationResponse struct {
 	// The migration.
 	Migration *v12.Migration `protobuf:"bytes,1,opt,name=migration,proto3" json:"migration,omitempty"`
@@ -5994,6 +5999,7 @@ func (m *GetMigrationResponse) GetMigration() *v12.Migration {
 	return nil
 }
 
+// temporal:dev
 type GetMigrationsRequest struct {
 	// The requested size of the page to retrieve.
 	// Cannot exceed 1000.
@@ -6050,6 +6056,7 @@ func (m *GetMigrationsRequest) GetPageToken() string {
 	return ""
 }
 
+// temporal:dev
 type GetMigrationsResponse struct {
 	// The list of migrations.
 	Migrations []*v12.Migration `protobuf:"bytes,1,rep,name=migrations,proto3" json:"migrations,omitempty"`
@@ -6103,6 +6110,7 @@ func (m *GetMigrationsResponse) GetNextPageToken() string {
 	return ""
 }
 
+// temporal:dev
 type HandoverNamespaceRequest struct {
 	// The migration id.
 	MigrationId string `protobuf:"bytes,1,opt,name=migration_id,json=migrationId,proto3" json:"migration_id,omitempty"`
@@ -6166,6 +6174,7 @@ func (m *HandoverNamespaceRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type HandoverNamespaceResponse struct {
 	// The async operation.
 	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
@@ -6210,6 +6219,7 @@ func (m *HandoverNamespaceResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
+// temporal:dev
 type ConfirmMigrationRequest struct {
 	// The migration id.
 	MigrationId string `protobuf:"bytes,1,opt,name=migration_id,json=migrationId,proto3" json:"migration_id,omitempty"`
@@ -6264,6 +6274,7 @@ func (m *ConfirmMigrationRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type ConfirmMigrationResponse struct {
 	// The async operation.
 	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
@@ -6308,6 +6319,7 @@ func (m *ConfirmMigrationResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
+// temporal:dev
 type AbortMigrationRequest struct {
 	// The migration id.
 	MigrationId string `protobuf:"bytes,1,opt,name=migration_id,json=migrationId,proto3" json:"migration_id,omitempty"`
@@ -6362,6 +6374,7 @@ func (m *AbortMigrationRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type AbortMigrationResponse struct {
 	// The async operation.
 	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
@@ -6406,6 +6419,7 @@ func (m *AbortMigrationResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
+// temporal:dev
 type CreateConnectivityRuleRequest struct {
 	Spec *v18.ConnectivityRuleSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
 	// The id to use for this async operation.
@@ -6459,6 +6473,7 @@ func (m *CreateConnectivityRuleRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type CreateConnectivityRuleResponse struct {
 	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
 	// The async operation
@@ -6511,6 +6526,7 @@ func (m *CreateConnectivityRuleResponse) GetAsyncOperation() *v11.AsyncOperation
 	return nil
 }
 
+// temporal:dev
 type GetConnectivityRuleRequest struct {
 	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
 }
@@ -6554,6 +6570,7 @@ func (m *GetConnectivityRuleRequest) GetConnectivityRuleId() string {
 	return ""
 }
 
+// temporal:dev
 type GetConnectivityRuleResponse struct {
 	ConnectivityRule *v18.ConnectivityRule `protobuf:"bytes,1,opt,name=connectivity_rule,json=connectivityRule,proto3" json:"connectivity_rule,omitempty"`
 }
@@ -6597,6 +6614,7 @@ func (m *GetConnectivityRuleResponse) GetConnectivityRule() *v18.ConnectivityRul
 	return nil
 }
 
+// temporal:dev
 type GetConnectivityRulesRequest struct {
 	// The requested size of the page to retrieve.
 	// Optional, defaults to 100.
@@ -6715,6 +6733,7 @@ func (m *GetConnectivityRulesResponse) GetNextPageToken() string {
 	return ""
 }
 
+// temporal:dev
 type UpdateConnectivityRuleRequest struct {
 	// The ID of the connectivity rule that need be updated, required.
 	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
@@ -6787,6 +6806,7 @@ func (m *UpdateConnectivityRuleRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type UpdateConnectivityRuleResponse struct {
 	// The async operation
 	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
@@ -6831,6 +6851,7 @@ func (m *UpdateConnectivityRuleResponse) GetAsyncOperation() *v11.AsyncOperation
 	return nil
 }
 
+// temporal:dev
 type DeleteConnectivityRuleRequest struct {
 	// The ID of the connectivity rule that need be deleted, required.
 	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
@@ -6894,6 +6915,7 @@ func (m *DeleteConnectivityRuleRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type DeleteConnectivityRuleResponse struct {
 	// The async operation
 	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
@@ -6938,6 +6960,7 @@ func (m *DeleteConnectivityRuleResponse) GetAsyncOperation() *v11.AsyncOperation
 	return nil
 }
 
+// temporal:dev
 type GetProjectsRequest struct {
 	// The requested size of the page to retrieve - optional.
 	// Cannot exceed 1000. Defaults to 100.
@@ -6992,6 +7015,7 @@ func (m *GetProjectsRequest) GetPageToken() string {
 	return ""
 }
 
+// temporal:dev
 type GetProjectsResponse struct {
 	// The list of projects in ascending ids order
 	Projects []*v19.Project `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects,omitempty"`
@@ -7045,6 +7069,7 @@ func (m *GetProjectsResponse) GetNextPageToken() string {
 	return ""
 }
 
+// temporal:dev
 type GetProjectRequest struct {
 	// The id of the project to get
 	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
@@ -7089,6 +7114,7 @@ func (m *GetProjectRequest) GetProjectId() string {
 	return ""
 }
 
+// temporal:dev
 type GetProjectResponse struct {
 	// The project
 	Project *v19.Project `protobuf:"bytes,1,opt,name=project,proto3" json:"project,omitempty"`
@@ -7133,6 +7159,7 @@ func (m *GetProjectResponse) GetProject() *v19.Project {
 	return nil
 }
 
+// temporal:dev
 type CreateProjectRequest struct {
 	// The spec for the project to create.
 	Spec *v19.ProjectSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
@@ -7187,6 +7214,7 @@ func (m *CreateProjectRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type CreateProjectResponse struct {
 	// The id of the project that was created.
 	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
@@ -7240,6 +7268,7 @@ func (m *CreateProjectResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
+// temporal:dev
 type UpdateProjectRequest struct {
 	// The id of the project to update.
 	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
@@ -7313,6 +7342,7 @@ func (m *UpdateProjectRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type UpdateProjectResponse struct {
 	// The async operation.
 	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
@@ -7357,6 +7387,7 @@ func (m *UpdateProjectResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
+// temporal:dev
 type DeleteProjectRequest struct {
 	// The id of the project to delete.
 	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
@@ -7421,6 +7452,7 @@ func (m *DeleteProjectRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type DeleteProjectResponse struct {
 	// The async operation.
 	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
@@ -13136,7 +13168,7 @@ func (this *GetConnectivityRulesRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 8)
+	s := make([]string, 0, 7)
 	s = append(s, "&cloudservice.GetConnectivityRulesRequest{")
 	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
 	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
@@ -21086,10 +21118,6 @@ func (m *GetConnectivityRulesRequest) Size() (n int) {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
 	l = len(m.Namespace)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.NamespaceId)
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
@@ -37609,38 +37637,6 @@ func (m *GetConnectivityRulesRequest) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Namespace = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NamespaceId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.NamespaceId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

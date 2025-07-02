@@ -273,6 +273,7 @@ type CloudServiceClient interface {
 	// Delete an API key
 	DeleteApiKey(ctx context.Context, in *DeleteApiKeyRequest, opts ...grpc.CallOption) (*DeleteApiKeyResponse, error)
 	// Get audit logs
+	// temporal:dev
 	GetAuditLogs(ctx context.Context, in *GetAuditLogsRequest, opts ...grpc.CallOption) (*GetAuditLogsResponse, error)
 	// Get usage
 	GetUsage(ctx context.Context, in *GetUsageRequest, opts ...grpc.CallOption) (*GetUsageResponse, error)
@@ -294,36 +295,52 @@ type CloudServiceClient interface {
 	// This operation verifies that the sink is correctly configured, accessible, and ready for data export.
 	ValidateNamespaceExportSink(ctx context.Context, in *ValidateNamespaceExportSinkRequest, opts ...grpc.CallOption) (*ValidateNamespaceExportSinkResponse, error)
 	// Starts a namespace migration
+	// temporal:dev
 	StartMigration(ctx context.Context, in *StartMigrationRequest, opts ...grpc.CallOption) (*StartMigrationResponse, error)
 	// Get namespace migrations for an account
+	// temporal:dev
 	GetMigrations(ctx context.Context, in *GetMigrationsRequest, opts ...grpc.CallOption) (*GetMigrationsResponse, error)
 	// Get a namespace migration
+	// temporal:dev
 	GetMigration(ctx context.Context, in *GetMigrationRequest, opts ...grpc.CallOption) (*GetMigrationResponse, error)
 	// Handover the namespace during a migration, which switches the active and passive replicas
+	// temporal:dev
 	HandoverNamespace(ctx context.Context, in *HandoverNamespaceRequest, opts ...grpc.CallOption) (*HandoverNamespaceResponse, error)
 	// Abort a namespace migration
+	// temporal:dev
 	AbortMigration(ctx context.Context, in *AbortMigrationRequest, opts ...grpc.CallOption) (*AbortMigrationResponse, error)
 	// Confirm a namespace migration, which completes the migration
+	// temporal:dev
 	ConfirmMigration(ctx context.Context, in *ConfirmMigrationRequest, opts ...grpc.CallOption) (*ConfirmMigrationResponse, error)
 	// Creates a connectivity rule
+	// temporal:dev
 	CreateConnectivityRule(ctx context.Context, in *CreateConnectivityRuleRequest, opts ...grpc.CallOption) (*CreateConnectivityRuleResponse, error)
 	// Updates a connectivity rule
+	// temporal:dev
 	UpdateConnectivityRule(ctx context.Context, in *UpdateConnectivityRuleRequest, opts ...grpc.CallOption) (*UpdateConnectivityRuleResponse, error)
 	// Gets a connectivity rule by id
+	// temporal:dev
 	GetConnectivityRule(ctx context.Context, in *GetConnectivityRuleRequest, opts ...grpc.CallOption) (*GetConnectivityRuleResponse, error)
 	// Lists connectivity rules by account
+	// temporal:dev
 	GetConnectivityRules(ctx context.Context, in *GetConnectivityRulesRequest, opts ...grpc.CallOption) (*GetConnectivityRulesResponse, error)
 	// Deletes a connectivity
+	// temporal:dev
 	DeleteConnectivityRule(ctx context.Context, in *DeleteConnectivityRuleRequest, opts ...grpc.CallOption) (*DeleteConnectivityRuleResponse, error)
 	// Get all projects
+	// temporal:dev
 	GetProjects(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*GetProjectsResponse, error)
 	// Get a projects
+	// temporal:dev
 	GetProject(ctx context.Context, in *GetProjectRequest, opts ...grpc.CallOption) (*GetProjectResponse, error)
 	// Create new a projects
+	// temporal:dev
 	CreateProject(ctx context.Context, in *CreateProjectRequest, opts ...grpc.CallOption) (*CreateProjectResponse, error)
 	// Update a projects
+	// temporal:dev
 	UpdateProject(ctx context.Context, in *UpdateProjectRequest, opts ...grpc.CallOption) (*UpdateProjectResponse, error)
 	// Delete a projects
+	// temporal:dev
 	DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*DeleteProjectResponse, error)
 }
 
@@ -1033,6 +1050,7 @@ type CloudServiceServer interface {
 	// Delete an API key
 	DeleteApiKey(context.Context, *DeleteApiKeyRequest) (*DeleteApiKeyResponse, error)
 	// Get audit logs
+	// temporal:dev
 	GetAuditLogs(context.Context, *GetAuditLogsRequest) (*GetAuditLogsResponse, error)
 	// Get usage
 	GetUsage(context.Context, *GetUsageRequest) (*GetUsageResponse, error)
@@ -1054,36 +1072,52 @@ type CloudServiceServer interface {
 	// This operation verifies that the sink is correctly configured, accessible, and ready for data export.
 	ValidateNamespaceExportSink(context.Context, *ValidateNamespaceExportSinkRequest) (*ValidateNamespaceExportSinkResponse, error)
 	// Starts a namespace migration
+	// temporal:dev
 	StartMigration(context.Context, *StartMigrationRequest) (*StartMigrationResponse, error)
 	// Get namespace migrations for an account
+	// temporal:dev
 	GetMigrations(context.Context, *GetMigrationsRequest) (*GetMigrationsResponse, error)
 	// Get a namespace migration
+	// temporal:dev
 	GetMigration(context.Context, *GetMigrationRequest) (*GetMigrationResponse, error)
 	// Handover the namespace during a migration, which switches the active and passive replicas
+	// temporal:dev
 	HandoverNamespace(context.Context, *HandoverNamespaceRequest) (*HandoverNamespaceResponse, error)
 	// Abort a namespace migration
+	// temporal:dev
 	AbortMigration(context.Context, *AbortMigrationRequest) (*AbortMigrationResponse, error)
 	// Confirm a namespace migration, which completes the migration
+	// temporal:dev
 	ConfirmMigration(context.Context, *ConfirmMigrationRequest) (*ConfirmMigrationResponse, error)
 	// Creates a connectivity rule
+	// temporal:dev
 	CreateConnectivityRule(context.Context, *CreateConnectivityRuleRequest) (*CreateConnectivityRuleResponse, error)
 	// Updates a connectivity rule
+	// temporal:dev
 	UpdateConnectivityRule(context.Context, *UpdateConnectivityRuleRequest) (*UpdateConnectivityRuleResponse, error)
 	// Gets a connectivity rule by id
+	// temporal:dev
 	GetConnectivityRule(context.Context, *GetConnectivityRuleRequest) (*GetConnectivityRuleResponse, error)
 	// Lists connectivity rules by account
+	// temporal:dev
 	GetConnectivityRules(context.Context, *GetConnectivityRulesRequest) (*GetConnectivityRulesResponse, error)
 	// Deletes a connectivity
+	// temporal:dev
 	DeleteConnectivityRule(context.Context, *DeleteConnectivityRuleRequest) (*DeleteConnectivityRuleResponse, error)
 	// Get all projects
+	// temporal:dev
 	GetProjects(context.Context, *GetProjectsRequest) (*GetProjectsResponse, error)
 	// Get a projects
+	// temporal:dev
 	GetProject(context.Context, *GetProjectRequest) (*GetProjectResponse, error)
 	// Create new a projects
+	// temporal:dev
 	CreateProject(context.Context, *CreateProjectRequest) (*CreateProjectResponse, error)
 	// Update a projects
+	// temporal:dev
 	UpdateProject(context.Context, *UpdateProjectRequest) (*UpdateProjectResponse, error)
 	// Delete a projects
+	// temporal:dev
 	DeleteProject(context.Context, *DeleteProjectRequest) (*DeleteProjectResponse, error)
 }
 
