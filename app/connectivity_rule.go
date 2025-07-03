@@ -126,7 +126,7 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 
 	if !IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
 		return CommandOut{
-			Command: &cli.Command{},
+			Command: nil,
 		}, nil
 	}
 

@@ -26,6 +26,10 @@ type ConnectivityRuleTestSuite struct {
 }
 
 func (s *ConnectivityRuleTestSuite) SetupTest() {
+	if !IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
+		err := toggleFeature(ConnectivityRuleFeatureFlag)
+		s.Require().NoError(err)
+	}
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockCloudService = cloudservicemock.NewMockCloudServiceClient(s.mockCtrl)
 	out, err := NewConnectivityRuleCommand(func(ctx *cli.Context) (*ConnectivityRuleClient, error) {
@@ -42,11 +46,6 @@ func (s *ConnectivityRuleTestSuite) SetupTest() {
 		Flags: []cli.Flag{
 			AutoConfirmFlag,
 		},
-	}
-
-	if !IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
-		err := toggleFeature(ConnectivityRuleFeatureFlag)
-		s.Require().NoError(err)
 	}
 }
 
@@ -120,10 +119,7 @@ func (s *ConnectivityRuleTestSuite) TestGetConnectivityRules() {
 	s.NoError(s.RunCmd("connectivity-rule", "list"))
 }
 
-// Note, anything after the bool flag will be ignored, and i think that's something we discussed earlier with ocld cmd
-// will need to test real cmd to see how it goes.
 func (s *ConnectivityRuleTestSuite) TestCreateConnectivityRule() {
-
 	// Test create error
 	s.mockCloudService.EXPECT().CreateConnectivityRule(gomock.Any(), gomock.Any()).Return(nil, errors.New("create error")).Times(1)
 	s.Error(s.RunCmd("connectivity-rule", "create",
