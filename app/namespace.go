@@ -515,7 +515,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 				&cli.StringSliceFlag{
 					Name:     namespaceRegionFlagName,
-					Usage:    "Create namespace in specified regions; if multiple regions are selected, the first one will be the active region. See 'tcld account list-regions' to get a list of available regions for your account",
+					Usage:    "Create namespace in specified regions; if two regions are entered, the first one will be the active region. See 'tcld account list-regions' to get a list of available regions for your account. Regions should be in the format of 'aws-us-east-1' or 'gcp-us-central1' with the cloud provider prefix before the region name.",
 					Aliases:  []string{"re"},
 					Required: true,
 				},
@@ -565,9 +565,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				codecIncludeCredentialsFlag,
 				&cli.StringFlag{
 					Name:    cloudProviderFlagName,
-					Usage:   `Cloud provider for the namespace to be created for, currently support [aws, gcp].  For this version, if not specified, we default to aws`,
+					Usage:   `Cloud provider for the namespace to be created for, currently support [aws, gcp]. If cloud provider not prefixed for region flag, this flag is used. If neither are provided, we default to aws`,
 					Aliases: []string{"cp"},
-					// this is a temporary solution, we will have a follow up version update to make the cloud provider mandatory
+					// this is a temporary solution.
 					Value: CloudProviderAWS,
 				},
 			},
