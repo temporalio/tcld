@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/mail"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -156,6 +157,12 @@ var (
 		Name:     sinkRegionFlagName,
 		Usage:    "The region to use for the request, if not set the server will use the namespace's region",
 		Aliases:  []string{"re"},
+		Required: false,
+	}
+	connectivityRuleIdsFlag = &cli.StringSliceFlag{
+		Name:     connectivityRuleIdsFlagName,
+		Usage:    "The list of connectivity rule IDs, can be used in create namespace, update namespace and get list of connectivity rules. example: --ids id1 --ids id2 --ids id3",
+		Aliases:  []string{"ids"},
 		Required: false,
 	}
 )
@@ -497,6 +504,82 @@ func ReadCertFilters(ctx *cli.Context) ([]byte, error) {
 	return certFilterBytes, nil
 }
 
+func getCreateNamespaceFlags() []cli.Flag {
+	baseFlags := []cli.Flag{
+		RequestIDFlag,
+		CaCertificateFlag,
+		&cli.StringFlag{
+			Name:     NamespaceFlagName,
+			Usage:    "The namespace hosted on temporal cloud",
+			Aliases:  []string{"n"},
+			Required: true,
+		},
+		&cli.StringSliceFlag{
+			Name:     namespaceRegionFlagName,
+			Usage:    "Create namespace in specified regions; if multiple regions are selected, the first one will be the active region. See 'tcld account list-regions' to get a list of available regions for your account",
+			Aliases:  []string{"re"},
+			Required: true,
+		},
+		&cli.IntFlag{
+			Name:    RetentionDaysFlagName,
+			Usage:   "The retention of the namespace in days",
+			Aliases: []string{"rd"},
+			Value:   30,
+		},
+		&cli.StringFlag{
+			Name:  authMethodFlagName,
+			Usage: "The authentication method to use for the namespace (e.g. 'mtls', 'api_key')",
+			Value: AuthMethodMTLS,
+		},
+		&cli.PathFlag{
+			Name:    CaCertificateFileFlagName,
+			Usage:   "The path to the ca pem file",
+			Aliases: []string{"cf"},
+		},
+		&cli.PathFlag{
+			Name:    certificateFilterFileFlagName,
+			Usage:   `Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
+			Aliases: []string{"cff"},
+		},
+		&cli.StringFlag{
+			Name:    certificateFilterInputFlagName,
+			Usage:   `JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
+			Aliases: []string{"cfi"},
+		},
+		&cli.StringSliceFlag{
+			Name:    searchAttributeFlagName,
+			Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
+			Aliases: []string{"sa"},
+		},
+		&cli.StringSliceFlag{
+			Name:    userNamespacePermissionFlagName,
+			Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
+			Aliases: []string{"p"},
+		},
+		&cli.BoolFlag{
+			Name:    enableDeleteProtectionFlagName,
+			Usage:   "Enable delete protection on the namespace",
+			Aliases: []string{"edp"},
+		},
+		codecEndpointFlag,
+		codecPassAccessTokenFlag,
+		codecIncludeCredentialsFlag,
+		&cli.StringFlag{
+			Name:    cloudProviderFlagName,
+			Usage:   `Cloud provider for the namespace to be created for, currently support [aws, gcp].  For this version, if not specified, we default to aws`,
+			Aliases: []string{"cp"},
+			// this is a temporary solution, we will have a follow up version update to make the cloud provider mandatory
+			Value: CloudProviderAWS,
+		},
+	}
+
+	if IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
+		baseFlags = append(baseFlags, connectivityRuleIdsFlag)
+	}
+
+	return baseFlags
+}
+
 func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut, error) {
 	var c *NamespaceClient
 	subCommands := []*cli.Command{
@@ -504,73 +587,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Name:    "create",
 			Usage:   "Create a temporal namespace",
 			Aliases: []string{"c"},
-			Flags: []cli.Flag{
-				RequestIDFlag,
-				CaCertificateFlag,
-				&cli.StringFlag{
-					Name:     NamespaceFlagName,
-					Usage:    "The namespace hosted on temporal cloud",
-					Aliases:  []string{"n"},
-					Required: true,
-				},
-				&cli.StringSliceFlag{
-					Name:     namespaceRegionFlagName,
-					Usage:    "Create namespace in specified regions; if multiple regions are selected, the first one will be the active region. See 'tcld account list-regions' to get a list of available regions for your account",
-					Aliases:  []string{"re"},
-					Required: true,
-				},
-				&cli.IntFlag{
-					Name:    RetentionDaysFlagName,
-					Usage:   "The retention of the namespace in days",
-					Aliases: []string{"rd"},
-					Value:   30,
-				},
-				&cli.StringFlag{
-					Name:  authMethodFlagName,
-					Usage: "The authentication method to use for the namespace (e.g. 'mtls', 'api_key')",
-					Value: AuthMethodMTLS,
-				},
-				&cli.PathFlag{
-					Name:    CaCertificateFileFlagName,
-					Usage:   "The path to the ca pem file",
-					Aliases: []string{"cf"},
-				},
-				&cli.PathFlag{
-					Name:    certificateFilterFileFlagName,
-					Usage:   `Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
-					Aliases: []string{"cff"},
-				},
-				&cli.StringFlag{
-					Name:    certificateFilterInputFlagName,
-					Usage:   `JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
-					Aliases: []string{"cfi"},
-				},
-				&cli.StringSliceFlag{
-					Name:    searchAttributeFlagName,
-					Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
-					Aliases: []string{"sa"},
-				},
-				&cli.StringSliceFlag{
-					Name:    userNamespacePermissionFlagName,
-					Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
-					Aliases: []string{"p"},
-				},
-				&cli.BoolFlag{
-					Name:    enableDeleteProtectionFlagName,
-					Usage:   "Enable delete protection on the namespace",
-					Aliases: []string{"edp"},
-				},
-				codecEndpointFlag,
-				codecPassAccessTokenFlag,
-				codecIncludeCredentialsFlag,
-				&cli.StringFlag{
-					Name:    cloudProviderFlagName,
-					Usage:   `Cloud provider for the namespace to be created for, currently support [aws, gcp].  For this version, if not specified, we default to aws`,
-					Aliases: []string{"cp"},
-					// this is a temporary solution, we will have a follow up version update to make the cloud provider mandatory
-					Value: CloudProviderAWS,
-				},
-			},
+			Flags:   getCreateNamespaceFlags(),
 			Action: func(ctx *cli.Context) error {
 				n := &namespace.Namespace{
 					RequestId: ctx.String(RequestIDFlagName),
@@ -720,6 +737,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 				n.Spec.Lifecycle = &namespace.LifecycleSpec{
 					EnableDeleteProtection: ctx.Bool(enableDeleteProtectionFlagName),
+				}
+
+				connectivityRuleIds := ctx.StringSlice(connectivityRuleIdsFlagName)
+				if len(connectivityRuleIds) > 0 {
+					n.Spec.ConnectivityRuleIds = connectivityRuleIds
 				}
 
 				return c.createNamespace(n, unp)
@@ -2113,7 +2135,37 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 	exportGCSCommands.Subcommands = append(exportGCSCommands.Subcommands, exportGeneralCommands...)
 	exportCommand.Subcommands = append(exportCommand.Subcommands, exportGCSCommands)
 
+	coonectivityRuleCommand := &cli.Command{
+		Name:    "set-connectivity-rules",
+		Usage:   "set the connectivity rules for a namespace",
+		Aliases: []string{"scrs"},
+		Flags: []cli.Flag{
+			NamespaceFlag,
+			connectivityRuleIdsFlag,
+		},
+		Action: func(ctx *cli.Context) error {
+			n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+			if err != nil {
+				return err
+			}
+			connectivityRuleIds := ctx.StringSlice(connectivityRuleIdsFlagName)
+			if len(connectivityRuleIds) == 0 {
+				return fmt.Errorf("connectivity rule ids must be provided")
+			}
+			if reflect.DeepEqual(n.Spec.ConnectivityRuleIds, connectivityRuleIds) {
+				return fmt.Errorf("no connectivity rule changes to apply")
+			}
+
+			n.Spec.ConnectivityRuleIds = connectivityRuleIds
+			return c.updateNamespace(ctx, n)
+		},
+	}
+
 	subCommands = append(subCommands, exportCommand)
+
+	if IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
+		subCommands = append(subCommands, coonectivityRuleCommand)
+	}
 
 	command := &cli.Command{
 		Name:    "namespace",
