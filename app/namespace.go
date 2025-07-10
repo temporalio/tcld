@@ -2142,6 +2142,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		Flags: []cli.Flag{
 			NamespaceFlag,
 			connectivityRuleIdsFlag,
+			&cli.BoolFlag{
+				Name:  "remove-all",
+				Usage: "Acknowledge that all connectivity rules will be removed, enabling connectivity from any source",
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			n, err := c.getNamespace(ctx.String(NamespaceFlagName))
@@ -2149,8 +2153,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				return err
 			}
 			connectivityRuleIds := ctx.StringSlice(connectivityRuleIdsFlagName)
-			if len(connectivityRuleIds) == 0 {
-				return fmt.Errorf("connectivity rule ids must be provided")
+			if len(connectivityRuleIds) == 0 && !ctx.Bool("remove-all") {
+				return fmt.Errorf("connectivity rule ids must be provided or --remove-all must be used")
+			}
+			if ctx.Bool("remove-all") && len(connectivityRuleIds) > 0 {
+				return fmt.Errorf("connectivity rule ids must not be provided when --remove-all is used")
 			}
 			if reflect.DeepEqual(n.Spec.ConnectivityRuleIds, connectivityRuleIds) {
 				return fmt.Errorf("no connectivity rule changes to apply")
