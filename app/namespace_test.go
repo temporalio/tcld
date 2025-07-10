@@ -2854,9 +2854,29 @@ func (s *NamespaceTestSuite) TestSetConnectivityRules() {
 			expectErr: true,
 		},
 		{
-			name:      "missing ids",
-			args:      []string{"namespace", "set-connectivity-rules", "--namespace", ns},
-			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			name: "missing ids",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectErr: true,
+		},
+		{
+			name: "remove all",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--remove-all"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.ConnectivityRuleIds = nil
+			},
+		},
+		{
+			name: "remove all with ids",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--connectivity-rule-ids", "cr-1", "--remove-all"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
 			expectErr: true,
 		},
 	}
