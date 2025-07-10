@@ -2157,6 +2157,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			}
 
 			n.Spec.ConnectivityRuleIds = connectivityRuleIds
+			n.Spec.PassiveRegionIds = []*common.RegionID{}
 			return c.updateNamespace(ctx, n)
 		},
 	}
