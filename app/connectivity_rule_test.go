@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/connectivityrule/v1"
-	regionpb "github.com/temporalio/tcld/protogen/api/cloud/region/v1"
 	cloudservicemock "github.com/temporalio/tcld/protogen/apimock/cloudservice/v1"
 	"github.com/urfave/cli/v2"
 )
@@ -64,9 +63,8 @@ func getExampleConnectivityRule() *cloudservice.GetConnectivityRuleResponse {
 			Spec: &connectivityrule.ConnectivityRuleSpec{
 				ConnectionType: &connectivityrule.ConnectivityRuleSpec_PrivateRule{
 					PrivateRule: &connectivityrule.PrivateConnectivityRule{
-						ConnectionId:  "test-connection-id",
-						Region:        "us-west-2",
-						CloudProvider: regionpb.CLOUD_PROVIDER_AWS,
+						ConnectionId: "test-connection-id",
+						Region:       "aws-us-west-2",
 					},
 				},
 			},
@@ -81,9 +79,8 @@ func getExampleConnectivityRules() *cloudservice.GetConnectivityRulesResponse {
 			Spec: &connectivityrule.ConnectivityRuleSpec{
 				ConnectionType: &connectivityrule.ConnectivityRuleSpec_PrivateRule{
 					PrivateRule: &connectivityrule.PrivateConnectivityRule{
-						ConnectionId:  "test-connection-id",
-						Region:        "us-west-2",
-						CloudProvider: regionpb.CLOUD_PROVIDER_AWS,
+						ConnectionId: "test-connection-id",
+						Region:       "aws-us-west-2",
 					},
 				},
 			},
@@ -124,15 +121,14 @@ func (s *ConnectivityRuleTestSuite) TestCreateConnectivityRule() {
 	s.mockCloudService.EXPECT().CreateConnectivityRule(gomock.Any(), gomock.Any()).Return(nil, errors.New("create error")).Times(1)
 	s.Error(s.RunCmd("connectivity-rule", "create",
 		"--connection-id", "test-connection-id",
-		"--region", "us-west-2",
-		"--cloud-provider", "aws", "--connectivity-type", "private"))
+		"--region", "aws-us-west-2", "--connectivity-type", "private"))
 
 	// Test successful create with AWS
 	s.mockCloudService.EXPECT().CreateConnectivityRule(gomock.Any(), gomock.Any()).Return(&cloudservice.CreateConnectivityRuleResponse{
 		ConnectivityRuleId: "test-connection-id",
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("connectivity-rule", "create",
-		"--connection-id", "test-connection-id", "--region", "us-west-2", "--cloud-provider", "aws", "--connectivity-type", "private"))
+		"--connection-id", "test-connection-id", "--region", "aws-us-west-2", "--connectivity-type", "private"))
 
 	// Test successful create with GCP
 	s.mockCloudService.EXPECT().CreateConnectivityRule(gomock.Any(), gomock.Any()).Return(&cloudservice.CreateConnectivityRuleResponse{
@@ -140,17 +136,17 @@ func (s *ConnectivityRuleTestSuite) TestCreateConnectivityRule() {
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("connectivity-rule", "create",
 		"--connection-id", "test-connection-id",
-		"--region", "us-west-2", "--cloud-provider", "gcp",
+		"--region", "gcp-us-west2",
 		"--gcp-project-id", "test-project-id", "--connectivity-type", "private"))
 
 	// Test invalid cloud provider
 	s.Error(s.RunCmd("connectivity-rule", "create",
-		"--connection-id", "test-connection-id", "--region", "us-west-2", "--cloud-provider", "invalid", "--connectivity-type", "private"))
+		"--connection-id", "test-connection-id", "--region", "gcp-us-west-2", "--connectivity-type", "private"))
 
 	// Test missing GCP project ID
 	s.Error(s.RunCmd("connectivity-rule", "create",
-		"--connection-id", "test-connection-id", "--region", "us-west-2",
-		"--cloud-provider", "gcp", "--connectivity-type", "private"))
+		"--connection-id", "test-connection-id", "--region", "gcp-us-west2",
+		"--connectivity-type", "private"))
 
 	// Test public connectivity rule
 	s.mockCloudService.EXPECT().CreateConnectivityRule(gomock.Any(), gomock.Any()).Return(&cloudservice.CreateConnectivityRuleResponse{

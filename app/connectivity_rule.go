@@ -7,6 +7,7 @@ import (
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/connectivityrule/v1"
 	regionpb "github.com/temporalio/tcld/protogen/api/cloud/region/v1"
+	"github.com/temporalio/tcld/protogen/api/common/v1"
 	"github.com/urfave/cli/v2"
 )
 
@@ -55,10 +56,9 @@ func (c *ConnectivityRuleClient) createConnectivityRule(connectivityType, connec
 		spec = connectivityrule.ConnectivityRuleSpec{
 			ConnectionType: &connectivityrule.ConnectivityRuleSpec_PrivateRule{
 				PrivateRule: &connectivityrule.PrivateConnectivityRule{
-					ConnectionId:  connectionId,
-					Region:        region,
-					CloudProvider: cloudProvider,
-					GcpProjectId:  gcpProjectId,
+					ConnectionId: connectionId,
+					Region:       region,
+					GcpProjectId: gcpProjectId,
 				},
 			},
 		}
@@ -96,12 +96,6 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 		Name:     regionFlagName,
 		Aliases:  []string{"r"},
 		Usage:    "The region of the connection",
-		Required: false,
-	}
-	cloudProviderFlag := &cli.StringFlag{
-		Name:     cloudProviderFlagName,
-		Aliases:  []string{"cp"},
-		Usage:    "The cloud provider of the connection, currently only support 'aws' and 'gcp'",
 		Required: false,
 	}
 	gcpProjectIdFlag := &cli.StringFlag{
@@ -150,7 +144,6 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 						connectivityTypeFlag,
 						connectionIdFlag,
 						regionFlag,
-						cloudProviderFlag,
 						gcpProjectIdFlag,
 					},
 					Action: func(ctx *cli.Context) error {
@@ -158,7 +151,6 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 							ctx.String(connectivityTypeFlagName),
 							ctx.String(connectionIdFlagName),
 							ctx.String(regionFlagName),
-							ctx.String(cloudProviderFlagName),
 							ctx.String(gcpProjectIdFlagName))
 						if err != nil {
 							return err
@@ -237,7 +229,7 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 	}, nil
 }
 
-func validateParamAndConvert(connectivityType, connectionId, region, cloudProvider, gcpProjectId string) (regionpb.Region_CloudProvider, string, error) {
+func validateParamAndConvert(connectivityType, connectionId, region, gcpProjectId string) (regionpb.Region_CloudProvider, string, error) {
 	switch connectivityType {
 	case "private":
 		if connectionId == "" {
@@ -246,21 +238,22 @@ func validateParamAndConvert(connectivityType, connectionId, region, cloudProvid
 		if region == "" {
 			return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", fmt.Errorf("must provide region for private connectivity rule")
 		}
-		if cloudProvider == "" {
-			return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", fmt.Errorf("must provide cloud provider for private connectivity rule")
+		regionID, err := regionIDFromString(region)
+		if err != nil {
+			return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", fmt.Errorf("invalid region: %w", err)
 		}
 
 		var cp regionpb.Region_CloudProvider
-		switch cloudProvider {
-		case "aws":
+		switch regionID.Provider {
+		case common.CLOUD_PROVIDER_AWS:
 			cp = regionpb.CLOUD_PROVIDER_AWS
-		case "gcp":
+		case common.CLOUD_PROVIDER_GCP:
 			if gcpProjectId == "" {
 				return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", fmt.Errorf("gcp project ID is required if the cloud provider is 'gcp'")
 			}
 			cp = regionpb.CLOUD_PROVIDER_GCP
 		default:
-			return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", fmt.Errorf("unknown or unsupported cloud provider: %s", cloudProvider)
+			return regionpb.CLOUD_PROVIDER_UNSPECIFIED, "", fmt.Errorf("unknown or unsupported cloud provider in region: %s", region)
 		}
 		return cp, gcpProjectId, nil
 	case "public":

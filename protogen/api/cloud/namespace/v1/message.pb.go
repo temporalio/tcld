@@ -721,7 +721,7 @@ type NamespaceSpec struct {
 	// temporal:versioning:min_version=v0.4.0
 	HighAvailability *HighAvailabilitySpec `protobuf:"bytes,10,opt,name=high_availability,json=highAvailability,proto3" json:"high_availability,omitempty"`
 	// The existing connectivity rule ids for the namespace.
-	// temporal:versioning:min_version=v0.5.1
+	// temporal:versioning:min_version=prerelease
 	// temporal:dev
 	ConnectivityRuleIds []string `protobuf:"bytes,11,rep,name=connectivity_rule_ids,json=connectivityRuleIds,proto3" json:"connectivity_rule_ids,omitempty"`
 }
