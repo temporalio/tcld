@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/connectivityrule/v1"
-	regionpb "github.com/temporalio/tcld/protogen/api/cloud/region/v1"
 	cloudservicemock "github.com/temporalio/tcld/protogen/apimock/cloudservice/v1"
 	"github.com/urfave/cli/v2"
 )
@@ -64,9 +63,8 @@ func getExampleConnectivityRule() *cloudservice.GetConnectivityRuleResponse {
 			Spec: &connectivityrule.ConnectivityRuleSpec{
 				ConnectionType: &connectivityrule.ConnectivityRuleSpec_PrivateRule{
 					PrivateRule: &connectivityrule.PrivateConnectivityRule{
-						ConnectionId:  "test-connection-id",
-						Region:        "us-west-2",
-						CloudProvider: regionpb.CLOUD_PROVIDER_AWS,
+						ConnectionId: "test-connection-id",
+						Region:       "aws-us-west-2",
 					},
 				},
 			},
@@ -81,9 +79,8 @@ func getExampleConnectivityRules() *cloudservice.GetConnectivityRulesResponse {
 			Spec: &connectivityrule.ConnectivityRuleSpec{
 				ConnectionType: &connectivityrule.ConnectivityRuleSpec_PrivateRule{
 					PrivateRule: &connectivityrule.PrivateConnectivityRule{
-						ConnectionId:  "test-connection-id",
-						Region:        "us-west-2",
-						CloudProvider: regionpb.CLOUD_PROVIDER_AWS,
+						ConnectionId: "test-connection-id",
+						Region:       "aws-us-west-2",
 					},
 				},
 			},

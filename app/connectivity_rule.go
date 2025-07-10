@@ -55,10 +55,9 @@ func (c *ConnectivityRuleClient) createConnectivityRule(connectivityType, connec
 		spec = connectivityrule.ConnectivityRuleSpec{
 			ConnectionType: &connectivityrule.ConnectivityRuleSpec_PrivateRule{
 				PrivateRule: &connectivityrule.PrivateConnectivityRule{
-					ConnectionId:  connectionId,
-					Region:        region,
-					CloudProvider: cloudProvider,
-					GcpProjectId:  gcpProjectId,
+					ConnectionId: connectionId,
+					Region:       region,
+					GcpProjectId: gcpProjectId,
 				},
 			},
 		}
