@@ -1734,9 +1734,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					},
 					Action: func(ctx *cli.Context) error {
 						tags := ctx.StringSlice("tag")
-						if len(tags) == 0 {
-							return fmt.Errorf("at least one --tag must be specified")
-						}
 
 						tagsToAdd := make(map[string]string)
 						for _, tag := range tags {
@@ -1766,10 +1763,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					},
 					Action: func(ctx *cli.Context) error {
 						keysToRemove := ctx.StringSlice("tag-key")
-						if len(keysToRemove) == 0 {
-							return fmt.Errorf("at least one --tag-key must be specified")
-						}
-
 						return c.updateNamespaceTags(ctx, nil, keysToRemove)
 					},
 				},
