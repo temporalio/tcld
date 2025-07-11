@@ -6419,7 +6419,6 @@ func (m *AbortMigrationResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
-// temporal:dev
 type CreateConnectivityRuleRequest struct {
 	Spec *v18.ConnectivityRuleSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
 	// The id to use for this async operation.
@@ -6473,7 +6472,6 @@ func (m *CreateConnectivityRuleRequest) GetAsyncOperationId() string {
 	return ""
 }
 
-// temporal:dev
 type CreateConnectivityRuleResponse struct {
 	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
 	// The async operation
