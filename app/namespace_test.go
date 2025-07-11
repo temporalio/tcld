@@ -42,8 +42,10 @@ type NamespaceTestSuite struct {
 }
 
 func (s *NamespaceTestSuite) SetupTest() {
-	err := toggleFeature(GCPSinkFeatureFlag)
-	s.Require().NoError(err)
+	if !IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
+		err := toggleFeature(ConnectivityRuleFeatureFlag)
+		s.Require().NoError(err)
+	}
 
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = namespaceservicemock.NewMockNamespaceServiceClient(s.mockCtrl)
@@ -2805,6 +2807,110 @@ func (s *NamespaceTestSuite) TestRemoveNamespaceRegion() {
 						ResourceVersion: "ver1",
 					},
 				}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestSetConnectivityRules() {
+	ns := "ns1"
+	resourceVersion := "ver1"
+	initialRules := []string{"cr-1"}
+	newRules := []string{"cr-2", "cr-3"}
+
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)
+
+	tests := []struct {
+		name         string
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{
+		{
+			name: "success",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--connectivity-rule-ids", "cr-2", "--connectivity-rule-ids", "cr-3"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.ConnectivityRuleIds = newRules
+			},
+		},
+		{
+			name: "no change",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--connectivity-rule-ids", "cr-1"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectErr: true,
+		},
+		{
+			name: "missing ids",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectErr: true,
+		},
+		{
+			name: "remove all",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--remove-all"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.ConnectivityRuleIds = nil
+			},
+		},
+		{
+			name: "remove all with ids",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--connectivity-rule-ids", "cr-1", "--remove-all"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						ConnectivityRuleIds: initialRules,
+					},
+					ResourceVersion: resourceVersion,
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Namespace.Spec)
+				req := namespaceservice.UpdateNamespaceRequest{
+					Namespace:       ns,
+					Spec:            &spec,
+					ResourceVersion: getResp.Namespace.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.UpdateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
 			}
 
 			err := s.RunCmd(tc.args...)

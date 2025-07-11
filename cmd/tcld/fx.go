@@ -27,6 +27,7 @@ func fxOptions() fx.Option {
 			app.NewServiceAccountCommand,
 			app.NewNexusCommand,
 			app.NewMigrationCommand,
+			app.NewConnectivityRuleCommand,
 			func() app.GetNamespaceClientFn {
 				return app.GetNamespaceClient
 			},
@@ -54,6 +55,7 @@ func fxOptions() fx.Option {
 			func() app.GetMigrationClientFn {
 				return app.GetMigrationClient
 			},
+			func() app.GetConnectivityRuleClientFn { return app.GetConnectivityRuleClient },
 		),
 		fx.Invoke(func(app *cli.App, shutdowner fx.Shutdowner) error {
 			err := app.Run(os.Args)

@@ -25,7 +25,7 @@ const (
 	CommitHeader                  = "tcld-commit"
 	TemporalCloudAPIVersionHeader = "temporal-cloud-api-version"
 	LegacyTemporalCloudAPIVersion = "2025-01-01-00"
-	TemporalCloudAPIVersion       = "v0.4.0"
+	TemporalCloudAPIVersion       = "v0.5.1"
 )
 
 var (
