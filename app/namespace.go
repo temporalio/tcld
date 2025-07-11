@@ -1714,41 +1714,65 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			},
 		},
 		{
-			Name:    "update-tags",
-			Usage:   "Add new tags, remove existing tags or update the value of an existing tag key",
-			Aliases: []string{"ut"},
-			Flags: []cli.Flag{
-				NamespaceFlag,
-				RequestIDFlag,
-				&cli.StringSliceFlag{
-					Name:    "tag-to-add",
-					Usage:   "Add new or update existing namespace tags (format: key=value). Flag can be used multiple times.",
-					Aliases: []string{"ta"},
+			Name:    "tags",
+			Usage:   "Manage namespace tags",
+			Aliases: []string{"t"},
+			Subcommands: []*cli.Command{
+				{
+					Name:    "upsert",
+					Usage:   "Add new tags or update existing tag values",
+					Aliases: []string{"u"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RequestIDFlag,
+						&cli.StringSliceFlag{
+							Name:     "tag",
+							Usage:    "Add new or update existing namespace tags (format: key=value). Flag can be used multiple times.",
+							Aliases:  []string{"t"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						tags := ctx.StringSlice("tag")
+						if len(tags) == 0 {
+							return fmt.Errorf("at least one --tag must be specified")
+						}
+
+						tagsToAdd := make(map[string]string)
+						for _, tag := range tags {
+							parts := strings.Split(tag, "=")
+							if len(parts) != 2 {
+								return fmt.Errorf("invalid tag format '%s', must be 'key=value'", tag)
+							}
+							tagsToAdd[parts[0]] = parts[1]
+						}
+
+						return c.updateNamespaceTags(ctx, tagsToAdd, nil)
+					},
 				},
-				&cli.StringSliceFlag{
-					Name:    "tag-to-remove",
-					Usage:   "Remove namespace tags by key. Flag can be used multiple times.",
-					Aliases: []string{"tr"},
+				{
+					Name:    "remove",
+					Usage:   "Remove existing tags by key",
+					Aliases: []string{"rm"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RequestIDFlag,
+						&cli.StringSliceFlag{
+							Name:     "tag-key",
+							Usage:    "Remove namespace tags by key. Flag can be used multiple times.",
+							Aliases:  []string{"tk"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						keysToRemove := ctx.StringSlice("tag-key")
+						if len(keysToRemove) == 0 {
+							return fmt.Errorf("at least one --tag-key must be specified")
+						}
+
+						return c.updateNamespaceTags(ctx, nil, keysToRemove)
+					},
 				},
-			},
-			Action: func(ctx *cli.Context) error {
-				tagsToAdd := ctx.StringSlice("tag-to-add")
-				tagsToRemove := ctx.StringSlice("tag-to-remove")
-
-				if len(tagsToAdd) == 0 && len(tagsToRemove) == 0 {
-					return fmt.Errorf("at least one --tag-to-add or --tag-to-remove must be specified")
-				}
-
-				tagsToAddMap := make(map[string]string)
-				for _, tag := range tagsToAdd {
-					parts := strings.Split(tag, "=")
-					if len(parts) != 2 {
-						return fmt.Errorf("invalid tag format '%s', must be 'key=value'", tag)
-					}
-					tagsToAddMap[parts[0]] = parts[1]
-				}
-
-				return c.updateNamespaceTags(ctx, tagsToAddMap, tagsToRemove)
 			},
 		},
 	}
