@@ -360,6 +360,24 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 	return PrintProto(res)
 }
 
+func (c *NamespaceClient) updateNamespaceTags(ctx *cli.Context, tagsToAdd map[string]string, tagsToRemove []string) error {
+	namespace := ctx.String(NamespaceFlagName)
+	if len(namespace) == 0 {
+		return fmt.Errorf("namespace is required")
+	}
+
+	res, err := c.cloudAPIClient.UpdateNamespaceTags(c.ctx, &cloudservice.UpdateNamespaceTagsRequest{
+		Namespace:        namespace,
+		TagsToAdd:        tagsToAdd,
+		TagsToRemove:     tagsToRemove,
+		AsyncOperationId: ctx.String(RequestIDFlagName),
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res.GetAsyncOperation())
+}
+
 func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *namespace.Namespace, existingName string, newName string) error {
 	resourceVersion := n.ResourceVersion
 	if v := ctx.String(ResourceVersionFlagName); v != "" {
@@ -1693,6 +1711,61 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 				fmt.Println("No changes to apply to Namespace:", ctx.String(NamespaceFlagName))
 				return nil
+			},
+		},
+		{
+			Name:    "tags",
+			Usage:   "Manage namespace tags",
+			Aliases: []string{"t"},
+			Subcommands: []*cli.Command{
+				{
+					Name:    "upsert",
+					Usage:   "Add new tags or update existing tag values",
+					Aliases: []string{"u"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RequestIDFlag,
+						&cli.StringSliceFlag{
+							Name:     "tag",
+							Usage:    "Add new or update existing namespace tags (format: key=value). Flag can be used multiple times.",
+							Aliases:  []string{"t"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						tags := ctx.StringSlice("tag")
+
+						tagsToAdd := make(map[string]string)
+						for _, tag := range tags {
+							parts := strings.Split(tag, "=")
+							if len(parts) != 2 {
+								return fmt.Errorf("invalid tag format '%s', must be 'key=value'", tag)
+							}
+							tagsToAdd[parts[0]] = parts[1]
+						}
+
+						return c.updateNamespaceTags(ctx, tagsToAdd, nil)
+					},
+				},
+				{
+					Name:    "remove",
+					Usage:   "Remove existing tags by key",
+					Aliases: []string{"rm"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RequestIDFlag,
+						&cli.StringSliceFlag{
+							Name:     "tag-key",
+							Usage:    "Remove namespace tags by key. Flag can be used multiple times.",
+							Aliases:  []string{"tk"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						keysToRemove := ctx.StringSlice("tag-key")
+						return c.updateNamespaceTags(ctx, nil, keysToRemove)
+					},
+				},
 			},
 		},
 	}
