@@ -136,7 +136,7 @@ func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string, accountRol
 	}
 	aRole := accountRoleToAccess(accountRole)
 	if aRole == nil {
-		return cli.Exit(fmt.Sprintf("Invalid account role: %s", accountRole), 1)
+		return fmt.Errorf("Invalid account role: %s", accountRole)
 	}
 	group.Group.Spec.Access.AccountAccess = aRole
 	if accountRole == "none" {
@@ -147,7 +147,7 @@ func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string, accountRol
 	for _, role := range nsRoles {
 		name, access := nsRoleToAccess(role)
 		if access == nil {
-			return cli.Exit(fmt.Sprintf("Invalid namespace role: %s", role), 1)
+			return fmt.Errorf("Invalid namespace role: %s", role)
 		}
 		nsAccess[name] = access
 	}
@@ -165,6 +165,149 @@ func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string, accountRol
 		if isNothingChangedErr(ctx, err) {
 			return nil
 		}
+		return err
+	}
+
+	return PrintProto(resp.GetAsyncOperation())
+}
+
+// createGroup creates a new user group with the specified display name and account role
+func (c *UserGroupClient) createGroup(_ *cli.Context, displayName string, accountRole string) error {
+	aRole := accountRoleToAccess(accountRole)
+	if aRole == nil {
+		return fmt.Errorf("Invalid account role: %s", accountRole)
+	}
+
+	spec := &identity.UserGroupSpec{
+		DisplayName: displayName,
+		Access: &identity.Access{
+			AccountAccess: aRole,
+		},
+		GroupType: &identity.UserGroupSpec_CloudGroup{
+			CloudGroup: &identity.CloudGroupSpec{},
+		},
+	}
+
+	resp, err := c.client.CreateUserGroup(c.ctx, &cloudsvc.CreateUserGroupRequest{
+		Spec: spec,
+	})
+	if err != nil {
+		return err
+	}
+
+	return PrintProto(resp.GetAsyncOperation())
+}
+
+// getUserIDByEmail gets a user ID by email using the auth service API
+func (c *UserGroupClient) getUserIDByEmail(email string) (string, error) {
+	res, err := c.authClient.GetUser(c.ctx, &authservice.GetUserRequest{
+		UserEmail: email,
+	})
+	if err != nil {
+		return "", fmt.Errorf("unable to get user: %w", err)
+	}
+	if res.User == nil || res.User.Id == "" {
+		return "", fmt.Errorf("user not found for email: %s", email)
+	}
+	return res.User.Id, nil
+}
+
+// addUsersToGroup adds users to a group using the cloud services API
+func (c *UserGroupClient) addUsersToGroup(ctx *cli.Context, groupID string, emails []string) error {
+	for _, email := range emails {
+		userID, err := c.getUserIDByEmail(email)
+		if err != nil {
+			return fmt.Errorf("unable to add user %s to group: %w", email, err)
+		}
+
+		req := &cloudsvc.AddUserGroupMemberRequest{
+			GroupId: groupID,
+			MemberId: &identity.UserGroupMemberId{
+				MemberType: &identity.UserGroupMemberId_UserId{
+					UserId: userID,
+				},
+			},
+			AsyncOperationId: ctx.String(RequestIDFlagName),
+		}
+
+		resp, err := c.client.AddUserGroupMember(c.ctx, req)
+		if err != nil {
+			return fmt.Errorf("unable to add user %s to group: %w", email, err)
+		}
+
+		if err := PrintProto(resp.GetAsyncOperation()); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// removeUsersFromGroup removes users from a group using the cloud services API
+func (c *UserGroupClient) removeUsersFromGroup(ctx *cli.Context, groupID string, emails []string) error {
+	for _, email := range emails {
+		userID, err := c.getUserIDByEmail(email)
+		if err != nil {
+			return fmt.Errorf("unable to remove user %s from group: %w", email, err)
+		}
+
+		req := &cloudsvc.RemoveUserGroupMemberRequest{
+			GroupId: groupID,
+			MemberId: &identity.UserGroupMemberId{
+				MemberType: &identity.UserGroupMemberId_UserId{
+					UserId: userID,
+				},
+			},
+			AsyncOperationId: ctx.String(RequestIDFlagName),
+		}
+
+		resp, err := c.client.RemoveUserGroupMember(c.ctx, req)
+		if err != nil {
+			return fmt.Errorf("unable to remove user %s from group: %w", email, err)
+		}
+
+		if err := PrintProto(resp.GetAsyncOperation()); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// listGroupMembers lists the members of a group using the cloud services API
+func (c *UserGroupClient) listGroupMembers(
+	pageToken string,
+	pageSize int,
+	groupID string,
+) error {
+	members, err := c.client.GetUserGroupMembers(c.ctx, &cloudsvc.GetUserGroupMembersRequest{
+		PageToken: pageToken,
+		PageSize:  int32(pageSize),
+		GroupId:   groupID,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return PrintProto(members)
+}
+
+// deleteGroup deletes a user group using the cloud services API
+func (c *UserGroupClient) deleteGroup(ctx *cli.Context, groupID string) error {
+	group, err := c.client.GetUserGroup(c.ctx, &cloudsvc.GetUserGroupRequest{
+		GroupId: groupID,
+	})
+	if err != nil {
+		return err
+	}
+
+	req := &cloudsvc.DeleteUserGroupRequest{
+		GroupId:          groupID,
+		ResourceVersion:  group.Group.ResourceVersion,
+		AsyncOperationId: ctx.String(RequestIDFlagName),
+	}
+
+	resp, err := c.client.DeleteUserGroup(c.ctx, req)
+	if err != nil {
 		return err
 	}
 
@@ -198,6 +341,7 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 						&cli.IntFlag{
 							Name:    pageSizeFlagName,
 							Usage:   "number of groups to list",
+							Value:   10,
 							Aliases: []string{"s"},
 						},
 					},
@@ -217,7 +361,30 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 						},
 					},
 					Action: func(ctx *cli.Context) error {
+						if ctx.String(groupIDFlagName) == "" {
+							return fmt.Errorf("group ID is required")
+						}
 						return c.getGroup(ctx, ctx.String(groupIDFlagName))
+					},
+				},
+				{
+					Name:    "create",
+					Usage:   "Create a new user group",
+					Aliases: []string{"c"},
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:     "display-name",
+							Usage:    "display name for the group",
+							Required: true,
+						},
+						&cli.StringFlag{
+							Name:     accountRoleFlagName,
+							Usage:    "account role (admin, read, developer, owner, financeadmin, none)",
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						return c.createGroup(ctx, ctx.String("display-name"), ctx.String(accountRoleFlagName))
 					},
 				},
 				{
@@ -226,9 +393,10 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 					Aliases: []string{"sa"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
-							Name:    groupIDFlagName,
-							Usage:   "group ID",
-							Aliases: []string{"id"},
+							Name:     groupIDFlagName,
+							Usage:    "group ID",
+							Required: true,
+							Aliases:  []string{"id"},
 						},
 						&cli.StringFlag{
 							Name:    accountRoleFlagName,
@@ -243,6 +411,96 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 					},
 					Action: func(ctx *cli.Context) error {
 						return c.setAccess(ctx, ctx.String(groupIDFlagName), ctx.String(accountRoleFlagName), ctx.StringSlice(namespaceRoleFlagName))
+					},
+				},
+				{
+					Name:    "add-users",
+					Usage:   "Add users to a group",
+					Aliases: []string{"au"},
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:     groupIDFlagName,
+							Usage:    "group ID",
+							Aliases:  []string{"id"},
+							Required: true,
+						},
+						&cli.StringSliceFlag{
+							Name:     userEmailFlagName,
+							Usage:    "The email address of the user, you can supply this flag multiple times to add multiple users in a single request",
+							Aliases:  []string{"e"},
+							Required: true,
+						},
+						RequestIDFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						return c.addUsersToGroup(ctx, ctx.String(groupIDFlagName), ctx.StringSlice(userEmailFlagName))
+					},
+				},
+				{
+					Name:    "remove-users",
+					Usage:   "Remove users from a group",
+					Aliases: []string{"ru"},
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:     groupIDFlagName,
+							Usage:    "group ID",
+							Aliases:  []string{"id"},
+							Required: true,
+						},
+						&cli.StringSliceFlag{
+							Name:     userEmailFlagName,
+							Usage:    "The email address of the user, you can supply this flag multiple times to remove multiple users in a single request",
+							Aliases:  []string{"e"},
+							Required: true,
+						},
+						RequestIDFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						return c.removeUsersFromGroup(ctx, ctx.String(groupIDFlagName), ctx.StringSlice(userEmailFlagName))
+					},
+				},
+				{
+					Name:    "list-members",
+					Usage:   "List members of a group",
+					Aliases: []string{"lm"},
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:     groupIDFlagName,
+							Usage:    "group ID",
+							Required: true,
+							Aliases:  []string{"id"},
+						},
+						&cli.StringFlag{
+							Name:    pageTokenFlagName,
+							Usage:   "list members starting from this page token",
+							Aliases: []string{"p"},
+						},
+						&cli.IntFlag{
+							Name:    pageSizeFlagName,
+							Usage:   "number of members to list",
+							Value:   10,
+							Aliases: []string{"s"},
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						return c.listGroupMembers(ctx.String(pageTokenFlagName), ctx.Int(pageSizeFlagName), ctx.String(groupIDFlagName))
+					},
+				},
+				{
+					Name:    "delete",
+					Usage:   "Delete a user group",
+					Aliases: []string{"d"},
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:     groupIDFlagName,
+							Usage:    "group ID",
+							Aliases:  []string{"id"},
+							Required: true,
+						},
+						RequestIDFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						return c.deleteGroup(ctx, ctx.String(groupIDFlagName))
 					},
 				},
 			},
