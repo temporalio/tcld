@@ -1735,16 +1735,16 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Action: func(ctx *cli.Context) error {
 						tags := ctx.StringSlice("tag")
 
-						tagsToAdd := make(map[string]string)
+						tagsToUpsert := make(map[string]string)
 						for _, tag := range tags {
 							parts := strings.Split(tag, "=")
 							if len(parts) != 2 {
 								return fmt.Errorf("invalid tag format '%s', must be 'key=value'", tag)
 							}
-							tagsToAdd[parts[0]] = parts[1]
+							tagsToUpsert[parts[0]] = parts[1]
 						}
 
-						return c.updateNamespaceTags(ctx, tagsToAdd, nil)
+						return c.updateNamespaceTags(ctx, tagsToUpsert, nil)
 					},
 				},
 				{
