@@ -179,3 +179,20 @@ func (s *ConnectivityRuleTestSuite) TestDeleteConnectivityRule() {
 		Return(&cloudservice.DeleteConnectivityRuleResponse{}, nil).Times(1)
 	s.NoError(s.RunCmd("connectivity-rule", "delete", "--id", "test-rule-id"))
 }
+
+func (s *ConnectivityRuleTestSuite) TestGetNamespacesByConnectivityRule() {
+	// Test missing required flag (id)
+	s.Error(s.RunCmd("connectivity-rule", "get-namespaces-by-connectivity-rule"))
+
+	// Test get namespaces by connectivity rule error
+	s.mockCloudService.EXPECT().GetNamespacesByConnectivityRule(gomock.Any(), gomock.Any()).
+		Return(nil, errors.New("not found")).Times(1)
+	s.Error(s.RunCmd("connectivity-rule", "get-namespaces-by-connectivity-rule", "--id", "test-rule-id"))
+
+	// Test successful get namespaces by connectivity rule
+	s.mockCloudService.EXPECT().GetNamespacesByConnectivityRule(gomock.Any(), gomock.Any()).
+		Return(&cloudservice.GetNamespacesByConnectivityRuleResponse{
+			Namespaces: []string{"test-namespace-id"},
+		}, nil).Times(1)
+	s.NoError(s.RunCmd("connectivity-rule", "get-namespaces-by-connectivity-rule", "--id", "test-rule-id"))
+}

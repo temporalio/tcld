@@ -203,6 +203,24 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 					},
 				},
 				{
+					Name:        "get-namespaces-by-connectivity-rule",
+					Aliases:     []string{"gns"},
+					Usage:       "Get namespaces by connectivity rule",
+					Description: "This command gets namespaces by connectivity rule",
+					Flags: []cli.Flag{
+						connectivityRuleIdFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						resp, err := c.client.GetNamespacesByConnectivityRule(c.ctx, &cloudservice.GetNamespacesByConnectivityRuleRequest{
+							ConnectivityRuleId: ctx.String(connectivityRuleIdFlagName),
+						})
+						if err != nil {
+							return err
+						}
+						return PrintProto(resp)
+					},
+				},
+				{
 					Name:        "delete",
 					Aliases:     []string{"d"},
 					Usage:       "Delete a connectivity rule",
