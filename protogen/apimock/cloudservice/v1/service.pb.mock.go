@@ -756,6 +756,26 @@ func (mr *MockCloudServiceClientMockRecorder) GetNamespaceExportSinks(ctx, in in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaceExportSinks", reflect.TypeOf((*MockCloudServiceClient)(nil).GetNamespaceExportSinks), varargs...)
 }
 
+// GetNamespaceIDs mocks base method.
+func (m *MockCloudServiceClient) GetNamespaceIDs(ctx context.Context, in *cloudservice.GetNamespaceIDsRequest, opts ...grpc.CallOption) (*cloudservice.GetNamespaceIDsResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetNamespaceIDs", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetNamespaceIDsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNamespaceIDs indicates an expected call of GetNamespaceIDs.
+func (mr *MockCloudServiceClientMockRecorder) GetNamespaceIDs(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaceIDs", reflect.TypeOf((*MockCloudServiceClient)(nil).GetNamespaceIDs), varargs...)
+}
+
 // GetNamespaces mocks base method.
 func (m *MockCloudServiceClient) GetNamespaces(ctx context.Context, in *cloudservice.GetNamespacesRequest, opts ...grpc.CallOption) (*cloudservice.GetNamespacesResponse, error) {
 	m.ctrl.T.Helper()
@@ -1274,6 +1294,26 @@ func (mr *MockCloudServiceClientMockRecorder) UpdateNamespaceExportSink(ctx, in 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNamespaceExportSink", reflect.TypeOf((*MockCloudServiceClient)(nil).UpdateNamespaceExportSink), varargs...)
+}
+
+// UpdateNamespaceTags mocks base method.
+func (m *MockCloudServiceClient) UpdateNamespaceTags(ctx context.Context, in *cloudservice.UpdateNamespaceTagsRequest, opts ...grpc.CallOption) (*cloudservice.UpdateNamespaceTagsResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateNamespaceTags", varargs...)
+	ret0, _ := ret[0].(*cloudservice.UpdateNamespaceTagsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateNamespaceTags indicates an expected call of UpdateNamespaceTags.
+func (mr *MockCloudServiceClientMockRecorder) UpdateNamespaceTags(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNamespaceTags", reflect.TypeOf((*MockCloudServiceClient)(nil).UpdateNamespaceTags), varargs...)
 }
 
 // UpdateNexusEndpoint mocks base method.
@@ -1959,6 +1999,21 @@ func (mr *MockCloudServiceServerMockRecorder) GetNamespaceExportSinks(arg0, arg1
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaceExportSinks", reflect.TypeOf((*MockCloudServiceServer)(nil).GetNamespaceExportSinks), arg0, arg1)
 }
 
+// GetNamespaceIDs mocks base method.
+func (m *MockCloudServiceServer) GetNamespaceIDs(arg0 context.Context, arg1 *cloudservice.GetNamespaceIDsRequest) (*cloudservice.GetNamespaceIDsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNamespaceIDs", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetNamespaceIDsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNamespaceIDs indicates an expected call of GetNamespaceIDs.
+func (mr *MockCloudServiceServerMockRecorder) GetNamespaceIDs(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaceIDs", reflect.TypeOf((*MockCloudServiceServer)(nil).GetNamespaceIDs), arg0, arg1)
+}
+
 // GetNamespaces mocks base method.
 func (m *MockCloudServiceServer) GetNamespaces(arg0 context.Context, arg1 *cloudservice.GetNamespacesRequest) (*cloudservice.GetNamespacesResponse, error) {
 	m.ctrl.T.Helper()
@@ -2347,6 +2402,21 @@ func (m *MockCloudServiceServer) UpdateNamespaceExportSink(arg0 context.Context,
 func (mr *MockCloudServiceServerMockRecorder) UpdateNamespaceExportSink(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNamespaceExportSink", reflect.TypeOf((*MockCloudServiceServer)(nil).UpdateNamespaceExportSink), arg0, arg1)
+}
+
+// UpdateNamespaceTags mocks base method.
+func (m *MockCloudServiceServer) UpdateNamespaceTags(arg0 context.Context, arg1 *cloudservice.UpdateNamespaceTagsRequest) (*cloudservice.UpdateNamespaceTagsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateNamespaceTags", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.UpdateNamespaceTagsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateNamespaceTags indicates an expected call of UpdateNamespaceTags.
+func (mr *MockCloudServiceServerMockRecorder) UpdateNamespaceTags(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNamespaceTags", reflect.TypeOf((*MockCloudServiceServer)(nil).UpdateNamespaceTags), arg0, arg1)
 }
 
 // UpdateNexusEndpoint mocks base method.
