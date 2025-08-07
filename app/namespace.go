@@ -361,7 +361,7 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 	return PrintProto(res)
 }
 
-func (c *NamespaceClient) updateNamespaceTags(ctx *cli.Context, tagsToAdd map[string]string, tagsToRemove []string) error {
+func (c *NamespaceClient) updateNamespaceTags(ctx *cli.Context, tagsToUpsert map[string]string, tagsToRemove []string) error {
 	namespace := ctx.String(NamespaceFlagName)
 	if len(namespace) == 0 {
 		return fmt.Errorf("namespace is required")
@@ -369,7 +369,7 @@ func (c *NamespaceClient) updateNamespaceTags(ctx *cli.Context, tagsToAdd map[st
 
 	res, err := c.cloudAPIClient.UpdateNamespaceTags(c.ctx, &cloudservice.UpdateNamespaceTagsRequest{
 		Namespace:        namespace,
-		TagsToAdd:        tagsToAdd,
+		TagsToUpsert:     tagsToUpsert,
 		TagsToRemove:     tagsToRemove,
 		AsyncOperationId: ctx.String(RequestIDFlagName),
 	})
