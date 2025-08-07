@@ -45,6 +45,7 @@ const (
 	sinkRegionFlagName               = "region"
 	disableFailoverFlagName          = "disable-auto-failover"
 	enableDeleteProtectionFlagName   = "enable-delete-protection"
+	tagFlagName                     = "tag"
 )
 
 const (
@@ -225,12 +226,13 @@ func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespa
 	return PrintProto(res)
 }
 
-func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.UserNamespacePermissions) error {
+func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.UserNamespacePermissions, tags map[string]string) error {
 	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
 		RequestId:                n.RequestId,
 		Namespace:                n.Namespace,
 		Spec:                     n.Spec,
 		UserNamespacePermissions: p,
+		Tags:                     tags,
 	})
 	if err != nil {
 		return err
@@ -359,6 +361,24 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 	}
 
 	return PrintProto(res)
+}
+
+func (c *NamespaceClient) updateNamespaceTags(ctx *cli.Context, tagsToUpsert map[string]string, tagsToRemove []string) error {
+	namespace := ctx.String(NamespaceFlagName)
+	if len(namespace) == 0 {
+		return fmt.Errorf("namespace is required")
+	}
+
+	res, err := c.cloudAPIClient.UpdateNamespaceTags(c.ctx, &cloudservice.UpdateNamespaceTagsRequest{
+		Namespace:        namespace,
+		TagsToUpsert:     tagsToUpsert,
+		TagsToRemove:     tagsToRemove,
+		AsyncOperationId: ctx.String(RequestIDFlagName),
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res.GetAsyncOperation())
 }
 
 func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *namespace.Namespace, existingName string, newName string) error {
@@ -572,6 +592,11 @@ func getCreateNamespaceFlags() []cli.Flag {
 			// this is a temporary solution, we will have a follow up version update to make the cloud provider mandatory
 			Value: CloudProviderAWS,
 		},
+		&cli.StringSliceFlag{
+			Name:     tagFlagName,
+			Usage:    "Add tags to the namespace (format: key=value). Flag can be used multiple times.",
+			Aliases:  []string{"t"},
+		},
 	}
 
 	if IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
@@ -745,7 +770,21 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					n.Spec.ConnectivityRuleIds = connectivityRuleIds
 				}
 
-				return c.createNamespace(n, unp)
+				tags := ctx.StringSlice(tagFlagName)
+				tagsToCreate := make(map[string]string)
+				for _, tag := range tags {
+					parts := strings.Split(tag, "=")
+					if len(parts) != 2 {
+						return fmt.Errorf("invalid tag format '%s', must be 'key=value'", tag)
+					}
+					key := parts[0]
+					if _, exists := tagsToCreate[key]; exists {
+						return fmt.Errorf("duplicate tag key '%s' found", key)
+					}
+					tagsToCreate[key] = parts[1]
+				}
+
+				return c.createNamespace(n, unp, tagsToCreate)
 			},
 		},
 		{
@@ -1702,6 +1741,65 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 				fmt.Println("No changes to apply to Namespace:", ctx.String(NamespaceFlagName))
 				return nil
+			},
+		},
+		{
+			Name:    "tags",
+			Usage:   "Manage namespace tags",
+			Aliases: []string{"t"},
+			Subcommands: []*cli.Command{
+				{
+					Name:    "upsert",
+					Usage:   "Add new tags or update existing tag values",
+					Aliases: []string{"u"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RequestIDFlag,
+						&cli.StringSliceFlag{
+							Name:     "tag",
+							Usage:    "Add new or update existing namespace tags (format: key=value). Flag can be used multiple times.",
+							Aliases:  []string{"t"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						tags := ctx.StringSlice("tag")
+
+						tagsToUpsert := make(map[string]string)
+						for _, tag := range tags {
+							parts := strings.Split(tag, "=")
+							if len(parts) != 2 {
+								return fmt.Errorf("invalid tag format '%s', must be 'key=value'", tag)
+							}
+							key := parts[0]
+							if _, exists := tagsToUpsert[key]; exists {
+								return fmt.Errorf("duplicate tag key '%s' found", key)
+							}
+							tagsToUpsert[key] = parts[1]
+						}
+
+						return c.updateNamespaceTags(ctx, tagsToUpsert, nil)
+					},
+				},
+				{
+					Name:    "remove",
+					Usage:   "Remove existing tags by key",
+					Aliases: []string{"rm"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RequestIDFlag,
+						&cli.StringSliceFlag{
+							Name:     "tag-key",
+							Usage:    "Remove namespace tags by key. Flag can be used multiple times.",
+							Aliases:  []string{"tk"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						keysToRemove := ctx.StringSlice("tag-key")
+						return c.updateNamespaceTags(ctx, nil, keysToRemove)
+					},
+				},
 			},
 		},
 	}
