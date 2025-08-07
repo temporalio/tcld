@@ -26,7 +26,6 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// temporal:dev
 type ConnectivityRule struct {
 	// unique id for ConnectivityRule (should be a uuid generated from db)
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -115,7 +114,6 @@ func (m *ConnectivityRule) GetCreatedTime() *types.Timestamp {
 }
 
 // spec that passed in when create/update the connectivity rule
-// temporal:dev
 type ConnectivityRuleSpec struct {
 	// Types that are valid to be assigned to ConnectionType:
 	//
@@ -202,7 +200,6 @@ func (*ConnectivityRuleSpec) XXX_OneofWrappers() []interface{} {
 	}
 }
 
-// temporal:dev
 type PublicConnectivityRule struct {
 }
 
@@ -238,7 +235,6 @@ func (m *PublicConnectivityRule) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_PublicConnectivityRule proto.InternalMessageInfo
 
-// temporal:dev
 type PrivateConnectivityRule struct {
 	// connection id provided by user so we enforce the private connectivity.  This is required both by AWS and GCP
 	ConnectionId string `protobuf:"bytes,1,opt,name=connection_id,json=connectionId,proto3" json:"connection_id,omitempty"`

@@ -161,7 +161,7 @@ var (
 	}
 	connectivityRuleIdsFlag = &cli.StringSliceFlag{
 		Name:     connectivityRuleIdsFlagName,
-		Usage:    "The list of connectivity rule IDs, can be used in create namespace, update namespace and get list of connectivity rules. example: --ids id1 --ids id2 --ids id3",
+		Usage:    "The list of connectivity rule IDs, can be used in create namespace and update namespace. example: --ids id1 --ids id2 --ids id3",
 		Aliases:  []string{"ids"},
 		Required: false,
 	}
@@ -305,11 +305,12 @@ func (c *NamespaceClient) deleteRegion(ctx *cli.Context) error {
 	return PrintProto(res.GetAsyncOperation())
 }
 
-func (c *NamespaceClient) listNamespaces() error {
+func (c *NamespaceClient) listNamespaces(connectivityRuleId string) error {
 	totalRes := &namespaceservice.ListNamespacesResponse{}
 	pageToken := ""
 	for {
 		res, err := c.client.ListNamespaces(c.ctx, &namespaceservice.ListNamespacesRequest{
+			Filter:    &namespaceservice.ListNamespacesFilter{ConnectivityRuleId: connectivityRuleId},
 			PageToken: pageToken,
 		})
 		if err != nil {
@@ -950,9 +951,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Name:    "list",
 			Usage:   "List all known namespaces",
 			Aliases: []string{"l"},
-			Flags:   []cli.Flag{},
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     connectivityRuleIdFlagName,
+					Usage:    "The connectivity rule id. Default: empty",
+					Value:    "",
+					Aliases:  []string{"crid"},
+					Required: false,
+				},
+			},
 			Action: func(ctx *cli.Context) error {
-				return c.listNamespaces()
+				return c.listNamespaces(ctx.String(connectivityRuleIdFlagName))
 			},
 		},
 		{

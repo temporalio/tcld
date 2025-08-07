@@ -110,11 +110,13 @@ func (s *NamespaceTestSuite) TestGet() {
 
 func (s *NamespaceTestSuite) TestList() {
 
-	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{}).
-		Return(nil, errors.New("some error")).Times(1)
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		Filter: &namespaceservice.ListNamespacesFilter{},
+	}).Return(nil, errors.New("some error")).Times(1)
 	s.Error(s.RunCmd("namespace", "list"))
 
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		Filter:    &namespaceservice.ListNamespacesFilter{},
 		PageToken: "",
 	}).Return(&namespaceservice.ListNamespacesResponse{
 		Namespaces: []string{""},
@@ -122,6 +124,7 @@ func (s *NamespaceTestSuite) TestList() {
 	s.NoError(s.RunCmd("namespace", "list"))
 
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		Filter:    &namespaceservice.ListNamespacesFilter{},
 		PageToken: "",
 	}).Return(&namespaceservice.ListNamespacesResponse{
 		Namespaces: []string{"ns1", "ns2"},
@@ -129,28 +132,42 @@ func (s *NamespaceTestSuite) TestList() {
 	s.NoError(s.RunCmd("namespace", "list"))
 
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		Filter:    &namespaceservice.ListNamespacesFilter{},
 		PageToken: "",
 	}).Return(&namespaceservice.ListNamespacesResponse{
 		Namespaces:    []string{"ns1", "ns2"},
 		NextPageToken: "token1",
 	}, nil).Times(1)
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		Filter:    &namespaceservice.ListNamespacesFilter{},
 		PageToken: "token1",
 	}).Return(&namespaceservice.ListNamespacesResponse{
 		Namespaces:    []string{"ns3"},
 		NextPageToken: "token2",
 	}, nil).Times(1)
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		Filter:    &namespaceservice.ListNamespacesFilter{},
 		PageToken: "token2",
 	}).Return(&namespaceservice.ListNamespacesResponse{
 		Namespaces:    []string{"ns4"},
 		NextPageToken: "token3",
 	}, nil).Times(1)
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		Filter:    &namespaceservice.ListNamespacesFilter{},
 		PageToken: "token3",
 	}).Return(&namespaceservice.ListNamespacesResponse{}, nil).Times(1)
 
 	s.NoError(s.RunCmd("namespace", "list"))
+
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		Filter: &namespaceservice.ListNamespacesFilter{
+			ConnectivityRuleId: "crid1",
+		},
+		PageToken: "",
+	}).Return(&namespaceservice.ListNamespacesResponse{
+		Namespaces: []string{"ns5"},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("namespace", "list", "--connectivity-rule-id", "crid1"))
 }
 
 func (s *NamespaceTestSuite) TestDeleteProtection() {

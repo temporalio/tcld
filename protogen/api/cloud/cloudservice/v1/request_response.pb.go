@@ -6,6 +6,7 @@ package cloudservice
 import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
+	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 	types "github.com/gogo/protobuf/types"
 	v15 "github.com/temporalio/tcld/protogen/api/cloud/account/v1"
 	v16 "github.com/temporalio/tcld/protogen/api/cloud/auditlog/v1"
@@ -796,6 +797,9 @@ type CreateNamespaceRequest struct {
 	// The id to use for this async operation.
 	// Optional, if not provided a random id will be generated.
 	AsyncOperationId string `protobuf:"bytes,3,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+	// The tags to add to the namespace - can be set by global admins or account owners only
+	// temporal:dev
+	Tags map[string]string `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (m *CreateNamespaceRequest) Reset()      { *m = CreateNamespaceRequest{} }
@@ -842,6 +846,13 @@ func (m *CreateNamespaceRequest) GetAsyncOperationId() string {
 		return m.AsyncOperationId
 	}
 	return ""
+}
+
+func (m *CreateNamespaceRequest) GetTags() map[string]string {
+	if m != nil {
+		return m.Tags
+	}
+	return nil
 }
 
 type CreateNamespaceResponse struct {
@@ -908,6 +919,10 @@ type GetNamespacesRequest struct {
 	// Filter namespaces by their name.
 	// Optional, defaults to empty.
 	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	// Filter namespaces that the connectivity rule is associated with.
+	// Optional, defaults to empty.
+	// temporal:dev
+	ConnectivityRuleId string `protobuf:"bytes,4,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
 }
 
 func (m *GetNamespacesRequest) Reset()      { *m = GetNamespacesRequest{} }
@@ -959,6 +974,13 @@ func (m *GetNamespacesRequest) GetPageToken() string {
 func (m *GetNamespacesRequest) GetName() string {
 	if m != nil {
 		return m.Name
+	}
+	return ""
+}
+
+func (m *GetNamespacesRequest) GetConnectivityRuleId() string {
+	if m != nil {
+		return m.ConnectivityRuleId
 	}
 	return ""
 }
@@ -1016,6 +1038,117 @@ func (m *GetNamespacesResponse) GetNextPageToken() string {
 	return ""
 }
 
+// temporal:ui
+type GetNamespaceIDsRequest struct {
+	// The requested size of the page to retrieve.
+	// Cannot exceed 1000.
+	// Optional, defaults to 100.
+	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// The page token if this is continuing from another response.
+	// Optional, defaults to empty.
+	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+}
+
+func (m *GetNamespaceIDsRequest) Reset()      { *m = GetNamespaceIDsRequest{} }
+func (*GetNamespaceIDsRequest) ProtoMessage() {}
+func (*GetNamespaceIDsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{18}
+}
+func (m *GetNamespaceIDsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetNamespaceIDsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetNamespaceIDsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetNamespaceIDsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetNamespaceIDsRequest.Merge(m, src)
+}
+func (m *GetNamespaceIDsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetNamespaceIDsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetNamespaceIDsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetNamespaceIDsRequest proto.InternalMessageInfo
+
+func (m *GetNamespaceIDsRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *GetNamespaceIDsRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
+// temporal:ui
+type GetNamespaceIDsResponse struct {
+	// The list of namespaces in ascending name order.
+	NamespaceIds []string `protobuf:"bytes,1,rep,name=namespace_ids,json=namespaceIds,proto3" json:"namespace_ids,omitempty"`
+	// The next page's token.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (m *GetNamespaceIDsResponse) Reset()      { *m = GetNamespaceIDsResponse{} }
+func (*GetNamespaceIDsResponse) ProtoMessage() {}
+func (*GetNamespaceIDsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{19}
+}
+func (m *GetNamespaceIDsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetNamespaceIDsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetNamespaceIDsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetNamespaceIDsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetNamespaceIDsResponse.Merge(m, src)
+}
+func (m *GetNamespaceIDsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetNamespaceIDsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetNamespaceIDsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetNamespaceIDsResponse proto.InternalMessageInfo
+
+func (m *GetNamespaceIDsResponse) GetNamespaceIds() []string {
+	if m != nil {
+		return m.NamespaceIds
+	}
+	return nil
+}
+
+func (m *GetNamespaceIDsResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
+
 type GetNamespaceRequest struct {
 	// The namespace to get.
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
@@ -1024,7 +1157,7 @@ type GetNamespaceRequest struct {
 func (m *GetNamespaceRequest) Reset()      { *m = GetNamespaceRequest{} }
 func (*GetNamespaceRequest) ProtoMessage() {}
 func (*GetNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{18}
+	return fileDescriptor_d04330087ace166d, []int{20}
 }
 func (m *GetNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1068,7 +1201,7 @@ type GetNamespaceResponse struct {
 func (m *GetNamespaceResponse) Reset()      { *m = GetNamespaceResponse{} }
 func (*GetNamespaceResponse) ProtoMessage() {}
 func (*GetNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{19}
+	return fileDescriptor_d04330087ace166d, []int{21}
 }
 func (m *GetNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1120,7 +1253,7 @@ type UpdateNamespaceRequest struct {
 func (m *UpdateNamespaceRequest) Reset()      { *m = UpdateNamespaceRequest{} }
 func (*UpdateNamespaceRequest) ProtoMessage() {}
 func (*UpdateNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{20}
+	return fileDescriptor_d04330087ace166d, []int{22}
 }
 func (m *UpdateNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1185,7 +1318,7 @@ type UpdateNamespaceResponse struct {
 func (m *UpdateNamespaceResponse) Reset()      { *m = UpdateNamespaceResponse{} }
 func (*UpdateNamespaceResponse) ProtoMessage() {}
 func (*UpdateNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{21}
+	return fileDescriptor_d04330087ace166d, []int{23}
 }
 func (m *UpdateNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1239,7 +1372,7 @@ type RenameCustomSearchAttributeRequest struct {
 func (m *RenameCustomSearchAttributeRequest) Reset()      { *m = RenameCustomSearchAttributeRequest{} }
 func (*RenameCustomSearchAttributeRequest) ProtoMessage() {}
 func (*RenameCustomSearchAttributeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{22}
+	return fileDescriptor_d04330087ace166d, []int{24}
 }
 func (m *RenameCustomSearchAttributeRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1311,7 +1444,7 @@ type RenameCustomSearchAttributeResponse struct {
 func (m *RenameCustomSearchAttributeResponse) Reset()      { *m = RenameCustomSearchAttributeResponse{} }
 func (*RenameCustomSearchAttributeResponse) ProtoMessage() {}
 func (*RenameCustomSearchAttributeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{23}
+	return fileDescriptor_d04330087ace166d, []int{25}
 }
 func (m *RenameCustomSearchAttributeResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1361,7 +1494,7 @@ type DeleteNamespaceRequest struct {
 func (m *DeleteNamespaceRequest) Reset()      { *m = DeleteNamespaceRequest{} }
 func (*DeleteNamespaceRequest) ProtoMessage() {}
 func (*DeleteNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{24}
+	return fileDescriptor_d04330087ace166d, []int{26}
 }
 func (m *DeleteNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1419,7 +1552,7 @@ type DeleteNamespaceResponse struct {
 func (m *DeleteNamespaceResponse) Reset()      { *m = DeleteNamespaceResponse{} }
 func (*DeleteNamespaceResponse) ProtoMessage() {}
 func (*DeleteNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{25}
+	return fileDescriptor_d04330087ace166d, []int{27}
 }
 func (m *DeleteNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1468,7 +1601,7 @@ type FailoverNamespaceRegionRequest struct {
 func (m *FailoverNamespaceRegionRequest) Reset()      { *m = FailoverNamespaceRegionRequest{} }
 func (*FailoverNamespaceRegionRequest) ProtoMessage() {}
 func (*FailoverNamespaceRegionRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{26}
+	return fileDescriptor_d04330087ace166d, []int{28}
 }
 func (m *FailoverNamespaceRegionRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1526,7 +1659,7 @@ type FailoverNamespaceRegionResponse struct {
 func (m *FailoverNamespaceRegionResponse) Reset()      { *m = FailoverNamespaceRegionResponse{} }
 func (*FailoverNamespaceRegionResponse) ProtoMessage() {}
 func (*FailoverNamespaceRegionResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{27}
+	return fileDescriptor_d04330087ace166d, []int{29}
 }
 func (m *FailoverNamespaceRegionResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1579,7 +1712,7 @@ type AddNamespaceRegionRequest struct {
 func (m *AddNamespaceRegionRequest) Reset()      { *m = AddNamespaceRegionRequest{} }
 func (*AddNamespaceRegionRequest) ProtoMessage() {}
 func (*AddNamespaceRegionRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{28}
+	return fileDescriptor_d04330087ace166d, []int{30}
 }
 func (m *AddNamespaceRegionRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1644,7 +1777,7 @@ type AddNamespaceRegionResponse struct {
 func (m *AddNamespaceRegionResponse) Reset()      { *m = AddNamespaceRegionResponse{} }
 func (*AddNamespaceRegionResponse) ProtoMessage() {}
 func (*AddNamespaceRegionResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{29}
+	return fileDescriptor_d04330087ace166d, []int{31}
 }
 func (m *AddNamespaceRegionResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1697,7 +1830,7 @@ type DeleteNamespaceRegionRequest struct {
 func (m *DeleteNamespaceRegionRequest) Reset()      { *m = DeleteNamespaceRegionRequest{} }
 func (*DeleteNamespaceRegionRequest) ProtoMessage() {}
 func (*DeleteNamespaceRegionRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{30}
+	return fileDescriptor_d04330087ace166d, []int{32}
 }
 func (m *DeleteNamespaceRegionRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1762,7 +1895,7 @@ type DeleteNamespaceRegionResponse struct {
 func (m *DeleteNamespaceRegionResponse) Reset()      { *m = DeleteNamespaceRegionResponse{} }
 func (*DeleteNamespaceRegionResponse) ProtoMessage() {}
 func (*DeleteNamespaceRegionResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{31}
+	return fileDescriptor_d04330087ace166d, []int{33}
 }
 func (m *DeleteNamespaceRegionResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1804,7 +1937,7 @@ type GetRegionsRequest struct {
 func (m *GetRegionsRequest) Reset()      { *m = GetRegionsRequest{} }
 func (*GetRegionsRequest) ProtoMessage() {}
 func (*GetRegionsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{32}
+	return fileDescriptor_d04330087ace166d, []int{34}
 }
 func (m *GetRegionsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1841,7 +1974,7 @@ type GetRegionsResponse struct {
 func (m *GetRegionsResponse) Reset()      { *m = GetRegionsResponse{} }
 func (*GetRegionsResponse) ProtoMessage() {}
 func (*GetRegionsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{33}
+	return fileDescriptor_d04330087ace166d, []int{35}
 }
 func (m *GetRegionsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1885,7 +2018,7 @@ type GetRegionRequest struct {
 func (m *GetRegionRequest) Reset()      { *m = GetRegionRequest{} }
 func (*GetRegionRequest) ProtoMessage() {}
 func (*GetRegionRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{34}
+	return fileDescriptor_d04330087ace166d, []int{36}
 }
 func (m *GetRegionRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1929,7 +2062,7 @@ type GetRegionResponse struct {
 func (m *GetRegionResponse) Reset()      { *m = GetRegionResponse{} }
 func (*GetRegionResponse) ProtoMessage() {}
 func (*GetRegionResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{35}
+	return fileDescriptor_d04330087ace166d, []int{37}
 }
 func (m *GetRegionResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1982,7 +2115,7 @@ type GetNexusEndpointsRequest struct {
 func (m *GetNexusEndpointsRequest) Reset()      { *m = GetNexusEndpointsRequest{} }
 func (*GetNexusEndpointsRequest) ProtoMessage() {}
 func (*GetNexusEndpointsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{36}
+	return fileDescriptor_d04330087ace166d, []int{38}
 }
 func (m *GetNexusEndpointsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2056,7 +2189,7 @@ type GetNexusEndpointsResponse struct {
 func (m *GetNexusEndpointsResponse) Reset()      { *m = GetNexusEndpointsResponse{} }
 func (*GetNexusEndpointsResponse) ProtoMessage() {}
 func (*GetNexusEndpointsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{37}
+	return fileDescriptor_d04330087ace166d, []int{39}
 }
 func (m *GetNexusEndpointsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2107,7 +2240,7 @@ type GetNexusEndpointRequest struct {
 func (m *GetNexusEndpointRequest) Reset()      { *m = GetNexusEndpointRequest{} }
 func (*GetNexusEndpointRequest) ProtoMessage() {}
 func (*GetNexusEndpointRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{38}
+	return fileDescriptor_d04330087ace166d, []int{40}
 }
 func (m *GetNexusEndpointRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2151,7 +2284,7 @@ type GetNexusEndpointResponse struct {
 func (m *GetNexusEndpointResponse) Reset()      { *m = GetNexusEndpointResponse{} }
 func (*GetNexusEndpointResponse) ProtoMessage() {}
 func (*GetNexusEndpointResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{39}
+	return fileDescriptor_d04330087ace166d, []int{41}
 }
 func (m *GetNexusEndpointResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2197,7 +2330,7 @@ type CreateNexusEndpointRequest struct {
 func (m *CreateNexusEndpointRequest) Reset()      { *m = CreateNexusEndpointRequest{} }
 func (*CreateNexusEndpointRequest) ProtoMessage() {}
 func (*CreateNexusEndpointRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{40}
+	return fileDescriptor_d04330087ace166d, []int{42}
 }
 func (m *CreateNexusEndpointRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2250,7 +2383,7 @@ type CreateNexusEndpointResponse struct {
 func (m *CreateNexusEndpointResponse) Reset()      { *m = CreateNexusEndpointResponse{} }
 func (*CreateNexusEndpointResponse) ProtoMessage() {}
 func (*CreateNexusEndpointResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{41}
+	return fileDescriptor_d04330087ace166d, []int{43}
 }
 func (m *CreateNexusEndpointResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2308,7 +2441,7 @@ type UpdateNexusEndpointRequest struct {
 func (m *UpdateNexusEndpointRequest) Reset()      { *m = UpdateNexusEndpointRequest{} }
 func (*UpdateNexusEndpointRequest) ProtoMessage() {}
 func (*UpdateNexusEndpointRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{42}
+	return fileDescriptor_d04330087ace166d, []int{44}
 }
 func (m *UpdateNexusEndpointRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2373,7 +2506,7 @@ type UpdateNexusEndpointResponse struct {
 func (m *UpdateNexusEndpointResponse) Reset()      { *m = UpdateNexusEndpointResponse{} }
 func (*UpdateNexusEndpointResponse) ProtoMessage() {}
 func (*UpdateNexusEndpointResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{43}
+	return fileDescriptor_d04330087ace166d, []int{45}
 }
 func (m *UpdateNexusEndpointResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2422,7 +2555,7 @@ type DeleteNexusEndpointRequest struct {
 func (m *DeleteNexusEndpointRequest) Reset()      { *m = DeleteNexusEndpointRequest{} }
 func (*DeleteNexusEndpointRequest) ProtoMessage() {}
 func (*DeleteNexusEndpointRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{44}
+	return fileDescriptor_d04330087ace166d, []int{46}
 }
 func (m *DeleteNexusEndpointRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2480,7 +2613,7 @@ type DeleteNexusEndpointResponse struct {
 func (m *DeleteNexusEndpointResponse) Reset()      { *m = DeleteNexusEndpointResponse{} }
 func (*DeleteNexusEndpointResponse) ProtoMessage() {}
 func (*DeleteNexusEndpointResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{45}
+	return fileDescriptor_d04330087ace166d, []int{47}
 }
 func (m *DeleteNexusEndpointResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2530,7 +2663,7 @@ type UpdateAccountRequest struct {
 func (m *UpdateAccountRequest) Reset()      { *m = UpdateAccountRequest{} }
 func (*UpdateAccountRequest) ProtoMessage() {}
 func (*UpdateAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{46}
+	return fileDescriptor_d04330087ace166d, []int{48}
 }
 func (m *UpdateAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2588,7 +2721,7 @@ type UpdateAccountResponse struct {
 func (m *UpdateAccountResponse) Reset()      { *m = UpdateAccountResponse{} }
 func (*UpdateAccountResponse) ProtoMessage() {}
 func (*UpdateAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{47}
+	return fileDescriptor_d04330087ace166d, []int{49}
 }
 func (m *UpdateAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2643,7 +2776,7 @@ type GetUserGroupsRequest struct {
 func (m *GetUserGroupsRequest) Reset()      { *m = GetUserGroupsRequest{} }
 func (*GetUserGroupsRequest) ProtoMessage() {}
 func (*GetUserGroupsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{48}
+	return fileDescriptor_d04330087ace166d, []int{50}
 }
 func (m *GetUserGroupsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2724,7 +2857,7 @@ func (m *GetUserGroupsRequest_GoogleGroupFilter) Reset() {
 }
 func (*GetUserGroupsRequest_GoogleGroupFilter) ProtoMessage() {}
 func (*GetUserGroupsRequest_GoogleGroupFilter) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{48, 0}
+	return fileDescriptor_d04330087ace166d, []int{50, 0}
 }
 func (m *GetUserGroupsRequest_GoogleGroupFilter) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2768,7 +2901,7 @@ type GetUserGroupsRequest_SCIMGroupFilter struct {
 func (m *GetUserGroupsRequest_SCIMGroupFilter) Reset()      { *m = GetUserGroupsRequest_SCIMGroupFilter{} }
 func (*GetUserGroupsRequest_SCIMGroupFilter) ProtoMessage() {}
 func (*GetUserGroupsRequest_SCIMGroupFilter) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{48, 1}
+	return fileDescriptor_d04330087ace166d, []int{50, 1}
 }
 func (m *GetUserGroupsRequest_SCIMGroupFilter) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2814,7 +2947,7 @@ type GetUserGroupsResponse struct {
 func (m *GetUserGroupsResponse) Reset()      { *m = GetUserGroupsResponse{} }
 func (*GetUserGroupsResponse) ProtoMessage() {}
 func (*GetUserGroupsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{49}
+	return fileDescriptor_d04330087ace166d, []int{51}
 }
 func (m *GetUserGroupsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2865,7 +2998,7 @@ type GetUserGroupRequest struct {
 func (m *GetUserGroupRequest) Reset()      { *m = GetUserGroupRequest{} }
 func (*GetUserGroupRequest) ProtoMessage() {}
 func (*GetUserGroupRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{50}
+	return fileDescriptor_d04330087ace166d, []int{52}
 }
 func (m *GetUserGroupRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2909,7 +3042,7 @@ type GetUserGroupResponse struct {
 func (m *GetUserGroupResponse) Reset()      { *m = GetUserGroupResponse{} }
 func (*GetUserGroupResponse) ProtoMessage() {}
 func (*GetUserGroupResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{51}
+	return fileDescriptor_d04330087ace166d, []int{53}
 }
 func (m *GetUserGroupResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2956,7 +3089,7 @@ type CreateUserGroupRequest struct {
 func (m *CreateUserGroupRequest) Reset()      { *m = CreateUserGroupRequest{} }
 func (*CreateUserGroupRequest) ProtoMessage() {}
 func (*CreateUserGroupRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{52}
+	return fileDescriptor_d04330087ace166d, []int{54}
 }
 func (m *CreateUserGroupRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3009,7 +3142,7 @@ type CreateUserGroupResponse struct {
 func (m *CreateUserGroupResponse) Reset()      { *m = CreateUserGroupResponse{} }
 func (*CreateUserGroupResponse) ProtoMessage() {}
 func (*CreateUserGroupResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{53}
+	return fileDescriptor_d04330087ace166d, []int{55}
 }
 func (m *CreateUserGroupResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3068,7 +3201,7 @@ type UpdateUserGroupRequest struct {
 func (m *UpdateUserGroupRequest) Reset()      { *m = UpdateUserGroupRequest{} }
 func (*UpdateUserGroupRequest) ProtoMessage() {}
 func (*UpdateUserGroupRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{54}
+	return fileDescriptor_d04330087ace166d, []int{56}
 }
 func (m *UpdateUserGroupRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3133,7 +3266,7 @@ type UpdateUserGroupResponse struct {
 func (m *UpdateUserGroupResponse) Reset()      { *m = UpdateUserGroupResponse{} }
 func (*UpdateUserGroupResponse) ProtoMessage() {}
 func (*UpdateUserGroupResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{55}
+	return fileDescriptor_d04330087ace166d, []int{57}
 }
 func (m *UpdateUserGroupResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3183,7 +3316,7 @@ type DeleteUserGroupRequest struct {
 func (m *DeleteUserGroupRequest) Reset()      { *m = DeleteUserGroupRequest{} }
 func (*DeleteUserGroupRequest) ProtoMessage() {}
 func (*DeleteUserGroupRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{56}
+	return fileDescriptor_d04330087ace166d, []int{58}
 }
 func (m *DeleteUserGroupRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3241,7 +3374,7 @@ type DeleteUserGroupResponse struct {
 func (m *DeleteUserGroupResponse) Reset()      { *m = DeleteUserGroupResponse{} }
 func (*DeleteUserGroupResponse) ProtoMessage() {}
 func (*DeleteUserGroupResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{57}
+	return fileDescriptor_d04330087ace166d, []int{59}
 }
 func (m *DeleteUserGroupResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3294,7 +3427,7 @@ type SetUserGroupNamespaceAccessRequest struct {
 func (m *SetUserGroupNamespaceAccessRequest) Reset()      { *m = SetUserGroupNamespaceAccessRequest{} }
 func (*SetUserGroupNamespaceAccessRequest) ProtoMessage() {}
 func (*SetUserGroupNamespaceAccessRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{58}
+	return fileDescriptor_d04330087ace166d, []int{60}
 }
 func (m *SetUserGroupNamespaceAccessRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3366,7 +3499,7 @@ type SetUserGroupNamespaceAccessResponse struct {
 func (m *SetUserGroupNamespaceAccessResponse) Reset()      { *m = SetUserGroupNamespaceAccessResponse{} }
 func (*SetUserGroupNamespaceAccessResponse) ProtoMessage() {}
 func (*SetUserGroupNamespaceAccessResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{59}
+	return fileDescriptor_d04330087ace166d, []int{61}
 }
 func (m *SetUserGroupNamespaceAccessResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3415,7 +3548,7 @@ type AddUserGroupMemberRequest struct {
 func (m *AddUserGroupMemberRequest) Reset()      { *m = AddUserGroupMemberRequest{} }
 func (*AddUserGroupMemberRequest) ProtoMessage() {}
 func (*AddUserGroupMemberRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{60}
+	return fileDescriptor_d04330087ace166d, []int{62}
 }
 func (m *AddUserGroupMemberRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3473,7 +3606,7 @@ type AddUserGroupMemberResponse struct {
 func (m *AddUserGroupMemberResponse) Reset()      { *m = AddUserGroupMemberResponse{} }
 func (*AddUserGroupMemberResponse) ProtoMessage() {}
 func (*AddUserGroupMemberResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{61}
+	return fileDescriptor_d04330087ace166d, []int{63}
 }
 func (m *AddUserGroupMemberResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3522,7 +3655,7 @@ type RemoveUserGroupMemberRequest struct {
 func (m *RemoveUserGroupMemberRequest) Reset()      { *m = RemoveUserGroupMemberRequest{} }
 func (*RemoveUserGroupMemberRequest) ProtoMessage() {}
 func (*RemoveUserGroupMemberRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{62}
+	return fileDescriptor_d04330087ace166d, []int{64}
 }
 func (m *RemoveUserGroupMemberRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3580,7 +3713,7 @@ type RemoveUserGroupMemberResponse struct {
 func (m *RemoveUserGroupMemberResponse) Reset()      { *m = RemoveUserGroupMemberResponse{} }
 func (*RemoveUserGroupMemberResponse) ProtoMessage() {}
 func (*RemoveUserGroupMemberResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{63}
+	return fileDescriptor_d04330087ace166d, []int{65}
 }
 func (m *RemoveUserGroupMemberResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3629,7 +3762,7 @@ type GetUserGroupMembersRequest struct {
 func (m *GetUserGroupMembersRequest) Reset()      { *m = GetUserGroupMembersRequest{} }
 func (*GetUserGroupMembersRequest) ProtoMessage() {}
 func (*GetUserGroupMembersRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{64}
+	return fileDescriptor_d04330087ace166d, []int{66}
 }
 func (m *GetUserGroupMembersRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3689,7 +3822,7 @@ type GetUserGroupMembersResponse struct {
 func (m *GetUserGroupMembersResponse) Reset()      { *m = GetUserGroupMembersResponse{} }
 func (*GetUserGroupMembersResponse) ProtoMessage() {}
 func (*GetUserGroupMembersResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{65}
+	return fileDescriptor_d04330087ace166d, []int{67}
 }
 func (m *GetUserGroupMembersResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3742,7 +3875,7 @@ type CreateServiceAccountRequest struct {
 func (m *CreateServiceAccountRequest) Reset()      { *m = CreateServiceAccountRequest{} }
 func (*CreateServiceAccountRequest) ProtoMessage() {}
 func (*CreateServiceAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{66}
+	return fileDescriptor_d04330087ace166d, []int{68}
 }
 func (m *CreateServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3795,7 +3928,7 @@ type CreateServiceAccountResponse struct {
 func (m *CreateServiceAccountResponse) Reset()      { *m = CreateServiceAccountResponse{} }
 func (*CreateServiceAccountResponse) ProtoMessage() {}
 func (*CreateServiceAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{67}
+	return fileDescriptor_d04330087ace166d, []int{69}
 }
 func (m *CreateServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3846,7 +3979,7 @@ type GetServiceAccountRequest struct {
 func (m *GetServiceAccountRequest) Reset()      { *m = GetServiceAccountRequest{} }
 func (*GetServiceAccountRequest) ProtoMessage() {}
 func (*GetServiceAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{68}
+	return fileDescriptor_d04330087ace166d, []int{70}
 }
 func (m *GetServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3890,7 +4023,7 @@ type GetServiceAccountResponse struct {
 func (m *GetServiceAccountResponse) Reset()      { *m = GetServiceAccountResponse{} }
 func (*GetServiceAccountResponse) ProtoMessage() {}
 func (*GetServiceAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{69}
+	return fileDescriptor_d04330087ace166d, []int{71}
 }
 func (m *GetServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3937,7 +4070,7 @@ type GetServiceAccountsRequest struct {
 func (m *GetServiceAccountsRequest) Reset()      { *m = GetServiceAccountsRequest{} }
 func (*GetServiceAccountsRequest) ProtoMessage() {}
 func (*GetServiceAccountsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{70}
+	return fileDescriptor_d04330087ace166d, []int{72}
 }
 func (m *GetServiceAccountsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3990,7 +4123,7 @@ type GetServiceAccountsResponse struct {
 func (m *GetServiceAccountsResponse) Reset()      { *m = GetServiceAccountsResponse{} }
 func (*GetServiceAccountsResponse) ProtoMessage() {}
 func (*GetServiceAccountsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{71}
+	return fileDescriptor_d04330087ace166d, []int{73}
 }
 func (m *GetServiceAccountsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4048,7 +4181,7 @@ type UpdateServiceAccountRequest struct {
 func (m *UpdateServiceAccountRequest) Reset()      { *m = UpdateServiceAccountRequest{} }
 func (*UpdateServiceAccountRequest) ProtoMessage() {}
 func (*UpdateServiceAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{72}
+	return fileDescriptor_d04330087ace166d, []int{74}
 }
 func (m *UpdateServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4113,7 +4246,7 @@ type UpdateServiceAccountResponse struct {
 func (m *UpdateServiceAccountResponse) Reset()      { *m = UpdateServiceAccountResponse{} }
 func (*UpdateServiceAccountResponse) ProtoMessage() {}
 func (*UpdateServiceAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{73}
+	return fileDescriptor_d04330087ace166d, []int{75}
 }
 func (m *UpdateServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4162,7 +4295,7 @@ type DeleteServiceAccountRequest struct {
 func (m *DeleteServiceAccountRequest) Reset()      { *m = DeleteServiceAccountRequest{} }
 func (*DeleteServiceAccountRequest) ProtoMessage() {}
 func (*DeleteServiceAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{74}
+	return fileDescriptor_d04330087ace166d, []int{76}
 }
 func (m *DeleteServiceAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4220,7 +4353,7 @@ type DeleteServiceAccountResponse struct {
 func (m *DeleteServiceAccountResponse) Reset()      { *m = DeleteServiceAccountResponse{} }
 func (*DeleteServiceAccountResponse) ProtoMessage() {}
 func (*DeleteServiceAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{75}
+	return fileDescriptor_d04330087ace166d, []int{77}
 }
 func (m *DeleteServiceAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4275,7 +4408,7 @@ type GetApiKeysRequest struct {
 func (m *GetApiKeysRequest) Reset()      { *m = GetApiKeysRequest{} }
 func (*GetApiKeysRequest) ProtoMessage() {}
 func (*GetApiKeysRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{76}
+	return fileDescriptor_d04330087ace166d, []int{78}
 }
 func (m *GetApiKeysRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4350,7 +4483,7 @@ type GetApiKeysResponse struct {
 func (m *GetApiKeysResponse) Reset()      { *m = GetApiKeysResponse{} }
 func (*GetApiKeysResponse) ProtoMessage() {}
 func (*GetApiKeysResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{77}
+	return fileDescriptor_d04330087ace166d, []int{79}
 }
 func (m *GetApiKeysResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4401,7 +4534,7 @@ type GetApiKeyRequest struct {
 func (m *GetApiKeyRequest) Reset()      { *m = GetApiKeyRequest{} }
 func (*GetApiKeyRequest) ProtoMessage() {}
 func (*GetApiKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{78}
+	return fileDescriptor_d04330087ace166d, []int{80}
 }
 func (m *GetApiKeyRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4445,7 +4578,7 @@ type GetApiKeyResponse struct {
 func (m *GetApiKeyResponse) Reset()      { *m = GetApiKeyResponse{} }
 func (*GetApiKeyResponse) ProtoMessage() {}
 func (*GetApiKeyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{79}
+	return fileDescriptor_d04330087ace166d, []int{81}
 }
 func (m *GetApiKeyResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4492,7 +4625,7 @@ type CreateApiKeyRequest struct {
 func (m *CreateApiKeyRequest) Reset()      { *m = CreateApiKeyRequest{} }
 func (*CreateApiKeyRequest) ProtoMessage() {}
 func (*CreateApiKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{80}
+	return fileDescriptor_d04330087ace166d, []int{82}
 }
 func (m *CreateApiKeyRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4549,7 +4682,7 @@ type CreateApiKeyResponse struct {
 func (m *CreateApiKeyResponse) Reset()      { *m = CreateApiKeyResponse{} }
 func (*CreateApiKeyResponse) ProtoMessage() {}
 func (*CreateApiKeyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{81}
+	return fileDescriptor_d04330087ace166d, []int{83}
 }
 func (m *CreateApiKeyResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4614,7 +4747,7 @@ type UpdateApiKeyRequest struct {
 func (m *UpdateApiKeyRequest) Reset()      { *m = UpdateApiKeyRequest{} }
 func (*UpdateApiKeyRequest) ProtoMessage() {}
 func (*UpdateApiKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{82}
+	return fileDescriptor_d04330087ace166d, []int{84}
 }
 func (m *UpdateApiKeyRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4679,7 +4812,7 @@ type UpdateApiKeyResponse struct {
 func (m *UpdateApiKeyResponse) Reset()      { *m = UpdateApiKeyResponse{} }
 func (*UpdateApiKeyResponse) ProtoMessage() {}
 func (*UpdateApiKeyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{83}
+	return fileDescriptor_d04330087ace166d, []int{85}
 }
 func (m *UpdateApiKeyResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4728,7 +4861,7 @@ type DeleteApiKeyRequest struct {
 func (m *DeleteApiKeyRequest) Reset()      { *m = DeleteApiKeyRequest{} }
 func (*DeleteApiKeyRequest) ProtoMessage() {}
 func (*DeleteApiKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{84}
+	return fileDescriptor_d04330087ace166d, []int{86}
 }
 func (m *DeleteApiKeyRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4786,7 +4919,7 @@ type DeleteApiKeyResponse struct {
 func (m *DeleteApiKeyResponse) Reset()      { *m = DeleteApiKeyResponse{} }
 func (*DeleteApiKeyResponse) ProtoMessage() {}
 func (*DeleteApiKeyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{85}
+	return fileDescriptor_d04330087ace166d, []int{87}
 }
 func (m *DeleteApiKeyResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4838,7 +4971,7 @@ type GetAuditLogsRequest struct {
 func (m *GetAuditLogsRequest) Reset()      { *m = GetAuditLogsRequest{} }
 func (*GetAuditLogsRequest) ProtoMessage() {}
 func (*GetAuditLogsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{86}
+	return fileDescriptor_d04330087ace166d, []int{88}
 }
 func (m *GetAuditLogsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4906,7 +5039,7 @@ type GetAuditLogsResponse struct {
 func (m *GetAuditLogsResponse) Reset()      { *m = GetAuditLogsResponse{} }
 func (*GetAuditLogsResponse) ProtoMessage() {}
 func (*GetAuditLogsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{87}
+	return fileDescriptor_d04330087ace166d, []int{89}
 }
 func (m *GetAuditLogsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -4971,7 +5104,7 @@ type GetUsageRequest struct {
 func (m *GetUsageRequest) Reset()      { *m = GetUsageRequest{} }
 func (*GetUsageRequest) ProtoMessage() {}
 func (*GetUsageRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{88}
+	return fileDescriptor_d04330087ace166d, []int{90}
 }
 func (m *GetUsageRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5039,7 +5172,7 @@ type GetUsageResponse struct {
 func (m *GetUsageResponse) Reset()      { *m = GetUsageResponse{} }
 func (*GetUsageResponse) ProtoMessage() {}
 func (*GetUsageResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{89}
+	return fileDescriptor_d04330087ace166d, []int{91}
 }
 func (m *GetUsageResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5088,7 +5221,7 @@ type GetAccountRequest struct {
 func (m *GetAccountRequest) Reset()      { *m = GetAccountRequest{} }
 func (*GetAccountRequest) ProtoMessage() {}
 func (*GetAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{90}
+	return fileDescriptor_d04330087ace166d, []int{92}
 }
 func (m *GetAccountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5125,7 +5258,7 @@ type GetAccountResponse struct {
 func (m *GetAccountResponse) Reset()      { *m = GetAccountResponse{} }
 func (*GetAccountResponse) ProtoMessage() {}
 func (*GetAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{91}
+	return fileDescriptor_d04330087ace166d, []int{93}
 }
 func (m *GetAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5173,7 +5306,7 @@ type CreateNamespaceExportSinkRequest struct {
 func (m *CreateNamespaceExportSinkRequest) Reset()      { *m = CreateNamespaceExportSinkRequest{} }
 func (*CreateNamespaceExportSinkRequest) ProtoMessage() {}
 func (*CreateNamespaceExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{92}
+	return fileDescriptor_d04330087ace166d, []int{94}
 }
 func (m *CreateNamespaceExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5231,7 +5364,7 @@ type CreateNamespaceExportSinkResponse struct {
 func (m *CreateNamespaceExportSinkResponse) Reset()      { *m = CreateNamespaceExportSinkResponse{} }
 func (*CreateNamespaceExportSinkResponse) ProtoMessage() {}
 func (*CreateNamespaceExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{93}
+	return fileDescriptor_d04330087ace166d, []int{95}
 }
 func (m *CreateNamespaceExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5277,7 +5410,7 @@ type GetNamespaceExportSinkRequest struct {
 func (m *GetNamespaceExportSinkRequest) Reset()      { *m = GetNamespaceExportSinkRequest{} }
 func (*GetNamespaceExportSinkRequest) ProtoMessage() {}
 func (*GetNamespaceExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{94}
+	return fileDescriptor_d04330087ace166d, []int{96}
 }
 func (m *GetNamespaceExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5328,7 +5461,7 @@ type GetNamespaceExportSinkResponse struct {
 func (m *GetNamespaceExportSinkResponse) Reset()      { *m = GetNamespaceExportSinkResponse{} }
 func (*GetNamespaceExportSinkResponse) ProtoMessage() {}
 func (*GetNamespaceExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{95}
+	return fileDescriptor_d04330087ace166d, []int{97}
 }
 func (m *GetNamespaceExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5377,7 +5510,7 @@ type GetNamespaceExportSinksRequest struct {
 func (m *GetNamespaceExportSinksRequest) Reset()      { *m = GetNamespaceExportSinksRequest{} }
 func (*GetNamespaceExportSinksRequest) ProtoMessage() {}
 func (*GetNamespaceExportSinksRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{96}
+	return fileDescriptor_d04330087ace166d, []int{98}
 }
 func (m *GetNamespaceExportSinksRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5437,7 +5570,7 @@ type GetNamespaceExportSinksResponse struct {
 func (m *GetNamespaceExportSinksResponse) Reset()      { *m = GetNamespaceExportSinksResponse{} }
 func (*GetNamespaceExportSinksResponse) ProtoMessage() {}
 func (*GetNamespaceExportSinksResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{97}
+	return fileDescriptor_d04330087ace166d, []int{99}
 }
 func (m *GetNamespaceExportSinksResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5495,7 +5628,7 @@ type UpdateNamespaceExportSinkRequest struct {
 func (m *UpdateNamespaceExportSinkRequest) Reset()      { *m = UpdateNamespaceExportSinkRequest{} }
 func (*UpdateNamespaceExportSinkRequest) ProtoMessage() {}
 func (*UpdateNamespaceExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{98}
+	return fileDescriptor_d04330087ace166d, []int{100}
 }
 func (m *UpdateNamespaceExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5560,7 +5693,7 @@ type UpdateNamespaceExportSinkResponse struct {
 func (m *UpdateNamespaceExportSinkResponse) Reset()      { *m = UpdateNamespaceExportSinkResponse{} }
 func (*UpdateNamespaceExportSinkResponse) ProtoMessage() {}
 func (*UpdateNamespaceExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{99}
+	return fileDescriptor_d04330087ace166d, []int{101}
 }
 func (m *UpdateNamespaceExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5611,7 +5744,7 @@ type DeleteNamespaceExportSinkRequest struct {
 func (m *DeleteNamespaceExportSinkRequest) Reset()      { *m = DeleteNamespaceExportSinkRequest{} }
 func (*DeleteNamespaceExportSinkRequest) ProtoMessage() {}
 func (*DeleteNamespaceExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{100}
+	return fileDescriptor_d04330087ace166d, []int{102}
 }
 func (m *DeleteNamespaceExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5676,7 +5809,7 @@ type DeleteNamespaceExportSinkResponse struct {
 func (m *DeleteNamespaceExportSinkResponse) Reset()      { *m = DeleteNamespaceExportSinkResponse{} }
 func (*DeleteNamespaceExportSinkResponse) ProtoMessage() {}
 func (*DeleteNamespaceExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{101}
+	return fileDescriptor_d04330087ace166d, []int{103}
 }
 func (m *DeleteNamespaceExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5722,7 +5855,7 @@ type ValidateNamespaceExportSinkRequest struct {
 func (m *ValidateNamespaceExportSinkRequest) Reset()      { *m = ValidateNamespaceExportSinkRequest{} }
 func (*ValidateNamespaceExportSinkRequest) ProtoMessage() {}
 func (*ValidateNamespaceExportSinkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{102}
+	return fileDescriptor_d04330087ace166d, []int{104}
 }
 func (m *ValidateNamespaceExportSinkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5771,7 +5904,7 @@ type ValidateNamespaceExportSinkResponse struct {
 func (m *ValidateNamespaceExportSinkResponse) Reset()      { *m = ValidateNamespaceExportSinkResponse{} }
 func (*ValidateNamespaceExportSinkResponse) ProtoMessage() {}
 func (*ValidateNamespaceExportSinkResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{103}
+	return fileDescriptor_d04330087ace166d, []int{105}
 }
 func (m *ValidateNamespaceExportSinkResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5812,7 +5945,7 @@ type StartMigrationRequest struct {
 func (m *StartMigrationRequest) Reset()      { *m = StartMigrationRequest{} }
 func (*StartMigrationRequest) ProtoMessage() {}
 func (*StartMigrationRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{104}
+	return fileDescriptor_d04330087ace166d, []int{106}
 }
 func (m *StartMigrationRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5866,7 +5999,7 @@ type StartMigrationResponse struct {
 func (m *StartMigrationResponse) Reset()      { *m = StartMigrationResponse{} }
 func (*StartMigrationResponse) ProtoMessage() {}
 func (*StartMigrationResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{105}
+	return fileDescriptor_d04330087ace166d, []int{107}
 }
 func (m *StartMigrationResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5918,7 +6051,7 @@ type GetMigrationRequest struct {
 func (m *GetMigrationRequest) Reset()      { *m = GetMigrationRequest{} }
 func (*GetMigrationRequest) ProtoMessage() {}
 func (*GetMigrationRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{106}
+	return fileDescriptor_d04330087ace166d, []int{108}
 }
 func (m *GetMigrationRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -5963,7 +6096,7 @@ type GetMigrationResponse struct {
 func (m *GetMigrationResponse) Reset()      { *m = GetMigrationResponse{} }
 func (*GetMigrationResponse) ProtoMessage() {}
 func (*GetMigrationResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{107}
+	return fileDescriptor_d04330087ace166d, []int{109}
 }
 func (m *GetMigrationResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6013,7 +6146,7 @@ type GetMigrationsRequest struct {
 func (m *GetMigrationsRequest) Reset()      { *m = GetMigrationsRequest{} }
 func (*GetMigrationsRequest) ProtoMessage() {}
 func (*GetMigrationsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{108}
+	return fileDescriptor_d04330087ace166d, []int{110}
 }
 func (m *GetMigrationsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6067,7 +6200,7 @@ type GetMigrationsResponse struct {
 func (m *GetMigrationsResponse) Reset()      { *m = GetMigrationsResponse{} }
 func (*GetMigrationsResponse) ProtoMessage() {}
 func (*GetMigrationsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{109}
+	return fileDescriptor_d04330087ace166d, []int{111}
 }
 func (m *GetMigrationsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6124,7 +6257,7 @@ type HandoverNamespaceRequest struct {
 func (m *HandoverNamespaceRequest) Reset()      { *m = HandoverNamespaceRequest{} }
 func (*HandoverNamespaceRequest) ProtoMessage() {}
 func (*HandoverNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{110}
+	return fileDescriptor_d04330087ace166d, []int{112}
 }
 func (m *HandoverNamespaceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6183,7 +6316,7 @@ type HandoverNamespaceResponse struct {
 func (m *HandoverNamespaceResponse) Reset()      { *m = HandoverNamespaceResponse{} }
 func (*HandoverNamespaceResponse) ProtoMessage() {}
 func (*HandoverNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{111}
+	return fileDescriptor_d04330087ace166d, []int{113}
 }
 func (m *HandoverNamespaceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6231,7 +6364,7 @@ type ConfirmMigrationRequest struct {
 func (m *ConfirmMigrationRequest) Reset()      { *m = ConfirmMigrationRequest{} }
 func (*ConfirmMigrationRequest) ProtoMessage() {}
 func (*ConfirmMigrationRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{112}
+	return fileDescriptor_d04330087ace166d, []int{114}
 }
 func (m *ConfirmMigrationRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6283,7 +6416,7 @@ type ConfirmMigrationResponse struct {
 func (m *ConfirmMigrationResponse) Reset()      { *m = ConfirmMigrationResponse{} }
 func (*ConfirmMigrationResponse) ProtoMessage() {}
 func (*ConfirmMigrationResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{113}
+	return fileDescriptor_d04330087ace166d, []int{115}
 }
 func (m *ConfirmMigrationResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6331,7 +6464,7 @@ type AbortMigrationRequest struct {
 func (m *AbortMigrationRequest) Reset()      { *m = AbortMigrationRequest{} }
 func (*AbortMigrationRequest) ProtoMessage() {}
 func (*AbortMigrationRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{114}
+	return fileDescriptor_d04330087ace166d, []int{116}
 }
 func (m *AbortMigrationRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6383,7 +6516,7 @@ type AbortMigrationResponse struct {
 func (m *AbortMigrationResponse) Reset()      { *m = AbortMigrationResponse{} }
 func (*AbortMigrationResponse) ProtoMessage() {}
 func (*AbortMigrationResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{115}
+	return fileDescriptor_d04330087ace166d, []int{117}
 }
 func (m *AbortMigrationResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6419,7 +6552,6 @@ func (m *AbortMigrationResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
-// temporal:dev
 type CreateConnectivityRuleRequest struct {
 	Spec *v18.ConnectivityRuleSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
 	// The id to use for this async operation.
@@ -6430,7 +6562,7 @@ type CreateConnectivityRuleRequest struct {
 func (m *CreateConnectivityRuleRequest) Reset()      { *m = CreateConnectivityRuleRequest{} }
 func (*CreateConnectivityRuleRequest) ProtoMessage() {}
 func (*CreateConnectivityRuleRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{116}
+	return fileDescriptor_d04330087ace166d, []int{118}
 }
 func (m *CreateConnectivityRuleRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6473,7 +6605,6 @@ func (m *CreateConnectivityRuleRequest) GetAsyncOperationId() string {
 	return ""
 }
 
-// temporal:dev
 type CreateConnectivityRuleResponse struct {
 	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
 	// The async operation
@@ -6483,7 +6614,7 @@ type CreateConnectivityRuleResponse struct {
 func (m *CreateConnectivityRuleResponse) Reset()      { *m = CreateConnectivityRuleResponse{} }
 func (*CreateConnectivityRuleResponse) ProtoMessage() {}
 func (*CreateConnectivityRuleResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{117}
+	return fileDescriptor_d04330087ace166d, []int{119}
 }
 func (m *CreateConnectivityRuleResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6526,7 +6657,6 @@ func (m *CreateConnectivityRuleResponse) GetAsyncOperation() *v11.AsyncOperation
 	return nil
 }
 
-// temporal:dev
 type GetConnectivityRuleRequest struct {
 	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
 }
@@ -6534,7 +6664,7 @@ type GetConnectivityRuleRequest struct {
 func (m *GetConnectivityRuleRequest) Reset()      { *m = GetConnectivityRuleRequest{} }
 func (*GetConnectivityRuleRequest) ProtoMessage() {}
 func (*GetConnectivityRuleRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{118}
+	return fileDescriptor_d04330087ace166d, []int{120}
 }
 func (m *GetConnectivityRuleRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6570,7 +6700,6 @@ func (m *GetConnectivityRuleRequest) GetConnectivityRuleId() string {
 	return ""
 }
 
-// temporal:dev
 type GetConnectivityRuleResponse struct {
 	ConnectivityRule *v18.ConnectivityRule `protobuf:"bytes,1,opt,name=connectivity_rule,json=connectivityRule,proto3" json:"connectivity_rule,omitempty"`
 }
@@ -6578,7 +6707,7 @@ type GetConnectivityRuleResponse struct {
 func (m *GetConnectivityRuleResponse) Reset()      { *m = GetConnectivityRuleResponse{} }
 func (*GetConnectivityRuleResponse) ProtoMessage() {}
 func (*GetConnectivityRuleResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{119}
+	return fileDescriptor_d04330087ace166d, []int{121}
 }
 func (m *GetConnectivityRuleResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6614,7 +6743,6 @@ func (m *GetConnectivityRuleResponse) GetConnectivityRule() *v18.ConnectivityRul
 	return nil
 }
 
-// temporal:dev
 type GetConnectivityRulesRequest struct {
 	// The requested size of the page to retrieve.
 	// Optional, defaults to 100.
@@ -6629,7 +6757,7 @@ type GetConnectivityRulesRequest struct {
 func (m *GetConnectivityRulesRequest) Reset()      { *m = GetConnectivityRulesRequest{} }
 func (*GetConnectivityRulesRequest) ProtoMessage() {}
 func (*GetConnectivityRulesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{120}
+	return fileDescriptor_d04330087ace166d, []int{122}
 }
 func (m *GetConnectivityRulesRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6679,7 +6807,6 @@ func (m *GetConnectivityRulesRequest) GetNamespace() string {
 	return ""
 }
 
-// temporal:dev
 type GetConnectivityRulesResponse struct {
 	// connectivity_rules returned
 	ConnectivityRules []*v18.ConnectivityRule `protobuf:"bytes,1,rep,name=connectivity_rules,json=connectivityRules,proto3" json:"connectivity_rules,omitempty"`
@@ -6690,7 +6817,7 @@ type GetConnectivityRulesResponse struct {
 func (m *GetConnectivityRulesResponse) Reset()      { *m = GetConnectivityRulesResponse{} }
 func (*GetConnectivityRulesResponse) ProtoMessage() {}
 func (*GetConnectivityRulesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{121}
+	return fileDescriptor_d04330087ace166d, []int{123}
 }
 func (m *GetConnectivityRulesResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6733,125 +6860,6 @@ func (m *GetConnectivityRulesResponse) GetNextPageToken() string {
 	return ""
 }
 
-// temporal:dev
-type UpdateConnectivityRuleRequest struct {
-	// The ID of the connectivity rule that need be updated, required.
-	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
-	// The spec of the connectivity rule that needs to be applied as the update, required.
-	Spec *v18.ConnectivityRuleSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
-	// The resource version which should be the same from the the db, required
-	ResourceVersion string `protobuf:"bytes,3,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
-	// The id to use for this async operation.
-	// Optional, if not provided a random id will be generated.
-	AsyncOperationId string `protobuf:"bytes,4,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
-}
-
-func (m *UpdateConnectivityRuleRequest) Reset()      { *m = UpdateConnectivityRuleRequest{} }
-func (*UpdateConnectivityRuleRequest) ProtoMessage() {}
-func (*UpdateConnectivityRuleRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{122}
-}
-func (m *UpdateConnectivityRuleRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *UpdateConnectivityRuleRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_UpdateConnectivityRuleRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *UpdateConnectivityRuleRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateConnectivityRuleRequest.Merge(m, src)
-}
-func (m *UpdateConnectivityRuleRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *UpdateConnectivityRuleRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateConnectivityRuleRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UpdateConnectivityRuleRequest proto.InternalMessageInfo
-
-func (m *UpdateConnectivityRuleRequest) GetConnectivityRuleId() string {
-	if m != nil {
-		return m.ConnectivityRuleId
-	}
-	return ""
-}
-
-func (m *UpdateConnectivityRuleRequest) GetSpec() *v18.ConnectivityRuleSpec {
-	if m != nil {
-		return m.Spec
-	}
-	return nil
-}
-
-func (m *UpdateConnectivityRuleRequest) GetResourceVersion() string {
-	if m != nil {
-		return m.ResourceVersion
-	}
-	return ""
-}
-
-func (m *UpdateConnectivityRuleRequest) GetAsyncOperationId() string {
-	if m != nil {
-		return m.AsyncOperationId
-	}
-	return ""
-}
-
-// temporal:dev
-type UpdateConnectivityRuleResponse struct {
-	// The async operation
-	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
-}
-
-func (m *UpdateConnectivityRuleResponse) Reset()      { *m = UpdateConnectivityRuleResponse{} }
-func (*UpdateConnectivityRuleResponse) ProtoMessage() {}
-func (*UpdateConnectivityRuleResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{123}
-}
-func (m *UpdateConnectivityRuleResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *UpdateConnectivityRuleResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_UpdateConnectivityRuleResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *UpdateConnectivityRuleResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateConnectivityRuleResponse.Merge(m, src)
-}
-func (m *UpdateConnectivityRuleResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *UpdateConnectivityRuleResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateConnectivityRuleResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UpdateConnectivityRuleResponse proto.InternalMessageInfo
-
-func (m *UpdateConnectivityRuleResponse) GetAsyncOperation() *v11.AsyncOperation {
-	if m != nil {
-		return m.AsyncOperation
-	}
-	return nil
-}
-
-// temporal:dev
 type DeleteConnectivityRuleRequest struct {
 	// The ID of the connectivity rule that need be deleted, required.
 	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
@@ -6915,7 +6923,6 @@ func (m *DeleteConnectivityRuleRequest) GetAsyncOperationId() string {
 	return ""
 }
 
-// temporal:dev
 type DeleteConnectivityRuleResponse struct {
 	// The async operation
 	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
@@ -7497,6 +7504,227 @@ func (m *DeleteProjectResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
+// temporal:dev
+// temporal:skip_validation_rule=MessageRuleUpdateRequest
+type UpdateNamespaceTagsRequest struct {
+	// The namespace to set tags for.
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// A list of tags to add or update.
+	// If a key of an existing tag is added, the tag's value is updated.
+	// At least one of tags_to_upsert or tags_to_remove must be specified.
+	TagsToUpsert map[string]string `protobuf:"bytes,2,rep,name=tags_to_upsert,json=tagsToUpsert,proto3" json:"tags_to_upsert,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// A list of tag keys to remove.
+	// If a tag key doesn't exist, it is silently ignored.
+	// At least one of tags_to_upsert or tags_to_remove must be specified.
+	TagsToRemove []string `protobuf:"bytes,3,rep,name=tags_to_remove,json=tagsToRemove,proto3" json:"tags_to_remove,omitempty"`
+	// The id to use for this async operation - optional.
+	AsyncOperationId string `protobuf:"bytes,4,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *UpdateNamespaceTagsRequest) Reset()      { *m = UpdateNamespaceTagsRequest{} }
+func (*UpdateNamespaceTagsRequest) ProtoMessage() {}
+func (*UpdateNamespaceTagsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{136}
+}
+func (m *UpdateNamespaceTagsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateNamespaceTagsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateNamespaceTagsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateNamespaceTagsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateNamespaceTagsRequest.Merge(m, src)
+}
+func (m *UpdateNamespaceTagsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateNamespaceTagsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateNamespaceTagsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateNamespaceTagsRequest proto.InternalMessageInfo
+
+func (m *UpdateNamespaceTagsRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *UpdateNamespaceTagsRequest) GetTagsToUpsert() map[string]string {
+	if m != nil {
+		return m.TagsToUpsert
+	}
+	return nil
+}
+
+func (m *UpdateNamespaceTagsRequest) GetTagsToRemove() []string {
+	if m != nil {
+		return m.TagsToRemove
+	}
+	return nil
+}
+
+func (m *UpdateNamespaceTagsRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+// temporal:dev
+type UpdateNamespaceTagsResponse struct {
+	// The async operation.
+	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *UpdateNamespaceTagsResponse) Reset()      { *m = UpdateNamespaceTagsResponse{} }
+func (*UpdateNamespaceTagsResponse) ProtoMessage() {}
+func (*UpdateNamespaceTagsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{137}
+}
+func (m *UpdateNamespaceTagsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateNamespaceTagsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateNamespaceTagsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateNamespaceTagsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateNamespaceTagsResponse.Merge(m, src)
+}
+func (m *UpdateNamespaceTagsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateNamespaceTagsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateNamespaceTagsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateNamespaceTagsResponse proto.InternalMessageInfo
+
+func (m *UpdateNamespaceTagsResponse) GetAsyncOperation() *v11.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+// temporal:ui
+type ResendUserInviteRequest struct {
+	// the id of user.
+	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// Optional, if not provided a random id will be generated.
+	AsyncOperationId string `protobuf:"bytes,2,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *ResendUserInviteRequest) Reset()      { *m = ResendUserInviteRequest{} }
+func (*ResendUserInviteRequest) ProtoMessage() {}
+func (*ResendUserInviteRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{138}
+}
+func (m *ResendUserInviteRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ResendUserInviteRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ResendUserInviteRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ResendUserInviteRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ResendUserInviteRequest.Merge(m, src)
+}
+func (m *ResendUserInviteRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *ResendUserInviteRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ResendUserInviteRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ResendUserInviteRequest proto.InternalMessageInfo
+
+func (m *ResendUserInviteRequest) GetUserId() string {
+	if m != nil {
+		return m.UserId
+	}
+	return ""
+}
+
+func (m *ResendUserInviteRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+// temporal:ui
+type ResendUserInviteResponse struct {
+	// The async operation.
+	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *ResendUserInviteResponse) Reset()      { *m = ResendUserInviteResponse{} }
+func (*ResendUserInviteResponse) ProtoMessage() {}
+func (*ResendUserInviteResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{139}
+}
+func (m *ResendUserInviteResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ResendUserInviteResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ResendUserInviteResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ResendUserInviteResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ResendUserInviteResponse.Merge(m, src)
+}
+func (m *ResendUserInviteResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *ResendUserInviteResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ResendUserInviteResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ResendUserInviteResponse proto.InternalMessageInfo
+
+func (m *ResendUserInviteResponse) GetAsyncOperation() *v11.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*GetUsersRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetUsersRequest")
 	proto.RegisterType((*GetUsersResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetUsersResponse")
@@ -7513,9 +7741,12 @@ func init() {
 	proto.RegisterType((*GetAsyncOperationRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetAsyncOperationRequest")
 	proto.RegisterType((*GetAsyncOperationResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetAsyncOperationResponse")
 	proto.RegisterType((*CreateNamespaceRequest)(nil), "temporal.api.cloud.cloudservice.v1.CreateNamespaceRequest")
+	proto.RegisterMapType((map[string]string)(nil), "temporal.api.cloud.cloudservice.v1.CreateNamespaceRequest.TagsEntry")
 	proto.RegisterType((*CreateNamespaceResponse)(nil), "temporal.api.cloud.cloudservice.v1.CreateNamespaceResponse")
 	proto.RegisterType((*GetNamespacesRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetNamespacesRequest")
 	proto.RegisterType((*GetNamespacesResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetNamespacesResponse")
+	proto.RegisterType((*GetNamespaceIDsRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetNamespaceIDsRequest")
+	proto.RegisterType((*GetNamespaceIDsResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetNamespaceIDsResponse")
 	proto.RegisterType((*GetNamespaceRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetNamespaceRequest")
 	proto.RegisterType((*GetNamespaceResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetNamespaceResponse")
 	proto.RegisterType((*UpdateNamespaceRequest)(nil), "temporal.api.cloud.cloudservice.v1.UpdateNamespaceRequest")
@@ -7622,8 +7853,6 @@ func init() {
 	proto.RegisterType((*GetConnectivityRuleResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetConnectivityRuleResponse")
 	proto.RegisterType((*GetConnectivityRulesRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetConnectivityRulesRequest")
 	proto.RegisterType((*GetConnectivityRulesResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetConnectivityRulesResponse")
-	proto.RegisterType((*UpdateConnectivityRuleRequest)(nil), "temporal.api.cloud.cloudservice.v1.UpdateConnectivityRuleRequest")
-	proto.RegisterType((*UpdateConnectivityRuleResponse)(nil), "temporal.api.cloud.cloudservice.v1.UpdateConnectivityRuleResponse")
 	proto.RegisterType((*DeleteConnectivityRuleRequest)(nil), "temporal.api.cloud.cloudservice.v1.DeleteConnectivityRuleRequest")
 	proto.RegisterType((*DeleteConnectivityRuleResponse)(nil), "temporal.api.cloud.cloudservice.v1.DeleteConnectivityRuleResponse")
 	proto.RegisterType((*GetProjectsRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetProjectsRequest")
@@ -7636,6 +7865,11 @@ func init() {
 	proto.RegisterType((*UpdateProjectResponse)(nil), "temporal.api.cloud.cloudservice.v1.UpdateProjectResponse")
 	proto.RegisterType((*DeleteProjectRequest)(nil), "temporal.api.cloud.cloudservice.v1.DeleteProjectRequest")
 	proto.RegisterType((*DeleteProjectResponse)(nil), "temporal.api.cloud.cloudservice.v1.DeleteProjectResponse")
+	proto.RegisterType((*UpdateNamespaceTagsRequest)(nil), "temporal.api.cloud.cloudservice.v1.UpdateNamespaceTagsRequest")
+	proto.RegisterMapType((map[string]string)(nil), "temporal.api.cloud.cloudservice.v1.UpdateNamespaceTagsRequest.TagsToUpsertEntry")
+	proto.RegisterType((*UpdateNamespaceTagsResponse)(nil), "temporal.api.cloud.cloudservice.v1.UpdateNamespaceTagsResponse")
+	proto.RegisterType((*ResendUserInviteRequest)(nil), "temporal.api.cloud.cloudservice.v1.ResendUserInviteRequest")
+	proto.RegisterType((*ResendUserInviteResponse)(nil), "temporal.api.cloud.cloudservice.v1.ResendUserInviteResponse")
 }
 
 func init() {
@@ -7643,198 +7877,211 @@ func init() {
 }
 
 var fileDescriptor_d04330087ace166d = []byte{
-	// 3054 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x5c, 0xdd, 0x6f, 0x1c, 0x57,
-	0x15, 0xcf, 0x5d, 0x7f, 0xc5, 0xc7, 0x69, 0x1c, 0x8f, 0x3f, 0xe2, 0x38, 0xf6, 0xc6, 0x99, 0x34,
-	0x55, 0x92, 0xb6, 0xeb, 0x26, 0x05, 0x14, 0x4c, 0x5b, 0xd8, 0xb8, 0x8d, 0xbd, 0xfd, 0x48, 0xdd,
-	0xb1, 0x9b, 0x22, 0x24, 0xb4, 0x4c, 0x76, 0x6e, 0xb7, 0x53, 0xef, 0xee, 0x4c, 0x67, 0x66, 0x6d,
-	0xaf, 0x51, 0x09, 0x85, 0xa2, 0x52, 0xa8, 0xda, 0x22, 0x04, 0xe2, 0xa5, 0xe2, 0x05, 0x21, 0x54,
-	0x81, 0xfa, 0x00, 0x88, 0x3f, 0x00, 0x81, 0x78, 0xa2, 0x95, 0x10, 0x52, 0x9f, 0x10, 0x75, 0x85,
-	0x04, 0xa8, 0x0f, 0x7d, 0xe4, 0xa1, 0x12, 0x68, 0xee, 0xd7, 0x7c, 0xec, 0xcc, 0x7a, 0x76, 0xbb,
-	0x37, 0x2d, 0x2f, 0x89, 0xe7, 0xce, 0x3d, 0xe7, 0xfc, 0xce, 0xef, 0x7e, 0x9d, 0x7b, 0xee, 0x9d,
-	0x85, 0xcf, 0x7b, 0xb8, 0x6e, 0x5b, 0x8e, 0x5e, 0x5b, 0xd2, 0x6d, 0x73, 0xa9, 0x52, 0xb3, 0x9a,
-	0x06, 0xfd, 0xd7, 0xc5, 0xce, 0xb6, 0x59, 0xc1, 0x4b, 0xdb, 0x17, 0x97, 0x1c, 0xfc, 0x5c, 0x13,
-	0xbb, 0x5e, 0xd9, 0xc1, 0xae, 0x6d, 0x35, 0x5c, 0x5c, 0xb0, 0x1d, 0xcb, 0xb3, 0x14, 0x95, 0x8b,
-	0x16, 0x74, 0xdb, 0x2c, 0x10, 0xa1, 0x42, 0x58, 0xb4, 0xb0, 0x7d, 0x71, 0xee, 0x54, 0xd5, 0xb2,
-	0xaa, 0x35, 0xbc, 0x44, 0x24, 0x6e, 0x34, 0x9f, 0x5e, 0xf2, 0xcc, 0x3a, 0x76, 0x3d, 0xbd, 0x6e,
-	0x53, 0x25, 0x73, 0x77, 0x27, 0xd8, 0xb7, 0x6c, 0xec, 0xe8, 0x9e, 0x69, 0x35, 0x7c, 0xe3, 0x75,
-	0xec, 0xba, 0x7a, 0x95, 0xd9, 0x9c, 0xbb, 0x2b, 0xa1, 0xba, 0x69, 0xe0, 0x86, 0x67, 0x7a, 0xad,
-	0xf6, 0xda, 0x49, 0xca, 0x1b, 0x7a, 0x1d, 0xbb, 0xb6, 0x4e, 0x3d, 0x8b, 0x56, 0x3f, 0x9f, 0x54,
-	0x1d, 0xef, 0x36, 0xdd, 0xf6, 0xaa, 0x17, 0x12, 0xaa, 0x3a, 0xb8, 0x9a, 0x88, 0xf9, 0xce, 0x84,
-	0xba, 0x7a, 0xa5, 0x62, 0x35, 0x1b, 0x5e, 0x36, 0x07, 0xf5, 0xa6, 0x61, 0x7a, 0x35, 0xab, 0x9a,
-	0x0d, 0x71, 0xd3, 0x7f, 0xdf, 0x5e, 0xf5, 0x33, 0x49, 0x0d, 0x6d, 0x35, 0x1a, 0xb8, 0xe2, 0x99,
-	0xdb, 0xa6, 0xd7, 0x72, 0x9a, 0x35, 0x9c, 0x0d, 0xbb, 0xed, 0x58, 0xcf, 0xe2, 0x4a, 0x3b, 0x76,
-	0xf5, 0x05, 0x04, 0xe3, 0xab, 0xd8, 0x7b, 0xd2, 0xc5, 0x8e, 0xab, 0xd1, 0x3e, 0xa3, 0x9c, 0x84,
-	0x51, 0x5b, 0xaf, 0xe2, 0xb2, 0x6b, 0xee, 0xe1, 0x59, 0xb4, 0x88, 0xce, 0x0d, 0x69, 0x87, 0xfd,
-	0x82, 0x0d, 0x73, 0x0f, 0x2b, 0x0b, 0x00, 0xe4, 0xa5, 0x67, 0x6d, 0xe1, 0xc6, 0x6c, 0x6e, 0x11,
-	0x9d, 0x1b, 0xd5, 0x48, 0xf5, 0x4d, 0xbf, 0x40, 0x99, 0x82, 0x21, 0x5c, 0xd7, 0xcd, 0xda, 0xec,
-	0x00, 0x79, 0x43, 0x1f, 0x94, 0x79, 0x18, 0x15, 0x6d, 0x38, 0x3b, 0x48, 0x65, 0x44, 0x81, 0xba,
-	0x0d, 0xc7, 0x02, 0x08, 0xb4, 0xbb, 0x2a, 0xcb, 0x30, 0xd4, 0xf4, 0x0b, 0x66, 0xd1, 0xe2, 0xc0,
-	0xb9, 0xb1, 0x4b, 0xb7, 0x17, 0x12, 0x3a, 0x2e, 0xef, 0x44, 0x85, 0xed, 0x8b, 0x05, 0x5f, 0x5a,
-	0xa3, 0x22, 0xca, 0x1d, 0x30, 0xde, 0xc0, 0xbb, 0x5e, 0xb9, 0x0d, 0xe7, 0x6d, 0x7e, 0xf1, 0x3a,
-	0xc7, 0xaa, 0x9e, 0x87, 0xa3, 0xcc, 0x2e, 0xf7, 0xfc, 0x38, 0x8c, 0xf8, 0x2a, 0xca, 0xa6, 0x41,
-	0xfc, 0x1e, 0xd5, 0x86, 0xfd, 0xc7, 0x92, 0xa1, 0x3e, 0x22, 0x58, 0x12, 0x08, 0x2f, 0xc3, 0xa0,
-	0xff, 0x92, 0x54, 0xcc, 0x0a, 0x90, 0x48, 0xa8, 0x37, 0x61, 0x62, 0xc5, 0xc1, 0xba, 0x87, 0xc3,
-	0xa6, 0xef, 0x83, 0x41, 0xd7, 0xc6, 0x15, 0xa6, 0xee, 0x5c, 0x16, 0x75, 0x1b, 0x36, 0xae, 0x68,
-	0x44, 0x4a, 0xb9, 0x0b, 0x14, 0xdd, 0x6d, 0x35, 0x2a, 0x65, 0x31, 0x0e, 0x7d, 0x1f, 0xa8, 0xd7,
-	0xc7, 0xc8, 0x9b, 0xc7, 0xf9, 0x8b, 0x92, 0xa1, 0xbe, 0x84, 0x40, 0x09, 0x23, 0x60, 0x1e, 0xa5,
-	0x79, 0xaf, 0x7c, 0x19, 0xc6, 0x63, 0xda, 0x89, 0xea, 0xb1, 0x4b, 0x4b, 0x49, 0x30, 0x45, 0x25,
-	0x1f, 0x67, 0x31, 0x62, 0x5b, 0x3b, 0x1a, 0xc5, 0xa2, 0xfe, 0x1e, 0xc1, 0xc4, 0x93, 0xb6, 0x11,
-	0xe3, 0x22, 0x15, 0x08, 0x27, 0x29, 0xd7, 0x13, 0x49, 0xe7, 0xe1, 0x98, 0x83, 0x5d, 0xab, 0xe9,
-	0x54, 0x70, 0x79, 0x1b, 0x3b, 0xae, 0xef, 0x07, 0xed, 0xa6, 0xe3, 0xbc, 0xfc, 0x3a, 0x2d, 0x4e,
-	0xe1, 0x73, 0x30, 0x85, 0xcf, 0x06, 0x28, 0x61, 0x27, 0x18, 0x9d, 0x09, 0xac, 0xa1, 0xfe, 0xb0,
-	0xf6, 0x1d, 0x04, 0x13, 0x0f, 0xe2, 0x1a, 0xce, 0xc8, 0x5a, 0x92, 0xdf, 0xb9, 0x6e, 0xfc, 0x1e,
-	0x48, 0xf7, 0x3b, 0x0c, 0x43, 0xba, 0xdf, 0xff, 0x41, 0xb0, 0xb0, 0x41, 0x87, 0xe1, 0x35, 0x3e,
-	0x7b, 0x14, 0x2b, 0x15, 0xec, 0x8a, 0xa9, 0x2b, 0x32, 0xd1, 0xa0, 0xd8, 0x44, 0x13, 0x66, 0x28,
-	0x17, 0x61, 0x68, 0x15, 0x86, 0x75, 0xa2, 0x87, 0xb8, 0x9a, 0x82, 0x34, 0xdc, 0xb3, 0xe2, 0xe6,
-	0x99, 0x78, 0x22, 0xd5, 0x83, 0xdd, 0x50, 0x3d, 0x94, 0x42, 0xf5, 0x1e, 0xe4, 0xd3, 0x3c, 0x97,
-	0x4e, 0xfb, 0x1a, 0xcc, 0xae, 0x62, 0x2f, 0x56, 0x89, 0x11, 0x9e, 0xec, 0x05, 0x4a, 0xf1, 0xa2,
-	0x09, 0x27, 0x12, 0x34, 0x49, 0x77, 0xe0, 0x7b, 0x08, 0x66, 0xe8, 0x7c, 0x27, 0xc8, 0xe3, 0xf8,
-	0xaf, 0x44, 0x66, 0x94, 0x42, 0x92, 0x25, 0xd1, 0x7f, 0x22, 0x0d, 0x7f, 0xe0, 0xe4, 0x9b, 0x36,
-	0x68, 0x7e, 0x80, 0xe0, 0x78, 0x1b, 0x18, 0x46, 0x41, 0xe7, 0xee, 0x2b, 0x6f, 0x1a, 0x7e, 0x1a,
-	0xa6, 0x56, 0xb1, 0x27, 0xf0, 0xf4, 0x25, 0x12, 0x50, 0x60, 0xd0, 0x87, 0xce, 0x78, 0x20, 0x7f,
-	0xab, 0xdf, 0x47, 0x30, 0x1d, 0x33, 0xc4, 0x3c, 0x7f, 0x18, 0x40, 0x38, 0xca, 0x17, 0xfd, 0x0b,
-	0xd9, 0x5b, 0x43, 0x0b, 0x49, 0x67, 0x5e, 0xff, 0xef, 0x85, 0xc9, 0x30, 0x98, 0x4c, 0x73, 0x88,
-	0xfa, 0xb5, 0x28, 0x55, 0xc2, 0x81, 0xb5, 0xb8, 0x54, 0x77, 0xf8, 0x43, 0x16, 0xfe, 0x82, 0x60,
-	0x86, 0x2e, 0x27, 0xdd, 0x41, 0xeb, 0x4b, 0x5f, 0x96, 0xb6, 0x46, 0xba, 0x70, 0xbc, 0xcd, 0x29,
-	0xe9, 0x03, 0xff, 0xb7, 0x39, 0x50, 0x35, 0xec, 0x3b, 0xbd, 0xd2, 0x74, 0x3d, 0xab, 0xbe, 0x81,
-	0x75, 0xa7, 0xf2, 0x4c, 0xd1, 0xf3, 0x1c, 0xf3, 0x46, 0xd3, 0xcb, 0x48, 0xeb, 0x3a, 0x9c, 0xc5,
-	0xbb, 0xa6, 0xeb, 0x99, 0x8d, 0x6a, 0xb9, 0x42, 0xd4, 0x94, 0x5d, 0xa2, 0xa7, 0xac, 0x73, 0x45,
-	0x65, 0xd2, 0xd3, 0x69, 0x27, 0x3b, 0xcd, 0x2b, 0x27, 0x9a, 0xf4, 0xbd, 0x57, 0xae, 0xc2, 0x62,
-	0x03, 0xef, 0x74, 0x56, 0x46, 0x49, 0x9f, 0x6f, 0xe0, 0x9d, 0x74, 0x3d, 0xd2, 0x56, 0x9b, 0x9b,
-	0x70, 0xa6, 0x23, 0x6d, 0xd2, 0x1b, 0xee, 0x35, 0x04, 0x33, 0x34, 0xb4, 0xe8, 0x72, 0x0c, 0x48,
-	0x8b, 0x75, 0x5c, 0x38, 0xde, 0x06, 0x48, 0x3a, 0x0d, 0x2f, 0x22, 0xc8, 0x5f, 0xd5, 0xcd, 0x9a,
-	0xb5, 0x1d, 0x5a, 0xf7, 0x35, 0xb2, 0x67, 0xcd, 0x46, 0xc7, 0x0c, 0x0c, 0xd3, 0x2d, 0x2e, 0x0f,
-	0x78, 0xe8, 0x53, 0x97, 0xbe, 0x7f, 0x1d, 0x4e, 0xa5, 0xa2, 0x90, 0xce, 0xc1, 0x9b, 0x08, 0x4e,
-	0x14, 0x0d, 0xa3, 0xaf, 0xee, 0x4b, 0x9b, 0xe5, 0xb6, 0x61, 0x2e, 0x09, 0xab, 0x74, 0x92, 0x7e,
-	0x85, 0x60, 0xbe, 0xad, 0x7b, 0x7e, 0x8a, 0x79, 0x6a, 0xc1, 0x42, 0x0a, 0x5c, 0xe9, 0x54, 0x4d,
-	0xc2, 0xc4, 0x2a, 0xf6, 0xa8, 0x39, 0x1e, 0xe8, 0xa8, 0x9b, 0xa0, 0x84, 0x0b, 0x19, 0x88, 0x07,
-	0x60, 0x84, 0x12, 0xd1, 0x31, 0x0d, 0x41, 0xab, 0xf8, 0x96, 0x99, 0x0f, 0x5c, 0x48, 0xbd, 0x40,
-	0x12, 0x1b, 0xd1, 0x86, 0x08, 0xa8, 0x46, 0x61, 0xaa, 0xd5, 0x27, 0x42, 0xb0, 0x04, 0x80, 0xfb,
-	0x22, 0x95, 0xb3, 0xda, 0xe7, 0x2a, 0xff, 0x88, 0x48, 0xe0, 0x7e, 0x0d, 0xef, 0x36, 0xdd, 0x87,
-	0x1a, 0x86, 0x6d, 0x99, 0x0d, 0xaf, 0x2f, 0xa1, 0x5d, 0x01, 0x26, 0x3d, 0xdd, 0xa9, 0x62, 0xaf,
-	0x2c, 0xba, 0x50, 0x30, 0x7d, 0x4c, 0xd0, 0x57, 0xa2, 0x61, 0x4b, 0x86, 0x72, 0x01, 0x58, 0x61,
-	0xd9, 0xd3, 0xdd, 0xad, 0xf2, 0x73, 0x4d, 0xdc, 0xe4, 0x69, 0xa0, 0x71, 0xfa, 0x62, 0x53, 0x77,
-	0xb7, 0x9e, 0xf0, 0x8b, 0x45, 0xd8, 0x38, 0x14, 0x0a, 0x1b, 0xbf, 0x8b, 0xc8, 0xbe, 0x21, 0xee,
-	0x08, 0x23, 0x69, 0x05, 0x46, 0x31, 0x2f, 0x64, 0xed, 0x74, 0x36, 0x31, 0xf6, 0xf1, 0xc5, 0x7d,
-	0x9a, 0xb8, 0x0a, 0x2d, 0x90, 0xcb, 0x1c, 0x33, 0x2e, 0xc3, 0xf1, 0x38, 0x12, 0xce, 0xe8, 0x29,
-	0x18, 0xe3, 0xfa, 0x82, 0x3d, 0x10, 0xf0, 0xa2, 0x92, 0xa1, 0x7e, 0xb5, 0xbd, 0x39, 0x84, 0x13,
-	0x45, 0x38, 0xcc, 0x6b, 0xb2, 0xb6, 0xce, 0xe8, 0x83, 0x10, 0x53, 0x5f, 0x46, 0x30, 0xc7, 0x36,
-	0x16, 0x49, 0xf0, 0xee, 0x8f, 0x24, 0x98, 0xce, 0x67, 0xd2, 0xde, 0x73, 0x86, 0xe9, 0x27, 0x08,
-	0x4e, 0x26, 0x62, 0x61, 0xee, 0x1e, 0xc4, 0x95, 0xc4, 0xbd, 0xce, 0x5f, 0x11, 0xcc, 0xb1, 0x48,
-	0xb4, 0x97, 0x56, 0x14, 0x3c, 0xe6, 0x7a, 0xe3, 0x51, 0xda, 0x94, 0xba, 0x03, 0x27, 0x13, 0xdd,
-	0x92, 0x3e, 0xa1, 0xfe, 0x18, 0xc1, 0x1c, 0x9b, 0xcc, 0x7b, 0x22, 0x54, 0x5a, 0xc8, 0xb6, 0x03,
-	0x27, 0x13, 0x71, 0x49, 0x67, 0xe4, 0x2d, 0x04, 0x53, 0xb4, 0x2d, 0x8a, 0xf4, 0xcc, 0x80, 0x73,
-	0xf1, 0x40, 0x64, 0x0c, 0x26, 0xee, 0x0f, 0xd9, 0x29, 0x03, 0xb1, 0x42, 0xff, 0x3c, 0xa0, 0xf3,
-	0xf4, 0x85, 0xaa, 0xe7, 0x60, 0x3a, 0x06, 0x58, 0x3a, 0x49, 0x6f, 0x0f, 0x90, 0x9d, 0xf4, 0x93,
-	0x2e, 0x76, 0x56, 0x1d, 0xab, 0x69, 0xf7, 0x65, 0x65, 0x8a, 0x84, 0x39, 0x03, 0xf1, 0x30, 0xe7,
-	0x34, 0x1c, 0x31, 0x4c, 0xd7, 0xae, 0xe9, 0x2d, 0xba, 0xc7, 0xa2, 0x43, 0x69, 0x8c, 0x95, 0x91,
-	0x2d, 0x55, 0x1d, 0x8e, 0xd0, 0xe3, 0xaf, 0x72, 0xd5, 0x07, 0x45, 0x96, 0xa1, 0xb1, 0x4b, 0x0f,
-	0x17, 0x0e, 0x3e, 0x37, 0x2b, 0x24, 0x39, 0x53, 0x58, 0x25, 0xca, 0x48, 0xd9, 0x55, 0xb3, 0xe6,
-	0x61, 0x47, 0x1b, 0xab, 0x06, 0x45, 0x4a, 0x15, 0xc0, 0xad, 0x98, 0x75, 0x66, 0x6c, 0x98, 0x18,
-	0x5b, 0xeb, 0xd9, 0xd8, 0xc6, 0x4a, 0xe9, 0xb1, 0xb0, 0xa9, 0x51, 0x5f, 0x37, 0x29, 0x98, 0xbb,
-	0x0c, 0x13, 0x6d, 0x50, 0x94, 0x33, 0x70, 0x1b, 0x39, 0x9f, 0x29, 0xeb, 0x86, 0xe1, 0x60, 0xd7,
-	0x65, 0x83, 0xf3, 0x08, 0x29, 0x2c, 0xd2, 0xb2, 0xb9, 0x73, 0x30, 0x1e, 0xd3, 0xab, 0x4c, 0xc3,
-	0xb0, 0x69, 0xd8, 0xc1, 0x68, 0x1e, 0x32, 0x0d, 0xbb, 0x64, 0xa8, 0xdf, 0xa2, 0xd9, 0x9d, 0x30,
-	0x2e, 0xb1, 0xba, 0x0d, 0x13, 0x0f, 0xf9, 0xfa, 0x7c, 0x3e, 0x4b, 0xe6, 0x9e, 0xe8, 0xd0, 0x98,
-	0x60, 0xe6, 0x05, 0xfa, 0x1e, 0x92, 0xd4, 0x09, 0xe4, 0x59, 0xa7, 0x3a, 0x01, 0x87, 0x89, 0xa2,
-	0x00, 0xf4, 0x08, 0x79, 0x2e, 0x19, 0xea, 0x53, 0xd1, 0x7e, 0x28, 0x40, 0x7f, 0x11, 0x86, 0x68,
-	0xb3, 0x74, 0x58, 0x31, 0x93, 0x31, 0x53, 0x39, 0x7f, 0x41, 0x9e, 0x09, 0x8e, 0x59, 0x22, 0x70,
-	0x8a, 0x91, 0x89, 0xe0, 0xee, 0xcc, 0xaa, 0x7b, 0x5e, 0x90, 0x5f, 0x15, 0x59, 0xc7, 0x76, 0x47,
-	0xd3, 0xb9, 0x91, 0xb8, 0x0c, 0xbf, 0x2d, 0xb2, 0x5c, 0x5d, 0xb4, 0x95, 0xe0, 0x2d, 0xd7, 0x3b,
-	0x6f, 0xf2, 0x33, 0x5c, 0xed, 0x0c, 0xcb, 0x9b, 0x45, 0x5f, 0x11, 0x89, 0x92, 0x6e, 0x68, 0x94,
-	0x9f, 0x25, 0xb9, 0x95, 0x1c, 0xfc, 0x17, 0x81, 0xba, 0x11, 0x1a, 0xc1, 0x3d, 0x9d, 0x0d, 0x85,
-	0xd9, 0xca, 0x45, 0xd9, 0xfa, 0xf4, 0x9f, 0x0e, 0xdd, 0x84, 0x33, 0x1d, 0x09, 0x90, 0xde, 0x04,
-	0xbf, 0xa1, 0x49, 0x1a, 0x81, 0xe0, 0x31, 0x5c, 0xbf, 0x11, 0x9c, 0x4c, 0x76, 0xe8, 0x89, 0xd7,
-	0x60, 0xb4, 0x4e, 0xea, 0x72, 0xde, 0xc7, 0x2e, 0x5d, 0xcc, 0x3c, 0xaa, 0xa9, 0x95, 0x92, 0xa1,
-	0x1d, 0xae, 0xb3, 0xbf, 0xba, 0xec, 0xae, 0x34, 0x5d, 0xd3, 0x86, 0x5a, 0x3a, 0x5d, 0xbf, 0x43,
-	0x30, 0xaf, 0xe1, 0xba, 0xb5, 0x8d, 0xff, 0xdf, 0x18, 0x6b, 0xc1, 0x42, 0x0a, 0x70, 0xe9, 0xa4,
-	0xb9, 0x30, 0x17, 0x5e, 0xa7, 0xa9, 0xdd, 0xbe, 0x44, 0x8d, 0x61, 0xb6, 0x07, 0xa2, 0xc1, 0xc1,
-	0xeb, 0x08, 0x4e, 0x26, 0x5a, 0x65, 0xee, 0x96, 0x60, 0x84, 0x32, 0xc9, 0x43, 0x9b, 0xa5, 0x2e,
-	0xdb, 0x42, 0xe3, 0xf2, 0x99, 0x23, 0x9c, 0x1f, 0x8a, 0xbd, 0xf5, 0x06, 0x8d, 0x07, 0x63, 0x9b,
-	0x8c, 0xab, 0x91, 0xd8, 0xe2, 0xd2, 0x41, 0x78, 0xa2, 0x4a, 0x7a, 0x0e, 0x30, 0x7e, 0x8e, 0x60,
-	0x3e, 0x19, 0x15, 0x63, 0xea, 0x2e, 0x50, 0x58, 0xfc, 0x5a, 0x66, 0x7b, 0x9c, 0xd0, 0x49, 0xb1,
-	0x1b, 0x91, 0x91, 0x1a, 0x78, 0xd0, 0xd3, 0xec, 0x64, 0xea, 0xba, 0xc2, 0xa8, 0x7a, 0x24, 0x2b,
-	0x95, 0xe2, 0xee, 0x53, 0x30, 0x1e, 0x53, 0xc5, 0x1a, 0xa4, 0xd0, 0x5d, 0x83, 0x68, 0x47, 0xa3,
-	0x76, 0xd5, 0xa7, 0x12, 0xac, 0xf6, 0x63, 0x14, 0xa8, 0x6f, 0x20, 0x32, 0xc0, 0xda, 0x34, 0x77,
-	0x72, 0x68, 0xe0, 0xe3, 0x3b, 0x94, 0xb9, 0xdf, 0x7f, 0x80, 0x78, 0x86, 0xa3, 0x0f, 0x8d, 0x27,
-	0x46, 0x49, 0xee, 0x63, 0x8e, 0x12, 0x69, 0xe1, 0xe4, 0x2e, 0xcc, 0x27, 0x7b, 0x2b, 0x7d, 0xa2,
-	0xfd, 0x19, 0xe2, 0x89, 0x93, 0x7e, 0x10, 0x2d, 0x2d, 0xd6, 0xdc, 0xe5, 0x47, 0x1e, 0xb7, 0x9c,
-	0xa0, 0x0f, 0x10, 0x49, 0xd6, 0x17, 0x6d, 0xf3, 0x11, 0xdc, 0xea, 0xd7, 0x0a, 0x64, 0xed, 0x34,
-	0xe8, 0x9a, 0xce, 0x56, 0x20, 0xf2, 0x5c, 0x32, 0x94, 0xcf, 0xc1, 0x34, 0x7d, 0xe5, 0xb5, 0x6c,
-	0x5c, 0x36, 0xb0, 0xed, 0xe0, 0x8a, 0xee, 0x61, 0xd6, 0x71, 0xae, 0xe4, 0x66, 0x91, 0x36, 0x49,
-	0x2a, 0x6c, 0xb6, 0x6c, 0xfc, 0xa0, 0x78, 0xad, 0xac, 0x01, 0x04, 0x72, 0x24, 0x72, 0x3c, 0x7a,
-	0xf0, 0x1e, 0xf6, 0x71, 0xae, 0x48, 0x1b, 0x15, 0x3a, 0xd5, 0x9b, 0xe4, 0x70, 0x44, 0x78, 0x1b,
-	0x64, 0xac, 0x75, 0xdb, 0x2c, 0x6f, 0xe1, 0x16, 0x5f, 0xfa, 0xee, 0x38, 0x48, 0x3b, 0x55, 0xa1,
-	0x8d, 0xe8, 0x54, 0x55, 0x17, 0x17, 0x35, 0x8f, 0x09, 0x00, 0x9c, 0xed, 0x69, 0x18, 0xde, 0xc2,
-	0xad, 0x50, 0x0e, 0x62, 0x0b, 0xb7, 0x4a, 0x86, 0xba, 0x19, 0x6a, 0x99, 0xd0, 0x4e, 0x7e, 0x84,
-	0x41, 0x65, 0x3d, 0x20, 0x2b, 0xd2, 0x61, 0x8a, 0x54, 0xfd, 0x36, 0x82, 0x49, 0xba, 0xb8, 0x45,
-	0x41, 0x64, 0xc8, 0xe7, 0xb5, 0x6b, 0xed, 0x79, 0x89, 0x7d, 0x03, 0xc1, 0x54, 0x14, 0x05, 0xf3,
-	0x2f, 0x99, 0x0b, 0x65, 0x0a, 0x86, 0xc2, 0xa4, 0xd2, 0x87, 0xa4, 0x61, 0x31, 0xd0, 0x9f, 0x61,
-	0xf1, 0x07, 0x04, 0x93, 0x2c, 0x8b, 0x98, 0xa1, 0xa9, 0x04, 0x79, 0xb9, 0x1e, 0xc9, 0x93, 0x36,
-	0xf3, 0xda, 0x22, 0x7b, 0x1b, 0xa5, 0x59, 0xea, 0x85, 0xce, 0x49, 0x3a, 0x97, 0x65, 0x62, 0x4e,
-	0xda, 0x94, 0x6a, 0xc3, 0x54, 0x14, 0x86, 0x74, 0xcf, 0xff, 0x85, 0x48, 0xbe, 0xae, 0xd8, 0x34,
-	0x4c, 0xef, 0x51, 0xab, 0xda, 0x97, 0xc9, 0xf4, 0x51, 0x98, 0x72, 0x3d, 0xdd, 0xf1, 0xca, 0x9e,
-	0x59, 0xc7, 0x65, 0xb3, 0x51, 0xa9, 0x35, 0x5d, 0x73, 0x1b, 0xb3, 0x6e, 0x3e, 0x57, 0xa0, 0x09,
-	0xd8, 0x02, 0xff, 0xbe, 0xa1, 0xb0, 0xc9, 0xbf, 0x6f, 0xd0, 0x14, 0x22, 0xe7, 0x3f, 0x97, 0xb8,
-	0x94, 0xb2, 0x06, 0x0a, 0x6e, 0x18, 0x54, 0x17, 0xde, 0xe5, 0xba, 0x06, 0x0f, 0xd4, 0x75, 0x0c,
-	0x37, 0x0c, 0xff, 0xe9, 0x21, 0x2e, 0xa3, 0x3e, 0x4f, 0x12, 0x8d, 0x21, 0x57, 0x19, 0xbb, 0xf7,
-	0xc3, 0x60, 0xcd, 0xaa, 0x76, 0xcc, 0x8d, 0xf2, 0xcf, 0x09, 0x7c, 0x46, 0x1f, 0xb5, 0xaa, 0x1a,
-	0xae, 0x58, 0x8e, 0xa1, 0x11, 0xb1, 0xcc, 0xb3, 0xe8, 0x3f, 0xf8, 0x55, 0x7f, 0xbd, 0x2a, 0x2e,
-	0xd3, 0xa4, 0x51, 0x85, 0xfa, 0x48, 0x55, 0xae, 0x7b, 0xaa, 0xa2, 0xcd, 0x3f, 0xd0, 0xb1, 0xf9,
-	0x07, 0xe3, 0x71, 0xec, 0x37, 0xd8, 0xe7, 0x04, 0xc4, 0x4d, 0x46, 0xf1, 0x15, 0x18, 0x75, 0x9b,
-	0xf5, 0xba, 0xee, 0x98, 0xb8, 0xe3, 0x59, 0x3e, 0xf9, 0x10, 0x83, 0xc4, 0x7b, 0xa4, 0x76, 0x4b,
-	0x0b, 0xc4, 0x32, 0xf3, 0x4c, 0x2f, 0x18, 0x44, 0x63, 0x26, 0xf5, 0x3a, 0x5d, 0x43, 0x63, 0x21,
-	0xca, 0x97, 0x60, 0x24, 0xba, 0x39, 0xb8, 0x23, 0xdb, 0x91, 0x90, 0xc6, 0xc5, 0xd4, 0x5f, 0x23,
-	0x58, 0x8c, 0xdd, 0x26, 0x7d, 0x68, 0xd7, 0xb6, 0x1c, 0x6f, 0xc3, 0x6c, 0x6c, 0x65, 0xcb, 0x7c,
-	0xad, 0x44, 0xe6, 0xe1, 0xa5, 0x03, 0xaf, 0x0d, 0x06, 0xfa, 0x7b, 0xbe, 0x03, 0xfb, 0x3c, 0x9c,
-	0xee, 0x00, 0x5a, 0xfa, 0xa4, 0xf3, 0x04, 0x2c, 0x84, 0xef, 0x70, 0x76, 0x4b, 0x18, 0xbf, 0xa2,
-	0x90, 0x0b, 0x5d, 0x51, 0xd0, 0x21, 0x9f, 0xa6, 0x52, 0x04, 0x21, 0x83, 0xae, 0xd9, 0xd8, 0x62,
-	0x3e, 0xdc, 0xd9, 0x05, 0xcd, 0x1a, 0x11, 0x54, 0xf7, 0xd2, 0x4c, 0x64, 0xcc, 0x70, 0x46, 0xc6,
-	0x54, 0xae, 0xe3, 0x98, 0x1a, 0x88, 0x8f, 0xa9, 0x57, 0x10, 0x9c, 0x4a, 0x35, 0x2e, 0x02, 0xc2,
-	0x21, 0x1f, 0x27, 0x1f, 0x5f, 0x5d, 0x79, 0x48, 0x25, 0x33, 0x0f, 0xb1, 0xbf, 0x21, 0x58, 0x8c,
-	0xdd, 0x26, 0xfd, 0x44, 0x7a, 0xbd, 0xb4, 0x10, 0xe4, 0x79, 0x38, 0xdd, 0xc1, 0xbf, 0x5b, 0x71,
-	0x9d, 0x6c, 0x31, 0x76, 0x3f, 0xab, 0x0f, 0x83, 0x44, 0x2a, 0x5d, 0x1d, 0xe0, 0x4a, 0xa7, 0xeb,
-	0x25, 0x04, 0xea, 0x75, 0xbd, 0x66, 0x7e, 0xe2, 0x1d, 0x52, 0x3d, 0x0b, 0x67, 0x3a, 0x02, 0xa1,
-	0x54, 0xa8, 0x2f, 0x23, 0x98, 0xde, 0xf0, 0xd7, 0xef, 0xc7, 0xcc, 0x6a, 0xf4, 0x7b, 0x8e, 0x2b,
-	0x91, 0x1d, 0xcd, 0xc1, 0x77, 0xc8, 0x85, 0x82, 0x9e, 0x77, 0x35, 0x3f, 0x42, 0x30, 0x13, 0xc7,
-	0xc2, 0x5a, 0xec, 0x34, 0x1c, 0xa9, 0xf3, 0xc2, 0x20, 0x08, 0x1e, 0x13, 0x65, 0x52, 0xf3, 0x84,
-	0x97, 0x49, 0x60, 0xda, 0x46, 0xd0, 0xc1, 0x98, 0xd8, 0x27, 0x02, 0xed, 0xee, 0xac, 0xc1, 0xa8,
-	0xa8, 0x96, 0xf9, 0x13, 0x81, 0x40, 0x4d, 0x20, 0xac, 0x6a, 0x51, 0x0b, 0x7d, 0x49, 0xff, 0xb1,
-	0x6f, 0x33, 0xc2, 0x4a, 0x83, 0x6f, 0x33, 0x84, 0xe9, 0xec, 0xdf, 0x66, 0x04, 0xc0, 0x43, 0xd2,
-	0x99, 0x67, 0xf8, 0xd7, 0x10, 0xcc, 0xae, 0xe9, 0x0d, 0x23, 0x76, 0xe7, 0x38, 0x6b, 0x1b, 0x28,
-	0x2a, 0xdc, 0xe6, 0x59, 0x65, 0x07, 0xdb, 0x35, 0xb3, 0xa2, 0x07, 0xdd, 0x6f, 0xcc, 0xb3, 0x34,
-	0x5a, 0xd6, 0xf5, 0xc9, 0x47, 0x13, 0x4e, 0x24, 0x00, 0x92, 0x3e, 0xb7, 0x3c, 0x0b, 0xc7, 0x57,
-	0xac, 0xc6, 0xd3, 0xa6, 0x53, 0xef, 0xa1, 0x2b, 0x76, 0x39, 0x14, 0x3d, 0x98, 0x6d, 0xb7, 0x25,
-	0xdd, 0xc3, 0x67, 0x60, 0xba, 0x78, 0xc3, 0x72, 0x3c, 0xf9, 0xfe, 0x39, 0x30, 0x13, 0xb7, 0x24,
-	0xdd, 0xbb, 0x9f, 0x22, 0x58, 0xa0, 0xb1, 0xee, 0x4a, 0xe8, 0xcb, 0x6d, 0xad, 0x59, 0x13, 0xbd,
-	0x79, 0x3d, 0x32, 0xe5, 0xde, 0x97, 0x78, 0xfb, 0x27, 0xf6, 0xd1, 0xb7, 0x6f, 0x37, 0xae, 0xae,
-	0xe7, 0x09, 0xf8, 0x97, 0x08, 0xf2, 0x69, 0x08, 0x19, 0x3d, 0xf7, 0xc0, 0x54, 0x18, 0x42, 0xd9,
-	0xc7, 0x10, 0xb4, 0x88, 0x52, 0x89, 0xc9, 0x49, 0x9d, 0x97, 0xaf, 0x91, 0x53, 0x8a, 0x34, 0x32,
-	0xbb, 0x46, 0xaa, 0xbe, 0x48, 0x4f, 0xf8, 0x52, 0x7d, 0xc7, 0x30, 0xd1, 0xa6, 0x91, 0xb5, 0xd5,
-	0xe5, 0x5e, 0xdb, 0x4a, 0x3b, 0x16, 0x07, 0xa2, 0xee, 0x24, 0xa2, 0x90, 0x7f, 0x29, 0x4e, 0x7d,
-	0x0b, 0xc1, 0x7c, 0xb2, 0x65, 0x46, 0x40, 0x15, 0x94, 0x36, 0x02, 0xf8, 0x32, 0xd0, 0x3b, 0x03,
-	0x13, 0x71, 0x06, 0xb2, 0xaf, 0x0d, 0x1f, 0x21, 0x58, 0xa0, 0xd1, 0x71, 0xdf, 0x7a, 0x81, 0x18,
-	0x84, 0xb9, 0xbe, 0x0d, 0x42, 0x69, 0xc1, 0xee, 0x1e, 0xe4, 0xd3, 0xbc, 0xbf, 0x15, 0x1f, 0xe3,
-	0xb0, 0x0f, 0x37, 0xfa, 0x47, 0xbd, 0xb4, 0x6c, 0xe6, 0x1e, 0xe4, 0xd3, 0xb0, 0x4a, 0x27, 0x6a,
-	0x9d, 0xe4, 0x7b, 0xd6, 0xe9, 0xcf, 0x6e, 0xf4, 0x25, 0x3e, 0x7b, 0x81, 0x66, 0x4a, 0x03, 0x95,
-	0x22, 0xb5, 0x75, 0x98, 0xfd, 0xba, 0x47, 0xc7, 0x73, 0x18, 0x56, 0xc7, 0x87, 0xce, 0x54, 0x68,
-	0x42, 0x2e, 0xf3, 0xc8, 0xbb, 0x44, 0x52, 0x5b, 0x5c, 0x9e, 0x39, 0xe5, 0xe3, 0xa6, 0x25, 0x41,
-	0x3b, 0x8f, 0xb2, 0x92, 0x92, 0xc1, 0x32, 0x5f, 0x42, 0x26, 0xc8, 0x7c, 0xb1, 0x2a, 0x9d, 0x32,
-	0x5f, 0x09, 0xa0, 0xb9, 0x98, 0x3f, 0x6f, 0xb3, 0xd3, 0x90, 0x18, 0x9e, 0x0c, 0x87, 0x32, 0xed,
-	0x7a, 0x7b, 0x5e, 0x3d, 0x5f, 0x47, 0x30, 0x1d, 0x83, 0xc1, 0x5c, 0xec, 0xcc, 0x8b, 0xc4, 0x15,
-	0xf2, 0xcf, 0xe2, 0xfa, 0x79, 0x57, 0x2d, 0x95, 0xe5, 0x40, 0xa6, 0x23, 0x71, 0xd2, 0x66, 0x3c,
-	0x71, 0x3b, 0x3d, 0x4e, 0xb1, 0xbc, 0xf1, 0xfb, 0x2a, 0xe2, 0x47, 0x21, 0xdd, 0x71, 0x28, 0xf3,
-	0x86, 0x7e, 0x0c, 0x8f, 0x6c, 0x0e, 0xae, 0x7c, 0x84, 0xde, 0x79, 0x2f, 0x7f, 0xe8, 0xdd, 0xf7,
-	0xf2, 0x87, 0x3e, 0x7c, 0x2f, 0x8f, 0xbe, 0xb9, 0x9f, 0x47, 0xbf, 0xd8, 0xcf, 0xa3, 0x3f, 0xed,
-	0xe7, 0xd1, 0x3b, 0xfb, 0x79, 0xf4, 0xf7, 0xfd, 0x3c, 0xfa, 0xe7, 0x7e, 0xfe, 0xd0, 0x87, 0xfb,
-	0x79, 0xf4, 0xfa, 0xfb, 0xf9, 0x43, 0xef, 0xbc, 0x9f, 0x3f, 0xf4, 0xee, 0xfb, 0xf9, 0x43, 0x70,
-	0xd6, 0xb4, 0x32, 0xdc, 0x60, 0xbf, 0x32, 0xc5, 0x18, 0xe5, 0x8e, 0xac, 0x3b, 0x96, 0x67, 0xad,
-	0xa3, 0xaf, 0x7c, 0xb6, 0x1a, 0x12, 0x37, 0xad, 0xf4, 0xdf, 0xb8, 0xfa, 0x42, 0xf8, 0xf9, 0xcd,
-	0xdc, 0xed, 0x9b, 0x4c, 0xc8, 0xb4, 0x0a, 0x45, 0xdb, 0x2c, 0xac, 0x10, 0xab, 0xe4, 0x5f, 0x76,
-	0x41, 0xa0, 0x70, 0xfd, 0xe2, 0xbf, 0x73, 0xe7, 0x82, 0x6a, 0xcb, 0xcb, 0x45, 0xdb, 0x5c, 0x5e,
-	0x26, 0x55, 0xd8, 0x7f, 0xac, 0xe6, 0xf2, 0xf2, 0xf5, 0x8b, 0x37, 0x86, 0xc9, 0x49, 0xc5, 0xbd,
-	0xff, 0x0b, 0x00, 0x00, 0xff, 0xff, 0x36, 0x69, 0x44, 0xa0, 0x6f, 0x4b, 0x00, 0x00,
+	// 3252 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x5c, 0xdb, 0x6f, 0x1c, 0x57,
+	0x19, 0xcf, 0x59, 0xdf, 0xe2, 0xcf, 0x49, 0x6c, 0x8f, 0xaf, 0x71, 0x9c, 0x8d, 0x33, 0x69, 0xaa,
+	0x24, 0x6d, 0xd7, 0x4d, 0xca, 0x25, 0x98, 0x5e, 0xd8, 0x38, 0x89, 0xbd, 0xbd, 0xa4, 0xee, 0xd8,
+	0x49, 0x2b, 0x24, 0xb4, 0x9d, 0xec, 0x9c, 0x6e, 0xa7, 0xde, 0x9d, 0x99, 0xce, 0xcc, 0x6e, 0xbc,
+	0x41, 0x25, 0x14, 0x8a, 0x4a, 0x45, 0xd5, 0x16, 0x21, 0x50, 0x5f, 0x2a, 0x5e, 0x10, 0x42, 0x15,
+	0xa8, 0x0f, 0x80, 0xf8, 0x03, 0x10, 0x97, 0x27, 0x5a, 0x09, 0x21, 0xf5, 0x09, 0x51, 0x57, 0x48,
+	0x80, 0xfa, 0xd0, 0x47, 0x1e, 0x90, 0x40, 0x73, 0x2e, 0x73, 0xdb, 0x99, 0xf5, 0xec, 0x76, 0x4f,
+	0x5a, 0x5e, 0x12, 0xcf, 0x99, 0xf3, 0x7d, 0xdf, 0xef, 0xfb, 0x9d, 0xdb, 0x37, 0xdf, 0x39, 0x67,
+	0xe1, 0x4b, 0x2e, 0xae, 0x5b, 0xa6, 0xad, 0xd6, 0x96, 0x55, 0x4b, 0x5f, 0xae, 0xd4, 0xcc, 0x86,
+	0x46, 0xff, 0x75, 0xb0, 0xdd, 0xd4, 0x2b, 0x78, 0xb9, 0x79, 0x76, 0xd9, 0xc6, 0xcf, 0x37, 0xb0,
+	0xe3, 0x96, 0x6d, 0xec, 0x58, 0xa6, 0xe1, 0xe0, 0x82, 0x65, 0x9b, 0xae, 0x29, 0xc9, 0x5c, 0xb4,
+	0xa0, 0x5a, 0x7a, 0x81, 0x08, 0x15, 0xc2, 0xa2, 0x85, 0xe6, 0xd9, 0x85, 0x63, 0x55, 0xd3, 0xac,
+	0xd6, 0xf0, 0x32, 0x91, 0xb8, 0xde, 0x78, 0x66, 0xd9, 0xd5, 0xeb, 0xd8, 0x71, 0xd5, 0xba, 0x45,
+	0x95, 0x2c, 0xdc, 0x93, 0x60, 0xdf, 0xb4, 0xb0, 0xad, 0xba, 0xba, 0x69, 0x78, 0xc6, 0xeb, 0xd8,
+	0x71, 0xd4, 0x2a, 0xb3, 0xb9, 0x70, 0x77, 0x42, 0x75, 0x5d, 0xc3, 0x86, 0xab, 0xbb, 0xad, 0xf6,
+	0xda, 0x49, 0xca, 0x0d, 0xb5, 0x8e, 0x1d, 0x4b, 0xa5, 0x9e, 0x45, 0xab, 0x9f, 0x4e, 0xaa, 0x8e,
+	0x77, 0x1a, 0x4e, 0x7b, 0xd5, 0x33, 0x09, 0x55, 0x6d, 0x5c, 0x4d, 0xc4, 0x7c, 0x57, 0x42, 0x5d,
+	0xb5, 0x52, 0x31, 0x1b, 0x86, 0x9b, 0xcd, 0x41, 0xb5, 0xa1, 0xe9, 0x6e, 0xcd, 0xac, 0x66, 0x43,
+	0xdc, 0xf0, 0xde, 0xb7, 0x57, 0xfd, 0x5c, 0x52, 0x43, 0x9b, 0x86, 0x81, 0x2b, 0xae, 0xde, 0xd4,
+	0xdd, 0x96, 0xdd, 0xa8, 0xe1, 0x6c, 0xd8, 0x2d, 0xdb, 0x7c, 0x0e, 0x57, 0xda, 0xb1, 0xcb, 0x2f,
+	0x22, 0x18, 0x5f, 0xc3, 0xee, 0x55, 0x07, 0xdb, 0x8e, 0x42, 0xfb, 0x8c, 0x74, 0x04, 0x46, 0x2d,
+	0xb5, 0x8a, 0xcb, 0x8e, 0x7e, 0x13, 0xcf, 0xa3, 0x25, 0x74, 0x6a, 0x48, 0xd9, 0xef, 0x15, 0x6c,
+	0xea, 0x37, 0xb1, 0x74, 0x14, 0x80, 0xbc, 0x74, 0xcd, 0x6d, 0x6c, 0xcc, 0xe7, 0x96, 0xd0, 0xa9,
+	0x51, 0x85, 0x54, 0xdf, 0xf2, 0x0a, 0xa4, 0x69, 0x18, 0xc2, 0x75, 0x55, 0xaf, 0xcd, 0x0f, 0x90,
+	0x37, 0xf4, 0x41, 0x5a, 0x84, 0x51, 0xbf, 0x0d, 0xe7, 0x07, 0xa9, 0x8c, 0x5f, 0x20, 0x37, 0x61,
+	0x22, 0x80, 0x40, 0xbb, 0xab, 0xb4, 0x02, 0x43, 0x0d, 0xaf, 0x60, 0x1e, 0x2d, 0x0d, 0x9c, 0x1a,
+	0x3b, 0x77, 0x47, 0x21, 0xa1, 0xe3, 0xf2, 0x4e, 0x54, 0x68, 0x9e, 0x2d, 0x78, 0xd2, 0x0a, 0x15,
+	0x91, 0xee, 0x84, 0x71, 0x03, 0xef, 0xb8, 0xe5, 0x36, 0x9c, 0x07, 0xbd, 0xe2, 0x0d, 0x8e, 0x55,
+	0x3e, 0x0d, 0x87, 0x98, 0x5d, 0xee, 0xf9, 0x1c, 0x8c, 0x78, 0x2a, 0xca, 0xba, 0x46, 0xfc, 0x1e,
+	0x55, 0x86, 0xbd, 0xc7, 0x92, 0x26, 0x3f, 0xe2, 0xb3, 0xe4, 0x23, 0x3c, 0x0f, 0x83, 0xde, 0x4b,
+	0x52, 0x31, 0x2b, 0x40, 0x22, 0x21, 0xdf, 0x82, 0xc9, 0x55, 0x1b, 0xab, 0x2e, 0x0e, 0x9b, 0xbe,
+	0x1f, 0x06, 0x1d, 0x0b, 0x57, 0x98, 0xba, 0x53, 0x59, 0xd4, 0x6d, 0x5a, 0xb8, 0xa2, 0x10, 0x29,
+	0xe9, 0x6e, 0x90, 0x54, 0xa7, 0x65, 0x54, 0xca, 0xfe, 0x38, 0xf4, 0x7c, 0xa0, 0x5e, 0x4f, 0x90,
+	0x37, 0x8f, 0xf3, 0x17, 0x25, 0x4d, 0x7e, 0x19, 0x81, 0x14, 0x46, 0xc0, 0x3c, 0x4a, 0xf3, 0x5e,
+	0x7a, 0x0a, 0xc6, 0x63, 0xda, 0x89, 0xea, 0xb1, 0x73, 0xcb, 0x49, 0x30, 0xfd, 0x4a, 0x1e, 0xce,
+	0x62, 0xc4, 0xb6, 0x72, 0x28, 0x8a, 0x45, 0xfe, 0x2d, 0x82, 0xc9, 0xab, 0x96, 0x16, 0xe3, 0x22,
+	0x15, 0x08, 0x27, 0x29, 0xd7, 0x13, 0x49, 0xa7, 0x61, 0xc2, 0xc6, 0x8e, 0xd9, 0xb0, 0x2b, 0xb8,
+	0xdc, 0xc4, 0xb6, 0xe3, 0xf9, 0x41, 0xbb, 0xe9, 0x38, 0x2f, 0xbf, 0x46, 0x8b, 0x53, 0xf8, 0x1c,
+	0x4c, 0xe1, 0xd3, 0x00, 0x29, 0xec, 0x04, 0xa3, 0x33, 0x81, 0x35, 0xd4, 0x1f, 0xd6, 0xbe, 0x83,
+	0x60, 0xf2, 0x22, 0xae, 0xe1, 0x8c, 0xac, 0x25, 0xf9, 0x9d, 0xeb, 0xc6, 0xef, 0x81, 0x74, 0xbf,
+	0xc3, 0x30, 0x84, 0xfb, 0xfd, 0x6f, 0x04, 0x47, 0x37, 0xe9, 0x30, 0xbc, 0xc2, 0x67, 0x8f, 0x62,
+	0xa5, 0x82, 0x1d, 0x7f, 0xea, 0x8a, 0x4c, 0x34, 0x28, 0x36, 0xd1, 0x84, 0x19, 0xca, 0x45, 0x18,
+	0x5a, 0x83, 0x61, 0x95, 0xe8, 0x21, 0xae, 0xa6, 0x20, 0x0d, 0xf7, 0xac, 0xb8, 0x79, 0x26, 0x9e,
+	0x48, 0xf5, 0x60, 0x37, 0x54, 0x0f, 0xa5, 0x50, 0x7d, 0x13, 0xf2, 0x69, 0x9e, 0x0b, 0xa7, 0x7d,
+	0x1d, 0xe6, 0xd7, 0xb0, 0x1b, 0xab, 0xc4, 0x08, 0x4f, 0xf6, 0x02, 0xa5, 0x78, 0xd1, 0x80, 0xc3,
+	0x09, 0x9a, 0x84, 0x3b, 0xf0, 0x56, 0x0e, 0x66, 0xe9, 0x7c, 0xe7, 0x93, 0xc7, 0xf1, 0x5f, 0x88,
+	0xcc, 0x28, 0x85, 0x24, 0x4b, 0x7e, 0xff, 0x89, 0x34, 0xfc, 0x9e, 0x93, 0x6f, 0xca, 0xa0, 0x91,
+	0x9e, 0x82, 0x41, 0x57, 0xad, 0x3a, 0xf3, 0x83, 0x64, 0x61, 0xbb, 0x58, 0xd8, 0x3b, 0x22, 0x2b,
+	0x24, 0x63, 0x2f, 0x6c, 0xa9, 0x55, 0xe7, 0x92, 0xe1, 0xda, 0x2d, 0x85, 0x68, 0x5c, 0xf8, 0x22,
+	0x8c, 0xfa, 0x45, 0xd2, 0x04, 0x0c, 0x6c, 0xe3, 0x16, 0x6b, 0x09, 0xef, 0x4f, 0x6f, 0x69, 0x6e,
+	0xaa, 0xb5, 0x06, 0x66, 0x7d, 0x9f, 0x3e, 0xac, 0xe4, 0xce, 0x23, 0xf9, 0xfb, 0x08, 0xe6, 0xda,
+	0x6c, 0xb0, 0x56, 0xe9, 0x3c, 0xa2, 0xc4, 0xad, 0x0c, 0x6f, 0x22, 0x98, 0x5e, 0xc3, 0xae, 0x0f,
+	0xa8, 0x2f, 0xd1, 0x89, 0x04, 0x83, 0x1e, 0x76, 0xd6, 0x36, 0xe4, 0x6f, 0xe9, 0x5e, 0x98, 0x0e,
+	0xc7, 0x54, 0x65, 0x2f, 0xa8, 0x0a, 0x26, 0x7b, 0x29, 0xfc, 0x4e, 0x69, 0xd4, 0x70, 0x49, 0x93,
+	0xbf, 0x87, 0x60, 0x26, 0x06, 0x8d, 0x91, 0xf5, 0x30, 0x80, 0xcf, 0x0d, 0x0f, 0x5d, 0xce, 0x64,
+	0xef, 0x53, 0x4a, 0x48, 0x3a, 0x73, 0x14, 0xb3, 0x05, 0xb3, 0x61, 0x30, 0xa5, 0x8b, 0xfd, 0x60,
+	0x4a, 0x7e, 0x06, 0xe6, 0xda, 0xb4, 0x32, 0x27, 0x4f, 0xc0, 0x41, 0x1f, 0x66, 0x59, 0xd7, 0xa8,
+	0x9f, 0xa3, 0xca, 0x01, 0xbf, 0xb0, 0xa4, 0x65, 0x47, 0x7f, 0x1f, 0x4c, 0x85, 0xed, 0x64, 0x9a,
+	0xc7, 0xe5, 0xa7, 0xa3, 0x5d, 0xc3, 0x47, 0xb6, 0x1e, 0x97, 0xea, 0x8e, 0xfd, 0x90, 0x85, 0x3f,
+	0x23, 0x98, 0xa5, 0x4b, 0x7a, 0x77, 0xd0, 0xfa, 0x32, 0x9f, 0x08, 0x8b, 0x53, 0x1c, 0x98, 0x6b,
+	0x73, 0x4a, 0xf8, 0xe4, 0xfb, 0xeb, 0x1c, 0xc8, 0x0a, 0xf6, 0x9c, 0x5e, 0x6d, 0x38, 0xae, 0x59,
+	0xdf, 0xc4, 0xaa, 0x5d, 0x79, 0xb6, 0xe8, 0xba, 0xb6, 0x7e, 0xbd, 0xe1, 0x66, 0xa4, 0x75, 0x03,
+	0x4e, 0xe2, 0x1d, 0xdd, 0x71, 0x75, 0xa3, 0x5a, 0xae, 0x10, 0x35, 0x65, 0x87, 0xe8, 0x29, 0xab,
+	0x5c, 0x51, 0x99, 0x8c, 0x6c, 0xda, 0xc9, 0x8e, 0xf3, 0xca, 0x89, 0x26, 0x3d, 0xef, 0xa5, 0xcb,
+	0xb0, 0x64, 0xe0, 0x1b, 0x9d, 0x95, 0x51, 0xd2, 0x17, 0x0d, 0x7c, 0x23, 0x5d, 0x8f, 0xb0, 0x15,
+	0xff, 0x16, 0x9c, 0xe8, 0x48, 0x9b, 0xf0, 0x86, 0x7b, 0x1d, 0xc1, 0x2c, 0x0d, 0xef, 0xba, 0x1c,
+	0x03, 0xc2, 0xe2, 0x4d, 0x07, 0xe6, 0xda, 0x00, 0x09, 0xa7, 0xe1, 0x25, 0x04, 0xf9, 0xcb, 0xaa,
+	0x5e, 0x33, 0x9b, 0xa1, 0xd8, 0x4b, 0x21, 0x79, 0x83, 0x6c, 0x74, 0xcc, 0xc2, 0x30, 0x4d, 0x33,
+	0xf0, 0xa0, 0x93, 0x3e, 0x75, 0xe9, 0xfb, 0xd7, 0xe1, 0x58, 0x2a, 0x0a, 0xe1, 0x1c, 0xbc, 0x8d,
+	0xe0, 0x70, 0x51, 0xd3, 0xfa, 0xea, 0xbe, 0xb0, 0x59, 0xae, 0x09, 0x0b, 0x49, 0x58, 0x85, 0x93,
+	0xf4, 0x0b, 0x04, 0x8b, 0x6d, 0xdd, 0xf3, 0x33, 0xcc, 0x53, 0x0b, 0x8e, 0xa6, 0xc0, 0x15, 0x4e,
+	0xd5, 0x14, 0x4c, 0xae, 0x61, 0x97, 0x9a, 0xe3, 0xe1, 0x8a, 0xbc, 0x05, 0x52, 0xb8, 0x90, 0x81,
+	0x78, 0x10, 0x46, 0x28, 0x11, 0x1d, 0x53, 0x41, 0xb4, 0x8a, 0x67, 0x99, 0xf9, 0xc0, 0x85, 0xe4,
+	0x33, 0x24, 0xb9, 0x14, 0x6d, 0x88, 0x80, 0x6a, 0x14, 0xa6, 0x5a, 0x7e, 0x22, 0x04, 0xcb, 0x07,
+	0x70, 0x7f, 0xa4, 0x72, 0x56, 0xfb, 0x5c, 0xe5, 0xef, 0x11, 0xf9, 0x78, 0xba, 0x82, 0x77, 0x1a,
+	0xce, 0x25, 0x43, 0xb3, 0x4c, 0xdd, 0x70, 0xfb, 0x12, 0xca, 0x16, 0x60, 0xca, 0x55, 0xed, 0x2a,
+	0x76, 0xcb, 0xe1, 0x60, 0x8c, 0xf5, 0x8c, 0x49, 0xfa, 0x2a, 0x08, 0xdf, 0x34, 0xe9, 0x0c, 0xb0,
+	0xc2, 0xb2, 0xab, 0x3a, 0xdb, 0xe5, 0xe7, 0x1b, 0xb8, 0xc1, 0x53, 0x71, 0xe3, 0xf4, 0xc5, 0x96,
+	0xea, 0x6c, 0x3f, 0xe1, 0x15, 0xfb, 0x61, 0xf2, 0x50, 0x10, 0x26, 0xcb, 0xdf, 0x45, 0xe4, 0xdb,
+	0x2d, 0xee, 0x08, 0x23, 0x69, 0x15, 0x46, 0x31, 0x2f, 0x64, 0xed, 0x74, 0x32, 0x31, 0xf6, 0xf1,
+	0xc4, 0x3d, 0x9a, 0xb8, 0x0a, 0x25, 0x90, 0xcb, 0x1c, 0x33, 0xae, 0xd0, 0xd8, 0x34, 0x8c, 0x84,
+	0x33, 0x7a, 0x0c, 0xc6, 0xb8, 0xbe, 0xe0, 0x3b, 0x14, 0x78, 0x51, 0x49, 0x93, 0xbf, 0xd6, 0xde,
+	0x1c, 0xbe, 0x13, 0x45, 0xd8, 0xcf, 0x6b, 0xb2, 0xb6, 0xce, 0xe8, 0x83, 0x2f, 0x26, 0xbf, 0x82,
+	0x60, 0x81, 0x7d, 0x49, 0x25, 0xc1, 0x7b, 0x20, 0x92, 0xe4, 0x3b, 0x9d, 0x49, 0x7b, 0xcf, 0x59,
+	0xbe, 0x37, 0x11, 0x1c, 0x49, 0xc4, 0xc2, 0xdc, 0xdd, 0x8b, 0x2b, 0x81, 0x1f, 0x77, 0x7f, 0x41,
+	0xb0, 0xc0, 0x22, 0xd1, 0x5e, 0x5a, 0xd1, 0xe7, 0x31, 0xd7, 0x1b, 0x8f, 0xc2, 0xa6, 0xd4, 0x1b,
+	0x70, 0x24, 0xd1, 0x2d, 0xe1, 0x13, 0xea, 0x8f, 0x10, 0x2c, 0xb0, 0xc9, 0xbc, 0x27, 0x42, 0x85,
+	0x85, 0x6c, 0x37, 0xe0, 0x48, 0x22, 0x2e, 0xe1, 0x8c, 0xbc, 0x83, 0x60, 0x9a, 0xb6, 0x45, 0x91,
+	0xee, 0xdb, 0x70, 0x2e, 0x1e, 0x8c, 0x8c, 0xc1, 0xc4, 0xef, 0x43, 0xb6, 0xd3, 0x43, 0xac, 0xd0,
+	0x3f, 0xf7, 0xe8, 0x3c, 0x7d, 0xa1, 0xea, 0x79, 0x98, 0x89, 0x01, 0x16, 0x4e, 0xd2, 0xbb, 0x03,
+	0xe4, 0x4b, 0xfa, 0xaa, 0x83, 0xed, 0x35, 0xdb, 0x6c, 0x58, 0x7d, 0x59, 0x99, 0x22, 0x61, 0xce,
+	0x40, 0x3c, 0xcc, 0x39, 0x0e, 0x07, 0x34, 0xdd, 0xb1, 0x6a, 0x6a, 0x8b, 0x7e, 0x63, 0xd1, 0xa1,
+	0x34, 0xc6, 0xca, 0xc8, 0x27, 0x55, 0x1d, 0x0e, 0xd0, 0x2d, 0xc8, 0x72, 0xd5, 0x03, 0x45, 0x96,
+	0xa1, 0xb1, 0x73, 0x0f, 0x67, 0xc9, 0x94, 0x25, 0x39, 0x53, 0x58, 0x23, 0xca, 0x48, 0xd9, 0x65,
+	0xbd, 0xe6, 0x62, 0x5b, 0x19, 0xab, 0x06, 0x45, 0x52, 0x15, 0xc0, 0xa9, 0xe8, 0x75, 0x66, 0x6c,
+	0x98, 0x18, 0x5b, 0xef, 0xd9, 0xd8, 0xe6, 0x6a, 0xe9, 0xb1, 0xb0, 0xa9, 0x51, 0x4f, 0x37, 0x29,
+	0x58, 0x38, 0x0f, 0x93, 0x6d, 0x50, 0xa4, 0x13, 0x70, 0x90, 0xec, 0x91, 0x95, 0x55, 0x4d, 0xb3,
+	0xb1, 0xe3, 0xb0, 0xc1, 0x79, 0x80, 0x14, 0x16, 0x69, 0xd9, 0xc2, 0x29, 0x18, 0x8f, 0xe9, 0x95,
+	0x66, 0x60, 0x58, 0xd7, 0xac, 0x60, 0x34, 0x0f, 0xe9, 0x9a, 0x55, 0xd2, 0xe4, 0x6f, 0xd1, 0xdc,
+	0x54, 0x18, 0x97, 0xbf, 0xba, 0x0d, 0x13, 0x0f, 0xf9, 0xfa, 0x7c, 0x3a, 0xcb, 0xee, 0x09, 0xd1,
+	0xa1, 0x30, 0xc1, 0xcc, 0x0b, 0xf4, 0xbd, 0x24, 0xa9, 0x13, 0xc8, 0xb3, 0x4e, 0x75, 0x18, 0xf6,
+	0x13, 0x45, 0x01, 0xe8, 0x11, 0xf2, 0x5c, 0xd2, 0xe4, 0x27, 0xa3, 0xfd, 0xd0, 0x07, 0xfd, 0x10,
+	0x0c, 0xd1, 0x66, 0xe9, 0xb0, 0x62, 0x26, 0x63, 0xa6, 0x72, 0xde, 0x82, 0x3c, 0x1b, 0x6c, 0x75,
+	0x45, 0xe0, 0x14, 0x23, 0x13, 0xc1, 0x3d, 0x99, 0x55, 0xf7, 0xbc, 0x20, 0xbf, 0xe6, 0xa7, 0x59,
+	0xdb, 0x1d, 0x4d, 0xe7, 0x46, 0xe0, 0x32, 0xfc, 0xae, 0x9f, 0xe5, 0xea, 0xa2, 0xad, 0x7c, 0xde,
+	0x72, 0xbd, 0xf3, 0x26, 0x3e, 0xc3, 0xd5, 0xce, 0xb0, 0xb8, 0x59, 0xf4, 0x55, 0x3f, 0x51, 0xd2,
+	0x0d, 0x8d, 0xe2, 0xb3, 0x24, 0xb7, 0x93, 0x83, 0xff, 0x22, 0x90, 0x37, 0x43, 0x23, 0xb8, 0xa7,
+	0xfd, 0xb9, 0x30, 0x5b, 0xb9, 0x28, 0x5b, 0x9f, 0xfd, 0x1d, 0xba, 0x5b, 0x70, 0xa2, 0x23, 0x01,
+	0xc2, 0x9b, 0xe0, 0x57, 0x34, 0x49, 0xe3, 0x23, 0x78, 0x0c, 0xd7, 0xaf, 0x07, 0xbb, 0xc3, 0x1d,
+	0x7a, 0xe2, 0x15, 0x18, 0xad, 0x93, 0xba, 0x9c, 0xf7, 0xb1, 0x73, 0x67, 0x33, 0x8f, 0x6a, 0x6a,
+	0xa5, 0xa4, 0x29, 0xfb, 0xeb, 0xec, 0xaf, 0x2e, 0xbb, 0x2b, 0x4d, 0xd7, 0xb4, 0xa1, 0x16, 0x4e,
+	0xd7, 0x6f, 0x10, 0x2c, 0x2a, 0xb8, 0x6e, 0x36, 0xf1, 0xff, 0x1b, 0x63, 0x2d, 0x38, 0x9a, 0x02,
+	0x5c, 0x38, 0x69, 0x0e, 0x2c, 0x84, 0xd7, 0x69, 0x6a, 0xb7, 0x2f, 0x51, 0x63, 0x98, 0xed, 0x81,
+	0x68, 0x70, 0xf0, 0x06, 0x82, 0x23, 0x89, 0x56, 0x99, 0xbb, 0x25, 0x18, 0xa1, 0x4c, 0xf2, 0xd0,
+	0x66, 0xb9, 0xcb, 0xb6, 0x50, 0xb8, 0x7c, 0xe6, 0x08, 0xe7, 0x07, 0xfe, 0xb7, 0xf5, 0x26, 0x8d,
+	0x07, 0x63, 0x1f, 0x19, 0x97, 0x23, 0xb1, 0xc5, 0xb9, 0xbd, 0xf0, 0x44, 0x95, 0xf4, 0x1c, 0x60,
+	0xfc, 0x14, 0xc1, 0x62, 0x32, 0x2a, 0xc6, 0xd4, 0xdd, 0x20, 0xb1, 0xf8, 0xb5, 0xcc, 0xbe, 0x71,
+	0x42, 0xbb, 0xf5, 0x4e, 0x44, 0x46, 0x68, 0xe0, 0x41, 0x4f, 0x14, 0x24, 0x53, 0xd7, 0x15, 0x46,
+	0xd9, 0x25, 0x59, 0xa9, 0x14, 0x77, 0x9f, 0x84, 0xf1, 0x98, 0x2a, 0xd6, 0x20, 0x85, 0xee, 0x1a,
+	0x44, 0x39, 0x14, 0xb5, 0x2b, 0x3f, 0x99, 0x60, 0xb5, 0x2f, 0xdb, 0xae, 0x6f, 0x21, 0x32, 0xc0,
+	0xda, 0x34, 0x77, 0x72, 0x68, 0xe0, 0x93, 0x3b, 0x94, 0xb9, 0xdf, 0x7f, 0x84, 0x78, 0x86, 0xa3,
+	0x0f, 0x8d, 0xe7, 0x8f, 0x92, 0xdc, 0x27, 0x1c, 0x25, 0xc2, 0xc2, 0xc9, 0x1d, 0x58, 0x4c, 0xf6,
+	0x56, 0xf8, 0x44, 0xfb, 0x13, 0xc4, 0x13, 0x27, 0xfd, 0x20, 0x5a, 0x58, 0xac, 0xb9, 0xc3, 0xb7,
+	0x3c, 0x6e, 0x3b, 0x41, 0x1f, 0x21, 0x92, 0xac, 0x2f, 0x5a, 0xfa, 0x23, 0xb8, 0xd5, 0xaf, 0x15,
+	0xc8, 0xbc, 0x61, 0xd0, 0x35, 0x9d, 0xad, 0x40, 0xe4, 0xb9, 0xa4, 0x49, 0x5f, 0x80, 0x19, 0xfa,
+	0xca, 0x6d, 0x59, 0xb8, 0xac, 0x61, 0xcb, 0xc6, 0x15, 0xd5, 0xc5, 0xac, 0xe3, 0x5c, 0xc8, 0xcd,
+	0x23, 0x65, 0x8a, 0x54, 0xd8, 0x6a, 0x59, 0xf8, 0xa2, 0xff, 0x5a, 0x5a, 0x07, 0x08, 0xe4, 0x48,
+	0xe4, 0x78, 0x68, 0xef, 0x6f, 0xd8, 0xc7, 0xb9, 0x22, 0x65, 0xd4, 0xd7, 0x29, 0xdf, 0x22, 0x9b,
+	0x23, 0xbe, 0xb7, 0x41, 0xc6, 0x5a, 0xb5, 0xf4, 0xf2, 0x36, 0x6e, 0xf1, 0xa5, 0xef, 0xce, 0xbd,
+	0xb4, 0x53, 0x15, 0xca, 0x88, 0x4a, 0x55, 0x75, 0x71, 0x58, 0x76, 0xc2, 0x07, 0xc0, 0xd9, 0x9e,
+	0x81, 0xe1, 0x6d, 0xdc, 0x0a, 0xe5, 0x20, 0xb6, 0x71, 0xab, 0xa4, 0xc9, 0x5b, 0xa1, 0x96, 0x09,
+	0x7d, 0xc9, 0x8f, 0x30, 0xa8, 0xac, 0x07, 0x64, 0x45, 0x3a, 0x4c, 0x91, 0xca, 0xdf, 0x46, 0x30,
+	0x45, 0x17, 0xb7, 0x28, 0x88, 0x0c, 0xf9, 0xbc, 0x76, 0xad, 0x3d, 0x2f, 0xb1, 0x6f, 0x21, 0x98,
+	0x8e, 0xa2, 0x60, 0xfe, 0x25, 0x73, 0x21, 0x4d, 0xc3, 0x50, 0x98, 0x54, 0xfa, 0x90, 0x34, 0x2c,
+	0x06, 0xfa, 0x33, 0x2c, 0x7e, 0x87, 0x60, 0x8a, 0x65, 0x11, 0x33, 0x34, 0x95, 0x4f, 0x5e, 0xae,
+	0x47, 0xf2, 0x84, 0xcd, 0xbc, 0x96, 0x9f, 0xbd, 0x8d, 0xd2, 0x2c, 0xf4, 0x50, 0xed, 0x14, 0x9d,
+	0xcb, 0x32, 0x31, 0x27, 0x6c, 0x4a, 0xb5, 0x60, 0x3a, 0x0a, 0x43, 0xb8, 0xe7, 0xff, 0x44, 0x24,
+	0x5f, 0x57, 0x6c, 0x68, 0xba, 0xfb, 0xa8, 0x59, 0xed, 0xcb, 0x64, 0xfa, 0x28, 0x4c, 0x3b, 0xae,
+	0x6a, 0xbb, 0x65, 0x57, 0xaf, 0xe3, 0xb2, 0x6e, 0x54, 0x6a, 0x0d, 0x47, 0x6f, 0x62, 0xd6, 0xcd,
+	0x17, 0x0a, 0x34, 0x01, 0x5b, 0xe0, 0x77, 0x4c, 0x0a, 0x5b, 0xfc, 0x8e, 0x89, 0x22, 0x11, 0x39,
+	0xef, 0xb9, 0xc4, 0xa5, 0xa4, 0x75, 0x90, 0xb0, 0xa1, 0x51, 0x5d, 0x78, 0x87, 0xeb, 0x1a, 0xdc,
+	0x53, 0xd7, 0x04, 0x36, 0x34, 0xef, 0xe9, 0x12, 0x97, 0x91, 0x5f, 0x20, 0x89, 0xc6, 0x90, 0xab,
+	0x8c, 0xdd, 0x07, 0x60, 0xb0, 0x66, 0x56, 0x3b, 0xe6, 0x46, 0xf9, 0x95, 0x0e, 0x8f, 0xd1, 0x47,
+	0xcd, 0xaa, 0x82, 0x2b, 0xa6, 0xad, 0x29, 0x44, 0x2c, 0xf3, 0x2c, 0xfa, 0x77, 0x7e, 0xdd, 0x42,
+	0xad, 0xfa, 0x87, 0x69, 0xd2, 0xa8, 0x42, 0x7d, 0xa4, 0x2a, 0xd7, 0x3d, 0x55, 0xd1, 0xe6, 0x1f,
+	0xe8, 0xd8, 0xfc, 0x83, 0xf1, 0x38, 0xf6, 0x1b, 0xec, 0x4a, 0x07, 0x71, 0x93, 0x51, 0x7c, 0x01,
+	0x46, 0x9d, 0x46, 0xbd, 0xae, 0xda, 0x3a, 0xee, 0xb8, 0x97, 0x4f, 0x2e, 0xc3, 0x90, 0x78, 0x8f,
+	0xd4, 0x6e, 0x29, 0x81, 0x58, 0x66, 0x9e, 0xe9, 0x01, 0x83, 0x68, 0xcc, 0x24, 0x5f, 0xa3, 0x6b,
+	0x68, 0x2c, 0x44, 0xf9, 0x0a, 0x8c, 0x44, 0x3f, 0x0e, 0xee, 0xcc, 0xb6, 0x25, 0xa4, 0x70, 0x31,
+	0xf9, 0x97, 0x08, 0x96, 0x62, 0xc7, 0x67, 0x2f, 0xed, 0x58, 0xa6, 0xed, 0x6e, 0xea, 0xc6, 0x76,
+	0xb6, 0xcc, 0xd7, 0x6a, 0x64, 0x1e, 0x5e, 0xde, 0xf3, 0xd8, 0x60, 0xa0, 0xbf, 0xd7, 0x73, 0xc8,
+	0xf2, 0x0b, 0x70, 0xbc, 0x03, 0x68, 0xe1, 0x93, 0xce, 0x13, 0x70, 0x34, 0x7c, 0x86, 0xb3, 0x5b,
+	0xc2, 0xf8, 0x11, 0x85, 0x5c, 0xe8, 0x88, 0x82, 0x0a, 0xf9, 0x34, 0x95, 0x7e, 0x10, 0x32, 0xe8,
+	0xe8, 0xc6, 0x36, 0xf3, 0xe1, 0xae, 0x2e, 0x68, 0x56, 0x88, 0xa0, 0x7c, 0x33, 0xcd, 0x44, 0xc6,
+	0x0c, 0x67, 0x64, 0x4c, 0xe5, 0x3a, 0x8e, 0xa9, 0x81, 0xf8, 0x98, 0x7a, 0x15, 0xc1, 0xb1, 0x54,
+	0xe3, 0x7e, 0x40, 0x38, 0xe4, 0xe1, 0xe4, 0xe3, 0xab, 0x2b, 0x0f, 0xa9, 0x64, 0xe6, 0x21, 0xf6,
+	0x57, 0x04, 0x4b, 0xb1, 0xd3, 0xa4, 0x9f, 0x4a, 0xaf, 0x17, 0x16, 0x82, 0xbc, 0x00, 0xc7, 0x3b,
+	0xf8, 0x77, 0x3b, 0x8e, 0x93, 0x2d, 0xc5, 0xce, 0x67, 0xf5, 0x61, 0x90, 0x08, 0xa5, 0xab, 0x03,
+	0x5c, 0xe1, 0x74, 0xbd, 0x8c, 0x40, 0xbe, 0xa6, 0xd6, 0xf4, 0x4f, 0xbd, 0x43, 0xca, 0x27, 0xe1,
+	0x44, 0x47, 0x20, 0x94, 0x0a, 0xf9, 0x15, 0x04, 0x33, 0x9b, 0xde, 0xfa, 0xfd, 0x98, 0x5e, 0x8d,
+	0xde, 0xa9, 0xb9, 0x10, 0xf9, 0xa2, 0xd9, 0xfb, 0x0c, 0xb9, 0xaf, 0xa0, 0xe7, 0xaf, 0x9a, 0x1f,
+	0x22, 0x98, 0x8d, 0x63, 0x61, 0x2d, 0x76, 0x1c, 0x0e, 0xd4, 0x79, 0x61, 0x10, 0x04, 0x8f, 0xf9,
+	0x65, 0x42, 0xf3, 0x84, 0xe7, 0x49, 0x60, 0xda, 0x46, 0xd0, 0xde, 0x98, 0xd8, 0x15, 0x81, 0x76,
+	0x77, 0xd6, 0x61, 0xd4, 0xaf, 0x96, 0xf9, 0x8a, 0x40, 0xa0, 0x26, 0x10, 0x96, 0x95, 0xa8, 0x85,
+	0xbe, 0xa4, 0xff, 0xd8, 0xcd, 0x92, 0xb0, 0xd2, 0xe0, 0x66, 0x89, 0x6f, 0x3a, 0xfb, 0xcd, 0x92,
+	0x00, 0x78, 0x48, 0x3a, 0xf3, 0x0c, 0xff, 0x3a, 0x82, 0xf9, 0x75, 0xd5, 0xd0, 0x62, 0x67, 0x8e,
+	0xb3, 0xb6, 0x81, 0x24, 0xc3, 0x41, 0xd7, 0x2c, 0xdb, 0xd8, 0xaa, 0xe9, 0x15, 0x35, 0xe8, 0x7e,
+	0x63, 0xae, 0xa9, 0xd0, 0xb2, 0xae, 0x77, 0x3e, 0x1a, 0x70, 0x38, 0x01, 0x90, 0xf0, 0xb9, 0xe5,
+	0x39, 0x98, 0x5b, 0x35, 0x8d, 0x67, 0x74, 0xbb, 0xde, 0x43, 0x57, 0xec, 0x72, 0x28, 0xba, 0x30,
+	0xdf, 0x6e, 0x4b, 0xb8, 0x87, 0xcf, 0xc2, 0x4c, 0xf1, 0xba, 0x69, 0xbb, 0xe2, 0xfd, 0xb3, 0x61,
+	0x36, 0x6e, 0x49, 0xb8, 0x77, 0x3f, 0x46, 0x70, 0x94, 0xc6, 0xba, 0xab, 0xb1, 0xdb, 0x5c, 0xdc,
+	0xcd, 0x8d, 0xc8, 0x94, 0x7b, 0x7f, 0xe2, 0xe9, 0x9f, 0xd8, 0xc5, 0x7b, 0x72, 0x31, 0x2f, 0xa6,
+	0xae, 0xe7, 0x09, 0xf8, 0xe7, 0x08, 0xf2, 0x69, 0x08, 0x19, 0x3d, 0x69, 0xf7, 0xd4, 0x50, 0xda,
+	0x3d, 0x35, 0x81, 0xf3, 0xf2, 0x15, 0xb2, 0x4b, 0x91, 0x46, 0x66, 0xd7, 0x48, 0xe5, 0x97, 0xe8,
+	0x0e, 0x5f, 0xaa, 0xef, 0x18, 0x26, 0xdb, 0x34, 0xb2, 0xb6, 0x3a, 0xdf, 0x6b, 0x5b, 0x29, 0x13,
+	0x71, 0x20, 0xf2, 0x8d, 0x44, 0x14, 0xe2, 0x0f, 0xc5, 0xc9, 0xef, 0x20, 0x58, 0x4c, 0xb6, 0xcc,
+	0x08, 0xa8, 0x82, 0xd4, 0x46, 0x00, 0x5f, 0x06, 0x7a, 0x67, 0x60, 0x32, 0xce, 0x40, 0xf6, 0xb5,
+	0xe1, 0x6d, 0xc4, 0x6f, 0x0f, 0xf4, 0xad, 0x17, 0x88, 0x4b, 0xa9, 0xdd, 0x84, 0x7c, 0x1a, 0x56,
+	0xe1, 0x73, 0xcf, 0x06, 0x49, 0x3a, 0x6c, 0xd0, 0xdf, 0xdf, 0xe8, 0x4b, 0x90, 0xf0, 0x22, 0x4d,
+	0xd7, 0x05, 0x2a, 0xfd, 0xfc, 0xca, 0x7e, 0xf6, 0x33, 0x1f, 0x1d, 0x37, 0x03, 0x58, 0x1d, 0x0f,
+	0x3a, 0x53, 0xa1, 0xf8, 0x72, 0x99, 0x9b, 0xff, 0x1c, 0xc9, 0xaf, 0x70, 0x79, 0xe6, 0x94, 0x87,
+	0x9b, 0x96, 0x04, 0xed, 0x3c, 0xca, 0x4a, 0x4a, 0x1a, 0x4b, 0xbf, 0xf8, 0x32, 0x41, 0xfa, 0x85,
+	0x55, 0xe9, 0x94, 0x7e, 0x49, 0x00, 0xcd, 0xc5, 0xbc, 0xc9, 0x83, 0xa5, 0xe4, 0x63, 0x78, 0x32,
+	0xec, 0x0c, 0xb4, 0xeb, 0xed, 0x79, 0x0a, 0x7f, 0x03, 0xc1, 0x4c, 0x0c, 0x06, 0x73, 0xb1, 0x33,
+	0x2f, 0x02, 0xa7, 0xe9, 0x3f, 0xf9, 0x67, 0xa0, 0xbb, 0x6a, 0xa9, 0x2c, 0xbb, 0x02, 0x1d, 0x89,
+	0x13, 0xf6, 0x8d, 0xe9, 0x1f, 0x91, 0x8e, 0x53, 0x2c, 0x6e, 0xfc, 0xbe, 0x86, 0x78, 0x3e, 0xbe,
+	0x3b, 0x0e, 0x45, 0x1e, 0x13, 0x8f, 0xe1, 0x11, 0xce, 0xc1, 0x1f, 0x72, 0xfe, 0x75, 0x0d, 0xbe,
+	0x64, 0x6d, 0xa9, 0xd5, 0x8c, 0x29, 0xaf, 0x26, 0x1c, 0x72, 0xd5, 0xaa, 0x53, 0x76, 0xcd, 0x72,
+	0xc3, 0x72, 0xb0, 0xed, 0xce, 0xe7, 0xc8, 0xe4, 0xb4, 0x91, 0xe5, 0x88, 0x75, 0xba, 0x55, 0xf2,
+	0xeb, 0x07, 0x5b, 0xe6, 0x55, 0xa2, 0x92, 0xfe, 0x0a, 0xc2, 0x01, 0x37, 0x54, 0x24, 0xdd, 0x11,
+	0xd8, 0xb5, 0xc9, 0x69, 0xa9, 0xf9, 0x01, 0x7a, 0x4f, 0x9d, 0xd6, 0xa2, 0x27, 0xa8, 0xba, 0xeb,
+	0x7f, 0x0b, 0x0f, 0xc1, 0x64, 0x9b, 0xd9, 0xae, 0x7e, 0x69, 0x21, 0xb8, 0x20, 0x12, 0x75, 0x49,
+	0x78, 0x13, 0x3e, 0x0d, 0x73, 0x0a, 0x76, 0xb0, 0x41, 0x0e, 0xda, 0x95, 0x8c, 0xa6, 0x1e, 0xdc,
+	0xbc, 0x4e, 0xfd, 0xdd, 0x98, 0xae, 0x3f, 0x5c, 0xda, 0x2d, 0x88, 0xf6, 0xeb, 0xc2, 0x7f, 0xd0,
+	0x7b, 0x1f, 0xe4, 0xf7, 0xbd, 0xff, 0x41, 0x7e, 0xdf, 0xc7, 0x1f, 0xe4, 0xd1, 0x37, 0x77, 0xf3,
+	0xe8, 0x67, 0xbb, 0x79, 0xf4, 0xc7, 0xdd, 0x3c, 0x7a, 0x6f, 0x37, 0x8f, 0xfe, 0xb6, 0x9b, 0x47,
+	0xff, 0xd8, 0xcd, 0xef, 0xfb, 0x78, 0x37, 0x8f, 0xde, 0xf8, 0x30, 0xbf, 0xef, 0xbd, 0x0f, 0xf3,
+	0xfb, 0xde, 0xff, 0x30, 0xbf, 0x0f, 0x4e, 0xea, 0x66, 0x86, 0xee, 0x77, 0x61, 0x9a, 0x71, 0xc4,
+	0x1d, 0xd9, 0xb0, 0x4d, 0xd7, 0xdc, 0x40, 0x5f, 0xfd, 0x7c, 0x35, 0x24, 0xae, 0x9b, 0xe9, 0xbf,
+	0xc3, 0xf6, 0xe5, 0xf0, 0xf3, 0xdb, 0xb9, 0x3b, 0xb6, 0x98, 0x90, 0x6e, 0x16, 0x8a, 0x96, 0x5e,
+	0x58, 0x25, 0x56, 0xc9, 0xbf, 0xec, 0x00, 0x45, 0xe1, 0xda, 0xd9, 0x7f, 0xe5, 0x4e, 0x05, 0xd5,
+	0x56, 0x56, 0x8a, 0x96, 0xbe, 0xb2, 0x42, 0xaa, 0xb0, 0xff, 0x58, 0xcd, 0x95, 0x95, 0x6b, 0x67,
+	0xaf, 0x0f, 0x93, 0x9d, 0x9c, 0xfb, 0xfe, 0x17, 0x00, 0x00, 0xff, 0xff, 0x6f, 0xde, 0x0c, 0x68,
+	0x13, 0x4e, 0x00, 0x00,
 }
 
 func (this *GetUsersRequest) Equal(that interface{}) bool {
@@ -8248,6 +8495,14 @@ func (this *CreateNamespaceRequest) Equal(that interface{}) bool {
 	if this.AsyncOperationId != that1.AsyncOperationId {
 		return false
 	}
+	if len(this.Tags) != len(that1.Tags) {
+		return false
+	}
+	for i := range this.Tags {
+		if this.Tags[i] != that1.Tags[i] {
+			return false
+		}
+	}
 	return true
 }
 func (this *CreateNamespaceResponse) Equal(that interface{}) bool {
@@ -8305,6 +8560,9 @@ func (this *GetNamespacesRequest) Equal(that interface{}) bool {
 	if this.Name != that1.Name {
 		return false
 	}
+	if this.ConnectivityRuleId != that1.ConnectivityRuleId {
+		return false
+	}
 	return true
 }
 func (this *GetNamespacesResponse) Equal(that interface{}) bool {
@@ -8331,6 +8589,65 @@ func (this *GetNamespacesResponse) Equal(that interface{}) bool {
 	}
 	for i := range this.Namespaces {
 		if !this.Namespaces[i].Equal(that1.Namespaces[i]) {
+			return false
+		}
+	}
+	if this.NextPageToken != that1.NextPageToken {
+		return false
+	}
+	return true
+}
+func (this *GetNamespaceIDsRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetNamespaceIDsRequest)
+	if !ok {
+		that2, ok := that.(GetNamespaceIDsRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.PageSize != that1.PageSize {
+		return false
+	}
+	if this.PageToken != that1.PageToken {
+		return false
+	}
+	return true
+}
+func (this *GetNamespaceIDsResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetNamespaceIDsResponse)
+	if !ok {
+		that2, ok := that.(GetNamespaceIDsResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.NamespaceIds) != len(that1.NamespaceIds) {
+		return false
+	}
+	for i := range this.NamespaceIds {
+		if this.NamespaceIds[i] != that1.NamespaceIds[i] {
 			return false
 		}
 	}
@@ -11262,63 +11579,6 @@ func (this *GetConnectivityRulesResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *UpdateConnectivityRuleRequest) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*UpdateConnectivityRuleRequest)
-	if !ok {
-		that2, ok := that.(UpdateConnectivityRuleRequest)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.ConnectivityRuleId != that1.ConnectivityRuleId {
-		return false
-	}
-	if !this.Spec.Equal(that1.Spec) {
-		return false
-	}
-	if this.ResourceVersion != that1.ResourceVersion {
-		return false
-	}
-	if this.AsyncOperationId != that1.AsyncOperationId {
-		return false
-	}
-	return true
-}
-func (this *UpdateConnectivityRuleResponse) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*UpdateConnectivityRuleResponse)
-	if !ok {
-		that2, ok := that.(UpdateConnectivityRuleResponse)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
-		return false
-	}
-	return true
-}
 func (this *DeleteConnectivityRuleRequest) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -11645,6 +11905,124 @@ func (this *DeleteProjectResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *UpdateNamespaceTagsRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateNamespaceTagsRequest)
+	if !ok {
+		that2, ok := that.(UpdateNamespaceTagsRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if len(this.TagsToUpsert) != len(that1.TagsToUpsert) {
+		return false
+	}
+	for i := range this.TagsToUpsert {
+		if this.TagsToUpsert[i] != that1.TagsToUpsert[i] {
+			return false
+		}
+	}
+	if len(this.TagsToRemove) != len(that1.TagsToRemove) {
+		return false
+	}
+	for i := range this.TagsToRemove {
+		if this.TagsToRemove[i] != that1.TagsToRemove[i] {
+			return false
+		}
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *UpdateNamespaceTagsResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateNamespaceTagsResponse)
+	if !ok {
+		that2, ok := that.(UpdateNamespaceTagsResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
+		return false
+	}
+	return true
+}
+func (this *ResendUserInviteRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ResendUserInviteRequest)
+	if !ok {
+		that2, ok := that.(ResendUserInviteRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.UserId != that1.UserId {
+		return false
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *ResendUserInviteResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ResendUserInviteResponse)
+	if !ok {
+		that2, ok := that.(ResendUserInviteResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
+		return false
+	}
+	return true
+}
 func (this *GetUsersRequest) GoString() string {
 	if this == nil {
 		return "nil"
@@ -11824,12 +12202,25 @@ func (this *CreateNamespaceRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 6)
+	s := make([]string, 0, 7)
 	s = append(s, "&cloudservice.CreateNamespaceRequest{")
 	if this.Spec != nil {
 		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
 	}
 	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	keysForTags := make([]string, 0, len(this.Tags))
+	for k, _ := range this.Tags {
+		keysForTags = append(keysForTags, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForTags)
+	mapStringForTags := "map[string]string{"
+	for _, k := range keysForTags {
+		mapStringForTags += fmt.Sprintf("%#v: %#v,", k, this.Tags[k])
+	}
+	mapStringForTags += "}"
+	if this.Tags != nil {
+		s = append(s, "Tags: "+mapStringForTags+",\n")
+	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -11850,11 +12241,12 @@ func (this *GetNamespacesRequest) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 8)
 	s = append(s, "&cloudservice.GetNamespacesRequest{")
 	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
 	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
 	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "ConnectivityRuleId: "+fmt.Sprintf("%#v", this.ConnectivityRuleId)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -11867,6 +12259,28 @@ func (this *GetNamespacesResponse) GoString() string {
 	if this.Namespaces != nil {
 		s = append(s, "Namespaces: "+fmt.Sprintf("%#v", this.Namespaces)+",\n")
 	}
+	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetNamespaceIDsRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&cloudservice.GetNamespaceIDsRequest{")
+	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
+	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetNamespaceIDsResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&cloudservice.GetNamespaceIDsResponse{")
+	s = append(s, "NamespaceIds: "+fmt.Sprintf("%#v", this.NamespaceIds)+",\n")
 	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -13189,33 +13603,6 @@ func (this *GetConnectivityRulesResponse) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *UpdateConnectivityRuleRequest) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 8)
-	s = append(s, "&cloudservice.UpdateConnectivityRuleRequest{")
-	s = append(s, "ConnectivityRuleId: "+fmt.Sprintf("%#v", this.ConnectivityRuleId)+",\n")
-	if this.Spec != nil {
-		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
-	}
-	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
-	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *UpdateConnectivityRuleResponse) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&cloudservice.UpdateConnectivityRuleResponse{")
-	if this.AsyncOperation != nil {
-		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
 func (this *DeleteConnectivityRuleRequest) GoString() string {
 	if this == nil {
 		return "nil"
@@ -13357,6 +13744,66 @@ func (this *DeleteProjectResponse) GoString() string {
 	}
 	s := make([]string, 0, 5)
 	s = append(s, "&cloudservice.DeleteProjectResponse{")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UpdateNamespaceTagsRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&cloudservice.UpdateNamespaceTagsRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	keysForTagsToUpsert := make([]string, 0, len(this.TagsToUpsert))
+	for k, _ := range this.TagsToUpsert {
+		keysForTagsToUpsert = append(keysForTagsToUpsert, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForTagsToUpsert)
+	mapStringForTagsToUpsert := "map[string]string{"
+	for _, k := range keysForTagsToUpsert {
+		mapStringForTagsToUpsert += fmt.Sprintf("%#v: %#v,", k, this.TagsToUpsert[k])
+	}
+	mapStringForTagsToUpsert += "}"
+	if this.TagsToUpsert != nil {
+		s = append(s, "TagsToUpsert: "+mapStringForTagsToUpsert+",\n")
+	}
+	s = append(s, "TagsToRemove: "+fmt.Sprintf("%#v", this.TagsToRemove)+",\n")
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UpdateNamespaceTagsResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.UpdateNamespaceTagsResponse{")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ResendUserInviteRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&cloudservice.ResendUserInviteRequest{")
+	s = append(s, "UserId: "+fmt.Sprintf("%#v", this.UserId)+",\n")
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ResendUserInviteResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.ResendUserInviteResponse{")
 	if this.AsyncOperation != nil {
 		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
 	}
@@ -13966,6 +14413,25 @@ func (m *CreateNamespaceRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	_ = i
 	var l int
 	_ = l
+	if len(m.Tags) > 0 {
+		for k := range m.Tags {
+			v := m.Tags[k]
+			baseI := i
+			i -= len(v)
+			copy(dAtA[i:], v)
+			i = encodeVarintRequestResponse(dAtA, i, uint64(len(v)))
+			i--
+			dAtA[i] = 0x12
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintRequestResponse(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintRequestResponse(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x22
+		}
+	}
 	if len(m.AsyncOperationId) > 0 {
 		i -= len(m.AsyncOperationId)
 		copy(dAtA[i:], m.AsyncOperationId)
@@ -14050,6 +14516,13 @@ func (m *GetNamespacesRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.ConnectivityRuleId) > 0 {
+		i -= len(m.ConnectivityRuleId)
+		copy(dAtA[i:], m.ConnectivityRuleId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ConnectivityRuleId)))
+		i--
+		dAtA[i] = 0x22
+	}
 	if len(m.Name) > 0 {
 		i -= len(m.Name)
 		copy(dAtA[i:], m.Name)
@@ -14109,6 +14582,80 @@ func (m *GetNamespacesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i -= size
 				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
 			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetNamespaceIDsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetNamespaceIDsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetNamespaceIDsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.PageToken) > 0 {
+		i -= len(m.PageToken)
+		copy(dAtA[i:], m.PageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.PageSize != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetNamespaceIDsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetNamespaceIDsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetNamespaceIDsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextPageToken) > 0 {
+		i -= len(m.NextPageToken)
+		copy(dAtA[i:], m.NextPageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.NamespaceIds) > 0 {
+		for iNdEx := len(m.NamespaceIds) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.NamespaceIds[iNdEx])
+			copy(dAtA[i:], m.NamespaceIds[iNdEx])
+			i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NamespaceIds[iNdEx])))
 			i--
 			dAtA[i] = 0xa
 		}
@@ -18427,97 +18974,6 @@ func (m *GetConnectivityRulesResponse) MarshalToSizedBuffer(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
-func (m *UpdateConnectivityRuleRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *UpdateConnectivityRuleRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *UpdateConnectivityRuleRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.AsyncOperationId) > 0 {
-		i -= len(m.AsyncOperationId)
-		copy(dAtA[i:], m.AsyncOperationId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
-		i--
-		dAtA[i] = 0x22
-	}
-	if len(m.ResourceVersion) > 0 {
-		i -= len(m.ResourceVersion)
-		copy(dAtA[i:], m.ResourceVersion)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
-		i--
-		dAtA[i] = 0x1a
-	}
-	if m.Spec != nil {
-		{
-			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.ConnectivityRuleId) > 0 {
-		i -= len(m.ConnectivityRuleId)
-		copy(dAtA[i:], m.ConnectivityRuleId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ConnectivityRuleId)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *UpdateConnectivityRuleResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *UpdateConnectivityRuleResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *UpdateConnectivityRuleResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.AsyncOperation != nil {
-		{
-			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
 func (m *DeleteConnectivityRuleRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -18995,6 +19451,178 @@ func (m *DeleteProjectResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *UpdateNamespaceTagsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateNamespaceTagsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateNamespaceTagsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.TagsToRemove) > 0 {
+		for iNdEx := len(m.TagsToRemove) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.TagsToRemove[iNdEx])
+			copy(dAtA[i:], m.TagsToRemove[iNdEx])
+			i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.TagsToRemove[iNdEx])))
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.TagsToUpsert) > 0 {
+		for k := range m.TagsToUpsert {
+			v := m.TagsToUpsert[k]
+			baseI := i
+			i -= len(v)
+			copy(dAtA[i:], v)
+			i = encodeVarintRequestResponse(dAtA, i, uint64(len(v)))
+			i--
+			dAtA[i] = 0x12
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintRequestResponse(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintRequestResponse(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateNamespaceTagsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateNamespaceTagsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateNamespaceTagsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ResendUserInviteRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ResendUserInviteRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ResendUserInviteRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.UserId) > 0 {
+		i -= len(m.UserId)
+		copy(dAtA[i:], m.UserId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.UserId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ResendUserInviteResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ResendUserInviteResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ResendUserInviteResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintRequestResponse(dAtA []byte, offset int, v uint64) int {
 	offset -= sovRequestResponse(v)
 	base := offset
@@ -19263,6 +19891,14 @@ func (m *CreateNamespaceRequest) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
+	if len(m.Tags) > 0 {
+		for k, v := range m.Tags {
+			_ = k
+			_ = v
+			mapEntrySize := 1 + len(k) + sovRequestResponse(uint64(len(k))) + 1 + len(v) + sovRequestResponse(uint64(len(v)))
+			n += mapEntrySize + 1 + sovRequestResponse(uint64(mapEntrySize))
+		}
+	}
 	return n
 }
 
@@ -19300,6 +19936,10 @@ func (m *GetNamespacesRequest) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
+	l = len(m.ConnectivityRuleId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
 	return n
 }
 
@@ -19312,6 +19952,41 @@ func (m *GetNamespacesResponse) Size() (n int) {
 	if len(m.Namespaces) > 0 {
 		for _, e := range m.Namespaces {
 			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.NextPageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetNamespaceIDsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PageSize != 0 {
+		n += 1 + sovRequestResponse(uint64(m.PageSize))
+	}
+	l = len(m.PageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetNamespaceIDsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.NamespaceIds) > 0 {
+		for _, s := range m.NamespaceIds {
+			l = len(s)
 			n += 1 + l + sovRequestResponse(uint64(l))
 		}
 	}
@@ -21143,44 +21818,6 @@ func (m *GetConnectivityRulesResponse) Size() (n int) {
 	return n
 }
 
-func (m *UpdateConnectivityRuleRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.ConnectivityRuleId)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	if m.Spec != nil {
-		l = m.Spec.Size()
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.ResourceVersion)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.AsyncOperationId)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
-func (m *UpdateConnectivityRuleResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.AsyncOperation != nil {
-		l = m.AsyncOperation.Size()
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
 func (m *DeleteConnectivityRuleRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -21382,6 +22019,80 @@ func (m *DeleteProjectResponse) Size() (n int) {
 	return n
 }
 
+func (m *UpdateNamespaceTagsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if len(m.TagsToUpsert) > 0 {
+		for k, v := range m.TagsToUpsert {
+			_ = k
+			_ = v
+			mapEntrySize := 1 + len(k) + sovRequestResponse(uint64(len(k))) + 1 + len(v) + sovRequestResponse(uint64(len(v)))
+			n += mapEntrySize + 1 + sovRequestResponse(uint64(mapEntrySize))
+		}
+	}
+	if len(m.TagsToRemove) > 0 {
+		for _, s := range m.TagsToRemove {
+			l = len(s)
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.AsyncOperationId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *UpdateNamespaceTagsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ResendUserInviteRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.UserId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.AsyncOperationId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ResendUserInviteResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
 func sovRequestResponse(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
@@ -21552,9 +22263,20 @@ func (this *CreateNamespaceRequest) String() string {
 	if this == nil {
 		return "nil"
 	}
+	keysForTags := make([]string, 0, len(this.Tags))
+	for k, _ := range this.Tags {
+		keysForTags = append(keysForTags, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForTags)
+	mapStringForTags := "map[string]string{"
+	for _, k := range keysForTags {
+		mapStringForTags += fmt.Sprintf("%v: %v,", k, this.Tags[k])
+	}
+	mapStringForTags += "}"
 	s := strings.Join([]string{`&CreateNamespaceRequest{`,
 		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "NamespaceSpec", "v12.NamespaceSpec", 1) + `,`,
 		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`Tags:` + mapStringForTags + `,`,
 		`}`,
 	}, "")
 	return s
@@ -21578,6 +22300,7 @@ func (this *GetNamespacesRequest) String() string {
 		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
 		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
 		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`ConnectivityRuleId:` + fmt.Sprintf("%v", this.ConnectivityRuleId) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -21593,6 +22316,28 @@ func (this *GetNamespacesResponse) String() string {
 	repeatedStringForNamespaces += "}"
 	s := strings.Join([]string{`&GetNamespacesResponse{`,
 		`Namespaces:` + repeatedStringForNamespaces + `,`,
+		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetNamespaceIDsRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetNamespaceIDsRequest{`,
+		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
+		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetNamespaceIDsResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetNamespaceIDsResponse{`,
+		`NamespaceIds:` + fmt.Sprintf("%v", this.NamespaceIds) + `,`,
 		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
 		`}`,
 	}, "")
@@ -22821,29 +23566,6 @@ func (this *GetConnectivityRulesResponse) String() string {
 	}, "")
 	return s
 }
-func (this *UpdateConnectivityRuleRequest) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&UpdateConnectivityRuleRequest{`,
-		`ConnectivityRuleId:` + fmt.Sprintf("%v", this.ConnectivityRuleId) + `,`,
-		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ConnectivityRuleSpec", "v18.ConnectivityRuleSpec", 1) + `,`,
-		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
-		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *UpdateConnectivityRuleResponse) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&UpdateConnectivityRuleResponse{`,
-		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
 func (this *DeleteConnectivityRuleRequest) String() string {
 	if this == nil {
 		return "nil"
@@ -22975,6 +23697,60 @@ func (this *DeleteProjectResponse) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&DeleteProjectResponse{`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateNamespaceTagsRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	keysForTagsToUpsert := make([]string, 0, len(this.TagsToUpsert))
+	for k, _ := range this.TagsToUpsert {
+		keysForTagsToUpsert = append(keysForTagsToUpsert, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForTagsToUpsert)
+	mapStringForTagsToUpsert := "map[string]string{"
+	for _, k := range keysForTagsToUpsert {
+		mapStringForTagsToUpsert += fmt.Sprintf("%v: %v,", k, this.TagsToUpsert[k])
+	}
+	mapStringForTagsToUpsert += "}"
+	s := strings.Join([]string{`&UpdateNamespaceTagsRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`TagsToUpsert:` + mapStringForTagsToUpsert + `,`,
+		`TagsToRemove:` + fmt.Sprintf("%v", this.TagsToRemove) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateNamespaceTagsResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateNamespaceTagsResponse{`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ResendUserInviteRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ResendUserInviteRequest{`,
+		`UserId:` + fmt.Sprintf("%v", this.UserId) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ResendUserInviteResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ResendUserInviteResponse{`,
 		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
 		`}`,
 	}, "")
@@ -24780,6 +25556,133 @@ func (m *CreateNamespaceRequest) Unmarshal(dAtA []byte) error {
 			}
 			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Tags", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Tags == nil {
+				m.Tags = make(map[string]string)
+			}
+			var mapkey string
+			var mapvalue string
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowRequestResponse
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowRequestResponse
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthRequestResponse
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthRequestResponse
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var stringLenmapvalue uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowRequestResponse
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapvalue |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapvalue := int(stringLenmapvalue)
+					if intStringLenmapvalue < 0 {
+						return ErrInvalidLengthRequestResponse
+					}
+					postStringIndexmapvalue := iNdEx + intStringLenmapvalue
+					if postStringIndexmapvalue < 0 {
+						return ErrInvalidLengthRequestResponse
+					}
+					if postStringIndexmapvalue > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = string(dAtA[iNdEx:postStringIndexmapvalue])
+					iNdEx = postStringIndexmapvalue
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipRequestResponse(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthRequestResponse
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Tags[mapkey] = mapvalue
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipRequestResponse(dAtA[iNdEx:])
@@ -25037,6 +25940,38 @@ func (m *GetNamespacesRequest) Unmarshal(dAtA []byte) error {
 			}
 			m.Name = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConnectivityRuleId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ConnectivityRuleId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipRequestResponse(dAtA[iNdEx:])
@@ -25123,6 +26058,227 @@ func (m *GetNamespacesResponse) Unmarshal(dAtA []byte) error {
 			if err := m.Namespaces[len(m.Namespaces)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextPageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetNamespaceIDsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetNamespaceIDsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetNamespaceIDsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
+			}
+			m.PageSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PageSize |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetNamespaceIDsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetNamespaceIDsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetNamespaceIDsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NamespaceIds", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NamespaceIds = append(m.NamespaceIds, string(dAtA[iNdEx:postIndex]))
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -37781,280 +38937,6 @@ func (m *GetConnectivityRulesResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *UpdateConnectivityRuleRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: UpdateConnectivityRuleRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UpdateConnectivityRuleRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ConnectivityRuleId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ConnectivityRuleId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Spec == nil {
-				m.Spec = &v18.ConnectivityRuleSpec{}
-			}
-			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *UpdateConnectivityRuleResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: UpdateConnectivityRuleResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UpdateConnectivityRuleResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.AsyncOperation == nil {
-				m.AsyncOperation = &v11.AsyncOperation{}
-			}
-			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
 func (m *DeleteConnectivityRuleRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -39382,6 +40264,577 @@ func (m *DeleteProjectResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: DeleteProjectResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v11.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateNamespaceTagsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateNamespaceTagsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateNamespaceTagsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TagsToUpsert", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.TagsToUpsert == nil {
+				m.TagsToUpsert = make(map[string]string)
+			}
+			var mapkey string
+			var mapvalue string
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowRequestResponse
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowRequestResponse
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthRequestResponse
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthRequestResponse
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var stringLenmapvalue uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowRequestResponse
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapvalue |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapvalue := int(stringLenmapvalue)
+					if intStringLenmapvalue < 0 {
+						return ErrInvalidLengthRequestResponse
+					}
+					postStringIndexmapvalue := iNdEx + intStringLenmapvalue
+					if postStringIndexmapvalue < 0 {
+						return ErrInvalidLengthRequestResponse
+					}
+					if postStringIndexmapvalue > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = string(dAtA[iNdEx:postStringIndexmapvalue])
+					iNdEx = postStringIndexmapvalue
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipRequestResponse(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthRequestResponse
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.TagsToUpsert[mapkey] = mapvalue
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TagsToRemove", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TagsToRemove = append(m.TagsToRemove, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateNamespaceTagsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateNamespaceTagsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateNamespaceTagsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v11.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ResendUserInviteRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ResendUserInviteRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ResendUserInviteRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UserId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UserId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ResendUserInviteResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ResendUserInviteResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ResendUserInviteResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
