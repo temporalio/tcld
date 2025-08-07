@@ -45,6 +45,7 @@ const (
 	sinkRegionFlagName               = "region"
 	disableFailoverFlagName          = "disable-auto-failover"
 	enableDeleteProtectionFlagName   = "enable-delete-protection"
+	tagFlagName                     = "tag"
 )
 
 const (
@@ -225,12 +226,13 @@ func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespa
 	return PrintProto(res)
 }
 
-func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.UserNamespacePermissions) error {
+func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.UserNamespacePermissions, tags map[string]string) error {
 	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
 		RequestId:                n.RequestId,
 		Namespace:                n.Namespace,
 		Spec:                     n.Spec,
 		UserNamespacePermissions: p,
+		Tags:                     tags,
 	})
 	if err != nil {
 		return err
@@ -590,6 +592,11 @@ func getCreateNamespaceFlags() []cli.Flag {
 			// this is a temporary solution, we will have a follow up version update to make the cloud provider mandatory
 			Value: CloudProviderAWS,
 		},
+		&cli.StringSliceFlag{
+			Name:     tagFlagName,
+			Usage:    "Add tags to the namespace (format: key=value). Flag can be used multiple times.",
+			Aliases:  []string{"t"},
+		},
 	}
 
 	if IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
@@ -763,7 +770,17 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					n.Spec.ConnectivityRuleIds = connectivityRuleIds
 				}
 
-				return c.createNamespace(n, unp)
+				tags := ctx.StringSlice(tagFlagName)
+				tagsToCreate := make(map[string]string)
+				for _, tag := range tags {
+					parts := strings.Split(tag, "=")
+					if len(parts) != 2 {
+						return fmt.Errorf("invalid tag format '%s', must be 'key=value'", tag)
+					}
+					tagsToCreate[parts[0]] = parts[1]
+				}
+
+				return c.createNamespace(n, unp, tagsToCreate)
 			},
 		},
 		{
