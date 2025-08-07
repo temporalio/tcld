@@ -777,7 +777,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					if len(parts) != 2 {
 						return fmt.Errorf("invalid tag format '%s', must be 'key=value'", tag)
 					}
-					tagsToCreate[parts[0]] = parts[1]
+					key := parts[0]
+					if _, exists := tagsToCreate[key]; exists {
+						return fmt.Errorf("duplicate tag key '%s' found", key)
+					}
+					tagsToCreate[key] = parts[1]
 				}
 
 				return c.createNamespace(n, unp, tagsToCreate)
@@ -1767,7 +1771,11 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							if len(parts) != 2 {
 								return fmt.Errorf("invalid tag format '%s', must be 'key=value'", tag)
 							}
-							tagsToUpsert[parts[0]] = parts[1]
+							key := parts[0]
+							if _, exists := tagsToUpsert[key]; exists {
+								return fmt.Errorf("duplicate tag key '%s' found", key)
+							}
+							tagsToUpsert[key] = parts[1]
 						}
 
 						return c.updateNamespaceTags(ctx, tagsToUpsert, nil)
