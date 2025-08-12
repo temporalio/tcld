@@ -45,7 +45,7 @@ const (
 	sinkRegionFlagName               = "region"
 	disableFailoverFlagName          = "disable-auto-failover"
 	enableDeleteProtectionFlagName   = "enable-delete-protection"
-	tagFlagName                     = "tag"
+	tagFlagName                      = "tag"
 )
 
 const (
@@ -307,12 +307,11 @@ func (c *NamespaceClient) deleteRegion(ctx *cli.Context) error {
 	return PrintProto(res.GetAsyncOperation())
 }
 
-func (c *NamespaceClient) listNamespaces(connectivityRuleId string) error {
+func (c *NamespaceClient) listNamespaces() error {
 	totalRes := &namespaceservice.ListNamespacesResponse{}
 	pageToken := ""
 	for {
 		res, err := c.client.ListNamespaces(c.ctx, &namespaceservice.ListNamespacesRequest{
-			Filter:    &namespaceservice.ListNamespacesFilter{ConnectivityRuleId: connectivityRuleId},
 			PageToken: pageToken,
 		})
 		if err != nil {
@@ -593,9 +592,9 @@ func getCreateNamespaceFlags() []cli.Flag {
 			Value: CloudProviderAWS,
 		},
 		&cli.StringSliceFlag{
-			Name:     tagFlagName,
-			Usage:    "Add tags to the namespace (format: key=value). Flag can be used multiple times.",
-			Aliases:  []string{"t"},
+			Name:    tagFlagName,
+			Usage:   "Add tags to the namespace (format: key=value). Flag can be used multiple times.",
+			Aliases: []string{"t"},
 		},
 	}
 
@@ -972,17 +971,8 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Name:    "list",
 			Usage:   "List all known namespaces",
 			Aliases: []string{"l"},
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:     connectivityRuleIdFlagName,
-					Usage:    "The connectivity rule id. Default: empty",
-					Value:    "",
-					Aliases:  []string{"crid"},
-					Required: false,
-				},
-			},
 			Action: func(ctx *cli.Context) error {
-				return c.listNamespaces(ctx.String(connectivityRuleIdFlagName))
+				return c.listNamespaces()
 			},
 		},
 		{
