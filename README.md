@@ -234,6 +234,8 @@ The `--namespace-role` flag can be repeated for each namespace role the group sh
 
 The account and namespace roles replace the definition, so any namespace roles omitted will be removed from the group level access.
 
+To add or remove namespace access without specifying all other roles, the `set-access` command also takes in a `--append`(`-a`), or `--remove`(`-r`) flag which will add the given namespace access or remove them. Appending will not change an existing namespace access(it will reject the update) and the account access cannot be changed when either flag is specified.
+
 # Migration Management (Preview)
 
 *The Migration feature is currently in "Preview Release". Customers must be invited to use this feature. Please reach out to Temporal Cloud support for more information.*
