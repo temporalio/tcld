@@ -26,11 +26,20 @@ const (
 	TemporalCloudAPIVersionHeader = "temporal-cloud-api-version"
 	LegacyTemporalCloudAPIVersion = "2025-07-09-00"
 	TemporalCloudAPIVersion       = "v0.5.1"
+	userAgentTemplate             = "tcld/%s"
 )
 
 var (
 	TemporalCloudAPIMethodRegex = regexp.MustCompile(`^\/temporal\.api\.cloud\.cloudservice\.v1\.CloudService\/[^\/]*$`)
+
+	// UserAgent is set on package initialization.
+	UserAgent string
 )
+
+func init() {
+	buildInfo := NewBuildInfo()
+	UserAgent = fmt.Sprintf(userAgentTemplate, buildInfo.Version)
+}
 
 func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Context, *grpc.ClientConn, error) {
 	addr, err := url.Parse(c.String(ServerFlagName))
@@ -88,6 +97,7 @@ func defaultDialOptions(c *cli.Context, addr *url.URL) ([]grpc.DialOption, error
 			unaryVersionInterceptor,
 			grpcretry.UnaryClientInterceptor(retryOpts...),
 		),
+		grpc.WithUserAgent(UserAgent),
 	}
 
 	creds, err := newRPCCredential(c)
