@@ -7,18 +7,19 @@ import (
 	"strings"
 	"time"
 
+	"encoding/json"
+	"io"
+	"net/http"
+
 	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/semver"
-	"net/http"
-	"io"
-	"encoding/json"
 )
 
 const (
 	// MinSupportedVersion is the minimum tcld version supported by our APIs.
 	// This string must be updated when we deprecate older versions, but should be
 	// done carefully as this will likely break user's current usage of tcld.
-	MinSupportedVersion = "v0.1.3"
+	MinSupportedVersion = "v0.17.0"
 
 	// DefaultVersionString is the version which is sent over if no version was available.
 	// This can happen if a user builds the latest main branch, as the version string provided

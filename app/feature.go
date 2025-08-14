@@ -11,11 +11,12 @@ import (
 )
 
 var (
-	GCPSinkFeatureFlag  = "enable-gcp-sink"
-	featureflagFileName = "feature.json"
+	GCPSinkFeatureFlag          = "enable-gcp-sink"
+	ConnectivityRuleFeatureFlag = "enable-connectivity-rule"
+	featureflagFileName         = "feature.json"
 )
 
-var supportFeatureFlags = []string{GCPSinkFeatureFlag}
+var supportFeatureFlags = []string{ConnectivityRuleFeatureFlag}
 
 type FeatureFlag struct {
 	Name  string `json:"Name"`
@@ -124,12 +125,21 @@ func NewFeatureCommand() (CommandOut, error) {
 			Usage:   "feature commands",
 			Hidden:  true,
 			Subcommands: []*cli.Command{
+				// Leave here as an example
+				// {
+				// 	Name:    "toggle-gcp-sink",
+				// 	Aliases: []string{"tgs"},
+				// 	Usage:   "switch gcp sink on/off",
+				// 	Action: func(c *cli.Context) error {
+				// 		return toggleFeature(GCPSinkFeatureFlag)
+				// 	},
+				// },
 				{
-					Name:    "toggle-gcp-sink",
-					Aliases: []string{"tgs"},
-					Usage:   "switch gcp sink on/off",
+					Name:    "toggle-connectivity-rule",
+					Aliases: []string{"tcr"},
+					Usage:   "switch connectivity rule on/off",
 					Action: func(c *cli.Context) error {
-						return toggleFeature(GCPSinkFeatureFlag)
+						return toggleFeature(ConnectivityRuleFeatureFlag)
 					},
 				},
 				{

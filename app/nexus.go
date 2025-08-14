@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"reflect"
+
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/nexus/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
@@ -84,7 +86,7 @@ func (c *NexusClient) createEndpoint(
 	resp, err := c.client.CreateNexusEndpoint(c.ctx, &cloudservice.CreateNexusEndpointRequest{
 		Spec: &nexus.EndpointSpec{
 			Name:        endpointName,
-			Description: endpointDescription,
+			Description: newAPIPayloadFromString(endpointDescription),
 			TargetSpec: &nexus.EndpointTargetSpec{
 				Variant: &nexus.EndpointTargetSpec_WorkerTargetSpec{
 					WorkerTargetSpec: &nexus.WorkerTargetSpec{
@@ -113,12 +115,16 @@ func (c *NexusClient) patchEndpoint(
 	asyncOperationId string,
 ) (*operation.AsyncOperation, error) {
 	hasChanges := false
-	if unsetDescription && existingEndpoint.Spec.Description != "" {
-		existingEndpoint.Spec.Description = ""
+
+	endpointDescription := newAPIPayloadFromString(description)
+	isExistingEndpointDescriptionNil := existingEndpoint.Spec.Description == nil
+	isExistingEndpointDescriptionEmpty := reflect.DeepEqual(newAPIPayloadFromString(""), existingEndpoint.Spec.Description)
+	if unsetDescription && !(isExistingEndpointDescriptionNil || isExistingEndpointDescriptionEmpty) {
+		existingEndpoint.Spec.Description = nil
 		hasChanges = true
 	}
-	if !unsetDescription && description != "" && description != existingEndpoint.Spec.Description {
-		existingEndpoint.Spec.Description = description
+	if !unsetDescription && description != "" && !reflect.DeepEqual(endpointDescription, existingEndpoint.Spec.Description) {
+		existingEndpoint.Spec.Description = endpointDescription
 		hasChanges = true
 	}
 	if targetNamespaceID != "" && targetNamespaceID != existingEndpoint.Spec.TargetSpec.GetWorkerTargetSpec().NamespaceId {

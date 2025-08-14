@@ -24,13 +24,22 @@ const (
 	VersionHeader                 = "tcld-version"
 	CommitHeader                  = "tcld-commit"
 	TemporalCloudAPIVersionHeader = "temporal-cloud-api-version"
-	LegacyTemporalCloudAPIVersion = "2024-03-18-00"
-	TemporalCloudAPIVersion       = "2024-05-13-00"
+	LegacyTemporalCloudAPIVersion = "2025-07-09-00"
+	TemporalCloudAPIVersion       = "v0.5.1"
+	userAgentTemplate             = "tcld/%s"
 )
 
 var (
 	TemporalCloudAPIMethodRegex = regexp.MustCompile(`^\/temporal\.api\.cloud\.cloudservice\.v1\.CloudService\/[^\/]*$`)
+
+	// UserAgent is set on package initialization.
+	UserAgent string
 )
+
+func init() {
+	buildInfo := NewBuildInfo()
+	UserAgent = fmt.Sprintf(userAgentTemplate, buildInfo.Version)
+}
 
 func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Context, *grpc.ClientConn, error) {
 	addr, err := url.Parse(c.String(ServerFlagName))
@@ -43,7 +52,7 @@ func GetServerConnection(c *cli.Context, opts ...grpc.DialOption) (context.Conte
 		return nil, nil, fmt.Errorf("failed to generate default dial options: %s", err)
 	}
 
-	conn, err := grpc.Dial(
+	conn, err := grpc.Dial( //nolint:all this is supported for now, ignore deprecation
 		addr.String(),
 		append(defaultOpts, opts...)...,
 	)
@@ -88,6 +97,7 @@ func defaultDialOptions(c *cli.Context, addr *url.URL) ([]grpc.DialOption, error
 			unaryVersionInterceptor,
 			grpcretry.UnaryClientInterceptor(retryOpts...),
 		),
+		grpc.WithUserAgent(UserAgent),
 	}
 
 	creds, err := newRPCCredential(c)

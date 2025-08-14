@@ -67,16 +67,33 @@ func login(ctx *cli.Context, tokenConfig *TokenConfig) (*TokenConfig, error) {
 }
 
 func defaultTokenConfig(ctx *cli.Context) (*TokenConfig, error) {
-	domainURL, err := parseURL(ctx.String(domainFlagName))
+	domainURLStr := ctx.String(domainFlagName)
+	if domainURLStr == "" {
+		// the domain flag was not set on the command, fallback to the default value set in the flag definition
+		domainURLStr = domainFlag.Value
+	}
+	domainURL, err := parseURL(domainURLStr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse domain URL: %w", err)
 	}
 
+	audience := ctx.String(audienceFlagName)
+	if audience == "" {
+		// the audience flag is not set on the command, fallback to the default value set in the flag definition
+		audience = audienceFlag.Value
+	}
+
+	clientID := ctx.String(clientIDFlagName)
+	if clientID == "" {
+		// the clientID flag is not set on the command, fallback to the default value set in the flag definition
+		clientID = clientIDFlag.Value
+	}
+
 	return &TokenConfig{
-		Audience: ctx.String(audienceFlagName),
+		Audience: audience,
 		Domain:   domainURL.String(),
 		OAuthConfig: oauth2.Config{
-			ClientID: ctx.String("client-id"),
+			ClientID: clientID,
 			Endpoint: oauth2.Endpoint{
 				DeviceAuthURL: domainURL.JoinPath("oauth", "device", "code").String(),
 				TokenURL:      domainURL.JoinPath("oauth", "token").String(),

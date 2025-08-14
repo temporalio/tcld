@@ -1,4 +1,4 @@
-.PHONY: clean test bins lint tools
+.PHONY: clean test bins lint tools tcld
 PROJECT_ROOT = github.com/temporalio/tcld
 
 # default target
@@ -45,7 +45,7 @@ release:
 	$(call build,tcld,windows,amd64,.exe)
 
 tools:
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 	@go install github.com/golang/mock/mockgen@latest
 
 lint:

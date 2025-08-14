@@ -17,6 +17,7 @@ func fxOptions() fx.Option {
 			app.NewAccountCommand,
 			app.NewNamespaceCommand,
 			app.NewUserCommand,
+			app.NewUserGroupCommand,
 			app.NewRequestCommand,
 			app.NewLoginCommand,
 			app.NewLogoutCommand,
@@ -25,6 +26,8 @@ func fxOptions() fx.Option {
 			app.NewFeatureCommand,
 			app.NewServiceAccountCommand,
 			app.NewNexusCommand,
+			app.NewMigrationCommand,
+			app.NewConnectivityRuleCommand,
 			func() app.GetNamespaceClientFn {
 				return app.GetNamespaceClient
 			},
@@ -37,6 +40,9 @@ func fxOptions() fx.Option {
 			func() app.GetUserClientFn {
 				return app.GetUserClient
 			},
+			func() app.GetGroupClientFn {
+				return app.GetUserGroupClient
+			},
 			func() app.GetAPIKeyClientFn {
 				return app.GetAPIKeyClient
 			},
@@ -46,6 +52,10 @@ func fxOptions() fx.Option {
 			func() app.GetNexusClientFn {
 				return app.GetNexusClient
 			},
+			func() app.GetMigrationClientFn {
+				return app.GetMigrationClient
+			},
+			func() app.GetConnectivityRuleClientFn { return app.GetConnectivityRuleClient },
 		),
 		fx.Invoke(func(app *cli.App, shutdowner fx.Shutdowner) error {
 			err := app.Run(os.Args)

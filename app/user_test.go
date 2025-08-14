@@ -3,6 +3,9 @@ package app
 import (
 	"context"
 	"errors"
+	"reflect"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
@@ -10,8 +13,8 @@ import (
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	authservicemock "github.com/temporalio/tcld/protogen/apimock/authservice/v1"
 	"github.com/urfave/cli/v2"
-	"reflect"
-	"testing"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestUser(t *testing.T) {
@@ -41,6 +44,7 @@ func (s *UserTestSuite) SetupTest() {
 	}
 	flags := []cli.Flag{
 		AutoConfirmFlag,
+		IdempotentFlag,
 	}
 	s.cliApp, _ = NewTestApp(s.T(), cmds, flags)
 }
@@ -542,4 +546,57 @@ func (s *UserTestSuite) TestSetNamespacePermissionsEmpty() {
 		},
 	}, nil)
 	s.NoError(s.RunCmd("user", "set-namespace-permissions", "--user-email", "test@example.com"))
+}
+
+func (s *UserTestSuite) TestSetNamespacePermissionsNoChanges() {
+	s.mockAuthService.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&authservice.GetUserResponse{
+		User: &auth.User{
+			Id: "test-user-id",
+			Spec: &auth.UserSpec{
+				Email: "test@example.com",
+			},
+		},
+	}, nil).Times(1)
+	s.mockAuthService.EXPECT().GetRoles(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesResponse{
+		Roles: []*auth.Role{
+			{
+				Id:   "test-account-developer-role",
+				Type: auth.ROLE_TYPE_PREDEFINED,
+				Spec: &auth.RoleSpec{
+					AccountRole: &auth.AccountRoleSpec{
+						ActionGroup: auth.ACCOUNT_ACTION_GROUP_DEVELOPER,
+					},
+				},
+			},
+		},
+	}, nil).Times(1)
+	s.mockAuthService.EXPECT().GetRolesByPermissions(gomock.Any(), gomock.Any()).Return(&authservice.GetRolesByPermissionsResponse{
+		Roles: []*auth.Role{
+			{
+				Id:   "test-ns1-admin-role",
+				Type: auth.ROLE_TYPE_PREDEFINED,
+				Spec: &auth.RoleSpec{
+					NamespaceRoles: []*auth.NamespaceRoleSpec{
+						{
+							Namespace:   "ns1",
+							ActionGroup: auth.NAMESPACE_ACTION_GROUP_ADMIN,
+						},
+					},
+				},
+			},
+		},
+	}, nil).Times(1)
+	s.mockAuthService.EXPECT().UpdateUser(gomock.Any(), gomock.All(&updateUserRequestMatcher{
+		request: &authservice.UpdateUserRequest{
+			UserId: "test-user-id",
+			Spec: &auth.UserSpec{
+				Email: "test@example.com",
+				Roles: []string{
+					"test-account-developer-role",
+					"test-ns1-admin-role",
+				},
+			},
+		},
+	})).Return(nil, status.Error(codes.InvalidArgument, "nothing to change")).Times(1)
+	s.NoError(s.RunCmd("--idempotent", "user", "set-namespace-permissions", "--user-email", "test@example.com", "-p", "ns1=Admin", "-p", "ns2=Write", "-p", "ns3=Read"))
 }

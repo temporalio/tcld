@@ -12,6 +12,21 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+const (
+	ownerIDFlagName   = "owner-id"
+	ownerTypeFlagName = "owner-type"
+)
+
+const (
+	OwnerTypeUser           = "user"
+	OwnerTypeServiceAccount = "service-account"
+)
+
+var OwnerTypes = []string{
+	OwnerTypeUser,
+	OwnerTypeServiceAccount,
+}
+
 type (
 	APIKeyClient struct {
 		client authservice.AuthServiceClient
@@ -29,6 +44,18 @@ func GetAPIKeyClient(ctx *cli.Context) (*APIKeyClient, error) {
 		client: authservice.NewAuthServiceClient(conn),
 		ctx:    ct,
 	}, nil
+}
+
+func validateOwnerType(t string) error {
+	if len(t) == 0 {
+		return nil
+	}
+	for _, ownerType := range OwnerTypes {
+		if t == ownerType {
+			return nil
+		}
+	}
+	return fmt.Errorf("invalid owner type: '%s'", t)
 }
 
 func (s *APIKeyClient) createAPIKey(
@@ -85,13 +112,14 @@ func (s *APIKeyClient) createServiceAccountAPIKey(
 	return PrintProto(resp)
 }
 
-func (s *APIKeyClient) listAPIKey() error {
-
+func (s *APIKeyClient) listAPIKey(ownerID, ownerType string) error {
 	totalRes := &authservice.GetAPIKeysResponse{}
 	pageToken := ""
 	for {
 		resp, err := s.client.GetAPIKeys(s.ctx, &authservice.GetAPIKeysRequest{
 			PageToken: pageToken,
+			OwnerId:   ownerID,
+			OwnerType: ownerType,
 		})
 		if err != nil {
 			return err
@@ -256,11 +284,29 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 				},
 				{
 					Name:    "list",
-					Usage:   "List apikeys",
+					Usage:   "List API keys",
 					Aliases: []string{"l"},
-					Flags:   []cli.Flag{},
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:    ownerIDFlagName,
+							Usage:   "Filter API keys by owner ID",
+							Aliases: []string{"oid"},
+						},
+						&cli.StringFlag{
+							Name:    ownerTypeFlagName,
+							Usage:   fmt.Sprintf("Filter API keys by owner type (i.e. %s)", formatStringSlice(OwnerTypes)),
+							Aliases: []string{"ot"},
+						},
+					},
 					Action: func(ctx *cli.Context) error {
-						return c.listAPIKey()
+						ownerType := ctx.String(ownerTypeFlagName)
+						if err := validateOwnerType(ownerType); err != nil {
+							return err
+						}
+						return c.listAPIKey(
+							ctx.String(ownerIDFlagName),
+							ownerType,
+						)
 					},
 				},
 				{

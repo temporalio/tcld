@@ -62,6 +62,13 @@ tcld apikey create --name <api-key-name> --description <api-key-description> --d
 ```
 tcld apikey list
 ```
+
+### List API keys for a specific owner (service account or user):
+Note: only Global Admins may list API keys for other users/service accounts.
+```
+tcld apikey list --owner-id <owner-id>
+```
+
 ### Delete an API Key:
 ```
 tcld apikey delete --id <api-key-id>
@@ -75,13 +82,26 @@ tcld apikey enable --id <api-key-id>
 ```
 
 ### Performing an API Key rotation:
+
+#### Current User Specific Rotation
 1. Generate the new API key to rotate to.
 ```
 tcld apikey create --name <api-key-name> --description <api-key-description> --duration <api-key-duration>
 ```
 2. Update temporal clients to use the new API key and monitor deployments to make sure all old API key usage is gone.
 3. Delete the old API key.
-``` 
+```
+tcld apikey delete --id <api-key-id>
+```
+
+#### Service Account Specific Rotation
+1. Generate the new API key to rotate to.
+```
+tcld apikey create --name <api-key-name> --description <api-key-description> --duration <api-key-duration> --service-account-id <service-account-id>
+```
+2. Update temporal clients to use the new API key and monitor deployments to make sure all old API key usage is gone.
+3. Delete the old API key.
+```
 tcld apikey delete --id <api-key-id>
 ```
 
@@ -178,8 +198,93 @@ tcld user get -e <user-email> | jq -r '.spec.namespacePermissions'
 tcld user set-namespace-permissions -e <user-email> -p <namespace-1=namespace-permission> -p <namespace-2=namespace-permission>
 ```
 
+# User Group Management
+
+### List groups:
+```
+tcld user-group list
+```
+
+### Get group information:
+```
+tcld user-group get <group-id>
+```
+
+### Set group access:
+```
+tcld user-group set-access -id <group-id> --account-role read --namespace-role <namespace>-read
+```
+
+Setting the group access will replace all permissions for the given group. The account role can be one of:
+
+- `owner` - Account owner, full access
+- `admin` - Account admin, full access except to financial information
+- `developer` - Account developer
+- `financeadmin` - Only access to financial information
+- `read` - Account read
+- `none` - No account level access.
+
+Note that if the account role is `owner` or `admin`, namespace role assignment is not available because the group will already have access to all namespaces.
+
+The `--namespace-role` flag can be repeated for each namespace role the group should be assigned. The format of the role is: `<namespace>-<role>` with the namespace nominally being `<name>.<accountid>`. For example `mynamespace.cwl3n-read` would give read permission to the `mynamespace.cwl3n` namespace. The namespace role can be one of the following:
+
+- `admin` - Full access to the namespace
+- `write` - Read and write access to the namespace
+- `read` - Read only access
+
+The account and namespace roles replace the definition, so any namespace roles omitted will be removed from the group level access.
+
+To add or remove namespace access without specifying all other roles, the `set-access` command also takes in a `--append`(`-a`), or `--remove`(`-r`) flag which will add the given namespace access or remove them. Appending will not change an existing namespace access(it will reject the update) and the account access cannot be changed when either flag is specified.
+
+# Migration Management (Preview)
+
+*The Migration feature is currently in "Preview Release". Customers must be invited to use this feature. Please reach out to Temporal Cloud support for more information.*
+
+Migrations provide a way to migrate a namespace and its workflow between a self-hosted Temporal server and Temporal Cloud. Migrations rely on active/passive replication built-in to Temporal. Before starting a migration, deploy the [s2s-proxy](https://github.com/temporalio/s2s-proxy/) alongside your self-hosted cluster and obtain a migration endpoint id from Temporal Cloud support. Please reach out to Temporal Cloud support for more information.
+
+### Start a migration
+
+To start a migration, provide the migration endpoint id and the source and target namespace names.
+Starting the migration enables active/passive namespace replication.
+
+```
+tcld migration start --endpoint-id <endpoint-id> --source-namespace <source-namespace> --target-namespace <target-namespace>
+```
+
+### Get a migration
+
+```
+tcld migration get --id <migration-id>
+```
+
+### Perform handover during a migration
+
+To handover, provide the migration id and the replica id.
+Handover changes the active replica to the given replica.
+The active replica is the replica currently accepting write operations.
+
+```
+tcld migration handover --id <migration-id> --to-replica-id <to-replica-id>
+```
+
+### Confirm a migration
+
+Confirming the migration completes the migration and disables replication.
+
+```
+tcld migration confirm --id <migration-id>
+```
+
+### Abort a migration
+
+Aborting the migration cancels the migration and disables replication.
+
+```
+tcld migration abort --id <migration-id>
+```
+
 # Asynchronous Operations
-Any update operations making changes to the namespaces hosted on Temporal Cloud are asynchronous. Such operations are tracked using a `request-id` that can be passed in when invoking the update operation or will be auto-generated by the server if one is not specified. Once an asynchronous request is initiated, a `request-id` is returned. Use the `request get` command to query the status of an asynchronous request.
+Any update operations making changes to the namespaces or user groups hosted on Temporal Cloud are asynchronous. Such operations are tracked using a `request-id` that can be passed in when invoking the update operation or will be auto-generated by the server if one is not specified. Once an asynchronous request is initiated, a `request-id` is returned. Use the `request get` command to query the status of an asynchronous request.
 ```
 tcld request get -r <request-id> -n <namespace>
 ```

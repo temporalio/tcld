@@ -8,9 +8,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
+	"github.com/temporalio/tcld/protogen/api/common/v1"
+
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
-	"github.com/temporalio/tcld/protogen/api/sink/v1"
+	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
+	cloudNamespace "github.com/temporalio/tcld/protogen/api/cloud/namespace/v1"
+	cloudSink "github.com/temporalio/tcld/protogen/api/cloud/sink/v1"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
@@ -18,6 +23,7 @@ import (
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	authservicemock "github.com/temporalio/tcld/protogen/apimock/authservice/v1"
+	apimock "github.com/temporalio/tcld/protogen/apimock/cloudservice/v1"
 	namespaceservicemock "github.com/temporalio/tcld/protogen/apimock/namespaceservice/v1"
 	"github.com/urfave/cli/v2"
 )
@@ -28,25 +34,30 @@ func TestNamespace(t *testing.T) {
 
 type NamespaceTestSuite struct {
 	suite.Suite
-	cliApp          *cli.App
-	mockCtrl        *gomock.Controller
-	mockService     *namespaceservicemock.MockNamespaceServiceClient
-	mockAuthService *authservicemock.MockAuthServiceClient
+	cliApp             *cli.App
+	mockCtrl           *gomock.Controller
+	mockService        *namespaceservicemock.MockNamespaceServiceClient
+	mockAuthService    *authservicemock.MockAuthServiceClient
+	mockCloudApiClient *apimock.MockCloudServiceClient
 }
 
 func (s *NamespaceTestSuite) SetupTest() {
-	err := toggleFeature(GCPSinkFeatureFlag)
-	s.Require().NoError(err)
+	if !IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
+		err := toggleFeature(ConnectivityRuleFeatureFlag)
+		s.Require().NoError(err)
+	}
 
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = namespaceservicemock.NewMockNamespaceServiceClient(s.mockCtrl)
 	s.mockAuthService = authservicemock.NewMockAuthServiceClient(s.mockCtrl)
+	s.mockCloudApiClient = apimock.NewMockCloudServiceClient(s.mockCtrl)
 
 	out, err := NewNamespaceCommand(func(ctx *cli.Context) (*NamespaceClient, error) {
 		return &NamespaceClient{
-			ctx:        context.TODO(),
-			client:     s.mockService,
-			authClient: s.mockAuthService,
+			ctx:            context.TODO(),
+			client:         s.mockService,
+			authClient:     s.mockAuthService,
+			cloudAPIClient: s.mockCloudApiClient,
 		}, nil
 	})
 	s.Require().NoError(err)
@@ -56,6 +67,7 @@ func (s *NamespaceTestSuite) SetupTest() {
 	}
 	flags := []cli.Flag{
 		AutoConfirmFlag,
+		IdempotentFlag,
 	}
 
 	s.cliApp, _ = NewTestApp(s.T(), cmds, flags)
@@ -98,8 +110,7 @@ func (s *NamespaceTestSuite) TestGet() {
 
 func (s *NamespaceTestSuite) TestList() {
 
-	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{}).
-		Return(nil, errors.New("some error")).Times(1)
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{}).Return(nil, errors.New("some error")).Times(1)
 	s.Error(s.RunCmd("namespace", "list"))
 
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
@@ -139,6 +150,163 @@ func (s *NamespaceTestSuite) TestList() {
 	}).Return(&namespaceservice.ListNamespacesResponse{}, nil).Times(1)
 
 	s.NoError(s.RunCmd("namespace", "list"))
+}
+
+func (s *NamespaceTestSuite) TestDeleteProtection() {
+	ns := "ns1"
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)
+
+	tests := []struct {
+		name         string
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{
+		{
+			name: "no sub command help",
+			args: []string{"namespace", "lifecycle"},
+		},
+		{
+			name: "alias with no args help",
+			args: []string{"n", "lc"},
+		},
+		{
+			name:      "no flags",
+			args:      []string{"namespace", "lifecycle", "set"},
+			expectErr: true,
+		},
+		{
+			name:      "no flag value",
+			args:      []string{"namespace", "lifecycle", "set", "enable-delete-protection"},
+			expectErr: true,
+		},
+		{
+			name:      "missing string flag",
+			args:      []string{"n", "lc", "set", "-n", ns},
+			expectErr: true,
+		},
+		{
+			name:      "string flag value missing",
+			args:      []string{"n", "lc", "set", "-n", ns, "--edp"},
+			expectErr: true,
+		},
+		{
+			name:      "success enable",
+			args:      []string{"n", "lc", "set", "-n", ns, "--edp", "true"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: true,
+				}
+			},
+		},
+		{
+			name: "success disable",
+			args: []string{"n", "lc", "set", "-n", ns, "--edp", "false"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: true,
+				}
+			},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: false,
+				}
+			},
+		},
+		{
+			name: "no change already enabled",
+			args: []string{"n", "lc", "set", "-n", ns, "--edp", "true"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: true,
+				}
+			},
+			expectErr: true,
+		},
+		{
+			name: "no change already enabled, idempotent",
+			args: []string{"--idempotent", "n", "lc", "set", "-n", ns, "--edp", "true"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: true,
+				}
+			},
+			expectErr: false,
+		},
+		{
+			name:      "no change already disabled",
+			args:      []string{"n", "lc", "set", "-n", ns, "--edp", "false"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+			expectErr: true,
+		},
+		{
+			name: "missing namespace",
+			args: []string{"n", "lc", "set", "-n", ns, "--edp", "true"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace = nil
+			},
+			expectErr: true,
+		},
+		{
+			name: "get lifecycle success",
+			args: []string{"n", "lc", "get", "-n", ns},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: true,
+				}
+			},
+			expectErr: false,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						SearchAttributes: map[string]namespace.SearchAttributeType{
+							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
+						},
+						RetentionDays: 7,
+						AuthMethod:    namespace.AUTH_METHOD_RESTRICTED,
+					},
+					State:           namespace.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Namespace.Spec)
+				req := namespaceservice.UpdateNamespaceRequest{
+					Namespace:       ns,
+					Spec:            &spec,
+					ResourceVersion: getResp.Namespace.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.UpdateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
 }
 
 func (s *NamespaceTestSuite) TestUpdateAuthMethod() {
@@ -760,6 +928,84 @@ func (s *NamespaceTestSuite) TestUpdateAddSearchAttrs() {
 				"attr3": namespace.SEARCH_ATTRIBUTE_TYPE_INT,
 			}
 			r.ResourceVersion = "ver2"
+		},
+	}}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						AcceptedClientCa: "cert1",
+						SearchAttributes: map[string]namespace.SearchAttributeType{
+							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
+						},
+						RetentionDays: 7,
+					},
+					State:           namespace.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Namespace.Spec)
+				req := namespaceservice.UpdateNamespaceRequest{
+					Namespace:       ns,
+					Spec:            &spec,
+					ResourceVersion: getResp.Namespace.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.UpdateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestUpdateRemoveSearchAttrs() {
+
+	ns := "ns1"
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)
+
+	tests := []struct {
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{{
+		args: []string{"namespace", "search-attributes"},
+	}, {
+		args:      []string{"namespace", "search-attributes", "remove"},
+		expectErr: true,
+	}, {
+		args:      []string{"namespace", "search-attributes", "remove", "--namespace", ns},
+		expectErr: true,
+	}, {
+		args:      []string{"n", "sa", "remove", "-n", ns, "--sa", "unknown"},
+		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+		expectErr: true,
+	}, {
+		args:      []string{"n", "sa", "remove", "-n", ns, "--sa", "attr1"},
+		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+			r.Spec.SearchAttributes = map[string]namespace.SearchAttributeType{}
 		},
 	}}
 
@@ -1647,7 +1893,7 @@ func (s *NamespaceTestSuite) TestDelete() {
 func (s *NamespaceTestSuite) TestCreateExportS3Sink() {
 	ns := "testNamespace"
 	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
-	type morphCreateSinkReq func(*namespaceservice.CreateExportSinkRequest)
+	type morphCreateSinkReq func(*cloudservice.CreateNamespaceExportSinkRequest)
 
 	tests := []struct {
 		name          string
@@ -1661,13 +1907,12 @@ func (s *NamespaceTestSuite) TestCreateExportS3Sink() {
 			name:      "create export sink",
 			args:      []string{"namespace", "es", "s3", "create", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
-			expectRequest: func(r *namespaceservice.CreateExportSinkRequest) {
+			expectRequest: func(r *cloudservice.CreateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					Enabled:         true,
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
-					S3Sink: &sink.S3Spec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name:    "sink1",
+					Enabled: true,
+					S3: &cloudSink.S3Spec{
 						RoleName:     "TestRole",
 						BucketName:   "testBucket",
 						Region:       "us-west-2",
@@ -1689,7 +1934,10 @@ func (s *NamespaceTestSuite) TestCreateExportS3Sink() {
 				g.Namespace = &namespace.Namespace{
 					Namespace: "",
 					Spec: &namespace.NamespaceSpec{
-						Region: "us-west-2",
+						RegionId: &common.RegionID{
+							Name:     "us-west-2",
+							Provider: common.CLOUD_PROVIDER_AWS,
+						},
 					},
 				}
 			},
@@ -1699,13 +1947,12 @@ func (s *NamespaceTestSuite) TestCreateExportS3Sink() {
 		{
 			name: "uses region when provided as arg",
 			args: []string{"namespace", "es", "s3", "create", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--region", "us-east-1"},
-			expectRequest: func(r *namespaceservice.CreateExportSinkRequest) {
+			expectRequest: func(r *cloudservice.CreateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					Enabled:         true,
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
-					S3Sink: &sink.S3Spec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name:    "sink1",
+					Enabled: true,
+					S3: &cloudSink.S3Spec{
 						RoleName:     "TestRole",
 						BucketName:   "testBucket",
 						Region:       "us-east-1",
@@ -1722,7 +1969,10 @@ func (s *NamespaceTestSuite) TestCreateExportS3Sink() {
 				Namespace: &namespace.Namespace{
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
-						Region: "us-west-2",
+						RegionId: &common.RegionID{
+							Name:     "us-west-2",
+							Provider: common.CLOUD_PROVIDER_AWS,
+						},
 					},
 				},
 			}
@@ -1735,10 +1985,10 @@ func (s *NamespaceTestSuite) TestCreateExportS3Sink() {
 			}
 
 			if tc.expectRequest != nil {
-				req := namespaceservice.CreateExportSinkRequest{}
+				req := cloudservice.CreateNamespaceExportSinkRequest{}
 				tc.expectRequest(&req)
-				s.mockService.EXPECT().CreateExportSink(gomock.Any(), &req).
-					Return(&namespaceservice.CreateExportSinkResponse{RequestStatus: &request.RequestStatus{}}, nil).Times(1)
+				s.mockCloudApiClient.EXPECT().CreateNamespaceExportSink(gomock.Any(), &req).
+					Return(&cloudservice.CreateNamespaceExportSinkResponse{AsyncOperation: &operation.AsyncOperation{}}, nil).Times(1)
 			}
 
 			err := s.RunCmd(tc.args...)
@@ -1754,7 +2004,7 @@ func (s *NamespaceTestSuite) TestCreateExportS3Sink() {
 
 func (s *NamespaceTestSuite) TestGetExportSink() {
 	ns := "namespace"
-	type morphGetReq func(*namespaceservice.GetExportSinkRequest)
+	type morphGetReq func(*cloudservice.GetNamespaceExportSinkRequest)
 
 	tests := []struct {
 		name          string
@@ -1765,17 +2015,17 @@ func (s *NamespaceTestSuite) TestGetExportSink() {
 		{
 			name: "get export sink succeeds",
 			args: []string{"namespace", "es", "s3", "get", "--namespace", ns, "--sink-name", "sink1"},
-			expectRequest: func(r *namespaceservice.GetExportSinkRequest) {
+			expectRequest: func(r *cloudservice.GetNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.SinkName = "sink1"
+				r.Name = "sink1"
 			},
 		},
 		{
 			name: "get export sink succeeds",
 			args: []string{"namespace", "es", "gcs", "get", "--namespace", ns, "--sink-name", "sink1"},
-			expectRequest: func(r *namespaceservice.GetExportSinkRequest) {
+			expectRequest: func(r *cloudservice.GetNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.SinkName = "sink1"
+				r.Name = "sink1"
 			},
 		},
 	}
@@ -1783,10 +2033,10 @@ func (s *NamespaceTestSuite) TestGetExportSink() {
 	for _, tc := range tests {
 		s.Run(strings.Join(tc.args, " "), func() {
 			if tc.expectRequest != nil {
-				req := namespaceservice.GetExportSinkRequest{}
+				req := cloudservice.GetNamespaceExportSinkRequest{}
 				tc.expectRequest(&req)
-				s.mockService.EXPECT().GetExportSink(gomock.Any(), &req).
-					Return(&namespaceservice.GetExportSinkResponse{Sink: &sink.ExportSink{}}, nil).Times(1)
+				s.mockCloudApiClient.EXPECT().GetNamespaceExportSink(gomock.Any(), &req).
+					Return(&cloudservice.GetNamespaceExportSinkResponse{Sink: &cloudNamespace.ExportSink{}}, nil).Times(1)
 			}
 
 			err := s.RunCmd(tc.args...)
@@ -1799,10 +2049,10 @@ func (s *NamespaceTestSuite) TestGetExportSink() {
 	}
 }
 
-func (s *NamespaceTestSuite) TestDeleteExportSink() {
+func (s *NamespaceTestSuite) TestDeleteNamespaceExportSink() {
 	ns := "namespace"
-	type morphDeleteReq func(*namespaceservice.DeleteExportSinkRequest)
-	type morphGetSinkResp func(*namespaceservice.GetExportSinkResponse)
+	type morphDeleteReq func(*cloudservice.DeleteNamespaceExportSinkRequest)
+	type morphGetSinkResp func(*cloudservice.GetNamespaceExportSinkResponse)
 
 	tests := []struct {
 		name                  string
@@ -1815,52 +2065,46 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 		{
 			name: "delete export sink succeeds without resource version",
 			args: []string{"namespace", "es", "s3", "delete", "--namespace", ns, "--sink-name", "sink1"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {
-				r.Sink = &sink.ExportSink{
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {
+				r.Sink = &cloudNamespace.ExportSink{
 					ResourceVersion: "124214124",
 				}
 			},
-			expectRequest: func(r *namespaceservice.DeleteExportSinkRequest) {
+			expectRequest: func(r *cloudservice.DeleteNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.SinkName = "sink1"
+				r.Name = "sink1"
 				r.ResourceVersion = "124214124"
 			},
 		},
 		{
 			name: "delete export succeeds sink with resource version",
 			args: []string{"namespace", "es", "s3", "delete", "--namespace", ns, "--sink-name", "sink1", "--resource-version", "999999999"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {
-				r.Sink = &sink.ExportSink{}
-			},
-			expectRequest: func(r *namespaceservice.DeleteExportSinkRequest) {
+			expectRequest: func(r *cloudservice.DeleteNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.SinkName = "sink1"
+				r.Name = "sink1"
 				r.ResourceVersion = "999999999"
 			},
 		},
 		{
 			name: "delete export sink succeeds without resource version",
 			args: []string{"namespace", "es", "gcs", "delete", "--namespace", ns, "--sink-name", "sink1"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {
-				r.Sink = &sink.ExportSink{
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {
+				r.Sink = &cloudNamespace.ExportSink{
 					ResourceVersion: "124214124",
 				}
 			},
-			expectRequest: func(r *namespaceservice.DeleteExportSinkRequest) {
+			expectRequest: func(r *cloudservice.DeleteNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.SinkName = "sink1"
+				r.Name = "sink1"
 				r.ResourceVersion = "124214124"
 			},
 		},
 		{
 			name: "delete export succeeds sink with resource version",
 			args: []string{"namespace", "es", "gcs", "delete", "--namespace", ns, "--sink-name", "sink1", "--resource-version", "999999999"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {
-				r.Sink = &sink.ExportSink{}
-			},
-			expectRequest: func(r *namespaceservice.DeleteExportSinkRequest) {
+			expectRequest: func(r *cloudservice.DeleteNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.SinkName = "sink1"
+				r.Name = "sink1"
 				r.ResourceVersion = "999999999"
 			},
 		},
@@ -1869,16 +2113,16 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 	for _, tc := range tests {
 		s.Run(strings.Join(tc.args, " "), func() {
 			if tc.expectGetSinkResponse != nil {
-				getSinkResp := namespaceservice.GetExportSinkResponse{Sink: &sink.ExportSink{}}
+				getSinkResp := cloudservice.GetNamespaceExportSinkResponse{Sink: &cloudNamespace.ExportSink{}}
 				tc.expectGetSinkResponse(&getSinkResp)
-				s.mockService.EXPECT().GetExportSink(gomock.Any(), gomock.Any()).Return(&getSinkResp, nil).Times(1)
+				s.mockCloudApiClient.EXPECT().GetNamespaceExportSink(gomock.Any(), gomock.Any()).Return(&getSinkResp, nil).Times(1)
 			}
 
 			if tc.expectRequest != nil {
-				req := namespaceservice.DeleteExportSinkRequest{}
+				req := cloudservice.DeleteNamespaceExportSinkRequest{}
 				tc.expectRequest(&req)
-				s.mockService.EXPECT().DeleteExportSink(gomock.Any(), &req).
-					Return(&namespaceservice.DeleteExportSinkResponse{RequestStatus: &request.RequestStatus{}}, nil).Times(1)
+				s.mockCloudApiClient.EXPECT().DeleteNamespaceExportSink(gomock.Any(), &req).
+					Return(&cloudservice.DeleteNamespaceExportSinkResponse{AsyncOperation: &operation.AsyncOperation{}}, nil).Times(1)
 			}
 
 			err := s.RunCmd(tc.args...)
@@ -1894,7 +2138,7 @@ func (s *NamespaceTestSuite) TestDeleteExportSink() {
 func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
 	ns := "testNamespace"
 	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
-	type morphCreateSinkReq func(*namespaceservice.CreateExportSinkRequest)
+	type morphCreateSinkReq func(*cloudservice.CreateNamespaceExportSinkRequest)
 
 	tests := []struct {
 		name          string
@@ -1908,13 +2152,12 @@ func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
 			name:      "create export sink",
 			args:      []string{"namespace", "es", "gcs", "create", "--namespace", ns, "--sink-name", "sink1", "--service-account-email", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket"},
 			expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
-			expectRequest: func(r *namespaceservice.CreateExportSinkRequest) {
+			expectRequest: func(r *cloudservice.CreateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					Enabled:         true,
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
-					GcsSink: &sink.GCSSpec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name:    "sink1",
+					Enabled: true,
+					Gcs: &cloudSink.GCSSpec{
 						SaId:         "testSA",
 						GcpProjectId: "testGcpAccount",
 						BucketName:   "testBucket",
@@ -1935,7 +2178,10 @@ func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
 				g.Namespace = &namespace.Namespace{
 					Namespace: "",
 					Spec: &namespace.NamespaceSpec{
-						Region: "us-west-2",
+						RegionId: &common.RegionID{
+							Name:     "us-west-2",
+							Provider: common.CLOUD_PROVIDER_AWS,
+						},
 					},
 				}
 			},
@@ -1950,7 +2196,10 @@ func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
 				Namespace: &namespace.Namespace{
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
-						Region: "us-west-2",
+						RegionId: &common.RegionID{
+							Name:     "us-west-2",
+							Provider: common.CLOUD_PROVIDER_AWS,
+						},
 					},
 				},
 			}
@@ -1963,10 +2212,10 @@ func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
 			}
 
 			if tc.expectRequest != nil {
-				req := namespaceservice.CreateExportSinkRequest{}
+				req := cloudservice.CreateNamespaceExportSinkRequest{}
 				tc.expectRequest(&req)
-				s.mockService.EXPECT().CreateExportSink(gomock.Any(), &req).
-					Return(&namespaceservice.CreateExportSinkResponse{RequestStatus: &request.RequestStatus{}}, nil).Times(1)
+				s.mockCloudApiClient.EXPECT().CreateNamespaceExportSink(gomock.Any(), &req).
+					Return(&cloudservice.CreateNamespaceExportSinkResponse{AsyncOperation: &operation.AsyncOperation{}}, nil).Times(1)
 			}
 
 			err := s.RunCmd(tc.args...)
@@ -1982,8 +2231,8 @@ func (s *NamespaceTestSuite) TestCreateExportGCSSink() {
 
 func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 	ns := "sink1"
-	type morphGetReq func(*namespaceservice.UpdateExportSinkRequest)
-	type morphGetSinkResp func(*namespaceservice.GetExportSinkResponse)
+	type morphGetReq func(*cloudservice.UpdateNamespaceExportSinkRequest)
+	type morphGetSinkResp func(*cloudservice.GetNamespaceExportSinkResponse)
 
 	tests := []struct {
 		name                  string
@@ -1996,12 +2245,7 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 		{
 			name:                  "update export sink succeeds with no input",
 			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--sink-name", "testSink"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
-		},
-		{
-			name:                  "update export sink succeeds with no updates",
-			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-email", "testSA@testGcpAccount.iam.gserviceaccount.com", "--enabled", "true", "--gcs-bucket", "testBucket", "--sink-name", "testSink"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
 		},
 		{
 			name:         "update export sink fails with no sink name",
@@ -2012,21 +2256,20 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 		{
 			name:                  "update export sink fails with not valid enabled value",
 			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-email", "testSA@testGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "testBucket", "--sink-name", "testSink", "--enabled", ""},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
 			expectErr:             true,
 			expectErrMsg:          "invalid value for enabled flag",
 		},
 		{
 			name:                  "update export sink succeeds with enable flag",
 			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--enabled", "false", "--sink-name", "testSink"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
-			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
+			expectRequest: func(r *cloudservice.UpdateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					Enabled:         false,
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
-					GcsSink: &sink.GCSSpec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name:    "sink1",
+					Enabled: false,
+					Gcs: &cloudSink.GCSSpec{
 						SaId:         "testSA",
 						GcpProjectId: "testGcpAccount",
 						BucketName:   "testBucket",
@@ -2038,14 +2281,13 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 		{
 			name:                  "update export sink succeeds with sa principal and enabled flag",
 			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--enabled", "false", "--service-account-email", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--sink-name", "testSink"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
-			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
+			expectRequest: func(r *cloudservice.UpdateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					Enabled:         false,
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
-					GcsSink: &sink.GCSSpec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name:    "sink1",
+					Enabled: false,
+					Gcs: &cloudSink.GCSSpec{
 						SaId:         "newTestSA",
 						GcpProjectId: "newTestGcpAccount",
 						BucketName:   "testBucket",
@@ -2057,14 +2299,13 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 		{
 			name:                  "update export sink succeeds with sa principal, bucket name and enabled flag",
 			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-email", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "newTestBucket", "--enabled", "false", "--sink-name", "testSink"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
-			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
+			expectRequest: func(r *cloudservice.UpdateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					Enabled:         false,
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
-					GcsSink: &sink.GCSSpec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name:    "sink1",
+					Enabled: false,
+					Gcs: &cloudSink.GCSSpec{
 						SaId:         "newTestSA",
 						GcpProjectId: "newTestGcpAccount",
 						BucketName:   "newTestBucket",
@@ -2076,14 +2317,13 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 		{
 			name:                  "update export sink succeeds with sa principal, bucket name and enabled flag",
 			args:                  []string{"namespace", "es", "gcs", "update", "--namespace", ns, "--service-account-email", "newTestSA@newTestGcpAccount.iam.gserviceaccount.com", "--gcs-bucket", "newTestBucket", "--enabled", "false", "--sink-name", "testSink"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
-			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
+			expectRequest: func(r *cloudservice.UpdateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					Enabled:         false,
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
-					GcsSink: &sink.GCSSpec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name:    "sink1",
+					Enabled: false,
+					Gcs: &cloudSink.GCSSpec{
 						SaId:         "newTestSA",
 						GcpProjectId: "newTestGcpAccount",
 						BucketName:   "newTestBucket",
@@ -2097,13 +2337,12 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 	for _, tc := range tests {
 		s.Run(strings.Join(tc.args, " "), func() {
 			if tc.expectGetSinkResponse != nil {
-				getSinkResp := namespaceservice.GetExportSinkResponse{Sink: &sink.ExportSink{
+				getSinkResp := cloudservice.GetNamespaceExportSinkResponse{Sink: &cloudNamespace.ExportSink{
 					Name: ns,
-					Spec: &sink.ExportSinkSpec{
-						Name:            ns,
-						Enabled:         true,
-						DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
-						GcsSink: &sink.GCSSpec{
+					Spec: &cloudNamespace.ExportSinkSpec{
+						Name:    ns,
+						Enabled: true,
+						Gcs: &cloudSink.GCSSpec{
 							SaId:         "testSA",
 							GcpProjectId: "testGcpAccount",
 							BucketName:   "testBucket",
@@ -2112,14 +2351,14 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 					ResourceVersion: "124214124",
 				}}
 				tc.expectGetSinkResponse(&getSinkResp)
-				s.mockService.EXPECT().GetExportSink(gomock.Any(), gomock.Any()).Return(&getSinkResp, nil).Times(1)
+				s.mockCloudApiClient.EXPECT().GetNamespaceExportSink(gomock.Any(), gomock.Any()).Return(&getSinkResp, nil).Times(1)
 			}
 
 			if tc.expectRequest != nil {
-				req := namespaceservice.UpdateExportSinkRequest{}
+				req := cloudservice.UpdateNamespaceExportSinkRequest{}
 				tc.expectRequest(&req)
-				s.mockService.EXPECT().UpdateExportSink(gomock.Any(), &req).
-					Return(&namespaceservice.UpdateExportSinkResponse{RequestStatus: &request.RequestStatus{}}, nil).Times(1)
+				s.mockCloudApiClient.EXPECT().UpdateNamespaceExportSink(gomock.Any(), &req).
+					Return(&cloudservice.UpdateNamespaceExportSinkResponse{AsyncOperation: &operation.AsyncOperation{}}, nil).Times(1)
 			}
 
 			err := s.RunCmd(tc.args...)
@@ -2135,7 +2374,7 @@ func (s *NamespaceTestSuite) TestUpdateExportGCSSink() {
 
 func (s *NamespaceTestSuite) TestValidateExportGCPSink() {
 	ns := "namespace"
-	type morphValidateReq func(*namespaceservice.ValidateExportSinkRequest)
+	type morphValidateReq func(*cloudservice.ValidateNamespaceExportSinkRequest)
 	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
 
 	tests := []struct {
@@ -2149,12 +2388,11 @@ func (s *NamespaceTestSuite) TestValidateExportGCPSink() {
 		{
 			name: "Validate export gcs sinks succeeds",
 			args: []string{"namespace", "es", "gcs", "validate", "--namespace", ns, "--sink-name", "sink1", "--service-account-email", "test-sa@test-gcs.iam.gserviceaccount.com", "--gcs-bucket", "testBucket"},
-			expectRequest: func(r *namespaceservice.ValidateExportSinkRequest) {
+			expectRequest: func(r *cloudservice.ValidateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_GCS,
-					GcsSink: &sink.GCSSpec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name: "sink1",
+					Gcs: &cloudSink.GCSSpec{
 						SaId:         "test-sa",
 						BucketName:   "testBucket",
 						GcpProjectId: "test-gcs",
@@ -2185,10 +2423,10 @@ func (s *NamespaceTestSuite) TestValidateExportGCPSink() {
 			}
 
 			if tc.expectRequest != nil {
-				req := namespaceservice.ValidateExportSinkRequest{}
+				req := cloudservice.ValidateNamespaceExportSinkRequest{}
 				tc.expectRequest(&req)
-				s.mockService.EXPECT().ValidateExportSink(gomock.Any(), &req).
-					Return(&namespaceservice.ValidateExportSinkResponse{}, nil).Times(1)
+				s.mockCloudApiClient.EXPECT().ValidateNamespaceExportSink(gomock.Any(), &req).
+					Return(&cloudservice.ValidateNamespaceExportSinkResponse{}, nil).Times(1)
 			}
 
 			err := s.RunCmd(tc.args...)
@@ -2203,7 +2441,7 @@ func (s *NamespaceTestSuite) TestValidateExportGCPSink() {
 
 func (s *NamespaceTestSuite) TestValidateExportS3Sink() {
 	ns := "namespace"
-	type morphValidateReq func(*namespaceservice.ValidateExportSinkRequest)
+	type morphValidateReq func(*cloudservice.ValidateNamespaceExportSinkRequest)
 	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
 
 	tests := []struct {
@@ -2217,12 +2455,11 @@ func (s *NamespaceTestSuite) TestValidateExportS3Sink() {
 		{
 			name: "Validate export sinks succeeds",
 			args: []string{"namespace", "es", "s3", "validate", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket"},
-			expectRequest: func(r *namespaceservice.ValidateExportSinkRequest) {
+			expectRequest: func(r *cloudservice.ValidateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
-					S3Sink: &sink.S3Spec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name: "sink1",
+					S3: &cloudSink.S3Spec{
 						RoleName:     "TestRole",
 						BucketName:   "testBucket",
 						Region:       "us-west-2",
@@ -2234,7 +2471,10 @@ func (s *NamespaceTestSuite) TestValidateExportS3Sink() {
 				g.Namespace = &namespace.Namespace{
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
-						Region: "us-west-2",
+						RegionId: &common.RegionID{
+							Name:     "us-west-2",
+							Provider: common.CLOUD_PROVIDER_AWS,
+						},
 					},
 				}
 			},
@@ -2249,12 +2489,11 @@ func (s *NamespaceTestSuite) TestValidateExportS3Sink() {
 		{
 			name: "Validate export sinks succeeds",
 			args: []string{"namespace", "es", "s3", "validate", "--namespace", ns, "--sink-name", "sink1", "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--region", "us-east-1"},
-			expectRequest: func(r *namespaceservice.ValidateExportSinkRequest) {
+			expectRequest: func(r *cloudservice.ValidateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
-					S3Sink: &sink.S3Spec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name: "sink1",
+					S3: &cloudSink.S3Spec{
 						RoleName:     "TestRole",
 						BucketName:   "testBucket",
 						Region:       "us-east-1",
@@ -2266,7 +2505,10 @@ func (s *NamespaceTestSuite) TestValidateExportS3Sink() {
 				g.Namespace = &namespace.Namespace{
 					Namespace: ns,
 					Spec: &namespace.NamespaceSpec{
-						Region: "us-east-1",
+						RegionId: &common.RegionID{
+							Name:     "us-west-2",
+							Provider: common.CLOUD_PROVIDER_AWS,
+						},
 					},
 				}
 			},
@@ -2281,12 +2523,11 @@ func (s *NamespaceTestSuite) TestValidateExportS3Sink() {
 				tc.expectGet(&getResp)
 				s.mockService.EXPECT().GetNamespace(gomock.Any(), gomock.Any()).Return(&getResp, nil).AnyTimes()
 			}
-
 			if tc.expectRequest != nil {
-				req := namespaceservice.ValidateExportSinkRequest{}
+				req := cloudservice.ValidateNamespaceExportSinkRequest{}
 				tc.expectRequest(&req)
-				s.mockService.EXPECT().ValidateExportSink(gomock.Any(), &req).
-					Return(&namespaceservice.ValidateExportSinkResponse{}, nil).Times(1)
+				s.mockCloudApiClient.EXPECT().ValidateNamespaceExportSink(gomock.Any(), &req).
+					Return(&cloudservice.ValidateNamespaceExportSinkResponse{}, nil).Times(1)
 			}
 
 			err := s.RunCmd(tc.args...)
@@ -2301,7 +2542,7 @@ func (s *NamespaceTestSuite) TestValidateExportS3Sink() {
 
 func (s *NamespaceTestSuite) TestListExportSinks() {
 	ns := "namespace"
-	type morphGetReq func(*namespaceservice.ListExportSinksRequest)
+	type morphGetReq func(*cloudservice.GetNamespaceExportSinksRequest)
 
 	tests := []struct {
 		name string
@@ -2313,7 +2554,7 @@ func (s *NamespaceTestSuite) TestListExportSinks() {
 		{
 			name: "list export sinks succeeds",
 			args: []string{"namespace", "es", "s3", "list", "--namespace", ns},
-			expectRequest: func(r *namespaceservice.ListExportSinksRequest) {
+			expectRequest: func(r *cloudservice.GetNamespaceExportSinksRequest) {
 				r.Namespace = ns
 				r.PageSize = 100
 			},
@@ -2321,7 +2562,7 @@ func (s *NamespaceTestSuite) TestListExportSinks() {
 		{
 			name: "list export sinks succeeds",
 			args: []string{"namespace", "es", "gcs", "list", "--namespace", ns},
-			expectRequest: func(r *namespaceservice.ListExportSinksRequest) {
+			expectRequest: func(r *cloudservice.GetNamespaceExportSinksRequest) {
 				r.Namespace = ns
 				r.PageSize = 100
 			},
@@ -2331,10 +2572,10 @@ func (s *NamespaceTestSuite) TestListExportSinks() {
 	for _, tc := range tests {
 		s.Run(strings.Join(tc.args, " "), func() {
 			if tc.expectRequest != nil {
-				req := namespaceservice.ListExportSinksRequest{}
+				req := cloudservice.GetNamespaceExportSinksRequest{}
 				tc.expectRequest(&req)
-				s.mockService.EXPECT().ListExportSinks(gomock.Any(), &req).
-					Return(&namespaceservice.ListExportSinksResponse{}, nil).Times(1)
+				s.mockCloudApiClient.EXPECT().GetNamespaceExportSinks(gomock.Any(), &req).
+					Return(&cloudservice.GetNamespaceExportSinksResponse{}, nil).Times(1)
 			}
 
 			err := s.RunCmd(tc.args...)
@@ -2349,8 +2590,8 @@ func (s *NamespaceTestSuite) TestListExportSinks() {
 
 func (s *NamespaceTestSuite) TestUpdateExportS3Sink() {
 	ns := "sink1"
-	type morphGetReq func(*namespaceservice.UpdateExportSinkRequest)
-	type morphGetSinkResp func(*namespaceservice.GetExportSinkResponse)
+	type morphGetReq func(*cloudservice.UpdateNamespaceExportSinkRequest)
+	type morphGetSinkResp func(*cloudservice.GetNamespaceExportSinkResponse)
 
 	tests := []struct {
 		name                  string
@@ -2363,12 +2604,12 @@ func (s *NamespaceTestSuite) TestUpdateExportS3Sink() {
 		{
 			name:                  "update export sink succeeds with no input",
 			args:                  []string{"namespace", "es", "s3", "update", "--namespace", ns, "--sink-name", "testSink"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
 		},
 		{
 			name:                  "update export sink succeeds with no updates",
 			args:                  []string{"namespace", "es", "s3", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--enabled", "true", "--sink-name", "testSink"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
 		},
 		{
 			name:         "update export sink fails with no sink name",
@@ -2379,21 +2620,20 @@ func (s *NamespaceTestSuite) TestUpdateExportS3Sink() {
 		{
 			name:                  "update export sink fails with not valid enabled value",
 			args:                  []string{"namespace", "es", "s3", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::123456789012:role/TestRole", "--s3-bucket-name", "testBucket", "--sink-name", "testSink", "--enabled", ""},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
 			expectErr:             true,
 			expectErrMsg:          "invalid value for enabled flag",
 		},
 		{
 			name:                  "update export sink succeeds with enable flag",
 			args:                  []string{"namespace", "es", "s3", "update", "--namespace", ns, "--enabled", "false", "--sink-name", "testSink"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
-			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
+			expectRequest: func(r *cloudservice.UpdateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					Enabled:         false,
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
-					S3Sink: &sink.S3Spec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name:    "sink1",
+					Enabled: false,
+					S3: &cloudSink.S3Spec{
 						RoleName:     "TestRole",
 						BucketName:   "testBucket",
 						Region:       "us-west-2",
@@ -2406,14 +2646,13 @@ func (s *NamespaceTestSuite) TestUpdateExportS3Sink() {
 		{
 			name:                  "update export sink succeeds with role arn and enabled flag",
 			args:                  []string{"namespace", "es", "s3", "update", "--namespace", ns, "--enabled", "false", "--role-arn", "arn:aws:iam::923456789012:role/newTestRole", "--sink-name", "testSink"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
-			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
+			expectRequest: func(r *cloudservice.UpdateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					Enabled:         false,
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
-					S3Sink: &sink.S3Spec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name:    "sink1",
+					Enabled: false,
+					S3: &cloudSink.S3Spec{
 						RoleName:     "newTestRole",
 						BucketName:   "testBucket",
 						Region:       "us-west-2",
@@ -2426,14 +2665,13 @@ func (s *NamespaceTestSuite) TestUpdateExportS3Sink() {
 		{
 			name:                  "update export sink succeeds with role arn, bucket name and enabled flag",
 			args:                  []string{"namespace", "es", "s3", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::923456789012:role/newTestRole", "--s3-bucket-name", "newTestBucket", "--enabled", "false", "--sink-name", "testSink"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
-			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
+			expectRequest: func(r *cloudservice.UpdateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					Enabled:         false,
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
-					S3Sink: &sink.S3Spec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name:    "sink1",
+					Enabled: false,
+					S3: &cloudSink.S3Spec{
 						RoleName:     "newTestRole",
 						BucketName:   "newTestBucket",
 						Region:       "us-west-2",
@@ -2446,14 +2684,13 @@ func (s *NamespaceTestSuite) TestUpdateExportS3Sink() {
 		{
 			name:                  "update export sink succeeds with role arn, bucket name, kms arn and enabled flag",
 			args:                  []string{"namespace", "es", "s3", "update", "--namespace", ns, "--role-arn", "arn:aws:iam::923456789012:role/newTestRole", "--s3-bucket-name", "newTestBucket", "--kms-arn", "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab", "--enabled", "false", "--sink-name", "testSink"},
-			expectGetSinkResponse: func(r *namespaceservice.GetExportSinkResponse) {},
-			expectRequest: func(r *namespaceservice.UpdateExportSinkRequest) {
+			expectGetSinkResponse: func(r *cloudservice.GetNamespaceExportSinkResponse) {},
+			expectRequest: func(r *cloudservice.UpdateNamespaceExportSinkRequest) {
 				r.Namespace = ns
-				r.Spec = &sink.ExportSinkSpec{
-					Name:            "sink1",
-					Enabled:         false,
-					DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
-					S3Sink: &sink.S3Spec{
+				r.Spec = &cloudNamespace.ExportSinkSpec{
+					Name:    "sink1",
+					Enabled: false,
+					S3: &cloudSink.S3Spec{
 						RoleName:     "newTestRole",
 						BucketName:   "newTestBucket",
 						Region:       "us-west-2",
@@ -2469,13 +2706,12 @@ func (s *NamespaceTestSuite) TestUpdateExportS3Sink() {
 	for _, tc := range tests {
 		s.Run(strings.Join(tc.args, " "), func() {
 			if tc.expectGetSinkResponse != nil {
-				getSinkResp := namespaceservice.GetExportSinkResponse{Sink: &sink.ExportSink{
+				getSinkResp := cloudservice.GetNamespaceExportSinkResponse{Sink: &cloudNamespace.ExportSink{
 					Name: ns,
-					Spec: &sink.ExportSinkSpec{
-						Name:            ns,
-						Enabled:         true,
-						DestinationType: sink.EXPORT_DESTINATION_TYPE_S3,
-						S3Sink: &sink.S3Spec{
+					Spec: &cloudNamespace.ExportSinkSpec{
+						Name:    ns,
+						Enabled: true,
+						S3: &cloudSink.S3Spec{
 							RoleName:     "TestRole",
 							BucketName:   "testBucket",
 							Region:       "us-west-2",
@@ -2485,20 +2721,505 @@ func (s *NamespaceTestSuite) TestUpdateExportS3Sink() {
 					ResourceVersion: "124214124",
 				}}
 				tc.expectGetSinkResponse(&getSinkResp)
-				s.mockService.EXPECT().GetExportSink(gomock.Any(), gomock.Any()).Return(&getSinkResp, nil).Times(1)
+				s.mockCloudApiClient.EXPECT().GetNamespaceExportSink(gomock.Any(), gomock.Any()).Return(&getSinkResp, nil).Times(1)
 			}
 
 			if tc.expectRequest != nil {
-				req := namespaceservice.UpdateExportSinkRequest{}
+				req := cloudservice.UpdateNamespaceExportSinkRequest{}
 				tc.expectRequest(&req)
-				s.mockService.EXPECT().UpdateExportSink(gomock.Any(), &req).
-					Return(&namespaceservice.UpdateExportSinkResponse{RequestStatus: &request.RequestStatus{}}, nil).Times(1)
+				s.mockCloudApiClient.EXPECT().UpdateNamespaceExportSink(gomock.Any(), &req).
+					Return(&cloudservice.UpdateNamespaceExportSinkResponse{AsyncOperation: &operation.AsyncOperation{}}, nil).Times(1)
 			}
 
 			err := s.RunCmd(tc.args...)
 			if tc.expectErr {
 				s.Error(err)
 				s.ErrorContains(err, tc.expectErrMsg)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestRemoveNamespaceRegion() {
+	ns := "namespace"
+	type expectReq func(*cloudservice.DeleteNamespaceRegionRequest)
+
+	tests := []struct {
+		name string
+
+		args          []string
+		expectRequest expectReq
+		expectErr     bool
+	}{
+		{
+			name: "Validate default cloud provider",
+			args: []string{"namespace", "delete-region", "--namespace", ns, "--region", "us-west-2"},
+			expectRequest: func(r *cloudservice.DeleteNamespaceRegionRequest) {
+				r.Namespace = ns
+				r.Region = "aws-us-west-2"
+				r.ResourceVersion = "ver1"
+			},
+			expectErr: false,
+		},
+		{
+			name: "Validate GCP cloud provider",
+			args: []string{"namespace", "delete-region", "--namespace", ns, "--region", "us-central1", "--cloud-provider", "gcp"},
+			expectRequest: func(r *cloudservice.DeleteNamespaceRegionRequest) {
+				r.Namespace = ns
+				r.Region = "gcp-us-central1"
+				r.ResourceVersion = "ver1"
+			},
+			expectErr: false,
+		},
+		{
+			name:      "Invalid Argument: missing namespace",
+			args:      []string{"namespace", "delete-region", "--region", "us-west-2"},
+			expectErr: true,
+		},
+		{
+			name:      "Invalid Argument: missing region",
+			args:      []string{"namespace", "delete-region", "--namespace", ns},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+
+			if tc.expectRequest != nil {
+				req := cloudservice.DeleteNamespaceRegionRequest{}
+				tc.expectRequest(&req)
+				s.mockCloudApiClient.EXPECT().DeleteNamespaceRegion(gomock.Any(), &req).
+					Return(&cloudservice.DeleteNamespaceRegionResponse{
+						AsyncOperation: &operation.AsyncOperation{Id: tc.name},
+					}, nil).Times(1)
+			}
+			if !tc.expectErr {
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&namespaceservice.GetNamespaceResponse{
+					Namespace: &namespace.Namespace{
+						Namespace:       ns,
+						State:           namespace.STATE_UPDATING,
+						ResourceVersion: "ver1",
+					},
+				}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestCreateWithTags() {
+	ns := "test-namespace"
+	requestId := "test-request-id"
+
+	type morphCreateReq func(*namespaceservice.CreateNamespaceRequest)
+
+	tests := []struct {
+		name          string
+		args          []string
+		expectRequest morphCreateReq
+		expectErr     bool
+		expectErrMsg  string
+		mockError     error
+	}{
+		{
+			name: "successful create with tags",
+			args: []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId, "--tag", "env=prod", "--tag", "team=backend"},
+			expectRequest: func(r *namespaceservice.CreateNamespaceRequest) {
+				r.RequestId = requestId
+				r.Namespace = ns
+				r.Spec = &namespace.NamespaceSpec{
+					AuthMethod: namespace.AUTH_METHOD_API_KEY,
+					RegionId: &common.RegionID{
+						Name:     "us-west-2",
+						Provider: common.CLOUD_PROVIDER_AWS,
+					},
+					RetentionDays: 30,
+					Lifecycle: &namespace.LifecycleSpec{
+						EnableDeleteProtection: false,
+					},
+				}
+				r.Tags = map[string]string{
+					"env":  "prod",
+					"team": "backend",
+				}
+			},
+		},
+		{
+			name: "successful create without tags",
+			args: []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId},
+			expectRequest: func(r *namespaceservice.CreateNamespaceRequest) {
+				r.RequestId = requestId
+				r.Namespace = ns
+				r.Spec = &namespace.NamespaceSpec{
+					AuthMethod: namespace.AUTH_METHOD_API_KEY,
+					RegionId: &common.RegionID{
+						Name:     "us-west-2",
+						Provider: common.CLOUD_PROVIDER_AWS,
+					},
+					RetentionDays: 30,
+					Lifecycle: &namespace.LifecycleSpec{
+						EnableDeleteProtection: false,
+					},
+				}
+				r.Tags = map[string]string{}
+			},
+		},
+		{
+			name:         "invalid tag format",
+			args:         []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId, "--tag", "invalid-tag-format"},
+			expectErr:    true,
+			expectErrMsg: "invalid tag format 'invalid-tag-format', must be 'key=value'",
+		},
+		{
+			name: "create error with tags",
+			args: []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId, "--tag", "env=test"},
+			expectRequest: func(r *namespaceservice.CreateNamespaceRequest) {
+				r.RequestId = requestId
+				r.Namespace = ns
+				r.Spec = &namespace.NamespaceSpec{
+					AuthMethod: namespace.AUTH_METHOD_API_KEY,
+					RegionId: &common.RegionID{
+						Name:     "us-west-2",
+						Provider: common.CLOUD_PROVIDER_AWS,
+					},
+					RetentionDays: 30,
+					Lifecycle: &namespace.LifecycleSpec{
+						EnableDeleteProtection: false,
+					},
+				}
+				r.Tags = map[string]string{
+					"env": "test",
+				}
+			},
+			mockError:    errors.New("create error"),
+			expectErr:    true,
+			expectErrMsg: "create error",
+		},
+		{
+			name:         "multiple tags with same key should error",
+			args:         []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId, "--tag", "env=dev", "--tag", "env=prod"},
+			expectErr:    true,
+			expectErrMsg: "duplicate tag key 'env' found",
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.expectRequest != nil {
+				req := namespaceservice.CreateNamespaceRequest{}
+				tc.expectRequest(&req)
+				s.mockService.EXPECT().CreateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.CreateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, tc.mockError).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+				if tc.expectErrMsg != "" {
+					s.Contains(err.Error(), tc.expectErrMsg)
+				}
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestTagsUpsert() {
+	ns := "test-namespace"
+	requestId := "test-request-id"
+
+	type morphUpdateReq func(*cloudservice.UpdateNamespaceTagsRequest)
+
+	tests := []struct {
+		name          string
+		args          []string
+		expectRequest morphUpdateReq
+		expectErr     bool
+		expectErrMsg  string
+		mockError     error
+	}{
+		{
+			name: "successful upsert single tag",
+			args: []string{"namespace", "tags", "upsert", "--namespace", ns, "--request-id", requestId, "--tag", "env=staging"},
+			expectRequest: func(r *cloudservice.UpdateNamespaceTagsRequest) {
+				r.Namespace = ns
+				r.TagsToUpsert = map[string]string{"env": "staging"}
+				r.TagsToRemove = nil
+				r.AsyncOperationId = requestId
+			},
+		},
+		{
+			name: "successful upsert multiple tags",
+			args: []string{"namespace", "tags", "upsert", "--namespace", ns, "--request-id", requestId, "--tag", "env=staging", "--tag", "version=v1.2.3"},
+			expectRequest: func(r *cloudservice.UpdateNamespaceTagsRequest) {
+				r.Namespace = ns
+				r.TagsToUpsert = map[string]string{
+					"env":     "staging",
+					"version": "v1.2.3",
+				}
+				r.TagsToRemove = nil
+				r.AsyncOperationId = requestId
+			},
+		},
+		{
+			name:         "invalid tag format",
+			args:         []string{"namespace", "tags", "upsert", "--namespace", ns, "--request-id", requestId, "--tag", "invalid-tag-format"},
+			expectErr:    true,
+			expectErrMsg: "invalid tag format 'invalid-tag-format', must be 'key=value'",
+		},
+		{
+			name:         "missing namespace",
+			args:         []string{"namespace", "tags", "upsert", "--tag", "env=prod"},
+			expectErr:    true,
+			expectErrMsg: "Required flag \"namespace\" not set",
+		},
+		{
+			name:         "missing tags",
+			args:         []string{"namespace", "tags", "upsert", "--namespace", ns},
+			expectErr:    true,
+			expectErrMsg: "Required flag \"tag\" not set",
+		},
+		{
+			name: "update error",
+			args: []string{"namespace", "tags", "upsert", "--namespace", ns, "--request-id", requestId, "--tag", "env=prod"},
+			expectRequest: func(r *cloudservice.UpdateNamespaceTagsRequest) {
+				r.Namespace = ns
+				r.TagsToUpsert = map[string]string{"env": "prod"}
+				r.TagsToRemove = nil
+				r.AsyncOperationId = requestId
+			},
+			mockError:    errors.New("update error"),
+			expectErr:    true,
+			expectErrMsg: "update error",
+		},
+		{
+			name:         "multiple tags with same key should error",
+			args:         []string{"namespace", "tags", "upsert", "--namespace", ns, "--request-id", requestId, "--tag", "env=dev", "--tag", "env=prod"},
+			expectErr:    true,
+			expectErrMsg: "duplicate tag key 'env' found",
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.expectRequest != nil {
+				req := cloudservice.UpdateNamespaceTagsRequest{}
+				tc.expectRequest(&req)
+				s.mockCloudApiClient.EXPECT().UpdateNamespaceTags(gomock.Any(), &req).
+					Return(&cloudservice.UpdateNamespaceTagsResponse{
+						AsyncOperation: &operation.AsyncOperation{Id: requestId},
+					}, tc.mockError).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+				if tc.expectErrMsg != "" {
+					s.Contains(err.Error(), tc.expectErrMsg)
+				}
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestTagsRemove() {
+	ns := "test-namespace"
+	requestId := "test-request-id"
+
+	type morphUpdateReq func(*cloudservice.UpdateNamespaceTagsRequest)
+
+	tests := []struct {
+		name          string
+		args          []string
+		expectRequest morphUpdateReq
+		expectErr     bool
+		expectErrMsg  string
+		mockError     error
+	}{
+		{
+			name: "successful remove single key",
+			args: []string{"namespace", "tags", "remove", "--namespace", ns, "--request-id", requestId, "--tag-key", "env"},
+			expectRequest: func(r *cloudservice.UpdateNamespaceTagsRequest) {
+				r.Namespace = ns
+				r.TagsToUpsert = nil
+				r.TagsToRemove = []string{"env"}
+				r.AsyncOperationId = requestId
+			},
+		},
+		{
+			name: "successful remove multiple keys",
+			args: []string{"namespace", "tags", "remove", "--namespace", ns, "--request-id", requestId, "--tag-key", "env", "--tag-key", "old-tag"},
+			expectRequest: func(r *cloudservice.UpdateNamespaceTagsRequest) {
+				r.Namespace = ns
+				r.TagsToUpsert = nil
+				r.TagsToRemove = []string{"env", "old-tag"}
+				r.AsyncOperationId = requestId
+			},
+		},
+		{
+			name:         "missing namespace",
+			args:         []string{"namespace", "tags", "remove", "--tag-key", "env"},
+			expectErr:    true,
+			expectErrMsg: "Required flag \"namespace\" not set",
+		},
+		{
+			name:         "missing keys",
+			args:         []string{"namespace", "tags", "remove", "--namespace", ns},
+			expectErr:    true,
+			expectErrMsg: "Required flag \"tag-key\" not set",
+		},
+		{
+			name: "remove error",
+			args: []string{"namespace", "tags", "remove", "--namespace", ns, "--request-id", requestId, "--tag-key", "env"},
+			expectRequest: func(r *cloudservice.UpdateNamespaceTagsRequest) {
+				r.Namespace = ns
+				r.TagsToUpsert = nil
+				r.TagsToRemove = []string{"env"}
+				r.AsyncOperationId = requestId
+			},
+			mockError:    errors.New("remove error"),
+			expectErr:    true,
+			expectErrMsg: "remove error",
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.expectRequest != nil {
+				req := cloudservice.UpdateNamespaceTagsRequest{}
+				tc.expectRequest(&req)
+				s.mockCloudApiClient.EXPECT().UpdateNamespaceTags(gomock.Any(), &req).
+					Return(&cloudservice.UpdateNamespaceTagsResponse{
+						AsyncOperation: &operation.AsyncOperation{Id: requestId},
+					}, tc.mockError).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+				if tc.expectErrMsg != "" {
+					s.Contains(err.Error(), tc.expectErrMsg)
+				}
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestSetConnectivityRules() {
+	ns := "ns1"
+	resourceVersion := "ver1"
+	initialRules := []string{"cr-1"}
+	newRules := []string{"cr-2", "cr-3"}
+
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)
+
+	tests := []struct {
+		name         string
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{
+		{
+			name: "success",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--connectivity-rule-ids", "cr-2", "--connectivity-rule-ids", "cr-3"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.ConnectivityRuleIds = newRules
+			},
+		},
+		{
+			name: "no change",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--connectivity-rule-ids", "cr-1"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectErr: true,
+		},
+		{
+			name: "missing ids",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectErr: true,
+		},
+		{
+			name: "remove all",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--remove-all"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.ConnectivityRuleIds = nil
+			},
+		},
+		{
+			name: "remove all with ids",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--connectivity-rule-ids", "cr-1", "--remove-all"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						ConnectivityRuleIds: initialRules,
+					},
+					ResourceVersion: resourceVersion,
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Namespace.Spec)
+				req := namespaceservice.UpdateNamespaceRequest{
+					Namespace:       ns,
+					Spec:            &spec,
+					ResourceVersion: getResp.Namespace.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.UpdateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
 			} else {
 				s.NoError(err)
 			}

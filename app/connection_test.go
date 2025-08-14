@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -55,7 +56,7 @@ func (s *testServer) GetAsyncOperation(ctx context.Context, req *cloudservice.Ge
 	return &cloudservice.GetAsyncOperationResponse{
 		AsyncOperation: &operation.AsyncOperation{
 			Id:    "test-id",
-			State: "fulfilled",
+			State: operation.STATE_FULFILLED,
 		},
 	}, nil
 }
@@ -164,6 +165,9 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 	}
 	for _, tc := range testcases {
 		s.Run(tc.name, func() {
+			// setting the env var unexpectedly interferes with the test.
+			require.NoError(s.T(), os.Unsetenv("TEMPORAL_CLOUD_API_KEY"))
+
 			app, cfgDir := NewTestApp(s.T(), nil, []cli.Flag{
 				ServerFlag,
 				ConfigDirFlag,
@@ -194,7 +198,6 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 					return s.listener.Dial()
 				}),
 				grpc.WithTransportCredentials(insecure.NewCredentials()),
-				grpc.WithBlock(),
 			}
 			connCtx, conn, err := GetServerConnection(cCtx, opts...)
 			if tc.expectedErr != nil {

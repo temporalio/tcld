@@ -11,6 +11,7 @@ import (
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
+	strconv "strconv"
 	strings "strings"
 )
 
@@ -25,24 +26,101 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+type AsyncOperation_State int32
+
+const (
+	STATE_UNSPECIFIED AsyncOperation_State = 0
+	STATE_PENDING     AsyncOperation_State = 1
+	STATE_IN_PROGRESS AsyncOperation_State = 2
+	STATE_FAILED      AsyncOperation_State = 3
+	STATE_CANCELLED   AsyncOperation_State = 4
+	STATE_FULFILLED   AsyncOperation_State = 5
+	STATE_REJECTED    AsyncOperation_State = 6
+)
+
+var AsyncOperation_State_name = map[int32]string{
+	0: "StateUnspecified",
+	1: "StatePending",
+	2: "StateInProgress",
+	3: "StateFailed",
+	4: "StateCancelled",
+	5: "StateFulfilled",
+	6: "StateRejected",
+}
+
+var AsyncOperation_State_value = map[string]int32{
+	"StateUnspecified": 0,
+	"StatePending":     1,
+	"StateInProgress":  2,
+	"StateFailed":      3,
+	"StateCancelled":   4,
+	"StateFulfilled":   5,
+	"StateRejected":    6,
+}
+
+func (AsyncOperation_State) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_e895f88c45383e9d, []int{0, 0}
+}
+
+type AsyncOperation_ApprovalStatus_State int32
+
+const (
+	APPROVAL_STATE_UNSPECIFIED AsyncOperation_ApprovalStatus_State = 0
+	APPROVAL_STATE_PENDING     AsyncOperation_ApprovalStatus_State = 1
+	APPROVAL_STATE_APPROVED    AsyncOperation_ApprovalStatus_State = 2
+	APPROVAL_STATE_REJECTED    AsyncOperation_ApprovalStatus_State = 3
+	APPROVAL_STATE_EXPIRED     AsyncOperation_ApprovalStatus_State = 4
+)
+
+var AsyncOperation_ApprovalStatus_State_name = map[int32]string{
+	0: "ApprovalStateUnspecified",
+	1: "ApprovalStatePending",
+	2: "ApprovalStateApproved",
+	3: "ApprovalStateRejected",
+	4: "ApprovalStateExpired",
+}
+
+var AsyncOperation_ApprovalStatus_State_value = map[string]int32{
+	"ApprovalStateUnspecified": 0,
+	"ApprovalStatePending":     1,
+	"ApprovalStateApproved":    2,
+	"ApprovalStateRejected":    3,
+	"ApprovalStateExpired":     4,
+}
+
+func (AsyncOperation_ApprovalStatus_State) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_e895f88c45383e9d, []int{0, 0, 0}
+}
+
 type AsyncOperation struct {
 	// The operation id
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// The current state of this operation
 	// Possible values are: pending, in_progress, failed, cancelled, fulfilled
-	State string `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
-	// The recommended duration to check back for an update in the operation's state
+	// Deprecated: Use the state field instead.
+	// temporal:versioning:max_version=v0.3.0
+	StateDeprecated string `protobuf:"bytes,2,opt,name=state_deprecated,json=stateDeprecated,proto3" json:"state_deprecated,omitempty"` // Deprecated: Do not use.
+	// The current state of this operation.
+	// temporal:versioning:min_version=v0.3.0
+	// temporal:enums:replaces=state_deprecated
+	State AsyncOperation_State `protobuf:"varint,9,opt,name=state,proto3,enum=temporal.api.cloud.operation.v1.AsyncOperation_State" json:"state,omitempty"`
+	// The recommended duration to check back for an update in the operation's state.
 	CheckDuration *types.Duration `protobuf:"bytes,3,opt,name=check_duration,json=checkDuration,proto3" json:"check_duration,omitempty"`
-	// The type of operation being performed
+	// The type of operation being performed.
 	OperationType string `protobuf:"bytes,4,opt,name=operation_type,json=operationType,proto3" json:"operation_type,omitempty"`
-	// The input to the operation being performed
+	// The input to the operation being performed.
+	//
+	// (-- api-linter: core::0146::any=disabled --)
 	OperationInput *types.Any `protobuf:"bytes,5,opt,name=operation_input,json=operationInput,proto3" json:"operation_input,omitempty"`
-	// If the operation failed, the reason for the failure
+	// If the operation failed, the reason for the failure.
 	FailureReason string `protobuf:"bytes,6,opt,name=failure_reason,json=failureReason,proto3" json:"failure_reason,omitempty"`
-	// The date and time when the operation initiated
+	// The date and time when the operation initiated.
 	StartedTime *types.Timestamp `protobuf:"bytes,7,opt,name=started_time,json=startedTime,proto3" json:"started_time,omitempty"`
-	// The date and time when the operation completed
+	// The date and time when the operation completed.
 	FinishedTime *types.Timestamp `protobuf:"bytes,8,opt,name=finished_time,json=finishedTime,proto3" json:"finished_time,omitempty"`
+	// The approval status of the operation, if any.
+	// temporal:dev
+	Approval *AsyncOperation_ApprovalStatus `protobuf:"bytes,10,opt,name=approval,proto3" json:"approval,omitempty"`
 }
 
 func (m *AsyncOperation) Reset()      { *m = AsyncOperation{} }
@@ -84,11 +162,19 @@ func (m *AsyncOperation) GetId() string {
 	return ""
 }
 
-func (m *AsyncOperation) GetState() string {
+// Deprecated: Do not use.
+func (m *AsyncOperation) GetStateDeprecated() string {
+	if m != nil {
+		return m.StateDeprecated
+	}
+	return ""
+}
+
+func (m *AsyncOperation) GetState() AsyncOperation_State {
 	if m != nil {
 		return m.State
 	}
-	return ""
+	return STATE_UNSPECIFIED
 }
 
 func (m *AsyncOperation) GetCheckDuration() *types.Duration {
@@ -133,8 +219,73 @@ func (m *AsyncOperation) GetFinishedTime() *types.Timestamp {
 	return nil
 }
 
+func (m *AsyncOperation) GetApproval() *AsyncOperation_ApprovalStatus {
+	if m != nil {
+		return m.Approval
+	}
+	return nil
+}
+
+// temporal:dev
+type AsyncOperation_ApprovalStatus struct {
+	// The current state of the approval.
+	State AsyncOperation_ApprovalStatus_State `protobuf:"varint,1,opt,name=state,proto3,enum=temporal.api.cloud.operation.v1.AsyncOperation_ApprovalStatus_State" json:"state,omitempty"`
+	// The outcome of the approval.
+	// Explains why the required approvals were approved, rejected or expired.
+	Outcome string `protobuf:"bytes,2,opt,name=outcome,proto3" json:"outcome,omitempty"`
+}
+
+func (m *AsyncOperation_ApprovalStatus) Reset()      { *m = AsyncOperation_ApprovalStatus{} }
+func (*AsyncOperation_ApprovalStatus) ProtoMessage() {}
+func (*AsyncOperation_ApprovalStatus) Descriptor() ([]byte, []int) {
+	return fileDescriptor_e895f88c45383e9d, []int{0, 0}
+}
+func (m *AsyncOperation_ApprovalStatus) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AsyncOperation_ApprovalStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AsyncOperation_ApprovalStatus.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AsyncOperation_ApprovalStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AsyncOperation_ApprovalStatus.Merge(m, src)
+}
+func (m *AsyncOperation_ApprovalStatus) XXX_Size() int {
+	return m.Size()
+}
+func (m *AsyncOperation_ApprovalStatus) XXX_DiscardUnknown() {
+	xxx_messageInfo_AsyncOperation_ApprovalStatus.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AsyncOperation_ApprovalStatus proto.InternalMessageInfo
+
+func (m *AsyncOperation_ApprovalStatus) GetState() AsyncOperation_ApprovalStatus_State {
+	if m != nil {
+		return m.State
+	}
+	return APPROVAL_STATE_UNSPECIFIED
+}
+
+func (m *AsyncOperation_ApprovalStatus) GetOutcome() string {
+	if m != nil {
+		return m.Outcome
+	}
+	return ""
+}
+
 func init() {
+	proto.RegisterEnum("temporal.api.cloud.operation.v1.AsyncOperation_State", AsyncOperation_State_name, AsyncOperation_State_value)
+	proto.RegisterEnum("temporal.api.cloud.operation.v1.AsyncOperation_ApprovalStatus_State", AsyncOperation_ApprovalStatus_State_name, AsyncOperation_ApprovalStatus_State_value)
 	proto.RegisterType((*AsyncOperation)(nil), "temporal.api.cloud.operation.v1.AsyncOperation")
+	proto.RegisterType((*AsyncOperation_ApprovalStatus)(nil), "temporal.api.cloud.operation.v1.AsyncOperation.ApprovalStatus")
 }
 
 func init() {
@@ -142,34 +293,68 @@ func init() {
 }
 
 var fileDescriptor_e895f88c45383e9d = []byte{
-	// 399 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x92, 0x31, 0x8f, 0xd3, 0x30,
-	0x18, 0x86, 0xe3, 0x1e, 0x77, 0x80, 0xef, 0x1a, 0x24, 0xeb, 0x86, 0x5c, 0x07, 0xdf, 0x09, 0x09,
-	0xe9, 0x16, 0x6c, 0x1d, 0x8c, 0xe8, 0x04, 0x87, 0x58, 0x98, 0x90, 0xa2, 0x4e, 0x2c, 0x91, 0x9b,
-	0xb8, 0xa9, 0x45, 0x12, 0x5b, 0xb1, 0x53, 0x29, 0x1b, 0x0b, 0x3b, 0x3f, 0x83, 0x9f, 0xc2, 0xd8,
-	0xb1, 0x23, 0x4d, 0x17, 0xc6, 0xfe, 0x04, 0x14, 0x27, 0x4e, 0xa5, 0x56, 0xe8, 0xc6, 0xef, 0xfd,
-	0x9e, 0x37, 0x8f, 0x63, 0x19, 0xbe, 0x36, 0x3c, 0x57, 0xb2, 0x64, 0x19, 0x65, 0x4a, 0xd0, 0x38,
-	0x93, 0x55, 0x42, 0xa5, 0xe2, 0x25, 0x33, 0x42, 0x16, 0x74, 0x79, 0x47, 0x73, 0xae, 0x35, 0x4b,
-	0x39, 0x51, 0xa5, 0x34, 0x12, 0x5d, 0x3b, 0x9c, 0x30, 0x25, 0x88, 0xc5, 0xc9, 0x80, 0x93, 0xe5,
-	0xdd, 0x04, 0xa7, 0x52, 0xa6, 0x19, 0xa7, 0x16, 0x9f, 0x55, 0x73, 0x9a, 0x54, 0xfd, 0xd2, 0x26,
-	0x93, 0xeb, 0xc3, 0xbd, 0x11, 0x39, 0xd7, 0x86, 0xe5, 0xaa, 0x07, 0xae, 0x0e, 0x01, 0x56, 0xd4,
-	0xdd, 0xea, 0xe5, 0x8f, 0x13, 0xe8, 0x3f, 0xe8, 0xba, 0x88, 0xbf, 0x38, 0x23, 0xf2, 0xe1, 0x48,
-	0x24, 0x01, 0xb8, 0x01, 0xb7, 0xcf, 0xc3, 0x91, 0x48, 0xd0, 0x25, 0x3c, 0xd5, 0x86, 0x19, 0x1e,
-	0x8c, 0x6c, 0xd4, 0x0d, 0xe8, 0x03, 0xf4, 0xe3, 0x05, 0x8f, 0xbf, 0x45, 0xee, 0x30, 0xc1, 0xc9,
-	0x0d, 0xb8, 0x3d, 0x7f, 0x73, 0x45, 0x3a, 0x19, 0x71, 0x32, 0xf2, 0xa9, 0x07, 0xc2, 0xb1, 0x2d,
-	0xb8, 0x11, 0xbd, 0x82, 0xfe, 0xf0, 0x9b, 0x91, 0xa9, 0x15, 0x0f, 0x9e, 0x58, 0xc1, 0x78, 0x48,
-	0xa7, 0xb5, 0xe2, 0xe8, 0x1e, 0xbe, 0xd8, 0x63, 0xa2, 0x50, 0x95, 0x09, 0x4e, 0xad, 0xe9, 0xf2,
-	0xc8, 0xf4, 0x50, 0xd4, 0xe1, 0xfe, 0x9b, 0x9f, 0x5b, 0xb6, 0xb5, 0xcc, 0x99, 0xc8, 0xaa, 0x92,
-	0x47, 0x25, 0x67, 0x5a, 0x16, 0xc1, 0x59, 0x67, 0xe9, 0xd3, 0xd0, 0x86, 0xe8, 0x1e, 0x5e, 0x68,
-	0xc3, 0x4a, 0xc3, 0x93, 0xa8, 0xbd, 0xbd, 0xe0, 0xa9, 0x55, 0x4c, 0x8e, 0x14, 0x53, 0x77, 0xb5,
-	0xe1, 0x79, 0xcf, 0xb7, 0x09, 0x7a, 0x0f, 0xc7, 0x73, 0x51, 0x08, 0xbd, 0x70, 0xfd, 0x67, 0x8f,
-	0xf6, 0x2f, 0x5c, 0xa1, 0x8d, 0x3e, 0xf2, 0xd5, 0x06, 0x7b, 0xeb, 0x0d, 0xf6, 0x76, 0x1b, 0x0c,
-	0xbe, 0x37, 0x18, 0xfc, 0x6a, 0x30, 0xf8, 0xdd, 0x60, 0xb0, 0x6a, 0x30, 0xf8, 0xd3, 0x60, 0xf0,
-	0xb7, 0xc1, 0xde, 0xae, 0xc1, 0xe0, 0xe7, 0x16, 0x7b, 0xab, 0x2d, 0xf6, 0xd6, 0x5b, 0xec, 0x7d,
-	0xa5, 0xa9, 0x24, 0xc3, 0xeb, 0x11, 0xf2, 0x3f, 0xef, 0xed, 0xdd, 0x30, 0xcc, 0xce, 0xec, 0x41,
-	0xde, 0xfe, 0x0b, 0x00, 0x00, 0xff, 0xff, 0x89, 0x4d, 0x07, 0xb4, 0xa3, 0x02, 0x00, 0x00,
+	// 708 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x54, 0x4b, 0x4f, 0xdb, 0x4a,
+	0x14, 0xce, 0x18, 0xc2, 0x63, 0x48, 0x82, 0x99, 0xfb, 0x32, 0xb9, 0xd2, 0xc0, 0x8d, 0x84, 0xc4,
+	0x06, 0x5b, 0xe1, 0xaa, 0x1b, 0x57, 0xb4, 0x35, 0xb1, 0x83, 0xdc, 0xa6, 0xc1, 0x72, 0x02, 0xaa,
+	0xd8, 0x58, 0x26, 0x19, 0xc2, 0xa8, 0x49, 0xc6, 0xb2, 0x1d, 0xa4, 0xec, 0xba, 0xeb, 0xb6, 0xcb,
+	0x76, 0xdb, 0x55, 0xd5, 0x5f, 0xd2, 0x25, 0x4b, 0x96, 0x25, 0xa8, 0x52, 0xd5, 0x15, 0x3f, 0xa1,
+	0xf2, 0x38, 0x76, 0x4a, 0xa0, 0x42, 0x55, 0x97, 0xf3, 0x3d, 0xce, 0x77, 0x8e, 0xce, 0xb1, 0xe1,
+	0x56, 0x48, 0x7a, 0x1e, 0xf3, 0xdd, 0xae, 0xe2, 0x7a, 0x54, 0x69, 0x75, 0xd9, 0xa0, 0xad, 0x30,
+	0x8f, 0xf8, 0x6e, 0x48, 0x59, 0x5f, 0x39, 0x2b, 0x2b, 0x3d, 0x12, 0x04, 0x6e, 0x87, 0xc8, 0x9e,
+	0xcf, 0x42, 0x86, 0xd6, 0x12, 0xb9, 0xec, 0x7a, 0x54, 0xe6, 0x72, 0x39, 0x95, 0xcb, 0x67, 0xe5,
+	0x22, 0xee, 0x30, 0xd6, 0xe9, 0x12, 0x85, 0xcb, 0x8f, 0x07, 0x27, 0x4a, 0x7b, 0x30, 0x26, 0x39,
+	0x52, 0x5c, 0x9b, 0xe6, 0x43, 0xda, 0x23, 0x41, 0xe8, 0xf6, 0xbc, 0xb1, 0x60, 0x75, 0x5a, 0xe0,
+	0xf6, 0x87, 0x31, 0x55, 0x7a, 0xbd, 0x00, 0x0b, 0x5a, 0x30, 0xec, 0xb7, 0xf6, 0x93, 0x44, 0x54,
+	0x80, 0x02, 0x6d, 0x4b, 0x60, 0x1d, 0x6c, 0x2e, 0xda, 0x02, 0x6d, 0xa3, 0x2d, 0x28, 0x06, 0xa1,
+	0x1b, 0x12, 0xa7, 0x4d, 0x3c, 0x9f, 0xb4, 0xdc, 0x90, 0xb4, 0x25, 0x21, 0x62, 0x77, 0x05, 0x09,
+	0xd8, 0xcb, 0x9c, 0xd3, 0x53, 0x0a, 0x3d, 0x83, 0x59, 0x0e, 0x49, 0x8b, 0xeb, 0x60, 0xb3, 0xb0,
+	0xfd, 0x40, 0xbe, 0x67, 0x3c, 0xf9, 0x66, 0xbc, 0xdc, 0x88, 0xcc, 0x76, 0x5c, 0x03, 0x3d, 0x81,
+	0x85, 0xd6, 0x29, 0x69, 0xbd, 0x74, 0x92, 0x91, 0xa5, 0x99, 0x75, 0xb0, 0xb9, 0xb4, 0xbd, 0x2a,
+	0xc7, 0x23, 0xc9, 0xc9, 0x48, 0xb2, 0x3e, 0x16, 0xd8, 0x79, 0x6e, 0x48, 0x9e, 0x68, 0x03, 0x16,
+	0xd2, 0x34, 0x27, 0x1c, 0x7a, 0x44, 0x9a, 0xe5, 0x93, 0xe5, 0x53, 0xb4, 0x39, 0xf4, 0x08, 0xda,
+	0x81, 0xcb, 0x13, 0x19, 0xed, 0x7b, 0x83, 0x50, 0xca, 0xf2, 0xa4, 0x3f, 0x6f, 0x25, 0x69, 0xfd,
+	0xa1, 0x3d, 0xa9, 0x69, 0x46, 0xda, 0x28, 0xe5, 0xc4, 0xa5, 0xdd, 0x81, 0x4f, 0x1c, 0x9f, 0xb8,
+	0x01, 0xeb, 0x4b, 0x73, 0x71, 0xca, 0x18, 0xb5, 0x39, 0x88, 0x76, 0x60, 0x2e, 0x08, 0x5d, 0x3f,
+	0x24, 0x6d, 0x27, 0xda, 0x91, 0x34, 0xcf, 0x23, 0x8a, 0xb7, 0x22, 0x9a, 0xc9, 0x02, 0xed, 0xa5,
+	0xb1, 0x3e, 0x42, 0xd0, 0x63, 0x98, 0x3f, 0xa1, 0x7d, 0x1a, 0x9c, 0x26, 0xfe, 0x85, 0x7b, 0xfd,
+	0xb9, 0xc4, 0xc0, 0x0b, 0x1c, 0xc1, 0x05, 0xd7, 0xf3, 0x7c, 0x76, 0xe6, 0x76, 0x25, 0xc8, 0xbd,
+	0x8f, 0x7e, 0x75, 0x3d, 0xda, 0xd8, 0x1f, 0xad, 0x69, 0x10, 0xd8, 0x69, 0xbd, 0xe2, 0x7b, 0x01,
+	0x16, 0x6e, 0x92, 0xe8, 0x28, 0x39, 0x05, 0xc0, 0x4f, 0x41, 0xff, 0xbd, 0xac, 0x9b, 0x97, 0x21,
+	0xc1, 0x79, 0x36, 0x08, 0x5b, 0xac, 0x47, 0xe2, 0x63, 0xb4, 0x93, 0x67, 0xe9, 0x1d, 0x80, 0x59,
+	0x2e, 0x45, 0x18, 0x16, 0x35, 0xcb, 0xb2, 0xf7, 0x0f, 0xb5, 0x9a, 0xd3, 0x68, 0x6a, 0x4d, 0xc3,
+	0x39, 0xa8, 0x37, 0x2c, 0xa3, 0x62, 0x56, 0x4d, 0x43, 0x17, 0x33, 0xa8, 0x08, 0xff, 0x9e, 0xe2,
+	0x2d, 0xa3, 0xae, 0x9b, 0xf5, 0x3d, 0x11, 0xa0, 0x7f, 0xe1, 0x3f, 0x53, 0x5c, 0xfc, 0x34, 0x74,
+	0x51, 0xb8, 0x83, 0xb4, 0x8d, 0xa7, 0x46, 0xa5, 0x69, 0xe8, 0xe2, 0xcc, 0x1d, 0x55, 0x8d, 0x17,
+	0x96, 0x69, 0x1b, 0xba, 0x38, 0x5b, 0x7a, 0x9b, 0xf6, 0xf6, 0x17, 0x5c, 0xb9, 0xab, 0xa5, 0x15,
+	0x98, 0x9f, 0xee, 0x24, 0x55, 0x9a, 0x75, 0xc7, 0xb2, 0xf7, 0xf7, 0x6c, 0xa3, 0xd1, 0x10, 0x05,
+	0x24, 0xc2, 0x5c, 0x0c, 0x57, 0x35, 0xb3, 0xc6, 0x83, 0xff, 0x80, 0xcb, 0x31, 0x52, 0xd1, 0xea,
+	0x15, 0xa3, 0x16, 0x81, 0xb3, 0x13, 0xb0, 0x7a, 0x50, 0xab, 0x9a, 0x1c, 0xcc, 0x22, 0x04, 0x0b,
+	0x53, 0x6d, 0xcf, 0xed, 0x7e, 0x01, 0xe7, 0x97, 0x38, 0x73, 0x71, 0x89, 0x33, 0xd7, 0x97, 0x18,
+	0xbc, 0x1a, 0x61, 0xf0, 0x61, 0x84, 0xc1, 0xa7, 0x11, 0x06, 0xe7, 0x23, 0x0c, 0x3e, 0x8f, 0x30,
+	0xf8, 0x3a, 0xc2, 0x99, 0xeb, 0x11, 0x06, 0x6f, 0xae, 0x70, 0xe6, 0xfc, 0x0a, 0x67, 0x2e, 0xae,
+	0x70, 0x06, 0x96, 0x28, 0xbb, 0x6f, 0xad, 0xbb, 0xb9, 0xe7, 0xf1, 0x0f, 0xcf, 0x8a, 0xee, 0xd3,
+	0x02, 0x47, 0x4a, 0xe7, 0x07, 0x0f, 0x65, 0x3f, 0xf9, 0x4d, 0x3e, 0x4c, 0x1f, 0x1f, 0x85, 0xff,
+	0x9a, 0x63, 0x39, 0x65, 0xb2, 0xe6, 0x51, 0xb9, 0xc2, 0x43, 0x26, 0x97, 0x72, 0x58, 0xfe, 0x26,
+	0x6c, 0x4c, 0x34, 0xaa, 0xaa, 0x79, 0x54, 0x55, 0xb9, 0x4a, 0x55, 0x53, 0x99, 0xaa, 0x1e, 0x96,
+	0x8f, 0xe7, 0xf8, 0x57, 0xf2, 0xff, 0xf7, 0x00, 0x00, 0x00, 0xff, 0xff, 0xc0, 0x43, 0x88, 0x2d,
+	0xa6, 0x05, 0x00, 0x00,
 }
 
+func (x AsyncOperation_State) String() string {
+	s, ok := AsyncOperation_State_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x AsyncOperation_ApprovalStatus_State) String() string {
+	s, ok := AsyncOperation_ApprovalStatus_State_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
 func (this *AsyncOperation) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -190,6 +375,9 @@ func (this *AsyncOperation) Equal(that interface{}) bool {
 		return false
 	}
 	if this.Id != that1.Id {
+		return false
+	}
+	if this.StateDeprecated != that1.StateDeprecated {
 		return false
 	}
 	if this.State != that1.State {
@@ -213,15 +401,46 @@ func (this *AsyncOperation) Equal(that interface{}) bool {
 	if !this.FinishedTime.Equal(that1.FinishedTime) {
 		return false
 	}
+	if !this.Approval.Equal(that1.Approval) {
+		return false
+	}
+	return true
+}
+func (this *AsyncOperation_ApprovalStatus) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AsyncOperation_ApprovalStatus)
+	if !ok {
+		that2, ok := that.(AsyncOperation_ApprovalStatus)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.State != that1.State {
+		return false
+	}
+	if this.Outcome != that1.Outcome {
+		return false
+	}
 	return true
 }
 func (this *AsyncOperation) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 12)
+	s := make([]string, 0, 14)
 	s = append(s, "&operation.AsyncOperation{")
 	s = append(s, "Id: "+fmt.Sprintf("%#v", this.Id)+",\n")
+	s = append(s, "StateDeprecated: "+fmt.Sprintf("%#v", this.StateDeprecated)+",\n")
 	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	if this.CheckDuration != nil {
 		s = append(s, "CheckDuration: "+fmt.Sprintf("%#v", this.CheckDuration)+",\n")
@@ -237,6 +456,20 @@ func (this *AsyncOperation) GoString() string {
 	if this.FinishedTime != nil {
 		s = append(s, "FinishedTime: "+fmt.Sprintf("%#v", this.FinishedTime)+",\n")
 	}
+	if this.Approval != nil {
+		s = append(s, "Approval: "+fmt.Sprintf("%#v", this.Approval)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *AsyncOperation_ApprovalStatus) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&operation.AsyncOperation_ApprovalStatus{")
+	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
+	s = append(s, "Outcome: "+fmt.Sprintf("%#v", this.Outcome)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -268,6 +501,23 @@ func (m *AsyncOperation) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.Approval != nil {
+		{
+			size, err := m.Approval.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x52
+	}
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x48
+	}
 	if m.FinishedTime != nil {
 		{
 			size, err := m.FinishedTime.MarshalToSizedBuffer(dAtA[:i])
@@ -330,10 +580,10 @@ func (m *AsyncOperation) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x1a
 	}
-	if len(m.State) > 0 {
-		i -= len(m.State)
-		copy(dAtA[i:], m.State)
-		i = encodeVarintMessage(dAtA, i, uint64(len(m.State)))
+	if len(m.StateDeprecated) > 0 {
+		i -= len(m.StateDeprecated)
+		copy(dAtA[i:], m.StateDeprecated)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.StateDeprecated)))
 		i--
 		dAtA[i] = 0x12
 	}
@@ -343,6 +593,41 @@ func (m *AsyncOperation) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i = encodeVarintMessage(dAtA, i, uint64(len(m.Id)))
 		i--
 		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *AsyncOperation_ApprovalStatus) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AsyncOperation_ApprovalStatus) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AsyncOperation_ApprovalStatus) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Outcome) > 0 {
+		i -= len(m.Outcome)
+		copy(dAtA[i:], m.Outcome)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Outcome)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
@@ -368,7 +653,7 @@ func (m *AsyncOperation) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
-	l = len(m.State)
+	l = len(m.StateDeprecated)
 	if l > 0 {
 		n += 1 + l + sovMessage(uint64(l))
 	}
@@ -396,6 +681,29 @@ func (m *AsyncOperation) Size() (n int) {
 		l = m.FinishedTime.Size()
 		n += 1 + l + sovMessage(uint64(l))
 	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
+	if m.Approval != nil {
+		l = m.Approval.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+
+func (m *AsyncOperation_ApprovalStatus) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
+	l = len(m.Outcome)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
 	return n
 }
 
@@ -411,13 +719,26 @@ func (this *AsyncOperation) String() string {
 	}
 	s := strings.Join([]string{`&AsyncOperation{`,
 		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
-		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`StateDeprecated:` + fmt.Sprintf("%v", this.StateDeprecated) + `,`,
 		`CheckDuration:` + strings.Replace(fmt.Sprintf("%v", this.CheckDuration), "Duration", "types.Duration", 1) + `,`,
 		`OperationType:` + fmt.Sprintf("%v", this.OperationType) + `,`,
 		`OperationInput:` + strings.Replace(fmt.Sprintf("%v", this.OperationInput), "Any", "types.Any", 1) + `,`,
 		`FailureReason:` + fmt.Sprintf("%v", this.FailureReason) + `,`,
 		`StartedTime:` + strings.Replace(fmt.Sprintf("%v", this.StartedTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`FinishedTime:` + strings.Replace(fmt.Sprintf("%v", this.FinishedTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`Approval:` + strings.Replace(fmt.Sprintf("%v", this.Approval), "AsyncOperation_ApprovalStatus", "AsyncOperation_ApprovalStatus", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AsyncOperation_ApprovalStatus) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AsyncOperation_ApprovalStatus{`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`Outcome:` + fmt.Sprintf("%v", this.Outcome) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -493,7 +814,7 @@ func (m *AsyncOperation) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StateDeprecated", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -521,7 +842,7 @@ func (m *AsyncOperation) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.State = string(dAtA[iNdEx:postIndex])
+			m.StateDeprecated = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
@@ -730,6 +1051,165 @@ func (m *AsyncOperation) Unmarshal(dAtA []byte) error {
 			if err := m.FinishedTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= AsyncOperation_State(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Approval", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Approval == nil {
+				m.Approval = &AsyncOperation_ApprovalStatus{}
+			}
+			if err := m.Approval.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AsyncOperation_ApprovalStatus) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ApprovalStatus: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ApprovalStatus: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= AsyncOperation_ApprovalStatus_State(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Outcome", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Outcome = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
