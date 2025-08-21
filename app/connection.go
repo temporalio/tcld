@@ -107,9 +107,13 @@ func defaultDialOptions(c *cli.Context, addr *url.URL) ([]grpc.DialOption, error
 		opts = append(opts, grpc.WithPerRPCCredentials(creds))
 	}
 
+	serverName := addr.Hostname()
+	if tlsServerName := c.String(TLSServerNameFlagName); tlsServerName != "" {
+		serverName = tlsServerName
+	}
 	transport := credentials.NewTLS(&tls.Config{
 		MinVersion: tls.VersionTLS12,
-		ServerName: addr.Hostname(),
+		ServerName: serverName,
 	})
 	if c.Bool(InsecureConnectionFlagName) {
 		transport = insecure.NewCredentials()

@@ -29,6 +29,7 @@ func NewApp(params AppParams) (*cli.App, error) {
 		Usage: "Temporal Cloud cli",
 		Flags: []cli.Flag{
 			ServerFlag,
+			TLSServerNameFlag,
 			ConfigDirFlag,
 			AutoConfirmFlag,
 			IdempotentFlag,
