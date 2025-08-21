@@ -16,6 +16,7 @@ const (
 	ResourceVersionFlagName    = "resource-version"
 	APIKeyFlagName             = "api-key"
 	InsecureConnectionFlagName = "insecure"
+	TLSServerNameFlagName      = "tls-server-name"
 	EnableDebugLogsFlagName    = "enable-debug-logs"
 	IdempotentFlagName         = "idempotent"
 	AuthenticationFlagCategory = "Authentication:"
@@ -81,6 +82,12 @@ var (
 		// users may be using a service mesh or local proxy, which is insecure locally but uses TLS off the host,
 		// and thus may require the use of this.
 		Hidden: true,
+	}
+	TLSServerNameFlag = &cli.StringFlag{
+		Name:     TLSServerNameFlagName,
+		Usage:    "Override the TLS server name for certificate validation (useful for connecting through proxies)",
+		EnvVars:  []string{"TEMPORAL_CLOUD_TLS_SERVER_NAME"},
+		Category: AuthenticationFlagCategory,
 	}
 	EnableDebugLogsFlag = &cli.BoolFlag{
 		Name:    EnableDebugLogsFlagName,
