@@ -47,8 +47,7 @@ export TEMPORAL_CLOUD_API_KEY=<api-key>
 tcld ...
 ```
 
-# API Key Management (Preview)
-*The API Key feature is currently in "Preview Release". Customers must be invited to use this feature. Please reach out to Temporal Cloud support for more information.*
+# API Key Management
 
 API Keys provide machine based authentication for Temporal Control Plane APIs. These keys are generated for and inherit the roles and permissions of the current user. API Keys are required to have a duration / expiry for preview within 1 to 90 days. We recommend to always set a duration / expiry for your API keys. This will allow you to rotate your API keys frequently and minimize the exposure of a token in case it is compromised.
 ### Creating an API Key:
