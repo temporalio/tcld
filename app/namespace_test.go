@@ -42,8 +42,10 @@ type NamespaceTestSuite struct {
 }
 
 func (s *NamespaceTestSuite) SetupTest() {
-	err := toggleFeature(GCPSinkFeatureFlag)
-	s.Require().NoError(err)
+	if !IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
+		err := toggleFeature(ConnectivityRuleFeatureFlag)
+		s.Require().NoError(err)
+	}
 
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = namespaceservicemock.NewMockNamespaceServiceClient(s.mockCtrl)
@@ -65,6 +67,7 @@ func (s *NamespaceTestSuite) SetupTest() {
 	}
 	flags := []cli.Flag{
 		AutoConfirmFlag,
+		IdempotentFlag,
 	}
 
 	s.cliApp, _ = NewTestApp(s.T(), cmds, flags)
@@ -107,8 +110,7 @@ func (s *NamespaceTestSuite) TestGet() {
 
 func (s *NamespaceTestSuite) TestList() {
 
-	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{}).
-		Return(nil, errors.New("some error")).Times(1)
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{}).Return(nil, errors.New("some error")).Times(1)
 	s.Error(s.RunCmd("namespace", "list"))
 
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
@@ -223,6 +225,16 @@ func (s *NamespaceTestSuite) TestDeleteProtection() {
 				}
 			},
 			expectErr: true,
+		},
+		{
+			name: "no change already enabled, idempotent",
+			args: []string{"--idempotent", "n", "lc", "set", "-n", ns, "--edp", "true"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.Lifecycle = &namespace.LifecycleSpec{
+					EnableDeleteProtection: true,
+				}
+			},
+			expectErr: false,
 		},
 		{
 			name:      "no change already disabled",
@@ -916,6 +928,84 @@ func (s *NamespaceTestSuite) TestUpdateAddSearchAttrs() {
 				"attr3": namespace.SEARCH_ATTRIBUTE_TYPE_INT,
 			}
 			r.ResourceVersion = "ver2"
+		},
+	}}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						AcceptedClientCa: "cert1",
+						SearchAttributes: map[string]namespace.SearchAttributeType{
+							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
+						},
+						RetentionDays: 7,
+					},
+					State:           namespace.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Namespace.Spec)
+				req := namespaceservice.UpdateNamespaceRequest{
+					Namespace:       ns,
+					Spec:            &spec,
+					ResourceVersion: getResp.Namespace.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.UpdateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestUpdateRemoveSearchAttrs() {
+
+	ns := "ns1"
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)
+
+	tests := []struct {
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{{
+		args: []string{"namespace", "search-attributes"},
+	}, {
+		args:      []string{"namespace", "search-attributes", "remove"},
+		expectErr: true,
+	}, {
+		args:      []string{"namespace", "search-attributes", "remove", "--namespace", ns},
+		expectErr: true,
+	}, {
+		args:      []string{"n", "sa", "remove", "-n", ns, "--sa", "unknown"},
+		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+		expectErr: true,
+	}, {
+		args:      []string{"n", "sa", "remove", "-n", ns, "--sa", "attr1"},
+		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+			r.Spec.SearchAttributes = map[string]namespace.SearchAttributeType{}
 		},
 	}}
 
@@ -2721,6 +2811,415 @@ func (s *NamespaceTestSuite) TestRemoveNamespaceRegion() {
 						ResourceVersion: "ver1",
 					},
 				}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestCreateWithTags() {
+	ns := "test-namespace"
+	requestId := "test-request-id"
+
+	type morphCreateReq func(*namespaceservice.CreateNamespaceRequest)
+
+	tests := []struct {
+		name          string
+		args          []string
+		expectRequest morphCreateReq
+		expectErr     bool
+		expectErrMsg  string
+		mockError     error
+	}{
+		{
+			name: "successful create with tags",
+			args: []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId, "--tag", "env=prod", "--tag", "team=backend"},
+			expectRequest: func(r *namespaceservice.CreateNamespaceRequest) {
+				r.RequestId = requestId
+				r.Namespace = ns
+				r.Spec = &namespace.NamespaceSpec{
+					AuthMethod: namespace.AUTH_METHOD_API_KEY,
+					RegionId: &common.RegionID{
+						Name:     "us-west-2",
+						Provider: common.CLOUD_PROVIDER_AWS,
+					},
+					RetentionDays: 30,
+					Lifecycle: &namespace.LifecycleSpec{
+						EnableDeleteProtection: false,
+					},
+				}
+				r.Tags = map[string]string{
+					"env":  "prod",
+					"team": "backend",
+				}
+			},
+		},
+		{
+			name: "successful create without tags",
+			args: []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId},
+			expectRequest: func(r *namespaceservice.CreateNamespaceRequest) {
+				r.RequestId = requestId
+				r.Namespace = ns
+				r.Spec = &namespace.NamespaceSpec{
+					AuthMethod: namespace.AUTH_METHOD_API_KEY,
+					RegionId: &common.RegionID{
+						Name:     "us-west-2",
+						Provider: common.CLOUD_PROVIDER_AWS,
+					},
+					RetentionDays: 30,
+					Lifecycle: &namespace.LifecycleSpec{
+						EnableDeleteProtection: false,
+					},
+				}
+				r.Tags = map[string]string{}
+			},
+		},
+		{
+			name:         "invalid tag format",
+			args:         []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId, "--tag", "invalid-tag-format"},
+			expectErr:    true,
+			expectErrMsg: "invalid tag format 'invalid-tag-format', must be 'key=value'",
+		},
+		{
+			name: "create error with tags",
+			args: []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId, "--tag", "env=test"},
+			expectRequest: func(r *namespaceservice.CreateNamespaceRequest) {
+				r.RequestId = requestId
+				r.Namespace = ns
+				r.Spec = &namespace.NamespaceSpec{
+					AuthMethod: namespace.AUTH_METHOD_API_KEY,
+					RegionId: &common.RegionID{
+						Name:     "us-west-2",
+						Provider: common.CLOUD_PROVIDER_AWS,
+					},
+					RetentionDays: 30,
+					Lifecycle: &namespace.LifecycleSpec{
+						EnableDeleteProtection: false,
+					},
+				}
+				r.Tags = map[string]string{
+					"env": "test",
+				}
+			},
+			mockError:    errors.New("create error"),
+			expectErr:    true,
+			expectErrMsg: "create error",
+		},
+		{
+			name:         "multiple tags with same key should error",
+			args:         []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId, "--tag", "env=dev", "--tag", "env=prod"},
+			expectErr:    true,
+			expectErrMsg: "duplicate tag key 'env' found",
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.expectRequest != nil {
+				req := namespaceservice.CreateNamespaceRequest{}
+				tc.expectRequest(&req)
+				s.mockService.EXPECT().CreateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.CreateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, tc.mockError).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+				if tc.expectErrMsg != "" {
+					s.Contains(err.Error(), tc.expectErrMsg)
+				}
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestTagsUpsert() {
+	ns := "test-namespace"
+	requestId := "test-request-id"
+
+	type morphUpdateReq func(*cloudservice.UpdateNamespaceTagsRequest)
+
+	tests := []struct {
+		name          string
+		args          []string
+		expectRequest morphUpdateReq
+		expectErr     bool
+		expectErrMsg  string
+		mockError     error
+	}{
+		{
+			name: "successful upsert single tag",
+			args: []string{"namespace", "tags", "upsert", "--namespace", ns, "--request-id", requestId, "--tag", "env=staging"},
+			expectRequest: func(r *cloudservice.UpdateNamespaceTagsRequest) {
+				r.Namespace = ns
+				r.TagsToUpsert = map[string]string{"env": "staging"}
+				r.TagsToRemove = nil
+				r.AsyncOperationId = requestId
+			},
+		},
+		{
+			name: "successful upsert multiple tags",
+			args: []string{"namespace", "tags", "upsert", "--namespace", ns, "--request-id", requestId, "--tag", "env=staging", "--tag", "version=v1.2.3"},
+			expectRequest: func(r *cloudservice.UpdateNamespaceTagsRequest) {
+				r.Namespace = ns
+				r.TagsToUpsert = map[string]string{
+					"env":     "staging",
+					"version": "v1.2.3",
+				}
+				r.TagsToRemove = nil
+				r.AsyncOperationId = requestId
+			},
+		},
+		{
+			name:         "invalid tag format",
+			args:         []string{"namespace", "tags", "upsert", "--namespace", ns, "--request-id", requestId, "--tag", "invalid-tag-format"},
+			expectErr:    true,
+			expectErrMsg: "invalid tag format 'invalid-tag-format', must be 'key=value'",
+		},
+		{
+			name:         "missing namespace",
+			args:         []string{"namespace", "tags", "upsert", "--tag", "env=prod"},
+			expectErr:    true,
+			expectErrMsg: "Required flag \"namespace\" not set",
+		},
+		{
+			name:         "missing tags",
+			args:         []string{"namespace", "tags", "upsert", "--namespace", ns},
+			expectErr:    true,
+			expectErrMsg: "Required flag \"tag\" not set",
+		},
+		{
+			name: "update error",
+			args: []string{"namespace", "tags", "upsert", "--namespace", ns, "--request-id", requestId, "--tag", "env=prod"},
+			expectRequest: func(r *cloudservice.UpdateNamespaceTagsRequest) {
+				r.Namespace = ns
+				r.TagsToUpsert = map[string]string{"env": "prod"}
+				r.TagsToRemove = nil
+				r.AsyncOperationId = requestId
+			},
+			mockError:    errors.New("update error"),
+			expectErr:    true,
+			expectErrMsg: "update error",
+		},
+		{
+			name:         "multiple tags with same key should error",
+			args:         []string{"namespace", "tags", "upsert", "--namespace", ns, "--request-id", requestId, "--tag", "env=dev", "--tag", "env=prod"},
+			expectErr:    true,
+			expectErrMsg: "duplicate tag key 'env' found",
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.expectRequest != nil {
+				req := cloudservice.UpdateNamespaceTagsRequest{}
+				tc.expectRequest(&req)
+				s.mockCloudApiClient.EXPECT().UpdateNamespaceTags(gomock.Any(), &req).
+					Return(&cloudservice.UpdateNamespaceTagsResponse{
+						AsyncOperation: &operation.AsyncOperation{Id: requestId},
+					}, tc.mockError).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+				if tc.expectErrMsg != "" {
+					s.Contains(err.Error(), tc.expectErrMsg)
+				}
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestTagsRemove() {
+	ns := "test-namespace"
+	requestId := "test-request-id"
+
+	type morphUpdateReq func(*cloudservice.UpdateNamespaceTagsRequest)
+
+	tests := []struct {
+		name          string
+		args          []string
+		expectRequest morphUpdateReq
+		expectErr     bool
+		expectErrMsg  string
+		mockError     error
+	}{
+		{
+			name: "successful remove single key",
+			args: []string{"namespace", "tags", "remove", "--namespace", ns, "--request-id", requestId, "--tag-key", "env"},
+			expectRequest: func(r *cloudservice.UpdateNamespaceTagsRequest) {
+				r.Namespace = ns
+				r.TagsToUpsert = nil
+				r.TagsToRemove = []string{"env"}
+				r.AsyncOperationId = requestId
+			},
+		},
+		{
+			name: "successful remove multiple keys",
+			args: []string{"namespace", "tags", "remove", "--namespace", ns, "--request-id", requestId, "--tag-key", "env", "--tag-key", "old-tag"},
+			expectRequest: func(r *cloudservice.UpdateNamespaceTagsRequest) {
+				r.Namespace = ns
+				r.TagsToUpsert = nil
+				r.TagsToRemove = []string{"env", "old-tag"}
+				r.AsyncOperationId = requestId
+			},
+		},
+		{
+			name:         "missing namespace",
+			args:         []string{"namespace", "tags", "remove", "--tag-key", "env"},
+			expectErr:    true,
+			expectErrMsg: "Required flag \"namespace\" not set",
+		},
+		{
+			name:         "missing keys",
+			args:         []string{"namespace", "tags", "remove", "--namespace", ns},
+			expectErr:    true,
+			expectErrMsg: "Required flag \"tag-key\" not set",
+		},
+		{
+			name: "remove error",
+			args: []string{"namespace", "tags", "remove", "--namespace", ns, "--request-id", requestId, "--tag-key", "env"},
+			expectRequest: func(r *cloudservice.UpdateNamespaceTagsRequest) {
+				r.Namespace = ns
+				r.TagsToUpsert = nil
+				r.TagsToRemove = []string{"env"}
+				r.AsyncOperationId = requestId
+			},
+			mockError:    errors.New("remove error"),
+			expectErr:    true,
+			expectErrMsg: "remove error",
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.expectRequest != nil {
+				req := cloudservice.UpdateNamespaceTagsRequest{}
+				tc.expectRequest(&req)
+				s.mockCloudApiClient.EXPECT().UpdateNamespaceTags(gomock.Any(), &req).
+					Return(&cloudservice.UpdateNamespaceTagsResponse{
+						AsyncOperation: &operation.AsyncOperation{Id: requestId},
+					}, tc.mockError).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+				if tc.expectErrMsg != "" {
+					s.Contains(err.Error(), tc.expectErrMsg)
+				}
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestSetConnectivityRules() {
+	ns := "ns1"
+	resourceVersion := "ver1"
+	initialRules := []string{"cr-1"}
+	newRules := []string{"cr-2", "cr-3"}
+
+	type morphGetResp func(*namespaceservice.GetNamespaceResponse)
+	type morphUpdateReq func(*namespaceservice.UpdateNamespaceRequest)
+
+	tests := []struct {
+		name         string
+		args         []string
+		expectGet    morphGetResp
+		expectErr    bool
+		expectUpdate morphUpdateReq
+	}{
+		{
+			name: "success",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--connectivity-rule-ids", "cr-2", "--connectivity-rule-ids", "cr-3"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.ConnectivityRuleIds = newRules
+			},
+		},
+		{
+			name: "no change",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--connectivity-rule-ids", "cr-1"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectErr: true,
+		},
+		{
+			name: "missing ids",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectErr: true,
+		},
+		{
+			name: "remove all",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--remove-all"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+				r.Spec.ConnectivityRuleIds = nil
+			},
+		},
+		{
+			name: "remove all with ids",
+			args: []string{"namespace", "set-connectivity-rules", "--namespace", ns, "--connectivity-rule-ids", "cr-1", "--remove-all"},
+			expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+				g.Namespace.Spec.ConnectivityRuleIds = initialRules
+			},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			getResp := namespaceservice.GetNamespaceResponse{
+				Namespace: &namespace.Namespace{
+					Namespace: ns,
+					Spec: &namespace.NamespaceSpec{
+						ConnectivityRuleIds: initialRules,
+					},
+					ResourceVersion: resourceVersion,
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+					Namespace: ns,
+				}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := *(getResp.Namespace.Spec)
+				req := namespaceservice.UpdateNamespaceRequest{
+					Namespace:       ns,
+					Spec:            &spec,
+					ResourceVersion: getResp.Namespace.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateNamespace(gomock.Any(), &req).
+					Return(&namespaceservice.UpdateNamespaceResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
 			}
 
 			err := s.RunCmd(tc.args...)

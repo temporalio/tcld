@@ -16,18 +16,28 @@ type CommandOut struct {
 }
 
 func NewApp(params AppParams) (*cli.App, error) {
+	// Filter out nil commands (for disabled features)
+	var enabledCommands []*cli.Command
+	for _, cmd := range params.Commands {
+		if cmd != nil {
+			enabledCommands = append(enabledCommands, cmd)
+		}
+	}
+
 	app := &cli.App{
 		Name:  "tcld",
 		Usage: "Temporal Cloud cli",
 		Flags: []cli.Flag{
 			ServerFlag,
+			TLSServerNameFlag,
 			ConfigDirFlag,
 			AutoConfirmFlag,
+			IdempotentFlag,
 			APIKeyFlag,
 			InsecureConnectionFlag,
 			EnableDebugLogsFlag,
 		},
-		Commands: params.Commands,
+		Commands: enabledCommands,
 	}
 
 	return app, nil

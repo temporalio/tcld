@@ -98,8 +98,10 @@ type AsyncOperation struct {
 	// The current state of this operation
 	// Possible values are: pending, in_progress, failed, cancelled, fulfilled
 	// Deprecated: Use the state field instead.
+	// temporal:versioning:max_version=v0.3.0
 	StateDeprecated string `protobuf:"bytes,2,opt,name=state_deprecated,json=stateDeprecated,proto3" json:"state_deprecated,omitempty"` // Deprecated: Do not use.
 	// The current state of this operation.
+	// temporal:versioning:min_version=v0.3.0
 	// temporal:enums:replaces=state_deprecated
 	State AsyncOperation_State `protobuf:"varint,9,opt,name=state,proto3,enum=temporal.api.cloud.operation.v1.AsyncOperation_State" json:"state,omitempty"`
 	// The recommended duration to check back for an update in the operation's state.
@@ -117,6 +119,7 @@ type AsyncOperation struct {
 	// The date and time when the operation completed.
 	FinishedTime *types.Timestamp `protobuf:"bytes,8,opt,name=finished_time,json=finishedTime,proto3" json:"finished_time,omitempty"`
 	// The approval status of the operation, if any.
+	// temporal:dev
 	Approval *AsyncOperation_ApprovalStatus `protobuf:"bytes,10,opt,name=approval,proto3" json:"approval,omitempty"`
 }
 
@@ -223,11 +226,12 @@ func (m *AsyncOperation) GetApproval() *AsyncOperation_ApprovalStatus {
 	return nil
 }
 
+// temporal:dev
 type AsyncOperation_ApprovalStatus struct {
 	// The current state of the approval.
 	State AsyncOperation_ApprovalStatus_State `protobuf:"varint,1,opt,name=state,proto3,enum=temporal.api.cloud.operation.v1.AsyncOperation_ApprovalStatus_State" json:"state,omitempty"`
 	// The outcome of the approval.
-	// Will elaborate more on why the required approvals were approved, rejected or expired.
+	// Explains why the required approvals were approved, rejected or expired.
 	Outcome string `protobuf:"bytes,2,opt,name=outcome,proto3" json:"outcome,omitempty"`
 }
 

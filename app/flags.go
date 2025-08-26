@@ -16,7 +16,9 @@ const (
 	ResourceVersionFlagName    = "resource-version"
 	APIKeyFlagName             = "api-key"
 	InsecureConnectionFlagName = "insecure"
+	TLSServerNameFlagName      = "tls-server-name"
 	EnableDebugLogsFlagName    = "enable-debug-logs"
+	IdempotentFlagName         = "idempotent"
 	AuthenticationFlagCategory = "Authentication:"
 
 	// APIKeyVersionTag indicates the state of API keys. This should be removed when fully released.
@@ -81,9 +83,20 @@ var (
 		// and thus may require the use of this.
 		Hidden: true,
 	}
+	TLSServerNameFlag = &cli.StringFlag{
+		Name:     TLSServerNameFlagName,
+		Usage:    "Override the TLS server name for certificate validation (useful for connecting through proxies)",
+		EnvVars:  []string{"TEMPORAL_CLOUD_TLS_SERVER_NAME"},
+		Category: AuthenticationFlagCategory,
+	}
 	EnableDebugLogsFlag = &cli.BoolFlag{
 		Name:    EnableDebugLogsFlagName,
 		Usage:   "A flag to enable debug logs",
 		EnvVars: []string{"TEMPORAL_CLOUD_ENABLE_DEBUG_LOGS"},
+	}
+	IdempotentFlag = &cli.BoolFlag{
+		Name:    IdempotentFlagName,
+		Usage:   "A flag to not error if there are no changes to the resource",
+		EnvVars: []string{"TEMPORAL_CLOUD_IDEMPOTENT"},
 	}
 )

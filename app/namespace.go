@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/mail"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -44,6 +45,7 @@ const (
 	sinkRegionFlagName               = "region"
 	disableFailoverFlagName          = "disable-auto-failover"
 	enableDeleteProtectionFlagName   = "enable-delete-protection"
+	tagFlagName                      = "tag"
 )
 
 const (
@@ -158,6 +160,12 @@ var (
 		Aliases:  []string{"re"},
 		Required: false,
 	}
+	connectivityRuleIdsFlag = &cli.StringSliceFlag{
+		Name:     connectivityRuleIdsFlagName,
+		Usage:    "The list of connectivity rule IDs, can be used in create namespace and update namespace. example: --ids id1 --ids id2 --ids id3",
+		Aliases:  []string{"ids"},
+		Required: false,
+	}
 )
 
 type NamespaceClient struct {
@@ -218,12 +226,13 @@ func (c *NamespaceClient) deleteNamespace(ctx *cli.Context, n *namespace.Namespa
 	return PrintProto(res)
 }
 
-func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.UserNamespacePermissions) error {
+func (c *NamespaceClient) createNamespace(n *namespace.Namespace, p []*auth.UserNamespacePermissions, tags map[string]string) error {
 	res, err := c.client.CreateNamespace(c.ctx, &namespaceservice.CreateNamespaceRequest{
 		RequestId:                n.RequestId,
 		Namespace:                n.Namespace,
 		Spec:                     n.Spec,
 		UserNamespacePermissions: p,
+		Tags:                     tags,
 	})
 	if err != nil {
 		return err
@@ -344,10 +353,31 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 		Spec:            n.Spec,
 	})
 	if err != nil {
+		if isNothingChangedErr(ctx, err) {
+			return nil
+		}
 		return err
 	}
 
 	return PrintProto(res)
+}
+
+func (c *NamespaceClient) updateNamespaceTags(ctx *cli.Context, tagsToUpsert map[string]string, tagsToRemove []string) error {
+	namespace := ctx.String(NamespaceFlagName)
+	if len(namespace) == 0 {
+		return fmt.Errorf("namespace is required")
+	}
+
+	res, err := c.cloudAPIClient.UpdateNamespaceTags(c.ctx, &cloudservice.UpdateNamespaceTagsRequest{
+		Namespace:        namespace,
+		TagsToUpsert:     tagsToUpsert,
+		TagsToRemove:     tagsToRemove,
+		AsyncOperationId: ctx.String(RequestIDFlagName),
+	})
+	if err != nil {
+		return err
+	}
+	return PrintProto(res.GetAsyncOperation())
 }
 
 func (c *NamespaceClient) renameSearchAttribute(ctx *cli.Context, n *namespace.Namespace, existingName string, newName string) error {
@@ -494,6 +524,87 @@ func ReadCertFilters(ctx *cli.Context) ([]byte, error) {
 	return certFilterBytes, nil
 }
 
+func getCreateNamespaceFlags() []cli.Flag {
+	baseFlags := []cli.Flag{
+		RequestIDFlag,
+		CaCertificateFlag,
+		&cli.StringFlag{
+			Name:     NamespaceFlagName,
+			Usage:    "The namespace hosted on temporal cloud",
+			Aliases:  []string{"n"},
+			Required: true,
+		},
+		&cli.StringSliceFlag{
+			Name:     namespaceRegionFlagName,
+			Usage:    "Create namespace in specified regions; if multiple regions are selected, the first one will be the active region. See 'tcld account list-regions' to get a list of available regions for your account",
+			Aliases:  []string{"re"},
+			Required: true,
+		},
+		&cli.IntFlag{
+			Name:    RetentionDaysFlagName,
+			Usage:   "The retention of the namespace in days",
+			Aliases: []string{"rd"},
+			Value:   30,
+		},
+		&cli.StringFlag{
+			Name:  authMethodFlagName,
+			Usage: "The authentication method to use for the namespace (e.g. 'mtls', 'api_key')",
+			Value: AuthMethodMTLS,
+		},
+		&cli.PathFlag{
+			Name:    CaCertificateFileFlagName,
+			Usage:   "The path to the ca pem file",
+			Aliases: []string{"cf"},
+		},
+		&cli.PathFlag{
+			Name:    certificateFilterFileFlagName,
+			Usage:   `Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
+			Aliases: []string{"cff"},
+		},
+		&cli.StringFlag{
+			Name:    certificateFilterInputFlagName,
+			Usage:   `JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
+			Aliases: []string{"cfi"},
+		},
+		&cli.StringSliceFlag{
+			Name:    searchAttributeFlagName,
+			Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
+			Aliases: []string{"sa"},
+		},
+		&cli.StringSliceFlag{
+			Name:    userNamespacePermissionFlagName,
+			Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
+			Aliases: []string{"p"},
+		},
+		&cli.BoolFlag{
+			Name:    enableDeleteProtectionFlagName,
+			Usage:   "Enable delete protection on the namespace",
+			Aliases: []string{"edp"},
+		},
+		codecEndpointFlag,
+		codecPassAccessTokenFlag,
+		codecIncludeCredentialsFlag,
+		&cli.StringFlag{
+			Name:    cloudProviderFlagName,
+			Usage:   `Cloud provider for the namespace to be created for, currently support [aws, gcp].  For this version, if not specified, we default to aws`,
+			Aliases: []string{"cp"},
+			// this is a temporary solution, we will have a follow up version update to make the cloud provider mandatory
+			Value: CloudProviderAWS,
+		},
+		&cli.StringSliceFlag{
+			Name:    tagFlagName,
+			Usage:   "Add tags to the namespace (format: key=value). Flag can be used multiple times.",
+			Aliases: []string{"t"},
+		},
+	}
+
+	if IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
+		baseFlags = append(baseFlags, connectivityRuleIdsFlag)
+	}
+
+	return baseFlags
+}
+
 func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut, error) {
 	var c *NamespaceClient
 	subCommands := []*cli.Command{
@@ -501,76 +612,12 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Name:    "create",
 			Usage:   "Create a temporal namespace",
 			Aliases: []string{"c"},
-			Flags: []cli.Flag{
-				RequestIDFlag,
-				CaCertificateFlag,
-				&cli.StringFlag{
-					Name:     NamespaceFlagName,
-					Usage:    "The namespace hosted on temporal cloud",
-					Aliases:  []string{"n"},
-					Required: true,
-				},
-				&cli.StringSliceFlag{
-					Name:     namespaceRegionFlagName,
-					Usage:    "Create namespace in specified regions; if multiple regions are selected, the first one will be the active region. See 'tcld account list-regions' to get a list of available regions for your account",
-					Aliases:  []string{"re"},
-					Required: true,
-				},
-				&cli.IntFlag{
-					Name:    RetentionDaysFlagName,
-					Usage:   "The retention of the namespace in days",
-					Aliases: []string{"rd"},
-					Value:   30,
-				},
-				&cli.StringFlag{
-					Name:  authMethodFlagName,
-					Usage: "The authentication method to use for the namespace (e.g. 'mtls', 'api_key')",
-					Value: AuthMethodMTLS,
-				},
-				&cli.PathFlag{
-					Name:    CaCertificateFileFlagName,
-					Usage:   "The path to the ca pem file",
-					Aliases: []string{"cf"},
-				},
-				&cli.PathFlag{
-					Name:    certificateFilterFileFlagName,
-					Usage:   `Path to a JSON file that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
-					Aliases: []string{"cff"},
-				},
-				&cli.StringFlag{
-					Name:    certificateFilterInputFlagName,
-					Usage:   `JSON that defines the certificate filters that will be added to the namespace. Sample JSON: { "filters": [ { "commonName": "test1" } ] }`,
-					Aliases: []string{"cfi"},
-				},
-				&cli.StringSliceFlag{
-					Name:    searchAttributeFlagName,
-					Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"name=type\"; valid types are: %v", getSearchAttributeTypes()),
-					Aliases: []string{"sa"},
-				},
-				&cli.StringSliceFlag{
-					Name:    userNamespacePermissionFlagName,
-					Usage:   fmt.Sprintf("Flag can be used multiple times; value must be \"email=permission\"; valid permissions are: %v", getNamespacePermissionTypes()),
-					Aliases: []string{"p"},
-				},
-				&cli.BoolFlag{
-					Name:    enableDeleteProtectionFlagName,
-					Usage:   "Enable delete protection on the namespace",
-					Aliases: []string{"edp"},
-				},
-				codecEndpointFlag,
-				codecPassAccessTokenFlag,
-				codecIncludeCredentialsFlag,
-				&cli.StringFlag{
-					Name:     cloudProviderFlagName,
-					Usage:    `Cloud provider for the namespace to be created for, currently support [aws, gcp].`,
-					Aliases:  []string{"cp"},
-					Required: true,
-				},
-			},
+			Flags:   getCreateNamespaceFlags(),
 			Action: func(ctx *cli.Context) error {
 				n := &namespace.Namespace{
 					RequestId: ctx.String(RequestIDFlagName),
 					Namespace: ctx.String(NamespaceFlagName),
+					Spec:      &namespace.NamespaceSpec{},
 				}
 
 				regions := ctx.StringSlice(namespaceRegionFlagName)
@@ -580,16 +627,52 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				if len(regions) > 2 {
 					return fmt.Errorf("namespace can only be replicated up to 2 regions")
 				}
-				n.Spec = &namespace.NamespaceSpec{
-					PassiveRegions: regions[1:],
+
+				// Check if any region has cloud provider prefix
+				hasCloudPrefix := false
+				var regionIDs []string
+				for _, region := range regions {
+					if strings.HasPrefix(region, CloudProviderAWS) || strings.HasPrefix(region, CloudProviderGCP) {
+						hasCloudPrefix = true
+						regionIDs = append(regionIDs, region)
+					} else {
+						cloudProvider := ctx.String(cloudProviderFlagName)
+						if len(cloudProvider) == 0 {
+							return fmt.Errorf("namespace cloud provider is required when regions don't have cloud provider prefix")
+						}
+						regionIDs = append(regionIDs, fmt.Sprintf("%s-%s", cloudProvider, region))
+					}
 				}
 
-				cloudProvider := ctx.String(cloudProviderFlagName)
-				regionId, err := getRegionId(cloudProvider, regions[0])
+				// If any region has cloud prefix, validate all regions have the same prefix
+				if hasCloudPrefix {
+					for _, region := range regions {
+						if !strings.HasPrefix(region, CloudProviderAWS) && !strings.HasPrefix(region, CloudProviderGCP) {
+							return fmt.Errorf("all regions must have the same cloud provider prefix. Found %s ", region)
+						}
+					}
+				}
+
+				// Set active region
+				activeRegionID := regionIDs[0]
+				activeRegion, err := regionIDFromString(activeRegionID)
 				if err != nil {
 					return err
 				}
-				n.Spec.RegionId = &regionId
+				n.Spec.RegionId = activeRegion
+
+				// Set passive regions if any
+				if len(regions) > 1 {
+					passiveRegionIDs := make([]*common.RegionID, len(regionIDs)-1)
+					for i, regionID := range regionIDs[1:] {
+						passiveRegionID, err := regionIDFromString(regionID)
+						if err != nil {
+							return err
+						}
+						passiveRegionIDs[i] = passiveRegionID
+					}
+					n.Spec.PassiveRegionIds = passiveRegionIDs
+				}
 
 				authMethod, err := toAuthMethod(ctx.String(authMethodFlagName))
 				if err != nil {
@@ -681,7 +764,26 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					EnableDeleteProtection: ctx.Bool(enableDeleteProtectionFlagName),
 				}
 
-				return c.createNamespace(n, unp)
+				connectivityRuleIds := ctx.StringSlice(connectivityRuleIdsFlagName)
+				if len(connectivityRuleIds) > 0 {
+					n.Spec.ConnectivityRuleIds = connectivityRuleIds
+				}
+
+				tags := ctx.StringSlice(tagFlagName)
+				tagsToCreate := make(map[string]string)
+				for _, tag := range tags {
+					parts := strings.Split(tag, "=")
+					if len(parts) != 2 {
+						return fmt.Errorf("invalid tag format '%s', must be 'key=value'", tag)
+					}
+					key := parts[0]
+					if _, exists := tagsToCreate[key]; exists {
+						return fmt.Errorf("duplicate tag key '%s' found", key)
+					}
+					tagsToCreate[key] = parts[1]
+				}
+
+				return c.createNamespace(n, unp, tagsToCreate)
 			},
 		},
 		{
@@ -801,6 +903,10 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 						if enable {
 							if n.Spec.Lifecycle != nil && n.Spec.Lifecycle.EnableDeleteProtection {
+								if ctx.Bool(IdempotentFlagName) {
+									return nil
+								}
+
 								return errors.New("delete protection is already enabled")
 							}
 							n.Spec.Lifecycle = &namespace.LifecycleSpec{
@@ -808,6 +914,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							}
 						} else {
 							if n.Spec.Lifecycle == nil || !n.Spec.Lifecycle.EnableDeleteProtection {
+								if ctx.Bool(IdempotentFlagName) {
+									return nil
+								}
 								return errors.New("delete protection is already disabled")
 							}
 							y, err := ConfirmPrompt(ctx, "disabling namespace delete protection may be prone to accidental deletion. confirm?")
@@ -862,7 +971,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Name:    "list",
 			Usage:   "List all known namespaces",
 			Aliases: []string{"l"},
-			Flags:   []cli.Flag{},
 			Action: func(ctx *cli.Context) error {
 				return c.listNamespaces()
 			},
@@ -935,6 +1043,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 						if n.Spec.AcceptedClientCa == bundle {
+							if ctx.Bool(IdempotentFlagName) {
+								return nil
+							}
 							return errors.New("nothing to change")
 						}
 						n.Spec.AcceptedClientCa = bundle
@@ -982,6 +1093,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 						if n.Spec.AcceptedClientCa == bundle {
+							if ctx.Bool(IdempotentFlagName) {
+								return nil
+							}
 							return errors.New("nothing to change")
 						}
 						n.Spec.AcceptedClientCa = bundle
@@ -1013,6 +1127,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 						if n.Spec.AcceptedClientCa == cert {
+							if ctx.Bool(IdempotentFlagName) {
+								return nil
+							}
 							return errors.New("nothing to change")
 						}
 						n.Spec.AcceptedClientCa = cert
@@ -1050,6 +1167,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 						if n.Spec.AuthMethod == authMethod {
+							if ctx.Bool(IdempotentFlagName) {
+								return nil
+							}
 							return errors.New("nothing to change")
 						}
 						if disruptiveChange(n.Spec.AuthMethod, authMethod) {
@@ -1462,6 +1582,34 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					},
 				},
 				{
+					Name:    "remove",
+					Usage:   "Remove an existing namespace custom search attribute",
+					Aliases: []string{"rm"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RequestIDFlag,
+						ResourceVersionFlag,
+						&cli.StringFlag{
+							Name:     "search-attribute",
+							Usage:    "The name of the search attribute to remove",
+							Aliases:  []string{"sa"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+						if err != nil {
+							return err
+						}
+						attrName := ctx.String("search-attribute")
+						if _, exists := n.Spec.SearchAttributes[attrName]; !exists {
+							return fmt.Errorf("search attribute with name '%s' does not exist", attrName)
+						}
+						delete(n.Spec.SearchAttributes, attrName)
+						return c.updateNamespace(ctx, n)
+					},
+				},
+				{
 					Name:    "rename",
 					Usage:   "Update the name of an existing custom search attribute",
 					Aliases: []string{"rn"},
@@ -1583,6 +1731,65 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				}
 				fmt.Println("No changes to apply to Namespace:", ctx.String(NamespaceFlagName))
 				return nil
+			},
+		},
+		{
+			Name:    "tags",
+			Usage:   "Manage namespace tags",
+			Aliases: []string{"t"},
+			Subcommands: []*cli.Command{
+				{
+					Name:    "upsert",
+					Usage:   "Add new tags or update existing tag values",
+					Aliases: []string{"u"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RequestIDFlag,
+						&cli.StringSliceFlag{
+							Name:     "tag",
+							Usage:    "Add new or update existing namespace tags (format: key=value). Flag can be used multiple times.",
+							Aliases:  []string{"t"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						tags := ctx.StringSlice("tag")
+
+						tagsToUpsert := make(map[string]string)
+						for _, tag := range tags {
+							parts := strings.Split(tag, "=")
+							if len(parts) != 2 {
+								return fmt.Errorf("invalid tag format '%s', must be 'key=value'", tag)
+							}
+							key := parts[0]
+							if _, exists := tagsToUpsert[key]; exists {
+								return fmt.Errorf("duplicate tag key '%s' found", key)
+							}
+							tagsToUpsert[key] = parts[1]
+						}
+
+						return c.updateNamespaceTags(ctx, tagsToUpsert, nil)
+					},
+				},
+				{
+					Name:    "remove",
+					Usage:   "Remove existing tags by key",
+					Aliases: []string{"rm"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						RequestIDFlag,
+						&cli.StringSliceFlag{
+							Name:     "tag-key",
+							Usage:    "Remove namespace tags by key. Flag can be used multiple times.",
+							Aliases:  []string{"tk"},
+							Required: true,
+						},
+					},
+					Action: func(ctx *cli.Context) error {
+						keysToRemove := ctx.StringSlice("tag-key")
+						return c.updateNamespaceTags(ctx, nil, keysToRemove)
+					},
+				},
 			},
 		},
 	}
@@ -2022,13 +2229,47 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 	exportS3Commands.Subcommands = append(exportS3Commands.Subcommands, exportGeneralCommands...)
 	exportCommand.Subcommands = append(exportCommand.Subcommands, exportS3Commands)
 
-	// TODO: remove GCP sink feature flag check when out of pre-release
-	if IsFeatureEnabled(GCPSinkFeatureFlag) {
-		exportGCSCommands.Subcommands = append(exportGCSCommands.Subcommands, exportGeneralCommands...)
-		exportCommand.Subcommands = append(exportCommand.Subcommands, exportGCSCommands)
+	exportGCSCommands.Subcommands = append(exportGCSCommands.Subcommands, exportGeneralCommands...)
+	exportCommand.Subcommands = append(exportCommand.Subcommands, exportGCSCommands)
+
+	coonectivityRuleCommand := &cli.Command{
+		Name:    "set-connectivity-rules",
+		Usage:   "set the connectivity rules for a namespace",
+		Aliases: []string{"scrs"},
+		Flags: []cli.Flag{
+			NamespaceFlag,
+			connectivityRuleIdsFlag,
+			&cli.BoolFlag{
+				Name:  "remove-all",
+				Usage: "Acknowledge that all connectivity rules will be removed, enabling connectivity from any source",
+			},
+		},
+		Action: func(ctx *cli.Context) error {
+			n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+			if err != nil {
+				return err
+			}
+			connectivityRuleIds := ctx.StringSlice(connectivityRuleIdsFlagName)
+			if len(connectivityRuleIds) == 0 && !ctx.Bool("remove-all") {
+				return fmt.Errorf("connectivity rule ids must be provided or --remove-all must be used")
+			}
+			if ctx.Bool("remove-all") && len(connectivityRuleIds) > 0 {
+				return fmt.Errorf("connectivity rule ids must not be provided when --remove-all is used")
+			}
+			if reflect.DeepEqual(n.Spec.ConnectivityRuleIds, connectivityRuleIds) {
+				return fmt.Errorf("no connectivity rule changes to apply")
+			}
+
+			n.Spec.ConnectivityRuleIds = connectivityRuleIds
+			return c.updateNamespace(ctx, n)
+		},
 	}
 
 	subCommands = append(subCommands, exportCommand)
+
+	if IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
+		subCommands = append(subCommands, coonectivityRuleCommand)
+	}
 
 	command := &cli.Command{
 		Name:    "namespace",
@@ -2145,18 +2386,24 @@ func disruptiveChange(old namespace.AuthMethod, new namespace.AuthMethod) bool {
 	return old != namespace.AUTH_METHOD_RESTRICTED && new != namespace.AUTH_METHOD_API_KEY_OR_MTLS
 }
 
-func getRegionId(cloudProvider, activeRegion string) (common.RegionID, error) {
-	var regionId common.RegionID
-	switch strings.ToLower(cloudProvider) {
-	case CloudProviderAWS:
-		regionId.Provider = common.CLOUD_PROVIDER_AWS
-	case CloudProviderGCP:
-		regionId.Provider = common.CLOUD_PROVIDER_GCP
+// regionIDFromString parses a region string and returns a RegionID. It must be in the format "<provider>-<region>".
+func regionIDFromString(region string) (*common.RegionID, error) {
+	switch {
+	case strings.HasPrefix(region, CloudProviderAWS+"-"):
+		awsRegion := region[len(CloudProviderAWS)+1:]
+		return &common.RegionID{
+			Provider: common.CLOUD_PROVIDER_AWS,
+			Name:     awsRegion,
+		}, nil
+	case strings.HasPrefix(region, CloudProviderGCP+"-"):
+		gcpRegion := region[len(CloudProviderGCP)+1:]
+		return &common.RegionID{
+			Provider: common.CLOUD_PROVIDER_GCP,
+			Name:     gcpRegion,
+		}, nil
 	default:
-		return regionId, fmt.Errorf("unknown cloud provider specified, the supported cloud providers: [%s]", strings.Join([]string{CloudProviderAWS, CloudProviderGCP}, ","))
+		return nil, fmt.Errorf("invalid region: %s", region)
 	}
-	regionId.Name = activeRegion
-	return regionId, nil
 }
 
 func toAuthMethod(m string) (namespace.AuthMethod, error) {
