@@ -15,7 +15,7 @@ var (
 	featureflagFileName = "feature.json"
 )
 
-var supportFeatureFlags = []string{}
+var supportFeatureFlags = []string{GCPSinkFeatureFlag}
 
 type FeatureFlag struct {
 	Name  string `json:"Name"`
