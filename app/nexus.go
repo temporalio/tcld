@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+
 	"reflect"
 
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
@@ -348,8 +349,10 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 	}
 	return CommandOut{
 		Command: &cli.Command{
-			Name:    "nexus",
-			Aliases: []string{"nxs"},
+			Name:        "nexus",
+			Aliases:     []string{"nxs"},
+			Usage:       "Manage Nexus resources in Temporal Cloud",
+			Description: "These commands manage Nexus resources in Temporal Cloud.",
 			Before: func(ctx *cli.Context) error {
 				var err error
 				c, err = getNexusClientFn(ctx)
@@ -357,9 +360,10 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 			},
 			Subcommands: []*cli.Command{
 				{
-					Name:    "endpoint",
-					Aliases: []string{"ep"},
-					Usage:   "Commands for managing Nexus Endpoints (EXPERIMENTAL)",
+					Name:        "endpoint",
+					Aliases:     []string{"ep"},
+					Usage:       "Manage Nexus Endpoints in Temporal Cloud (EXPERIMENTAL)",
+					Description: "These commands manage Nexus Endpoints in Temporal Cloud.",
 					Subcommands: []*cli.Command{
 						{
 							Name:        "get",
@@ -483,14 +487,16 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 							},
 						},
 						{
-							Name:    "allowed-namespace",
-							Aliases: []string{"an"},
-							Usage:   "Allowed namespace operations for a Nexus Endpoint (EXPERIMENTAL)",
+							Name:        "allowed-namespace",
+							Aliases:     []string{"an"},
+							Usage:       "Allowed namespace operations for a Nexus Endpoint (EXPERIMENTAL)",
+							Description: "These commands manage the allowed namespaces for a Nexus Endpoint",
 							Subcommands: []*cli.Command{
 								{
-									Name:    "add",
-									Aliases: []string{"a"},
-									Usage:   "Add allowed namespaces to a Nexus Endpoint (EXPERIMENTAL)",
+									Name:        "add",
+									Aliases:     []string{"a"},
+									Usage:       "Add allowed namespaces to a Nexus Endpoint (EXPERIMENTAL)",
+									Description: "This command adds allowed namespaces to a Nexus Endpoint",
 									Flags: []cli.Flag{
 										endpointNameFlag,
 										namespaceFlag,
@@ -519,9 +525,10 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 									},
 								},
 								{
-									Name:    "list",
-									Aliases: []string{"l"},
-									Usage:   "List allowed namespaces of a Nexus Endpoint (EXPERIMENTAL)",
+									Name:        "list",
+									Aliases:     []string{"l"},
+									Usage:       "List allowed namespaces of a Nexus Endpoint (EXPERIMENTAL)",
+									Description: "This command lists the allowed namespaces of a Nexus Endpoint",
 									Flags: []cli.Flag{
 										endpointNameFlag,
 									},
@@ -542,9 +549,10 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 									},
 								},
 								{
-									Name:    "set",
-									Aliases: []string{"s"},
-									Usage:   "Set allowed namespaces of a Nexus Endpoint (EXPERIMENTAL)",
+									Name:        "set",
+									Aliases:     []string{"s"},
+									Usage:       "Set allowed namespaces of a Nexus Endpoint (EXPERIMENTAL)",
+									Description: "This command sets the allowed namespaces of a Nexus Endpoint",
 									Flags: []cli.Flag{
 										endpointNameFlag,
 										namespaceFlag,
@@ -573,9 +581,10 @@ func NewNexusCommand(getNexusClientFn GetNexusClientFn) (CommandOut, error) {
 									},
 								},
 								{
-									Name:    "remove",
-									Aliases: []string{"r"},
-									Usage:   "Remove allowed namespaces from a Nexus Endpoint (EXPERIMENTAL)",
+									Name:        "remove",
+									Aliases:     []string{"r"},
+									Usage:       "Remove allowed namespaces from a Nexus Endpoint (EXPERIMENTAL)",
+									Description: "This command removes allowed namespaces from a Nexus Endpoint",
 									Flags: []cli.Flag{
 										endpointNameFlag,
 										namespaceFlag,
