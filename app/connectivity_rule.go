@@ -118,12 +118,6 @@ func NewConnectivityRuleCommand(getConnectivityRuleClientFn GetConnectivityRuleC
 		Required: false,
 	}
 
-	if !IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
-		return CommandOut{
-			Command: nil,
-		}, nil
-	}
-
 	return CommandOut{
 		Command: &cli.Command{
 			Name:    "connectivity-rule",

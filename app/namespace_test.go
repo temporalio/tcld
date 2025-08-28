@@ -42,11 +42,6 @@ type NamespaceTestSuite struct {
 }
 
 func (s *NamespaceTestSuite) SetupTest() {
-	if !IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
-		err := toggleFeature(ConnectivityRuleFeatureFlag)
-		s.Require().NoError(err)
-	}
-
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = namespaceservicemock.NewMockNamespaceServiceClient(s.mockCtrl)
 	s.mockAuthService = authservicemock.NewMockAuthServiceClient(s.mockCtrl)

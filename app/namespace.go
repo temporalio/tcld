@@ -596,10 +596,7 @@ func getCreateNamespaceFlags() []cli.Flag {
 			Usage:   "Add tags to the namespace (format: key=value). Flag can be used multiple times.",
 			Aliases: []string{"t"},
 		},
-	}
-
-	if IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
-		baseFlags = append(baseFlags, connectivityRuleIdsFlag)
+		connectivityRuleIdsFlag,
 	}
 
 	return baseFlags
@@ -2267,9 +2264,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 	subCommands = append(subCommands, exportCommand)
 
-	if IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
-		subCommands = append(subCommands, coonectivityRuleCommand)
-	}
+	subCommands = append(subCommands, coonectivityRuleCommand)
 
 	command := &cli.Command{
 		Name:    "namespace",
