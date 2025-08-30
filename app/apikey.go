@@ -211,7 +211,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:    "duration",
-							Usage:   "the duration from now when the apikey will expire, will be ignored if expiry flag is set, examples: '2.5y', '30d', '4d12h'",
+							Usage:   "the duration from now when the apikey will expire, will be ignored if expiry flag is set, examples: '1.5y', '30d', '4d12h'",
 							Aliases: []string{"d"},
 						},
 						&cli.TimestampFlag{
