@@ -46,7 +46,6 @@ type CreateNamespaceRequest struct {
 	// this request will be assigned to admin role of the namespace
 	IdentityNamespacePermissions []*v11.IdentityNamespacePermissions `protobuf:"bytes,5,rep,name=identity_namespace_permissions,json=identityNamespacePermissions,proto3" json:"identity_namespace_permissions,omitempty"`
 	// the tags to add to the namespace - can be set by global admins or account owners only
-	// temporal:dev
 	Tags map[string]string `protobuf:"bytes,6,rep,name=tags,proto3" json:"tags,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
