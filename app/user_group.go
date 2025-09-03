@@ -222,17 +222,28 @@ func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string,
 	return PrintProto(resp.GetAsyncOperation())
 }
 
-// createGroup creates a new user group with the specified display name and account role
-func (c *UserGroupClient) createGroup(_ *cli.Context, displayName string, accountRole string) error {
+// createGroup creates a new user group with the specified display name, account role, and namespace roles
+func (c *UserGroupClient) createGroup(_ *cli.Context, displayName string, accountRole string, nsRoles []string) error {
 	aRole := accountRoleToAccess(accountRole)
 	if aRole == nil {
 		return fmt.Errorf("Invalid account role: %s", accountRole)
 	}
 
+	// Process namespace roles
+	nsAccess := map[string]*identity.NamespaceAccess{}
+	for _, role := range nsRoles {
+		name, access := nsRoleToAccess(role)
+		if access == nil {
+			return fmt.Errorf("Invalid namespace role: %s", role)
+		}
+		nsAccess[name] = access
+	}
+
 	spec := &identity.UserGroupSpec{
 		DisplayName: displayName,
 		Access: &identity.Access{
-			AccountAccess: aRole,
+			AccountAccess:     aRole,
+			NamespaceAccesses: nsAccess,
 		},
 		GroupType: &identity.UserGroupSpec_CloudGroup{
 			CloudGroup: &identity.CloudGroupSpec{},
@@ -433,9 +444,14 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 							Usage:    "account role (admin, read, developer, owner, financeadmin, none)",
 							Required: true,
 						},
+						&cli.StringSliceFlag{
+							Name:    namespaceRoleFlagName,
+							Usage:   "namespace roles",
+							Aliases: []string{"nr"},
+						},
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.createGroup(ctx, ctx.String("display-name"), ctx.String(accountRoleFlagName))
+						return c.createGroup(ctx, ctx.String("display-name"), ctx.String(accountRoleFlagName), ctx.StringSlice(namespaceRoleFlagName))
 					},
 				},
 				{

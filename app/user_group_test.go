@@ -122,6 +122,7 @@ func (s *UserGroupTestSuite) TestCreateGroup() {
 				AccountAccess: &identity.AccountAccess{
 					Role: identity.ROLE_ADMIN,
 				},
+				NamespaceAccesses: map[string]*identity.NamespaceAccess{},
 			},
 			GroupType: &identity.UserGroupSpec_CloudGroup{
 				CloudGroup: &identity.CloudGroupSpec{},
@@ -134,8 +135,41 @@ func (s *UserGroupTestSuite) TestCreateGroup() {
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("user-group", "create", "--display-name", "Test Group", "--account-role", "admin"))
 
+	// Test successful create with namespace roles
+	s.mockCloudService.EXPECT().CreateUserGroup(gomock.Any(), &cloudservice.CreateUserGroupRequest{
+		Spec: &identity.UserGroupSpec{
+			DisplayName: "Test Group with NS",
+			Access: &identity.Access{
+				AccountAccess: &identity.AccountAccess{
+					Role: identity.ROLE_DEVELOPER,
+				},
+				NamespaceAccesses: map[string]*identity.NamespaceAccess{
+					"test-namespace": {
+						Permission: identity.PERMISSION_ADMIN,
+					},
+					"another-namespace": {
+						Permission: identity.PERMISSION_READ,
+					},
+				},
+			},
+			GroupType: &identity.UserGroupSpec_CloudGroup{
+				CloudGroup: &identity.CloudGroupSpec{},
+			},
+		},
+	}).Return(&cloudservice.CreateUserGroupResponse{
+		AsyncOperation: &operation.AsyncOperation{
+			Id: "op1",
+		},
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("user-group", "create", "--display-name", "Test Group with NS", "--account-role", "developer", "--namespace-role", "test-namespace-admin", "--namespace-role", "another-namespace-read"))
+
+	// Test invalid namespace role
+	err := s.RunCmd("user-group", "create", "--display-name", "Test Group", "--account-role", "admin", "--namespace-role", "invalid-role")
+	s.Error(err)
+	s.Contains(err.Error(), "Invalid namespace role: invalid-role")
+
 	// Test invalid account role
-	err := s.RunCmd("user-group", "create", "--display-name", "Test Group", "--account-role", "invalid")
+	err = s.RunCmd("user-group", "create", "--display-name", "Test Group", "--account-role", "invalid")
 	s.Error(err)
 	s.Contains(err.Error(), "Invalid account role: invalid")
 }
