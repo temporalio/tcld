@@ -142,22 +142,6 @@ func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string,
 	if err != nil {
 		return err
 	}
-<<<<<<< HEAD
-	aRole := accountRoleToAccess(accountRole)
-	if aRole == nil {
-		return fmt.Errorf("Invalid account role: %s", accountRole)
-	}
-	group.Group.Spec.Access.AccountAccess = aRole
-	if accountRole == "none" {
-		group.Group.Spec.Access.AccountAccess = nil
-	}
-
-	nsAccess := map[string]*identity.NamespaceAccess{}
-	for _, role := range nsRoles {
-		name, access := nsRoleToAccess(role)
-		if access == nil {
-			return fmt.Errorf("Invalid namespace role: %s", role)
-=======
 
 	// Start with existing namespace accesses if we're appending or removing,
 	// if not appending or removing, set the account role
@@ -216,7 +200,6 @@ func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string,
 				return cli.Exit(fmt.Sprintf("Invalid namespace role: %s", role), 1)
 			}
 			nsAccess[name] = access
->>>>>>> origin/main
 		}
 	}
 
