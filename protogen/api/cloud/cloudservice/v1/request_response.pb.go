@@ -14,6 +14,7 @@ import (
 	v12 "github.com/temporalio/tcld/protogen/api/cloud/namespace/v1"
 	v14 "github.com/temporalio/tcld/protogen/api/cloud/nexus/v1"
 	v11 "github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
+	v19 "github.com/temporalio/tcld/protogen/api/cloud/project/v1"
 	v13 "github.com/temporalio/tcld/protogen/api/cloud/region/v1"
 	v17 "github.com/temporalio/tcld/protogen/api/cloud/usage/v1"
 	io "io"
@@ -4821,6 +4822,7 @@ func (m *DeleteApiKeyResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
+// temporal:dev
 type GetAuditLogsRequest struct {
 	// The requested size of the page to retrieve - optional.
 	// Cannot exceed 1000. Defaults to 100.
@@ -4893,6 +4895,7 @@ func (m *GetAuditLogsRequest) GetEndTimeExclusive() *types.Timestamp {
 	return nil
 }
 
+// temporal:dev
 type GetAuditLogsResponse struct {
 	// The list of audit logs ordered by inserted time, emit time, log_id
 	Logs []*v16.LogRecord `protobuf:"bytes,1,rep,name=logs,proto3" json:"logs,omitempty"`
@@ -5797,6 +5800,7 @@ func (m *ValidateNamespaceExportSinkResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ValidateNamespaceExportSinkResponse proto.InternalMessageInfo
 
+// temporal:dev
 type StartMigrationRequest struct {
 	// The migration specification.
 	Spec *v12.MigrationSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
@@ -5851,6 +5855,7 @@ func (m *StartMigrationRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type StartMigrationResponse struct {
 	// The migration id.
 	MigrationId string `protobuf:"bytes,1,opt,name=migration_id,json=migrationId,proto3" json:"migration_id,omitempty"`
@@ -5904,6 +5909,7 @@ func (m *StartMigrationResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
+// temporal:dev
 type GetMigrationRequest struct {
 	// The migration id.
 	MigrationId string `protobuf:"bytes,1,opt,name=migration_id,json=migrationId,proto3" json:"migration_id,omitempty"`
@@ -5948,6 +5954,7 @@ func (m *GetMigrationRequest) GetMigrationId() string {
 	return ""
 }
 
+// temporal:dev
 type GetMigrationResponse struct {
 	// The migration.
 	Migration *v12.Migration `protobuf:"bytes,1,opt,name=migration,proto3" json:"migration,omitempty"`
@@ -5992,6 +5999,7 @@ func (m *GetMigrationResponse) GetMigration() *v12.Migration {
 	return nil
 }
 
+// temporal:dev
 type GetMigrationsRequest struct {
 	// The requested size of the page to retrieve.
 	// Cannot exceed 1000.
@@ -6048,6 +6056,7 @@ func (m *GetMigrationsRequest) GetPageToken() string {
 	return ""
 }
 
+// temporal:dev
 type GetMigrationsResponse struct {
 	// The list of migrations.
 	Migrations []*v12.Migration `protobuf:"bytes,1,rep,name=migrations,proto3" json:"migrations,omitempty"`
@@ -6101,6 +6110,7 @@ func (m *GetMigrationsResponse) GetNextPageToken() string {
 	return ""
 }
 
+// temporal:dev
 type HandoverNamespaceRequest struct {
 	// The migration id.
 	MigrationId string `protobuf:"bytes,1,opt,name=migration_id,json=migrationId,proto3" json:"migration_id,omitempty"`
@@ -6164,6 +6174,7 @@ func (m *HandoverNamespaceRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type HandoverNamespaceResponse struct {
 	// The async operation.
 	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
@@ -6208,6 +6219,7 @@ func (m *HandoverNamespaceResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
+// temporal:dev
 type ConfirmMigrationRequest struct {
 	// The migration id.
 	MigrationId string `protobuf:"bytes,1,opt,name=migration_id,json=migrationId,proto3" json:"migration_id,omitempty"`
@@ -6262,6 +6274,7 @@ func (m *ConfirmMigrationRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type ConfirmMigrationResponse struct {
 	// The async operation.
 	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
@@ -6306,6 +6319,7 @@ func (m *ConfirmMigrationResponse) GetAsyncOperation() *v11.AsyncOperation {
 	return nil
 }
 
+// temporal:dev
 type AbortMigrationRequest struct {
 	// The migration id.
 	MigrationId string `protobuf:"bytes,1,opt,name=migration_id,json=migrationId,proto3" json:"migration_id,omitempty"`
@@ -6360,6 +6374,7 @@ func (m *AbortMigrationRequest) GetAsyncOperationId() string {
 	return ""
 }
 
+// temporal:dev
 type AbortMigrationResponse struct {
 	// The async operation.
 	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
@@ -6602,8 +6617,8 @@ type GetConnectivityRulesRequest struct {
 	// The page token if this is continuing from another response.
 	// Optional, defaults to empty.
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	// Accept group of connectivity rule ids
-	ConnectivityRuleIds []string `protobuf:"bytes,3,rep,name=connectivity_rule_ids,json=connectivityRuleIds,proto3" json:"connectivity_rule_ids,omitempty"`
+	// Namespace id
+	Namespace string `protobuf:"bytes,3,opt,name=namespace,proto3" json:"namespace,omitempty"`
 }
 
 func (m *GetConnectivityRulesRequest) Reset()      { *m = GetConnectivityRulesRequest{} }
@@ -6652,11 +6667,11 @@ func (m *GetConnectivityRulesRequest) GetPageToken() string {
 	return ""
 }
 
-func (m *GetConnectivityRulesRequest) GetConnectivityRuleIds() []string {
+func (m *GetConnectivityRulesRequest) GetNamespace() string {
 	if m != nil {
-		return m.ConnectivityRuleIds
+		return m.Namespace
 	}
-	return nil
+	return ""
 }
 
 type GetConnectivityRulesResponse struct {
@@ -6712,122 +6727,6 @@ func (m *GetConnectivityRulesResponse) GetNextPageToken() string {
 	return ""
 }
 
-type UpdateConnectivityRuleRequest struct {
-	// The ID of the connectivity rule that need be updated, required.
-	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
-	// The spec of the connectivity rule that needs to be applied as the update, required.
-	Spec *v18.ConnectivityRuleSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
-	// The resource version which should be the same from the the db, required
-	ResourceVersion string `protobuf:"bytes,3,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
-	// The id to use for this async operation.
-	// Optional, if not provided a random id will be generated.
-	AsyncOperationId string `protobuf:"bytes,4,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
-}
-
-func (m *UpdateConnectivityRuleRequest) Reset()      { *m = UpdateConnectivityRuleRequest{} }
-func (*UpdateConnectivityRuleRequest) ProtoMessage() {}
-func (*UpdateConnectivityRuleRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{122}
-}
-func (m *UpdateConnectivityRuleRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *UpdateConnectivityRuleRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_UpdateConnectivityRuleRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *UpdateConnectivityRuleRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateConnectivityRuleRequest.Merge(m, src)
-}
-func (m *UpdateConnectivityRuleRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *UpdateConnectivityRuleRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateConnectivityRuleRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UpdateConnectivityRuleRequest proto.InternalMessageInfo
-
-func (m *UpdateConnectivityRuleRequest) GetConnectivityRuleId() string {
-	if m != nil {
-		return m.ConnectivityRuleId
-	}
-	return ""
-}
-
-func (m *UpdateConnectivityRuleRequest) GetSpec() *v18.ConnectivityRuleSpec {
-	if m != nil {
-		return m.Spec
-	}
-	return nil
-}
-
-func (m *UpdateConnectivityRuleRequest) GetResourceVersion() string {
-	if m != nil {
-		return m.ResourceVersion
-	}
-	return ""
-}
-
-func (m *UpdateConnectivityRuleRequest) GetAsyncOperationId() string {
-	if m != nil {
-		return m.AsyncOperationId
-	}
-	return ""
-}
-
-type UpdateConnectivityRuleResponse struct {
-	// The async operation
-	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
-}
-
-func (m *UpdateConnectivityRuleResponse) Reset()      { *m = UpdateConnectivityRuleResponse{} }
-func (*UpdateConnectivityRuleResponse) ProtoMessage() {}
-func (*UpdateConnectivityRuleResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{123}
-}
-func (m *UpdateConnectivityRuleResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *UpdateConnectivityRuleResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_UpdateConnectivityRuleResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *UpdateConnectivityRuleResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateConnectivityRuleResponse.Merge(m, src)
-}
-func (m *UpdateConnectivityRuleResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *UpdateConnectivityRuleResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateConnectivityRuleResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UpdateConnectivityRuleResponse proto.InternalMessageInfo
-
-func (m *UpdateConnectivityRuleResponse) GetAsyncOperation() *v11.AsyncOperation {
-	if m != nil {
-		return m.AsyncOperation
-	}
-	return nil
-}
-
 type DeleteConnectivityRuleRequest struct {
 	// The ID of the connectivity rule that need be deleted, required.
 	ConnectivityRuleId string `protobuf:"bytes,1,opt,name=connectivity_rule_id,json=connectivityRuleId,proto3" json:"connectivity_rule_id,omitempty"`
@@ -6841,7 +6740,7 @@ type DeleteConnectivityRuleRequest struct {
 func (m *DeleteConnectivityRuleRequest) Reset()      { *m = DeleteConnectivityRuleRequest{} }
 func (*DeleteConnectivityRuleRequest) ProtoMessage() {}
 func (*DeleteConnectivityRuleRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{124}
+	return fileDescriptor_d04330087ace166d, []int{122}
 }
 func (m *DeleteConnectivityRuleRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6899,7 +6798,7 @@ type DeleteConnectivityRuleResponse struct {
 func (m *DeleteConnectivityRuleResponse) Reset()      { *m = DeleteConnectivityRuleResponse{} }
 func (*DeleteConnectivityRuleResponse) ProtoMessage() {}
 func (*DeleteConnectivityRuleResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04330087ace166d, []int{125}
+	return fileDescriptor_d04330087ace166d, []int{123}
 }
 func (m *DeleteConnectivityRuleResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -6929,6 +6828,642 @@ func (m *DeleteConnectivityRuleResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_DeleteConnectivityRuleResponse proto.InternalMessageInfo
 
 func (m *DeleteConnectivityRuleResponse) GetAsyncOperation() *v11.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+// temporal:dev
+type GetProjectsRequest struct {
+	// The requested size of the page to retrieve - optional.
+	// Cannot exceed 1000. Defaults to 100.
+	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// The page token if this is continuing from another response - optional.
+	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+}
+
+func (m *GetProjectsRequest) Reset()      { *m = GetProjectsRequest{} }
+func (*GetProjectsRequest) ProtoMessage() {}
+func (*GetProjectsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{124}
+}
+func (m *GetProjectsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetProjectsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetProjectsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetProjectsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetProjectsRequest.Merge(m, src)
+}
+func (m *GetProjectsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetProjectsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetProjectsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetProjectsRequest proto.InternalMessageInfo
+
+func (m *GetProjectsRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *GetProjectsRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
+// temporal:dev
+type GetProjectsResponse struct {
+	// The list of projects in ascending ids order
+	Projects []*v19.Project `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects,omitempty"`
+	// The next page's token
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (m *GetProjectsResponse) Reset()      { *m = GetProjectsResponse{} }
+func (*GetProjectsResponse) ProtoMessage() {}
+func (*GetProjectsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{125}
+}
+func (m *GetProjectsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetProjectsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetProjectsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetProjectsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetProjectsResponse.Merge(m, src)
+}
+func (m *GetProjectsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetProjectsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetProjectsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetProjectsResponse proto.InternalMessageInfo
+
+func (m *GetProjectsResponse) GetProjects() []*v19.Project {
+	if m != nil {
+		return m.Projects
+	}
+	return nil
+}
+
+func (m *GetProjectsResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
+
+// temporal:dev
+type GetProjectRequest struct {
+	// The id of the project to get
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+}
+
+func (m *GetProjectRequest) Reset()      { *m = GetProjectRequest{} }
+func (*GetProjectRequest) ProtoMessage() {}
+func (*GetProjectRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{126}
+}
+func (m *GetProjectRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetProjectRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetProjectRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetProjectRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetProjectRequest.Merge(m, src)
+}
+func (m *GetProjectRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetProjectRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetProjectRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetProjectRequest proto.InternalMessageInfo
+
+func (m *GetProjectRequest) GetProjectId() string {
+	if m != nil {
+		return m.ProjectId
+	}
+	return ""
+}
+
+// temporal:dev
+type GetProjectResponse struct {
+	// The project
+	Project *v19.Project `protobuf:"bytes,1,opt,name=project,proto3" json:"project,omitempty"`
+}
+
+func (m *GetProjectResponse) Reset()      { *m = GetProjectResponse{} }
+func (*GetProjectResponse) ProtoMessage() {}
+func (*GetProjectResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{127}
+}
+func (m *GetProjectResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetProjectResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetProjectResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetProjectResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetProjectResponse.Merge(m, src)
+}
+func (m *GetProjectResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetProjectResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetProjectResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetProjectResponse proto.InternalMessageInfo
+
+func (m *GetProjectResponse) GetProject() *v19.Project {
+	if m != nil {
+		return m.Project
+	}
+	return nil
+}
+
+// temporal:dev
+type CreateProjectRequest struct {
+	// The spec for the project to create.
+	Spec *v19.ProjectSpec `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
+	// The id to use for this async operation.
+	// Optional, if not provided a random id will be generated.
+	AsyncOperationId string `protobuf:"bytes,2,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *CreateProjectRequest) Reset()      { *m = CreateProjectRequest{} }
+func (*CreateProjectRequest) ProtoMessage() {}
+func (*CreateProjectRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{128}
+}
+func (m *CreateProjectRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CreateProjectRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CreateProjectRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CreateProjectRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateProjectRequest.Merge(m, src)
+}
+func (m *CreateProjectRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *CreateProjectRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateProjectRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateProjectRequest proto.InternalMessageInfo
+
+func (m *CreateProjectRequest) GetSpec() *v19.ProjectSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *CreateProjectRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+// temporal:dev
+type CreateProjectResponse struct {
+	// The id of the project that was created.
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	// The async operation.
+	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,2,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *CreateProjectResponse) Reset()      { *m = CreateProjectResponse{} }
+func (*CreateProjectResponse) ProtoMessage() {}
+func (*CreateProjectResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{129}
+}
+func (m *CreateProjectResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CreateProjectResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CreateProjectResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CreateProjectResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateProjectResponse.Merge(m, src)
+}
+func (m *CreateProjectResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *CreateProjectResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateProjectResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateProjectResponse proto.InternalMessageInfo
+
+func (m *CreateProjectResponse) GetProjectId() string {
+	if m != nil {
+		return m.ProjectId
+	}
+	return ""
+}
+
+func (m *CreateProjectResponse) GetAsyncOperation() *v11.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+// temporal:dev
+type UpdateProjectRequest struct {
+	// The id of the project to update.
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	// The new project specification.
+	Spec *v19.ProjectSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	// The version of the project for which this update is intended for.
+	// The latest version can be found in the GetProject operation response.
+	ResourceVersion string `protobuf:"bytes,3,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	// The id to use for this async operation.
+	// Optional, if not provided a random id will be generated.
+	AsyncOperationId string `protobuf:"bytes,4,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *UpdateProjectRequest) Reset()      { *m = UpdateProjectRequest{} }
+func (*UpdateProjectRequest) ProtoMessage() {}
+func (*UpdateProjectRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{130}
+}
+func (m *UpdateProjectRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateProjectRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateProjectRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateProjectRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateProjectRequest.Merge(m, src)
+}
+func (m *UpdateProjectRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateProjectRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateProjectRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateProjectRequest proto.InternalMessageInfo
+
+func (m *UpdateProjectRequest) GetProjectId() string {
+	if m != nil {
+		return m.ProjectId
+	}
+	return ""
+}
+
+func (m *UpdateProjectRequest) GetSpec() *v19.ProjectSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *UpdateProjectRequest) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *UpdateProjectRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+// temporal:dev
+type UpdateProjectResponse struct {
+	// The async operation.
+	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *UpdateProjectResponse) Reset()      { *m = UpdateProjectResponse{} }
+func (*UpdateProjectResponse) ProtoMessage() {}
+func (*UpdateProjectResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{131}
+}
+func (m *UpdateProjectResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateProjectResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateProjectResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateProjectResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateProjectResponse.Merge(m, src)
+}
+func (m *UpdateProjectResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateProjectResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateProjectResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateProjectResponse proto.InternalMessageInfo
+
+func (m *UpdateProjectResponse) GetAsyncOperation() *v11.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+// temporal:dev
+type DeleteProjectRequest struct {
+	// The id of the project to delete.
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	// The version of the project for which this delete is intended for.
+	// The latest version can be found in the GetProject operation response.
+	ResourceVersion string `protobuf:"bytes,2,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	// The id to use for this async operation.
+	// Optional, if not provided a random id will be generated.
+	AsyncOperationId string `protobuf:"bytes,3,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *DeleteProjectRequest) Reset()      { *m = DeleteProjectRequest{} }
+func (*DeleteProjectRequest) ProtoMessage() {}
+func (*DeleteProjectRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{132}
+}
+func (m *DeleteProjectRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DeleteProjectRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DeleteProjectRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DeleteProjectRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteProjectRequest.Merge(m, src)
+}
+func (m *DeleteProjectRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *DeleteProjectRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteProjectRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteProjectRequest proto.InternalMessageInfo
+
+func (m *DeleteProjectRequest) GetProjectId() string {
+	if m != nil {
+		return m.ProjectId
+	}
+	return ""
+}
+
+func (m *DeleteProjectRequest) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *DeleteProjectRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+// temporal:dev
+type DeleteProjectResponse struct {
+	// The async operation.
+	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *DeleteProjectResponse) Reset()      { *m = DeleteProjectResponse{} }
+func (*DeleteProjectResponse) ProtoMessage() {}
+func (*DeleteProjectResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{133}
+}
+func (m *DeleteProjectResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DeleteProjectResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DeleteProjectResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DeleteProjectResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteProjectResponse.Merge(m, src)
+}
+func (m *DeleteProjectResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *DeleteProjectResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteProjectResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteProjectResponse proto.InternalMessageInfo
+
+func (m *DeleteProjectResponse) GetAsyncOperation() *v11.AsyncOperation {
+	if m != nil {
+		return m.AsyncOperation
+	}
+	return nil
+}
+
+// temporal:ui
+type ResendUserInviteRequest struct {
+	// the id of user.
+	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// Optional, if not provided a random id will be generated.
+	AsyncOperationId string `protobuf:"bytes,2,opt,name=async_operation_id,json=asyncOperationId,proto3" json:"async_operation_id,omitempty"`
+}
+
+func (m *ResendUserInviteRequest) Reset()      { *m = ResendUserInviteRequest{} }
+func (*ResendUserInviteRequest) ProtoMessage() {}
+func (*ResendUserInviteRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{134}
+}
+func (m *ResendUserInviteRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ResendUserInviteRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ResendUserInviteRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ResendUserInviteRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ResendUserInviteRequest.Merge(m, src)
+}
+func (m *ResendUserInviteRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *ResendUserInviteRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ResendUserInviteRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ResendUserInviteRequest proto.InternalMessageInfo
+
+func (m *ResendUserInviteRequest) GetUserId() string {
+	if m != nil {
+		return m.UserId
+	}
+	return ""
+}
+
+func (m *ResendUserInviteRequest) GetAsyncOperationId() string {
+	if m != nil {
+		return m.AsyncOperationId
+	}
+	return ""
+}
+
+// temporal:ui
+type ResendUserInviteResponse struct {
+	// The async operation.
+	AsyncOperation *v11.AsyncOperation `protobuf:"bytes,1,opt,name=async_operation,json=asyncOperation,proto3" json:"async_operation,omitempty"`
+}
+
+func (m *ResendUserInviteResponse) Reset()      { *m = ResendUserInviteResponse{} }
+func (*ResendUserInviteResponse) ProtoMessage() {}
+func (*ResendUserInviteResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04330087ace166d, []int{135}
+}
+func (m *ResendUserInviteResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ResendUserInviteResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ResendUserInviteResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ResendUserInviteResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ResendUserInviteResponse.Merge(m, src)
+}
+func (m *ResendUserInviteResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *ResendUserInviteResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ResendUserInviteResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ResendUserInviteResponse proto.InternalMessageInfo
+
+func (m *ResendUserInviteResponse) GetAsyncOperation() *v11.AsyncOperation {
 	if m != nil {
 		return m.AsyncOperation
 	}
@@ -7060,10 +7595,20 @@ func init() {
 	proto.RegisterType((*GetConnectivityRuleResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetConnectivityRuleResponse")
 	proto.RegisterType((*GetConnectivityRulesRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetConnectivityRulesRequest")
 	proto.RegisterType((*GetConnectivityRulesResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetConnectivityRulesResponse")
-	proto.RegisterType((*UpdateConnectivityRuleRequest)(nil), "temporal.api.cloud.cloudservice.v1.UpdateConnectivityRuleRequest")
-	proto.RegisterType((*UpdateConnectivityRuleResponse)(nil), "temporal.api.cloud.cloudservice.v1.UpdateConnectivityRuleResponse")
 	proto.RegisterType((*DeleteConnectivityRuleRequest)(nil), "temporal.api.cloud.cloudservice.v1.DeleteConnectivityRuleRequest")
 	proto.RegisterType((*DeleteConnectivityRuleResponse)(nil), "temporal.api.cloud.cloudservice.v1.DeleteConnectivityRuleResponse")
+	proto.RegisterType((*GetProjectsRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetProjectsRequest")
+	proto.RegisterType((*GetProjectsResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetProjectsResponse")
+	proto.RegisterType((*GetProjectRequest)(nil), "temporal.api.cloud.cloudservice.v1.GetProjectRequest")
+	proto.RegisterType((*GetProjectResponse)(nil), "temporal.api.cloud.cloudservice.v1.GetProjectResponse")
+	proto.RegisterType((*CreateProjectRequest)(nil), "temporal.api.cloud.cloudservice.v1.CreateProjectRequest")
+	proto.RegisterType((*CreateProjectResponse)(nil), "temporal.api.cloud.cloudservice.v1.CreateProjectResponse")
+	proto.RegisterType((*UpdateProjectRequest)(nil), "temporal.api.cloud.cloudservice.v1.UpdateProjectRequest")
+	proto.RegisterType((*UpdateProjectResponse)(nil), "temporal.api.cloud.cloudservice.v1.UpdateProjectResponse")
+	proto.RegisterType((*DeleteProjectRequest)(nil), "temporal.api.cloud.cloudservice.v1.DeleteProjectRequest")
+	proto.RegisterType((*DeleteProjectResponse)(nil), "temporal.api.cloud.cloudservice.v1.DeleteProjectResponse")
+	proto.RegisterType((*ResendUserInviteRequest)(nil), "temporal.api.cloud.cloudservice.v1.ResendUserInviteRequest")
+	proto.RegisterType((*ResendUserInviteResponse)(nil), "temporal.api.cloud.cloudservice.v1.ResendUserInviteResponse")
 }
 
 func init() {
@@ -7071,191 +7616,198 @@ func init() {
 }
 
 var fileDescriptor_d04330087ace166d = []byte{
-	// 2929 bytes of a gzipped FileDescriptorProto
+	// 3056 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x5c, 0xdd, 0x6f, 0x1c, 0x57,
-	0xd9, 0xf7, 0xd9, 0xf5, 0x47, 0xfc, 0x38, 0x8d, 0xed, 0xf1, 0x67, 0x1c, 0x7b, 0xe3, 0x4c, 0x9a,
-	0xca, 0x49, 0xdb, 0x75, 0xed, 0xbe, 0x2f, 0x0a, 0xa6, 0x2d, 0xac, 0xdd, 0xc6, 0xde, 0x7e, 0xa4,
-	0xe9, 0xd8, 0x4d, 0x11, 0x12, 0x5a, 0x26, 0x3b, 0xa7, 0xdb, 0xc1, 0xbb, 0x33, 0xd3, 0x99, 0x59,
-	0xc7, 0x6b, 0x14, 0xc2, 0x47, 0x51, 0x29, 0x14, 0x5a, 0x84, 0x40, 0xdc, 0x54, 0xdc, 0x20, 0x84,
-	0x2a, 0x50, 0x2f, 0x00, 0xf1, 0x07, 0x20, 0x10, 0x77, 0x8d, 0x84, 0x90, 0x7a, 0x85, 0x88, 0x23,
-	0x24, 0x40, 0xbd, 0xe8, 0x25, 0x17, 0x95, 0x40, 0x73, 0x3e, 0x66, 0x67, 0x66, 0x67, 0xd6, 0xb3,
-	0xdb, 0x3d, 0x69, 0xb9, 0x71, 0x76, 0xce, 0x9c, 0xe7, 0x79, 0x7e, 0xcf, 0xef, 0x7c, 0x3d, 0xe7,
-	0x39, 0x67, 0x02, 0x9f, 0x76, 0x71, 0xcd, 0x32, 0x6d, 0xb5, 0xba, 0xac, 0x5a, 0xfa, 0x72, 0xb9,
-	0x6a, 0xd6, 0x35, 0xfa, 0xd7, 0xc1, 0xf6, 0x9e, 0x5e, 0xc6, 0xcb, 0x7b, 0x2b, 0xcb, 0x36, 0x7e,
-	0xb9, 0x8e, 0x1d, 0xb7, 0x64, 0x63, 0xc7, 0x32, 0x0d, 0x07, 0xe7, 0x2d, 0xdb, 0x74, 0x4d, 0x49,
-	0xe6, 0xa2, 0x79, 0xd5, 0xd2, 0xf3, 0x44, 0x28, 0x1f, 0x14, 0xcd, 0xef, 0xad, 0xcc, 0x9d, 0xae,
-	0x98, 0x66, 0xa5, 0x8a, 0x97, 0x89, 0xc4, 0xb5, 0xfa, 0x8b, 0xcb, 0xae, 0x5e, 0xc3, 0x8e, 0xab,
-	0xd6, 0x2c, 0xaa, 0x64, 0xee, 0xc1, 0x18, 0xfb, 0xa6, 0x85, 0x6d, 0xd5, 0xd5, 0x4d, 0xc3, 0x33,
-	0x5e, 0xc3, 0x8e, 0xa3, 0x56, 0x98, 0xcd, 0xb9, 0x07, 0x62, 0xaa, 0xeb, 0x1a, 0x36, 0x5c, 0xdd,
-	0x6d, 0xb4, 0xd6, 0x8e, 0x53, 0x6e, 0xa8, 0x35, 0xec, 0x58, 0x2a, 0xf5, 0x2c, 0x5c, 0xfd, 0x7c,
-	0x5c, 0x75, 0xbc, 0x5f, 0x77, 0x5a, 0xab, 0x5e, 0x88, 0xa9, 0x6a, 0xe3, 0x4a, 0x2c, 0xe6, 0xfb,
-	0x63, 0xea, 0xaa, 0xe5, 0xb2, 0x59, 0x37, 0xdc, 0x74, 0x0e, 0xaa, 0x75, 0x4d, 0x77, 0xab, 0x66,
-	0x25, 0x1d, 0xe2, 0xba, 0xf7, 0xbe, 0xb5, 0xea, 0xff, 0xc5, 0x35, 0xb4, 0x69, 0x18, 0xb8, 0xec,
-	0xea, 0x7b, 0xba, 0xdb, 0xb0, 0xeb, 0xd5, 0x56, 0x29, 0xf9, 0xeb, 0x08, 0x46, 0x37, 0xb1, 0xfb,
-	0xbc, 0x83, 0x6d, 0x47, 0xa1, 0xdd, 0x40, 0x3a, 0x05, 0xc3, 0x96, 0x5a, 0xc1, 0x25, 0x47, 0x3f,
-	0xc0, 0xb3, 0x68, 0x11, 0x2d, 0x0d, 0x28, 0xc7, 0xbc, 0x82, 0x6d, 0xfd, 0x00, 0x4b, 0x0b, 0x00,
-	0xe4, 0xa5, 0x6b, 0xee, 0x62, 0x63, 0x36, 0xb3, 0x88, 0x96, 0x86, 0x15, 0x52, 0x7d, 0xc7, 0x2b,
-	0x90, 0x26, 0x61, 0x00, 0xd7, 0x54, 0xbd, 0x3a, 0x9b, 0x25, 0x6f, 0xe8, 0x83, 0x34, 0x0f, 0xc3,
-	0x7e, 0xb3, 0xcc, 0xf6, 0x53, 0x19, 0xbf, 0x40, 0xde, 0x83, 0xb1, 0x26, 0x04, 0xda, 0x03, 0xa5,
-	0x35, 0x18, 0xa8, 0x7b, 0x05, 0xb3, 0x68, 0x31, 0xbb, 0x34, 0xb2, 0x7a, 0x6f, 0x3e, 0xa6, 0x2f,
-	0xf2, 0x7e, 0x91, 0xdf, 0x5b, 0xc9, 0x7b, 0xd2, 0x0a, 0x15, 0x91, 0xee, 0x83, 0x51, 0x03, 0xef,
-	0xbb, 0xa5, 0x16, 0x9c, 0xf7, 0x78, 0xc5, 0x57, 0x38, 0x56, 0xf9, 0x3c, 0x9c, 0x60, 0x76, 0xb9,
-	0xe7, 0x33, 0x30, 0xe4, 0xa9, 0x28, 0xe9, 0x1a, 0xf1, 0x7b, 0x58, 0x19, 0xf4, 0x1e, 0x8b, 0x9a,
-	0xfc, 0x94, 0xcf, 0x92, 0x8f, 0xf0, 0x22, 0xf4, 0x7b, 0x2f, 0x49, 0xc5, 0xb4, 0x00, 0x89, 0x84,
-	0x7c, 0x13, 0xc6, 0x37, 0x6c, 0xac, 0xba, 0x38, 0x68, 0xfa, 0x11, 0xe8, 0x77, 0x2c, 0x5c, 0x66,
-	0xea, 0x96, 0xd2, 0xa8, 0xdb, 0xb6, 0x70, 0x59, 0x21, 0x52, 0xd2, 0x03, 0x20, 0xa9, 0x4e, 0xc3,
-	0x28, 0x97, 0xfc, 0xa1, 0xe5, 0xf9, 0x40, 0xbd, 0x1e, 0x23, 0x6f, 0x9e, 0xe5, 0x2f, 0x8a, 0x9a,
-	0xfc, 0x2a, 0x02, 0x29, 0x88, 0x80, 0x79, 0x94, 0xe4, 0xbd, 0xf4, 0x79, 0x18, 0x8d, 0x68, 0x27,
-	0xaa, 0x47, 0x56, 0x97, 0xe3, 0x60, 0xfa, 0x95, 0x3c, 0x9c, 0x85, 0x90, 0x6d, 0xe5, 0x44, 0x18,
-	0x8b, 0xfc, 0x7b, 0x04, 0xe3, 0xcf, 0x5b, 0x5a, 0x84, 0x8b, 0x44, 0x20, 0x9c, 0xa4, 0x4c, 0x57,
-	0x24, 0x9d, 0x87, 0x31, 0x1b, 0x3b, 0x66, 0xdd, 0x2e, 0xe3, 0xd2, 0x1e, 0xb6, 0x1d, 0xcf, 0x0f,
-	0xda, 0x4d, 0x47, 0x79, 0xf9, 0x55, 0x5a, 0x9c, 0xc0, 0x67, 0x7f, 0x02, 0x9f, 0x06, 0x48, 0x41,
-	0x27, 0x18, 0x9d, 0x31, 0xac, 0xa1, 0xde, 0xb0, 0xf6, 0x2d, 0x04, 0xe3, 0x8f, 0xe3, 0x2a, 0x4e,
-	0xc9, 0x5a, 0x9c, 0xdf, 0x99, 0x4e, 0xfc, 0xce, 0x26, 0xfb, 0x1d, 0x84, 0x21, 0xdc, 0xef, 0x7f,
-	0x23, 0x58, 0xd8, 0xa6, 0xc3, 0xf0, 0x32, 0x9f, 0x3d, 0x0a, 0xe5, 0x32, 0x76, 0xfc, 0xa9, 0x2b,
-	0x34, 0xd1, 0xa0, 0xc8, 0x44, 0x13, 0x64, 0x28, 0x13, 0x62, 0x68, 0x13, 0x06, 0x55, 0xa2, 0x87,
-	0xb8, 0x9a, 0x80, 0x34, 0xd8, 0xb3, 0xa2, 0xe6, 0x99, 0x78, 0x2c, 0xd5, 0xfd, 0x9d, 0x50, 0x3d,
-	0x90, 0x40, 0xf5, 0x01, 0xe4, 0x92, 0x3c, 0x17, 0x4e, 0xfb, 0x16, 0xcc, 0x6e, 0x62, 0x37, 0x52,
-	0x89, 0x11, 0x1e, 0xef, 0x05, 0x4a, 0xf0, 0xa2, 0x0e, 0x27, 0x63, 0x34, 0x09, 0x77, 0xe0, 0x3b,
-	0x08, 0xa6, 0xe9, 0x7c, 0xe7, 0x93, 0xc7, 0xf1, 0xaf, 0x87, 0x66, 0x94, 0x7c, 0x9c, 0x25, 0xbf,
-	0xff, 0x84, 0x1a, 0xfe, 0xc8, 0xc9, 0x37, 0x69, 0xd0, 0xfc, 0x00, 0xc1, 0x4c, 0x0b, 0x18, 0x46,
-	0x41, 0xfb, 0xee, 0x2b, 0x6e, 0x1a, 0x7e, 0x11, 0x26, 0x37, 0xb1, 0xeb, 0xe3, 0xe9, 0x49, 0x24,
-	0x20, 0x41, 0xbf, 0x07, 0x9d, 0xf1, 0x40, 0x7e, 0xcb, 0xdf, 0x45, 0x30, 0x15, 0x31, 0xc4, 0x3c,
-	0x7f, 0x12, 0xc0, 0x77, 0x94, 0x2f, 0xfa, 0x17, 0xd2, 0xb7, 0x86, 0x12, 0x90, 0x4e, 0xbd, 0xfe,
-	0x3f, 0x0c, 0x13, 0x41, 0x30, 0xa9, 0xe6, 0x10, 0xf9, 0x4b, 0x61, 0xaa, 0x7c, 0x07, 0xb6, 0xa2,
-	0x52, 0x9d, 0xe1, 0x0f, 0x58, 0xf8, 0x33, 0x82, 0x69, 0xba, 0x9c, 0x74, 0x06, 0xad, 0x27, 0x7d,
-	0x59, 0xd8, 0x1a, 0xe9, 0xc0, 0x4c, 0x8b, 0x53, 0xc2, 0x07, 0xfe, 0x6f, 0x33, 0x20, 0x2b, 0xd8,
-	0x73, 0x7a, 0xa3, 0xee, 0xb8, 0x66, 0x6d, 0x1b, 0xab, 0x76, 0xf9, 0xa5, 0x82, 0xeb, 0xda, 0xfa,
-	0xb5, 0xba, 0x9b, 0x92, 0xd6, 0x2b, 0x70, 0x0e, 0xef, 0xeb, 0x8e, 0xab, 0x1b, 0x95, 0x52, 0x99,
-	0xa8, 0x29, 0x39, 0x44, 0x4f, 0x49, 0xe5, 0x8a, 0x4a, 0xa4, 0xa7, 0xd3, 0x4e, 0x76, 0x86, 0x57,
-	0x8e, 0x35, 0xe9, 0x79, 0x2f, 0x5d, 0x82, 0x45, 0x03, 0x5f, 0x6f, 0xaf, 0x8c, 0x92, 0x3e, 0x6f,
-	0xe0, 0xeb, 0xc9, 0x7a, 0x84, 0xad, 0x36, 0x37, 0xe1, 0x6c, 0x5b, 0xda, 0x84, 0x37, 0xdc, 0x1b,
-	0x08, 0xa6, 0x69, 0x68, 0xd1, 0xe1, 0x18, 0x10, 0x16, 0xeb, 0x38, 0x30, 0xd3, 0x02, 0x48, 0x38,
-	0x0d, 0xaf, 0x20, 0xc8, 0x5d, 0x52, 0xf5, 0xaa, 0xb9, 0x17, 0x58, 0xf7, 0x15, 0xb2, 0x0d, 0x4d,
-	0x47, 0xc7, 0x34, 0x0c, 0xd2, 0x5d, 0x2b, 0x0f, 0x78, 0xe8, 0x53, 0x87, 0xbe, 0x7f, 0x05, 0x4e,
-	0x27, 0xa2, 0x10, 0xce, 0xc1, 0xdb, 0x08, 0x4e, 0x16, 0x34, 0xad, 0xa7, 0xee, 0x0b, 0x9b, 0xe5,
-	0xf6, 0x60, 0x2e, 0x0e, 0xab, 0x70, 0x92, 0x7e, 0x85, 0x60, 0xbe, 0xa5, 0x7b, 0x7e, 0x82, 0x79,
-	0x6a, 0xc0, 0x42, 0x02, 0x5c, 0xe1, 0x54, 0x4d, 0xc0, 0xf8, 0x26, 0x76, 0xa9, 0x39, 0x1e, 0xe8,
-	0xc8, 0x3b, 0x20, 0x05, 0x0b, 0x19, 0x88, 0xc7, 0x60, 0x88, 0x12, 0xd1, 0x36, 0x0d, 0x41, 0xab,
-	0x78, 0x96, 0x99, 0x0f, 0x5c, 0x48, 0xbe, 0x40, 0x12, 0x1b, 0xe1, 0x86, 0x68, 0x52, 0x8d, 0x82,
-	0x54, 0xcb, 0xcf, 0x05, 0x60, 0xf9, 0x00, 0x1e, 0x09, 0x55, 0x4e, 0x6b, 0x9f, 0xab, 0xfc, 0x23,
-	0x22, 0x81, 0xfb, 0x65, 0xbc, 0x5f, 0x77, 0x9e, 0x30, 0x34, 0xcb, 0xd4, 0x0d, 0xb7, 0x27, 0xa1,
-	0x5d, 0x1e, 0x26, 0x5c, 0xd5, 0xae, 0x60, 0xb7, 0xe4, 0x77, 0xa1, 0xe6, 0xf4, 0x31, 0x4e, 0x5f,
-	0xf9, 0x0d, 0x5b, 0xd4, 0xa4, 0x0b, 0xc0, 0x0a, 0x4b, 0xae, 0xea, 0xec, 0x96, 0x5e, 0xae, 0xe3,
-	0x3a, 0x4f, 0x03, 0x8d, 0xd2, 0x17, 0x3b, 0xaa, 0xb3, 0xfb, 0x9c, 0x57, 0xec, 0x87, 0x8d, 0x03,
-	0x81, 0xb0, 0xf1, 0xdb, 0x88, 0xec, 0x1b, 0xa2, 0x8e, 0x30, 0x92, 0x36, 0x60, 0x18, 0xf3, 0x42,
-	0xd6, 0x4e, 0xe7, 0x62, 0x63, 0x1f, 0x4f, 0xdc, 0xa3, 0x89, 0xab, 0x50, 0x9a, 0x72, 0xa9, 0x63,
-	0xc6, 0x35, 0x98, 0x89, 0x22, 0xe1, 0x8c, 0x9e, 0x86, 0x11, 0xae, 0xaf, 0xb9, 0x07, 0x02, 0x5e,
-	0x54, 0xd4, 0xe4, 0x2f, 0xb6, 0x36, 0x87, 0xef, 0x44, 0x01, 0x8e, 0xf1, 0x9a, 0xac, 0xad, 0x53,
-	0xfa, 0xe0, 0x8b, 0xc9, 0xaf, 0x21, 0x98, 0x63, 0x1b, 0x8b, 0x38, 0x78, 0x8f, 0x86, 0x12, 0x4c,
-	0xe7, 0x53, 0x69, 0xef, 0x3a, 0xc3, 0xf4, 0x13, 0x04, 0xa7, 0x62, 0xb1, 0x30, 0x77, 0x8f, 0xe2,
-	0x4a, 0xe0, 0x5e, 0xe7, 0x2f, 0x08, 0xe6, 0x58, 0x24, 0xda, 0x4d, 0x2b, 0xfa, 0x3c, 0x66, 0xba,
-	0xe3, 0x51, 0xd8, 0x94, 0x7a, 0x1d, 0x4e, 0xc5, 0xba, 0x25, 0x7c, 0x42, 0xfd, 0x31, 0x82, 0x39,
-	0x36, 0x99, 0x77, 0x45, 0xa8, 0xb0, 0x90, 0xed, 0x3a, 0x9c, 0x8a, 0xc5, 0x25, 0x9c, 0x91, 0x77,
-	0x10, 0x4c, 0xd2, 0xb6, 0x28, 0xd0, 0x63, 0x00, 0xce, 0xc5, 0x63, 0xa1, 0x31, 0x18, 0xbb, 0x3f,
-	0x64, 0x07, 0x07, 0xc4, 0x0a, 0xfd, 0x79, 0x44, 0xe7, 0xe9, 0x09, 0x55, 0x2f, 0xc3, 0x54, 0x04,
-	0xb0, 0x70, 0x92, 0xde, 0xcd, 0x92, 0x9d, 0xf4, 0xf3, 0x0e, 0xb6, 0x37, 0x6d, 0xb3, 0x6e, 0xf5,
-	0x64, 0x65, 0x0a, 0x85, 0x39, 0xd9, 0x68, 0x98, 0x73, 0x06, 0x8e, 0x6b, 0xba, 0x63, 0x55, 0xd5,
-	0x06, 0xdd, 0x63, 0xd1, 0xa1, 0x34, 0xc2, 0xca, 0xc8, 0x96, 0xaa, 0x06, 0xc7, 0xe9, 0x89, 0x56,
-	0xa9, 0xe2, 0x81, 0x22, 0xcb, 0xd0, 0xc8, 0xea, 0x93, 0xf9, 0xa3, 0x8f, 0xc2, 0xf2, 0x71, 0xce,
-	0xe4, 0x37, 0x89, 0x32, 0x52, 0x76, 0x49, 0xaf, 0xba, 0xd8, 0x56, 0x46, 0x2a, 0xcd, 0x22, 0xa9,
-	0x02, 0xe0, 0x94, 0xf5, 0x1a, 0x33, 0x36, 0x48, 0x8c, 0x6d, 0x75, 0x6d, 0x6c, 0x7b, 0xa3, 0xf8,
-	0x4c, 0xd0, 0xd4, 0xb0, 0xa7, 0x9b, 0x14, 0xcc, 0x5d, 0x84, 0xf1, 0x16, 0x28, 0xd2, 0x59, 0xb8,
-	0x87, 0x9c, 0xcf, 0x94, 0x54, 0x4d, 0xb3, 0xb1, 0xe3, 0xb0, 0xc1, 0x79, 0x9c, 0x14, 0x16, 0x68,
-	0xd9, 0xdc, 0x12, 0x8c, 0x46, 0xf4, 0x4a, 0x53, 0x30, 0xa8, 0x6b, 0x56, 0x73, 0x34, 0x0f, 0xe8,
-	0x9a, 0x55, 0xd4, 0xe4, 0x6f, 0xd0, 0xec, 0x4e, 0x10, 0x97, 0xbf, 0xba, 0x0d, 0x12, 0x0f, 0xf9,
-	0xfa, 0x7c, 0x3e, 0x4d, 0xe6, 0x9e, 0xe8, 0x50, 0x98, 0x60, 0xea, 0x05, 0xfa, 0x21, 0x92, 0xd4,
-	0x69, 0xca, 0xb3, 0x4e, 0x75, 0x12, 0x8e, 0x11, 0x45, 0x4d, 0xd0, 0x43, 0xe4, 0xb9, 0xa8, 0xc9,
-	0x2f, 0x84, 0xfb, 0xa1, 0x0f, 0xfa, 0xb3, 0x30, 0x40, 0x9b, 0xa5, 0xcd, 0x8a, 0x19, 0x8f, 0x99,
-	0xca, 0x79, 0x0b, 0xf2, 0x74, 0xf3, 0x98, 0x25, 0x04, 0xa7, 0x10, 0x9a, 0x08, 0x1e, 0x4c, 0xad,
-	0xba, 0xeb, 0x05, 0xf9, 0xfb, 0x7e, 0xd6, 0xb1, 0xd5, 0xd1, 0x64, 0x6e, 0x04, 0x2e, 0xc3, 0xef,
-	0xfa, 0x59, 0xae, 0x0e, 0xda, 0xca, 0xe7, 0x2d, 0xd3, 0x3d, 0x6f, 0xe2, 0x33, 0x5c, 0xad, 0x0c,
-	0x8b, 0x9b, 0x45, 0x5f, 0xf7, 0x13, 0x25, 0x9d, 0xd0, 0x28, 0x3e, 0x4b, 0x72, 0x37, 0x39, 0xf8,
-	0x0f, 0x02, 0x79, 0x3b, 0x30, 0x82, 0xbb, 0x3a, 0x1b, 0x0a, 0xb2, 0x95, 0x09, 0xb3, 0xf5, 0xc9,
-	0x3f, 0x1d, 0xba, 0x09, 0x67, 0xdb, 0x12, 0x20, 0xbc, 0x09, 0x7e, 0x43, 0x93, 0x34, 0x3e, 0x82,
-	0x67, 0x70, 0xed, 0x5a, 0xf3, 0x64, 0xb2, 0x4d, 0x4f, 0xbc, 0x0c, 0xc3, 0x35, 0x52, 0x97, 0xf3,
-	0x3e, 0xb2, 0xba, 0x92, 0x7a, 0x54, 0x53, 0x2b, 0x45, 0x4d, 0x39, 0x56, 0x63, 0xbf, 0x3a, 0xec,
-	0xae, 0x34, 0x5d, 0xd3, 0x82, 0x5a, 0x38, 0x5d, 0xbf, 0x43, 0x30, 0xaf, 0xe0, 0x9a, 0xb9, 0x87,
-	0xff, 0xd7, 0x18, 0x6b, 0xc0, 0x42, 0x02, 0x70, 0xe1, 0xa4, 0x39, 0x30, 0x17, 0x5c, 0xa7, 0xa9,
-	0xdd, 0x9e, 0x44, 0x8d, 0x41, 0xb6, 0xb3, 0xe1, 0xe0, 0xe0, 0x4d, 0x04, 0xa7, 0x62, 0xad, 0x32,
-	0x77, 0x8b, 0x30, 0x44, 0x99, 0xe4, 0xa1, 0xcd, 0x72, 0x87, 0x6d, 0xa1, 0x70, 0xf9, 0xd4, 0x11,
-	0xce, 0x0f, 0xfd, 0xbd, 0xf5, 0x36, 0x8d, 0x07, 0x23, 0x9b, 0x8c, 0x4b, 0xa1, 0xd8, 0x62, 0xf5,
-	0x28, 0x3c, 0x61, 0x25, 0x5d, 0x07, 0x18, 0x3f, 0x47, 0x30, 0x1f, 0x8f, 0x8a, 0x31, 0xf5, 0x00,
-	0x48, 0x2c, 0x7e, 0x2d, 0xb1, 0x3d, 0x4e, 0xe0, 0xa4, 0xd8, 0x09, 0xc9, 0x08, 0x0d, 0x3c, 0xe8,
-	0x69, 0x76, 0x3c, 0x75, 0x1d, 0x61, 0x94, 0x5d, 0x92, 0x95, 0x4a, 0x70, 0xf7, 0x05, 0x18, 0x8d,
-	0xa8, 0x62, 0x0d, 0x92, 0xef, 0xac, 0x41, 0x94, 0x13, 0x61, 0xbb, 0xf2, 0x0b, 0x31, 0x56, 0x7b,
-	0x31, 0x0a, 0xe4, 0xb7, 0x10, 0x19, 0x60, 0x2d, 0x9a, 0xdb, 0x39, 0x94, 0xfd, 0xe8, 0x0e, 0xa5,
-	0xee, 0xf7, 0xef, 0x23, 0x9e, 0xe1, 0xe8, 0x41, 0xe3, 0xf9, 0xa3, 0x24, 0xf3, 0x11, 0x47, 0x89,
-	0xb0, 0x70, 0x72, 0x1f, 0xe6, 0xe3, 0xbd, 0x15, 0x3e, 0xd1, 0xfe, 0x0c, 0xf1, 0xc4, 0x49, 0x2f,
-	0x88, 0x16, 0x16, 0x6b, 0xee, 0xf3, 0x23, 0x8f, 0xbb, 0x4e, 0xd0, 0xfb, 0x88, 0x24, 0xeb, 0x0b,
-	0x96, 0xfe, 0x14, 0x6e, 0xf4, 0x6a, 0x05, 0x32, 0xaf, 0x1b, 0x74, 0x4d, 0x67, 0x2b, 0x10, 0x79,
-	0x2e, 0x6a, 0xd2, 0xa7, 0x60, 0x8a, 0xbe, 0x72, 0x1b, 0x16, 0x2e, 0x69, 0xd8, 0xb2, 0x71, 0x59,
-	0x75, 0x31, 0xeb, 0x38, 0xeb, 0x99, 0x59, 0xa4, 0x4c, 0x90, 0x0a, 0x3b, 0x0d, 0x0b, 0x3f, 0xee,
-	0xbf, 0x96, 0xb6, 0x00, 0x9a, 0x72, 0x24, 0x72, 0x3c, 0x71, 0xf4, 0x1e, 0xf6, 0x59, 0xae, 0x48,
-	0x19, 0xf6, 0x75, 0xca, 0x37, 0xc9, 0xe1, 0x88, 0xef, 0x6d, 0x33, 0x63, 0xad, 0x5a, 0x7a, 0x69,
-	0x17, 0x37, 0xf8, 0xd2, 0x77, 0xdf, 0x51, 0xda, 0xa9, 0x0a, 0x65, 0x48, 0xa5, 0xaa, 0x3a, 0xb8,
-	0xa8, 0x39, 0xe6, 0x03, 0xe0, 0x6c, 0x4f, 0xc1, 0xe0, 0x2e, 0x6e, 0x04, 0x72, 0x10, 0xbb, 0xb8,
-	0x51, 0xd4, 0xe4, 0x9d, 0x40, 0xcb, 0x04, 0x76, 0xf2, 0x43, 0x0c, 0x2a, 0xeb, 0x01, 0x69, 0x91,
-	0x0e, 0x52, 0xa4, 0xf2, 0x37, 0x11, 0x4c, 0xd0, 0xc5, 0x2d, 0x0c, 0x22, 0x45, 0x3e, 0xaf, 0x55,
-	0x6b, 0xd7, 0x4b, 0xec, 0x5b, 0x08, 0x26, 0xc3, 0x28, 0x98, 0x7f, 0xf1, 0x5c, 0x48, 0x93, 0x30,
-	0x10, 0x24, 0x95, 0x3e, 0xc4, 0x0d, 0x8b, 0x6c, 0x6f, 0x86, 0xc5, 0x1f, 0x10, 0x4c, 0xb0, 0x2c,
-	0x62, 0x8a, 0xa6, 0xf2, 0xc9, 0xcb, 0x74, 0x49, 0x9e, 0xb0, 0x99, 0xd7, 0xf2, 0xb3, 0xb7, 0x61,
-	0x9a, 0x85, 0x5e, 0xe8, 0x9c, 0xa0, 0x73, 0x59, 0x2a, 0xe6, 0x84, 0x4d, 0xa9, 0x16, 0x4c, 0x86,
-	0x61, 0x08, 0xf7, 0xfc, 0x9f, 0x88, 0xe4, 0xeb, 0x0a, 0x75, 0x4d, 0x77, 0x9f, 0x36, 0x2b, 0x3d,
-	0x99, 0x4c, 0x9f, 0x86, 0x49, 0xc7, 0x55, 0x6d, 0xb7, 0xe4, 0xea, 0x35, 0x5c, 0xd2, 0x8d, 0x72,
-	0xb5, 0xee, 0xe8, 0x7b, 0x98, 0x75, 0xf3, 0xb9, 0x3c, 0x4d, 0xc0, 0xe6, 0xf9, 0x27, 0x0b, 0xf9,
-	0x1d, 0xfe, 0xc9, 0x82, 0x22, 0x11, 0x39, 0xef, 0xb9, 0xc8, 0xa5, 0xa4, 0x2d, 0x90, 0xb0, 0xa1,
-	0x51, 0x5d, 0x78, 0x9f, 0xeb, 0xea, 0x3f, 0x52, 0xd7, 0x18, 0x36, 0x34, 0xef, 0xe9, 0x09, 0x2e,
-	0x23, 0xdf, 0x20, 0x89, 0xc6, 0x80, 0xab, 0x8c, 0xdd, 0x47, 0xa1, 0xbf, 0x6a, 0x56, 0xda, 0xe6,
-	0x46, 0xf9, 0x17, 0x02, 0x1e, 0xa3, 0x4f, 0x9b, 0x15, 0x05, 0x97, 0x4d, 0x5b, 0x53, 0x88, 0x58,
-	0xea, 0x59, 0xf4, 0xef, 0xfc, 0xaa, 0xbf, 0x5a, 0xf1, 0x2f, 0xd3, 0x24, 0x51, 0x85, 0x7a, 0x48,
-	0x55, 0xa6, 0x73, 0xaa, 0xc2, 0xcd, 0x9f, 0x6d, 0xdb, 0xfc, 0xfd, 0xd1, 0x38, 0xf6, 0xab, 0xec,
-	0x73, 0x02, 0xe2, 0x26, 0xa3, 0x78, 0x1d, 0x86, 0x9d, 0x7a, 0xad, 0xa6, 0xda, 0x3a, 0x6e, 0x7b,
-	0x96, 0x4f, 0xbe, 0xad, 0x20, 0xf1, 0x1e, 0xa9, 0xdd, 0x50, 0x9a, 0x62, 0xa9, 0x79, 0xa6, 0x17,
-	0x0c, 0xc2, 0x31, 0x93, 0x7c, 0x95, 0xae, 0xa1, 0x91, 0x10, 0xe5, 0x73, 0x30, 0x14, 0xde, 0x1c,
-	0xdc, 0x97, 0xee, 0x48, 0x48, 0xe1, 0x62, 0xf2, 0xaf, 0x11, 0x2c, 0x46, 0x6e, 0x93, 0x3e, 0xb1,
-	0x6f, 0x99, 0xb6, 0xbb, 0xad, 0x1b, 0xbb, 0xe9, 0x32, 0x5f, 0x1b, 0xa1, 0x79, 0x78, 0xf9, 0xc8,
-	0x6b, 0x83, 0x4d, 0xfd, 0x5d, 0xdf, 0x81, 0xbd, 0x01, 0x67, 0xda, 0x80, 0x16, 0x3e, 0xe9, 0x3c,
-	0x07, 0x0b, 0xc1, 0x3b, 0x9c, 0x9d, 0x12, 0xc6, 0xaf, 0x28, 0x64, 0x02, 0x57, 0x14, 0x54, 0xc8,
-	0x25, 0xa9, 0xf4, 0x83, 0x90, 0x7e, 0x47, 0x37, 0x76, 0x99, 0x0f, 0xf7, 0x77, 0x40, 0xb3, 0x42,
-	0x04, 0xe5, 0x83, 0x24, 0x13, 0x29, 0x33, 0x9c, 0xa1, 0x31, 0x95, 0x69, 0x3b, 0xa6, 0xb2, 0xd1,
-	0x31, 0xf5, 0x3a, 0x82, 0xd3, 0x89, 0xc6, 0xfd, 0x80, 0x70, 0xc0, 0xc3, 0xc9, 0xc7, 0x57, 0x47,
-	0x1e, 0x52, 0xc9, 0xd4, 0x43, 0xec, 0xaf, 0x08, 0x16, 0x23, 0xb7, 0x49, 0x3f, 0x96, 0x5e, 0x2f,
-	0x2c, 0x04, 0xb9, 0x01, 0x67, 0xda, 0xf8, 0x77, 0x37, 0xae, 0x93, 0x2d, 0x46, 0xee, 0x67, 0xf5,
-	0x60, 0x90, 0x08, 0xa5, 0xab, 0x0d, 0x5c, 0xe1, 0x74, 0xbd, 0x8a, 0x40, 0xbe, 0xaa, 0x56, 0xf5,
-	0x8f, 0xbd, 0x43, 0xca, 0xe7, 0xe0, 0x6c, 0x5b, 0x20, 0x94, 0x0a, 0xf9, 0x35, 0x04, 0x53, 0xdb,
-	0xde, 0xfa, 0xfd, 0x8c, 0x5e, 0x09, 0x7f, 0xcf, 0xb1, 0x1e, 0xda, 0xd1, 0x1c, 0x7d, 0x87, 0xdc,
-	0x57, 0xd0, 0xf5, 0xae, 0xe6, 0x47, 0x08, 0xa6, 0xa3, 0x58, 0x58, 0x8b, 0x9d, 0x81, 0xe3, 0x35,
-	0x5e, 0xd8, 0x0c, 0x82, 0x47, 0xfc, 0x32, 0xa1, 0x79, 0xc2, 0x8b, 0x24, 0x30, 0x6d, 0x21, 0xe8,
-	0x68, 0x4c, 0xec, 0x13, 0x81, 0x56, 0x77, 0xb6, 0x60, 0xd8, 0xaf, 0x96, 0xfa, 0x13, 0x81, 0xa6,
-	0x9a, 0xa6, 0xb0, 0xac, 0x84, 0x2d, 0xf4, 0x24, 0xfd, 0xc7, 0xbe, 0xcd, 0x08, 0x2a, 0x6d, 0x7e,
-	0x9b, 0xe1, 0x9b, 0x4e, 0xff, 0x6d, 0x46, 0x13, 0x78, 0x40, 0x3a, 0xf5, 0x0c, 0xff, 0x06, 0x82,
-	0xd9, 0x2d, 0xd5, 0xd0, 0x22, 0x77, 0x8e, 0xd3, 0xb6, 0x81, 0x24, 0xc3, 0x3d, 0xae, 0x59, 0xb2,
-	0xb1, 0x55, 0xd5, 0xcb, 0x6a, 0xb3, 0xfb, 0x8d, 0xb8, 0xa6, 0x42, 0xcb, 0x3a, 0x3e, 0xf9, 0xa8,
-	0xc3, 0xc9, 0x18, 0x40, 0xc2, 0xe7, 0x96, 0x2f, 0xc3, 0xcc, 0x86, 0x69, 0xbc, 0xa8, 0xdb, 0xb5,
-	0x2e, 0xba, 0x62, 0x87, 0x43, 0xd1, 0x85, 0xd9, 0x56, 0x5b, 0xc2, 0x3d, 0x7c, 0x09, 0xa6, 0x0a,
-	0xd7, 0x4c, 0xdb, 0x15, 0xef, 0x9f, 0x0d, 0xd3, 0x51, 0x4b, 0xc2, 0xbd, 0xfb, 0x29, 0x82, 0x05,
-	0x1a, 0xeb, 0x6e, 0x04, 0x3e, 0xc6, 0x56, 0xea, 0x55, 0xbf, 0x37, 0x5f, 0x09, 0x4d, 0xb9, 0x8f,
-	0xc4, 0xde, 0xfe, 0x89, 0x7c, 0xc7, 0xed, 0xd9, 0x8d, 0xaa, 0xeb, 0x7a, 0x02, 0xfe, 0x25, 0x82,
-	0x5c, 0x12, 0x42, 0x46, 0xcf, 0x43, 0x30, 0x19, 0x84, 0x50, 0xf2, 0x30, 0x34, 0x5b, 0x44, 0x2a,
-	0x47, 0xe4, 0x84, 0xce, 0xcb, 0x97, 0xc9, 0x29, 0x45, 0x12, 0x99, 0x1d, 0x23, 0x95, 0x5f, 0xa1,
-	0x27, 0x7c, 0x89, 0xbe, 0x63, 0x18, 0x6f, 0xd1, 0xc8, 0xda, 0xea, 0x62, 0xb7, 0x6d, 0xa5, 0x8c,
-	0x45, 0x81, 0xc8, 0xdf, 0x8b, 0x87, 0xd1, 0x93, 0x84, 0xc8, 0x2a, 0x4c, 0xc5, 0x91, 0xe2, 0xcc,
-	0x66, 0x17, 0xb3, 0x4b, 0xc3, 0xca, 0x44, 0x2b, 0x2b, 0x8e, 0xfc, 0x0e, 0x82, 0xf9, 0x78, 0x3c,
-	0x8c, 0x97, 0x0a, 0x48, 0x2d, 0x4a, 0xf9, 0xea, 0xd0, 0x3d, 0x31, 0xe3, 0x51, 0x2c, 0xe9, 0x97,
-	0x8c, 0x0f, 0x11, 0x2c, 0xd0, 0xa0, 0xb9, 0x67, 0x9d, 0xc3, 0x1f, 0x9b, 0x99, 0x9e, 0x8d, 0x4d,
-	0x61, 0x31, 0xf0, 0x01, 0xe4, 0x92, 0xbc, 0xbf, 0x1b, 0xdf, 0xe8, 0xb0, 0xef, 0x39, 0x7a, 0x47,
-	0xbd, 0xb0, 0x24, 0xe7, 0x01, 0xe4, 0x92, 0xb0, 0x8a, 0x26, 0x6a, 0xfd, 0x43, 0x74, 0xeb, 0x76,
-	0xae, 0xef, 0xbd, 0xdb, 0xb9, 0xbe, 0x0f, 0x6e, 0xe7, 0xd0, 0xd7, 0x0e, 0x73, 0xe8, 0x17, 0x87,
-	0x39, 0xf4, 0xa7, 0xc3, 0x1c, 0xba, 0x75, 0x98, 0x43, 0x7f, 0x3b, 0xcc, 0xa1, 0x7f, 0x1c, 0xe6,
-	0xfa, 0x3e, 0x38, 0xcc, 0xa1, 0x37, 0xef, 0xe4, 0xfa, 0x6e, 0xdd, 0xc9, 0xf5, 0xbd, 0x77, 0x27,
-	0xd7, 0x07, 0xe7, 0x74, 0x33, 0xc5, 0xa5, 0xd0, 0xf5, 0x49, 0xc6, 0x36, 0x77, 0xe4, 0x8a, 0x6d,
-	0xba, 0xe6, 0x15, 0xf4, 0x85, 0xff, 0xaf, 0x04, 0xc4, 0x75, 0x33, 0xf9, 0x7f, 0x82, 0xf9, 0x4c,
-	0xf0, 0xf9, 0xed, 0xcc, 0xbd, 0x3b, 0x4c, 0x48, 0x37, 0xf3, 0x05, 0x4b, 0xcf, 0x6f, 0x10, 0xab,
-	0xe4, 0x2f, 0x3b, 0x73, 0xcb, 0x5f, 0x5d, 0xf9, 0x57, 0x66, 0xa9, 0x59, 0x6d, 0x6d, 0xad, 0x60,
-	0xe9, 0x6b, 0x6b, 0xa4, 0x0a, 0xfb, 0x87, 0xd5, 0x5c, 0x5b, 0xbb, 0xba, 0x72, 0x6d, 0x90, 0x24,
-	0xff, 0x1e, 0xfe, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x5b, 0x1d, 0xf5, 0xd7, 0x95, 0x46, 0x00,
-	0x00,
+	0x15, 0xcf, 0x5d, 0x7f, 0xc5, 0xc7, 0x69, 0x1c, 0x8f, 0x3f, 0xe3, 0x38, 0x1b, 0x67, 0xd2, 0x54,
+	0x49, 0xda, 0xae, 0x6b, 0x17, 0x50, 0x30, 0x6d, 0x61, 0xed, 0x36, 0xf6, 0xf6, 0x23, 0x75, 0xc7,
+	0x6e, 0x8a, 0x90, 0xd0, 0x76, 0xb2, 0x73, 0xbb, 0x9d, 0x7a, 0x77, 0x66, 0x3a, 0x33, 0xbb, 0xf6,
+	0x06, 0x95, 0x50, 0x28, 0x2a, 0x85, 0xaa, 0x2d, 0x42, 0x20, 0x5e, 0x2a, 0x5e, 0x10, 0x42, 0x15,
+	0xa8, 0x0f, 0x80, 0xf8, 0x03, 0x10, 0x88, 0x27, 0x5a, 0x09, 0x21, 0xf5, 0x09, 0x51, 0x57, 0x48,
+	0x80, 0xfa, 0xd0, 0x47, 0x1e, 0x90, 0x40, 0x73, 0x3f, 0xe6, 0x6b, 0x67, 0xd6, 0xb3, 0xdb, 0xbd,
+	0x69, 0x79, 0x49, 0x3c, 0x77, 0xee, 0x39, 0xe7, 0x77, 0x7e, 0xf7, 0xeb, 0xdc, 0x73, 0xef, 0x2c,
+	0x7c, 0xde, 0xc5, 0x75, 0xcb, 0xb4, 0xd5, 0xda, 0x92, 0x6a, 0xe9, 0x4b, 0x95, 0x9a, 0xd9, 0xd0,
+	0xe8, 0xbf, 0x0e, 0xb6, 0x9b, 0x7a, 0x05, 0x2f, 0x35, 0x97, 0x97, 0x6c, 0xfc, 0x7c, 0x03, 0x3b,
+	0x6e, 0xd9, 0xc6, 0x8e, 0x65, 0x1a, 0x0e, 0x2e, 0x58, 0xb6, 0xe9, 0x9a, 0x92, 0xcc, 0x45, 0x0b,
+	0xaa, 0xa5, 0x17, 0x88, 0x50, 0x21, 0x2c, 0x5a, 0x68, 0x2e, 0xcf, 0x9f, 0xa9, 0x9a, 0x66, 0xb5,
+	0x86, 0x97, 0x88, 0xc4, 0xf5, 0xc6, 0x33, 0x4b, 0xae, 0x5e, 0xc7, 0x8e, 0xab, 0xd6, 0x2d, 0xaa,
+	0x64, 0xfe, 0xee, 0x04, 0xfb, 0xa6, 0x85, 0x6d, 0xd5, 0xd5, 0x4d, 0xc3, 0x33, 0x5e, 0xc7, 0x8e,
+	0xa3, 0x56, 0x99, 0xcd, 0xf9, 0xbb, 0x12, 0xaa, 0xeb, 0x1a, 0x36, 0x5c, 0xdd, 0x6d, 0xb5, 0xd7,
+	0x4e, 0x52, 0x6e, 0xa8, 0x75, 0xec, 0x58, 0x2a, 0xf5, 0x2c, 0x5a, 0xfd, 0x62, 0x52, 0x75, 0xbc,
+	0xdf, 0x70, 0xda, 0xab, 0x5e, 0x4a, 0xa8, 0x6a, 0xe3, 0x6a, 0x22, 0xe6, 0x3b, 0x13, 0xea, 0xaa,
+	0x95, 0x8a, 0xd9, 0x30, 0xdc, 0x6c, 0x0e, 0xaa, 0x0d, 0x4d, 0x77, 0x6b, 0x66, 0x35, 0x1b, 0xe2,
+	0x86, 0xf7, 0xbe, 0xbd, 0xea, 0x67, 0x92, 0x1a, 0xda, 0x34, 0x0c, 0x5c, 0x71, 0xf5, 0xa6, 0xee,
+	0xb6, 0xec, 0x46, 0x0d, 0x67, 0xc3, 0x6e, 0xd9, 0xe6, 0x73, 0xb8, 0xd2, 0x8e, 0x5d, 0x7e, 0x11,
+	0xc1, 0xf8, 0x06, 0x76, 0x9f, 0x74, 0xb0, 0xed, 0x28, 0xb4, 0xcf, 0x48, 0xa7, 0x60, 0xd4, 0x52,
+	0xab, 0xb8, 0xec, 0xe8, 0x37, 0xf0, 0x1c, 0x5a, 0x44, 0x17, 0x86, 0x94, 0xa3, 0x5e, 0xc1, 0xb6,
+	0x7e, 0x03, 0x4b, 0xa7, 0x01, 0xc8, 0x4b, 0xd7, 0xdc, 0xc5, 0xc6, 0x5c, 0x6e, 0x11, 0x5d, 0x18,
+	0x55, 0x48, 0xf5, 0x1d, 0xaf, 0x40, 0x9a, 0x82, 0x21, 0x5c, 0x57, 0xf5, 0xda, 0xdc, 0x00, 0x79,
+	0x43, 0x1f, 0xa4, 0x05, 0x18, 0xf5, 0xdb, 0x70, 0x6e, 0x90, 0xca, 0xf8, 0x05, 0x72, 0x13, 0x4e,
+	0x04, 0x10, 0x68, 0x77, 0x95, 0x56, 0x61, 0xa8, 0xe1, 0x15, 0xcc, 0xa1, 0xc5, 0x81, 0x0b, 0x63,
+	0x2b, 0xb7, 0x17, 0x12, 0x3a, 0x2e, 0xef, 0x44, 0x85, 0xe6, 0x72, 0xc1, 0x93, 0x56, 0xa8, 0x88,
+	0x74, 0x07, 0x8c, 0x1b, 0x78, 0xdf, 0x2d, 0xb7, 0xe1, 0xbc, 0xcd, 0x2b, 0xde, 0xe2, 0x58, 0xe5,
+	0x8b, 0x70, 0x9c, 0xd9, 0xe5, 0x9e, 0xcf, 0xc2, 0x88, 0xa7, 0xa2, 0xac, 0x6b, 0xc4, 0xef, 0x51,
+	0x65, 0xd8, 0x7b, 0x2c, 0x69, 0xf2, 0x23, 0x3e, 0x4b, 0x3e, 0xc2, 0xcb, 0x30, 0xe8, 0xbd, 0x24,
+	0x15, 0xb3, 0x02, 0x24, 0x12, 0xf2, 0x4d, 0x98, 0x58, 0xb7, 0xb1, 0xea, 0xe2, 0xb0, 0xe9, 0xfb,
+	0x60, 0xd0, 0xb1, 0x70, 0x85, 0xa9, 0xbb, 0x90, 0x45, 0xdd, 0xb6, 0x85, 0x2b, 0x0a, 0x91, 0x92,
+	0xee, 0x02, 0x49, 0x75, 0x5a, 0x46, 0xa5, 0xec, 0x8f, 0x43, 0xcf, 0x07, 0xea, 0xf5, 0x09, 0xf2,
+	0xe6, 0x71, 0xfe, 0xa2, 0xa4, 0xc9, 0x2f, 0x23, 0x90, 0xc2, 0x08, 0x98, 0x47, 0x69, 0xde, 0x4b,
+	0x5f, 0x86, 0xf1, 0x98, 0x76, 0xa2, 0x7a, 0x6c, 0x65, 0x29, 0x09, 0xa6, 0x5f, 0xc9, 0xc3, 0x59,
+	0x8c, 0xd8, 0x56, 0x8e, 0x47, 0xb1, 0xc8, 0xbf, 0x43, 0x30, 0xf1, 0xa4, 0xa5, 0xc5, 0xb8, 0x48,
+	0x05, 0xc2, 0x49, 0xca, 0xf5, 0x44, 0xd2, 0x45, 0x38, 0x61, 0x63, 0xc7, 0x6c, 0xd8, 0x15, 0x5c,
+	0x6e, 0x62, 0xdb, 0xf1, 0xfc, 0xa0, 0xdd, 0x74, 0x9c, 0x97, 0x5f, 0xa3, 0xc5, 0x29, 0x7c, 0x0e,
+	0xa6, 0xf0, 0x69, 0x80, 0x14, 0x76, 0x82, 0xd1, 0x99, 0xc0, 0x1a, 0xea, 0x0f, 0x6b, 0xdf, 0x46,
+	0x30, 0xf1, 0x20, 0xae, 0xe1, 0x8c, 0xac, 0x25, 0xf9, 0x9d, 0xeb, 0xc6, 0xef, 0x81, 0x74, 0xbf,
+	0xc3, 0x30, 0x84, 0xfb, 0xfd, 0x6f, 0x04, 0xa7, 0xb7, 0xe9, 0x30, 0xbc, 0xca, 0x67, 0x8f, 0x62,
+	0xa5, 0x82, 0x1d, 0x7f, 0xea, 0x8a, 0x4c, 0x34, 0x28, 0x36, 0xd1, 0x84, 0x19, 0xca, 0x45, 0x18,
+	0xda, 0x80, 0x61, 0x95, 0xe8, 0x21, 0xae, 0xa6, 0x20, 0x0d, 0xf7, 0xac, 0xb8, 0x79, 0x26, 0x9e,
+	0x48, 0xf5, 0x60, 0x37, 0x54, 0x0f, 0xa5, 0x50, 0x7d, 0x03, 0xf2, 0x69, 0x9e, 0x0b, 0xa7, 0x7d,
+	0x13, 0xe6, 0x36, 0xb0, 0x1b, 0xab, 0xc4, 0x08, 0x4f, 0xf6, 0x02, 0xa5, 0x78, 0xd1, 0x80, 0x93,
+	0x09, 0x9a, 0x84, 0x3b, 0xf0, 0x5d, 0x04, 0x33, 0x74, 0xbe, 0xf3, 0xc9, 0xe3, 0xf8, 0xd7, 0x22,
+	0x33, 0x4a, 0x21, 0xc9, 0x92, 0xdf, 0x7f, 0x22, 0x0d, 0x7f, 0xe8, 0xe4, 0x9b, 0x36, 0x68, 0xbe,
+	0x8f, 0x60, 0xb6, 0x0d, 0x0c, 0xa3, 0xa0, 0x73, 0xf7, 0x15, 0x37, 0x0d, 0x3f, 0x03, 0x53, 0x1b,
+	0xd8, 0xf5, 0xf1, 0xf4, 0x25, 0x12, 0x90, 0x60, 0xd0, 0x83, 0xce, 0x78, 0x20, 0x7f, 0xcb, 0xdf,
+	0x43, 0x30, 0x1d, 0x33, 0xc4, 0x3c, 0x7f, 0x18, 0xc0, 0x77, 0x94, 0x2f, 0xfa, 0x97, 0xb2, 0xb7,
+	0x86, 0x12, 0x92, 0xce, 0xbc, 0xfe, 0xdf, 0x0b, 0x93, 0x61, 0x30, 0x99, 0xe6, 0x10, 0xf9, 0xe9,
+	0x28, 0x55, 0xbe, 0x03, 0x9b, 0x71, 0xa9, 0xee, 0xf0, 0x87, 0x2c, 0xfc, 0x19, 0xc1, 0x0c, 0x5d,
+	0x4e, 0xba, 0x83, 0xd6, 0x97, 0xbe, 0x2c, 0x6c, 0x8d, 0x74, 0x60, 0xb6, 0xcd, 0x29, 0xe1, 0x03,
+	0xff, 0x37, 0x39, 0x90, 0x15, 0xec, 0x39, 0xbd, 0xde, 0x70, 0x5c, 0xb3, 0xbe, 0x8d, 0x55, 0xbb,
+	0xf2, 0x6c, 0xd1, 0x75, 0x6d, 0xfd, 0x7a, 0xc3, 0xcd, 0x48, 0xeb, 0x16, 0x9c, 0xc7, 0xfb, 0xba,
+	0xe3, 0xea, 0x46, 0xb5, 0x5c, 0x21, 0x6a, 0xca, 0x0e, 0xd1, 0x53, 0x56, 0xb9, 0xa2, 0x32, 0xe9,
+	0xe9, 0xb4, 0x93, 0x9d, 0xe5, 0x95, 0x13, 0x4d, 0x7a, 0xde, 0x4b, 0x57, 0x60, 0xd1, 0xc0, 0x7b,
+	0x9d, 0x95, 0x51, 0xd2, 0x17, 0x0c, 0xbc, 0x97, 0xae, 0x47, 0xd8, 0x6a, 0x73, 0x13, 0xce, 0x75,
+	0xa4, 0x4d, 0x78, 0xc3, 0xbd, 0x8e, 0x60, 0x86, 0x86, 0x16, 0x5d, 0x8e, 0x01, 0x61, 0xb1, 0x8e,
+	0x03, 0xb3, 0x6d, 0x80, 0x84, 0xd3, 0xf0, 0x12, 0x82, 0xfc, 0x15, 0x55, 0xaf, 0x99, 0xcd, 0xd0,
+	0xba, 0xaf, 0x90, 0x3d, 0x6b, 0x36, 0x3a, 0x66, 0x60, 0x98, 0x6e, 0x71, 0x79, 0xc0, 0x43, 0x9f,
+	0xba, 0xf4, 0xfd, 0x6b, 0x70, 0x26, 0x15, 0x85, 0x70, 0x0e, 0xde, 0x42, 0x70, 0xb2, 0xa8, 0x69,
+	0x7d, 0x75, 0x5f, 0xd8, 0x2c, 0xd7, 0x84, 0xf9, 0x24, 0xac, 0xc2, 0x49, 0xfa, 0x25, 0x82, 0x85,
+	0xb6, 0xee, 0xf9, 0x29, 0xe6, 0xa9, 0x05, 0xa7, 0x53, 0xe0, 0x0a, 0xa7, 0x6a, 0x12, 0x26, 0x36,
+	0xb0, 0x4b, 0xcd, 0xf1, 0x40, 0x47, 0xde, 0x01, 0x29, 0x5c, 0xc8, 0x40, 0x3c, 0x00, 0x23, 0x94,
+	0x88, 0x8e, 0x69, 0x08, 0x5a, 0xc5, 0xb3, 0xcc, 0x7c, 0xe0, 0x42, 0xf2, 0x25, 0x92, 0xd8, 0x88,
+	0x36, 0x44, 0x40, 0x35, 0x0a, 0x53, 0x2d, 0x3f, 0x11, 0x82, 0xe5, 0x03, 0xb8, 0x2f, 0x52, 0x39,
+	0xab, 0x7d, 0xae, 0xf2, 0x0f, 0x88, 0x04, 0xee, 0x57, 0xf1, 0x7e, 0xc3, 0x79, 0xc8, 0xd0, 0x2c,
+	0x53, 0x37, 0xdc, 0xbe, 0x84, 0x76, 0x05, 0x98, 0x74, 0x55, 0xbb, 0x8a, 0xdd, 0xb2, 0xdf, 0x85,
+	0x82, 0xe9, 0x63, 0x82, 0xbe, 0xf2, 0x1b, 0xb6, 0xa4, 0x49, 0x97, 0x80, 0x15, 0x96, 0x5d, 0xd5,
+	0xd9, 0x2d, 0x3f, 0xdf, 0xc0, 0x0d, 0x9e, 0x06, 0x1a, 0xa7, 0x2f, 0x76, 0x54, 0x67, 0xf7, 0x09,
+	0xaf, 0xd8, 0x0f, 0x1b, 0x87, 0x42, 0x61, 0xe3, 0x77, 0x10, 0xd9, 0x37, 0xc4, 0x1d, 0x61, 0x24,
+	0xad, 0xc3, 0x28, 0xe6, 0x85, 0xac, 0x9d, 0xce, 0x27, 0xc6, 0x3e, 0x9e, 0xb8, 0x47, 0x13, 0x57,
+	0xa1, 0x04, 0x72, 0x99, 0x63, 0xc6, 0x55, 0x98, 0x8d, 0x23, 0xe1, 0x8c, 0x9e, 0x81, 0x31, 0xae,
+	0x2f, 0xd8, 0x03, 0x01, 0x2f, 0x2a, 0x69, 0xf2, 0x57, 0xdb, 0x9b, 0xc3, 0x77, 0xa2, 0x08, 0x47,
+	0x79, 0x4d, 0xd6, 0xd6, 0x19, 0x7d, 0xf0, 0xc5, 0xe4, 0x57, 0x10, 0xcc, 0xb3, 0x8d, 0x45, 0x12,
+	0xbc, 0xfb, 0x23, 0x09, 0xa6, 0x8b, 0x99, 0xb4, 0xf7, 0x9c, 0x61, 0xfa, 0x31, 0x82, 0x53, 0x89,
+	0x58, 0x98, 0xbb, 0x87, 0x71, 0x25, 0x70, 0xaf, 0xf3, 0x17, 0x04, 0xf3, 0x2c, 0x12, 0xed, 0xa5,
+	0x15, 0x7d, 0x1e, 0x73, 0xbd, 0xf1, 0x28, 0x6c, 0x4a, 0xdd, 0x83, 0x53, 0x89, 0x6e, 0x09, 0x9f,
+	0x50, 0x7f, 0x84, 0x60, 0x9e, 0x4d, 0xe6, 0x3d, 0x11, 0x2a, 0x2c, 0x64, 0xdb, 0x83, 0x53, 0x89,
+	0xb8, 0x84, 0x33, 0xf2, 0x36, 0x82, 0x29, 0xda, 0x16, 0x45, 0x7a, 0x66, 0xc0, 0xb9, 0x78, 0x20,
+	0x32, 0x06, 0x13, 0xf7, 0x87, 0xec, 0x94, 0x81, 0x58, 0xa1, 0x7f, 0x1e, 0xd2, 0x79, 0xfa, 0x42,
+	0xd5, 0xf3, 0x30, 0x1d, 0x03, 0x2c, 0x9c, 0xa4, 0x77, 0x06, 0xc8, 0x4e, 0xfa, 0x49, 0x07, 0xdb,
+	0x1b, 0xb6, 0xd9, 0xb0, 0xfa, 0xb2, 0x32, 0x45, 0xc2, 0x9c, 0x81, 0x78, 0x98, 0x73, 0x16, 0x8e,
+	0x69, 0xba, 0x63, 0xd5, 0xd4, 0x16, 0xdd, 0x63, 0xd1, 0xa1, 0x34, 0xc6, 0xca, 0xc8, 0x96, 0xaa,
+	0x0e, 0xc7, 0xe8, 0xf1, 0x57, 0xb9, 0xea, 0x81, 0x22, 0xcb, 0xd0, 0xd8, 0xca, 0xc3, 0x85, 0xc3,
+	0xcf, 0xcd, 0x0a, 0x49, 0xce, 0x14, 0x36, 0x88, 0x32, 0x52, 0x76, 0x45, 0xaf, 0xb9, 0xd8, 0x56,
+	0xc6, 0xaa, 0x41, 0x91, 0x54, 0x05, 0x70, 0x2a, 0x7a, 0x9d, 0x19, 0x1b, 0x26, 0xc6, 0x36, 0x7b,
+	0x36, 0xb6, 0xbd, 0x5e, 0x7a, 0x2c, 0x6c, 0x6a, 0xd4, 0xd3, 0x4d, 0x0a, 0xe6, 0x2f, 0xc3, 0x44,
+	0x1b, 0x14, 0xe9, 0x1c, 0xdc, 0x46, 0xce, 0x67, 0xca, 0xaa, 0xa6, 0xd9, 0xd8, 0x71, 0xd8, 0xe0,
+	0x3c, 0x46, 0x0a, 0x8b, 0xb4, 0x6c, 0xfe, 0x02, 0x8c, 0xc7, 0xf4, 0x4a, 0xd3, 0x30, 0xac, 0x6b,
+	0x56, 0x30, 0x9a, 0x87, 0x74, 0xcd, 0x2a, 0x69, 0xf2, 0x37, 0x69, 0x76, 0x27, 0x8c, 0xcb, 0x5f,
+	0xdd, 0x86, 0x89, 0x87, 0x7c, 0x7d, 0xbe, 0x98, 0x25, 0x73, 0x4f, 0x74, 0x28, 0x4c, 0x30, 0xf3,
+	0x02, 0x7d, 0x0f, 0x49, 0xea, 0x04, 0xf2, 0xac, 0x53, 0x9d, 0x84, 0xa3, 0x44, 0x51, 0x00, 0x7a,
+	0x84, 0x3c, 0x97, 0x34, 0xf9, 0xa9, 0x68, 0x3f, 0xf4, 0x41, 0x7f, 0x11, 0x86, 0x68, 0xb3, 0x74,
+	0x58, 0x31, 0x93, 0x31, 0x53, 0x39, 0x6f, 0x41, 0x9e, 0x09, 0x8e, 0x59, 0x22, 0x70, 0x8a, 0x91,
+	0x89, 0xe0, 0xee, 0xcc, 0xaa, 0x7b, 0x5e, 0x90, 0x5f, 0xf3, 0xb3, 0x8e, 0xed, 0x8e, 0xa6, 0x73,
+	0x23, 0x70, 0x19, 0x7e, 0xc7, 0xcf, 0x72, 0x75, 0xd1, 0x56, 0x3e, 0x6f, 0xb9, 0xde, 0x79, 0x13,
+	0x9f, 0xe1, 0x6a, 0x67, 0x58, 0xdc, 0x2c, 0xfa, 0xaa, 0x9f, 0x28, 0xe9, 0x86, 0x46, 0xf1, 0x59,
+	0x92, 0x5b, 0xc9, 0xc1, 0x7f, 0x11, 0xc8, 0xdb, 0xa1, 0x11, 0xdc, 0xd3, 0xd9, 0x50, 0x98, 0xad,
+	0x5c, 0x94, 0xad, 0x4f, 0xff, 0xe9, 0xd0, 0x4d, 0x38, 0xd7, 0x91, 0x00, 0xe1, 0x4d, 0xf0, 0x6b,
+	0x9a, 0xa4, 0xf1, 0x11, 0x3c, 0x86, 0xeb, 0xd7, 0x83, 0x93, 0xc9, 0x0e, 0x3d, 0xf1, 0x2a, 0x8c,
+	0xd6, 0x49, 0x5d, 0xce, 0xfb, 0xd8, 0xca, 0x72, 0xe6, 0x51, 0x4d, 0xad, 0x94, 0x34, 0xe5, 0x68,
+	0x9d, 0xfd, 0xd5, 0x65, 0x77, 0xa5, 0xe9, 0x9a, 0x36, 0xd4, 0xc2, 0xe9, 0xfa, 0x2d, 0x82, 0x05,
+	0x05, 0xd7, 0xcd, 0x26, 0xfe, 0x7f, 0x63, 0xac, 0x05, 0xa7, 0x53, 0x80, 0x0b, 0x27, 0xcd, 0x81,
+	0xf9, 0xf0, 0x3a, 0x4d, 0xed, 0xf6, 0x25, 0x6a, 0x0c, 0xb3, 0x3d, 0x10, 0x0d, 0x0e, 0xde, 0x40,
+	0x70, 0x2a, 0xd1, 0x2a, 0x73, 0xb7, 0x04, 0x23, 0x94, 0x49, 0x1e, 0xda, 0x2c, 0x75, 0xd9, 0x16,
+	0x0a, 0x97, 0xcf, 0x1c, 0xe1, 0xfc, 0xc0, 0xdf, 0x5b, 0x6f, 0xd3, 0x78, 0x30, 0xb6, 0xc9, 0xb8,
+	0x12, 0x89, 0x2d, 0x56, 0x0e, 0xc3, 0x13, 0x55, 0xd2, 0x73, 0x80, 0xf1, 0x33, 0x04, 0x0b, 0xc9,
+	0xa8, 0x18, 0x53, 0x77, 0x81, 0xc4, 0xe2, 0xd7, 0x32, 0xdb, 0xe3, 0x84, 0x4e, 0x8a, 0x9d, 0x88,
+	0x8c, 0xd0, 0xc0, 0x83, 0x9e, 0x66, 0x27, 0x53, 0xd7, 0x15, 0x46, 0xd9, 0x25, 0x59, 0xa9, 0x14,
+	0x77, 0x9f, 0x82, 0xf1, 0x98, 0x2a, 0xd6, 0x20, 0x85, 0xee, 0x1a, 0x44, 0x39, 0x1e, 0xb5, 0x2b,
+	0x3f, 0x95, 0x60, 0xb5, 0x1f, 0xa3, 0x40, 0x7e, 0x13, 0x91, 0x01, 0xd6, 0xa6, 0xb9, 0x93, 0x43,
+	0x03, 0x1f, 0xdf, 0xa1, 0xcc, 0xfd, 0xfe, 0x43, 0xc4, 0x33, 0x1c, 0x7d, 0x68, 0x3c, 0x7f, 0x94,
+	0xe4, 0x3e, 0xe6, 0x28, 0x11, 0x16, 0x4e, 0xee, 0xc3, 0x42, 0xb2, 0xb7, 0xc2, 0x27, 0xda, 0x9f,
+	0x22, 0x9e, 0x38, 0xe9, 0x07, 0xd1, 0xc2, 0x62, 0xcd, 0x7d, 0x7e, 0xe4, 0x71, 0xcb, 0x09, 0xfa,
+	0x10, 0x91, 0x64, 0x7d, 0xd1, 0xd2, 0x1f, 0xc1, 0xad, 0x7e, 0xad, 0x40, 0xe6, 0x9e, 0x41, 0xd7,
+	0x74, 0xb6, 0x02, 0x91, 0xe7, 0x92, 0x26, 0x7d, 0x0e, 0xa6, 0xe9, 0x2b, 0xb7, 0x65, 0xe1, 0xb2,
+	0x86, 0x2d, 0x1b, 0x57, 0x54, 0x17, 0xb3, 0x8e, 0xb3, 0x96, 0x9b, 0x43, 0xca, 0x24, 0xa9, 0xb0,
+	0xd3, 0xb2, 0xf0, 0x83, 0xfe, 0x6b, 0x69, 0x13, 0x20, 0x90, 0x23, 0x91, 0xe3, 0xf1, 0xc3, 0xf7,
+	0xb0, 0x8f, 0x73, 0x45, 0xca, 0xa8, 0xaf, 0x53, 0xbe, 0x49, 0x0e, 0x47, 0x7c, 0x6f, 0x83, 0x8c,
+	0xb5, 0x6a, 0xe9, 0xe5, 0x5d, 0xdc, 0xe2, 0x4b, 0xdf, 0x1d, 0x87, 0x69, 0xa7, 0x2a, 0x94, 0x11,
+	0x95, 0xaa, 0xea, 0xe2, 0xa2, 0xe6, 0x09, 0x1f, 0x00, 0x67, 0x7b, 0x1a, 0x86, 0x77, 0x71, 0x2b,
+	0x94, 0x83, 0xd8, 0xc5, 0xad, 0x92, 0x26, 0xef, 0x84, 0x5a, 0x26, 0xb4, 0x93, 0x1f, 0x61, 0x50,
+	0x59, 0x0f, 0xc8, 0x8a, 0x74, 0x98, 0x22, 0x95, 0xbf, 0x85, 0x60, 0x92, 0x2e, 0x6e, 0x51, 0x10,
+	0x19, 0xf2, 0x79, 0xed, 0x5a, 0x7b, 0x5e, 0x62, 0xdf, 0x44, 0x30, 0x15, 0x45, 0xc1, 0xfc, 0x4b,
+	0xe6, 0x42, 0x9a, 0x82, 0xa1, 0x30, 0xa9, 0xf4, 0x21, 0x69, 0x58, 0x0c, 0xf4, 0x67, 0x58, 0xfc,
+	0x1e, 0xc1, 0x24, 0xcb, 0x22, 0x66, 0x68, 0x2a, 0x9f, 0xbc, 0x5c, 0x8f, 0xe4, 0x09, 0x9b, 0x79,
+	0x2d, 0x3f, 0x7b, 0x1b, 0xa5, 0x59, 0xe8, 0x85, 0xce, 0x49, 0x3a, 0x97, 0x65, 0x62, 0x4e, 0xd8,
+	0x94, 0x6a, 0xc1, 0x54, 0x14, 0x86, 0x70, 0xcf, 0xff, 0x89, 0x48, 0xbe, 0xae, 0xd8, 0xd0, 0x74,
+	0xf7, 0x51, 0xb3, 0xda, 0x97, 0xc9, 0xf4, 0x51, 0x98, 0x72, 0x5c, 0xd5, 0x76, 0xcb, 0xae, 0x5e,
+	0xc7, 0x65, 0xdd, 0xa8, 0xd4, 0x1a, 0x8e, 0xde, 0xc4, 0xac, 0x9b, 0xcf, 0x17, 0x68, 0x02, 0xb6,
+	0xc0, 0xbf, 0x6f, 0x28, 0xec, 0xf0, 0xef, 0x1b, 0x14, 0x89, 0xc8, 0x79, 0xcf, 0x25, 0x2e, 0x25,
+	0x6d, 0x82, 0x84, 0x0d, 0x8d, 0xea, 0xc2, 0xfb, 0x5c, 0xd7, 0xe0, 0xa1, 0xba, 0x4e, 0x60, 0x43,
+	0xf3, 0x9e, 0x1e, 0xe2, 0x32, 0xf2, 0x0b, 0x24, 0xd1, 0x18, 0x72, 0x95, 0xb1, 0x7b, 0x3f, 0x0c,
+	0xd6, 0xcc, 0x6a, 0xc7, 0xdc, 0x28, 0xff, 0x9c, 0xc0, 0x63, 0xf4, 0x51, 0xb3, 0xaa, 0xe0, 0x8a,
+	0x69, 0x6b, 0x0a, 0x11, 0xcb, 0x3c, 0x8b, 0xfe, 0x9d, 0x5f, 0xf5, 0x57, 0xab, 0xfe, 0x65, 0x9a,
+	0x34, 0xaa, 0x50, 0x1f, 0xa9, 0xca, 0x75, 0x4f, 0x55, 0xb4, 0xf9, 0x07, 0x3a, 0x36, 0xff, 0x60,
+	0x3c, 0x8e, 0xfd, 0x3a, 0xfb, 0x9c, 0x80, 0xb8, 0xc9, 0x28, 0x5e, 0x83, 0x51, 0xa7, 0x51, 0xaf,
+	0xab, 0xb6, 0x8e, 0x3b, 0x9e, 0xe5, 0x93, 0x0f, 0x31, 0x48, 0xbc, 0x47, 0x6a, 0xb7, 0x94, 0x40,
+	0x2c, 0x33, 0xcf, 0xf4, 0x82, 0x41, 0x34, 0x66, 0x92, 0xaf, 0xd1, 0x35, 0x34, 0x16, 0xa2, 0x7c,
+	0x09, 0x46, 0xa2, 0x9b, 0x83, 0x3b, 0xb2, 0x1d, 0x09, 0x29, 0x5c, 0x4c, 0xfe, 0x15, 0x82, 0xc5,
+	0xd8, 0x6d, 0xd2, 0x87, 0xf6, 0x2d, 0xd3, 0x76, 0xb7, 0x75, 0x63, 0x37, 0x5b, 0xe6, 0x6b, 0x3d,
+	0x32, 0x0f, 0x2f, 0x1d, 0x7a, 0x6d, 0x30, 0xd0, 0xdf, 0xf3, 0x1d, 0xd8, 0x17, 0xe0, 0x6c, 0x07,
+	0xd0, 0xc2, 0x27, 0x9d, 0x27, 0xe0, 0x74, 0xf8, 0x0e, 0x67, 0xb7, 0x84, 0xf1, 0x2b, 0x0a, 0xb9,
+	0xd0, 0x15, 0x05, 0x15, 0xf2, 0x69, 0x2a, 0xfd, 0x20, 0x64, 0xd0, 0xd1, 0x8d, 0x5d, 0xe6, 0xc3,
+	0x9d, 0x5d, 0xd0, 0xac, 0x10, 0x41, 0xf9, 0x46, 0x9a, 0x89, 0x8c, 0x19, 0xce, 0xc8, 0x98, 0xca,
+	0x75, 0x1c, 0x53, 0x03, 0xf1, 0x31, 0xf5, 0x2a, 0x82, 0x33, 0xa9, 0xc6, 0xfd, 0x80, 0x70, 0xc8,
+	0xc3, 0xc9, 0xc7, 0x57, 0x57, 0x1e, 0x52, 0xc9, 0xcc, 0x43, 0xec, 0xaf, 0x08, 0x16, 0x63, 0xb7,
+	0x49, 0x3f, 0x91, 0x5e, 0x2f, 0x2c, 0x04, 0x79, 0x01, 0xce, 0x76, 0xf0, 0xef, 0x56, 0x5c, 0x27,
+	0x5b, 0x8c, 0xdd, 0xcf, 0xea, 0xc3, 0x20, 0x11, 0x4a, 0x57, 0x07, 0xb8, 0xc2, 0xe9, 0x7a, 0x19,
+	0x81, 0x7c, 0x4d, 0xad, 0xe9, 0x9f, 0x78, 0x87, 0x94, 0xcf, 0xc3, 0xb9, 0x8e, 0x40, 0x28, 0x15,
+	0xf2, 0x2b, 0x08, 0xa6, 0xb7, 0xbd, 0xf5, 0xfb, 0x31, 0xbd, 0x1a, 0xfd, 0x9e, 0x63, 0x2d, 0xb2,
+	0xa3, 0x39, 0xfc, 0x0e, 0xb9, 0xaf, 0xa0, 0xe7, 0x5d, 0xcd, 0x0f, 0x11, 0xcc, 0xc4, 0xb1, 0xb0,
+	0x16, 0x3b, 0x0b, 0xc7, 0xea, 0xbc, 0x30, 0x08, 0x82, 0xc7, 0xfc, 0x32, 0xa1, 0x79, 0xc2, 0xcb,
+	0x24, 0x30, 0x6d, 0x23, 0xe8, 0x70, 0x4c, 0xec, 0x13, 0x81, 0x76, 0x77, 0x36, 0x61, 0xd4, 0xaf,
+	0x96, 0xf9, 0x13, 0x81, 0x40, 0x4d, 0x20, 0x2c, 0x2b, 0x51, 0x0b, 0x7d, 0x49, 0xff, 0xb1, 0x6f,
+	0x33, 0xc2, 0x4a, 0x83, 0x6f, 0x33, 0x7c, 0xd3, 0xd9, 0xbf, 0xcd, 0x08, 0x80, 0x87, 0xa4, 0x33,
+	0xcf, 0xf0, 0xaf, 0x23, 0x98, 0xdb, 0x54, 0x0d, 0x2d, 0x76, 0xe7, 0x38, 0x6b, 0x1b, 0x48, 0x32,
+	0xdc, 0xe6, 0x9a, 0x65, 0x1b, 0x5b, 0x35, 0xbd, 0xa2, 0x06, 0xdd, 0x6f, 0xcc, 0x35, 0x15, 0x5a,
+	0xd6, 0xf5, 0xc9, 0x47, 0x03, 0x4e, 0x26, 0x00, 0x12, 0x3e, 0xb7, 0x3c, 0x07, 0xb3, 0xeb, 0xa6,
+	0xf1, 0x8c, 0x6e, 0xd7, 0x7b, 0xe8, 0x8a, 0x5d, 0x0e, 0x45, 0x17, 0xe6, 0xda, 0x6d, 0x09, 0xf7,
+	0xf0, 0x59, 0x98, 0x2e, 0x5e, 0x37, 0x6d, 0x57, 0xbc, 0x7f, 0x36, 0xcc, 0xc4, 0x2d, 0x09, 0xf7,
+	0xee, 0x27, 0x08, 0x4e, 0xd3, 0x58, 0x77, 0x3d, 0xf4, 0xe5, 0xb6, 0xd2, 0xa8, 0xf9, 0xbd, 0x79,
+	0x2b, 0x32, 0xe5, 0xde, 0x97, 0x78, 0xfb, 0x27, 0xf6, 0xd1, 0xb7, 0x67, 0x37, 0xae, 0xae, 0xe7,
+	0x09, 0xf8, 0x17, 0x08, 0xf2, 0x69, 0x08, 0x19, 0x3d, 0xf7, 0xc0, 0x54, 0x18, 0x42, 0xd9, 0xc3,
+	0x10, 0xb4, 0x88, 0x54, 0x89, 0xc9, 0x09, 0x9d, 0x97, 0xaf, 0x92, 0x53, 0x8a, 0x34, 0x32, 0xbb,
+	0x46, 0x2a, 0xbf, 0x44, 0x4f, 0xf8, 0x52, 0x7d, 0xc7, 0x30, 0xd1, 0xa6, 0x91, 0xb5, 0xd5, 0xe5,
+	0x5e, 0xdb, 0x4a, 0x39, 0x11, 0x07, 0x22, 0xef, 0x25, 0xa2, 0x10, 0x7f, 0x29, 0x4e, 0x7e, 0x1b,
+	0xc1, 0x42, 0xb2, 0x65, 0x46, 0x40, 0x15, 0xa4, 0x36, 0x02, 0xf8, 0x32, 0xd0, 0x3b, 0x03, 0x13,
+	0x71, 0x06, 0xb2, 0xaf, 0x0d, 0x6f, 0x21, 0xfe, 0xf5, 0x40, 0xdf, 0x7a, 0x81, 0xb8, 0x94, 0xda,
+	0x0d, 0xc8, 0xa7, 0x61, 0x15, 0x3e, 0xf7, 0x6c, 0x91, 0xa4, 0xc3, 0x16, 0xfd, 0xed, 0x87, 0xbe,
+	0x04, 0x09, 0x2f, 0xd2, 0x74, 0x5d, 0xa0, 0xd2, 0xcf, 0xaf, 0x1c, 0x65, 0x3f, 0x31, 0xd1, 0xf1,
+	0x30, 0x80, 0xd5, 0xf1, 0xa0, 0x33, 0x15, 0x8a, 0x2f, 0x97, 0xb9, 0xf9, 0x57, 0x48, 0x7e, 0x85,
+	0xcb, 0x33, 0xa7, 0x3c, 0xdc, 0xb4, 0x24, 0x68, 0xe7, 0x51, 0x56, 0x52, 0xd2, 0x58, 0xfa, 0xc5,
+	0x97, 0x09, 0xd2, 0x2f, 0xac, 0x4a, 0xa7, 0xf4, 0x4b, 0x02, 0x68, 0x2e, 0xe6, 0x4d, 0x1e, 0x2c,
+	0x25, 0x1f, 0xc3, 0x93, 0xe1, 0x64, 0xa0, 0x5d, 0x6f, 0xcf, 0x53, 0xf8, 0x1b, 0x08, 0xa6, 0x63,
+	0x30, 0x98, 0x8b, 0x9d, 0x79, 0x11, 0x38, 0x4d, 0xff, 0xc9, 0xbf, 0x03, 0xdd, 0x55, 0x4b, 0x65,
+	0x39, 0x15, 0xe8, 0x48, 0x9c, 0xb0, 0x3d, 0xa6, 0x7f, 0x45, 0x3a, 0x4e, 0xb1, 0xb8, 0xf1, 0xfb,
+	0x1a, 0xe2, 0xf9, 0xf8, 0xee, 0x38, 0x14, 0x79, 0x4d, 0x3c, 0x86, 0x47, 0x38, 0x07, 0x4f, 0xc3,
+	0xac, 0x82, 0x1d, 0x6c, 0x90, 0x5b, 0x5a, 0x25, 0xa3, 0xa9, 0x07, 0x9f, 0xed, 0xa6, 0xfe, 0xe0,
+	0x45, 0xd7, 0x51, 0x6f, 0xbb, 0x05, 0xd1, 0x7e, 0xad, 0xfd, 0x07, 0xbd, 0xfb, 0x7e, 0xfe, 0xc8,
+	0x7b, 0xef, 0xe7, 0x8f, 0x7c, 0xf4, 0x7e, 0x1e, 0x7d, 0xe3, 0x20, 0x8f, 0x7e, 0x7e, 0x90, 0x47,
+	0x7f, 0x3c, 0xc8, 0xa3, 0x77, 0x0f, 0xf2, 0xe8, 0x6f, 0x07, 0x79, 0xf4, 0x8f, 0x83, 0xfc, 0x91,
+	0x8f, 0x0e, 0xf2, 0xe8, 0x8d, 0x0f, 0xf2, 0x47, 0xde, 0xfd, 0x20, 0x7f, 0xe4, 0xbd, 0x0f, 0xf2,
+	0x47, 0xe0, 0xbc, 0x6e, 0x66, 0xb8, 0x1e, 0xbe, 0x36, 0xc5, 0x38, 0xe2, 0x8e, 0x6c, 0xd9, 0xa6,
+	0x6b, 0x6e, 0xa1, 0xaf, 0x7c, 0xb6, 0x1a, 0x12, 0xd7, 0xcd, 0xf4, 0x1f, 0x90, 0xfa, 0x42, 0xf8,
+	0xf9, 0xad, 0xdc, 0xed, 0x3b, 0x4c, 0x48, 0x37, 0x0b, 0x45, 0x4b, 0x2f, 0xac, 0x13, 0xab, 0xe4,
+	0x5f, 0x76, 0xfa, 0x5e, 0xb8, 0xb6, 0xfc, 0xaf, 0xdc, 0x85, 0xa0, 0xda, 0xea, 0x6a, 0xd1, 0xd2,
+	0x57, 0x57, 0x49, 0x15, 0xf6, 0x1f, 0xab, 0xb9, 0xba, 0x7a, 0x6d, 0xf9, 0xfa, 0x30, 0x39, 0x06,
+	0xb8, 0xf7, 0x7f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x0c, 0xbe, 0x81, 0xb5, 0xcc, 0x4a, 0x00, 0x00,
 }
 
 func (this *GetUsersRequest) Equal(that interface{}) bool {
@@ -10646,13 +11198,8 @@ func (this *GetConnectivityRulesRequest) Equal(that interface{}) bool {
 	if this.PageToken != that1.PageToken {
 		return false
 	}
-	if len(this.ConnectivityRuleIds) != len(that1.ConnectivityRuleIds) {
+	if this.Namespace != that1.Namespace {
 		return false
-	}
-	for i := range this.ConnectivityRuleIds {
-		if this.ConnectivityRuleIds[i] != that1.ConnectivityRuleIds[i] {
-			return false
-		}
 	}
 	return true
 }
@@ -10684,63 +11231,6 @@ func (this *GetConnectivityRulesResponse) Equal(that interface{}) bool {
 		}
 	}
 	if this.NextPageToken != that1.NextPageToken {
-		return false
-	}
-	return true
-}
-func (this *UpdateConnectivityRuleRequest) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*UpdateConnectivityRuleRequest)
-	if !ok {
-		that2, ok := that.(UpdateConnectivityRuleRequest)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.ConnectivityRuleId != that1.ConnectivityRuleId {
-		return false
-	}
-	if !this.Spec.Equal(that1.Spec) {
-		return false
-	}
-	if this.ResourceVersion != that1.ResourceVersion {
-		return false
-	}
-	if this.AsyncOperationId != that1.AsyncOperationId {
-		return false
-	}
-	return true
-}
-func (this *UpdateConnectivityRuleResponse) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*UpdateConnectivityRuleResponse)
-	if !ok {
-		that2, ok := that.(UpdateConnectivityRuleResponse)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
 		return false
 	}
 	return true
@@ -10783,6 +11273,329 @@ func (this *DeleteConnectivityRuleResponse) Equal(that interface{}) bool {
 	that1, ok := that.(*DeleteConnectivityRuleResponse)
 	if !ok {
 		that2, ok := that.(DeleteConnectivityRuleResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
+		return false
+	}
+	return true
+}
+func (this *GetProjectsRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetProjectsRequest)
+	if !ok {
+		that2, ok := that.(GetProjectsRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.PageSize != that1.PageSize {
+		return false
+	}
+	if this.PageToken != that1.PageToken {
+		return false
+	}
+	return true
+}
+func (this *GetProjectsResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetProjectsResponse)
+	if !ok {
+		that2, ok := that.(GetProjectsResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Projects) != len(that1.Projects) {
+		return false
+	}
+	for i := range this.Projects {
+		if !this.Projects[i].Equal(that1.Projects[i]) {
+			return false
+		}
+	}
+	if this.NextPageToken != that1.NextPageToken {
+		return false
+	}
+	return true
+}
+func (this *GetProjectRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetProjectRequest)
+	if !ok {
+		that2, ok := that.(GetProjectRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ProjectId != that1.ProjectId {
+		return false
+	}
+	return true
+}
+func (this *GetProjectResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetProjectResponse)
+	if !ok {
+		that2, ok := that.(GetProjectResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Project.Equal(that1.Project) {
+		return false
+	}
+	return true
+}
+func (this *CreateProjectRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateProjectRequest)
+	if !ok {
+		that2, ok := that.(CreateProjectRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *CreateProjectResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateProjectResponse)
+	if !ok {
+		that2, ok := that.(CreateProjectResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ProjectId != that1.ProjectId {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
+		return false
+	}
+	return true
+}
+func (this *UpdateProjectRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateProjectRequest)
+	if !ok {
+		that2, ok := that.(UpdateProjectRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ProjectId != that1.ProjectId {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *UpdateProjectResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateProjectResponse)
+	if !ok {
+		that2, ok := that.(UpdateProjectResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
+		return false
+	}
+	return true
+}
+func (this *DeleteProjectRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DeleteProjectRequest)
+	if !ok {
+		that2, ok := that.(DeleteProjectRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ProjectId != that1.ProjectId {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *DeleteProjectResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DeleteProjectResponse)
+	if !ok {
+		that2, ok := that.(DeleteProjectResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AsyncOperation.Equal(that1.AsyncOperation) {
+		return false
+	}
+	return true
+}
+func (this *ResendUserInviteRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ResendUserInviteRequest)
+	if !ok {
+		that2, ok := that.(ResendUserInviteRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.UserId != that1.UserId {
+		return false
+	}
+	if this.AsyncOperationId != that1.AsyncOperationId {
+		return false
+	}
+	return true
+}
+func (this *ResendUserInviteResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ResendUserInviteResponse)
+	if !ok {
+		that2, ok := that.(ResendUserInviteResponse)
 		if ok {
 			that1 = &that2
 		} else {
@@ -12326,7 +13139,7 @@ func (this *GetConnectivityRulesRequest) GoString() string {
 	s = append(s, "&cloudservice.GetConnectivityRulesRequest{")
 	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
 	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
-	s = append(s, "ConnectivityRuleIds: "+fmt.Sprintf("%#v", this.ConnectivityRuleIds)+",\n")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -12340,33 +13153,6 @@ func (this *GetConnectivityRulesResponse) GoString() string {
 		s = append(s, "ConnectivityRules: "+fmt.Sprintf("%#v", this.ConnectivityRules)+",\n")
 	}
 	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *UpdateConnectivityRuleRequest) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 8)
-	s = append(s, "&cloudservice.UpdateConnectivityRuleRequest{")
-	s = append(s, "ConnectivityRuleId: "+fmt.Sprintf("%#v", this.ConnectivityRuleId)+",\n")
-	if this.Spec != nil {
-		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
-	}
-	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
-	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *UpdateConnectivityRuleResponse) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&cloudservice.UpdateConnectivityRuleResponse{")
-	if this.AsyncOperation != nil {
-		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
-	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -12388,6 +13174,152 @@ func (this *DeleteConnectivityRuleResponse) GoString() string {
 	}
 	s := make([]string, 0, 5)
 	s = append(s, "&cloudservice.DeleteConnectivityRuleResponse{")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetProjectsRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&cloudservice.GetProjectsRequest{")
+	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
+	s = append(s, "PageToken: "+fmt.Sprintf("%#v", this.PageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetProjectsResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&cloudservice.GetProjectsResponse{")
+	if this.Projects != nil {
+		s = append(s, "Projects: "+fmt.Sprintf("%#v", this.Projects)+",\n")
+	}
+	s = append(s, "NextPageToken: "+fmt.Sprintf("%#v", this.NextPageToken)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetProjectRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.GetProjectRequest{")
+	s = append(s, "ProjectId: "+fmt.Sprintf("%#v", this.ProjectId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetProjectResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.GetProjectResponse{")
+	if this.Project != nil {
+		s = append(s, "Project: "+fmt.Sprintf("%#v", this.Project)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CreateProjectRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&cloudservice.CreateProjectRequest{")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CreateProjectResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&cloudservice.CreateProjectResponse{")
+	s = append(s, "ProjectId: "+fmt.Sprintf("%#v", this.ProjectId)+",\n")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UpdateProjectRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&cloudservice.UpdateProjectRequest{")
+	s = append(s, "ProjectId: "+fmt.Sprintf("%#v", this.ProjectId)+",\n")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UpdateProjectResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.UpdateProjectResponse{")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DeleteProjectRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&cloudservice.DeleteProjectRequest{")
+	s = append(s, "ProjectId: "+fmt.Sprintf("%#v", this.ProjectId)+",\n")
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DeleteProjectResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.DeleteProjectResponse{")
+	if this.AsyncOperation != nil {
+		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ResendUserInviteRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&cloudservice.ResendUserInviteRequest{")
+	s = append(s, "UserId: "+fmt.Sprintf("%#v", this.UserId)+",\n")
+	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ResendUserInviteResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&cloudservice.ResendUserInviteResponse{")
 	if this.AsyncOperation != nil {
 		s = append(s, "AsyncOperation: "+fmt.Sprintf("%#v", this.AsyncOperation)+",\n")
 	}
@@ -17392,14 +18324,12 @@ func (m *GetConnectivityRulesRequest) MarshalToSizedBuffer(dAtA []byte) (int, er
 	_ = i
 	var l int
 	_ = l
-	if len(m.ConnectivityRuleIds) > 0 {
-		for iNdEx := len(m.ConnectivityRuleIds) - 1; iNdEx >= 0; iNdEx-- {
-			i -= len(m.ConnectivityRuleIds[iNdEx])
-			copy(dAtA[i:], m.ConnectivityRuleIds[iNdEx])
-			i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ConnectivityRuleIds[iNdEx])))
-			i--
-			dAtA[i] = 0x1a
-		}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0x1a
 	}
 	if len(m.PageToken) > 0 {
 		i -= len(m.PageToken)
@@ -17456,97 +18386,6 @@ func (m *GetConnectivityRulesResponse) MarshalToSizedBuffer(dAtA []byte) (int, e
 			i--
 			dAtA[i] = 0xa
 		}
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *UpdateConnectivityRuleRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *UpdateConnectivityRuleRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *UpdateConnectivityRuleRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.AsyncOperationId) > 0 {
-		i -= len(m.AsyncOperationId)
-		copy(dAtA[i:], m.AsyncOperationId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
-		i--
-		dAtA[i] = 0x22
-	}
-	if len(m.ResourceVersion) > 0 {
-		i -= len(m.ResourceVersion)
-		copy(dAtA[i:], m.ResourceVersion)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
-		i--
-		dAtA[i] = 0x1a
-	}
-	if m.Spec != nil {
-		{
-			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.ConnectivityRuleId) > 0 {
-		i -= len(m.ConnectivityRuleId)
-		copy(dAtA[i:], m.ConnectivityRuleId)
-		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ConnectivityRuleId)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *UpdateConnectivityRuleResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *UpdateConnectivityRuleResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *UpdateConnectivityRuleResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.AsyncOperation != nil {
-		{
-			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -17611,6 +18450,476 @@ func (m *DeleteConnectivityRuleResponse) MarshalTo(dAtA []byte) (int, error) {
 }
 
 func (m *DeleteConnectivityRuleResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetProjectsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetProjectsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetProjectsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.PageToken) > 0 {
+		i -= len(m.PageToken)
+		copy(dAtA[i:], m.PageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.PageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.PageSize != 0 {
+		i = encodeVarintRequestResponse(dAtA, i, uint64(m.PageSize))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetProjectsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetProjectsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetProjectsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextPageToken) > 0 {
+		i -= len(m.NextPageToken)
+		copy(dAtA[i:], m.NextPageToken)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.NextPageToken)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Projects) > 0 {
+		for iNdEx := len(m.Projects) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Projects[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetProjectRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetProjectRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetProjectRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ProjectId) > 0 {
+		i -= len(m.ProjectId)
+		copy(dAtA[i:], m.ProjectId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ProjectId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetProjectResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetProjectResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetProjectResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Project != nil {
+		{
+			size, err := m.Project.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CreateProjectRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CreateProjectRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateProjectRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CreateProjectResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CreateProjectResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateProjectResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ProjectId) > 0 {
+		i -= len(m.ProjectId)
+		copy(dAtA[i:], m.ProjectId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ProjectId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateProjectRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateProjectRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateProjectRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ProjectId) > 0 {
+		i -= len(m.ProjectId)
+		copy(dAtA[i:], m.ProjectId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ProjectId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateProjectResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateProjectResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateProjectResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteProjectRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteProjectRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteProjectRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ProjectId) > 0 {
+		i -= len(m.ProjectId)
+		copy(dAtA[i:], m.ProjectId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.ProjectId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteProjectResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteProjectResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteProjectResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		{
+			size, err := m.AsyncOperation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRequestResponse(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ResendUserInviteRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ResendUserInviteRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ResendUserInviteRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AsyncOperationId) > 0 {
+		i -= len(m.AsyncOperationId)
+		copy(dAtA[i:], m.AsyncOperationId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.AsyncOperationId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.UserId) > 0 {
+		i -= len(m.UserId)
+		copy(dAtA[i:], m.UserId)
+		i = encodeVarintRequestResponse(dAtA, i, uint64(len(m.UserId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ResendUserInviteResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ResendUserInviteResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ResendUserInviteResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -19752,11 +21061,9 @@ func (m *GetConnectivityRulesRequest) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
-	if len(m.ConnectivityRuleIds) > 0 {
-		for _, s := range m.ConnectivityRuleIds {
-			l = len(s)
-			n += 1 + l + sovRequestResponse(uint64(l))
-		}
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
 	}
 	return n
 }
@@ -19775,44 +21082,6 @@ func (m *GetConnectivityRulesResponse) Size() (n int) {
 	}
 	l = len(m.NextPageToken)
 	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
-func (m *UpdateConnectivityRuleRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.ConnectivityRuleId)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	if m.Spec != nil {
-		l = m.Spec.Size()
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.ResourceVersion)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	l = len(m.AsyncOperationId)
-	if l > 0 {
-		n += 1 + l + sovRequestResponse(uint64(l))
-	}
-	return n
-}
-
-func (m *UpdateConnectivityRuleResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.AsyncOperation != nil {
-		l = m.AsyncOperation.Size()
 		n += 1 + l + sovRequestResponse(uint64(l))
 	}
 	return n
@@ -19840,6 +21109,203 @@ func (m *DeleteConnectivityRuleRequest) Size() (n int) {
 }
 
 func (m *DeleteConnectivityRuleResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetProjectsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PageSize != 0 {
+		n += 1 + sovRequestResponse(uint64(m.PageSize))
+	}
+	l = len(m.PageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetProjectsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Projects) > 0 {
+		for _, e := range m.Projects {
+			l = e.Size()
+			n += 1 + l + sovRequestResponse(uint64(l))
+		}
+	}
+	l = len(m.NextPageToken)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetProjectRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ProjectId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *GetProjectResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Project != nil {
+		l = m.Project.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *CreateProjectRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.AsyncOperationId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *CreateProjectResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ProjectId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *UpdateProjectRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ProjectId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.AsyncOperationId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *UpdateProjectResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *DeleteProjectRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ProjectId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.AsyncOperationId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *DeleteProjectResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AsyncOperation != nil {
+		l = m.AsyncOperation.Size()
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ResendUserInviteRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.UserId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	l = len(m.AsyncOperationId)
+	if l > 0 {
+		n += 1 + l + sovRequestResponse(uint64(l))
+	}
+	return n
+}
+
+func (m *ResendUserInviteResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -21270,7 +22736,7 @@ func (this *GetConnectivityRulesRequest) String() string {
 	s := strings.Join([]string{`&GetConnectivityRulesRequest{`,
 		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
 		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
-		`ConnectivityRuleIds:` + fmt.Sprintf("%v", this.ConnectivityRuleIds) + `,`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -21287,29 +22753,6 @@ func (this *GetConnectivityRulesResponse) String() string {
 	s := strings.Join([]string{`&GetConnectivityRulesResponse{`,
 		`ConnectivityRules:` + repeatedStringForConnectivityRules + `,`,
 		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *UpdateConnectivityRuleRequest) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&UpdateConnectivityRuleRequest{`,
-		`ConnectivityRuleId:` + fmt.Sprintf("%v", this.ConnectivityRuleId) + `,`,
-		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ConnectivityRuleSpec", "v18.ConnectivityRuleSpec", 1) + `,`,
-		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
-		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *UpdateConnectivityRuleResponse) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&UpdateConnectivityRuleResponse{`,
-		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -21331,6 +22774,141 @@ func (this *DeleteConnectivityRuleResponse) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&DeleteConnectivityRuleResponse{`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetProjectsRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetProjectsRequest{`,
+		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
+		`PageToken:` + fmt.Sprintf("%v", this.PageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetProjectsResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForProjects := "[]*Project{"
+	for _, f := range this.Projects {
+		repeatedStringForProjects += strings.Replace(fmt.Sprintf("%v", f), "Project", "v19.Project", 1) + ","
+	}
+	repeatedStringForProjects += "}"
+	s := strings.Join([]string{`&GetProjectsResponse{`,
+		`Projects:` + repeatedStringForProjects + `,`,
+		`NextPageToken:` + fmt.Sprintf("%v", this.NextPageToken) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetProjectRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetProjectRequest{`,
+		`ProjectId:` + fmt.Sprintf("%v", this.ProjectId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetProjectResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetProjectResponse{`,
+		`Project:` + strings.Replace(fmt.Sprintf("%v", this.Project), "Project", "v19.Project", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateProjectRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateProjectRequest{`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ProjectSpec", "v19.ProjectSpec", 1) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateProjectResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateProjectResponse{`,
+		`ProjectId:` + fmt.Sprintf("%v", this.ProjectId) + `,`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateProjectRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateProjectRequest{`,
+		`ProjectId:` + fmt.Sprintf("%v", this.ProjectId) + `,`,
+		`Spec:` + strings.Replace(fmt.Sprintf("%v", this.Spec), "ProjectSpec", "v19.ProjectSpec", 1) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateProjectResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateProjectResponse{`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DeleteProjectRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DeleteProjectRequest{`,
+		`ProjectId:` + fmt.Sprintf("%v", this.ProjectId) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DeleteProjectResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DeleteProjectResponse{`,
+		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ResendUserInviteRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ResendUserInviteRequest{`,
+		`UserId:` + fmt.Sprintf("%v", this.UserId) + `,`,
+		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ResendUserInviteResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ResendUserInviteResponse{`,
 		`AsyncOperation:` + strings.Replace(fmt.Sprintf("%v", this.AsyncOperation), "AsyncOperation", "v11.AsyncOperation", 1) + `,`,
 		`}`,
 	}, "")
@@ -35964,7 +37542,7 @@ func (m *GetConnectivityRulesRequest) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ConnectivityRuleIds", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -35992,7 +37570,7 @@ func (m *GetConnectivityRulesRequest) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.ConnectivityRuleIds = append(m.ConnectivityRuleIds, string(dAtA[iNdEx:postIndex]))
+			m.Namespace = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -36112,280 +37690,6 @@ func (m *GetConnectivityRulesResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.NextPageToken = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *UpdateConnectivityRuleRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: UpdateConnectivityRuleRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UpdateConnectivityRuleRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ConnectivityRuleId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ConnectivityRuleId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Spec == nil {
-				m.Spec = &v18.ConnectivityRuleSpec{}
-			}
-			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRequestResponse(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *UpdateConnectivityRuleResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRequestResponse
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: UpdateConnectivityRuleResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UpdateConnectivityRuleResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRequestResponse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRequestResponse
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.AsyncOperation == nil {
-				m.AsyncOperation = &v11.AsyncOperation{}
-			}
-			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -36587,6 +37891,1363 @@ func (m *DeleteConnectivityRuleResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: DeleteConnectivityRuleResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v11.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetProjectsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetProjectsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetProjectsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
+			}
+			m.PageSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PageSize |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetProjectsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetProjectsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetProjectsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Projects", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Projects = append(m.Projects, &v19.Project{})
+			if err := m.Projects[len(m.Projects)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextPageToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextPageToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetProjectRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetProjectRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetProjectRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProjectId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ProjectId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetProjectResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetProjectResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetProjectResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Project", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Project == nil {
+				m.Project = &v19.Project{}
+			}
+			if err := m.Project.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CreateProjectRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CreateProjectRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CreateProjectRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &v19.ProjectSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CreateProjectResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CreateProjectResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CreateProjectResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProjectId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ProjectId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v11.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateProjectRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateProjectRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateProjectRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProjectId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ProjectId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &v19.ProjectSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateProjectResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateProjectResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateProjectResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v11.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteProjectRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteProjectRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteProjectRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProjectId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ProjectId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteProjectResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteProjectResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteProjectResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AsyncOperation == nil {
+				m.AsyncOperation = &v11.AsyncOperation{}
+			}
+			if err := m.AsyncOperation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ResendUserInviteRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ResendUserInviteRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ResendUserInviteRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UserId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UserId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AsyncOperationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRequestResponse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AsyncOperationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRequestResponse(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthRequestResponse
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ResendUserInviteResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRequestResponse
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ResendUserInviteResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ResendUserInviteResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

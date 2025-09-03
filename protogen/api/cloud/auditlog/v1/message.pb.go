@@ -27,6 +27,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// temporal:dev
 type LogCategory int32
 
 const (
@@ -51,6 +52,7 @@ func (LogCategory) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_283286ea48ab34f8, []int{0}
 }
 
+// temporal:dev
 type LogLevel int32
 
 const (
@@ -85,6 +87,7 @@ func (LogLevel) EnumDescriptor() ([]byte, []int) {
 }
 
 // LogRecord represents an audit log entry from Temporal, structured for easy parsing and analysis.
+// temporal:dev
 type LogRecord struct {
 	// Time when the log was emitted from the source
 	EmitTime *types.Timestamp `protobuf:"bytes,1,opt,name=emit_time,json=emitTime,proto3" json:"emit_time,omitempty"`
@@ -230,6 +233,7 @@ func (m *LogRecord) GetPrincipal() *Principal {
 
 // OperationDetails includes potential more detailed operation logs extracted from the different fields in the
 // Temporal API logs or third party logs, e.g. auth0
+// temporal:dev
 type OperationDetail struct {
 	// The namespace the operation was performed on - optional
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
@@ -364,6 +368,7 @@ func (m *OperationDetail) GetNamespaceAccess() *NamespaceAccess {
 	return nil
 }
 
+// temporal:dev
 type Access struct {
 	AccountAccess     *AccountAccess              `protobuf:"bytes,1,opt,name=account_access,json=accountAccess,proto3" json:"account_access,omitempty"`
 	NamespaceAccesses map[string]*NamespaceAccess `protobuf:"bytes,2,rep,name=namespace_accesses,json=namespaceAccesses,proto3" json:"namespace_accesses,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
@@ -415,6 +420,7 @@ func (m *Access) GetNamespaceAccesses() map[string]*NamespaceAccess {
 	return nil
 }
 
+// temporal:dev
 type AccountAccess struct {
 	Role string `protobuf:"bytes,1,opt,name=role,proto3" json:"role,omitempty"`
 }
@@ -458,6 +464,7 @@ func (m *AccountAccess) GetRole() string {
 	return ""
 }
 
+// temporal:dev
 type NamespaceAccess struct {
 	Permission string `protobuf:"bytes,1,opt,name=permission,proto3" json:"permission,omitempty"`
 }
@@ -501,6 +508,7 @@ func (m *NamespaceAccess) GetPermission() string {
 	return ""
 }
 
+// temporal:dev
 type SearchAttributeUpdate struct {
 	ExistingAttribute string `protobuf:"bytes,1,opt,name=existing_attribute,json=existingAttribute,proto3" json:"existing_attribute,omitempty"`
 	NewAttribute      string `protobuf:"bytes,2,opt,name=new_attribute,json=newAttribute,proto3" json:"new_attribute,omitempty"`
@@ -552,6 +560,7 @@ func (m *SearchAttributeUpdate) GetNewAttribute() string {
 	return ""
 }
 
+// temporal:dev
 type ThirdPartyLogDetail struct {
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// the third party source, e.g. auth0
@@ -613,6 +622,7 @@ func (m *ThirdPartyLogDetail) GetRawMessage() string {
 	return ""
 }
 
+// temporal:dev
 type Principal struct {
 	// Possible type values: user, serviceaccount.
 	Type string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
