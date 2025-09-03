@@ -3142,6 +3142,7 @@ func (s *NamespaceTestSuite) TestSetConnectivityRules() {
 			},
 			expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 				r.Spec.ConnectivityRuleIds = newRules
+				r.Spec.PassiveRegionIds = []*common.RegionID{}
 			},
 		},
 		{
