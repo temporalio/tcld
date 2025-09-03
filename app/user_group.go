@@ -292,14 +292,11 @@ func (c *UserGroupClient) addUsersToGroup(ctx *cli.Context, groupID string, emai
 			AsyncOperationId: ctx.String(RequestIDFlagName),
 		}
 
-		resp, err := c.client.AddUserGroupMember(c.ctx, req)
+		_, err = c.client.AddUserGroupMember(c.ctx, req)
 		if err != nil {
 			return fmt.Errorf("unable to add user %s to group: %w", email, err)
 		}
 
-		if err := PrintProto(resp.GetAsyncOperation()); err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -322,35 +319,50 @@ func (c *UserGroupClient) removeUsersFromGroup(ctx *cli.Context, groupID string,
 			AsyncOperationId: ctx.String(RequestIDFlagName),
 		}
 
-		resp, err := c.client.RemoveUserGroupMember(c.ctx, req)
+		_, err = c.client.RemoveUserGroupMember(c.ctx, req)
 		if err != nil {
 			return fmt.Errorf("unable to remove user %s from group: %w", email, err)
 		}
 
-		if err := PrintProto(resp.GetAsyncOperation()); err != nil {
-			return err
-		}
 	}
 	return nil
 }
 
-// listGroupMembers lists the members of a group using the cloud services API
-func (c *UserGroupClient) listGroupMembers(
-	pageToken string,
-	pageSize int,
-	groupID string,
-) error {
-	members, err := c.client.GetUserGroupMembers(c.ctx, &cloudsvc.GetUserGroupMembersRequest{
-		PageToken: pageToken,
-		PageSize:  int32(pageSize),
-		GroupId:   groupID,
-	})
+// listGroupMembers lists all members of a group using the cloud services API
+// It automatically pages through all results and returns them as a single response
+func (c *UserGroupClient) listGroupMembers(groupID string) error {
+	var allMembers []*identity.UserGroupMember
+	var nextPageToken string
+	pageSize := int32(100) // Use a reasonable page size for efficient pagination
 
-	if err != nil {
-		return err
+	for {
+		members, err := c.client.GetUserGroupMembers(c.ctx, &cloudsvc.GetUserGroupMembersRequest{
+			PageToken: nextPageToken,
+			PageSize:  pageSize,
+			GroupId:   groupID,
+		})
+
+		if err != nil {
+			return err
+		}
+
+		// Add members from this page to our collection
+		allMembers = append(allMembers, members.Members...)
+
+		// Check if there are more pages
+		if members.NextPageToken == "" {
+			break
+		}
+		nextPageToken = members.NextPageToken
 	}
 
-	return PrintProto(members)
+	// Create a response with all members
+	response := &cloudsvc.GetUserGroupMembersResponse{
+		Members: allMembers,
+		// Note: We don't set NextPageToken since we've collected all results
+	}
+
+	return PrintProto(response)
 }
 
 // deleteGroup deletes a user group using the cloud services API
@@ -538,7 +550,7 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 				},
 				{
 					Name:    "list-members",
-					Usage:   "List members of a group",
+					Usage:   "List all members of a group",
 					Aliases: []string{"lm"},
 					Flags: []cli.Flag{
 						&cli.StringFlag{
@@ -547,20 +559,9 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 							Required: true,
 							Aliases:  []string{"id"},
 						},
-						&cli.StringFlag{
-							Name:    pageTokenFlagName,
-							Usage:   "list members starting from this page token",
-							Aliases: []string{"p"},
-						},
-						&cli.IntFlag{
-							Name:    pageSizeFlagName,
-							Usage:   "number of members to list",
-							Value:   10,
-							Aliases: []string{"s"},
-						},
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.listGroupMembers(ctx.String(pageTokenFlagName), ctx.Int(pageSizeFlagName), ctx.String(groupIDFlagName))
+						return c.listGroupMembers(ctx.String(groupIDFlagName))
 					},
 				},
 				{

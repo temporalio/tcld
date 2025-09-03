@@ -273,7 +273,7 @@ func (s *UserGroupTestSuite) TestListMembers() {
 	s.mockCloudService.EXPECT().GetUserGroupMembers(gomock.Any(), &cloudservice.GetUserGroupMembersRequest{
 		GroupId:   "group1",
 		PageToken: "",
-		PageSize:  10,
+		PageSize:  100,
 	}).Return(&cloudservice.GetUserGroupMembersResponse{
 		Members: []*identity.UserGroupMember{
 			{
@@ -287,13 +287,26 @@ func (s *UserGroupTestSuite) TestListMembers() {
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("user-group", "list-members", "--group-id", "group1"))
 
-	// Test with page token
+	// Test that the command works without page parameters (since it now auto-pages)
+	// The function will make one call with page size 100 and empty page token
 	s.mockCloudService.EXPECT().GetUserGroupMembers(gomock.Any(), &cloudservice.GetUserGroupMembersRequest{
 		GroupId:   "group1",
-		PageToken: "token1",
-		PageSize:  20,
-	}).Return(&cloudservice.GetUserGroupMembersResponse{}, nil).Times(1)
-	s.NoError(s.RunCmd("user-group", "list-members", "--group-id", "group1", "--page-token", "token1", "--page-size", "20"))
+		PageToken: "",
+		PageSize:  100,
+	}).Return(&cloudservice.GetUserGroupMembersResponse{
+		Members: []*identity.UserGroupMember{
+			{
+				MemberId: &identity.UserGroupMemberId{
+					MemberType: &identity.UserGroupMemberId_UserId{
+						UserId: "member1",
+					},
+				},
+				CreatedTime: nil,
+			},
+		},
+		NextPageToken: "", // No more pages
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("user-group", "list-members", "--group-id", "group1"))
 }
 
 func (s *UserGroupTestSuite) TestDeleteGroup() {

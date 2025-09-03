@@ -223,8 +223,6 @@ Listing members of a user group.
 tcld user-group list-members -id <group-id>
 ```
 
-Also accepts `-s` specifying the number of members per page, and `-p` to pass in a page token.
-
 Adding users to a group.
 
 ```
