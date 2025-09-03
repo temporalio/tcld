@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -15,6 +16,8 @@ import (
 const (
 	groupIDFlagName       = "group-id"
 	namespaceRoleFlagName = "namespace-role"
+	appendFlagName        = "append"
+	removeFlagName        = "remove"
 )
 
 type (
@@ -127,13 +130,19 @@ func nsRoleToAccess(role string) (string, *identity.NamespaceAccess) {
 }
 
 // setAccess sets the access for a group using the cloud services API
-func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string, accountRole string, nsRoles []string) error {
+func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string,
+	accountRole string, nsRoles []string, appendMode bool, removeMode bool) error {
+	if appendMode && removeMode {
+		return errors.New("Cannot use both append and remove flags")
+	}
+
 	group, err := c.client.GetUserGroup(c.ctx, &cloudsvc.GetUserGroupRequest{
 		GroupId: groupID,
 	})
 	if err != nil {
 		return err
 	}
+<<<<<<< HEAD
 	aRole := accountRoleToAccess(accountRole)
 	if aRole == nil {
 		return fmt.Errorf("Invalid account role: %s", accountRole)
@@ -148,8 +157,67 @@ func (c *UserGroupClient) setAccess(ctx *cli.Context, groupID string, accountRol
 		name, access := nsRoleToAccess(role)
 		if access == nil {
 			return fmt.Errorf("Invalid namespace role: %s", role)
+=======
+
+	// Start with existing namespace accesses if we're appending or removing,
+	// if not appending or removing, set the account role
+	nsAccess := map[string]*identity.NamespaceAccess{}
+	if appendMode || removeMode {
+		// Copy existing namespace accesses
+		for ns, access := range group.Group.Spec.Access.NamespaceAccesses {
+			nsAccess[ns] = access
 		}
-		nsAccess[name] = access
+
+		if accountRole != "" {
+			return errors.New("Cannot set account role when appending or removing namespace roles")
+		}
+	} else {
+		aRole := accountRoleToAccess(accountRole)
+		if aRole == nil {
+			return cli.Exit(fmt.Sprintf("Invalid account role: %s", accountRole), 1)
+		}
+		group.Group.Spec.Access.AccountAccess = aRole
+		if accountRole == "none" {
+			group.Group.Spec.Access.AccountAccess = nil
+		}
+	}
+
+	// Handle append flag - add new namespace roles
+	if appendMode {
+		for _, role := range nsRoles {
+			name, access := nsRoleToAccess(role)
+			if access == nil {
+				return cli.Exit(fmt.Sprintf("Invalid namespace role: %s", role), 1)
+			}
+			if nsAccess[name] != nil {
+				return fmt.Errorf("Group already has access to the %s namespace, remove existing access before appending", name)
+			}
+			nsAccess[name] = access
+		}
+	}
+
+	// Handle remove flag - remove existing namespace roles
+	if removeMode {
+		for _, role := range nsRoles {
+			name, _ := nsRoleToAccess(role)
+			if name == "" {
+				return cli.Exit(fmt.Sprintf("Invalid namespace role: %s", role), 1)
+			}
+			delete(nsAccess, name)
+		}
+	}
+
+	// Handle regular namespace roles (replaces all if no append/remove flags)
+	if !appendMode && !removeMode {
+		nsAccess = map[string]*identity.NamespaceAccess{}
+		for _, role := range nsRoles {
+			name, access := nsRoleToAccess(role)
+			if access == nil {
+				return cli.Exit(fmt.Sprintf("Invalid namespace role: %s", role), 1)
+			}
+			nsAccess[name] = access
+>>>>>>> origin/main
+		}
 	}
 
 	group.Group.Spec.Access.NamespaceAccesses = nsAccess
@@ -408,9 +476,19 @@ func NewUserGroupCommand(GetGroupClientFn GetGroupClientFn) (CommandOut, error) 
 							Usage:   "namespace roles",
 							Aliases: []string{"nr"},
 						},
+						&cli.BoolFlag{
+							Name:    appendFlagName,
+							Usage:   "append namespace roles, cannot be used with remove flag, cannot set account role",
+							Aliases: []string{"a"},
+						},
+						&cli.BoolFlag{
+							Name:    removeFlagName,
+							Usage:   "remove namespace roles, cannot be used with append flag, cannot set account role",
+							Aliases: []string{"r"},
+						},
 					},
 					Action: func(ctx *cli.Context) error {
-						return c.setAccess(ctx, ctx.String(groupIDFlagName), ctx.String(accountRoleFlagName), ctx.StringSlice(namespaceRoleFlagName))
+						return c.setAccess(ctx, ctx.String(groupIDFlagName), ctx.String(accountRoleFlagName), ctx.StringSlice(namespaceRoleFlagName), ctx.Bool(appendFlagName), ctx.Bool(removeFlagName))
 					},
 				},
 				{

@@ -25,10 +25,6 @@ type ConnectivityRuleTestSuite struct {
 }
 
 func (s *ConnectivityRuleTestSuite) SetupTest() {
-	if !IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
-		err := toggleFeature(ConnectivityRuleFeatureFlag)
-		s.Require().NoError(err)
-	}
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockCloudService = cloudservicemock.NewMockCloudServiceClient(s.mockCtrl)
 	out, err := NewConnectivityRuleCommand(func(ctx *cli.Context) (*ConnectivityRuleClient, error) {

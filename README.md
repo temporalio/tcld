@@ -47,8 +47,7 @@ export TEMPORAL_CLOUD_API_KEY=<api-key>
 tcld ...
 ```
 
-# API Key Management (Preview)
-*The API Key feature is currently in "Preview Release". Customers must be invited to use this feature. Please reach out to Temporal Cloud support for more information.*
+# API Key Management
 
 API Keys provide machine based authentication for Temporal Control Plane APIs. These keys are generated for and inherit the roles and permissions of the current user. API Keys are required to have a duration / expiry for preview within 1 to 90 days. We recommend to always set a duration / expiry for your API keys. This will allow you to rotate your API keys frequently and minimize the exposure of a token in case it is compromised.
 ### Creating an API Key:
@@ -233,6 +232,8 @@ The `--namespace-role` flag can be repeated for each namespace role the group sh
 - `read` - Read only access
 
 The account and namespace roles replace the definition, so any namespace roles omitted will be removed from the group level access.
+
+To add or remove namespace access without specifying all other roles, the `set-access` command also takes in a `--append`(`-a`), or `--remove`(`-r`) flag which will add the given namespace access or remove them. Appending will not change an existing namespace access(it will reject the update) and the account access cannot be changed when either flag is specified.
 
 # Migration Management (Preview)
 
