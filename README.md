@@ -206,8 +206,41 @@ tcld user-group list
 
 ### Get group information:
 ```
-tcld user-group get <group-id>
+tcld user-group get -id <group-id>
 ```
+
+### Delete group:
+
+```
+tcld user-group delete -id <group-id>
+```
+
+### Group membership management:
+
+Listing members of a user group.
+
+```
+tcld user-group list-members -id <group-id>
+```
+
+Also accepts `-s` specifying the number of members per page, and `-p` to pass in a page token.
+
+Adding users to a group.
+
+```
+tcld user-group add-users -id <group-id> -e <user-email>
+```
+
+Multiple users can be added in one call by specifying multiple `-e` flags.
+
+Removing users from a group.
+
+```
+tcld user-group remove-users -id <group-id> -e <user-email>
+```
+
+Multiple users can be removed in one call by specifying multiple `-e` flags.
+
 
 ### Set group access:
 ```
