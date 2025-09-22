@@ -666,6 +666,13 @@ func (s *NamespaceTestSuite) TestUpdateRemoveCA() {
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectErr: true,
 	}, {
+		name: "err remove all certs with api_key_or_mtls",
+		args: []string{"n", "ca", "remove", "-n", ns, "--all"},
+		expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+			g.Namespace.Spec.AuthMethod = namespace.AUTH_METHOD_API_KEY_OR_MTLS
+		},
+		expectErr: true,
+	}, {
 		name: "remove all certs: api_key",
 		args: []string{"n", "ca", "remove", "-n", ns, "--all"},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {
