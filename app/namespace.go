@@ -1060,46 +1060,69 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						CaCertificateFlag,
 						CaCertificateFileFlag,
 						caCertificateFingerprintFlag,
+						&cli.BoolFlag{
+							Name:  "all",
+							Usage: "If set, all existing certificates will be removed",
+						},
 					},
 					Action: func(ctx *cli.Context) error {
+						removeAll := ctx.Bool("all")
+						if removeAll && (ctx.String(caCertificateFingerprintFlagName) != "" ||
+							ctx.String(CaCertificateFlagName) != "" ||
+							ctx.Path(CaCertificateFileFlagName) != "") {
+							return fmt.Errorf("cannot use --all with other certificate flags")
+						}
+
 						n, existingCerts, err := c.parseExistingCerts(ctx)
 						if err != nil {
 							return err
 						}
-						var certs caCerts
-						if ctx.String(caCertificateFingerprintFlagName) != "" {
-							certs, err = removeCertWithFingerprint(
-								existingCerts,
-								ctx.String(caCertificateFingerprintFlagName),
-							)
-							if err != nil {
-								return err
+
+						if removeAll && (n.Spec.AuthMethod == namespace.AUTH_METHOD_MTLS ||
+							n.Spec.AuthMethod == namespace.AUTH_METHOD_API_KEY_OR_MTLS) {
+							return fmt.Errorf("cannot remove all certificates when mTLS is enabled")
+						}
+
+						var certBundle string
+						if !removeAll {
+							var certs caCerts
+							if ctx.String(caCertificateFingerprintFlagName) != "" {
+								certs, err = removeCertWithFingerprint(
+									existingCerts,
+									ctx.String(caCertificateFingerprintFlagName),
+								)
+								if err != nil {
+									return err
+								}
+							} else {
+								readCerts, err := readAndParseCACerts(ctx)
+								if err != nil {
+									return err
+								}
+								certs, err = removeCerts(existingCerts, readCerts)
+								if err != nil {
+									return err
+								}
 							}
-						} else {
-							readCerts, err := readAndParseCACerts(ctx)
-							if err != nil {
-								return err
-							}
-							certs, err = removeCerts(existingCerts, readCerts)
+							certBundle, err = certs.bundle()
 							if err != nil {
 								return err
 							}
 						}
-						bundle, err := certs.bundle()
-						if err != nil {
-							return err
-						}
-						if n.Spec.AcceptedClientCa == bundle {
+
+						if n.Spec.AcceptedClientCa == certBundle {
 							if ctx.Bool(IdempotentFlagName) {
 								return nil
 							}
 							return errors.New("nothing to change")
 						}
-						n.Spec.AcceptedClientCa = bundle
+
+						n.Spec.AcceptedClientCa = certBundle
 						y, err := ConfirmPrompt(ctx, "removing ca certificates can cause connectivity disruption if there are any clients using certificates that cannot be verified. confirm remove?")
 						if err != nil || !y {
 							return err
 						}
+
 						return c.updateNamespace(ctx, n)
 					},
 				},
