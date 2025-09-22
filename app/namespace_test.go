@@ -635,6 +635,18 @@ func (s *NamespaceTestSuite) TestUpdateRemoveCA() {
 		args:      []string{"namespace", "accepted-client-ca", "remove", "--namespace", ns},
 		expectErr: true,
 	}, {
+		name:      "err cert flag with all",
+		args:      []string{"namespace", "accepted-client-ca", "remove", "--namespace", ns, "--ca-certificate", cert1, "--all"},
+		expectErr: true,
+	}, {
+		name:      "err cert file flag with all",
+		args:      []string{"namespace", "accepted-client-ca", "remove", "--namespace", ns, "--ca-certificate-file", path, "--all"},
+		expectErr: true,
+	}, {
+		name:      "err cert fingerprint flag with all",
+		args:      []string{"namespace", "accepted-client-ca", "remove", "--namespace", ns, "--ca-certificate-fingerprint", cert2fingerprint, "--all"},
+		expectErr: true,
+	}, {
 		name:      "remove 1st cert",
 		args:      []string{"n", "ca", "remove", "-n", ns, "--ca-certificate", cert1},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
@@ -647,6 +659,29 @@ func (s *NamespaceTestSuite) TestUpdateRemoveCA() {
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 			r.Spec.AcceptedClientCa = cert1
+		},
+	}, {
+		name:      "err remove all certs with mtls",
+		args:      []string{"n", "ca", "remove", "-n", ns, "--all"},
+		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+		expectErr: true,
+	}, {
+		name: "remove all certs: api_key",
+		args: []string{"n", "ca", "remove", "-n", ns, "--all"},
+		expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+			g.Namespace.Spec.AuthMethod = namespace.AUTH_METHOD_API_KEY
+		},
+		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+			r.Spec.AcceptedClientCa = ""
+		},
+	}, {
+		name: "remove all certs: restricted",
+		args: []string{"n", "ca", "remove", "-n", ns, "--all"},
+		expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+			g.Namespace.Spec.AuthMethod = namespace.AUTH_METHOD_RESTRICTED
+		},
+		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+			r.Spec.AcceptedClientCa = ""
 		},
 	}, {
 		name:      "remove unknown cert",
@@ -710,6 +745,7 @@ func (s *NamespaceTestSuite) TestUpdateRemoveCA() {
 							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 						},
 						RetentionDays: 7,
+						AuthMethod:    namespace.AUTH_METHOD_MTLS,
 					},
 					State:           namespace.STATE_ACTIVE,
 					ResourceVersion: "ver1",
