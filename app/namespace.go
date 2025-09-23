@@ -995,7 +995,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				NamespaceFlag,
 			},
 			Action: func(ctx *cli.Context) error {
-				n, err := c.getNamespace(ctx.String(NamespaceFlagName))
+				n, err := c.getNamespaceCloudApi(ctx.String(NamespaceFlagName))
 				if err != nil {
 					return err
 				}
@@ -2258,7 +2258,6 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 
 				},
 			},
-			{},
 		},
 	}
 
