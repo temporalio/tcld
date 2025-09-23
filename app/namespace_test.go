@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
+	"github.com/temporalio/tcld/protogen/api/cloud/resource/v1"
 	"github.com/temporalio/tcld/protogen/api/common/v1"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
@@ -19,13 +20,14 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
+	"github.com/urfave/cli/v2"
+
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	authservicemock "github.com/temporalio/tcld/protogen/apimock/authservice/v1"
 	apimock "github.com/temporalio/tcld/protogen/apimock/cloudservice/v1"
 	namespaceservicemock "github.com/temporalio/tcld/protogen/apimock/namespaceservice/v1"
-	"github.com/urfave/cli/v2"
 )
 
 func TestNamespace(t *testing.T) {
@@ -79,24 +81,26 @@ func (s *NamespaceTestSuite) AfterTest(suiteName, testName string) {
 
 func (s *NamespaceTestSuite) TestGet() {
 	s.Error(s.RunCmd("namespace", "get"))
-	s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+	s.mockCloudApiClient.EXPECT().GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
 		Namespace: "ns1",
 	}).Return(nil, errors.New("some error")).Times(1)
 	s.Error(s.RunCmd("namespace", "get", "--namespace", "ns1"))
 
-	s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
+	s.mockCloudApiClient.EXPECT().GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
 		Namespace: "ns1",
-	}).Return(&namespaceservice.GetNamespaceResponse{
-		Namespace: &namespace.Namespace{
+	}).Return(&cloudservice.GetNamespaceResponse{
+		Namespace: &cloudNamespace.Namespace{
 			Namespace: "ns1",
-			Spec: &namespace.NamespaceSpec{
-				AcceptedClientCa: "cert1",
-				SearchAttributes: map[string]namespace.SearchAttributeType{
-					"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
+			Spec: &cloudNamespace.NamespaceSpec{
+				MtlsAuth: &cloudNamespace.MtlsAuthSpec{
+					AcceptedClientCa: []byte("cert1"),
+				},
+				SearchAttributes: map[string]cloudNamespace.NamespaceSpec_SearchAttributeType{
+					"attr1": cloudNamespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 				},
 				RetentionDays: 7,
 			},
-			State:           namespace.STATE_UPDATING,
+			State:           resource.RESOURCE_STATE_UPDATING,
 			ResourceVersion: "ver1",
 		},
 	}, nil).Times(1)
