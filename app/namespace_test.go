@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
-	"github.com/temporalio/tcld/protogen/api/cloud/resource/v1"
 	"github.com/temporalio/tcld/protogen/api/common/v1"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
@@ -81,26 +80,24 @@ func (s *NamespaceTestSuite) AfterTest(suiteName, testName string) {
 
 func (s *NamespaceTestSuite) TestGet() {
 	s.Error(s.RunCmd("namespace", "get"))
-	s.mockCloudApiClient.EXPECT().GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
+	s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
 		Namespace: "ns1",
 	}).Return(nil, errors.New("some error")).Times(1)
 	s.Error(s.RunCmd("namespace", "get", "--namespace", "ns1"))
 
-	s.mockCloudApiClient.EXPECT().GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
+	s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
 		Namespace: "ns1",
-	}).Return(&cloudservice.GetNamespaceResponse{
-		Namespace: &cloudNamespace.Namespace{
+	}).Return(&namespaceservice.GetNamespaceResponse{
+		Namespace: &namespace.Namespace{
 			Namespace: "ns1",
-			Spec: &cloudNamespace.NamespaceSpec{
-				MtlsAuth: &cloudNamespace.MtlsAuthSpec{
-					AcceptedClientCa: []byte("cert1"),
-				},
-				SearchAttributes: map[string]cloudNamespace.NamespaceSpec_SearchAttributeType{
-					"attr1": cloudNamespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
+			Spec: &namespace.NamespaceSpec{
+				AcceptedClientCa: "cert1",
+				SearchAttributes: map[string]namespace.SearchAttributeType{
+					"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 				},
 				RetentionDays: 7,
 			},
-			State:           resource.RESOURCE_STATE_UPDATING,
+			State:           namespace.STATE_UPDATING,
 			ResourceVersion: "ver1",
 		},
 	}, nil).Times(1)
