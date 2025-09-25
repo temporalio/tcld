@@ -46,6 +46,12 @@ const (
 	disableFailoverFlagName          = "disable-auto-failover"
 	enableDeleteProtectionFlagName   = "enable-delete-protection"
 	tagFlagName                      = "tag"
+
+	capacityModeFlagName  = "capacity-mode"
+	capacityValueFlagName = "capacity-value"
+
+	provisionedCapacityMode = "provisioned"
+	onDemandCapacityMode    = "on_demand"
 )
 
 const (
@@ -164,6 +170,28 @@ var (
 		Name:     connectivityRuleIdsFlagName,
 		Usage:    "The list of connectivity rule IDs, can be used in create namespace and update namespace. example: --ids id1 --ids id2 --ids id3",
 		Aliases:  []string{"ids"},
+		Required: false,
+	}
+
+	capacityModeFlag = &cli.StringFlag{
+		Name:     capacityModeFlagName,
+		Usage:    fmt.Sprintf("The capacity mode to use for the namespace. Valid values are '%s' and '%s'", onDemandCapacityMode, provisionedCapacityMode),
+		Aliases:  []string{"cm"},
+		Required: false,
+		Action: func(_ *cli.Context, s string) error {
+			switch s {
+			case "", onDemandCapacityMode, provisionedCapacityMode:
+				return nil
+			default:
+				return fmt.Errorf("invalid capacity mode %s, valid values are 'on_demand' and 'provisioned'", s)
+			}
+		},
+	}
+
+	capacityValueFlag = &cli.Float64Flag{
+		Name:     capacityValueFlagName,
+		Usage:    "The capacity value to use for the namespace. Required if capacity mode is 'provisioned', ignored otherwise",
+		Aliases:  []string{"cv"},
 		Required: false,
 	}
 )
@@ -366,6 +394,28 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 		Namespace:       n.Namespace,
 		ResourceVersion: resourceVersion,
 		Spec:            n.Spec,
+	})
+	if err != nil {
+		if isNothingChangedErr(ctx, err) {
+			return nil
+		}
+		return err
+	}
+
+	return PrintProto(res)
+}
+
+func (c *NamespaceClient) updateNamespaceCloudApi(ctx *cli.Context, n *cloudNamespace.Namespace) error {
+	resourceVersion := n.ResourceVersion
+	if v := ctx.String(ResourceVersionFlagName); v != "" {
+		resourceVersion = v
+	}
+
+	res, err := c.cloudAPIClient.UpdateNamespace(c.ctx, &cloudservice.UpdateNamespaceRequest{
+		AsyncOperationId: ctx.String(RequestIDFlagName),
+		Namespace:        n.Namespace,
+		ResourceVersion:  resourceVersion,
+		Spec:             n.Spec,
 	})
 	if err != nil {
 		if isNothingChangedErr(ctx, err) {
@@ -1845,6 +1895,56 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 							return err
 						}
 						return PrintProto(n.GetCapacity())
+					},
+				},
+				{
+					Name:    "update",
+					Usage:   "Set the capacity of a given namespace.",
+					Aliases: []string{"u"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						capacityModeFlag,
+						capacityValueFlag,
+						RequestIDFlag,
+						ResourceVersionFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						nsID := ctx.String(NamespaceFlagName)
+						mode := ctx.String(capacityModeFlagName)
+						value := ctx.Float64(capacityValueFlagName)
+						if mode == "" {
+							return fmt.Errorf("capacity mode must be specified (either '%s' or '%s')", onDemandCapacityMode, provisionedCapacityMode)
+						}
+						if mode == provisionedCapacityMode && value <= 0 {
+							return fmt.Errorf("capacity value must be greater than 0 when capacity mode is '%s'", provisionedCapacityMode)
+						}
+						var capacitySpec *cloudNamespace.CapacitySpec
+						switch mode {
+						case onDemandCapacityMode:
+							capacitySpec = &cloudNamespace.CapacitySpec{
+								Spec: &cloudNamespace.CapacitySpec_OnDemand_{
+									OnDemand: &cloudNamespace.CapacitySpec_OnDemand{},
+								},
+							}
+						case provisionedCapacityMode:
+							capacitySpec = &cloudNamespace.CapacitySpec{
+								Spec: &cloudNamespace.CapacitySpec_Provisioned_{
+									Provisioned: &cloudNamespace.CapacitySpec_Provisioned{
+										Value: value,
+									},
+								},
+							}
+						}
+						ns, err := c.getNamespaceCloudApi(nsID)
+						if err != nil {
+							return err
+						}
+
+						if ns != nil && ns.Spec == nil {
+							ns.Spec = &cloudNamespace.NamespaceSpec{}
+						}
+						ns.Spec.CapacitySpec = capacitySpec
+						return c.updateNamespaceCloudApi(ctx, ns)
 					},
 				},
 			},
