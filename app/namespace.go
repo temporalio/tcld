@@ -995,7 +995,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				NamespaceFlag,
 			},
 			Action: func(ctx *cli.Context) error {
-				n, err := c.getNamespaceCloudApi(ctx.String(NamespaceFlagName))
+				n, err := c.getNamespace(ctx.String(NamespaceFlagName))
 				if err != nil {
 					return err
 				}
@@ -1823,6 +1823,28 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Action: func(ctx *cli.Context) error {
 						keysToRemove := ctx.StringSlice("tag-key")
 						return c.updateNamespaceTags(ctx, nil, keysToRemove)
+					},
+				},
+			},
+		},
+		{
+			Name:    "capacity",
+			Usage:   "Manage namespace capacity settings",
+			Aliases: []string{"cap"},
+			Subcommands: []*cli.Command{
+				{
+					Name:    "get",
+					Usage:   "Get namespace capacity settings",
+					Aliases: []string{"g"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						n, err := c.getNamespaceCloudApi(ctx.String(NamespaceFlagName))
+						if err != nil {
+							return err
+						}
+						return PrintProto(n.GetCapacity())
 					},
 				},
 			},
