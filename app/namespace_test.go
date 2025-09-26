@@ -3321,3 +3321,101 @@ func (s *NamespaceTestSuite) TestGetNamespaceCapacity() {
 		})
 	}
 }
+
+func (s *NamespaceTestSuite) TestUpdateNamespaceCapacity() {
+	tests := []struct {
+		name      string
+		args      []string
+		mock      func()
+		expectErr bool
+	}{
+		{
+			name: "update namespace capacity - success",
+			args: []string{"namespace", "capacity", "update", "--namespace", "ns1", "--capacity-mode", "provisioned", "--capacity-value", "16"},
+			mock: func() {
+				s.mockCloudApiClient.EXPECT().
+					GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
+						Namespace: "ns1",
+					}).Return(&cloudservice.GetNamespaceResponse{
+					Namespace: &cloudNamespace.Namespace{
+						Namespace: "ns1",
+						Capacity: &cloudNamespace.Capacity{
+							CurrentMode: &cloudNamespace.Capacity_OnDemand_{
+								OnDemand: &cloudNamespace.Capacity_OnDemand{},
+							},
+						},
+					},
+				}, nil).Times(1)
+
+				s.mockCloudApiClient.EXPECT().
+					UpdateNamespace(gomock.Any(), &cloudservice.UpdateNamespaceRequest{
+						Namespace: "ns1",
+						Spec: &cloudNamespace.NamespaceSpec{
+							CapacitySpec: &cloudNamespace.CapacitySpec{
+								Spec: &cloudNamespace.CapacitySpec_Provisioned_{
+									Provisioned: &cloudNamespace.CapacitySpec_Provisioned{
+										Value: 16.0,
+									},
+								},
+							},
+						},
+					}).
+					Return(&cloudservice.UpdateNamespaceResponse{
+						AsyncOperation: &operation.AsyncOperation{
+							Id: "op-123",
+						},
+					}, nil)
+
+			},
+		},
+		{
+			name: "update namespace capacity - failure",
+			args: []string{"namespace", "capacity", "update", "--namespace", "ns1", "--capacity-mode", "provisioned", "--capacity-value", "16"},
+			mock: func() {
+				s.mockCloudApiClient.EXPECT().
+					GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
+						Namespace: "ns1",
+					}).Return(&cloudservice.GetNamespaceResponse{
+					Namespace: &cloudNamespace.Namespace{
+						Namespace: "ns1",
+						Capacity: &cloudNamespace.Capacity{
+							CurrentMode: &cloudNamespace.Capacity_OnDemand_{
+								OnDemand: &cloudNamespace.Capacity_OnDemand{},
+							},
+						},
+					},
+				}, nil).Times(1)
+
+				s.mockCloudApiClient.EXPECT().
+					UpdateNamespace(gomock.Any(), &cloudservice.UpdateNamespaceRequest{
+						Namespace: "ns1",
+						Spec: &cloudNamespace.NamespaceSpec{
+							CapacitySpec: &cloudNamespace.CapacitySpec{
+								Spec: &cloudNamespace.CapacitySpec_Provisioned_{
+									Provisioned: &cloudNamespace.CapacitySpec_Provisioned{
+										Value: 16.0,
+									},
+								},
+							},
+						},
+					}).
+					Return(nil, errors.New("some error"))
+			},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.mock != nil {
+				tc.mock()
+			}
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
