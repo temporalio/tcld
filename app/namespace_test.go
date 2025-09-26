@@ -19,13 +19,14 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
+	"github.com/urfave/cli/v2"
+
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	authservicemock "github.com/temporalio/tcld/protogen/apimock/authservice/v1"
 	apimock "github.com/temporalio/tcld/protogen/apimock/cloudservice/v1"
 	namespaceservicemock "github.com/temporalio/tcld/protogen/apimock/namespaceservice/v1"
-	"github.com/urfave/cli/v2"
 )
 
 func TestNamespace(t *testing.T) {
@@ -3255,6 +3256,62 @@ func (s *NamespaceTestSuite) TestSetConnectivityRules() {
 					}, nil).Times(1)
 			}
 
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestGetNamespaceCapacity() {
+	tests := []struct {
+		name      string
+		args      []string
+		mock      func()
+		expectErr bool
+	}{
+		{
+			name: "get namespace capacity - success",
+			args: []string{"namespace", "capacity", "get", "--namespace", "ns1"},
+			mock: func() {
+				s.mockCloudApiClient.EXPECT().
+					GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
+						Namespace: "ns1",
+					}).Return(&cloudservice.GetNamespaceResponse{
+					Namespace: &cloudNamespace.Namespace{
+						Namespace: "ns1",
+						Capacity: &cloudNamespace.Capacity{
+							CurrentMode: &cloudNamespace.Capacity_Provisioned_{
+								Provisioned: &cloudNamespace.Capacity_Provisioned{
+									CurrentValue: 16.0,
+								},
+							},
+						},
+					},
+				}, nil).Times(1)
+			},
+		},
+		{
+			name:      "get namespace capacity - fail",
+			args:      []string{"namespace", "capacity", "get", "--namespace", "ns1"},
+			expectErr: true,
+			mock: func() {
+				s.mockCloudApiClient.EXPECT().
+					GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
+						Namespace: "ns1",
+					}).Return(nil, errors.New("some error")).Times(1)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.mock != nil {
+				tc.mock()
+			}
 			err := s.RunCmd(tc.args...)
 			if tc.expectErr {
 				s.Error(err)

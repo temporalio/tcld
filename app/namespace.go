@@ -326,6 +326,21 @@ func (c *NamespaceClient) listNamespaces() error {
 	}
 }
 
+func (c *NamespaceClient) getNamespaceCloudApi(namespace string) (*cloudNamespace.Namespace, error) {
+	res, err := c.cloudAPIClient.GetNamespace(c.ctx, &cloudservice.GetNamespaceRequest{
+		Namespace: namespace,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if res.Namespace == nil || res.Namespace.Namespace == "" {
+		// this should never happen, the server should return an error when the namespace is not found
+		return nil, fmt.Errorf("invalid namespace returned by server")
+	}
+	return res.Namespace, nil
+}
+
+// TODO: deprecate this and use getNamespaceCloudApi everywhere
 func (c *NamespaceClient) getNamespace(namespace string) (*namespace.Namespace, error) {
 	res, err := c.client.GetNamespace(c.ctx, &namespaceservice.GetNamespaceRequest{
 		Namespace: namespace,
@@ -1808,6 +1823,28 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Action: func(ctx *cli.Context) error {
 						keysToRemove := ctx.StringSlice("tag-key")
 						return c.updateNamespaceTags(ctx, nil, keysToRemove)
+					},
+				},
+			},
+		},
+		{
+			Name:    "capacity",
+			Usage:   "Manage namespace capacity settings",
+			Aliases: []string{"cap"},
+			Subcommands: []*cli.Command{
+				{
+					Name:    "get",
+					Usage:   "Get namespace capacity settings",
+					Aliases: []string{"g"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						n, err := c.getNamespaceCloudApi(ctx.String(NamespaceFlagName))
+						if err != nil {
+							return err
+						}
+						return PrintProto(n.GetCapacity())
 					},
 				},
 			},
