@@ -3265,3 +3265,59 @@ func (s *NamespaceTestSuite) TestSetConnectivityRules() {
 		})
 	}
 }
+
+func (s *NamespaceTestSuite) TestGetNamespaceCapacity() {
+	tests := []struct {
+		name      string
+		args      []string
+		mock      func()
+		expectErr bool
+	}{
+		{
+			name: "get namespace capacity - success",
+			args: []string{"namespace", "capacity", "get", "--namespace", "ns1"},
+			mock: func() {
+				s.mockCloudApiClient.EXPECT().
+					GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
+						Namespace: "ns1",
+					}).Return(&cloudservice.GetNamespaceResponse{
+					Namespace: &cloudNamespace.Namespace{
+						Namespace: "ns1",
+						Capacity: &cloudNamespace.Capacity{
+							CurrentMode: &cloudNamespace.Capacity_Provisioned_{
+								Provisioned: &cloudNamespace.Capacity_Provisioned{
+									CurrentValue: 16.0,
+								},
+							},
+						},
+					},
+				}, nil).Times(1)
+			},
+		},
+		{
+			name:      "get namespace capacity - fail",
+			args:      []string{"namespace", "capacity", "get", "--namespace", "ns1"},
+			expectErr: true,
+			mock: func() {
+				s.mockCloudApiClient.EXPECT().
+					GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
+						Namespace: "ns1",
+					}).Return(nil, errors.New("some error")).Times(1)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.mock != nil {
+				tc.mock()
+			}
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
