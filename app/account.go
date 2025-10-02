@@ -23,6 +23,8 @@ const (
 	sinkServiceAccountIDFlagName = "service-account-id"
 	topicNameFlagName            = "topic-name"
 	roleNameFlagName             = "role-name"
+	kinesisAuditLogSinkType      = "kinesis"
+	pubsubAuditLogSinkType       = "pubsub"
 )
 
 var (
@@ -173,7 +175,7 @@ func toAuditLogSinkSpec(ctx *cli.Context, auditLogSinkType string) (*cloudaccoun
 		Name:    ctx.String(sinkNameFlag.Name),
 	}
 	switch auditLogSinkType {
-	case "kinesis":
+	case kinesisAuditLogSinkType:
 		{
 			spec.SinkType = &cloudaccount.AuditLogSinkSpec_KinesisSink{
 				KinesisSink: &cloudSink.KinesisSpec{
@@ -183,7 +185,7 @@ func toAuditLogSinkSpec(ctx *cli.Context, auditLogSinkType string) (*cloudaccoun
 				},
 			}
 		}
-	case "pubsub":
+	case pubsubAuditLogSinkType:
 		{
 			spec.SinkType = &cloudaccount.AuditLogSinkSpec_PubSubSink{
 				PubSubSink: &cloudSink.PubSubSpec{
@@ -518,7 +520,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 							sinkRegionFlagRequired,
 						},
 						Action: func(ctx *cli.Context) error {
-							spec, err := toAuditLogSinkSpec(ctx, "kinesis")
+							spec, err := toAuditLogSinkSpec(ctx, kinesisAuditLogSinkType)
 							if err != nil {
 								return err
 							}
@@ -543,7 +545,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 							gcpProjectIdFlag,
 						},
 						Action: func(ctx *cli.Context) error {
-							spec, err := toAuditLogSinkSpec(ctx, "pubsub")
+							spec, err := toAuditLogSinkSpec(ctx, pubsubAuditLogSinkType)
 							if err != nil {
 								return err
 							}
@@ -647,7 +649,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 							sinkRegionFlagRequired,
 						},
 						Action: func(ctx *cli.Context) error {
-							spec, err := toAuditLogSinkSpec(ctx, "kinesis")
+							spec, err := toAuditLogSinkSpec(ctx, kinesisAuditLogSinkType)
 							if err != nil {
 								return err
 							}
@@ -674,7 +676,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 							gcpProjectIdFlag,
 						},
 						Action: func(ctx *cli.Context) error {
-							spec, err := toAuditLogSinkSpec(ctx, "pubsub")
+							spec, err := toAuditLogSinkSpec(ctx, pubsubAuditLogSinkType)
 							if err != nil {
 								return err
 							}
@@ -707,7 +709,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 							sinkRegionFlagRequired,
 						},
 						Action: func(ctx *cli.Context) error {
-							spec, err := toAuditLogSinkSpec(ctx, "kinesis")
+							spec, err := toAuditLogSinkSpec(ctx, kinesisAuditLogSinkType)
 							if err != nil {
 								return err
 							}
@@ -733,7 +735,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 							gcpProjectIdFlag,
 						},
 						Action: func(ctx *cli.Context) error {
-							spec, err := toAuditLogSinkSpec(ctx, "pubsub")
+							spec, err := toAuditLogSinkSpec(ctx, pubsubAuditLogSinkType)
 							if err != nil {
 								return err
 							}

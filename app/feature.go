@@ -12,7 +12,7 @@ import (
 
 var (
 	GCPSinkFeatureFlag            = "enable-gcp-sink"
-	AuditLogSinkNewAPIFeatureFlag = "enable-audit-log-sink-new-api	"
+	AuditLogSinkNewAPIFeatureFlag = "enable-audit-log-sink-new-api"
 	featureflagFileName           = "feature.json"
 )
 
