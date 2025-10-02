@@ -175,45 +175,21 @@ func toAuditLogSinkSpec(ctx *cli.Context, auditLogSinkType string) (*cloudaccoun
 	switch auditLogSinkType {
 	case "kinesis":
 		{
-			roleName := ctx.String(roleNameFlag.Name)
-			if roleName == "" {
-				return nil, fmt.Errorf("role name is required for kinesis audit log sink")
-			}
-			region := ctx.String(sinkRegionFlagRequired.Name)
-			if region == "" {
-				return nil, fmt.Errorf("region is required for kinesis audit log sink")
-			}
-			destinationUri := ctx.String(destinationUriFlag.Name)
-			if destinationUri == "" {
-				return nil, fmt.Errorf("destination uri is required for kinesis audit log sink")
-			}
 			spec.SinkType = &cloudaccount.AuditLogSinkSpec_KinesisSink{
 				KinesisSink: &cloudSink.KinesisSpec{
-					RoleName:       roleName,
-					DestinationUri: destinationUri,
-					Region:         region,
+					RoleName:       ctx.String(roleNameFlag.Name),
+					DestinationUri: ctx.String(destinationUriFlag.Name),
+					Region:         ctx.String(sinkRegionFlagRequired.Name),
 				},
 			}
 		}
 	case "pubsub":
 		{
-			serviceAccountID := ctx.String(sinkServiceAccountIDFlag.Name)
-			if serviceAccountID == "" {
-				return nil, fmt.Errorf("service account id is required for pubsub audit log sink")
-			}
-			topicName := ctx.String(topicNameFlag.Name)
-			if topicName == "" {
-				return nil, fmt.Errorf("topic name is required for pubsub audit log sink")
-			}
-			gcpProjectId := ctx.String(gcpProjectIdFlag.Name)
-			if gcpProjectId == "" {
-				return nil, fmt.Errorf("gcp project id is required for pubsub audit log sink")
-			}
 			spec.SinkType = &cloudaccount.AuditLogSinkSpec_PubSubSink{
 				PubSubSink: &cloudSink.PubSubSpec{
-					ServiceAccountId: serviceAccountID,
-					TopicName:        topicName,
-					GcpProjectId:     gcpProjectId,
+					ServiceAccountId: ctx.String(sinkServiceAccountIDFlag.Name),
+					TopicName:        ctx.String(topicNameFlag.Name),
+					GcpProjectId:     ctx.String(gcpProjectIdFlag.Name),
 				},
 			}
 		}
@@ -225,12 +201,12 @@ func toAuditLogSinkSpec(ctx *cli.Context, auditLogSinkType string) (*cloudaccoun
 	return spec, nil
 }
 
-func (c *AccountClient) createAuditLogSink(ctx *cli.Context, spec *cloudaccount.AuditLogSinkSpec) (*cloudservice.CreateAccountAuditLogSinkResponse, error) {
+func (c *AccountClient) createAuditLogSink(spec *cloudaccount.AuditLogSinkSpec) (*cloudservice.CreateAccountAuditLogSinkResponse, error) {
 	createAuditLogSinkResp, err := c.cloudAPIClient.CreateAccountAuditLogSink(c.ctx, &cloudservice.CreateAccountAuditLogSinkRequest{
 		Spec: spec,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to create audit log sink: %v", err)
 	}
 	return createAuditLogSinkResp, nil
 }
@@ -546,7 +522,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 							if err != nil {
 								return err
 							}
-							resp, err := c.createAuditLogSink(ctx, spec)
+							resp, err := c.createAuditLogSink(spec)
 							if err != nil {
 								return err
 							}
@@ -571,7 +547,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 							if err != nil {
 								return err
 							}
-							resp, err := c.createAuditLogSink(ctx, spec)
+							resp, err := c.createAuditLogSink(spec)
 							if err != nil {
 								return err
 							}
