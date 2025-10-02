@@ -7,11 +7,14 @@ import (
 	bytes "bytes"
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
+	types "github.com/gogo/protobuf/types"
 	v1 "github.com/temporalio/tcld/protogen/api/cloud/resource/v1"
+	v11 "github.com/temporalio/tcld/protogen/api/cloud/sink/v1"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
+	strconv "strconv"
 	strings "strings"
 )
 
@@ -25,6 +28,33 @@ var _ = math.Inf
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
+
+type AuditLogSink_Health int32
+
+const (
+	HEALTH_UNSPECIFIED              AuditLogSink_Health = 0
+	HEALTH_OK                       AuditLogSink_Health = 1
+	HEALTH_ERROR_INTERNAL           AuditLogSink_Health = 2
+	HEALTH_ERROR_USER_CONFIGURATION AuditLogSink_Health = 3
+)
+
+var AuditLogSink_Health_name = map[int32]string{
+	0: "HealthUnspecified",
+	1: "HealthOk",
+	2: "HealthErrorInternal",
+	3: "HealthErrorUserConfiguration",
+}
+
+var AuditLogSink_Health_value = map[string]int32{
+	"HealthUnspecified":            0,
+	"HealthOk":                     1,
+	"HealthErrorInternal":          2,
+	"HealthErrorUserConfiguration": 3,
+}
+
+func (AuditLogSink_Health) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_0da0883d6b494eb5, []int{5, 0}
+}
 
 type MetricsSpec struct {
 	// The ca cert(s) in PEM format that clients connecting to the metrics endpoint can use for authentication.
@@ -251,11 +281,218 @@ func (m *Account) GetMetrics() *Metrics {
 	return nil
 }
 
+// AuditLogSinkSpec is only used by Audit Log
+type AuditLogSinkSpec struct {
+	// Name of the sink e.g. "audit_log_01"
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Types that are valid to be assigned to SinkType:
+	//	*AuditLogSinkSpec_KinesisSink
+	//	*AuditLogSinkSpec_PubSubSink
+	SinkType isAuditLogSinkSpec_SinkType `protobuf_oneof:"sink_type"`
+	// Enabled indicates whether the sink is enabled or not.
+	Enabled bool `protobuf:"varint,4,opt,name=enabled,proto3" json:"enabled,omitempty"`
+}
+
+func (m *AuditLogSinkSpec) Reset()      { *m = AuditLogSinkSpec{} }
+func (*AuditLogSinkSpec) ProtoMessage() {}
+func (*AuditLogSinkSpec) Descriptor() ([]byte, []int) {
+	return fileDescriptor_0da0883d6b494eb5, []int{4}
+}
+func (m *AuditLogSinkSpec) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AuditLogSinkSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AuditLogSinkSpec.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AuditLogSinkSpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AuditLogSinkSpec.Merge(m, src)
+}
+func (m *AuditLogSinkSpec) XXX_Size() int {
+	return m.Size()
+}
+func (m *AuditLogSinkSpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_AuditLogSinkSpec.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AuditLogSinkSpec proto.InternalMessageInfo
+
+type isAuditLogSinkSpec_SinkType interface {
+	isAuditLogSinkSpec_SinkType()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type AuditLogSinkSpec_KinesisSink struct {
+	KinesisSink *v11.KinesisSpec `protobuf:"bytes,2,opt,name=kinesis_sink,json=kinesisSink,proto3,oneof" json:"kinesis_sink,omitempty"`
+}
+type AuditLogSinkSpec_PubSubSink struct {
+	PubSubSink *v11.PubSubSpec `protobuf:"bytes,3,opt,name=pub_sub_sink,json=pubSubSink,proto3,oneof" json:"pub_sub_sink,omitempty"`
+}
+
+func (*AuditLogSinkSpec_KinesisSink) isAuditLogSinkSpec_SinkType() {}
+func (*AuditLogSinkSpec_PubSubSink) isAuditLogSinkSpec_SinkType()  {}
+
+func (m *AuditLogSinkSpec) GetSinkType() isAuditLogSinkSpec_SinkType {
+	if m != nil {
+		return m.SinkType
+	}
+	return nil
+}
+
+func (m *AuditLogSinkSpec) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *AuditLogSinkSpec) GetKinesisSink() *v11.KinesisSpec {
+	if x, ok := m.GetSinkType().(*AuditLogSinkSpec_KinesisSink); ok {
+		return x.KinesisSink
+	}
+	return nil
+}
+
+func (m *AuditLogSinkSpec) GetPubSubSink() *v11.PubSubSpec {
+	if x, ok := m.GetSinkType().(*AuditLogSinkSpec_PubSubSink); ok {
+		return x.PubSubSink
+	}
+	return nil
+}
+
+func (m *AuditLogSinkSpec) GetEnabled() bool {
+	if m != nil {
+		return m.Enabled
+	}
+	return false
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*AuditLogSinkSpec) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*AuditLogSinkSpec_KinesisSink)(nil),
+		(*AuditLogSinkSpec_PubSubSink)(nil),
+	}
+}
+
+// AuditLogSink is only used by Audit Log
+// temporal:dev
+type AuditLogSink struct {
+	// Name of the sink e.g. "audit_log_01"
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The version of the audit log sink resource.
+	ResourceVersion string `protobuf:"bytes,2,opt,name=resource_version,json=resourceVersion,proto3" json:"resource_version,omitempty"`
+	// The current state of the audit log sink.
+	State v1.ResourceState `protobuf:"varint,3,opt,name=state,proto3,enum=temporal.api.cloud.resource.v1.ResourceState" json:"state,omitempty"`
+	// The specification details of the audit log sink.
+	Spec *AuditLogSinkSpec `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
+	// The health status of the audit log sink.
+	Health AuditLogSink_Health `protobuf:"varint,5,opt,name=health,proto3,enum=temporal.api.cloud.account.v1.AuditLogSink_Health" json:"health,omitempty"`
+	// An error message describing any issues with the audit log sink, if applicable.
+	ErrorMessage string `protobuf:"bytes,6,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	// The last succeeded timestamp for the internal workflow responsible for adding data to the sink.
+	LastSucceededTime *types.Timestamp `protobuf:"bytes,7,opt,name=last_succeeded_time,json=lastSucceededTime,proto3" json:"last_succeeded_time,omitempty"`
+}
+
+func (m *AuditLogSink) Reset()      { *m = AuditLogSink{} }
+func (*AuditLogSink) ProtoMessage() {}
+func (*AuditLogSink) Descriptor() ([]byte, []int) {
+	return fileDescriptor_0da0883d6b494eb5, []int{5}
+}
+func (m *AuditLogSink) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AuditLogSink) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AuditLogSink.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AuditLogSink) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AuditLogSink.Merge(m, src)
+}
+func (m *AuditLogSink) XXX_Size() int {
+	return m.Size()
+}
+func (m *AuditLogSink) XXX_DiscardUnknown() {
+	xxx_messageInfo_AuditLogSink.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AuditLogSink proto.InternalMessageInfo
+
+func (m *AuditLogSink) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *AuditLogSink) GetResourceVersion() string {
+	if m != nil {
+		return m.ResourceVersion
+	}
+	return ""
+}
+
+func (m *AuditLogSink) GetState() v1.ResourceState {
+	if m != nil {
+		return m.State
+	}
+	return v1.RESOURCE_STATE_UNSPECIFIED
+}
+
+func (m *AuditLogSink) GetSpec() *AuditLogSinkSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *AuditLogSink) GetHealth() AuditLogSink_Health {
+	if m != nil {
+		return m.Health
+	}
+	return HEALTH_UNSPECIFIED
+}
+
+func (m *AuditLogSink) GetErrorMessage() string {
+	if m != nil {
+		return m.ErrorMessage
+	}
+	return ""
+}
+
+func (m *AuditLogSink) GetLastSucceededTime() *types.Timestamp {
+	if m != nil {
+		return m.LastSucceededTime
+	}
+	return nil
+}
+
 func init() {
+	proto.RegisterEnum("temporal.api.cloud.account.v1.AuditLogSink_Health", AuditLogSink_Health_name, AuditLogSink_Health_value)
 	proto.RegisterType((*MetricsSpec)(nil), "temporal.api.cloud.account.v1.MetricsSpec")
 	proto.RegisterType((*AccountSpec)(nil), "temporal.api.cloud.account.v1.AccountSpec")
 	proto.RegisterType((*Metrics)(nil), "temporal.api.cloud.account.v1.Metrics")
 	proto.RegisterType((*Account)(nil), "temporal.api.cloud.account.v1.Account")
+	proto.RegisterType((*AuditLogSinkSpec)(nil), "temporal.api.cloud.account.v1.AuditLogSinkSpec")
+	proto.RegisterType((*AuditLogSink)(nil), "temporal.api.cloud.account.v1.AuditLogSink")
 }
 
 func init() {
@@ -263,38 +500,66 @@ func init() {
 }
 
 var fileDescriptor_0da0883d6b494eb5 = []byte{
-	// 461 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x52, 0xcf, 0x8a, 0x13, 0x31,
-	0x18, 0x9f, 0xcc, 0xfe, 0x29, 0xa6, 0xcb, 0x5a, 0x72, 0x1a, 0x14, 0x63, 0xa9, 0x20, 0xd5, 0x5d,
-	0x33, 0x74, 0xbd, 0xcd, 0x82, 0xd8, 0xad, 0x17, 0x0f, 0x8b, 0xcb, 0x54, 0x7a, 0xf0, 0x32, 0xc4,
-	0x4c, 0x58, 0x02, 0xed, 0x24, 0x24, 0x69, 0xc1, 0x9b, 0x8f, 0xe0, 0x63, 0x88, 0x6f, 0xe0, 0x1b,
-	0x78, 0xec, 0x71, 0xc1, 0x8b, 0x9d, 0x5e, 0xc4, 0xd3, 0x3e, 0x82, 0x4c, 0x26, 0xe3, 0x16, 0x2c,
-	0xab, 0xb7, 0xf0, 0xfd, 0xfe, 0x7d, 0xf3, 0x9b, 0x0f, 0x1e, 0x59, 0x3e, 0x53, 0x52, 0xd3, 0x69,
-	0x4c, 0x95, 0x88, 0xd9, 0x54, 0xce, 0xf3, 0x98, 0x32, 0x26, 0xe7, 0x85, 0x8d, 0x17, 0x83, 0x78,
-	0xc6, 0x8d, 0xa1, 0x97, 0x9c, 0x28, 0x2d, 0xad, 0x44, 0x0f, 0x1a, 0x32, 0xa1, 0x4a, 0x10, 0x47,
-	0x26, 0x9e, 0x4c, 0x16, 0x83, 0x7b, 0xc7, 0x5b, 0xbc, 0x34, 0x37, 0x72, 0xae, 0x19, 0xff, 0xcb,
-	0xac, 0x77, 0x0a, 0xdb, 0xe7, 0xdc, 0x6a, 0xc1, 0xcc, 0x58, 0x71, 0x86, 0x8e, 0x21, 0xa2, 0x8c,
-	0x71, 0x65, 0x79, 0x9e, 0xb1, 0xa9, 0xe0, 0x85, 0xcd, 0x18, 0x8d, 0xc2, 0x2e, 0xe8, 0x1f, 0xa4,
-	0x9d, 0x06, 0x19, 0x39, 0x60, 0x44, 0x7b, 0x63, 0xd8, 0x1e, 0xd6, 0xc1, 0x4e, 0xfc, 0x0a, 0xb6,
-	0x66, 0xb5, 0x57, 0x04, 0xba, 0xa0, 0xdf, 0x3e, 0x79, 0x4a, 0x6e, 0x5d, 0x95, 0x6c, 0x24, 0xa7,
-	0x8d, 0xb4, 0x77, 0x1f, 0xb6, 0xfc, 0x1c, 0x75, 0xe0, 0xce, 0x5c, 0x0b, 0x67, 0x76, 0x27, 0xad,
-	0x9e, 0xbd, 0xaf, 0x21, 0x6c, 0xf9, 0x48, 0x74, 0x08, 0x43, 0x91, 0x7b, 0x30, 0x14, 0x39, 0x7a,
-	0x01, 0x77, 0x8d, 0xe2, 0xcc, 0x6d, 0xfb, 0xef, 0xec, 0x8d, 0xc5, 0x53, 0xa7, 0x43, 0x4f, 0x60,
-	0xa7, 0xe9, 0x29, 0x5b, 0x70, 0x6d, 0x84, 0x2c, 0xa2, 0x1d, 0xe7, 0x7e, 0xb7, 0x99, 0x4f, 0xea,
-	0x31, 0x1a, 0xc1, 0x3d, 0x63, 0xa9, 0xe5, 0xd1, 0x6e, 0x17, 0xf4, 0x0f, 0x4f, 0x9e, 0x6d, 0xcb,
-	0x6a, 0x34, 0x55, 0x58, 0xea, 0xdf, 0xe3, 0x4a, 0x94, 0xd6, 0x5a, 0xd7, 0xb5, 0xf9, 0x50, 0xb0,
-	0x4c, 0x2a, 0xae, 0xa9, 0x15, 0xb2, 0xc8, 0x44, 0x1e, 0xed, 0xb9, 0xc4, 0x8e, 0x43, 0xde, 0x34,
-	0xc0, 0xeb, 0x1c, 0xbd, 0xbc, 0x29, 0x77, 0xdf, 0x7d, 0xe0, 0xe3, 0xff, 0x2b, 0xf7, 0x4f, 0xb1,
-	0x67, 0xdf, 0xc1, 0x72, 0x85, 0x83, 0xab, 0x15, 0x0e, 0xae, 0x57, 0x18, 0x7c, 0x2c, 0x31, 0xf8,
-	0x5c, 0x62, 0xf0, 0xad, 0xc4, 0x60, 0x59, 0x62, 0xf0, 0xa3, 0xc4, 0xe0, 0x67, 0x89, 0x83, 0xeb,
-	0x12, 0x83, 0x4f, 0x6b, 0x1c, 0x2c, 0xd7, 0x38, 0xb8, 0x5a, 0xe3, 0x00, 0x76, 0x85, 0xbc, 0x3d,
-	0xe9, 0xec, 0xe0, 0xbc, 0x3e, 0xa9, 0x8b, 0xea, 0xa2, 0x2e, 0xc0, 0xbb, 0xa3, 0xcb, 0x0d, 0x85,
-	0x90, 0x5b, 0x6f, 0xfa, 0xd4, 0x3f, 0xbf, 0x84, 0x0f, 0xdf, 0x7a, 0xaa, 0x90, 0x64, 0xa8, 0x04,
-	0x19, 0x39, 0x7b, 0xff, 0x7b, 0xc8, 0x64, 0xf0, 0x2b, 0x7c, 0x74, 0xc3, 0x48, 0x92, 0xa1, 0x12,
-	0x49, 0xe2, 0x38, 0x49, 0xe2, 0x49, 0x49, 0x32, 0x19, 0xbc, 0xdf, 0x77, 0xf7, 0xfc, 0xfc, 0x77,
-	0x00, 0x00, 0x00, 0xff, 0xff, 0xef, 0xeb, 0xe5, 0xae, 0x4b, 0x03, 0x00, 0x00,
+	// 798 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x55, 0xcf, 0x6e, 0xfb, 0x44,
+	0x10, 0xb6, 0x9d, 0x34, 0x21, 0x9b, 0xb4, 0x98, 0x45, 0xa0, 0x50, 0x84, 0x1b, 0xa5, 0x12, 0x04,
+	0x5a, 0x6c, 0x25, 0xdc, 0x5c, 0x09, 0x91, 0xa6, 0x29, 0x49, 0x9b, 0x26, 0xd1, 0x3a, 0xed, 0x81,
+	0x8b, 0xe5, 0xd8, 0x4b, 0xba, 0x6a, 0xe2, 0xb5, 0xfc, 0xa7, 0x52, 0x6f, 0x5c, 0xb8, 0xf3, 0x18,
+	0x88, 0x37, 0xe0, 0x0d, 0x38, 0xf6, 0x58, 0x89, 0x0b, 0x4d, 0x0f, 0x20, 0x4e, 0x7d, 0x04, 0xb4,
+	0xeb, 0xb5, 0x1a, 0x68, 0x68, 0x41, 0xbf, 0x43, 0x24, 0xef, 0xcc, 0xf7, 0x7d, 0xb3, 0xf3, 0xed,
+	0x68, 0x02, 0xf6, 0x62, 0xbc, 0x08, 0x68, 0xe8, 0xcc, 0x0d, 0x27, 0x20, 0x86, 0x3b, 0xa7, 0x89,
+	0x67, 0x38, 0xae, 0x4b, 0x13, 0x3f, 0x36, 0xae, 0x9b, 0xc6, 0x02, 0x47, 0x91, 0x33, 0xc3, 0x7a,
+	0x10, 0xd2, 0x98, 0xc2, 0x8f, 0x32, 0xb0, 0xee, 0x04, 0x44, 0xe7, 0x60, 0x5d, 0x80, 0xf5, 0xeb,
+	0xe6, 0xf6, 0xfe, 0x1a, 0xad, 0x10, 0x47, 0x34, 0x09, 0x5d, 0xfc, 0x4c, 0x6c, 0xbb, 0xb1, 0x06,
+	0x1d, 0x11, 0xff, 0xea, 0x39, 0x72, 0x67, 0x46, 0xe9, 0x6c, 0x8e, 0x0d, 0x7e, 0x9a, 0x26, 0xdf,
+	0x1a, 0x31, 0x59, 0xe0, 0x28, 0x76, 0x16, 0x41, 0x0a, 0xa8, 0x1f, 0x80, 0xf2, 0x19, 0x8e, 0x43,
+	0xe2, 0x46, 0x56, 0x80, 0x5d, 0xb8, 0x0f, 0xa0, 0xe3, 0xba, 0x38, 0x88, 0xb1, 0x67, 0xbb, 0x73,
+	0x82, 0xfd, 0xd8, 0x76, 0x9d, 0xaa, 0x52, 0x93, 0x1b, 0x15, 0xa4, 0x66, 0x99, 0x0e, 0x4f, 0x74,
+	0x9c, 0xba, 0x05, 0xca, 0xed, 0xb4, 0x07, 0x4e, 0x3e, 0x02, 0xc5, 0x45, 0xaa, 0x55, 0x95, 0x6b,
+	0x72, 0xa3, 0xdc, 0xfa, 0x4c, 0x7f, 0xb1, 0x6b, 0x7d, 0xa5, 0x32, 0xca, 0xa8, 0xf5, 0x0f, 0x41,
+	0x51, 0xc4, 0xa1, 0x0a, 0x72, 0x49, 0x48, 0xb8, 0x58, 0x09, 0xb1, 0xcf, 0xfa, 0xcf, 0x0a, 0x28,
+	0x8a, 0x92, 0x70, 0x0b, 0x28, 0xc4, 0x13, 0x49, 0x85, 0x78, 0xf0, 0x4b, 0x90, 0x8f, 0x02, 0xec,
+	0xf2, 0xdb, 0xbe, 0x5e, 0x7b, 0xe5, 0xe2, 0x88, 0xf3, 0xe0, 0xa7, 0x40, 0xcd, 0x2c, 0xb7, 0xaf,
+	0x71, 0x18, 0x11, 0xea, 0x57, 0x73, 0x5c, 0xfd, 0xed, 0x2c, 0x7e, 0x91, 0x86, 0x61, 0x07, 0x6c,
+	0x44, 0xb1, 0x13, 0xe3, 0x6a, 0xbe, 0x26, 0x37, 0xb6, 0x5a, 0x9f, 0xaf, 0xab, 0x95, 0x71, 0x58,
+	0x31, 0x24, 0xbe, 0x2d, 0x46, 0x42, 0x29, 0x97, 0x7b, 0x1d, 0xdd, 0xf8, 0xae, 0x4d, 0x03, 0x1c,
+	0x3a, 0x31, 0xa1, 0xbe, 0x4d, 0xbc, 0xea, 0x06, 0xaf, 0xa8, 0xf2, 0xcc, 0x28, 0x4b, 0xf4, 0x3d,
+	0xf8, 0xd5, 0x93, 0xb9, 0x05, 0xde, 0xe0, 0xc7, 0xff, 0xcd, 0xdc, 0x27, 0x63, 0x7f, 0x97, 0x81,
+	0xda, 0x4e, 0x3c, 0x12, 0x0f, 0xe8, 0xcc, 0x22, 0xfe, 0x15, 0x7f, 0x33, 0x08, 0xf2, 0xbe, 0xb3,
+	0xc0, 0xc2, 0x46, 0xfe, 0x0d, 0x07, 0xa0, 0x72, 0x45, 0x7c, 0x1c, 0x91, 0xc8, 0x66, 0x53, 0x25,
+	0x0c, 0xfd, 0x64, 0x5d, 0x3d, 0x96, 0x67, 0xc5, 0x4e, 0x53, 0x3c, 0x93, 0xec, 0x49, 0xa8, 0x2c,
+	0xe8, 0xac, 0x0a, 0x3c, 0x01, 0x95, 0x20, 0x99, 0xda, 0x11, 0xfb, 0x31, 0xb5, 0xdc, 0xbf, 0xdf,
+	0x3e, 0x53, 0x1b, 0x27, 0x53, 0x2b, 0x99, 0x0a, 0x31, 0x10, 0xa4, 0x27, 0xa6, 0x55, 0x05, 0x45,
+	0xec, 0x3b, 0xd3, 0x39, 0xf6, 0xb8, 0xf3, 0x6f, 0xa1, 0xec, 0x78, 0x58, 0x06, 0x25, 0xc6, 0xb6,
+	0xe3, 0x9b, 0x00, 0xd7, 0xbf, 0xcf, 0x83, 0xca, 0x6a, 0xa7, 0x6b, 0xbb, 0x5c, 0xf7, 0xdc, 0xca,
+	0x2b, 0xcf, 0x9d, 0x7b, 0x83, 0xe7, 0xee, 0x88, 0xf1, 0xcc, 0xf3, 0xfe, 0x8d, 0xd7, 0xc6, 0xf3,
+	0x1f, 0x0f, 0x25, 0x66, 0xf4, 0x04, 0x14, 0x2e, 0xb1, 0x33, 0x8f, 0x2f, 0xf9, 0x9c, 0x6c, 0xb5,
+	0x5a, 0xff, 0x43, 0x46, 0xef, 0x71, 0x26, 0x12, 0x0a, 0x70, 0x17, 0x6c, 0xe2, 0x30, 0xa4, 0xa1,
+	0x2d, 0x56, 0x06, 0x9f, 0xab, 0x12, 0xaa, 0xf0, 0xe0, 0x59, 0x1a, 0x83, 0x27, 0xe0, 0xdd, 0xb9,
+	0x13, 0xc5, 0x76, 0x94, 0xb8, 0x2e, 0xc6, 0x1e, 0xf6, 0x6c, 0xb6, 0x41, 0xaa, 0x45, 0xde, 0xc4,
+	0xb6, 0x9e, 0xae, 0x17, 0x3d, 0x5b, 0x2f, 0xfa, 0x24, 0x5b, 0x2f, 0xe8, 0x1d, 0x46, 0xb3, 0x32,
+	0x16, 0x8b, 0xd7, 0x29, 0x28, 0xa4, 0x57, 0x80, 0xef, 0x03, 0xd8, 0xeb, 0xb6, 0x07, 0x93, 0x9e,
+	0x7d, 0x3e, 0xb4, 0xc6, 0xdd, 0x4e, 0xff, 0xb8, 0xdf, 0x3d, 0x52, 0x25, 0xb8, 0x09, 0x4a, 0x22,
+	0x3e, 0x3a, 0x55, 0x65, 0xf8, 0x01, 0x78, 0x4f, 0x1c, 0xbb, 0x08, 0x8d, 0x90, 0xdd, 0x1f, 0x4e,
+	0xba, 0x68, 0xd8, 0x1e, 0xa8, 0x0a, 0xdc, 0x05, 0x3b, 0x7f, 0x4b, 0x9d, 0x5b, 0x5d, 0x64, 0x77,
+	0x46, 0xc3, 0xe3, 0xfe, 0xd7, 0xe7, 0xa8, 0x3d, 0xe9, 0x8f, 0x86, 0x6a, 0xee, 0xf0, 0x57, 0xf9,
+	0xf6, 0x5e, 0x93, 0xee, 0xee, 0x35, 0xe9, 0xf1, 0x5e, 0x93, 0xbf, 0x5b, 0x6a, 0xf2, 0x8f, 0x4b,
+	0x4d, 0xfe, 0x65, 0xa9, 0xc9, 0xb7, 0x4b, 0x4d, 0xfe, 0x6d, 0xa9, 0xc9, 0x7f, 0x2c, 0x35, 0xe9,
+	0x71, 0xa9, 0xc9, 0x3f, 0x3c, 0x68, 0xd2, 0xed, 0x83, 0x26, 0xdd, 0x3d, 0x68, 0x12, 0xa8, 0x11,
+	0xfa, 0xb2, 0xad, 0x87, 0x15, 0x61, 0xcf, 0x98, 0xf5, 0x3d, 0x96, 0xbf, 0xd9, 0x9b, 0xad, 0x30,
+	0x08, 0x5d, 0xfb, 0x87, 0x70, 0x20, 0x3e, 0x7f, 0x52, 0x76, 0x26, 0x02, 0x4a, 0xa8, 0xde, 0x0e,
+	0x88, 0xde, 0xe1, 0xf2, 0x62, 0x21, 0xe9, 0x17, 0xcd, 0x3f, 0x95, 0xdd, 0x27, 0x84, 0x69, 0xb6,
+	0x03, 0x62, 0x9a, 0x1c, 0x63, 0x9a, 0x02, 0x64, 0x9a, 0x17, 0xcd, 0x69, 0x81, 0xbb, 0xfe, 0xc5,
+	0x5f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x4f, 0x20, 0x8a, 0x76, 0x88, 0x06, 0x00, 0x00,
 }
 
+func (x AuditLogSink_Health) String() string {
+	s, ok := AuditLogSink_Health_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
 func (this *MetricsSpec) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -406,6 +671,132 @@ func (this *Account) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *AuditLogSinkSpec) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AuditLogSinkSpec)
+	if !ok {
+		that2, ok := that.(AuditLogSinkSpec)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if that1.SinkType == nil {
+		if this.SinkType != nil {
+			return false
+		}
+	} else if this.SinkType == nil {
+		return false
+	} else if !this.SinkType.Equal(that1.SinkType) {
+		return false
+	}
+	if this.Enabled != that1.Enabled {
+		return false
+	}
+	return true
+}
+func (this *AuditLogSinkSpec_KinesisSink) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AuditLogSinkSpec_KinesisSink)
+	if !ok {
+		that2, ok := that.(AuditLogSinkSpec_KinesisSink)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.KinesisSink.Equal(that1.KinesisSink) {
+		return false
+	}
+	return true
+}
+func (this *AuditLogSinkSpec_PubSubSink) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AuditLogSinkSpec_PubSubSink)
+	if !ok {
+		that2, ok := that.(AuditLogSinkSpec_PubSubSink)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.PubSubSink.Equal(that1.PubSubSink) {
+		return false
+	}
+	return true
+}
+func (this *AuditLogSink) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AuditLogSink)
+	if !ok {
+		that2, ok := that.(AuditLogSink)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if this.ResourceVersion != that1.ResourceVersion {
+		return false
+	}
+	if this.State != that1.State {
+		return false
+	}
+	if !this.Spec.Equal(that1.Spec) {
+		return false
+	}
+	if this.Health != that1.Health {
+		return false
+	}
+	if this.ErrorMessage != that1.ErrorMessage {
+		return false
+	}
+	if !this.LastSucceededTime.Equal(that1.LastSucceededTime) {
+		return false
+	}
+	return true
+}
 func (this *MetricsSpec) GoString() string {
 	if this == nil {
 		return "nil"
@@ -453,6 +844,56 @@ func (this *Account) GoString() string {
 	s = append(s, "AsyncOperationId: "+fmt.Sprintf("%#v", this.AsyncOperationId)+",\n")
 	if this.Metrics != nil {
 		s = append(s, "Metrics: "+fmt.Sprintf("%#v", this.Metrics)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *AuditLogSinkSpec) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&account.AuditLogSinkSpec{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	if this.SinkType != nil {
+		s = append(s, "SinkType: "+fmt.Sprintf("%#v", this.SinkType)+",\n")
+	}
+	s = append(s, "Enabled: "+fmt.Sprintf("%#v", this.Enabled)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *AuditLogSinkSpec_KinesisSink) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&account.AuditLogSinkSpec_KinesisSink{` +
+		`KinesisSink:` + fmt.Sprintf("%#v", this.KinesisSink) + `}`}, ", ")
+	return s
+}
+func (this *AuditLogSinkSpec_PubSubSink) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&account.AuditLogSinkSpec_PubSubSink{` +
+		`PubSubSink:` + fmt.Sprintf("%#v", this.PubSubSink) + `}`}, ", ")
+	return s
+}
+func (this *AuditLogSink) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 11)
+	s = append(s, "&account.AuditLogSink{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "ResourceVersion: "+fmt.Sprintf("%#v", this.ResourceVersion)+",\n")
+	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
+	if this.Spec != nil {
+		s = append(s, "Spec: "+fmt.Sprintf("%#v", this.Spec)+",\n")
+	}
+	s = append(s, "Health: "+fmt.Sprintf("%#v", this.Health)+",\n")
+	s = append(s, "ErrorMessage: "+fmt.Sprintf("%#v", this.ErrorMessage)+",\n")
+	if this.LastSucceededTime != nil {
+		s = append(s, "LastSucceededTime: "+fmt.Sprintf("%#v", this.LastSucceededTime)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -633,6 +1074,175 @@ func (m *Account) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *AuditLogSinkSpec) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AuditLogSinkSpec) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AuditLogSinkSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Enabled {
+		i--
+		if m.Enabled {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.SinkType != nil {
+		{
+			size := m.SinkType.Size()
+			i -= size
+			if _, err := m.SinkType.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *AuditLogSinkSpec_KinesisSink) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AuditLogSinkSpec_KinesisSink) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.KinesisSink != nil {
+		{
+			size, err := m.KinesisSink.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *AuditLogSinkSpec_PubSubSink) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AuditLogSinkSpec_PubSubSink) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.PubSubSink != nil {
+		{
+			size, err := m.PubSubSink.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *AuditLogSink) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AuditLogSink) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AuditLogSink) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.LastSucceededTime != nil {
+		{
+			size, err := m.LastSucceededTime.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3a
+	}
+	if len(m.ErrorMessage) > 0 {
+		i -= len(m.ErrorMessage)
+		copy(dAtA[i:], m.ErrorMessage)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.ErrorMessage)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if m.Health != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.Health))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.Spec != nil {
+		{
+			size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMessage(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.State != 0 {
+		i = encodeVarintMessage(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.ResourceVersion) > 0 {
+		i -= len(m.ResourceVersion)
+		copy(dAtA[i:], m.ResourceVersion)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.ResourceVersion)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintMessage(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintMessage(dAtA []byte, offset int, v uint64) int {
 	offset -= sovMessage(v)
 	base := offset
@@ -715,6 +1325,84 @@ func (m *Account) Size() (n int) {
 	return n
 }
 
+func (m *AuditLogSinkSpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.SinkType != nil {
+		n += m.SinkType.Size()
+	}
+	if m.Enabled {
+		n += 2
+	}
+	return n
+}
+
+func (m *AuditLogSinkSpec_KinesisSink) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.KinesisSink != nil {
+		l = m.KinesisSink.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+func (m *AuditLogSinkSpec_PubSubSink) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PubSubSink != nil {
+		l = m.PubSubSink.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+func (m *AuditLogSink) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	l = len(m.ResourceVersion)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.State != 0 {
+		n += 1 + sovMessage(uint64(m.State))
+	}
+	if m.Spec != nil {
+		l = m.Spec.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.Health != 0 {
+		n += 1 + sovMessage(uint64(m.Health))
+	}
+	l = len(m.ErrorMessage)
+	if l > 0 {
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	if m.LastSucceededTime != nil {
+		l = m.LastSucceededTime.Size()
+		n += 1 + l + sovMessage(uint64(l))
+	}
+	return n
+}
+
 func sovMessage(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
@@ -762,6 +1450,54 @@ func (this *Account) String() string {
 		`State:` + fmt.Sprintf("%v", this.State) + `,`,
 		`AsyncOperationId:` + fmt.Sprintf("%v", this.AsyncOperationId) + `,`,
 		`Metrics:` + strings.Replace(this.Metrics.String(), "Metrics", "Metrics", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AuditLogSinkSpec) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AuditLogSinkSpec{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`SinkType:` + fmt.Sprintf("%v", this.SinkType) + `,`,
+		`Enabled:` + fmt.Sprintf("%v", this.Enabled) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AuditLogSinkSpec_KinesisSink) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AuditLogSinkSpec_KinesisSink{`,
+		`KinesisSink:` + strings.Replace(fmt.Sprintf("%v", this.KinesisSink), "KinesisSpec", "v11.KinesisSpec", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AuditLogSinkSpec_PubSubSink) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AuditLogSinkSpec_PubSubSink{`,
+		`PubSubSink:` + strings.Replace(fmt.Sprintf("%v", this.PubSubSink), "PubSubSpec", "v11.PubSubSpec", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AuditLogSink) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AuditLogSink{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`ResourceVersion:` + fmt.Sprintf("%v", this.ResourceVersion) + `,`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`Spec:` + strings.Replace(this.Spec.String(), "AuditLogSinkSpec", "AuditLogSinkSpec", 1) + `,`,
+		`Health:` + fmt.Sprintf("%v", this.Health) + `,`,
+		`ErrorMessage:` + fmt.Sprintf("%v", this.ErrorMessage) + `,`,
+		`LastSucceededTime:` + strings.Replace(fmt.Sprintf("%v", this.LastSucceededTime), "Timestamp", "types.Timestamp", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1248,6 +1984,440 @@ func (m *Account) Unmarshal(dAtA []byte) error {
 				m.Metrics = &Metrics{}
 			}
 			if err := m.Metrics.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AuditLogSinkSpec) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AuditLogSinkSpec: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AuditLogSinkSpec: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field KinesisSink", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &v11.KinesisSpec{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.SinkType = &AuditLogSinkSpec_KinesisSink{v}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PubSubSink", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &v11.PubSubSpec{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.SinkType = &AuditLogSinkSpec_PubSubSink{v}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Enabled", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Enabled = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMessage(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AuditLogSink) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMessage
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AuditLogSink: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AuditLogSink: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= v1.ResourceState(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Spec == nil {
+				m.Spec = &AuditLogSinkSpec{}
+			}
+			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Health", wireType)
+			}
+			m.Health = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Health |= AuditLogSink_Health(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ErrorMessage", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ErrorMessage = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastSucceededTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMessage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMessage
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMessage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.LastSucceededTime == nil {
+				m.LastSucceededTime = &types.Timestamp{}
+			}
+			if err := m.LastSucceededTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

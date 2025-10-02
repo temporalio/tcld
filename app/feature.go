@@ -11,11 +11,12 @@ import (
 )
 
 var (
-	GCPSinkFeatureFlag  = "enable-gcp-sink"
-	featureflagFileName = "feature.json"
+	GCPSinkFeatureFlag            = "enable-gcp-sink"
+	AuditLogSinkNewAPIFeatureFlag = "enable-audit-log-sink-new-api	"
+	featureflagFileName           = "feature.json"
 )
 
-var supportFeatureFlags = []string{GCPSinkFeatureFlag}
+var supportFeatureFlags = []string{GCPSinkFeatureFlag, AuditLogSinkNewAPIFeatureFlag}
 
 type FeatureFlag struct {
 	Name  string `json:"Name"`
@@ -152,6 +153,14 @@ func NewFeatureCommand() (CommandOut, error) {
 
 						fmt.Printf("%s\n", prettyJSON)
 						return nil
+					},
+				},
+				{
+					Name:    "toggle-audit-log-sink-new-api",
+					Aliases: []string{"tal"},
+					Usage:   "switch audit log sink new api on/off",
+					Action: func(c *cli.Context) error {
+						return toggleFeature(AuditLogSinkNewAPIFeatureFlag)
 					},
 				},
 			},

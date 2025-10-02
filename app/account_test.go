@@ -14,9 +14,14 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/account/v1"
 	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
+	cloudaccount "github.com/temporalio/tcld/protogen/api/cloud/account/v1"
+	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
+	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
+	cloudSink "github.com/temporalio/tcld/protogen/api/cloud/sink/v1"
 	"github.com/temporalio/tcld/protogen/api/common/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	accountservicemock "github.com/temporalio/tcld/protogen/apimock/accountservice/v1"
+	apimock "github.com/temporalio/tcld/protogen/apimock/cloudservice/v1"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,18 +31,26 @@ func TestAccount(t *testing.T) {
 
 type AccountTestSuite struct {
 	suite.Suite
-	cliApp      *cli.App
-	mockCtrl    *gomock.Controller
-	mockService *accountservicemock.MockAccountServiceClient
+	cliApp             *cli.App
+	mockCtrl           *gomock.Controller
+	mockService        *accountservicemock.MockAccountServiceClient
+	mockCloudApiClient *apimock.MockCloudServiceClient
 }
 
 func (s *AccountTestSuite) SetupTest() {
+	if !IsFeatureEnabled(AuditLogSinkNewAPIFeatureFlag) {
+		err := toggleFeature(AuditLogSinkNewAPIFeatureFlag)
+		s.Require().NoError(err)
+	}
+
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = accountservicemock.NewMockAccountServiceClient(s.mockCtrl)
+	s.mockCloudApiClient = apimock.NewMockCloudServiceClient(s.mockCtrl)
 	out, err := NewAccountCommand(func(ctx *cli.Context) (*AccountClient, error) {
 		return &AccountClient{
-			ctx:    context.TODO(),
-			client: s.mockService,
+			ctx:            context.TODO(),
+			client:         s.mockService,
+			cloudAPIClient: s.mockCloudApiClient,
 		}, nil
 	})
 	s.Require().NoError(err)
@@ -631,4 +644,539 @@ func (s *AccountTestSuite) copySpec(spec *account.AccountSpec) *account.AccountS
 	var copy account.AccountSpec
 	s.NoError(json.Unmarshal(bytes, &copy))
 	return &copy
+}
+
+func (s *AccountTestSuite) TestCreateAuditLogSink() {
+	tests := []struct {
+		name          string
+		args          []string
+		expectErr     bool
+		expectRequest cloudservice.CreateAccountAuditLogSinkRequest
+		createError   error
+	}{
+		{
+			name: "kinesis audit log sink",
+			args: []string{"a", "al", "create", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "kinesis", "--role-name", "TestRole",
+				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+				"--region", "us-east-1", "--enabled", "true"},
+			expectErr: false,
+			expectRequest: cloudservice.CreateAccountAuditLogSinkRequest{
+				Spec: &cloudaccount.AuditLogSinkSpec{
+					Name:    "audit_log_01",
+					Enabled: true,
+					SinkType: &cloudaccount.AuditLogSinkSpec_KinesisSink{
+						KinesisSink: &cloudSink.KinesisSpec{
+							RoleName:       "TestRole",
+							DestinationUri: "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+							Region:         "us-east-1",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "kinesis audit log sink with error",
+			args: []string{"a", "al", "create", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "kinesis", "--role-name", "TestRole",
+				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+				"--region", "us-east-1", "--enabled", "true"},
+			expectErr: true,
+			expectRequest: cloudservice.CreateAccountAuditLogSinkRequest{
+				Spec: &cloudaccount.AuditLogSinkSpec{
+					Name:    "audit_log_01",
+					Enabled: true,
+					SinkType: &cloudaccount.AuditLogSinkSpec_KinesisSink{
+						KinesisSink: &cloudSink.KinesisSpec{
+							RoleName:       "TestRole",
+							DestinationUri: "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+							Region:         "us-east-1",
+						},
+					},
+				},
+			},
+			createError: fmt.Errorf("error"),
+		},
+		{
+			name: "kinesis audit log sink missing role name",
+			args: []string{"a", "al", "create", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "kinesis",
+				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+				"--region", "us-east-1", "--enabled", "true"},
+			expectErr: true,
+		},
+		{
+			name: "kinesis audit log sink missing destination uri",
+			args: []string{"a", "al", "create", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "kinesis",
+				"--role-name", "TestRole",
+				"--region", "us-east-1", "--enabled", "true"},
+			expectErr: true,
+		},
+		{
+			name: "kinesis audit log sink missing region",
+			args: []string{"a", "al", "create", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "kinesis",
+				"--role-name", "TestRole",
+				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+				"--enabled", "true"},
+			expectErr: true,
+		},
+		{
+			name: "pubsub audit log sink",
+			args: []string{"a", "al", "create", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "pubsub", "--enabled", "true",
+				"--service-account-id", "123456789012", "--topic-name", "TestTopic", "--gcp-project-id", "TestProject"},
+			expectErr: false,
+			expectRequest: cloudservice.CreateAccountAuditLogSinkRequest{
+				Spec: &cloudaccount.AuditLogSinkSpec{
+					Name:    "audit_log_01",
+					Enabled: true,
+					SinkType: &cloudaccount.AuditLogSinkSpec_PubSubSink{
+						PubSubSink: &cloudSink.PubSubSpec{
+							ServiceAccountId: "123456789012",
+							TopicName:        "TestTopic",
+							GcpProjectId:     "TestProject",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "pubsub audit log sink missing service account id",
+			args: []string{"a", "al", "create", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "pubsub", "--enabled", "true",
+				"--topic-name", "TestTopic", "--gcp-project-id", "TestProject"},
+			expectErr: true,
+		},
+		{
+			name: "pubsub audit log sink missing topic name",
+			args: []string{"a", "al", "create", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "pubsub", "--enabled", "true",
+				"--service-account-id", "123456789012", "--gcp-project-id", "TestProject"},
+			expectErr: true,
+		},
+		{
+			name: "pubsub audit log sink missing gcp project id",
+			args: []string{"a", "al", "create", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "pubsub", "--enabled", "true",
+				"--service-account-id", "123456789012", "--topic-name", "TestTopic"},
+			expectErr: true,
+		},
+	}
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.expectRequest != (cloudservice.CreateAccountAuditLogSinkRequest{}) {
+				s.mockCloudApiClient.EXPECT().CreateAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.CreateAccountAuditLogSinkResponse{
+					AsyncOperation: &operation.AsyncOperation{
+						Id: "123",
+					},
+				}, tc.createError).Times(1)
+			}
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *AccountTestSuite) TestUpdateAuditLogSink() {
+	tests := []struct {
+		name             string
+		args             []string
+		expectErr        bool
+		expectRequest    cloudservice.UpdateAccountAuditLogSinkRequest
+		expectGetRequest bool
+		updateError      error
+		getSinkError     error
+	}{
+		{
+			name: "kinesis audit log sink",
+			args: []string{"a", "al", "update", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "kinesis", "--role-name", "TestRole",
+				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+				"--region", "us-east-1", "--enabled", "true"},
+			expectErr:        false,
+			expectGetRequest: true,
+			expectRequest: cloudservice.UpdateAccountAuditLogSinkRequest{
+				ResourceVersion: "123",
+				Spec: &cloudaccount.AuditLogSinkSpec{
+					Name:    "audit_log_01",
+					Enabled: true,
+					SinkType: &cloudaccount.AuditLogSinkSpec_KinesisSink{
+						KinesisSink: &cloudSink.KinesisSpec{
+							RoleName:       "TestRole",
+							DestinationUri: "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+							Region:         "us-east-1",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "audit log sink get sink error",
+			args: []string{"a", "al", "update", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "kinesis", "--role-name", "TestRole",
+				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+				"--region", "us-east-1", "--enabled", "true"},
+			expectErr:        true,
+			expectGetRequest: true,
+			expectRequest: cloudservice.UpdateAccountAuditLogSinkRequest{
+				ResourceVersion: "123",
+				Spec: &cloudaccount.AuditLogSinkSpec{
+					Name:    "audit_log_01",
+					Enabled: true,
+					SinkType: &cloudaccount.AuditLogSinkSpec_KinesisSink{
+						KinesisSink: &cloudSink.KinesisSpec{
+							RoleName:       "TestRole",
+							DestinationUri: "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+							Region:         "us-east-1",
+						},
+					},
+				},
+			},
+			getSinkError: fmt.Errorf("error"),
+		},
+		{
+			name: "audit log sink update error",
+			args: []string{"a", "al", "update", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "kinesis", "--role-name", "TestRole",
+				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+				"--region", "us-east-1", "--enabled", "true"},
+			expectErr:        true,
+			expectGetRequest: true,
+			expectRequest: cloudservice.UpdateAccountAuditLogSinkRequest{
+				ResourceVersion: "123",
+				Spec: &cloudaccount.AuditLogSinkSpec{
+					Name:    "audit_log_01",
+					Enabled: true,
+					SinkType: &cloudaccount.AuditLogSinkSpec_KinesisSink{
+						KinesisSink: &cloudSink.KinesisSpec{
+							RoleName:       "TestRole",
+							DestinationUri: "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+							Region:         "us-east-1",
+						},
+					},
+				},
+			},
+			updateError: fmt.Errorf("error"),
+		},
+		{
+			name: "pubsub audit log sink",
+			args: []string{"a", "al", "update", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "pubsub", "--enabled", "true",
+				"--service-account-id", "123456789012", "--topic-name", "TestTopic", "--gcp-project-id", "TestProject"},
+			expectErr:        false,
+			expectGetRequest: true,
+			expectRequest: cloudservice.UpdateAccountAuditLogSinkRequest{
+				ResourceVersion: "123",
+				Spec: &cloudaccount.AuditLogSinkSpec{
+					Name:    "audit_log_01",
+					Enabled: true,
+					SinkType: &cloudaccount.AuditLogSinkSpec_PubSubSink{
+						PubSubSink: &cloudSink.PubSubSpec{
+							ServiceAccountId: "123456789012",
+							TopicName:        "TestTopic",
+							GcpProjectId:     "TestProject",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "update sink uses provided resource version",
+			args: []string{"a", "al", "update", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "pubsub", "--enabled", "true",
+				"--service-account-id", "123456789012", "--topic-name", "TestTopic", "--gcp-project-id", "TestProject", "--resource-version", "345"},
+			expectErr: false,
+			expectRequest: cloudservice.UpdateAccountAuditLogSinkRequest{
+				ResourceVersion: "345",
+				Spec: &cloudaccount.AuditLogSinkSpec{
+					Name:    "audit_log_01",
+					Enabled: true,
+					SinkType: &cloudaccount.AuditLogSinkSpec_PubSubSink{
+						PubSubSink: &cloudSink.PubSubSpec{
+							ServiceAccountId: "123456789012",
+							TopicName:        "TestTopic",
+							GcpProjectId:     "TestProject",
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.expectRequest != (cloudservice.UpdateAccountAuditLogSinkRequest{}) {
+				if tc.expectGetRequest {
+					s.mockCloudApiClient.EXPECT().GetAccountAuditLogSink(gomock.Any(), &cloudservice.GetAccountAuditLogSinkRequest{
+						Name: "audit_log_01",
+					}).Return(&cloudservice.GetAccountAuditLogSinkResponse{
+						Sink: &cloudaccount.AuditLogSink{
+							ResourceVersion: "123",
+						},
+					}, tc.getSinkError).Times(1)
+				}
+				if tc.getSinkError == nil {
+					s.mockCloudApiClient.EXPECT().UpdateAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.UpdateAccountAuditLogSinkResponse{
+						AsyncOperation: &operation.AsyncOperation{
+							Id: "123",
+						},
+					}, tc.updateError).Times(1)
+				}
+			}
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *AccountTestSuite) TestDeleteAuditLogSink() {
+	tests := []struct {
+		name             string
+		args             []string
+		expectErr        bool
+		expectRequest    cloudservice.DeleteAccountAuditLogSinkRequest
+		expectGetRequest bool
+		deleteError      error
+		getSinkError     error
+	}{
+		{
+			name:             "delete audit log sink success",
+			args:             []string{"a", "al", "delete", "--sink-name", "audit_log_01"},
+			expectErr:        false,
+			expectGetRequest: true,
+			expectRequest: cloudservice.DeleteAccountAuditLogSinkRequest{
+				ResourceVersion: "123",
+				Name:            "audit_log_01",
+			},
+		},
+		{
+			name:      "delete audit log sink uses provided resource version",
+			args:      []string{"a", "al", "delete", "--sink-name", "audit_log_01", "--resource-version", "345"},
+			expectErr: false,
+			expectRequest: cloudservice.DeleteAccountAuditLogSinkRequest{
+				ResourceVersion: "345",
+				Name:            "audit_log_01",
+			},
+		},
+		{
+			name:             "delete audit log sink get sink error",
+			args:             []string{"a", "al", "delete", "--sink-name", "audit_log_01"},
+			expectErr:        true,
+			expectGetRequest: true,
+			expectRequest: cloudservice.DeleteAccountAuditLogSinkRequest{
+				ResourceVersion: "123",
+				Name:            "audit_log_01",
+			},
+			getSinkError: fmt.Errorf("error"),
+		},
+		{
+			name:             "delete audit log sink delete error",
+			args:             []string{"a", "al", "delete", "--sink-name", "audit_log_01"},
+			expectErr:        true,
+			expectGetRequest: true,
+			expectRequest: cloudservice.DeleteAccountAuditLogSinkRequest{
+				ResourceVersion: "123",
+				Name:            "audit_log_01",
+			},
+			deleteError: fmt.Errorf("error"),
+		},
+	}
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.expectRequest != (cloudservice.DeleteAccountAuditLogSinkRequest{}) {
+				if tc.expectGetRequest {
+					s.mockCloudApiClient.EXPECT().GetAccountAuditLogSink(gomock.Any(), &cloudservice.GetAccountAuditLogSinkRequest{
+						Name: "audit_log_01",
+					}).Return(&cloudservice.GetAccountAuditLogSinkResponse{
+						Sink: &cloudaccount.AuditLogSink{
+							ResourceVersion: "123",
+						},
+					}, tc.getSinkError).Times(1)
+				}
+				if tc.getSinkError == nil {
+					s.mockCloudApiClient.EXPECT().DeleteAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.DeleteAccountAuditLogSinkResponse{
+						AsyncOperation: &operation.AsyncOperation{
+							Id: "123",
+						},
+					}, tc.deleteError).Times(1)
+				}
+			}
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *AccountTestSuite) TestValidateAuditLogSink() {
+	tests := []struct {
+		name          string
+		args          []string
+		expectErr     bool
+		expectRequest cloudservice.ValidateAccountAuditLogSinkRequest
+		validateError error
+	}{
+		{
+			name: "kinesis audit log sink",
+			args: []string{"a", "al", "validate", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "kinesis", "--role-name", "TestRole",
+				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+				"--region", "us-east-1", "--enabled", "true"},
+			expectErr: false,
+			expectRequest: cloudservice.ValidateAccountAuditLogSinkRequest{
+				Spec: &cloudaccount.AuditLogSinkSpec{
+					Name:    "audit_log_01",
+					Enabled: true,
+					SinkType: &cloudaccount.AuditLogSinkSpec_KinesisSink{
+						KinesisSink: &cloudSink.KinesisSpec{
+							RoleName:       "TestRole",
+							DestinationUri: "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+							Region:         "us-east-1",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "kinesis audit log sink with error",
+			args: []string{"a", "al", "validate", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "kinesis", "--role-name", "TestRole",
+				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+				"--region", "us-east-1", "--enabled", "true"},
+			expectErr: true,
+			expectRequest: cloudservice.ValidateAccountAuditLogSinkRequest{
+				Spec: &cloudaccount.AuditLogSinkSpec{
+					Name:    "audit_log_01",
+					Enabled: true,
+					SinkType: &cloudaccount.AuditLogSinkSpec_KinesisSink{
+						KinesisSink: &cloudSink.KinesisSpec{
+							RoleName:       "TestRole",
+							DestinationUri: "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
+							Region:         "us-east-1",
+						},
+					},
+				},
+			},
+			validateError: fmt.Errorf("error"),
+		},
+		{
+			name: "pubsub audit log sink",
+			args: []string{"a", "al", "validate", "--sink-name", "audit_log_01",
+				"--audit-log-sink-type", "pubsub", "--enabled", "true",
+				"--service-account-id", "123456789012", "--topic-name", "TestTopic", "--gcp-project-id", "TestProject"},
+			expectErr: false,
+			expectRequest: cloudservice.ValidateAccountAuditLogSinkRequest{
+				Spec: &cloudaccount.AuditLogSinkSpec{
+					Name:    "audit_log_01",
+					Enabled: true,
+					SinkType: &cloudaccount.AuditLogSinkSpec_PubSubSink{
+						PubSubSink: &cloudSink.PubSubSpec{
+							ServiceAccountId: "123456789012",
+							TopicName:        "TestTopic",
+							GcpProjectId:     "TestProject",
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.expectRequest != (cloudservice.ValidateAccountAuditLogSinkRequest{}) {
+				s.mockCloudApiClient.EXPECT().ValidateAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.ValidateAccountAuditLogSinkResponse{}, tc.validateError).Times(1)
+			}
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *AccountTestSuite) TestListAuditLogSinks() {
+	tests := []struct {
+		name          string
+		args          []string
+		expectErr     bool
+		expectRequest cloudservice.GetAccountAuditLogSinksRequest
+		listError     error
+	}{
+		{
+			name:          "list sinks succeeds",
+			args:          []string{"a", "al", "list"},
+			expectErr:     false,
+			expectRequest: cloudservice.GetAccountAuditLogSinksRequest{},
+		},
+		{
+			name:          "list sinks with error",
+			args:          []string{"a", "al", "list"},
+			expectErr:     true,
+			expectRequest: cloudservice.GetAccountAuditLogSinksRequest{},
+			listError:     fmt.Errorf("error"),
+		},
+	}
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			s.mockCloudApiClient.EXPECT().GetAccountAuditLogSinks(gomock.Any(), gomock.Any()).Return(&cloudservice.GetAccountAuditLogSinksResponse{}, tc.listError).Times(1)
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *AccountTestSuite) TestGetAuditLogSink() {
+	tests := []struct {
+		name          string
+		args          []string
+		expectErr     bool
+		expectRequest cloudservice.GetAccountAuditLogSinkRequest
+		getError      error
+	}{
+		{
+			name:      "get sink succeeds",
+			args:      []string{"a", "al", "get", "--sink-name", "audit_log_01"},
+			expectErr: false,
+			expectRequest: cloudservice.GetAccountAuditLogSinkRequest{
+				Name: "audit_log_01",
+			},
+		},
+		{
+			name:      "get sink with error",
+			args:      []string{"a", "al", "get", "--sink-name", "audit_log_01"},
+			expectErr: true,
+			expectRequest: cloudservice.GetAccountAuditLogSinkRequest{
+				Name: "audit_log_01",
+			},
+			getError: fmt.Errorf("error"),
+		},
+	}
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			s.mockCloudApiClient.EXPECT().GetAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.GetAccountAuditLogSinkResponse{}, tc.getError).Times(1)
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
 }
