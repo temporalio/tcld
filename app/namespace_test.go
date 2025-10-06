@@ -1831,11 +1831,11 @@ func (s *NamespaceTestSuite) TestGetNamespaceRetention() {
 func (s *NamespaceTestSuite) TestCreate() {
 	s.Error(s.RunCmd("namespace", "create"))
 	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1"))
-	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2"))
-	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--auth-method", "api_key_or_mtls"))
-	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--auth-method", "invalid"))
+	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--cloud-provider", "aws"))
+	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--cloud-provider", "aws", "--auth-method", "api_key_or_mtls"))
+	s.Error(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--cloud-provider", "aws", "--auth-method", "invalid"))
 	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(nil, errors.New("create namespace error")).Times(1)
-	s.EqualError(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--ca-certificate", "cert1"), "create namespace error")
+	s.EqualError(s.RunCmd("namespace", "create", "--namespace", "ns1", "--region", "us-west-2", "--cloud-provider", "aws", "--ca-certificate", "cert1"), "create namespace error")
 	s.mockService.EXPECT().CreateNamespace(gomock.Any(), gomock.Any()).Return(&namespaceservice.CreateNamespaceResponse{
 		RequestStatus: &request.RequestStatus{},
 	}, nil).AnyTimes()
@@ -1851,6 +1851,7 @@ func (s *NamespaceTestSuite) TestCreate() {
 		"namespace", "create",
 		"--namespace", "ns1",
 		"--region", "us-west-2",
+		"--cloud-provider", "aws",
 		"--ca-certificate", "cert1",
 		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
 		"--search-attribute", "testsearchattribute=Keyword",
@@ -1860,6 +1861,7 @@ func (s *NamespaceTestSuite) TestCreate() {
 		"namespace", "create",
 		"--namespace", "ns1",
 		"--region", "us-west-2",
+		"--cloud-provider", "aws",
 		"--auth-method", "api_key",
 		"--search-attribute", "testsearchattribute=Keyword",
 		"--user-namespace-permission", "testuser@testcompany.com=Read",
@@ -1882,6 +1884,7 @@ func (s *NamespaceTestSuite) TestCreateWithCodec() {
 		"namespace", "create",
 		"--namespace", "ns1",
 		"--region", "us-west-2",
+		"--cloud-provider", "aws",
 		"--ca-certificate", "cert1",
 		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
 		"--search-attribute", "testsearchattribute=Keyword",
@@ -1893,6 +1896,7 @@ func (s *NamespaceTestSuite) TestCreateWithCodec() {
 		"namespace", "create",
 		"--namespace", "ns1",
 		"--region", "us-west-2",
+		"--cloud-provider", "aws",
 		"--ca-certificate", "cert1",
 		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
 		"--search-attribute", "testsearchattribute=Keyword",
@@ -1906,6 +1910,7 @@ func (s *NamespaceTestSuite) TestCreateWithCodec() {
 		"namespace", "create",
 		"--namespace", "ns1",
 		"--region", "us-west-2",
+		"--cloud-provider", "aws",
 		"--ca-certificate", "cert1",
 		"--certificate-filter-input", "{ \"filters\": [ { \"commonName\": \"test1\" } ] }",
 		"--search-attribute", "testsearchattribute=Keyword",
@@ -2790,17 +2795,16 @@ func (s *NamespaceTestSuite) TestRemoveNamespaceRegion() {
 
 		args          []string
 		expectRequest expectReq
-		expectErr     bool
+		expectErrMsg  string
 	}{
 		{
 			name: "Validate default cloud provider",
-			args: []string{"namespace", "delete-region", "--namespace", ns, "--region", "us-west-2"},
+			args: []string{"namespace", "delete-region", "--namespace", ns, "--region", "us-west-2", "--cloud-provider", "aws"},
 			expectRequest: func(r *cloudservice.DeleteNamespaceRegionRequest) {
 				r.Namespace = ns
 				r.Region = "aws-us-west-2"
 				r.ResourceVersion = "ver1"
 			},
-			expectErr: false,
 		},
 		{
 			name: "Validate GCP cloud provider",
@@ -2810,17 +2814,21 @@ func (s *NamespaceTestSuite) TestRemoveNamespaceRegion() {
 				r.Region = "gcp-us-central1"
 				r.ResourceVersion = "ver1"
 			},
-			expectErr: false,
 		},
 		{
-			name:      "Invalid Argument: missing namespace",
-			args:      []string{"namespace", "delete-region", "--region", "us-west-2"},
-			expectErr: true,
+			name:         "Invalid Argument: missing namespace",
+			args:         []string{"namespace", "delete-region", "--region", "us-west-2", "--cloud-provider", "aws"},
+			expectErrMsg: "Required flag \"namespace\" not set",
 		},
 		{
-			name:      "Invalid Argument: missing region",
-			args:      []string{"namespace", "delete-region", "--namespace", ns},
-			expectErr: true,
+			name:         "Invalid Argument: missing region",
+			args:         []string{"namespace", "delete-region", "--namespace", ns, "--cloud-provider", "aws"},
+			expectErrMsg: "Required flag \"region\" not set",
+		},
+		{
+			name:         "Invalid Argument: missing cloud provider",
+			args:         []string{"namespace", "delete-region", "--namespace", ns, "--region", "us-west-2"},
+			expectErrMsg: "Required flag \"cloud-provider\" not set",
 		},
 	}
 
@@ -2835,7 +2843,7 @@ func (s *NamespaceTestSuite) TestRemoveNamespaceRegion() {
 						AsyncOperation: &operation.AsyncOperation{Id: tc.name},
 					}, nil).Times(1)
 			}
-			if !tc.expectErr {
+			if tc.expectErrMsg == "" {
 				s.mockService.EXPECT().GetNamespace(gomock.Any(), &namespaceservice.GetNamespaceRequest{
 					Namespace: ns,
 				}).Return(&namespaceservice.GetNamespaceResponse{
@@ -2848,8 +2856,9 @@ func (s *NamespaceTestSuite) TestRemoveNamespaceRegion() {
 			}
 
 			err := s.RunCmd(tc.args...)
-			if tc.expectErr {
+			if tc.expectErrMsg != "" {
 				s.Error(err)
+				s.ErrorContains(err, tc.expectErrMsg)
 			} else {
 				s.NoError(err)
 			}
@@ -2873,7 +2882,7 @@ func (s *NamespaceTestSuite) TestCreateWithTags() {
 	}{
 		{
 			name: "successful create with tags",
-			args: []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId, "--tag", "env=prod", "--tag", "team=backend"},
+			args: []string{"namespace", "create", "--namespace", ns, "--region", "us-west-2", "--cloud-provider", "aws", "--auth-method", "api_key", "--request-id", requestId, "--tag", "env=prod", "--tag", "team=backend"},
 			expectRequest: func(r *namespaceservice.CreateNamespaceRequest) {
 				r.RequestId = requestId
 				r.Namespace = ns
@@ -2896,7 +2905,7 @@ func (s *NamespaceTestSuite) TestCreateWithTags() {
 		},
 		{
 			name: "successful create without tags",
-			args: []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId},
+			args: []string{"namespace", "create", "--namespace", ns, "--region", "us-west-2", "--cloud-provider", "aws", "--auth-method", "api_key", "--request-id", requestId},
 			expectRequest: func(r *namespaceservice.CreateNamespaceRequest) {
 				r.RequestId = requestId
 				r.Namespace = ns
@@ -2916,13 +2925,13 @@ func (s *NamespaceTestSuite) TestCreateWithTags() {
 		},
 		{
 			name:         "invalid tag format",
-			args:         []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId, "--tag", "invalid-tag-format"},
+			args:         []string{"namespace", "create", "--namespace", ns, "--region", "us-west-2", "--cloud-provider", "aws", "--auth-method", "api_key", "--request-id", requestId, "--tag", "invalid-tag-format"},
 			expectErr:    true,
 			expectErrMsg: "invalid tag format 'invalid-tag-format', must be 'key=value'",
 		},
 		{
 			name: "create error with tags",
-			args: []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId, "--tag", "env=test"},
+			args: []string{"namespace", "create", "--namespace", ns, "--region", "us-west-2", "--cloud-provider", "aws", "--auth-method", "api_key", "--request-id", requestId, "--tag", "env=test"},
 			expectRequest: func(r *namespaceservice.CreateNamespaceRequest) {
 				r.RequestId = requestId
 				r.Namespace = ns
@@ -2947,7 +2956,7 @@ func (s *NamespaceTestSuite) TestCreateWithTags() {
 		},
 		{
 			name:         "multiple tags with same key should error",
-			args:         []string{"namespace", "create", "--namespace", ns, "--region", "aws-us-west-2", "--auth-method", "api_key", "--request-id", requestId, "--tag", "env=dev", "--tag", "env=prod"},
+			args:         []string{"namespace", "create", "--namespace", ns, "--region", "us-west-2", "--cloud-provider", "aws", "--auth-method", "api_key", "--request-id", requestId, "--tag", "env=dev", "--tag", "env=prod"},
 			expectErr:    true,
 			expectErrMsg: "duplicate tag key 'env' found",
 		},
