@@ -106,6 +106,8 @@ func (s *NamespaceTestSuite) TestGet() {
 }
 
 func (s *NamespaceTestSuite) TestList() {
+	s.Error(s.RunCmd("namespace", "list", "--page-size", "0"))
+	s.Error(s.RunCmd("namespace", "list", "--page-size", "-1"))
 	s.Error(s.RunCmd("namespace", "list", "--page-size", fmt.Sprintf("%d", MaxPageSize+1)))
 
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{}).Return(nil, errors.New("some error")).Times(1)

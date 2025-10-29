@@ -1059,8 +1059,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 			},
 			Action: func(ctx *cli.Context) error {
-				if ctx.Int(pageSizeFlagName) > MaxPageSize {
-					return fmt.Errorf("page size cannot be greater than %d", MaxPageSize)
+				if ctx.IsSet(pageSizeFlagName) {
+					if ctx.Int(pageSizeFlagName) <= 0 {
+						return fmt.Errorf("page size cannot be less than or equal to 0")
+					}
+					if ctx.Int(pageSizeFlagName) > MaxPageSize {
+						return fmt.Errorf("page size cannot be greater than %d", MaxPageSize)
+					}
 				}
 				return c.listNamespaces(ctx.String(pageTokenFlagName), ctx.Int(pageSizeFlagName))
 			},
