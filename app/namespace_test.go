@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -108,7 +108,7 @@ func (s *NamespaceTestSuite) TestGet() {
 func (s *NamespaceTestSuite) TestList() {
 	s.Error(s.RunCmd("namespace", "list", "--page-size", "0"))
 	s.Error(s.RunCmd("namespace", "list", "--page-size", "-1"))
-	s.Error(s.RunCmd("namespace", "list", "--page-size", fmt.Sprintf("%d", MaxPageSize+1)))
+	s.Error(s.RunCmd("namespace", "list", "--page-size", strconv.Itoa(MaxPageSize+1)))
 
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{}).Return(nil, errors.New("some error")).Times(1)
 	s.Error(s.RunCmd("namespace", "list"))
