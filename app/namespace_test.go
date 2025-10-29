@@ -144,8 +144,32 @@ func (s *NamespaceTestSuite) TestList() {
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
 		PageToken: "token3",
 	}).Return(&namespaceservice.ListNamespacesResponse{}, nil).Times(1)
-
 	s.NoError(s.RunCmd("namespace", "list"))
+
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		PageToken: "foo",
+	}).Return(&namespaceservice.ListNamespacesResponse{
+		Namespaces:    []string{"ns1", "ns2"},
+		NextPageToken: "bar",
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("namespace", "list", "--page-token", "foo"))
+
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		PageSize: 10,
+	}).Return(&namespaceservice.ListNamespacesResponse{
+		Namespaces:    []string{"ns1", "ns2"},
+		NextPageToken: "foo",
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("namespace", "list", "--page-size", "10"))
+
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		PageToken: "foo",
+		PageSize:  10,
+	}).Return(&namespaceservice.ListNamespacesResponse{
+		Namespaces:    []string{"ns1", "ns2"},
+		NextPageToken: "bar",
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("namespace", "list", "--page-token", "foo", "--page-size", "10"))
 }
 
 func (s *NamespaceTestSuite) TestDeleteProtection() {

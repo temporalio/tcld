@@ -335,7 +335,19 @@ func (c *NamespaceClient) deleteRegion(ctx *cli.Context) error {
 	return PrintProto(res.GetAsyncOperation())
 }
 
-func (c *NamespaceClient) listNamespaces() error {
+func (c *NamespaceClient) listNamespaces(requestedPageToken string, pageSize int) error {
+	if len(requestedPageToken) > 0 || pageSize > 0 {
+		res, err := c.client.ListNamespaces(c.ctx, &namespaceservice.ListNamespacesRequest{
+			PageToken: requestedPageToken,
+			PageSize:  int32(pageSize),
+		})
+		if err != nil {
+			return err
+		}
+		return PrintProto(res)
+	}
+
+	// Fetch all namespaces.
 	totalRes := &namespaceservice.ListNamespacesResponse{}
 	pageToken := ""
 	for {
@@ -1033,8 +1045,15 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Name:    "list",
 			Usage:   "List all known namespaces",
 			Aliases: []string{"l"},
+			Flags: []cli.Flag{
+				pageTokenFlag,
+				&cli.IntFlag{
+					Name:  pageSizeFlagName,
+					Usage: "Number of namespaces to list per page",
+				},
+			},
 			Action: func(ctx *cli.Context) error {
-				return c.listNamespaces()
+				return c.listNamespaces(ctx.String(pageTokenFlagName), ctx.Int(pageSizeFlagName))
 			},
 		},
 		{
