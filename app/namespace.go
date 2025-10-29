@@ -61,6 +61,11 @@ const (
 	AuthMethodAPIKeyOrMTLS = "api_key_or_mtls"
 )
 
+const (
+	MaxPageSize     = 1000
+	DefaultPageSize = 100
+)
+
 var (
 	AuthMethods = []string{
 		AuthMethodRestricted,
@@ -121,7 +126,7 @@ var (
 	pageSizeFlag = &cli.IntFlag{
 		Name:  "page-size",
 		Usage: "The page size for list operations",
-		Value: 100,
+		Value: DefaultPageSize,
 	}
 	pageTokenFlag = &cli.StringFlag{
 		Name:  "page-token",
@@ -335,7 +340,20 @@ func (c *NamespaceClient) deleteRegion(ctx *cli.Context) error {
 	return PrintProto(res.GetAsyncOperation())
 }
 
-func (c *NamespaceClient) listNamespaces() error {
+func (c *NamespaceClient) listNamespaces(requestedPageToken string, pageSize int) error {
+	// Fetch a single page of namespaces.
+	if len(requestedPageToken) > 0 || pageSize > 0 {
+		res, err := c.client.ListNamespaces(c.ctx, &namespaceservice.ListNamespacesRequest{
+			PageToken: requestedPageToken,
+			PageSize:  int32(pageSize),
+		})
+		if err != nil {
+			return err
+		}
+		return PrintProto(res)
+	}
+
+	// Fetch all namespaces.
 	totalRes := &namespaceservice.ListNamespacesResponse{}
 	pageToken := ""
 	for {
@@ -1033,8 +1051,23 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Name:    "list",
 			Usage:   "List all known namespaces",
 			Aliases: []string{"l"},
+			Flags: []cli.Flag{
+				pageTokenFlag,
+				&cli.IntFlag{
+					Name:  pageSizeFlagName,
+					Usage: "Number of namespaces to list per page",
+				},
+			},
 			Action: func(ctx *cli.Context) error {
-				return c.listNamespaces()
+				if ctx.IsSet(pageSizeFlagName) {
+					if ctx.Int(pageSizeFlagName) <= 0 {
+						return fmt.Errorf("page size cannot be less than or equal to 0")
+					}
+					if ctx.Int(pageSizeFlagName) > MaxPageSize {
+						return fmt.Errorf("page size cannot be greater than %d", MaxPageSize)
+					}
+				}
+				return c.listNamespaces(ctx.String(pageTokenFlagName), ctx.Int(pageSizeFlagName))
 			},
 		},
 		{
