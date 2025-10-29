@@ -61,6 +61,11 @@ const (
 	AuthMethodAPIKeyOrMTLS = "api_key_or_mtls"
 )
 
+const (
+	MaxPageSize     = 1000
+	DefaultPageSize = 100
+)
+
 var (
 	AuthMethods = []string{
 		AuthMethodRestricted,
@@ -121,7 +126,7 @@ var (
 	pageSizeFlag = &cli.IntFlag{
 		Name:  "page-size",
 		Usage: "The page size for list operations",
-		Value: 100,
+		Value: DefaultPageSize,
 	}
 	pageTokenFlag = &cli.StringFlag{
 		Name:  "page-token",
@@ -1054,6 +1059,9 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 			},
 			Action: func(ctx *cli.Context) error {
+				if ctx.Int(pageSizeFlagName) > MaxPageSize {
+					return fmt.Errorf("page size cannot be greater than %d", MaxPageSize)
+				}
 				return c.listNamespaces(ctx.String(pageTokenFlagName), ctx.Int(pageSizeFlagName))
 			},
 		},
