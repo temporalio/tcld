@@ -336,6 +336,7 @@ func (c *NamespaceClient) deleteRegion(ctx *cli.Context) error {
 }
 
 func (c *NamespaceClient) listNamespaces(requestedPageToken string, pageSize int) error {
+	// Fetch a single page of namespaces.
 	if len(requestedPageToken) > 0 || pageSize > 0 {
 		res, err := c.client.ListNamespaces(c.ctx, &namespaceservice.ListNamespacesRequest{
 			PageToken: requestedPageToken,
