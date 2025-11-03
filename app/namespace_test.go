@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -105,6 +106,9 @@ func (s *NamespaceTestSuite) TestGet() {
 }
 
 func (s *NamespaceTestSuite) TestList() {
+	s.Error(s.RunCmd("namespace", "list", "--page-size", "0"))
+	s.Error(s.RunCmd("namespace", "list", "--page-size", "-1"))
+	s.Error(s.RunCmd("namespace", "list", "--page-size", strconv.Itoa(MaxPageSize+1)))
 
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{}).Return(nil, errors.New("some error")).Times(1)
 	s.Error(s.RunCmd("namespace", "list"))
@@ -144,8 +148,32 @@ func (s *NamespaceTestSuite) TestList() {
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
 		PageToken: "token3",
 	}).Return(&namespaceservice.ListNamespacesResponse{}, nil).Times(1)
-
 	s.NoError(s.RunCmd("namespace", "list"))
+
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		PageToken: "foo",
+	}).Return(&namespaceservice.ListNamespacesResponse{
+		Namespaces:    []string{"ns1", "ns2"},
+		NextPageToken: "bar",
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("namespace", "list", "--page-token", "foo"))
+
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		PageSize: 10,
+	}).Return(&namespaceservice.ListNamespacesResponse{
+		Namespaces:    []string{"ns1", "ns2"},
+		NextPageToken: "foo",
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("namespace", "list", "--page-size", "10"))
+
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		PageToken: "foo",
+		PageSize:  10,
+	}).Return(&namespaceservice.ListNamespacesResponse{
+		Namespaces:    []string{"ns1", "ns2"},
+		NextPageToken: "bar",
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("namespace", "list", "--page-token", "foo", "--page-size", "10"))
 }
 
 func (s *NamespaceTestSuite) TestDeleteProtection() {
