@@ -656,7 +656,7 @@ func (s *AccountTestSuite) TestCreateAuditLogSink() {
 	}{
 		{
 			name: "kinesis audit log sink",
-			args: []string{"a", "al", "sinks", "kinesis", "create", "--sink-name", "audit_log_01", "--role-name", "TestRole",
+			args: []string{"a", "al", "kinesis", "create", "--sink-name", "audit_log_01", "--role-name", "TestRole",
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
 				"--region", "us-east-1"},
 			expectErr: false,
@@ -676,7 +676,7 @@ func (s *AccountTestSuite) TestCreateAuditLogSink() {
 		},
 		{
 			name: "kinesis audit log sink with error",
-			args: []string{"a", "al", "sinks", "kinesis", "create", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "kinesis", "create", "--sink-name", "audit_log_01",
 				"--role-name", "TestRole",
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
 				"--region", "us-east-1"},
@@ -698,28 +698,28 @@ func (s *AccountTestSuite) TestCreateAuditLogSink() {
 		},
 		{
 			name: "kinesis audit log sink missing role name",
-			args: []string{"a", "al", "sinks", "kinesis", "create", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "kinesis", "create", "--sink-name", "audit_log_01",
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
 				"--region", "us-east-1"},
 			expectErr: true,
 		},
 		{
 			name: "kinesis audit log sink missing destination uri",
-			args: []string{"a", "al", "sinks", "kinesis", "create", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "kinesis", "create", "--sink-name", "audit_log_01",
 				"--role-name", "TestRole",
 				"--region", "us-east-1"},
 			expectErr: true,
 		},
 		{
 			name: "kinesis audit log sink missing region",
-			args: []string{"a", "al", "sinks", "kinesis", "create", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "kinesis", "create", "--sink-name", "audit_log_01",
 				"--role-name", "TestRole",
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream"},
 			expectErr: true,
 		},
 		{
 			name: "pubsub audit log sink",
-			args: []string{"a", "al", "sinks", "pubsub", "create", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "pubsub", "create", "--sink-name", "audit_log_01",
 				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic"},
 			expectErr: false,
 			expectRequest: cloudservice.CreateAccountAuditLogSinkRequest{
@@ -738,13 +738,13 @@ func (s *AccountTestSuite) TestCreateAuditLogSink() {
 		},
 		{
 			name: "pubsub audit log sink missing service account email",
-			args: []string{"a", "al", "sinks", "pubsub", "create", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "pubsub", "create", "--sink-name", "audit_log_01",
 				"--topic-name", "TestTopic"},
 			expectErr: true,
 		},
 		{
 			name: "pubsub audit log sink missing topic name",
-			args: []string{"a", "al", "sinks", "pubsub", "create", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "pubsub", "create", "--sink-name", "audit_log_01",
 				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com"},
 			expectErr: true,
 		},
@@ -780,7 +780,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 	}{
 		{
 			name: "kinesis audit log sink",
-			args: []string{"a", "al", "sinks", "kinesis", "update", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "kinesis", "update", "--sink-name", "audit_log_01",
 				"--role-name", "TestRole",
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
 				"--region", "us-east-1", "--enabled", "true"},
@@ -803,7 +803,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 		},
 		{
 			name: "audit log sink get sink error",
-			args: []string{"a", "al", "sinks", "kinesis", "update", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "kinesis", "update", "--sink-name", "audit_log_01",
 				"--role-name", "TestRole",
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
 				"--region", "us-east-1", "--enabled", "true"},
@@ -827,7 +827,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 		},
 		{
 			name: "audit log sink update error",
-			args: []string{"a", "al", "sinks", "kinesis", "update", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "kinesis", "update", "--sink-name", "audit_log_01",
 				"--role-name", "TestRole",
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
 				"--region", "us-east-1", "--enabled", "true"},
@@ -851,7 +851,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 		},
 		{
 			name: "pubsub audit log sink",
-			args: []string{"a", "al", "sinks", "pubsub", "update", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "pubsub", "update", "--sink-name", "audit_log_01",
 				"--enabled", "true",
 				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic"},
 			expectErr:        false,
@@ -873,7 +873,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 		},
 		{
 			name: "update sink uses provided resource version",
-			args: []string{"a", "al", "sinks", "pubsub", "update", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "pubsub", "update", "--sink-name", "audit_log_01",
 				"--enabled", "true",
 				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic", "--resource-version", "345"},
 			expectErr:        false,
@@ -899,8 +899,8 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 			if tc.expectRequest != (cloudservice.UpdateAccountAuditLogSinkRequest{}) {
 				if tc.expectGetRequest {
 					sinkType := ""
-					if len(tc.args) >= 4 {
-						sinkType = tc.args[3]
+					if len(tc.args) >= 3 {
+						sinkType = tc.args[2]
 					}
 
 					var mockSink *cloudaccount.AuditLogSink
@@ -973,7 +973,7 @@ func (s *AccountTestSuite) TestDeleteAuditLogSink() {
 	}{
 		{
 			name:             "delete audit log sink success",
-			args:             []string{"a", "al", "sinks", "kinesis", "delete", "--sink-name", "audit_log_01"},
+			args:             []string{"a", "al", "kinesis", "delete", "--sink-name", "audit_log_01"},
 			expectErr:        false,
 			expectGetRequest: true,
 			expectRequest: cloudservice.DeleteAccountAuditLogSinkRequest{
@@ -983,7 +983,7 @@ func (s *AccountTestSuite) TestDeleteAuditLogSink() {
 		},
 		{
 			name:      "delete audit log sink uses provided resource version",
-			args:      []string{"a", "al", "sinks", "kinesis", "delete", "--sink-name", "audit_log_01", "--resource-version", "345"},
+			args:      []string{"a", "al", "kinesis", "delete", "--sink-name", "audit_log_01", "--resource-version", "345"},
 			expectErr: false,
 			expectRequest: cloudservice.DeleteAccountAuditLogSinkRequest{
 				ResourceVersion: "345",
@@ -992,7 +992,7 @@ func (s *AccountTestSuite) TestDeleteAuditLogSink() {
 		},
 		{
 			name:             "delete audit log sink get sink error",
-			args:             []string{"a", "al", "sinks", "kinesis", "delete", "--sink-name", "audit_log_01"},
+			args:             []string{"a", "al", "kinesis", "delete", "--sink-name", "audit_log_01"},
 			expectErr:        true,
 			expectGetRequest: true,
 			expectRequest: cloudservice.DeleteAccountAuditLogSinkRequest{
@@ -1003,7 +1003,7 @@ func (s *AccountTestSuite) TestDeleteAuditLogSink() {
 		},
 		{
 			name:             "delete audit log sink delete error",
-			args:             []string{"a", "al", "sinks", "kinesis", "delete", "--sink-name", "audit_log_01"},
+			args:             []string{"a", "al", "kinesis", "delete", "--sink-name", "audit_log_01"},
 			expectErr:        true,
 			expectGetRequest: true,
 			expectRequest: cloudservice.DeleteAccountAuditLogSinkRequest{
@@ -1053,7 +1053,7 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 	}{
 		{
 			name: "kinesis audit log sink",
-			args: []string{"a", "al", "sinks", "kinesis", "validate", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "kinesis", "validate", "--sink-name", "audit_log_01",
 				"--role-name", "TestRole",
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
 				"--region", "us-east-1", "--enabled", "true"},
@@ -1074,7 +1074,7 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 		},
 		{
 			name: "kinesis audit log sink with error",
-			args: []string{"a", "al", "sinks", "kinesis", "validate", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "kinesis", "validate", "--sink-name", "audit_log_01",
 				"--role-name", "TestRole",
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
 				"--region", "us-east-1", "--enabled", "true"},
@@ -1096,7 +1096,7 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 		},
 		{
 			name: "pubsub audit log sink",
-			args: []string{"a", "al", "sinks", "pubsub", "validate", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "pubsub", "validate", "--sink-name", "audit_log_01",
 				"--enabled", "true",
 				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic"},
 			expectErr: false,
@@ -1140,13 +1140,13 @@ func (s *AccountTestSuite) TestListAuditLogSinks() {
 	}{
 		{
 			name:          "list sinks succeeds",
-			args:          []string{"a", "al", "sinks", "kinesis", "list"},
+			args:          []string{"a", "al", "kinesis", "list"},
 			expectErr:     false,
 			expectRequest: cloudservice.GetAccountAuditLogSinksRequest{},
 		},
 		{
 			name:          "list sinks with error",
-			args:          []string{"a", "al", "sinks", "kinesis", "list"},
+			args:          []string{"a", "al", "kinesis", "list"},
 			expectErr:     true,
 			expectRequest: cloudservice.GetAccountAuditLogSinksRequest{},
 			listError:     fmt.Errorf("error"),
@@ -1175,7 +1175,7 @@ func (s *AccountTestSuite) TestGetAuditLogSink() {
 	}{
 		{
 			name:      "get sink succeeds",
-			args:      []string{"a", "al", "sinks", "kinesis", "get", "--sink-name", "audit_log_01"},
+			args:      []string{"a", "al", "kinesis", "get", "--sink-name", "audit_log_01"},
 			expectErr: false,
 			expectRequest: cloudservice.GetAccountAuditLogSinkRequest{
 				Name: "audit_log_01",
@@ -1183,7 +1183,7 @@ func (s *AccountTestSuite) TestGetAuditLogSink() {
 		},
 		{
 			name:      "get sink with error",
-			args:      []string{"a", "al", "sinks", "kinesis", "get", "--sink-name", "audit_log_01"},
+			args:      []string{"a", "al", "kinesis", "get", "--sink-name", "audit_log_01"},
 			expectErr: true,
 			expectRequest: cloudservice.GetAccountAuditLogSinkRequest{
 				Name: "audit_log_01",

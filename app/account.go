@@ -523,13 +523,6 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 		Name:    "audit-log",
 		Usage:   "audit log commands",
 		Aliases: []string{"al"},
-		Subcommands: []*cli.Command{
-			{
-				Name:    "sinks",
-				Aliases: []string{"s"},
-				Usage:   "Manage audit log sinks",
-			},
-		},
 	}
 
 	// Shared audit log sink commands (get, delete, list)
@@ -870,7 +863,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 	kinesisAuditLogCommands.Subcommands = append(kinesisAuditLogCommands.Subcommands, auditLogGeneralCommands...)
 	pubsubAuditLogCommands.Subcommands = append(pubsubAuditLogCommands.Subcommands, auditLogGeneralCommands...)
 
-	auditLogCommands.Subcommands[0].Subcommands = []*cli.Command{
+	auditLogCommands.Subcommands = []*cli.Command{
 		kinesisAuditLogCommands,
 		pubsubAuditLogCommands,
 	}
