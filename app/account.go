@@ -171,8 +171,8 @@ func (c *AccountClient) parseExistingMetricsCerts(ctx *cli.Context) (account *ac
 
 func toAuditLogSinkSpec(ctx *cli.Context, auditLogSinkType string) (*cloudaccount.AuditLogSinkSpec, error) {
 	spec := &cloudaccount.AuditLogSinkSpec{
-		Enabled: ctx.Bool(sinkEnabledFlag.Name),
 		Name:    ctx.String(sinkNameFlag.Name),
+		Enabled: ctx.Bool(sinkEnabledFlag.Name),
 	}
 	switch auditLogSinkType {
 	case kinesisAuditLogSinkType:
@@ -505,257 +505,265 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 				Name:    "sinks",
 				Aliases: []string{"s"},
 				Usage:   "Manage audit log sinks",
-				Subcommands: []*cli.Command{{
-					Name:    "create",
-					Aliases: []string{"c"},
-					Usage:   "Create an audit log sink",
-					Subcommands: []*cli.Command{
-						{
-							Name:    "kinesis",
-							Aliases: []string{"k"},
-							Usage:   "Create a kinesis audit log sink",
-							Flags: []cli.Flag{
-								// general audit log sink flags
-								sinkNameFlag,
-								sinkEnabledFlag,
-								// kinesis audit log sink flags
-								roleNameFlag,
-								destinationUriFlag,
-								sinkRegionFlagRequired,
-							},
-							Action: func(ctx *cli.Context) error {
-								spec, err := toAuditLogSinkSpec(ctx, kinesisAuditLogSinkType)
-								if err != nil {
-									return err
-								}
-								resp, err := c.createAuditLogSink(spec)
-								if err != nil {
-									return err
-								}
-								return PrintProto(resp)
-							},
-						},
-						{
-							Name:    "pubsub",
-							Aliases: []string{"ps"},
-							Usage:   "Create a pubsub audit log sink",
-							Flags: []cli.Flag{
-								// general audit log sink flags
-								sinkNameFlag,
-								sinkEnabledFlag,
-								// pubsub audit log sink flags
-								sinkServiceAccountIDFlag,
-								topicNameFlag,
-								gcpProjectIdFlag,
-							},
-							Action: func(ctx *cli.Context) error {
-								spec, err := toAuditLogSinkSpec(ctx, pubsubAuditLogSinkType)
-								if err != nil {
-									return err
-								}
-								resp, err := c.createAuditLogSink(spec)
-								if err != nil {
-									return err
-								}
-								return PrintProto(resp)
-							},
-						},
-					},
+			},
+		},
+	}
+
+	// Shared audit log sink commands (get, delete, list)
+	auditLogGeneralCommands := []*cli.Command{
+		{
+			Name:    "get",
+			Aliases: []string{"g"},
+			Usage:   "Get audit log sink",
+			Flags: []cli.Flag{
+				sinkNameFlag,
+			},
+			Action: func(ctx *cli.Context) error {
+				auditLogSinkRes, err := c.cloudAPIClient.GetAccountAuditLogSink(c.ctx, &cloudservice.GetAccountAuditLogSinkRequest{
+					Name: ctx.String(sinkNameFlag.Name),
+				})
+				if err != nil {
+					return fmt.Errorf("unable to get audit log sink: %v", err)
+				}
+				return PrintProto(auditLogSinkRes)
+			},
+		},
+		{
+			Name:    "delete",
+			Aliases: []string{"d"},
+			Usage:   "Delete audit log sink",
+			Flags: []cli.Flag{
+				sinkNameFlag,
+				ResourceVersionFlag,
+			},
+			Action: func(ctx *cli.Context) error {
+				sinkName := ctx.String(sinkNameFlag.Name)
+				resourceVersion := ctx.String(ResourceVersionFlag.Name)
+
+				if resourceVersion == "" {
+					getAuditLogSinkRes, err := c.cloudAPIClient.GetAccountAuditLogSink(c.ctx, &cloudservice.GetAccountAuditLogSinkRequest{
+						Name: sinkName,
+					})
+					if err != nil {
+						return fmt.Errorf("unable to get audit log sink: %v", err)
+					}
+					resourceVersion = getAuditLogSinkRes.GetSink().GetResourceVersion()
+				}
+
+				deleteRequest := &cloudservice.DeleteAccountAuditLogSinkRequest{
+					Name:            sinkName,
+					ResourceVersion: resourceVersion,
+				}
+
+				deleteResp, err := c.cloudAPIClient.DeleteAccountAuditLogSink(c.ctx, deleteRequest)
+				if err != nil {
+					return err
+				}
+				return PrintProto(deleteResp.GetAsyncOperation())
+			},
+		},
+		{
+			Name:    "list",
+			Aliases: []string{"l"},
+			Usage:   "List audit log sinks",
+			Flags: []cli.Flag{
+				pageSizeFlag,
+				pageTokenFlag,
+			},
+			Action: func(ctx *cli.Context) error {
+				request := &cloudservice.GetAccountAuditLogSinksRequest{
+					PageSize:  int32(ctx.Int(pageSizeFlag.Name)),
+					PageToken: ctx.String(pageTokenFlag.Name),
+				}
+				resp, err := c.cloudAPIClient.GetAccountAuditLogSinks(c.ctx, request)
+				if err != nil {
+					return err
+				}
+				return PrintProto(resp)
+			},
+		},
+	}
+
+	// Kinesis audit log sink commands
+	kinesisAuditLogCommands := &cli.Command{
+		Name:    "kinesis",
+		Aliases: []string{"k"},
+		Usage:   "Manage Kinesis audit log sink",
+		Subcommands: []*cli.Command{
+			{
+				Name:    "create",
+				Aliases: []string{"c"},
+				Usage:   "Create a kinesis audit log sink",
+				Flags: []cli.Flag{
+					// general audit log sink flags
+					sinkNameFlag,
+					// kinesis audit log sink flags
+					roleNameFlag,
+					destinationUriFlag,
+					sinkRegionFlagRequired,
 				},
-					{
-						Name:    "get",
-						Aliases: []string{"g"},
-						Usage:   "Get audit log sink",
-						Flags: []cli.Flag{
-							sinkNameFlag,
-						},
-						Action: func(ctx *cli.Context) error {
-							auditLogSinkRes, err := c.cloudAPIClient.GetAccountAuditLogSink(c.ctx, &cloudservice.GetAccountAuditLogSinkRequest{
-								Name: ctx.String(sinkNameFlag.Name),
-							})
-							if err != nil {
-								return fmt.Errorf("unable to get audit log sink: %v", err)
-							}
-							return PrintProto(auditLogSinkRes)
-						},
-					},
-					{
-						Name:    "list",
-						Aliases: []string{"l"},
-						Usage:   "List audit log sinks",
-						Flags: []cli.Flag{
-							pageSizeFlag,
-							pageTokenFlag,
-						},
-						Action: func(ctx *cli.Context) error {
-							request := &cloudservice.GetAccountAuditLogSinksRequest{
-								PageSize:  int32(ctx.Int(pageSizeFlag.Name)),
-								PageToken: ctx.String(pageTokenFlag.Name),
-							}
-							resp, err := c.cloudAPIClient.GetAccountAuditLogSinks(c.ctx, request)
-							if err != nil {
-								return err
-							}
-							return PrintProto(resp)
-						},
-					},
-					{
-						Name:    "delete",
-						Aliases: []string{"d"},
-						Usage:   "Delete audit log sink",
-						Flags: []cli.Flag{
-							sinkNameFlag,
-							ResourceVersionFlag,
-						},
-						Action: func(ctx *cli.Context) error {
-							sinkName := ctx.String(sinkNameFlag.Name)
-							resourceVersion := ctx.String(ResourceVersionFlag.Name)
-
-							if resourceVersion == "" {
-								getAuditLogSinkRes, err := c.cloudAPIClient.GetAccountAuditLogSink(c.ctx, &cloudservice.GetAccountAuditLogSinkRequest{
-									Name: sinkName,
-								})
-								if err != nil {
-									return fmt.Errorf("unable to get audit log sink: %v", err)
-								}
-								resourceVersion = getAuditLogSinkRes.GetSink().GetResourceVersion()
-							}
-
-							deleteRequest := &cloudservice.DeleteAccountAuditLogSinkRequest{
-								Name:            sinkName,
-								ResourceVersion: resourceVersion,
-							}
-
-							deleteResp, err := c.cloudAPIClient.DeleteAccountAuditLogSink(c.ctx, deleteRequest)
-							if err != nil {
-								return err
-							}
-							return PrintProto(deleteResp.GetAsyncOperation())
-						},
-					},
-					{
-						Name:    "update",
-						Aliases: []string{"u"},
-						Usage:   "Update an audit log sink",
-						Subcommands: []*cli.Command{
-							{
-								Name:    "kinesis",
-								Aliases: []string{"k"},
-								Usage:   "Update a kinesis audit log sink",
-								Flags: []cli.Flag{
-									// general audit log sink flags
-									sinkNameFlag,
-									sinkEnabledFlag,
-									ResourceVersionFlag,
-									// kinesis audit log sink flags
-									roleNameFlag,
-									destinationUriFlag,
-									sinkRegionFlagRequired,
-								},
-								Action: func(ctx *cli.Context) error {
-									spec, err := toAuditLogSinkSpec(ctx, kinesisAuditLogSinkType)
-									if err != nil {
-										return err
-									}
-									resourceVersion := ctx.String(ResourceVersionFlag.Name)
-									updateAuditLogSinkRes, err := c.updateAuditLogSink(ctx, spec, resourceVersion)
-									if err != nil {
-										return err
-									}
-									return PrintProto(updateAuditLogSinkRes)
-								},
-							},
-							{
-								Name:    "pubsub",
-								Aliases: []string{"ps"},
-								Usage:   "Update a pubsub audit log sink",
-								Flags: []cli.Flag{
-									// general audit log sink flags
-									sinkNameFlag,
-									sinkEnabledFlag,
-									ResourceVersionFlag,
-									// pubsub audit log sink flags
-									sinkServiceAccountIDFlag,
-									topicNameFlag,
-									gcpProjectIdFlag,
-								},
-								Action: func(ctx *cli.Context) error {
-									spec, err := toAuditLogSinkSpec(ctx, pubsubAuditLogSinkType)
-									if err != nil {
-										return err
-									}
-									resourceVersion := ctx.String(ResourceVersionFlag.Name)
-									updateAuditLogSinkRes, err := c.updateAuditLogSink(ctx, spec, resourceVersion)
-									if err != nil {
-										return err
-									}
-									return PrintProto(updateAuditLogSinkRes)
-								},
-							},
-						},
-					},
-					{
-						Name:    "validate",
-						Usage:   "Validate audit log sink",
-						Aliases: []string{"v"},
-						Subcommands: []*cli.Command{
-							{
-								Name:    "kinesis",
-								Usage:   "Validate kinesis audit log sink",
-								Aliases: []string{"k"},
-								Flags: []cli.Flag{
-									// general audit log sink flags
-									sinkNameFlag,
-									sinkEnabledFlag,
-									// kinesis audit log sink flags
-									roleNameFlag,
-									destinationUriFlag,
-									sinkRegionFlagRequired,
-								},
-								Action: func(ctx *cli.Context) error {
-									spec, err := toAuditLogSinkSpec(ctx, kinesisAuditLogSinkType)
-									if err != nil {
-										return err
-									}
-									err = c.validateAuditLogSink(spec)
-									if err != nil {
-										return err
-									}
-									fmt.Println("Temporal Cloud was able to validate the sink")
-									return nil
-								},
-							},
-							{
-								Name:    "pubsub",
-								Usage:   "Validate pubsub audit log sink",
-								Aliases: []string{"ps"},
-								Flags: []cli.Flag{
-									// general audit log sink flags
-									sinkNameFlag,
-									sinkEnabledFlag,
-									// pubsub audit log sink flags
-									sinkServiceAccountIDFlag,
-									topicNameFlag,
-									gcpProjectIdFlag,
-								},
-								Action: func(ctx *cli.Context) error {
-									spec, err := toAuditLogSinkSpec(ctx, pubsubAuditLogSinkType)
-									if err != nil {
-										return err
-									}
-									err = c.validateAuditLogSink(spec)
-									if err != nil {
-										return err
-									}
-									fmt.Println("Temporal Cloud was able to validate the sink")
-									return nil
-								},
-							},
-						},
-					},
+				Action: func(ctx *cli.Context) error {
+					spec, err := toAuditLogSinkSpec(ctx, kinesisAuditLogSinkType)
+					if err != nil {
+						return err
+					}
+					spec.Enabled = true
+					resp, err := c.createAuditLogSink(spec)
+					if err != nil {
+						return err
+					}
+					return PrintProto(resp)
+				},
+			},
+			{
+				Name:    "validate",
+				Usage:   "Validate kinesis audit log sink",
+				Aliases: []string{"v"},
+				Flags: []cli.Flag{
+					// general audit log sink flags
+					sinkNameFlag,
+					sinkEnabledFlag,
+					// kinesis audit log sink flags
+					roleNameFlag,
+					destinationUriFlag,
+					sinkRegionFlagRequired,
+				},
+				Action: func(ctx *cli.Context) error {
+					spec, err := toAuditLogSinkSpec(ctx, kinesisAuditLogSinkType)
+					if err != nil {
+						return err
+					}
+					err = c.validateAuditLogSink(spec)
+					if err != nil {
+						return err
+					}
+					fmt.Println("Temporal Cloud was able to validate the sink")
+					return nil
+				},
+			},
+			{
+				Name:    "update",
+				Aliases: []string{"u"},
+				Usage:   "Update a kinesis audit log sink",
+				Flags: []cli.Flag{
+					// general audit log sink flags
+					sinkNameFlag,
+					sinkEnabledFlag,
+					ResourceVersionFlag,
+					// kinesis audit log sink flags
+					roleNameFlag,
+					destinationUriFlag,
+					sinkRegionFlagRequired,
+				},
+				Action: func(ctx *cli.Context) error {
+					spec, err := toAuditLogSinkSpec(ctx, kinesisAuditLogSinkType)
+					if err != nil {
+						return err
+					}
+					resourceVersion := ctx.String(ResourceVersionFlag.Name)
+					updateAuditLogSinkRes, err := c.updateAuditLogSink(ctx, spec, resourceVersion)
+					if err != nil {
+						return err
+					}
+					return PrintProto(updateAuditLogSinkRes)
 				},
 			},
 		},
+	}
+
+	// PubSub audit log sink commands
+	pubsubAuditLogCommands := &cli.Command{
+		Name:    "pubsub",
+		Aliases: []string{"ps"},
+		Usage:   "Manage PubSub audit log sink",
+		Subcommands: []*cli.Command{
+			{
+				Name:    "create",
+				Aliases: []string{"c"},
+				Usage:   "Create a pubsub audit log sink",
+				Flags: []cli.Flag{
+					// general audit log sink flags
+					sinkNameFlag,
+					// pubsub audit log sink flags
+					sinkServiceAccountIDFlag,
+					topicNameFlag,
+					gcpProjectIdFlag,
+				},
+				Action: func(ctx *cli.Context) error {
+					spec, err := toAuditLogSinkSpec(ctx, pubsubAuditLogSinkType)
+					if err != nil {
+						return err
+					}
+					spec.Enabled = true
+					resp, err := c.createAuditLogSink(spec)
+					if err != nil {
+						return err
+					}
+					return PrintProto(resp)
+				},
+			},
+			{
+				Name:    "validate",
+				Usage:   "Validate pubsub audit log sink",
+				Aliases: []string{"v"},
+				Flags: []cli.Flag{
+					// general audit log sink flags
+					sinkNameFlag,
+					sinkEnabledFlag,
+					// pubsub audit log sink flags
+					sinkServiceAccountIDFlag,
+					topicNameFlag,
+					gcpProjectIdFlag,
+				},
+				Action: func(ctx *cli.Context) error {
+					spec, err := toAuditLogSinkSpec(ctx, pubsubAuditLogSinkType)
+					if err != nil {
+						return err
+					}
+					err = c.validateAuditLogSink(spec)
+					if err != nil {
+						return err
+					}
+					fmt.Println("Temporal Cloud was able to validate the sink")
+					return nil
+				},
+			},
+			{
+				Name:    "update",
+				Aliases: []string{"u"},
+				Usage:   "Update a pubsub audit log sink",
+				Flags: []cli.Flag{
+					// general audit log sink flags
+					sinkNameFlag,
+					sinkEnabledFlag,
+					ResourceVersionFlag,
+					// pubsub audit log sink flags
+					sinkServiceAccountIDFlag,
+					topicNameFlag,
+					gcpProjectIdFlag,
+				},
+				Action: func(ctx *cli.Context) error {
+					spec, err := toAuditLogSinkSpec(ctx, pubsubAuditLogSinkType)
+					if err != nil {
+						return err
+					}
+					resourceVersion := ctx.String(ResourceVersionFlag.Name)
+					updateAuditLogSinkRes, err := c.updateAuditLogSink(ctx, spec, resourceVersion)
+					if err != nil {
+						return err
+					}
+					return PrintProto(updateAuditLogSinkRes)
+				},
+			},
+		},
+	}
+
+	kinesisAuditLogCommands.Subcommands = append(kinesisAuditLogCommands.Subcommands, auditLogGeneralCommands...)
+	pubsubAuditLogCommands.Subcommands = append(pubsubAuditLogCommands.Subcommands, auditLogGeneralCommands...)
+
+	auditLogCommands.Subcommands[0].Subcommands = []*cli.Command{
+		kinesisAuditLogCommands,
+		pubsubAuditLogCommands,
 	}
 	if IsFeatureEnabled(AuditLogSinkNewAPIFeatureFlag) {
 		commandOut.Command.Subcommands = append(commandOut.Command.Subcommands, auditLogCommands)
