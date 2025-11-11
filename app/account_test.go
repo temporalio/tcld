@@ -720,7 +720,7 @@ func (s *AccountTestSuite) TestCreateAuditLogSink() {
 		{
 			name: "pubsub audit log sink",
 			args: []string{"a", "al", "sinks", "pubsub", "create", "--sink-name", "audit_log_01",
-				"--service-account-id", "123456789012", "--topic-name", "TestTopic", "--gcp-project-id", "TestProject"},
+				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic"},
 			expectErr: false,
 			expectRequest: cloudservice.CreateAccountAuditLogSinkRequest{
 				Spec: &cloudaccount.AuditLogSinkSpec{
@@ -737,21 +737,15 @@ func (s *AccountTestSuite) TestCreateAuditLogSink() {
 			},
 		},
 		{
-			name: "pubsub audit log sink missing service account id",
+			name: "pubsub audit log sink missing service account email",
 			args: []string{"a", "al", "sinks", "pubsub", "create", "--sink-name", "audit_log_01",
-				"--topic-name", "TestTopic", "--gcp-project-id", "TestProject"},
+				"--topic-name", "TestTopic"},
 			expectErr: true,
 		},
 		{
 			name: "pubsub audit log sink missing topic name",
 			args: []string{"a", "al", "sinks", "pubsub", "create", "--sink-name", "audit_log_01",
-				"--service-account-id", "123456789012", "--gcp-project-id", "TestProject"},
-			expectErr: true,
-		},
-		{
-			name: "pubsub audit log sink missing gcp project id",
-			args: []string{"a", "al", "sinks", "pubsub", "create", "--sink-name", "audit_log_01",
-				"--service-account-id", "123456789012", "--topic-name", "TestTopic"},
+				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com"},
 			expectErr: true,
 		},
 	}
@@ -859,7 +853,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 			name: "pubsub audit log sink",
 			args: []string{"a", "al", "sinks", "pubsub", "update", "--sink-name", "audit_log_01",
 				"--enabled", "true",
-				"--service-account-id", "123456789012", "--topic-name", "TestTopic", "--gcp-project-id", "TestProject"},
+				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic"},
 			expectErr:        false,
 			expectGetRequest: true,
 			expectRequest: cloudservice.UpdateAccountAuditLogSinkRequest{
@@ -881,8 +875,9 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 			name: "update sink uses provided resource version",
 			args: []string{"a", "al", "sinks", "pubsub", "update", "--sink-name", "audit_log_01",
 				"--enabled", "true",
-				"--service-account-id", "123456789012", "--topic-name", "TestTopic", "--gcp-project-id", "TestProject", "--resource-version", "345"},
-			expectErr: false,
+				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic", "--resource-version", "345"},
+			expectErr:        false,
+			expectGetRequest: true,
 			expectRequest: cloudservice.UpdateAccountAuditLogSinkRequest{
 				ResourceVersion: "345",
 				Spec: &cloudaccount.AuditLogSinkSpec{
@@ -903,12 +898,49 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 		s.Run(tc.name, func() {
 			if tc.expectRequest != (cloudservice.UpdateAccountAuditLogSinkRequest{}) {
 				if tc.expectGetRequest {
+					sinkType := ""
+					if len(tc.args) >= 4 {
+						sinkType = tc.args[3]
+					}
+
+					var mockSink *cloudaccount.AuditLogSink
+					switch sinkType {
+					case "kinesis":
+						mockSink = &cloudaccount.AuditLogSink{
+							ResourceVersion: "123",
+							Spec: &cloudaccount.AuditLogSinkSpec{
+								Name:    "audit_log_01",
+								Enabled: false,
+								SinkType: &cloudaccount.AuditLogSinkSpec_KinesisSink{
+									KinesisSink: &cloudSink.KinesisSpec{
+										RoleName:       "OldRole",
+										DestinationUri: "old-uri",
+										Region:         "old-region",
+									},
+								},
+							},
+						}
+					case "pubsub":
+						mockSink = &cloudaccount.AuditLogSink{
+							ResourceVersion: "123",
+							Spec: &cloudaccount.AuditLogSinkSpec{
+								Name:    "audit_log_01",
+								Enabled: false,
+								SinkType: &cloudaccount.AuditLogSinkSpec_PubSubSink{
+									PubSubSink: &cloudSink.PubSubSpec{
+										ServiceAccountId: "old-sa",
+										TopicName:        "old-topic",
+										GcpProjectId:     "old-project",
+									},
+								},
+							},
+						}
+
+					}
 					s.mockCloudApiClient.EXPECT().GetAccountAuditLogSink(gomock.Any(), &cloudservice.GetAccountAuditLogSinkRequest{
 						Name: "audit_log_01",
 					}).Return(&cloudservice.GetAccountAuditLogSinkResponse{
-						Sink: &cloudaccount.AuditLogSink{
-							ResourceVersion: "123",
-						},
+						Sink: mockSink,
 					}, tc.getSinkError).Times(1)
 				}
 				if tc.getSinkError == nil {
@@ -1066,7 +1098,7 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 			name: "pubsub audit log sink",
 			args: []string{"a", "al", "sinks", "pubsub", "validate", "--sink-name", "audit_log_01",
 				"--enabled", "true",
-				"--service-account-id", "123456789012", "--topic-name", "TestTopic", "--gcp-project-id", "TestProject"},
+				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic"},
 			expectErr: false,
 			expectRequest: cloudservice.ValidateAccountAuditLogSinkRequest{
 				Spec: &cloudaccount.AuditLogSinkSpec{

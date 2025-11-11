@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/temporalio/tcld/protogen/api/account/v1"
@@ -18,13 +19,12 @@ import (
 )
 
 const (
-	auditLogSinkTypeFlagName     = "audit-log-sink-type"
-	destinationUriFlagName       = "destination-uri"
-	sinkServiceAccountIDFlagName = "service-account-id"
-	topicNameFlagName            = "topic-name"
-	roleNameFlagName             = "role-name"
-	kinesisAuditLogSinkType      = "kinesis"
-	pubsubAuditLogSinkType       = "pubsub"
+	destinationUriFlagName          = "destination-uri"
+	topicNameFlagName               = "topic-name"
+	roleNameFlagName                = "role-name"
+	kinesisAuditLogSinkType         = "kinesis"
+	pubsubAuditLogSinkType          = "pubsub"
+	sinkServiceAccountEmailFlagName = "service-account-email"
 )
 
 var (
@@ -34,11 +34,21 @@ var (
 		Aliases:  []string{"du"},
 		Required: true,
 	}
-	sinkServiceAccountIDFlag = &cli.StringFlag{
-		Name:     sinkServiceAccountIDFlagName,
-		Usage:    "The service account ID to impersonate to write to the sink",
-		Aliases:  []string{"sai"},
+	destinationUriFlagOptional = &cli.StringFlag{
+		Name:    destinationUriFlagName,
+		Usage:   "The destination URI of the audit log sink",
+		Aliases: []string{"du"},
+	}
+	sinkServiceAccountEmailFlag = &cli.StringFlag{
+		Name:     sinkServiceAccountEmailFlagName,
+		Usage:    "The service account email to impersonate to write to the sink",
+		Aliases:  []string{"sae"},
 		Required: true,
+	}
+	sinkServiceAccountEmailFlagOptional = &cli.StringFlag{
+		Name:    sinkServiceAccountEmailFlagName,
+		Usage:   "The service account email to impersonate to write to the sink",
+		Aliases: []string{"sae"},
 	}
 	roleNameFlag = &cli.StringFlag{
 		Name:     roleNameFlagName,
@@ -46,23 +56,32 @@ var (
 		Aliases:  []string{"rn"},
 		Required: true,
 	}
+	roleNameFlagOptional = &cli.StringFlag{
+		Name:    roleNameFlagName,
+		Usage:   "The role name to use to write to the sink",
+		Aliases: []string{"rn"},
+	}
 	topicNameFlag = &cli.StringFlag{
 		Name:     topicNameFlagName,
 		Usage:    "The topic name to write to the sink",
 		Aliases:  []string{"tn"},
 		Required: true,
 	}
-	gcpProjectIdFlag = &cli.StringFlag{
-		Name:     gcpProjectIdFlagName,
-		Usage:    "The GCP project ID to write to the sink",
-		Aliases:  []string{"gpi"},
-		Required: true,
+	topicNameFlagOptional = &cli.StringFlag{
+		Name:    topicNameFlagName,
+		Usage:   "The topic name to write to the sink",
+		Aliases: []string{"tn"},
 	}
 	sinkRegionFlagRequired = &cli.StringFlag{
 		Name:     sinkRegionFlagName,
 		Usage:    "The region to use for the request",
 		Aliases:  []string{"re"},
 		Required: true,
+	}
+	sinkRegionFlagOptional = &cli.StringFlag{
+		Name:    sinkRegionFlagName,
+		Usage:   "The region to use for the request",
+		Aliases: []string{"re"},
 	}
 )
 
@@ -169,38 +188,36 @@ func (c *AccountClient) parseExistingMetricsCerts(ctx *cli.Context) (account *ac
 	return a, existingCerts, nil
 }
 
-func toAuditLogSinkSpec(ctx *cli.Context, auditLogSinkType string) (*cloudaccount.AuditLogSinkSpec, error) {
-	spec := &cloudaccount.AuditLogSinkSpec{
-		Name:    ctx.String(sinkNameFlag.Name),
-		Enabled: ctx.Bool(sinkEnabledFlag.Name),
+func toKinesisAuditLogSinkSpec(ctx *cli.Context, name string, enabled bool, roleName string, destinationUri string, region string) (*cloudaccount.AuditLogSinkSpec, error) {
+	return &cloudaccount.AuditLogSinkSpec{
+		Name:    name,
+		Enabled: enabled,
+		SinkType: &cloudaccount.AuditLogSinkSpec_KinesisSink{
+			KinesisSink: &cloudSink.KinesisSpec{
+				RoleName:       roleName,
+				DestinationUri: destinationUri,
+				Region:         region,
+			},
+		},
+	}, nil
+}
+
+func toPubsubAuditLogSinkSpec(ctx *cli.Context, name string, enabled bool, serviceAccountEmail string, topicName string) (*cloudaccount.AuditLogSinkSpec, error) {
+	saId, gcpProjectId, err := parseSAPrincipal(serviceAccountEmail)
+	if err != nil {
+		return nil, err
 	}
-	switch auditLogSinkType {
-	case kinesisAuditLogSinkType:
-		{
-			spec.SinkType = &cloudaccount.AuditLogSinkSpec_KinesisSink{
-				KinesisSink: &cloudSink.KinesisSpec{
-					RoleName:       ctx.String(roleNameFlag.Name),
-					DestinationUri: ctx.String(destinationUriFlag.Name),
-					Region:         ctx.String(sinkRegionFlagRequired.Name),
-				},
-			}
-		}
-	case pubsubAuditLogSinkType:
-		{
-			spec.SinkType = &cloudaccount.AuditLogSinkSpec_PubSubSink{
-				PubSubSink: &cloudSink.PubSubSpec{
-					ServiceAccountId: ctx.String(sinkServiceAccountIDFlag.Name),
-					TopicName:        ctx.String(topicNameFlag.Name),
-					GcpProjectId:     ctx.String(gcpProjectIdFlag.Name),
-				},
-			}
-		}
-	default:
-		{
-			return nil, fmt.Errorf("invalid audit log sink type: %s", auditLogSinkType)
-		}
-	}
-	return spec, nil
+	return &cloudaccount.AuditLogSinkSpec{
+		Name:    name,
+		Enabled: enabled,
+		SinkType: &cloudaccount.AuditLogSinkSpec_PubSubSink{
+			PubSubSink: &cloudSink.PubSubSpec{
+				ServiceAccountId: saId,
+				TopicName:        topicName,
+				GcpProjectId:     gcpProjectId,
+			},
+		},
+	}, nil
 }
 
 func (c *AccountClient) createAuditLogSink(spec *cloudaccount.AuditLogSinkSpec) (*cloudservice.CreateAccountAuditLogSinkResponse, error) {
@@ -213,17 +230,23 @@ func (c *AccountClient) createAuditLogSink(spec *cloudaccount.AuditLogSinkSpec) 
 	return createAuditLogSinkResp, nil
 }
 
-func (c *AccountClient) updateAuditLogSink(ctx *cli.Context, spec *cloudaccount.AuditLogSinkSpec, resourceVersion string) (*cloudservice.UpdateAccountAuditLogSinkResponse, error) {
-	if resourceVersion == "" {
-		getAuditLogSinkRes, err := c.cloudAPIClient.GetAccountAuditLogSink(c.ctx, &cloudservice.GetAccountAuditLogSinkRequest{
-			Name: ctx.String(sinkNameFlag.Name),
-		})
-		if err != nil {
-			return nil, fmt.Errorf("unable to get audit log sink: %v", err)
-		}
-		resourceVersion = getAuditLogSinkRes.GetSink().GetResourceVersion()
+func (c *AccountClient) isSinkToggleChange(ctx *cli.Context, sink *cloudaccount.AuditLogSink) (bool, error) {
+	if !ctx.IsSet(sinkEnabledFlag.Name) {
+		return false, nil
 	}
 
+	enabledValue, err := strconv.ParseBool(ctx.String(sinkEnabledFlag.Name))
+	if err != nil {
+		return false, fmt.Errorf("invalid value for enabled flag: %w. Only allowed true or false", err)
+	}
+
+	if sink.GetSpec().GetEnabled() == enabledValue {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (c *AccountClient) updateAuditLogSink(ctx *cli.Context, resourceVersion string, spec *cloudaccount.AuditLogSinkSpec) (*cloudservice.UpdateAccountAuditLogSinkResponse, error) {
 	updateAuditLogSinkRes, err := c.cloudAPIClient.UpdateAccountAuditLogSink(c.ctx, &cloudservice.UpdateAccountAuditLogSinkRequest{
 		Spec:            spec,
 		ResourceVersion: resourceVersion,
@@ -603,7 +626,12 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 					sinkRegionFlagRequired,
 				},
 				Action: func(ctx *cli.Context) error {
-					spec, err := toAuditLogSinkSpec(ctx, kinesisAuditLogSinkType)
+					name := ctx.String(sinkNameFlag.Name)
+					enabled := true
+					roleName := ctx.String(roleNameFlag.Name)
+					destinationUri := ctx.String(destinationUriFlag.Name)
+					region := ctx.String(sinkRegionFlagRequired.Name)
+					spec, err := toKinesisAuditLogSinkSpec(ctx, name, enabled, roleName, destinationUri, region)
 					if err != nil {
 						return err
 					}
@@ -629,7 +657,12 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 					sinkRegionFlagRequired,
 				},
 				Action: func(ctx *cli.Context) error {
-					spec, err := toAuditLogSinkSpec(ctx, kinesisAuditLogSinkType)
+					name := ctx.String(sinkNameFlag.Name)
+					enabled := true
+					roleName := ctx.String(roleNameFlag.Name)
+					destinationUri := ctx.String(destinationUriFlag.Name)
+					region := ctx.String(sinkRegionFlagRequired.Name)
+					spec, err := toKinesisAuditLogSinkSpec(ctx, name, enabled, roleName, destinationUri, region)
 					if err != nil {
 						return err
 					}
@@ -651,17 +684,52 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 					sinkEnabledFlag,
 					ResourceVersionFlag,
 					// kinesis audit log sink flags
-					roleNameFlag,
-					destinationUriFlag,
-					sinkRegionFlagRequired,
+					roleNameFlagOptional,
+					destinationUriFlagOptional,
+					sinkRegionFlagOptional,
 				},
 				Action: func(ctx *cli.Context) error {
-					spec, err := toAuditLogSinkSpec(ctx, kinesisAuditLogSinkType)
+					sinkName := ctx.String(sinkNameFlag.Name)
+					getAuditLogSinkRes, err := c.cloudAPIClient.GetAccountAuditLogSink(c.ctx, &cloudservice.GetAccountAuditLogSinkRequest{
+						Name: sinkName,
+					})
+					if err != nil {
+						return fmt.Errorf("unable to get audit log sink: %v", err)
+					}
+
+					resourceVersion := ctx.String(ResourceVersionFlag.Name)
+					if resourceVersion == "" {
+						resourceVersion = getAuditLogSinkRes.GetSink().GetResourceVersion()
+					}
+
+					spec := getAuditLogSinkRes.GetSink().GetSpec()
+					isToggleChanged, err := c.isSinkToggleChange(ctx, getAuditLogSinkRes.GetSink())
 					if err != nil {
 						return err
 					}
-					resourceVersion := ctx.String(ResourceVersionFlag.Name)
-					updateAuditLogSinkRes, err := c.updateAuditLogSink(ctx, spec, resourceVersion)
+
+					if !isToggleChanged && !ctx.IsSet(roleNameFlagOptional.Name) && !ctx.IsSet(destinationUriFlagOptional.Name) && !ctx.IsSet(sinkRegionFlagOptional.Name) {
+						fmt.Println("nothing to update")
+						return nil
+					}
+
+					if isToggleChanged {
+						spec.Enabled = !spec.Enabled
+					}
+
+					if ctx.IsSet(roleNameFlagOptional.Name) {
+						spec.GetKinesisSink().RoleName = ctx.String(roleNameFlagOptional.Name)
+					}
+
+					if ctx.IsSet(destinationUriFlagOptional.Name) {
+						spec.GetKinesisSink().DestinationUri = ctx.String(destinationUriFlagOptional.Name)
+					}
+
+					if ctx.IsSet(sinkRegionFlagOptional.Name) {
+						spec.GetKinesisSink().Region = ctx.String(sinkRegionFlagOptional.Name)
+					}
+
+					updateAuditLogSinkRes, err := c.updateAuditLogSink(ctx, resourceVersion, spec)
 					if err != nil {
 						return err
 					}
@@ -685,12 +753,15 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 					// general audit log sink flags
 					sinkNameFlag,
 					// pubsub audit log sink flags
-					sinkServiceAccountIDFlag,
+					sinkServiceAccountEmailFlag,
 					topicNameFlag,
-					gcpProjectIdFlag,
 				},
 				Action: func(ctx *cli.Context) error {
-					spec, err := toAuditLogSinkSpec(ctx, pubsubAuditLogSinkType)
+					name := ctx.String(sinkNameFlag.Name)
+					enabled := true
+					serviceAccountEmail := ctx.String(sinkServiceAccountEmailFlag.Name)
+					topicName := ctx.String(topicNameFlag.Name)
+					spec, err := toPubsubAuditLogSinkSpec(ctx, name, enabled, serviceAccountEmail, topicName)
 					if err != nil {
 						return err
 					}
@@ -711,12 +782,15 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 					sinkNameFlag,
 					sinkEnabledFlag,
 					// pubsub audit log sink flags
-					sinkServiceAccountIDFlag,
+					sinkServiceAccountEmailFlag,
 					topicNameFlag,
-					gcpProjectIdFlag,
 				},
 				Action: func(ctx *cli.Context) error {
-					spec, err := toAuditLogSinkSpec(ctx, pubsubAuditLogSinkType)
+					name := ctx.String(sinkNameFlag.Name)
+					enabled := true
+					serviceAccountEmail := ctx.String(sinkServiceAccountEmailFlag.Name)
+					topicName := ctx.String(topicNameFlag.Name)
+					spec, err := toPubsubAuditLogSinkSpec(ctx, name, enabled, serviceAccountEmail, topicName)
 					if err != nil {
 						return err
 					}
@@ -738,17 +812,52 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 					sinkEnabledFlag,
 					ResourceVersionFlag,
 					// pubsub audit log sink flags
-					sinkServiceAccountIDFlag,
-					topicNameFlag,
-					gcpProjectIdFlag,
+					sinkServiceAccountEmailFlagOptional,
+					topicNameFlagOptional,
 				},
 				Action: func(ctx *cli.Context) error {
-					spec, err := toAuditLogSinkSpec(ctx, pubsubAuditLogSinkType)
+					sinkName := ctx.String(sinkNameFlag.Name)
+					getAuditLogSinkRes, err := c.cloudAPIClient.GetAccountAuditLogSink(c.ctx, &cloudservice.GetAccountAuditLogSinkRequest{
+						Name: sinkName,
+					})
+					if err != nil {
+						return fmt.Errorf("unable to get audit log sink: %v", err)
+					}
+
+					resourceVersion := ctx.String(ResourceVersionFlag.Name)
+					if resourceVersion == "" {
+						resourceVersion = getAuditLogSinkRes.GetSink().GetResourceVersion()
+					}
+
+					spec := getAuditLogSinkRes.GetSink().GetSpec()
+					isToggleChanged, err := c.isSinkToggleChange(ctx, getAuditLogSinkRes.GetSink())
 					if err != nil {
 						return err
 					}
-					resourceVersion := ctx.String(ResourceVersionFlag.Name)
-					updateAuditLogSinkRes, err := c.updateAuditLogSink(ctx, spec, resourceVersion)
+
+					if !isToggleChanged && !ctx.IsSet(sinkServiceAccountEmailFlagOptional.Name) && !ctx.IsSet(topicNameFlagOptional.Name) {
+						fmt.Println("nothing to update")
+						return nil
+					}
+
+					if isToggleChanged {
+						spec.Enabled = !spec.Enabled
+					}
+
+					if ctx.IsSet(sinkServiceAccountEmailFlagOptional.Name) {
+						saId, gcpProjectId, err := parseSAPrincipal(ctx.String(sinkServiceAccountEmailFlagOptional.Name))
+						if err != nil {
+							return err
+						}
+						spec.GetPubSubSink().ServiceAccountId = saId
+						spec.GetPubSubSink().GcpProjectId = gcpProjectId
+					}
+
+					if ctx.IsSet(topicNameFlagOptional.Name) {
+						spec.GetPubSubSink().TopicName = ctx.String(topicNameFlagOptional.Name)
+					}
+
+					updateAuditLogSinkRes, err := c.updateAuditLogSink(ctx, resourceVersion, spec)
 					if err != nil {
 						return err
 					}
