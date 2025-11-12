@@ -38,11 +38,6 @@ type AccountTestSuite struct {
 }
 
 func (s *AccountTestSuite) SetupTest() {
-	if !IsFeatureEnabled(AuditLogSinkNewAPIFeatureFlag) {
-		err := toggleFeature(AuditLogSinkNewAPIFeatureFlag)
-		s.Require().NoError(err)
-	}
-
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = accountservicemock.NewMockAccountServiceClient(s.mockCtrl)
 	s.mockCloudApiClient = apimock.NewMockCloudServiceClient(s.mockCtrl)

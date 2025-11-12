@@ -28,28 +28,7 @@ const (
 )
 
 var (
-	destinationUriFlag = &cli.StringFlag{
-		Name:     destinationUriFlagName,
-		Usage:    "The destination URI of the audit log sink",
-		Aliases:  []string{"du"},
-		Required: true,
-	}
-	destinationUriFlagOptional = &cli.StringFlag{
-		Name:    destinationUriFlagName,
-		Usage:   "The destination URI of the audit log sink",
-		Aliases: []string{"du"},
-	}
-	sinkServiceAccountEmailFlag = &cli.StringFlag{
-		Name:     sinkServiceAccountEmailFlagName,
-		Usage:    "The service account email to impersonate to write to the sink",
-		Aliases:  []string{"sae"},
-		Required: true,
-	}
-	sinkServiceAccountEmailFlagOptional = &cli.StringFlag{
-		Name:    sinkServiceAccountEmailFlagName,
-		Usage:   "The service account email to impersonate to write to the sink",
-		Aliases: []string{"sae"},
-	}
+	// Kinesis audit log sink flags
 	roleNameFlag = &cli.StringFlag{
 		Name:     roleNameFlagName,
 		Usage:    "The role name to use to write to the sink",
@@ -61,16 +40,16 @@ var (
 		Usage:   "The role name to use to write to the sink",
 		Aliases: []string{"rn"},
 	}
-	topicNameFlag = &cli.StringFlag{
-		Name:     topicNameFlagName,
-		Usage:    "The topic name to write to the sink",
-		Aliases:  []string{"tn"},
+	destinationUriFlag = &cli.StringFlag{
+		Name:     destinationUriFlagName,
+		Usage:    "The destination URI of the audit log sink",
+		Aliases:  []string{"du"},
 		Required: true,
 	}
-	topicNameFlagOptional = &cli.StringFlag{
-		Name:    topicNameFlagName,
-		Usage:   "The topic name to write to the sink",
-		Aliases: []string{"tn"},
+	destinationUriFlagOptional = &cli.StringFlag{
+		Name:    destinationUriFlagName,
+		Usage:   "The destination URI of the audit log sink",
+		Aliases: []string{"du"},
 	}
 	sinkRegionFlagRequired = &cli.StringFlag{
 		Name:     sinkRegionFlagName,
@@ -82,6 +61,30 @@ var (
 		Name:    sinkRegionFlagName,
 		Usage:   "The region to use for the request",
 		Aliases: []string{"re"},
+	}
+
+	// PubSub audit log sink flags
+	sinkServiceAccountEmailFlag = &cli.StringFlag{
+		Name:     sinkServiceAccountEmailFlagName,
+		Usage:    "The service account email to impersonate to write to the sink",
+		Aliases:  []string{"sae"},
+		Required: true,
+	}
+	sinkServiceAccountEmailFlagOptional = &cli.StringFlag{
+		Name:    sinkServiceAccountEmailFlagName,
+		Usage:   "The service account email to impersonate to write to the sink",
+		Aliases: []string{"sae"},
+	}
+	topicNameFlag = &cli.StringFlag{
+		Name:     topicNameFlagName,
+		Usage:    "The topic name to write to the sink",
+		Aliases:  []string{"tn"},
+		Required: true,
+	}
+	topicNameFlagOptional = &cli.StringFlag{
+		Name:    topicNameFlagName,
+		Usage:   "The topic name to write to the sink",
+		Aliases: []string{"tn"},
 	}
 )
 
@@ -867,8 +870,6 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 		kinesisAuditLogCommands,
 		pubsubAuditLogCommands,
 	}
-	if IsFeatureEnabled(AuditLogSinkNewAPIFeatureFlag) {
-		commandOut.Command.Subcommands = append(commandOut.Command.Subcommands, auditLogCommands)
-	}
+	commandOut.Command.Subcommands = append(commandOut.Command.Subcommands, auditLogCommands)
 	return commandOut, nil
 }
