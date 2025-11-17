@@ -46,6 +46,12 @@ const (
 	disableFailoverFlagName          = "disable-auto-failover"
 	enableDeleteProtectionFlagName   = "enable-delete-protection"
 	tagFlagName                      = "tag"
+
+	capacityModeFlagName  = "capacity-mode"
+	capacityValueFlagName = "capacity-value"
+
+	provisionedCapacityMode = "provisioned"
+	onDemandCapacityMode    = "on_demand"
 )
 
 const (
@@ -53,6 +59,11 @@ const (
 	AuthMethodMTLS         = "mtls"
 	AuthMethodAPIKey       = "api_key"
 	AuthMethodAPIKeyOrMTLS = "api_key_or_mtls"
+)
+
+const (
+	MaxPageSize     = 1000
+	DefaultPageSize = 100
 )
 
 var (
@@ -115,7 +126,7 @@ var (
 	pageSizeFlag = &cli.IntFlag{
 		Name:  "page-size",
 		Usage: "The page size for list operations",
-		Value: 100,
+		Value: DefaultPageSize,
 	}
 	pageTokenFlag = &cli.StringFlag{
 		Name:  "page-token",
@@ -164,6 +175,28 @@ var (
 		Name:     connectivityRuleIdsFlagName,
 		Usage:    "The list of connectivity rule IDs, can be used in create namespace and update namespace. example: --ids id1 --ids id2 --ids id3",
 		Aliases:  []string{"ids"},
+		Required: false,
+	}
+
+	capacityModeFlag = &cli.StringFlag{
+		Name:     capacityModeFlagName,
+		Usage:    fmt.Sprintf("The capacity mode to use for the namespace. Valid values are '%s' and '%s'", onDemandCapacityMode, provisionedCapacityMode),
+		Aliases:  []string{"cm"},
+		Required: false,
+		Action: func(_ *cli.Context, s string) error {
+			switch s {
+			case "", onDemandCapacityMode, provisionedCapacityMode:
+				return nil
+			default:
+				return fmt.Errorf("invalid capacity mode %s, valid values are 'on_demand' and 'provisioned'", s)
+			}
+		},
+	}
+
+	capacityValueFlag = &cli.Float64Flag{
+		Name:     capacityValueFlagName,
+		Usage:    "The capacity value to use for the namespace. Required if capacity mode is 'provisioned', ignored otherwise",
+		Aliases:  []string{"cv"},
 		Required: false,
 	}
 )
@@ -307,7 +340,20 @@ func (c *NamespaceClient) deleteRegion(ctx *cli.Context) error {
 	return PrintProto(res.GetAsyncOperation())
 }
 
-func (c *NamespaceClient) listNamespaces() error {
+func (c *NamespaceClient) listNamespaces(requestedPageToken string, pageSize int) error {
+	// Fetch a single page of namespaces.
+	if len(requestedPageToken) > 0 || pageSize > 0 {
+		res, err := c.client.ListNamespaces(c.ctx, &namespaceservice.ListNamespacesRequest{
+			PageToken: requestedPageToken,
+			PageSize:  int32(pageSize),
+		})
+		if err != nil {
+			return err
+		}
+		return PrintProto(res)
+	}
+
+	// Fetch all namespaces.
 	totalRes := &namespaceservice.ListNamespacesResponse{}
 	pageToken := ""
 	for {
@@ -326,6 +372,21 @@ func (c *NamespaceClient) listNamespaces() error {
 	}
 }
 
+func (c *NamespaceClient) getNamespaceCloudApi(namespace string) (*cloudNamespace.Namespace, error) {
+	res, err := c.cloudAPIClient.GetNamespace(c.ctx, &cloudservice.GetNamespaceRequest{
+		Namespace: namespace,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if res.Namespace == nil || res.Namespace.Namespace == "" {
+		// this should never happen, the server should return an error when the namespace is not found
+		return nil, fmt.Errorf("invalid namespace returned by server")
+	}
+	return res.Namespace, nil
+}
+
+// TODO: deprecate this and use getNamespaceCloudApi everywhere
 func (c *NamespaceClient) getNamespace(namespace string) (*namespace.Namespace, error) {
 	res, err := c.client.GetNamespace(c.ctx, &namespaceservice.GetNamespaceRequest{
 		Namespace: namespace,
@@ -351,6 +412,28 @@ func (c *NamespaceClient) updateNamespace(ctx *cli.Context, n *namespace.Namespa
 		Namespace:       n.Namespace,
 		ResourceVersion: resourceVersion,
 		Spec:            n.Spec,
+	})
+	if err != nil {
+		if isNothingChangedErr(ctx, err) {
+			return nil
+		}
+		return err
+	}
+
+	return PrintProto(res)
+}
+
+func (c *NamespaceClient) updateNamespaceCloudApi(ctx *cli.Context, n *cloudNamespace.Namespace) error {
+	resourceVersion := n.ResourceVersion
+	if v := ctx.String(ResourceVersionFlagName); v != "" {
+		resourceVersion = v
+	}
+
+	res, err := c.cloudAPIClient.UpdateNamespace(c.ctx, &cloudservice.UpdateNamespaceRequest{
+		AsyncOperationId: ctx.String(RequestIDFlagName),
+		Namespace:        n.Namespace,
+		ResourceVersion:  resourceVersion,
+		Spec:             n.Spec,
 	})
 	if err != nil {
 		if isNothingChangedErr(ctx, err) {
@@ -968,8 +1051,23 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Name:    "list",
 			Usage:   "List all known namespaces",
 			Aliases: []string{"l"},
+			Flags: []cli.Flag{
+				pageTokenFlag,
+				&cli.IntFlag{
+					Name:  pageSizeFlagName,
+					Usage: "Number of namespaces to list per page",
+				},
+			},
 			Action: func(ctx *cli.Context) error {
-				return c.listNamespaces()
+				if ctx.IsSet(pageSizeFlagName) {
+					if ctx.Int(pageSizeFlagName) <= 0 {
+						return fmt.Errorf("page size cannot be less than or equal to 0")
+					}
+					if ctx.Int(pageSizeFlagName) > MaxPageSize {
+						return fmt.Errorf("page size cannot be greater than %d", MaxPageSize)
+					}
+				}
+				return c.listNamespaces(ctx.String(pageTokenFlagName), ctx.Int(pageSizeFlagName))
 			},
 		},
 		{
@@ -1808,6 +1906,78 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 					Action: func(ctx *cli.Context) error {
 						keysToRemove := ctx.StringSlice("tag-key")
 						return c.updateNamespaceTags(ctx, nil, keysToRemove)
+					},
+				},
+			},
+		},
+		{
+			Name:    "capacity",
+			Usage:   "Manage namespace capacity settings",
+			Aliases: []string{"cap"},
+			Subcommands: []*cli.Command{
+				{
+					Name:    "get",
+					Usage:   "Get namespace capacity settings",
+					Aliases: []string{"g"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						n, err := c.getNamespaceCloudApi(ctx.String(NamespaceFlagName))
+						if err != nil {
+							return err
+						}
+						return PrintProto(n.GetCapacity())
+					},
+				},
+				{
+					Name:    "update",
+					Usage:   "Set the capacity of a given namespace.",
+					Aliases: []string{"u"},
+					Flags: []cli.Flag{
+						NamespaceFlag,
+						capacityModeFlag,
+						capacityValueFlag,
+						RequestIDFlag,
+						ResourceVersionFlag,
+					},
+					Action: func(ctx *cli.Context) error {
+						nsID := ctx.String(NamespaceFlagName)
+						mode := ctx.String(capacityModeFlagName)
+						value := ctx.Float64(capacityValueFlagName)
+						if mode == "" {
+							return fmt.Errorf("capacity mode must be specified (either '%s' or '%s')", onDemandCapacityMode, provisionedCapacityMode)
+						}
+						if mode == provisionedCapacityMode && value <= 0 {
+							return fmt.Errorf("capacity value must be greater than 0 when capacity mode is '%s'", provisionedCapacityMode)
+						}
+						var capacitySpec *cloudNamespace.CapacitySpec
+						switch mode {
+						case onDemandCapacityMode:
+							capacitySpec = &cloudNamespace.CapacitySpec{
+								Spec: &cloudNamespace.CapacitySpec_OnDemand_{
+									OnDemand: &cloudNamespace.CapacitySpec_OnDemand{},
+								},
+							}
+						case provisionedCapacityMode:
+							capacitySpec = &cloudNamespace.CapacitySpec{
+								Spec: &cloudNamespace.CapacitySpec_Provisioned_{
+									Provisioned: &cloudNamespace.CapacitySpec_Provisioned{
+										Value: value,
+									},
+								},
+							}
+						}
+						ns, err := c.getNamespaceCloudApi(nsID)
+						if err != nil {
+							return err
+						}
+
+						if ns != nil && ns.Spec == nil {
+							ns.Spec = &cloudNamespace.NamespaceSpec{}
+						}
+						ns.Spec.CapacitySpec = capacitySpec
+						return c.updateNamespaceCloudApi(ctx, ns)
 					},
 				},
 			},
