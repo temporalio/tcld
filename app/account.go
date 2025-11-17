@@ -646,7 +646,6 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 				Flags: []cli.Flag{
 					// general audit log sink flags
 					sinkNameFlag,
-					sinkEnabledFlag,
 					// kinesis audit log sink flags
 					roleNameFlag,
 					destinationUriFlag,
@@ -776,7 +775,6 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 				Flags: []cli.Flag{
 					// general audit log sink flags
 					sinkNameFlag,
-					sinkEnabledFlag,
 					// pubsub audit log sink flags
 					sinkServiceAccountEmailFlag,
 					topicNameFlag,

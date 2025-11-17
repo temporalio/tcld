@@ -1048,14 +1048,15 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 	}{
 		{
 			name: "kinesis audit log sink",
-			args: []string{"a", "al", "kinesis", "validate", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "kinesis", "validate",
+				"--sink-name", "test-sink",
 				"--role-name", "TestRole",
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
-				"--region", "us-east-1", "--enabled", "true"},
+				"--region", "us-east-1"},
 			expectErr: false,
 			expectRequest: cloudservice.ValidateAccountAuditLogSinkRequest{
 				Spec: &cloudaccount.AuditLogSinkSpec{
-					Name:    "audit_log_01",
+					Name:    "test-sink",
 					Enabled: true,
 					SinkType: &cloudaccount.AuditLogSinkSpec_KinesisSink{
 						KinesisSink: &cloudSink.KinesisSpec{
@@ -1069,14 +1070,15 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 		},
 		{
 			name: "kinesis audit log sink with error",
-			args: []string{"a", "al", "kinesis", "validate", "--sink-name", "audit_log_01",
+			args: []string{"a", "al", "kinesis", "validate",
+				"--sink-name", "test-sink",
 				"--role-name", "TestRole",
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
-				"--region", "us-east-1", "--enabled", "true"},
+				"--region", "us-east-1"},
 			expectErr: true,
 			expectRequest: cloudservice.ValidateAccountAuditLogSinkRequest{
 				Spec: &cloudaccount.AuditLogSinkSpec{
-					Name:    "audit_log_01",
+					Name:    "test-sink",
 					Enabled: true,
 					SinkType: &cloudaccount.AuditLogSinkSpec_KinesisSink{
 						KinesisSink: &cloudSink.KinesisSpec{
@@ -1091,13 +1093,13 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 		},
 		{
 			name: "pubsub audit log sink",
-			args: []string{"a", "al", "pubsub", "validate", "--sink-name", "audit_log_01",
-				"--enabled", "true",
+			args: []string{"a", "al", "pubsub", "validate",
+				"--sink-name", "test-sink",
 				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic"},
 			expectErr: false,
 			expectRequest: cloudservice.ValidateAccountAuditLogSinkRequest{
 				Spec: &cloudaccount.AuditLogSinkSpec{
-					Name:    "audit_log_01",
+					Name:    "test-sink",
 					Enabled: true,
 					SinkType: &cloudaccount.AuditLogSinkSpec_PubSubSink{
 						PubSubSink: &cloudSink.PubSubSpec{
