@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -19,13 +20,14 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
+	"github.com/urfave/cli/v2"
+
 	"github.com/temporalio/tcld/protogen/api/namespace/v1"
 	"github.com/temporalio/tcld/protogen/api/namespaceservice/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
 	authservicemock "github.com/temporalio/tcld/protogen/apimock/authservice/v1"
 	apimock "github.com/temporalio/tcld/protogen/apimock/cloudservice/v1"
 	namespaceservicemock "github.com/temporalio/tcld/protogen/apimock/namespaceservice/v1"
-	"github.com/urfave/cli/v2"
 )
 
 func TestNamespace(t *testing.T) {
@@ -42,11 +44,6 @@ type NamespaceTestSuite struct {
 }
 
 func (s *NamespaceTestSuite) SetupTest() {
-	if !IsFeatureEnabled(ConnectivityRuleFeatureFlag) {
-		err := toggleFeature(ConnectivityRuleFeatureFlag)
-		s.Require().NoError(err)
-	}
-
 	s.mockCtrl = gomock.NewController(s.T())
 	s.mockService = namespaceservicemock.NewMockNamespaceServiceClient(s.mockCtrl)
 	s.mockAuthService = authservicemock.NewMockAuthServiceClient(s.mockCtrl)
@@ -109,6 +106,9 @@ func (s *NamespaceTestSuite) TestGet() {
 }
 
 func (s *NamespaceTestSuite) TestList() {
+	s.Error(s.RunCmd("namespace", "list", "--page-size", "0"))
+	s.Error(s.RunCmd("namespace", "list", "--page-size", "-1"))
+	s.Error(s.RunCmd("namespace", "list", "--page-size", strconv.Itoa(MaxPageSize+1)))
 
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{}).Return(nil, errors.New("some error")).Times(1)
 	s.Error(s.RunCmd("namespace", "list"))
@@ -148,8 +148,32 @@ func (s *NamespaceTestSuite) TestList() {
 	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
 		PageToken: "token3",
 	}).Return(&namespaceservice.ListNamespacesResponse{}, nil).Times(1)
-
 	s.NoError(s.RunCmd("namespace", "list"))
+
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		PageToken: "foo",
+	}).Return(&namespaceservice.ListNamespacesResponse{
+		Namespaces:    []string{"ns1", "ns2"},
+		NextPageToken: "bar",
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("namespace", "list", "--page-token", "foo"))
+
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		PageSize: 10,
+	}).Return(&namespaceservice.ListNamespacesResponse{
+		Namespaces:    []string{"ns1", "ns2"},
+		NextPageToken: "foo",
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("namespace", "list", "--page-size", "10"))
+
+	s.mockService.EXPECT().ListNamespaces(gomock.Any(), &namespaceservice.ListNamespacesRequest{
+		PageToken: "foo",
+		PageSize:  10,
+	}).Return(&namespaceservice.ListNamespacesResponse{
+		Namespaces:    []string{"ns1", "ns2"},
+		NextPageToken: "bar",
+	}, nil).Times(1)
+	s.NoError(s.RunCmd("namespace", "list", "--page-token", "foo", "--page-size", "10"))
 }
 
 func (s *NamespaceTestSuite) TestDeleteProtection() {
@@ -640,6 +664,18 @@ func (s *NamespaceTestSuite) TestUpdateRemoveCA() {
 		args:      []string{"namespace", "accepted-client-ca", "remove", "--namespace", ns},
 		expectErr: true,
 	}, {
+		name:      "err cert flag with all",
+		args:      []string{"namespace", "accepted-client-ca", "remove", "--namespace", ns, "--ca-certificate", cert1, "--all"},
+		expectErr: true,
+	}, {
+		name:      "err cert file flag with all",
+		args:      []string{"namespace", "accepted-client-ca", "remove", "--namespace", ns, "--ca-certificate-file", path, "--all"},
+		expectErr: true,
+	}, {
+		name:      "err cert fingerprint flag with all",
+		args:      []string{"namespace", "accepted-client-ca", "remove", "--namespace", ns, "--ca-certificate-fingerprint", cert2fingerprint, "--all"},
+		expectErr: true,
+	}, {
 		name:      "remove 1st cert",
 		args:      []string{"n", "ca", "remove", "-n", ns, "--ca-certificate", cert1},
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
@@ -652,6 +688,36 @@ func (s *NamespaceTestSuite) TestUpdateRemoveCA() {
 		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
 		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
 			r.Spec.AcceptedClientCa = cert1
+		},
+	}, {
+		name:      "err remove all certs with mtls",
+		args:      []string{"n", "ca", "remove", "-n", ns, "--all"},
+		expectGet: func(g *namespaceservice.GetNamespaceResponse) {},
+		expectErr: true,
+	}, {
+		name: "err remove all certs with api_key_or_mtls",
+		args: []string{"n", "ca", "remove", "-n", ns, "--all"},
+		expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+			g.Namespace.Spec.AuthMethod = namespace.AUTH_METHOD_API_KEY_OR_MTLS
+		},
+		expectErr: true,
+	}, {
+		name: "remove all certs: api_key",
+		args: []string{"n", "ca", "remove", "-n", ns, "--all"},
+		expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+			g.Namespace.Spec.AuthMethod = namespace.AUTH_METHOD_API_KEY
+		},
+		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+			r.Spec.AcceptedClientCa = ""
+		},
+	}, {
+		name: "remove all certs: restricted",
+		args: []string{"n", "ca", "remove", "-n", ns, "--all"},
+		expectGet: func(g *namespaceservice.GetNamespaceResponse) {
+			g.Namespace.Spec.AuthMethod = namespace.AUTH_METHOD_RESTRICTED
+		},
+		expectUpdate: func(r *namespaceservice.UpdateNamespaceRequest) {
+			r.Spec.AcceptedClientCa = ""
 		},
 	}, {
 		name:      "remove unknown cert",
@@ -715,6 +781,7 @@ func (s *NamespaceTestSuite) TestUpdateRemoveCA() {
 							"attr1": namespace.SEARCH_ATTRIBUTE_TYPE_BOOL,
 						},
 						RetentionDays: 7,
+						AuthMethod:    namespace.AUTH_METHOD_MTLS,
 					},
 					State:           namespace.STATE_ACTIVE,
 					ResourceVersion: "ver1",
@@ -3217,6 +3284,160 @@ func (s *NamespaceTestSuite) TestSetConnectivityRules() {
 					}, nil).Times(1)
 			}
 
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestGetNamespaceCapacity() {
+	tests := []struct {
+		name      string
+		args      []string
+		mock      func()
+		expectErr bool
+	}{
+		{
+			name: "get namespace capacity - success",
+			args: []string{"namespace", "capacity", "get", "--namespace", "ns1"},
+			mock: func() {
+				s.mockCloudApiClient.EXPECT().
+					GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
+						Namespace: "ns1",
+					}).Return(&cloudservice.GetNamespaceResponse{
+					Namespace: &cloudNamespace.Namespace{
+						Namespace: "ns1",
+						Capacity: &cloudNamespace.Capacity{
+							CurrentMode: &cloudNamespace.Capacity_Provisioned_{
+								Provisioned: &cloudNamespace.Capacity_Provisioned{
+									CurrentValue: 16.0,
+								},
+							},
+						},
+					},
+				}, nil).Times(1)
+			},
+		},
+		{
+			name:      "get namespace capacity - fail",
+			args:      []string{"namespace", "capacity", "get", "--namespace", "ns1"},
+			expectErr: true,
+			mock: func() {
+				s.mockCloudApiClient.EXPECT().
+					GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
+						Namespace: "ns1",
+					}).Return(nil, errors.New("some error")).Times(1)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.mock != nil {
+				tc.mock()
+			}
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *NamespaceTestSuite) TestUpdateNamespaceCapacity() {
+	tests := []struct {
+		name      string
+		args      []string
+		mock      func()
+		expectErr bool
+	}{
+		{
+			name: "update namespace capacity - success",
+			args: []string{"namespace", "capacity", "update", "--namespace", "ns1", "--capacity-mode", "provisioned", "--capacity-value", "16"},
+			mock: func() {
+				s.mockCloudApiClient.EXPECT().
+					GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
+						Namespace: "ns1",
+					}).Return(&cloudservice.GetNamespaceResponse{
+					Namespace: &cloudNamespace.Namespace{
+						Namespace: "ns1",
+						Capacity: &cloudNamespace.Capacity{
+							CurrentMode: &cloudNamespace.Capacity_OnDemand_{
+								OnDemand: &cloudNamespace.Capacity_OnDemand{},
+							},
+						},
+					},
+				}, nil).Times(1)
+
+				s.mockCloudApiClient.EXPECT().
+					UpdateNamespace(gomock.Any(), &cloudservice.UpdateNamespaceRequest{
+						Namespace: "ns1",
+						Spec: &cloudNamespace.NamespaceSpec{
+							CapacitySpec: &cloudNamespace.CapacitySpec{
+								Spec: &cloudNamespace.CapacitySpec_Provisioned_{
+									Provisioned: &cloudNamespace.CapacitySpec_Provisioned{
+										Value: 16.0,
+									},
+								},
+							},
+						},
+					}).
+					Return(&cloudservice.UpdateNamespaceResponse{
+						AsyncOperation: &operation.AsyncOperation{
+							Id: "op-123",
+						},
+					}, nil)
+
+			},
+		},
+		{
+			name: "update namespace capacity - failure",
+			args: []string{"namespace", "capacity", "update", "--namespace", "ns1", "--capacity-mode", "provisioned", "--capacity-value", "16"},
+			mock: func() {
+				s.mockCloudApiClient.EXPECT().
+					GetNamespace(gomock.Any(), &cloudservice.GetNamespaceRequest{
+						Namespace: "ns1",
+					}).Return(&cloudservice.GetNamespaceResponse{
+					Namespace: &cloudNamespace.Namespace{
+						Namespace: "ns1",
+						Capacity: &cloudNamespace.Capacity{
+							CurrentMode: &cloudNamespace.Capacity_OnDemand_{
+								OnDemand: &cloudNamespace.Capacity_OnDemand{},
+							},
+						},
+					},
+				}, nil).Times(1)
+
+				s.mockCloudApiClient.EXPECT().
+					UpdateNamespace(gomock.Any(), &cloudservice.UpdateNamespaceRequest{
+						Namespace: "ns1",
+						Spec: &cloudNamespace.NamespaceSpec{
+							CapacitySpec: &cloudNamespace.CapacitySpec{
+								Spec: &cloudNamespace.CapacitySpec_Provisioned_{
+									Provisioned: &cloudNamespace.CapacitySpec_Provisioned{
+										Value: 16.0,
+									},
+								},
+							},
+						},
+					}).
+					Return(nil, errors.New("some error"))
+			},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.mock != nil {
+				tc.mock()
+			}
 			err := s.RunCmd(tc.args...)
 			if tc.expectErr {
 				s.Error(err)
