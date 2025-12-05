@@ -192,15 +192,6 @@ type CloudServiceClient interface {
 	// Delete a projects
 	// temporal:dev
 	DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*DeleteProjectResponse, error)
-	// Set a user's access to a project
-	// temporal:dev
-	SetUserProjectAccess(ctx context.Context, in *SetUserProjectAccessRequest, opts ...grpc.CallOption) (*SetUserProjectAccessResponse, error)
-	// Set a user group's access to a project
-	// temporal:dev
-	SetUserGroupProjectAccess(ctx context.Context, in *SetUserGroupProjectAccessRequest, opts ...grpc.CallOption) (*SetUserGroupProjectAccessResponse, error)
-	// Set a service account's access to a project.
-	// temporal:dev
-	SetServiceAccountProjectAccess(ctx context.Context, in *SetServiceAccountProjectAccessRequest, opts ...grpc.CallOption) (*SetServiceAccountProjectAccessResponse, error)
 	// Resend a user invite
 	// temporal:ui
 	ResendUserInvite(ctx context.Context, in *ResendUserInviteRequest, opts ...grpc.CallOption) (*ResendUserInviteResponse, error)
@@ -897,33 +888,6 @@ func (c *cloudServiceClient) DeleteProject(ctx context.Context, in *DeleteProjec
 	return out, nil
 }
 
-func (c *cloudServiceClient) SetUserProjectAccess(ctx context.Context, in *SetUserProjectAccessRequest, opts ...grpc.CallOption) (*SetUserProjectAccessResponse, error) {
-	out := new(SetUserProjectAccessResponse)
-	err := c.cc.Invoke(ctx, "/temporal.api.cloud.cloudservice.v1.CloudService/SetUserProjectAccess", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *cloudServiceClient) SetUserGroupProjectAccess(ctx context.Context, in *SetUserGroupProjectAccessRequest, opts ...grpc.CallOption) (*SetUserGroupProjectAccessResponse, error) {
-	out := new(SetUserGroupProjectAccessResponse)
-	err := c.cc.Invoke(ctx, "/temporal.api.cloud.cloudservice.v1.CloudService/SetUserGroupProjectAccess", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *cloudServiceClient) SetServiceAccountProjectAccess(ctx context.Context, in *SetServiceAccountProjectAccessRequest, opts ...grpc.CallOption) (*SetServiceAccountProjectAccessResponse, error) {
-	out := new(SetServiceAccountProjectAccessResponse)
-	err := c.cc.Invoke(ctx, "/temporal.api.cloud.cloudservice.v1.CloudService/SetServiceAccountProjectAccess", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *cloudServiceClient) ResendUserInvite(ctx context.Context, in *ResendUserInviteRequest, opts ...grpc.CallOption) (*ResendUserInviteResponse, error) {
 	out := new(ResendUserInviteResponse)
 	err := c.cc.Invoke(ctx, "/temporal.api.cloud.cloudservice.v1.CloudService/ResendUserInvite", in, out, opts...)
@@ -1125,15 +1089,6 @@ type CloudServiceServer interface {
 	// Delete a projects
 	// temporal:dev
 	DeleteProject(context.Context, *DeleteProjectRequest) (*DeleteProjectResponse, error)
-	// Set a user's access to a project
-	// temporal:dev
-	SetUserProjectAccess(context.Context, *SetUserProjectAccessRequest) (*SetUserProjectAccessResponse, error)
-	// Set a user group's access to a project
-	// temporal:dev
-	SetUserGroupProjectAccess(context.Context, *SetUserGroupProjectAccessRequest) (*SetUserGroupProjectAccessResponse, error)
-	// Set a service account's access to a project.
-	// temporal:dev
-	SetServiceAccountProjectAccess(context.Context, *SetServiceAccountProjectAccessRequest) (*SetServiceAccountProjectAccessResponse, error)
 	// Resend a user invite
 	// temporal:ui
 	ResendUserInvite(context.Context, *ResendUserInviteRequest) (*ResendUserInviteResponse, error)
@@ -1373,15 +1328,6 @@ func (UnimplementedCloudServiceServer) UpdateProject(context.Context, *UpdatePro
 }
 func (UnimplementedCloudServiceServer) DeleteProject(context.Context, *DeleteProjectRequest) (*DeleteProjectResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProject not implemented")
-}
-func (UnimplementedCloudServiceServer) SetUserProjectAccess(context.Context, *SetUserProjectAccessRequest) (*SetUserProjectAccessResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetUserProjectAccess not implemented")
-}
-func (UnimplementedCloudServiceServer) SetUserGroupProjectAccess(context.Context, *SetUserGroupProjectAccessRequest) (*SetUserGroupProjectAccessResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetUserGroupProjectAccess not implemented")
-}
-func (UnimplementedCloudServiceServer) SetServiceAccountProjectAccess(context.Context, *SetServiceAccountProjectAccessRequest) (*SetServiceAccountProjectAccessResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetServiceAccountProjectAccess not implemented")
 }
 func (UnimplementedCloudServiceServer) ResendUserInvite(context.Context, *ResendUserInviteRequest) (*ResendUserInviteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResendUserInvite not implemented")
@@ -2755,60 +2701,6 @@ func _CloudService_DeleteProject_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CloudService_SetUserProjectAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetUserProjectAccessRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CloudServiceServer).SetUserProjectAccess(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/temporal.api.cloud.cloudservice.v1.CloudService/SetUserProjectAccess",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CloudServiceServer).SetUserProjectAccess(ctx, req.(*SetUserProjectAccessRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _CloudService_SetUserGroupProjectAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetUserGroupProjectAccessRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CloudServiceServer).SetUserGroupProjectAccess(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/temporal.api.cloud.cloudservice.v1.CloudService/SetUserGroupProjectAccess",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CloudServiceServer).SetUserGroupProjectAccess(ctx, req.(*SetUserGroupProjectAccessRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _CloudService_SetServiceAccountProjectAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetServiceAccountProjectAccessRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CloudServiceServer).SetServiceAccountProjectAccess(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/temporal.api.cloud.cloudservice.v1.CloudService/SetServiceAccountProjectAccess",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CloudServiceServer).SetServiceAccountProjectAccess(ctx, req.(*SetServiceAccountProjectAccessRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _CloudService_ResendUserInvite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ResendUserInviteRequest)
 	if err := dec(in); err != nil {
@@ -3169,18 +3061,6 @@ var CloudService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteProject",
 			Handler:    _CloudService_DeleteProject_Handler,
-		},
-		{
-			MethodName: "SetUserProjectAccess",
-			Handler:    _CloudService_SetUserProjectAccess_Handler,
-		},
-		{
-			MethodName: "SetUserGroupProjectAccess",
-			Handler:    _CloudService_SetUserGroupProjectAccess_Handler,
-		},
-		{
-			MethodName: "SetServiceAccountProjectAccess",
-			Handler:    _CloudService_SetServiceAccountProjectAccess_Handler,
 		},
 		{
 			MethodName: "ResendUserInvite",
