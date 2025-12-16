@@ -116,6 +116,26 @@ func (mr *MockCloudServiceClientMockRecorder) ConfirmMigration(ctx, in interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConfirmMigration", reflect.TypeOf((*MockCloudServiceClient)(nil).ConfirmMigration), varargs...)
 }
 
+// CreateAccountAuditLogSink mocks base method.
+func (m *MockCloudServiceClient) CreateAccountAuditLogSink(ctx context.Context, in *cloudservice.CreateAccountAuditLogSinkRequest, opts ...grpc.CallOption) (*cloudservice.CreateAccountAuditLogSinkResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateAccountAuditLogSink", varargs...)
+	ret0, _ := ret[0].(*cloudservice.CreateAccountAuditLogSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateAccountAuditLogSink indicates an expected call of CreateAccountAuditLogSink.
+func (mr *MockCloudServiceClientMockRecorder) CreateAccountAuditLogSink(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccountAuditLogSink", reflect.TypeOf((*MockCloudServiceClient)(nil).CreateAccountAuditLogSink), varargs...)
+}
+
 // CreateApiKey mocks base method.
 func (m *MockCloudServiceClient) CreateApiKey(ctx context.Context, in *cloudservice.CreateApiKeyRequest, opts ...grpc.CallOption) (*cloudservice.CreateApiKeyResponse, error) {
 	m.ctrl.T.Helper()
@@ -294,6 +314,26 @@ func (mr *MockCloudServiceClientMockRecorder) CreateUserGroup(ctx, in interface{
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserGroup", reflect.TypeOf((*MockCloudServiceClient)(nil).CreateUserGroup), varargs...)
+}
+
+// DeleteAccountAuditLogSink mocks base method.
+func (m *MockCloudServiceClient) DeleteAccountAuditLogSink(ctx context.Context, in *cloudservice.DeleteAccountAuditLogSinkRequest, opts ...grpc.CallOption) (*cloudservice.DeleteAccountAuditLogSinkResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteAccountAuditLogSink", varargs...)
+	ret0, _ := ret[0].(*cloudservice.DeleteAccountAuditLogSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteAccountAuditLogSink indicates an expected call of DeleteAccountAuditLogSink.
+func (mr *MockCloudServiceClientMockRecorder) DeleteAccountAuditLogSink(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAccountAuditLogSink", reflect.TypeOf((*MockCloudServiceClient)(nil).DeleteAccountAuditLogSink), varargs...)
 }
 
 // DeleteApiKey mocks base method.
@@ -534,6 +574,46 @@ func (mr *MockCloudServiceClientMockRecorder) GetAccount(ctx, in interface{}, op
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccount", reflect.TypeOf((*MockCloudServiceClient)(nil).GetAccount), varargs...)
+}
+
+// GetAccountAuditLogSink mocks base method.
+func (m *MockCloudServiceClient) GetAccountAuditLogSink(ctx context.Context, in *cloudservice.GetAccountAuditLogSinkRequest, opts ...grpc.CallOption) (*cloudservice.GetAccountAuditLogSinkResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetAccountAuditLogSink", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetAccountAuditLogSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAccountAuditLogSink indicates an expected call of GetAccountAuditLogSink.
+func (mr *MockCloudServiceClientMockRecorder) GetAccountAuditLogSink(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountAuditLogSink", reflect.TypeOf((*MockCloudServiceClient)(nil).GetAccountAuditLogSink), varargs...)
+}
+
+// GetAccountAuditLogSinks mocks base method.
+func (m *MockCloudServiceClient) GetAccountAuditLogSinks(ctx context.Context, in *cloudservice.GetAccountAuditLogSinksRequest, opts ...grpc.CallOption) (*cloudservice.GetAccountAuditLogSinksResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetAccountAuditLogSinks", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetAccountAuditLogSinksResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAccountAuditLogSinks indicates an expected call of GetAccountAuditLogSinks.
+func (mr *MockCloudServiceClientMockRecorder) GetAccountAuditLogSinks(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountAuditLogSinks", reflect.TypeOf((*MockCloudServiceClient)(nil).GetAccountAuditLogSinks), varargs...)
 }
 
 // GetApiKey mocks base method.
@@ -956,6 +1036,26 @@ func (mr *MockCloudServiceClientMockRecorder) GetServiceAccounts(ctx, in interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetServiceAccounts", reflect.TypeOf((*MockCloudServiceClient)(nil).GetServiceAccounts), varargs...)
 }
 
+// GetTagKeys mocks base method.
+func (m *MockCloudServiceClient) GetTagKeys(ctx context.Context, in *cloudservice.GetTagKeysRequest, opts ...grpc.CallOption) (*cloudservice.GetTagKeysResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetTagKeys", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetTagKeysResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTagKeys indicates an expected call of GetTagKeys.
+func (mr *MockCloudServiceClientMockRecorder) GetTagKeys(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTagKeys", reflect.TypeOf((*MockCloudServiceClient)(nil).GetTagKeys), varargs...)
+}
+
 // GetUsage mocks base method.
 func (m *MockCloudServiceClient) GetUsage(ctx context.Context, in *cloudservice.GetUsageRequest, opts ...grpc.CallOption) (*cloudservice.GetUsageResponse, error) {
 	m.ctrl.T.Helper()
@@ -1156,6 +1256,26 @@ func (mr *MockCloudServiceClientMockRecorder) ResendUserInvite(ctx, in interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResendUserInvite", reflect.TypeOf((*MockCloudServiceClient)(nil).ResendUserInvite), varargs...)
 }
 
+// SetServiceAccountNamespaceAccess mocks base method.
+func (m *MockCloudServiceClient) SetServiceAccountNamespaceAccess(ctx context.Context, in *cloudservice.SetServiceAccountNamespaceAccessRequest, opts ...grpc.CallOption) (*cloudservice.SetServiceAccountNamespaceAccessResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SetServiceAccountNamespaceAccess", varargs...)
+	ret0, _ := ret[0].(*cloudservice.SetServiceAccountNamespaceAccessResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetServiceAccountNamespaceAccess indicates an expected call of SetServiceAccountNamespaceAccess.
+func (mr *MockCloudServiceClientMockRecorder) SetServiceAccountNamespaceAccess(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetServiceAccountNamespaceAccess", reflect.TypeOf((*MockCloudServiceClient)(nil).SetServiceAccountNamespaceAccess), varargs...)
+}
+
 // SetUserGroupNamespaceAccess mocks base method.
 func (m *MockCloudServiceClient) SetUserGroupNamespaceAccess(ctx context.Context, in *cloudservice.SetUserGroupNamespaceAccessRequest, opts ...grpc.CallOption) (*cloudservice.SetUserGroupNamespaceAccessResponse, error) {
 	m.ctrl.T.Helper()
@@ -1234,6 +1354,26 @@ func (mr *MockCloudServiceClientMockRecorder) UpdateAccount(ctx, in interface{},
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccount", reflect.TypeOf((*MockCloudServiceClient)(nil).UpdateAccount), varargs...)
+}
+
+// UpdateAccountAuditLogSink mocks base method.
+func (m *MockCloudServiceClient) UpdateAccountAuditLogSink(ctx context.Context, in *cloudservice.UpdateAccountAuditLogSinkRequest, opts ...grpc.CallOption) (*cloudservice.UpdateAccountAuditLogSinkResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateAccountAuditLogSink", varargs...)
+	ret0, _ := ret[0].(*cloudservice.UpdateAccountAuditLogSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAccountAuditLogSink indicates an expected call of UpdateAccountAuditLogSink.
+func (mr *MockCloudServiceClientMockRecorder) UpdateAccountAuditLogSink(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccountAuditLogSink", reflect.TypeOf((*MockCloudServiceClient)(nil).UpdateAccountAuditLogSink), varargs...)
 }
 
 // UpdateApiKey mocks base method.
@@ -1416,6 +1556,26 @@ func (mr *MockCloudServiceClientMockRecorder) UpdateUserGroup(ctx, in interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserGroup", reflect.TypeOf((*MockCloudServiceClient)(nil).UpdateUserGroup), varargs...)
 }
 
+// ValidateAccountAuditLogSink mocks base method.
+func (m *MockCloudServiceClient) ValidateAccountAuditLogSink(ctx context.Context, in *cloudservice.ValidateAccountAuditLogSinkRequest, opts ...grpc.CallOption) (*cloudservice.ValidateAccountAuditLogSinkResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ValidateAccountAuditLogSink", varargs...)
+	ret0, _ := ret[0].(*cloudservice.ValidateAccountAuditLogSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateAccountAuditLogSink indicates an expected call of ValidateAccountAuditLogSink.
+func (mr *MockCloudServiceClientMockRecorder) ValidateAccountAuditLogSink(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAccountAuditLogSink", reflect.TypeOf((*MockCloudServiceClient)(nil).ValidateAccountAuditLogSink), varargs...)
+}
+
 // ValidateNamespaceExportSink mocks base method.
 func (m *MockCloudServiceClient) ValidateNamespaceExportSink(ctx context.Context, in *cloudservice.ValidateNamespaceExportSinkRequest, opts ...grpc.CallOption) (*cloudservice.ValidateNamespaceExportSinkResponse, error) {
 	m.ctrl.T.Helper()
@@ -1517,6 +1677,21 @@ func (m *MockCloudServiceServer) ConfirmMigration(arg0 context.Context, arg1 *cl
 func (mr *MockCloudServiceServerMockRecorder) ConfirmMigration(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConfirmMigration", reflect.TypeOf((*MockCloudServiceServer)(nil).ConfirmMigration), arg0, arg1)
+}
+
+// CreateAccountAuditLogSink mocks base method.
+func (m *MockCloudServiceServer) CreateAccountAuditLogSink(arg0 context.Context, arg1 *cloudservice.CreateAccountAuditLogSinkRequest) (*cloudservice.CreateAccountAuditLogSinkResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateAccountAuditLogSink", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.CreateAccountAuditLogSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateAccountAuditLogSink indicates an expected call of CreateAccountAuditLogSink.
+func (mr *MockCloudServiceServerMockRecorder) CreateAccountAuditLogSink(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccountAuditLogSink", reflect.TypeOf((*MockCloudServiceServer)(nil).CreateAccountAuditLogSink), arg0, arg1)
 }
 
 // CreateApiKey mocks base method.
@@ -1652,6 +1827,21 @@ func (m *MockCloudServiceServer) CreateUserGroup(arg0 context.Context, arg1 *clo
 func (mr *MockCloudServiceServerMockRecorder) CreateUserGroup(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserGroup", reflect.TypeOf((*MockCloudServiceServer)(nil).CreateUserGroup), arg0, arg1)
+}
+
+// DeleteAccountAuditLogSink mocks base method.
+func (m *MockCloudServiceServer) DeleteAccountAuditLogSink(arg0 context.Context, arg1 *cloudservice.DeleteAccountAuditLogSinkRequest) (*cloudservice.DeleteAccountAuditLogSinkResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAccountAuditLogSink", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.DeleteAccountAuditLogSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteAccountAuditLogSink indicates an expected call of DeleteAccountAuditLogSink.
+func (mr *MockCloudServiceServerMockRecorder) DeleteAccountAuditLogSink(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAccountAuditLogSink", reflect.TypeOf((*MockCloudServiceServer)(nil).DeleteAccountAuditLogSink), arg0, arg1)
 }
 
 // DeleteApiKey mocks base method.
@@ -1832,6 +2022,36 @@ func (m *MockCloudServiceServer) GetAccount(arg0 context.Context, arg1 *cloudser
 func (mr *MockCloudServiceServerMockRecorder) GetAccount(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccount", reflect.TypeOf((*MockCloudServiceServer)(nil).GetAccount), arg0, arg1)
+}
+
+// GetAccountAuditLogSink mocks base method.
+func (m *MockCloudServiceServer) GetAccountAuditLogSink(arg0 context.Context, arg1 *cloudservice.GetAccountAuditLogSinkRequest) (*cloudservice.GetAccountAuditLogSinkResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAccountAuditLogSink", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetAccountAuditLogSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAccountAuditLogSink indicates an expected call of GetAccountAuditLogSink.
+func (mr *MockCloudServiceServerMockRecorder) GetAccountAuditLogSink(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountAuditLogSink", reflect.TypeOf((*MockCloudServiceServer)(nil).GetAccountAuditLogSink), arg0, arg1)
+}
+
+// GetAccountAuditLogSinks mocks base method.
+func (m *MockCloudServiceServer) GetAccountAuditLogSinks(arg0 context.Context, arg1 *cloudservice.GetAccountAuditLogSinksRequest) (*cloudservice.GetAccountAuditLogSinksResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAccountAuditLogSinks", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetAccountAuditLogSinksResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAccountAuditLogSinks indicates an expected call of GetAccountAuditLogSinks.
+func (mr *MockCloudServiceServerMockRecorder) GetAccountAuditLogSinks(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountAuditLogSinks", reflect.TypeOf((*MockCloudServiceServer)(nil).GetAccountAuditLogSinks), arg0, arg1)
 }
 
 // GetApiKey mocks base method.
@@ -2149,6 +2369,21 @@ func (mr *MockCloudServiceServerMockRecorder) GetServiceAccounts(arg0, arg1 inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetServiceAccounts", reflect.TypeOf((*MockCloudServiceServer)(nil).GetServiceAccounts), arg0, arg1)
 }
 
+// GetTagKeys mocks base method.
+func (m *MockCloudServiceServer) GetTagKeys(arg0 context.Context, arg1 *cloudservice.GetTagKeysRequest) (*cloudservice.GetTagKeysResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTagKeys", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetTagKeysResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTagKeys indicates an expected call of GetTagKeys.
+func (mr *MockCloudServiceServerMockRecorder) GetTagKeys(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTagKeys", reflect.TypeOf((*MockCloudServiceServer)(nil).GetTagKeys), arg0, arg1)
+}
+
 // GetUsage mocks base method.
 func (m *MockCloudServiceServer) GetUsage(arg0 context.Context, arg1 *cloudservice.GetUsageRequest) (*cloudservice.GetUsageResponse, error) {
 	m.ctrl.T.Helper()
@@ -2299,6 +2534,21 @@ func (mr *MockCloudServiceServerMockRecorder) ResendUserInvite(arg0, arg1 interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResendUserInvite", reflect.TypeOf((*MockCloudServiceServer)(nil).ResendUserInvite), arg0, arg1)
 }
 
+// SetServiceAccountNamespaceAccess mocks base method.
+func (m *MockCloudServiceServer) SetServiceAccountNamespaceAccess(arg0 context.Context, arg1 *cloudservice.SetServiceAccountNamespaceAccessRequest) (*cloudservice.SetServiceAccountNamespaceAccessResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetServiceAccountNamespaceAccess", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.SetServiceAccountNamespaceAccessResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetServiceAccountNamespaceAccess indicates an expected call of SetServiceAccountNamespaceAccess.
+func (mr *MockCloudServiceServerMockRecorder) SetServiceAccountNamespaceAccess(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetServiceAccountNamespaceAccess", reflect.TypeOf((*MockCloudServiceServer)(nil).SetServiceAccountNamespaceAccess), arg0, arg1)
+}
+
 // SetUserGroupNamespaceAccess mocks base method.
 func (m *MockCloudServiceServer) SetUserGroupNamespaceAccess(arg0 context.Context, arg1 *cloudservice.SetUserGroupNamespaceAccessRequest) (*cloudservice.SetUserGroupNamespaceAccessResponse, error) {
 	m.ctrl.T.Helper()
@@ -2357,6 +2607,21 @@ func (m *MockCloudServiceServer) UpdateAccount(arg0 context.Context, arg1 *cloud
 func (mr *MockCloudServiceServerMockRecorder) UpdateAccount(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccount", reflect.TypeOf((*MockCloudServiceServer)(nil).UpdateAccount), arg0, arg1)
+}
+
+// UpdateAccountAuditLogSink mocks base method.
+func (m *MockCloudServiceServer) UpdateAccountAuditLogSink(arg0 context.Context, arg1 *cloudservice.UpdateAccountAuditLogSinkRequest) (*cloudservice.UpdateAccountAuditLogSinkResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAccountAuditLogSink", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.UpdateAccountAuditLogSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAccountAuditLogSink indicates an expected call of UpdateAccountAuditLogSink.
+func (mr *MockCloudServiceServerMockRecorder) UpdateAccountAuditLogSink(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccountAuditLogSink", reflect.TypeOf((*MockCloudServiceServer)(nil).UpdateAccountAuditLogSink), arg0, arg1)
 }
 
 // UpdateApiKey mocks base method.
@@ -2492,6 +2757,21 @@ func (m *MockCloudServiceServer) UpdateUserGroup(arg0 context.Context, arg1 *clo
 func (mr *MockCloudServiceServerMockRecorder) UpdateUserGroup(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserGroup", reflect.TypeOf((*MockCloudServiceServer)(nil).UpdateUserGroup), arg0, arg1)
+}
+
+// ValidateAccountAuditLogSink mocks base method.
+func (m *MockCloudServiceServer) ValidateAccountAuditLogSink(arg0 context.Context, arg1 *cloudservice.ValidateAccountAuditLogSinkRequest) (*cloudservice.ValidateAccountAuditLogSinkResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateAccountAuditLogSink", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.ValidateAccountAuditLogSinkResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateAccountAuditLogSink indicates an expected call of ValidateAccountAuditLogSink.
+func (mr *MockCloudServiceServerMockRecorder) ValidateAccountAuditLogSink(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAccountAuditLogSink", reflect.TypeOf((*MockCloudServiceServer)(nil).ValidateAccountAuditLogSink), arg0, arg1)
 }
 
 // ValidateNamespaceExportSink mocks base method.
