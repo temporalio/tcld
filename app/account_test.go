@@ -9,7 +9,9 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/gogo/protobuf/types"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/account/v1"
@@ -1191,6 +1193,148 @@ func (s *AccountTestSuite) TestGetAuditLogSink() {
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
 			s.mockCloudApiClient.EXPECT().GetAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.GetAccountAuditLogSinkResponse{}, tc.getError).Times(1)
+			err := s.RunCmd(tc.args...)
+			if tc.expectErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *AccountTestSuite) TestQueryAuditLogs() {
+	startTime := time.Date(2024, 1, 13, 0, 0, 0, 0, time.UTC)
+	endTime := time.Date(2024, 1, 14, 0, 0, 0, 0, time.UTC)
+	startTimeProto, _ := types.TimestampProto(startTime)
+	endTimeProto, _ := types.TimestampProto(endTime)
+
+	tests := []struct {
+		name          string
+		args          []string
+		expectErr     bool
+		expectRequest func() *cloudservice.GetAuditLogsRequest
+		queryError    error
+	}{
+		{
+			name:      "query with both start and end time succeeds",
+			args:      []string{"a", "al", "get-logs", "--start-time", "2024-01-13T00:00:00Z", "--end-time", "2024-01-14T00:00:00Z"},
+			expectErr: false,
+			expectRequest: func() *cloudservice.GetAuditLogsRequest {
+				return &cloudservice.GetAuditLogsRequest{
+					StartTimeInclusive: startTimeProto,
+					EndTimeExclusive:   endTimeProto,
+					PageSize:           DefaultPageSize,
+					PageToken:          "",
+				}
+			},
+		},
+		{
+			name:      "query with aliases st and et succeeds",
+			args:      []string{"a", "al", "q", "--st", "2024-01-13T00:00:00Z", "--et", "2024-01-14T00:00:00Z"},
+			expectErr: false,
+			expectRequest: func() *cloudservice.GetAuditLogsRequest {
+				return &cloudservice.GetAuditLogsRequest{
+					StartTimeInclusive: startTimeProto,
+					EndTimeExclusive:   endTimeProto,
+					PageSize:           DefaultPageSize,
+					PageToken:          "",
+				}
+			},
+		},
+		{
+			name:      "query with only start time succeeds",
+			args:      []string{"a", "al", "get-logs", "--st", "2024-01-13T00:00:00Z"},
+			expectErr: false,
+			expectRequest: func() *cloudservice.GetAuditLogsRequest {
+				return &cloudservice.GetAuditLogsRequest{
+					StartTimeInclusive: startTimeProto,
+					PageSize:           DefaultPageSize,
+					PageToken:          "",
+				}
+			},
+		},
+		{
+			name:      "query with only end time succeeds",
+			args:      []string{"a", "al", "get-logs", "--et", "2024-01-14T00:00:00Z"},
+			expectErr: false,
+			expectRequest: func() *cloudservice.GetAuditLogsRequest {
+				return &cloudservice.GetAuditLogsRequest{
+					EndTimeExclusive: endTimeProto,
+					PageSize:         DefaultPageSize,
+					PageToken:        "",
+				}
+			},
+		},
+		{
+			name:      "query with page size and token succeeds",
+			args:      []string{"a", "al", "get-logs", "--st", "2024-01-13T00:00:00Z", "--page-size", "50", "--page-token", "token123"},
+			expectErr: false,
+			expectRequest: func() *cloudservice.GetAuditLogsRequest {
+				return &cloudservice.GetAuditLogsRequest{
+					StartTimeInclusive: startTimeProto,
+					PageSize:           50,
+					PageToken:          "token123",
+				}
+			},
+		},
+		{
+			name:      "query without time filters succeeds",
+			args:      []string{"a", "al", "getlogs"},
+			expectErr: false,
+			expectRequest: func() *cloudservice.GetAuditLogsRequest {
+				return &cloudservice.GetAuditLogsRequest{
+					PageSize:  DefaultPageSize,
+					PageToken: "",
+				}
+			},
+		},
+		{
+			name:      "query with invalid timestamp format fails",
+			args:      []string{"a", "al", "get-logs", "--st", "invalid-date"},
+			expectErr: true,
+		},
+		{
+			name:      "query with API error fails",
+			args:      []string{"a", "al", "get-logs", "--st", "2024-01-13T00:00:00Z"},
+			expectErr: true,
+			expectRequest: func() *cloudservice.GetAuditLogsRequest {
+				return &cloudservice.GetAuditLogsRequest{
+					StartTimeInclusive: startTimeProto,
+					PageSize:           DefaultPageSize,
+					PageToken:          "",
+				}
+			},
+			queryError: fmt.Errorf("API error"),
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			if tc.expectRequest != nil {
+				expectedReq := tc.expectRequest()
+				s.mockCloudApiClient.EXPECT().
+					GetAuditLogs(gomock.Any(), gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, req *cloudservice.GetAuditLogsRequest, opts ...interface{}) (*cloudservice.GetAuditLogsResponse, error) {
+						s.Equal(expectedReq.PageSize, req.PageSize)
+						s.Equal(expectedReq.PageToken, req.PageToken)
+						if expectedReq.StartTimeInclusive != nil {
+							s.NotNil(req.StartTimeInclusive)
+							s.Equal(expectedReq.StartTimeInclusive.Seconds, req.StartTimeInclusive.Seconds)
+						} else {
+							s.Nil(req.StartTimeInclusive)
+						}
+						if expectedReq.EndTimeExclusive != nil {
+							s.NotNil(req.EndTimeExclusive)
+							s.Equal(expectedReq.EndTimeExclusive.Seconds, req.EndTimeExclusive.Seconds)
+						} else {
+							s.Nil(req.EndTimeExclusive)
+						}
+						return &cloudservice.GetAuditLogsResponse{}, tc.queryError
+					}).
+					Times(1)
+			}
+
 			err := s.RunCmd(tc.args...)
 			if tc.expectErr {
 				s.Error(err)
