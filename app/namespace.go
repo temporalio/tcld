@@ -94,7 +94,7 @@ var (
 	}
 	sinkNameFlag = &cli.StringFlag{
 		Name:     "sink-name",
-		Usage:    "Provide a name for the export sink",
+		Usage:    "Provide a name for the sink",
 		Required: true,
 	}
 	sinkAssumedRoleFlagOptional = &cli.StringFlag{
@@ -117,7 +117,7 @@ var (
 	}
 	sinkEnabledFlag = &cli.StringFlag{
 		Name:  "enabled",
-		Usage: "Whether export is enabled",
+		Usage: "Whether the sink is enabled",
 	}
 	kmsArnFlag = &cli.StringFlag{
 		Name:  "kms-arn",
