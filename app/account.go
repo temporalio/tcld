@@ -885,9 +885,9 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 		kinesisAuditLogCommands,
 		pubsubAuditLogCommands,
 		{
-			Name:    "get-logs",
-			Usage:   "Get audit logs",
-			Aliases: []string{"gl"},
+			Name:    "list",
+			Usage:   "List audit logs",
+			Aliases: []string{"l"},
 			Flags: []cli.Flag{
 				startTimeInclusiveTimeFlag,
 				endTimeExclusiveTimeFlag,

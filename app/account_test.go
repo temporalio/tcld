@@ -1203,7 +1203,7 @@ func (s *AccountTestSuite) TestGetAuditLogSink() {
 	}
 }
 
-func (s *AccountTestSuite) TestQueryAuditLogs() {
+func (s *AccountTestSuite) TestListAuditLogs() {
 	startTime := time.Date(2024, 1, 13, 0, 0, 0, 0, time.UTC)
 	endTime := time.Date(2024, 1, 14, 0, 0, 0, 0, time.UTC)
 	startTimeProto, _ := types.TimestampProto(startTime)
@@ -1218,7 +1218,7 @@ func (s *AccountTestSuite) TestQueryAuditLogs() {
 	}{
 		{
 			name:      "query with both start and end time succeeds",
-			args:      []string{"a", "al", "get-logs", "--start-time", "2024-01-13T00:00:00Z", "--end-time", "2024-01-14T00:00:00Z"},
+			args:      []string{"a", "al", "list", "--start-time", "2024-01-13T00:00:00Z", "--end-time", "2024-01-14T00:00:00Z"},
 			expectErr: false,
 			expectRequest: func() *cloudservice.GetAuditLogsRequest {
 				return &cloudservice.GetAuditLogsRequest{
@@ -1231,7 +1231,7 @@ func (s *AccountTestSuite) TestQueryAuditLogs() {
 		},
 		{
 			name:      "query with aliases st and et succeeds",
-			args:      []string{"a", "al", "q", "--st", "2024-01-13T00:00:00Z", "--et", "2024-01-14T00:00:00Z"},
+			args:      []string{"a", "al", "list", "--st", "2024-01-13T00:00:00Z", "--et", "2024-01-14T00:00:00Z"},
 			expectErr: false,
 			expectRequest: func() *cloudservice.GetAuditLogsRequest {
 				return &cloudservice.GetAuditLogsRequest{
@@ -1244,7 +1244,7 @@ func (s *AccountTestSuite) TestQueryAuditLogs() {
 		},
 		{
 			name:      "query with only start time succeeds",
-			args:      []string{"a", "al", "get-logs", "--st", "2024-01-13T00:00:00Z"},
+			args:      []string{"a", "al", "list", "--st", "2024-01-13T00:00:00Z"},
 			expectErr: false,
 			expectRequest: func() *cloudservice.GetAuditLogsRequest {
 				return &cloudservice.GetAuditLogsRequest{
@@ -1256,7 +1256,7 @@ func (s *AccountTestSuite) TestQueryAuditLogs() {
 		},
 		{
 			name:      "query with only end time succeeds",
-			args:      []string{"a", "al", "get-logs", "--et", "2024-01-14T00:00:00Z"},
+			args:      []string{"a", "al", "list", "--et", "2024-01-14T00:00:00Z"},
 			expectErr: false,
 			expectRequest: func() *cloudservice.GetAuditLogsRequest {
 				return &cloudservice.GetAuditLogsRequest{
@@ -1268,7 +1268,7 @@ func (s *AccountTestSuite) TestQueryAuditLogs() {
 		},
 		{
 			name:      "query with page size and token succeeds",
-			args:      []string{"a", "al", "get-logs", "--st", "2024-01-13T00:00:00Z", "--page-size", "50", "--page-token", "token123"},
+			args:      []string{"a", "al", "list", "--st", "2024-01-13T00:00:00Z", "--page-size", "50", "--page-token", "token123"},
 			expectErr: false,
 			expectRequest: func() *cloudservice.GetAuditLogsRequest {
 				return &cloudservice.GetAuditLogsRequest{
@@ -1280,7 +1280,7 @@ func (s *AccountTestSuite) TestQueryAuditLogs() {
 		},
 		{
 			name:      "query without time filters succeeds",
-			args:      []string{"a", "al", "getlogs"},
+			args:      []string{"a", "al", "list"},
 			expectErr: false,
 			expectRequest: func() *cloudservice.GetAuditLogsRequest {
 				return &cloudservice.GetAuditLogsRequest{
@@ -1291,12 +1291,12 @@ func (s *AccountTestSuite) TestQueryAuditLogs() {
 		},
 		{
 			name:      "query with invalid timestamp format fails",
-			args:      []string{"a", "al", "get-logs", "--st", "invalid-date"},
+			args:      []string{"a", "al", "list", "--st", "invalid-date"},
 			expectErr: true,
 		},
 		{
 			name:      "query with API error fails",
-			args:      []string{"a", "al", "get-logs", "--st", "2024-01-13T00:00:00Z"},
+			args:      []string{"a", "al", "list", "--st", "2024-01-13T00:00:00Z"},
 			expectErr: true,
 			expectRequest: func() *cloudservice.GetAuditLogsRequest {
 				return &cloudservice.GetAuditLogsRequest{
