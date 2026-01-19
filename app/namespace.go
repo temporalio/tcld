@@ -1829,7 +1829,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 				},
 				&cli.BoolFlag{
 					Name:  disableFailoverFlagName,
-					Usage: "Disable Temporal-managed failover on this replicated namespace",
+					Usage: "Disable Temporal-managed failover on a replicated namespace (use --disable-auto-failover=false to enable)",
 				},
 			},
 			Action: func(ctx *cli.Context) error {
