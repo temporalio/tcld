@@ -7,9 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/temporalio/tcld/protogen/api/account/v1"
 	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
 	cloudaccount "github.com/temporalio/tcld/protogen/api/cloud/account/v1"
@@ -27,8 +25,6 @@ const (
 	kinesisAuditLogSinkType         = "kinesis"
 	pubsubAuditLogSinkType          = "pubsub"
 	sinkServiceAccountEmailFlagName = "service-account-email"
-	startTimeInclusiveFlagName      = "start-time"
-	endTimeExclusiveFlagName        = "end-time"
 )
 
 var (
@@ -89,19 +85,6 @@ var (
 		Name:    topicNameFlagName,
 		Usage:   "The topic name to write to the sink",
 		Aliases: []string{"tn"},
-	}
-
-	startTimeInclusiveTimeFlag = &cli.TimestampFlag{
-		Name:    startTimeInclusiveFlagName,
-		Usage:   "The start time (inclusive) in RFC3339 format (e.g., '2006-01-02T15:04:05Z' or '2006-01-02T15:04:05+07:00')",
-		Aliases: []string{"st"},
-		Layout:  time.RFC3339,
-	}
-	endTimeExclusiveTimeFlag = &cli.TimestampFlag{
-		Name:    endTimeExclusiveFlagName,
-		Usage:   "The end time (exclusive) in RFC3339 format (e.g., '2006-01-02T15:04:05Z' or '2006-01-02T15:04:05+07:00')",
-		Aliases: []string{"et"},
-		Layout:  time.RFC3339,
 	}
 )
 
@@ -884,51 +867,6 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 	auditLogCommands.Subcommands = []*cli.Command{
 		kinesisAuditLogCommands,
 		pubsubAuditLogCommands,
-		{
-			Name:    "list",
-			Usage:   "List audit logs",
-			Aliases: []string{"l"},
-			Flags: []cli.Flag{
-				startTimeInclusiveTimeFlag,
-				endTimeExclusiveTimeFlag,
-				pageSizeFlag,
-				pageTokenFlag,
-			},
-			Action: func(ctx *cli.Context) error {
-				req := &cloudservice.GetAuditLogsRequest{
-					PageSize:  int32(ctx.Int(pageSizeFlag.Name)),
-					PageToken: ctx.String(pageTokenFlag.Name),
-				}
-
-				if ctx.IsSet(startTimeInclusiveTimeFlag.Name) {
-					startTime := ctx.Timestamp(startTimeInclusiveTimeFlag.Name)
-					if startTime != nil && !startTime.IsZero() {
-						startTimeProto, err := types.TimestampProto(*startTime)
-						if err != nil {
-							return fmt.Errorf("invalid start time: %w", err)
-						}
-						req.StartTimeInclusive = startTimeProto
-					}
-				}
-
-				if ctx.IsSet(endTimeExclusiveTimeFlag.Name) {
-					endTime := ctx.Timestamp(endTimeExclusiveTimeFlag.Name)
-					if endTime != nil && !endTime.IsZero() {
-						endTimeProto, err := types.TimestampProto(*endTime)
-						if err != nil {
-							return fmt.Errorf("invalid end time: %w", err)
-						}
-						req.EndTimeExclusive = endTimeProto
-					}
-				}
-
-				resp, err := c.cloudAPIClient.GetAuditLogs(c.ctx, req)
-				if err != nil {
-					return err
-				}
-				return PrintProto(resp)
-			},
-		},
 	}
 	commandOut.Command.Subcommands = append(commandOut.Command.Subcommands, auditLogCommands)
 	return commandOut, nil
