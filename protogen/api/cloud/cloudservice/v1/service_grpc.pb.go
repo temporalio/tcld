@@ -233,8 +233,7 @@ type CloudServiceClient interface {
 	// temporal:dev
 	GetBillingReport(ctx context.Context, in *GetBillingReportRequest, opts ...grpc.CallOption) (*GetBillingReportResponse, error)
 	// GetNamespaceCapacityInfo returns capacity information for a namespace.
-	// This includes provisioned capacity options, on-demand limits, and 7
-	// day historical APS statistics useful for capacity planning.
+	// This includes provisioned capacity options, on-demand limits, and 7 day historical APS statistics useful for capacity planning.
 	// temporal:dev
 	GetNamespaceCapacityInfo(ctx context.Context, in *GetNamespaceCapacityInfoRequest, opts ...grpc.CallOption) (*GetNamespaceCapacityInfoResponse, error)
 }
@@ -1275,8 +1274,7 @@ type CloudServiceServer interface {
 	// temporal:dev
 	GetBillingReport(context.Context, *GetBillingReportRequest) (*GetBillingReportResponse, error)
 	// GetNamespaceCapacityInfo returns capacity information for a namespace.
-	// This includes provisioned capacity options, on-demand limits, and 7
-	// day historical APS statistics useful for capacity planning.
+	// This includes provisioned capacity options, on-demand limits, and 7 day historical APS statistics useful for capacity planning.
 	// temporal:dev
 	GetNamespaceCapacityInfo(context.Context, *GetNamespaceCapacityInfoRequest) (*GetNamespaceCapacityInfoResponse, error)
 	mustEmbedUnimplementedCloudServiceServer()
