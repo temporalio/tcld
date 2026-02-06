@@ -12,7 +12,6 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/stretchr/testify v1.11.1
-	github.com/temporalio/saas-proto v0.756.0
 	github.com/urfave/cli/v2 v2.25.7
 	go.temporal.io/api v1.62.0
 	go.uber.org/fx v1.20.1
