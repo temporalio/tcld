@@ -294,7 +294,7 @@ func (c *NamespaceClient) addRegion(ctx *cli.Context) error {
 		return err
 	}
 
-	res, err := c.cloudAPIClient.AddNamespaceRegion(c.ctx, &cloudservice.AddNamespaceRegionRequest{
+	res, err := c.cloudAPIClient.AddNamespaceRegion(c.ctx, &cloudservice.AddNamespaceRegionRequest{ //nolint:staticcheck
 		Namespace:        ctx.String(NamespaceFlagName),
 		Region:           targetRegion,
 		ResourceVersion:  ns.GetResourceVersion(),
@@ -327,7 +327,7 @@ func (c *NamespaceClient) deleteRegion(ctx *cli.Context) error {
 		return err
 	}
 
-	res, err := c.cloudAPIClient.DeleteNamespaceRegion(c.ctx, &cloudservice.DeleteNamespaceRegionRequest{
+	res, err := c.cloudAPIClient.DeleteNamespaceRegion(c.ctx, &cloudservice.DeleteNamespaceRegionRequest{ //nolint:staticcheck
 		Namespace:        ns.GetNamespace(),
 		Region:           deleteRegion,
 		ResourceVersion:  ns.GetResourceVersion(),
@@ -568,7 +568,7 @@ func (c *NamespaceClient) failoverNamespace(ctx *cli.Context) error {
 		return err
 	}
 
-	res, err := c.cloudAPIClient.FailoverNamespaceRegion(c.ctx, &cloudservice.FailoverNamespaceRegionRequest{
+	res, err := c.cloudAPIClient.FailoverNamespaceRegion(c.ctx, &cloudservice.FailoverNamespaceRegionRequest{ //nolint:staticcheck
 		Namespace:        namespace,
 		Region:           targetRegion,
 		AsyncOperationId: ctx.String(RequestIDFlagName),
