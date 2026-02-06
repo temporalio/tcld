@@ -249,7 +249,8 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							Description: ctx.String(serviceAccountDescriptionFlagName),
 						}
 
-						isAccountAdmin := ctx.String(accountRoleFlagName) == auth.AccountActionGroup_name[int32(auth.ACCOUNT_ACTION_GROUP_ADMIN)]
+						createRoleAG, _ := toAccountActionGroup(ctx.String(accountRoleFlagName))
+						isAccountAdmin := createRoleAG == auth.ACCOUNT_ACTION_GROUP_ADMIN
 						namespacePermissionsList := ctx.StringSlice(namespacePermissionFlagName)
 						if len(namespacePermissionsList) > 0 {
 							if isAccountAdmin {
@@ -435,12 +436,13 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 					},
 					Action: func(ctx *cli.Context) error {
 						// validate input role
-						if _, ok := auth.AccountActionGroup_value[ctx.String(accountRoleFlagName)]; !ok {
+						accountRoleAG, err := toAccountActionGroup(ctx.String(accountRoleFlagName))
+						if err != nil {
 							return fmt.Errorf("invalid account role %v; valid types are: %v", ctx.String(accountRoleFlagName), accountActionGroups)
 						}
 						// if account role is admin unset the namespace permissions
 						var namespacePermissions map[string]string
-						if ctx.String(accountRoleFlagName) == auth.AccountActionGroup_name[int32(auth.ACCOUNT_ACTION_GROUP_ADMIN)] {
+						if accountRoleAG == auth.ACCOUNT_ACTION_GROUP_ADMIN {
 							y, err := ConfirmPrompt(ctx, "Setting admin role on service account. All existing namespace permissions will be replaced, please confirm")
 							if err != nil {
 								return err

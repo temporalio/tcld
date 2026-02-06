@@ -386,6 +386,20 @@ func (c *NamespaceClient) getNamespaceCloudApi(namespace string) (*cloudNamespac
 	return res.Namespace, nil
 }
 
+func (c *NamespaceClient) getNamespaceCapacityInfoCloudApi(namespace string) (*cloudNamespace.NamespaceCapacityInfo, error) {
+	res, err := c.cloudAPIClient.GetNamespaceCapacityInfo(c.ctx, &cloudservice.GetNamespaceCapacityInfoRequest{
+		Namespace: namespace,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if res.GetCapacityInfo() == nil || res.GetCapacityInfo().Namespace == "" {
+		// this should never happen, the server should return an error when the namespace capacity info is not found or invalid
+		return nil, fmt.Errorf("invalid namespace capacity info returned by server")
+	}
+	return res.CapacityInfo, nil
+}
+
 // TODO: deprecate this and use getNamespaceCloudApi everywhere
 func (c *NamespaceClient) getNamespace(namespace string) (*namespace.Namespace, error) {
 	res, err := c.client.GetNamespace(c.ctx, &namespaceservice.GetNamespaceRequest{
@@ -508,8 +522,8 @@ func (c *NamespaceClient) toUserNamespacePermissions(userPermissionsInput map[st
 			errs = multierr.Append(errs, fmt.Errorf("user not found for: %s", email))
 			continue
 		}
-		actionGroupID, ok := auth.NamespaceActionGroup_value[actionGroup]
-		if !ok {
+		ag, agErr := toNamespaceActionGroup(actionGroup)
+		if agErr != nil {
 			errs = multierr.Append(errs, fmt.Errorf(
 				"namespace permission type \"%s\" does not exist, acceptable types are: %s",
 				actionGroup,
@@ -519,7 +533,7 @@ func (c *NamespaceClient) toUserNamespacePermissions(userPermissionsInput map[st
 		}
 		res = append(res, &auth.UserNamespacePermissions{
 			UserId:      u.GetUser().GetId(),
-			ActionGroup: auth.NamespaceActionGroup(actionGroupID),
+			ActionGroup: ag,
 		})
 	}
 	return res, errs
@@ -1912,22 +1926,22 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 		{
 			Name:    "capacity",
-			Usage:   "Manage namespace capacity settings",
+			Usage:   "Manage namespace capacity",
 			Aliases: []string{"cap"},
 			Subcommands: []*cli.Command{
 				{
 					Name:    "get",
-					Usage:   "Get namespace capacity settings",
+					Usage:   "Get namespace capacity information",
 					Aliases: []string{"g"},
 					Flags: []cli.Flag{
 						NamespaceFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						n, err := c.getNamespaceCloudApi(ctx.String(NamespaceFlagName))
+						n, err := c.getNamespaceCapacityInfoCloudApi(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
-						return PrintProto(n.GetCapacity())
+						return PrintProto(n)
 					},
 				},
 				{
@@ -2489,6 +2503,18 @@ func getSearchAttributeTypes() []string {
 	return validTypes
 }
 
+func toSearchAttributeType(s string) (int32, bool) {
+	lower := strings.ToLower(strings.TrimSpace(s))
+	for n, v := range namespace.SearchAttributeType_value {
+		name := strings.ToLower(n)
+		stripped := strings.TrimPrefix(name, "searchattributetype")
+		if name == lower || stripped == lower {
+			return v, true
+		}
+	}
+	return 0, false
+}
+
 func toSearchAttributes(keyValues []string) (map[string]namespace.SearchAttributeType, error) {
 	res := map[string]namespace.SearchAttributeType{}
 	for _, kv := range keyValues {
@@ -2497,7 +2523,7 @@ func toSearchAttributes(keyValues []string) (map[string]namespace.SearchAttribut
 			return nil, fmt.Errorf("invalid search attribute \"%s\" must be of format: \"name=type\"", kv)
 		}
 
-		val, ok := namespace.SearchAttributeType_value[parts[1]]
+		val, ok := toSearchAttributeType(parts[1])
 		if !ok {
 			return nil, fmt.Errorf(
 				"search attribute type \"%s\" does not exist, acceptable types are: %s",

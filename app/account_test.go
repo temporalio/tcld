@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/account/v1"
 	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
+	"reflect"
 	cloudaccount "github.com/temporalio/tcld/protogen/api/cloud/account/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
@@ -746,7 +747,7 @@ func (s *AccountTestSuite) TestCreateAuditLogSink() {
 	}
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			if tc.expectRequest != (cloudservice.CreateAccountAuditLogSinkRequest{}) {
+			if !reflect.DeepEqual(tc.expectRequest, cloudservice.CreateAccountAuditLogSinkRequest{}) {
 				s.mockCloudApiClient.EXPECT().CreateAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.CreateAccountAuditLogSinkResponse{
 					AsyncOperation: &operation.AsyncOperation{
 						Id: "123",
@@ -891,7 +892,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 	}
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			if tc.expectRequest != (cloudservice.UpdateAccountAuditLogSinkRequest{}) {
+			if !reflect.DeepEqual(tc.expectRequest, cloudservice.UpdateAccountAuditLogSinkRequest{}) {
 				if tc.expectGetRequest {
 					sinkType := ""
 					if len(tc.args) >= 3 {
@@ -1010,7 +1011,7 @@ func (s *AccountTestSuite) TestDeleteAuditLogSink() {
 	}
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			if tc.expectRequest != (cloudservice.DeleteAccountAuditLogSinkRequest{}) {
+			if !reflect.DeepEqual(tc.expectRequest, cloudservice.DeleteAccountAuditLogSinkRequest{}) {
 				if tc.expectGetRequest {
 					s.mockCloudApiClient.EXPECT().GetAccountAuditLogSink(gomock.Any(), &cloudservice.GetAccountAuditLogSinkRequest{
 						Name: "audit_log_01",
@@ -1114,7 +1115,7 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 	}
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			if tc.expectRequest != (cloudservice.ValidateAccountAuditLogSinkRequest{}) {
+			if !reflect.DeepEqual(tc.expectRequest, cloudservice.ValidateAccountAuditLogSinkRequest{}) {
 				s.mockCloudApiClient.EXPECT().ValidateAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.ValidateAccountAuditLogSinkResponse{}, tc.validateError).Times(1)
 			}
 			err := s.RunCmd(tc.args...)

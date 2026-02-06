@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/nexus/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
@@ -17,6 +16,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	cloudservicemock "github.com/temporalio/tcld/protogen/apimock/cloudservice/v1"
 	"github.com/urfave/cli/v2"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestNexus(t *testing.T) {
@@ -94,8 +94,8 @@ func getExampleNexusEndpoint() *nexus.Endpoint {
 		},
 		State:            resource.RESOURCE_STATE_ACTIVATING,
 		AsyncOperationId: "test-request-id",
-		CreatedTime:      &types.Timestamp{Seconds: time.Date(time.Now().Year(), time.April, 12, 0, 0, 0, 0, time.UTC).Unix()},
-		LastModifiedTime: &types.Timestamp{Seconds: time.Date(time.Now().Year(), time.April, 14, 0, 0, 0, 0, time.UTC).Unix()},
+		CreatedTime:      timestamppb.New(time.Date(time.Now().Year(), time.April, 12, 0, 0, 0, 0, time.UTC)),
+		LastModifiedTime: timestamppb.New(time.Date(time.Now().Year(), time.April, 14, 0, 0, 0, 0, time.UTC)),
 	}
 }
 

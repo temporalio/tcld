@@ -86,7 +86,7 @@ func generateCertificateHelper(
 }
 
 func generateRootX509CAForTest() (string, error) {
-	tlsCert, _, err := generateCertificateHelper("Temporal Development", nil, nil, nil, true, 512, x509.SHA256WithRSA)
+	tlsCert, _, err := generateCertificateHelper("Temporal Development", nil, nil, nil, true, 2048, x509.SHA256WithRSA)
 	if err != nil {
 		return "", err
 	}
