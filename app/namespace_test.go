@@ -11,6 +11,7 @@ import (
 
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
 	"github.com/temporalio/tcld/protogen/api/common/v1"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
@@ -310,10 +311,10 @@ func (s *NamespaceTestSuite) TestDeleteProtection() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)
@@ -412,10 +413,10 @@ func (s *NamespaceTestSuite) TestUpdateAuthMethod() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)
@@ -595,10 +596,10 @@ func (s *NamespaceTestSuite) TestUpdateCA() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)
@@ -795,10 +796,10 @@ func (s *NamespaceTestSuite) TestUpdateRemoveCA() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)
@@ -924,10 +925,10 @@ func (s *NamespaceTestSuite) TestUpdateAddCA() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)
@@ -1022,10 +1023,10 @@ func (s *NamespaceTestSuite) TestUpdateAddSearchAttrs() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)
@@ -1100,10 +1101,10 @@ func (s *NamespaceTestSuite) TestUpdateRemoveSearchAttrs() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)
@@ -1297,10 +1298,10 @@ func (s *NamespaceTestSuite) TestImportCertificateFilters() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)
@@ -1463,10 +1464,10 @@ func (s *NamespaceTestSuite) TestAddCertificateFilters() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)
@@ -1538,10 +1539,10 @@ func (s *NamespaceTestSuite) TestClearCertificateFilters() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)
@@ -1640,10 +1641,10 @@ func (s *NamespaceTestSuite) TestUpdateCodecServer() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)
@@ -1758,10 +1759,10 @@ func (s *NamespaceTestSuite) TestUpdateNamespaceRetention() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)
@@ -3271,10 +3272,10 @@ func (s *NamespaceTestSuite) TestSetConnectivityRules() {
 			}
 
 			if tc.expectUpdate != nil {
-				spec := *(getResp.Namespace.Spec)
+				spec := proto.Clone(getResp.Namespace.Spec).(*namespace.NamespaceSpec)
 				req := namespaceservice.UpdateNamespaceRequest{
 					Namespace:       ns,
-					Spec:            &spec,
+					Spec:            spec,
 					ResourceVersion: getResp.Namespace.ResourceVersion,
 				}
 				tc.expectUpdate(&req)

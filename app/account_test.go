@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/account/v1"
 	"github.com/temporalio/tcld/protogen/api/accountservice/v1"
-	"reflect"
 	cloudaccount "github.com/temporalio/tcld/protogen/api/cloud/account/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
@@ -647,7 +646,7 @@ func (s *AccountTestSuite) TestCreateAuditLogSink() {
 		name          string
 		args          []string
 		expectErr     bool
-		expectRequest cloudservice.CreateAccountAuditLogSinkRequest
+		expectRequest *cloudservice.CreateAccountAuditLogSinkRequest
 		createError   error
 	}{
 		{
@@ -656,7 +655,7 @@ func (s *AccountTestSuite) TestCreateAuditLogSink() {
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
 				"--region", "us-east-1"},
 			expectErr: false,
-			expectRequest: cloudservice.CreateAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.CreateAccountAuditLogSinkRequest{
 				Spec: &cloudaccount.AuditLogSinkSpec{
 					Name:    "audit_log_01",
 					Enabled: true,
@@ -677,7 +676,7 @@ func (s *AccountTestSuite) TestCreateAuditLogSink() {
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
 				"--region", "us-east-1"},
 			expectErr: true,
-			expectRequest: cloudservice.CreateAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.CreateAccountAuditLogSinkRequest{
 				Spec: &cloudaccount.AuditLogSinkSpec{
 					Name:    "audit_log_01",
 					Enabled: true,
@@ -718,7 +717,7 @@ func (s *AccountTestSuite) TestCreateAuditLogSink() {
 			args: []string{"a", "al", "pubsub", "create", "--sink-name", "audit_log_01",
 				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic"},
 			expectErr: false,
-			expectRequest: cloudservice.CreateAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.CreateAccountAuditLogSinkRequest{
 				Spec: &cloudaccount.AuditLogSinkSpec{
 					Name:    "audit_log_01",
 					Enabled: true,
@@ -747,8 +746,8 @@ func (s *AccountTestSuite) TestCreateAuditLogSink() {
 	}
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			if !reflect.DeepEqual(tc.expectRequest, cloudservice.CreateAccountAuditLogSinkRequest{}) {
-				s.mockCloudApiClient.EXPECT().CreateAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.CreateAccountAuditLogSinkResponse{
+			if tc.expectRequest != nil {
+				s.mockCloudApiClient.EXPECT().CreateAccountAuditLogSink(gomock.Any(), tc.expectRequest).Return(&cloudservice.CreateAccountAuditLogSinkResponse{
 					AsyncOperation: &operation.AsyncOperation{
 						Id: "123",
 					},
@@ -769,7 +768,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 		name             string
 		args             []string
 		expectErr        bool
-		expectRequest    cloudservice.UpdateAccountAuditLogSinkRequest
+		expectRequest    *cloudservice.UpdateAccountAuditLogSinkRequest
 		expectGetRequest bool
 		updateError      error
 		getSinkError     error
@@ -782,7 +781,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 				"--region", "us-east-1", "--enabled", "true"},
 			expectErr:        false,
 			expectGetRequest: true,
-			expectRequest: cloudservice.UpdateAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.UpdateAccountAuditLogSinkRequest{
 				ResourceVersion: "123",
 				Spec: &cloudaccount.AuditLogSinkSpec{
 					Name:    "audit_log_01",
@@ -805,7 +804,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 				"--region", "us-east-1", "--enabled", "true"},
 			expectErr:        true,
 			expectGetRequest: true,
-			expectRequest: cloudservice.UpdateAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.UpdateAccountAuditLogSinkRequest{
 				ResourceVersion: "123",
 				Spec: &cloudaccount.AuditLogSinkSpec{
 					Name:    "audit_log_01",
@@ -829,7 +828,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 				"--region", "us-east-1", "--enabled", "true"},
 			expectErr:        true,
 			expectGetRequest: true,
-			expectRequest: cloudservice.UpdateAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.UpdateAccountAuditLogSinkRequest{
 				ResourceVersion: "123",
 				Spec: &cloudaccount.AuditLogSinkSpec{
 					Name:    "audit_log_01",
@@ -852,7 +851,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic"},
 			expectErr:        false,
 			expectGetRequest: true,
-			expectRequest: cloudservice.UpdateAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.UpdateAccountAuditLogSinkRequest{
 				ResourceVersion: "123",
 				Spec: &cloudaccount.AuditLogSinkSpec{
 					Name:    "audit_log_01",
@@ -874,7 +873,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic", "--resource-version", "345"},
 			expectErr:        false,
 			expectGetRequest: true,
-			expectRequest: cloudservice.UpdateAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.UpdateAccountAuditLogSinkRequest{
 				ResourceVersion: "345",
 				Spec: &cloudaccount.AuditLogSinkSpec{
 					Name:    "audit_log_01",
@@ -892,7 +891,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 	}
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			if !reflect.DeepEqual(tc.expectRequest, cloudservice.UpdateAccountAuditLogSinkRequest{}) {
+			if tc.expectRequest != nil {
 				if tc.expectGetRequest {
 					sinkType := ""
 					if len(tc.args) >= 3 {
@@ -940,7 +939,7 @@ func (s *AccountTestSuite) TestUpdateAuditLogSink() {
 					}, tc.getSinkError).Times(1)
 				}
 				if tc.getSinkError == nil {
-					s.mockCloudApiClient.EXPECT().UpdateAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.UpdateAccountAuditLogSinkResponse{
+					s.mockCloudApiClient.EXPECT().UpdateAccountAuditLogSink(gomock.Any(), tc.expectRequest).Return(&cloudservice.UpdateAccountAuditLogSinkResponse{
 						AsyncOperation: &operation.AsyncOperation{
 							Id: "123",
 						},
@@ -962,7 +961,7 @@ func (s *AccountTestSuite) TestDeleteAuditLogSink() {
 		name             string
 		args             []string
 		expectErr        bool
-		expectRequest    cloudservice.DeleteAccountAuditLogSinkRequest
+		expectRequest    *cloudservice.DeleteAccountAuditLogSinkRequest
 		expectGetRequest bool
 		deleteError      error
 		getSinkError     error
@@ -972,7 +971,7 @@ func (s *AccountTestSuite) TestDeleteAuditLogSink() {
 			args:             []string{"a", "al", "kinesis", "delete", "--sink-name", "audit_log_01"},
 			expectErr:        false,
 			expectGetRequest: true,
-			expectRequest: cloudservice.DeleteAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.DeleteAccountAuditLogSinkRequest{
 				ResourceVersion: "123",
 				Name:            "audit_log_01",
 			},
@@ -981,7 +980,7 @@ func (s *AccountTestSuite) TestDeleteAuditLogSink() {
 			name:      "delete audit log sink uses provided resource version",
 			args:      []string{"a", "al", "kinesis", "delete", "--sink-name", "audit_log_01", "--resource-version", "345"},
 			expectErr: false,
-			expectRequest: cloudservice.DeleteAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.DeleteAccountAuditLogSinkRequest{
 				ResourceVersion: "345",
 				Name:            "audit_log_01",
 			},
@@ -991,7 +990,7 @@ func (s *AccountTestSuite) TestDeleteAuditLogSink() {
 			args:             []string{"a", "al", "kinesis", "delete", "--sink-name", "audit_log_01"},
 			expectErr:        true,
 			expectGetRequest: true,
-			expectRequest: cloudservice.DeleteAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.DeleteAccountAuditLogSinkRequest{
 				ResourceVersion: "123",
 				Name:            "audit_log_01",
 			},
@@ -1002,7 +1001,7 @@ func (s *AccountTestSuite) TestDeleteAuditLogSink() {
 			args:             []string{"a", "al", "kinesis", "delete", "--sink-name", "audit_log_01"},
 			expectErr:        true,
 			expectGetRequest: true,
-			expectRequest: cloudservice.DeleteAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.DeleteAccountAuditLogSinkRequest{
 				ResourceVersion: "123",
 				Name:            "audit_log_01",
 			},
@@ -1011,7 +1010,7 @@ func (s *AccountTestSuite) TestDeleteAuditLogSink() {
 	}
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			if !reflect.DeepEqual(tc.expectRequest, cloudservice.DeleteAccountAuditLogSinkRequest{}) {
+			if tc.expectRequest != nil {
 				if tc.expectGetRequest {
 					s.mockCloudApiClient.EXPECT().GetAccountAuditLogSink(gomock.Any(), &cloudservice.GetAccountAuditLogSinkRequest{
 						Name: "audit_log_01",
@@ -1022,7 +1021,7 @@ func (s *AccountTestSuite) TestDeleteAuditLogSink() {
 					}, tc.getSinkError).Times(1)
 				}
 				if tc.getSinkError == nil {
-					s.mockCloudApiClient.EXPECT().DeleteAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.DeleteAccountAuditLogSinkResponse{
+					s.mockCloudApiClient.EXPECT().DeleteAccountAuditLogSink(gomock.Any(), tc.expectRequest).Return(&cloudservice.DeleteAccountAuditLogSinkResponse{
 						AsyncOperation: &operation.AsyncOperation{
 							Id: "123",
 						},
@@ -1044,7 +1043,7 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 		name          string
 		args          []string
 		expectErr     bool
-		expectRequest cloudservice.ValidateAccountAuditLogSinkRequest
+		expectRequest *cloudservice.ValidateAccountAuditLogSinkRequest
 		validateError error
 	}{
 		{
@@ -1055,7 +1054,7 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
 				"--region", "us-east-1"},
 			expectErr: false,
-			expectRequest: cloudservice.ValidateAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.ValidateAccountAuditLogSinkRequest{
 				Spec: &cloudaccount.AuditLogSinkSpec{
 					Name:    "test-sink",
 					Enabled: true,
@@ -1077,7 +1076,7 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 				"--destination-uri", "arn:aws:kinesis:us-east-1:123456789012:stream/TestStream",
 				"--region", "us-east-1"},
 			expectErr: true,
-			expectRequest: cloudservice.ValidateAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.ValidateAccountAuditLogSinkRequest{
 				Spec: &cloudaccount.AuditLogSinkSpec{
 					Name:    "test-sink",
 					Enabled: true,
@@ -1098,7 +1097,7 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 				"--sink-name", "test-sink",
 				"--service-account-email", "123456789012@TestProject.iam.gserviceaccount.com", "--topic-name", "TestTopic"},
 			expectErr: false,
-			expectRequest: cloudservice.ValidateAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.ValidateAccountAuditLogSinkRequest{
 				Spec: &cloudaccount.AuditLogSinkSpec{
 					Name:    "test-sink",
 					Enabled: true,
@@ -1115,8 +1114,8 @@ func (s *AccountTestSuite) TestValidateAuditLogSink() {
 	}
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			if !reflect.DeepEqual(tc.expectRequest, cloudservice.ValidateAccountAuditLogSinkRequest{}) {
-				s.mockCloudApiClient.EXPECT().ValidateAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.ValidateAccountAuditLogSinkResponse{}, tc.validateError).Times(1)
+			if tc.expectRequest != nil {
+				s.mockCloudApiClient.EXPECT().ValidateAccountAuditLogSink(gomock.Any(), tc.expectRequest).Return(&cloudservice.ValidateAccountAuditLogSinkResponse{}, tc.validateError).Times(1)
 			}
 			err := s.RunCmd(tc.args...)
 			if tc.expectErr {
@@ -1133,20 +1132,20 @@ func (s *AccountTestSuite) TestListAuditLogSinks() {
 		name          string
 		args          []string
 		expectErr     bool
-		expectRequest cloudservice.GetAccountAuditLogSinksRequest
+		expectRequest *cloudservice.GetAccountAuditLogSinksRequest
 		listError     error
 	}{
 		{
 			name:          "list sinks succeeds",
 			args:          []string{"a", "al", "kinesis", "list"},
 			expectErr:     false,
-			expectRequest: cloudservice.GetAccountAuditLogSinksRequest{},
+			expectRequest: &cloudservice.GetAccountAuditLogSinksRequest{},
 		},
 		{
 			name:          "list sinks with error",
 			args:          []string{"a", "al", "kinesis", "list"},
 			expectErr:     true,
-			expectRequest: cloudservice.GetAccountAuditLogSinksRequest{},
+			expectRequest: &cloudservice.GetAccountAuditLogSinksRequest{},
 			listError:     fmt.Errorf("error"),
 		},
 	}
@@ -1168,14 +1167,14 @@ func (s *AccountTestSuite) TestGetAuditLogSink() {
 		name          string
 		args          []string
 		expectErr     bool
-		expectRequest cloudservice.GetAccountAuditLogSinkRequest
+		expectRequest *cloudservice.GetAccountAuditLogSinkRequest
 		getError      error
 	}{
 		{
 			name:      "get sink succeeds",
 			args:      []string{"a", "al", "kinesis", "get", "--sink-name", "audit_log_01"},
 			expectErr: false,
-			expectRequest: cloudservice.GetAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.GetAccountAuditLogSinkRequest{
 				Name: "audit_log_01",
 			},
 		},
@@ -1183,7 +1182,7 @@ func (s *AccountTestSuite) TestGetAuditLogSink() {
 			name:      "get sink with error",
 			args:      []string{"a", "al", "kinesis", "get", "--sink-name", "audit_log_01"},
 			expectErr: true,
-			expectRequest: cloudservice.GetAccountAuditLogSinkRequest{
+			expectRequest: &cloudservice.GetAccountAuditLogSinkRequest{
 				Name: "audit_log_01",
 			},
 			getError: fmt.Errorf("error"),
@@ -1191,7 +1190,7 @@ func (s *AccountTestSuite) TestGetAuditLogSink() {
 	}
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			s.mockCloudApiClient.EXPECT().GetAccountAuditLogSink(gomock.Any(), &tc.expectRequest).Return(&cloudservice.GetAccountAuditLogSinkResponse{}, tc.getError).Times(1)
+			s.mockCloudApiClient.EXPECT().GetAccountAuditLogSink(gomock.Any(), tc.expectRequest).Return(&cloudservice.GetAccountAuditLogSinkResponse{}, tc.getError).Times(1)
 			err := s.RunCmd(tc.args...)
 			if tc.expectErr {
 				s.Error(err)
