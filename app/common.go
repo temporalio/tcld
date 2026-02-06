@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	apipayload "github.com/temporalio/tcld/protogen/temporal/api/common/v1"
+	apipayload "go.temporal.io/api/common/v1"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

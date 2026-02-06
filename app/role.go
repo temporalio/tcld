@@ -91,7 +91,10 @@ func toAccountActionGroup(actionGroup string) (auth.AccountActionGroup, error) {
 	g := strings.ToLower(strings.TrimSpace(actionGroup))
 	var ag auth.AccountActionGroup
 	for n, v := range auth.AccountActionGroup_value {
-		if strings.ToLower(n) == g {
+		name := strings.ToLower(n)
+		// Strip the enum type prefix if present (e.g., "AccountActionGroupAdmin" -> "admin")
+		stripped := strings.TrimPrefix(name, "accountactiongroup")
+		if name == g || stripped == g {
 			ag = auth.AccountActionGroup(v)
 			break
 		}
@@ -107,7 +110,10 @@ func toNamespaceActionGroup(actionGroup string) (auth.NamespaceActionGroup, erro
 	g := strings.ToLower(strings.TrimSpace(actionGroup))
 	var ag auth.NamespaceActionGroup
 	for n, v := range auth.NamespaceActionGroup_value {
-		if strings.ToLower(n) == g {
+		name := strings.ToLower(n)
+		// Strip the enum type prefix if present (e.g., "NamespaceActionGroupAdmin" -> "admin")
+		stripped := strings.TrimPrefix(name, "namespaceactiongroup")
+		if name == g || stripped == g {
 			ag = auth.NamespaceActionGroup(v)
 			break
 		}

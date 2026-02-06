@@ -2,8 +2,9 @@ package auth
 
 import (
 	"fmt"
-	"github.com/gogo/protobuf/types"
 	"strings"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type GetUsersResponseWrapper struct {
@@ -18,8 +19,8 @@ type UserWrapper struct {
 	State            UserState        `protobuf:"varint,4,opt,name=state,proto3,enum=api.auth.v1.UserState" json:"state,omitempty"`
 	RequestId        string           `protobuf:"bytes,5,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	Invitation       *Invitation      `protobuf:"bytes,6,opt,name=invitation,proto3" json:"invitation,omitempty"`
-	CreatedTime      *types.Timestamp `protobuf:"bytes,7,opt,name=created_time,json=createdTime,proto3" json:"created_time,omitempty"`
-	LastModifiedTime *types.Timestamp `protobuf:"bytes,8,opt,name=last_modified_time,json=lastModifiedTime,proto3" json:"last_modified_time,omitempty"`
+	CreatedTime      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_time,json=createdTime,proto3" json:"created_time,omitempty"`
+	LastModifiedTime *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=last_modified_time,json=lastModifiedTime,proto3" json:"last_modified_time,omitempty"`
 }
 
 type UserSpecWrapper struct {
@@ -66,8 +67,8 @@ func (this *UserWrapper) String() string {
 		`State:` + fmt.Sprintf("%v", this.State) + `,`,
 		`RequestId:` + fmt.Sprintf("%v", this.RequestId) + `,`,
 		`Invitation:` + strings.Replace(this.Invitation.String(), "Invitation", "Invitation", 1) + `,`,
-		`CreatedTime:` + strings.Replace(fmt.Sprintf("%v", this.CreatedTime), "Timestamp", "types.Timestamp", 1) + `,`,
-		`LastModifiedTime:` + strings.Replace(fmt.Sprintf("%v", this.LastModifiedTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`CreatedTime:` + strings.Replace(fmt.Sprintf("%v", this.CreatedTime), "Timestamp", "timestamppb.Timestamp", 1) + `,`,
+		`LastModifiedTime:` + strings.Replace(fmt.Sprintf("%v", this.LastModifiedTime), "Timestamp", "timestamppb.Timestamp", 1) + `,`,
 		`}`,
 	}, "")
 	return s
