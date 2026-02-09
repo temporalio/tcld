@@ -508,7 +508,7 @@ func (c *NamespaceClient) toUserNamespacePermissions(userPermissionsInput map[st
 			errs = multierr.Append(errs, fmt.Errorf("user not found for: %s", email))
 			continue
 		}
-		actionGroupID, ok := auth.NamespaceActionGroup_value[actionGroup]
+		ag, ok := nsActionGroupByName[strings.ToLower(actionGroup)]
 		if !ok {
 			errs = multierr.Append(errs, fmt.Errorf(
 				"namespace permission type \"%s\" does not exist, acceptable types are: %s",
@@ -519,7 +519,7 @@ func (c *NamespaceClient) toUserNamespacePermissions(userPermissionsInput map[st
 		}
 		res = append(res, &auth.UserNamespacePermissions{
 			UserId:      u.GetUser().GetId(),
-			ActionGroup: auth.NamespaceActionGroup(actionGroupID),
+			ActionGroup: ag,
 		})
 	}
 	return res, errs
@@ -2484,10 +2484,21 @@ func validateCodecEndpoint(codecEndpoint string) error {
 func getSearchAttributeTypes() []string {
 	validTypes := []string{}
 	for i := 1; i < len(namespace.SearchAttributeType_name); i++ {
-		validTypes = append(validTypes, namespace.SearchAttributeType_name[int32(i)])
+		validTypes = append(validTypes, namespace.SearchAttributeType(i).String())
 	}
 	return validTypes
 }
+
+var searchAttributeTypeByName = func() map[string]namespace.SearchAttributeType {
+	m := make(map[string]namespace.SearchAttributeType)
+	for _, v := range namespace.SearchAttributeType_value {
+		sa := namespace.SearchAttributeType(v)
+		if sa != namespace.SEARCH_ATTRIBUTE_TYPE_UNSPECIFIED {
+			m[strings.ToLower(sa.String())] = sa
+		}
+	}
+	return m
+}()
 
 func toSearchAttributes(keyValues []string) (map[string]namespace.SearchAttributeType, error) {
 	res := map[string]namespace.SearchAttributeType{}
@@ -2497,7 +2508,7 @@ func toSearchAttributes(keyValues []string) (map[string]namespace.SearchAttribut
 			return nil, fmt.Errorf("invalid search attribute \"%s\" must be of format: \"name=type\"", kv)
 		}
 
-		val, ok := namespace.SearchAttributeType_value[parts[1]]
+		sat, ok := searchAttributeTypeByName[strings.ToLower(parts[1])]
 		if !ok {
 			return nil, fmt.Errorf(
 				"search attribute type \"%s\" does not exist, acceptable types are: %s",
@@ -2506,7 +2517,7 @@ func toSearchAttributes(keyValues []string) (map[string]namespace.SearchAttribut
 			)
 		}
 
-		res[parts[0]] = namespace.SearchAttributeType(val)
+		res[parts[0]] = sat
 	}
 	return res, nil
 }
@@ -2514,7 +2525,7 @@ func toSearchAttributes(keyValues []string) (map[string]namespace.SearchAttribut
 func getNamespacePermissionTypes() []string {
 	validTypes := []string{}
 	for i := 1; i < len(auth.NamespaceActionGroup_name); i++ {
-		validTypes = append(validTypes, auth.NamespaceActionGroup_name[int32(i)])
+		validTypes = append(validTypes, auth.NamespaceActionGroup(i).String())
 	}
 	return validTypes
 }

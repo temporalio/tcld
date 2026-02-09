@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
@@ -249,7 +250,7 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 							Description: ctx.String(serviceAccountDescriptionFlagName),
 						}
 
-						isAccountAdmin := ctx.String(accountRoleFlagName) == auth.AccountActionGroup_name[int32(auth.ACCOUNT_ACTION_GROUP_ADMIN)]
+						isAccountAdmin := strings.EqualFold(ctx.String(accountRoleFlagName), auth.ACCOUNT_ACTION_GROUP_ADMIN.String())
 						namespacePermissionsList := ctx.StringSlice(namespacePermissionFlagName)
 						if len(namespacePermissionsList) > 0 {
 							if isAccountAdmin {
@@ -435,12 +436,12 @@ func NewServiceAccountCommand(getServiceAccountClientFn GetServiceAccountClientF
 					},
 					Action: func(ctx *cli.Context) error {
 						// validate input role
-						if _, ok := auth.AccountActionGroup_value[ctx.String(accountRoleFlagName)]; !ok {
+						if _, ok := accountActionGroupByName[strings.ToLower(ctx.String(accountRoleFlagName))]; !ok {
 							return fmt.Errorf("invalid account role %v; valid types are: %v", ctx.String(accountRoleFlagName), accountActionGroups)
 						}
 						// if account role is admin unset the namespace permissions
 						var namespacePermissions map[string]string
-						if ctx.String(accountRoleFlagName) == auth.AccountActionGroup_name[int32(auth.ACCOUNT_ACTION_GROUP_ADMIN)] {
+						if strings.EqualFold(ctx.String(accountRoleFlagName), auth.ACCOUNT_ACTION_GROUP_ADMIN.String()) {
 							y, err := ConfirmPrompt(ctx, "Setting admin role on service account. All existing namespace permissions will be replaced, please confirm")
 							if err != nil {
 								return err

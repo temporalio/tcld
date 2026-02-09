@@ -11,15 +11,18 @@ import (
 )
 
 var (
-	accountActionGroups   = getAccountActionGroups()
-	namespaceActionGroups = getNamespaceActionGroups()
+	accountActionGroups      = getAccountActionGroups()
+	namespaceActionGroups    = getNamespaceActionGroups()
+	accountActionGroupByName = buildAccountActionGroupByName()
+	nsActionGroupByName      = buildNamespaceActionGroupByName()
 )
 
 func getAccountActionGroups() []string {
 	var rv []string
-	for n, v := range auth.AccountActionGroup_value {
-		if v != int32(auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED) {
-			rv = append(rv, n)
+	for v := range auth.AccountActionGroup_value {
+		ag := auth.AccountActionGroup(auth.AccountActionGroup_value[v])
+		if ag != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
+			rv = append(rv, ag.String())
 		}
 	}
 	slices.Sort(rv)
@@ -28,13 +31,36 @@ func getAccountActionGroups() []string {
 
 func getNamespaceActionGroups() []string {
 	var rv []string
-	for n, v := range auth.NamespaceActionGroup_value {
-		if v != int32(auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED) {
-			rv = append(rv, n)
+	for v := range auth.NamespaceActionGroup_value {
+		ag := auth.NamespaceActionGroup(auth.NamespaceActionGroup_value[v])
+		if ag != auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED {
+			rv = append(rv, ag.String())
 		}
 	}
 	slices.Sort(rv)
 	return rv
+}
+
+func buildAccountActionGroupByName() map[string]auth.AccountActionGroup {
+	m := make(map[string]auth.AccountActionGroup)
+	for _, v := range auth.AccountActionGroup_value {
+		ag := auth.AccountActionGroup(v)
+		if ag != auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
+			m[strings.ToLower(ag.String())] = ag
+		}
+	}
+	return m
+}
+
+func buildNamespaceActionGroupByName() map[string]auth.NamespaceActionGroup {
+	m := make(map[string]auth.NamespaceActionGroup)
+	for _, v := range auth.NamespaceActionGroup_value {
+		ag := auth.NamespaceActionGroup(v)
+		if ag != auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED {
+			m[strings.ToLower(ag.String())] = ag
+		}
+	}
+	return m
 }
 
 func getNamespaceRolesBatch(ctx context.Context, client authservice.AuthServiceClient, namespaceActionGroups map[string]string) ([]*auth.Role, error) {
@@ -89,32 +115,18 @@ func getAccountRole(ctx context.Context, client authservice.AuthServiceClient, a
 
 func toAccountActionGroup(actionGroup string) (auth.AccountActionGroup, error) {
 	g := strings.ToLower(strings.TrimSpace(actionGroup))
-	var ag auth.AccountActionGroup
-	for n, v := range auth.AccountActionGroup_value {
-		if strings.ToLower(n) == g {
-			ag = auth.AccountActionGroup(v)
-			break
-		}
+	if ag, ok := accountActionGroupByName[g]; ok {
+		return ag, nil
 	}
-	if ag == auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED {
-		return auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED,
-			fmt.Errorf("invalid action group: should be one of: %s", accountActionGroups)
-	}
-	return ag, nil
+	return auth.ACCOUNT_ACTION_GROUP_UNSPECIFIED,
+		fmt.Errorf("invalid action group: should be one of: %s", accountActionGroups)
 }
 
 func toNamespaceActionGroup(actionGroup string) (auth.NamespaceActionGroup, error) {
 	g := strings.ToLower(strings.TrimSpace(actionGroup))
-	var ag auth.NamespaceActionGroup
-	for n, v := range auth.NamespaceActionGroup_value {
-		if strings.ToLower(n) == g {
-			ag = auth.NamespaceActionGroup(v)
-			break
-		}
+	if ag, ok := nsActionGroupByName[g]; ok {
+		return ag, nil
 	}
-	if ag == auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED {
-		return auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED,
-			fmt.Errorf("invalid action group: should be one of: %s", namespaceActionGroups)
-	}
-	return ag, nil
+	return auth.NAMESPACE_ACTION_GROUP_UNSPECIFIED,
+		fmt.Errorf("invalid action group: should be one of: %s", namespaceActionGroups)
 }

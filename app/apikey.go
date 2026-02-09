@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/temporalio/tcld/protogen/api/auth/v1"
 	"github.com/temporalio/tcld/protogen/api/authservice/v1"
 	"github.com/temporalio/tcld/utils"
 	"github.com/urfave/cli/v2"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -64,10 +64,7 @@ func (s *APIKeyClient) createAPIKey(
 	expiry time.Time,
 	requestID string,
 ) error {
-	expiryts, err := types.TimestampProto(expiry)
-	if err != nil {
-		return fmt.Errorf("failed to convert timestamp to proto: %w", err)
-	}
+	expiryts := timestamppb.New(expiry)
 	resp, err := s.client.CreateAPIKey(s.ctx, &authservice.CreateAPIKeyRequest{
 		Spec: &auth.APIKeySpec{
 			AccessType:  auth.APIKEY_ACCESS_TYPE_INHERIT_OWNER_ACCESS,
@@ -91,10 +88,7 @@ func (s *APIKeyClient) createServiceAccountAPIKey(
 	expiry time.Time,
 	requestID string,
 ) error {
-	expiryts, err := types.TimestampProto(expiry)
-	if err != nil {
-		return fmt.Errorf("failed to convert timestamp to proto: %w", err)
-	}
+	expiryts := timestamppb.New(expiry)
 	resp, err := s.client.CreateServiceAccountAPIKey(s.ctx, &authservice.CreateServiceAccountAPIKeyRequest{
 		ServiceAccountId: serviceAccountID,
 		Spec: &auth.APIKeySpec{
