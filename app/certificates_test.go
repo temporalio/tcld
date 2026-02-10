@@ -83,7 +83,7 @@ func (s *CertificatesTestSuite) TestCertificateGenerateCore() {
 		{
 			"failure - missing required fields",
 			args{},
-			"Error:Field validation for 'Organization' failed on the 'required' tag",
+			"organization is required",
 			"",
 		},
 		{

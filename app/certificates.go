@@ -15,7 +15,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/temporalio/tcld/utils"
 	"github.com/urfave/cli/v2"
 )
@@ -47,17 +46,19 @@ func generateRandomString(n int) (string, error) {
 }
 
 type generateCACertificateInput struct {
-	Organization   string        `validate:"required"`
-	ValidityPeriod time.Duration `validate:"required"`
+	Organization   string
+	ValidityPeriod time.Duration
 	RSAAlgorithm   bool
 }
 
 func generateCACertificate(
 	input generateCACertificateInput,
 ) (caPEM, caPrivateKeyPEM []byte, err error) {
-	validator := validator.New()
-	if err := validator.Struct(input); err != nil {
-		return nil, nil, err
+	if input.Organization == "" {
+		return nil, nil, fmt.Errorf("organization is required")
+	}
+	if input.ValidityPeriod == 0 {
+		return nil, nil, fmt.Errorf("validity period is required")
 	}
 
 	serialNumber, err := generateSerialNumber()
@@ -140,13 +141,13 @@ func generateCACertificate(
 }
 
 type generateEndEntityCertificateInput struct {
-	Organization       string `validate:"required"`
+	Organization       string
 	OrganizationalUnit string
 	CommonName         string
 
 	ValidityPeriod  time.Duration
-	CaPem           []byte `validate:"required"`
-	CaPrivateKeyPEM []byte `validate:"required"`
+	CaPem           []byte
+	CaPrivateKeyPEM []byte
 }
 
 func parseCACerts(caPem, caPrivKeyPem []byte) (*x509.Certificate, any, bool, error) {
@@ -185,9 +186,14 @@ func generateSerialNumber() (*big.Int, error) {
 func generateEndEntityCertificate(
 	input generateEndEntityCertificateInput,
 ) (certPEM, certPrivateKeyPEM []byte, err error) {
-	validator := validator.New()
-	if err := validator.Struct(input); err != nil {
-		return nil, nil, err
+	if input.Organization == "" {
+		return nil, nil, fmt.Errorf("organization is required")
+	}
+	if len(input.CaPem) == 0 {
+		return nil, nil, fmt.Errorf("ca certificate is required")
+	}
+	if len(input.CaPrivateKeyPEM) == 0 {
+		return nil, nil, fmt.Errorf("ca private key is required")
 	}
 	caCert, caPrivateKey, isRSA, err := parseCACerts(input.CaPem, input.CaPrivateKeyPEM)
 	if err != nil {
