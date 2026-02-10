@@ -253,7 +253,6 @@ type GetUsersRequest struct {
 	// temporal:ui
 	EmailSubstring string `protobuf:"bytes,100,opt,name=email_substring,json=emailSubstring,proto3" json:"email_substring,omitempty"`
 	// Inclusive filter for entity states - optional.
-	// This is not the enum, because gogoproto will panic on decoding a repeated enum.
 	// temporal:ui
 	IncludeStates []string `protobuf:"bytes,101,rep,name=include_states,json=includeStates,proto3" json:"include_states,omitempty"`
 }
@@ -3240,7 +3239,6 @@ type GetUserGroupsRequest struct {
 	// temporal:ui
 	// Filter for name substring - optional
 	NameSubstring string `protobuf:"bytes,100,opt,name=name_substring,json=nameSubstring,proto3" json:"name_substring,omitempty"`
-	// This is not the enum, because gogoproto will panic on decoding a repeated enum.
 	// temporal:ui
 	IncludeStates []string `protobuf:"bytes,101,rep,name=include_states,json=includeStates,proto3" json:"include_states,omitempty"`
 }
@@ -4555,7 +4553,6 @@ type GetServiceAccountsRequest struct {
 	// temporal:ui
 	Namespace string `protobuf:"bytes,101,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	// Inclusive filter for entity states - optional.
-	// This is not the enum, because gogoproto will panic on decoding a repeated enum.
 	// temporal:ui
 	IncludeStates []string `protobuf:"bytes,102,rep,name=include_states,json=includeStates,proto3" json:"include_states,omitempty"`
 	// Filter for name substring - optional

@@ -5,7 +5,6 @@ go 1.23.0
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20260209202127-80ab13bee0bf.1
 	github.com/go-playground/validator/v10 v10.13.0
-	github.com/gogo/protobuf v1.3.2
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0

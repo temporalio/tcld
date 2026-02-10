@@ -213,7 +213,7 @@ type LogRecord struct {
 	RequestId string `protobuf:"bytes,11,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	// Principal struct
 	Principal *Principal `protobuf:"bytes,12,opt,name=principal,proto3" json:"principal,omitempty"`
-	// Raw request details - comment out for now, will need to wait for gogo deprecation to add it back
+	// Raw request details
 	RawDetails *structpb.Struct `protobuf:"bytes,13,opt,name=raw_details,json=rawDetails,proto3" json:"raw_details,omitempty"`
 	// x_forwarded_for, capture the chain of ip address from the caller
 	XForwardedFor string `protobuf:"bytes,14,opt,name=x_forwarded_for,json=xForwardedFor,proto3" json:"x_forwarded_for,omitempty"`

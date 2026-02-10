@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"reflect"
 
-	"github.com/gogo/protobuf/jsonpb"
-	"github.com/gogo/protobuf/proto"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 func FormatJson(i interface{}) (string, error) {
@@ -26,19 +27,29 @@ func PrintObj(i interface{}) error {
 	return nil
 }
 
-func serializeProto(m proto.Message) (string, error) {
-	marshaler := jsonpb.Marshaler{
-		Indent:       "\t",
-		EmitDefaults: true,
+func serializeProto(m any) (string, error) {
+	if m == nil || (reflect.ValueOf(m).Kind() == reflect.Ptr && reflect.ValueOf(m).IsNil()) {
+		return "", fmt.Errorf("nil message")
 	}
-	ser, err := marshaler.MarshalToString(m)
+	if pm, ok := m.(proto.Message); ok {
+		marshaler := protojson.MarshalOptions{
+			Indent:          "\t",
+			EmitUnpopulated: true,
+		}
+		b, err := marshaler.Marshal(pm)
+		if err != nil {
+			return "", err
+		}
+		return string(b), nil
+	}
+	b, err := json.MarshalIndent(m, "", "\t")
 	if err != nil {
 		return "", err
 	}
-	return ser, nil
+	return string(b), nil
 }
 
-func PrintProto(m proto.Message) error {
+func PrintProto(m any) error {
 	ser, err := serializeProto(m)
 	if err != nil {
 		return err
@@ -47,7 +58,7 @@ func PrintProto(m proto.Message) error {
 	return nil
 }
 
-func PrintProtoSlice(name string, ms []proto.Message) error {
+func PrintProtoSlice(name string, ms []any) error {
 
 	result := fmt.Sprintf("{\"%s\":[", name)
 	for i := range ms {
