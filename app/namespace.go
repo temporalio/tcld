@@ -294,7 +294,8 @@ func (c *NamespaceClient) addRegion(ctx *cli.Context) error {
 		return err
 	}
 
-	res, err := c.cloudAPIClient.AddNamespaceRegion(c.ctx, &cloudservice.AddNamespaceRegionRequest{
+	// Deprecated: use UpdateNamespace to add replicas instead.
+	res, err := c.cloudAPIClient.AddNamespaceRegion(c.ctx, &cloudservice.AddNamespaceRegionRequest{ //nolint:staticcheck
 		Namespace:        ctx.String(NamespaceFlagName),
 		Region:           targetRegion,
 		ResourceVersion:  ns.GetResourceVersion(),
@@ -327,7 +328,8 @@ func (c *NamespaceClient) deleteRegion(ctx *cli.Context) error {
 		return err
 	}
 
-	res, err := c.cloudAPIClient.DeleteNamespaceRegion(c.ctx, &cloudservice.DeleteNamespaceRegionRequest{
+	// Deprecated: use UpdateNamespace to delete replicas instead.
+	res, err := c.cloudAPIClient.DeleteNamespaceRegion(c.ctx, &cloudservice.DeleteNamespaceRegionRequest{ //nolint:staticcheck
 		Namespace:        ns.GetNamespace(),
 		Region:           deleteRegion,
 		ResourceVersion:  ns.GetResourceVersion(),
@@ -554,7 +556,8 @@ func (c *NamespaceClient) failoverNamespace(ctx *cli.Context) error {
 		return err
 	}
 
-	res, err := c.cloudAPIClient.FailoverNamespaceRegion(c.ctx, &cloudservice.FailoverNamespaceRegionRequest{
+	// Deprecated: use UpdateNamespace to set preferred_primary_replica_name instead.
+	res, err := c.cloudAPIClient.FailoverNamespaceRegion(c.ctx, &cloudservice.FailoverNamespaceRegionRequest{ //nolint:staticcheck
 		Namespace:        namespace,
 		Region:           targetRegion,
 		AsyncOperationId: ctx.String(RequestIDFlagName),
