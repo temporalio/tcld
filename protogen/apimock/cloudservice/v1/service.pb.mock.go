@@ -156,6 +156,26 @@ func (mr *MockCloudServiceClientMockRecorder) CreateApiKey(ctx, in interface{}, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApiKey", reflect.TypeOf((*MockCloudServiceClient)(nil).CreateApiKey), varargs...)
 }
 
+// CreateBillingReport mocks base method.
+func (m *MockCloudServiceClient) CreateBillingReport(ctx context.Context, in *cloudservice.CreateBillingReportRequest, opts ...grpc.CallOption) (*cloudservice.CreateBillingReportResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateBillingReport", varargs...)
+	ret0, _ := ret[0].(*cloudservice.CreateBillingReportResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateBillingReport indicates an expected call of CreateBillingReport.
+func (mr *MockCloudServiceClientMockRecorder) CreateBillingReport(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBillingReport", reflect.TypeOf((*MockCloudServiceClient)(nil).CreateBillingReport), varargs...)
+}
+
 // CreateConnectivityRule mocks base method.
 func (m *MockCloudServiceClient) CreateConnectivityRule(ctx context.Context, in *cloudservice.CreateConnectivityRuleRequest, opts ...grpc.CallOption) (*cloudservice.CreateConnectivityRuleResponse, error) {
 	m.ctrl.T.Helper()
@@ -174,6 +194,26 @@ func (mr *MockCloudServiceClientMockRecorder) CreateConnectivityRule(ctx, in int
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateConnectivityRule", reflect.TypeOf((*MockCloudServiceClient)(nil).CreateConnectivityRule), varargs...)
+}
+
+// CreateCustomRole mocks base method.
+func (m *MockCloudServiceClient) CreateCustomRole(ctx context.Context, in *cloudservice.CreateCustomRoleRequest, opts ...grpc.CallOption) (*cloudservice.CreateCustomRoleResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateCustomRole", varargs...)
+	ret0, _ := ret[0].(*cloudservice.CreateCustomRoleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateCustomRole indicates an expected call of CreateCustomRole.
+func (mr *MockCloudServiceClientMockRecorder) CreateCustomRole(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCustomRole", reflect.TypeOf((*MockCloudServiceClient)(nil).CreateCustomRole), varargs...)
 }
 
 // CreateNamespace mocks base method.
@@ -374,6 +414,26 @@ func (mr *MockCloudServiceClientMockRecorder) DeleteConnectivityRule(ctx, in int
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteConnectivityRule", reflect.TypeOf((*MockCloudServiceClient)(nil).DeleteConnectivityRule), varargs...)
+}
+
+// DeleteCustomRole mocks base method.
+func (m *MockCloudServiceClient) DeleteCustomRole(ctx context.Context, in *cloudservice.DeleteCustomRoleRequest, opts ...grpc.CallOption) (*cloudservice.DeleteCustomRoleResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteCustomRole", varargs...)
+	ret0, _ := ret[0].(*cloudservice.DeleteCustomRoleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteCustomRole indicates an expected call of DeleteCustomRole.
+func (mr *MockCloudServiceClientMockRecorder) DeleteCustomRole(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteCustomRole", reflect.TypeOf((*MockCloudServiceClient)(nil).DeleteCustomRole), varargs...)
 }
 
 // DeleteNamespace mocks base method.
@@ -696,6 +756,26 @@ func (mr *MockCloudServiceClientMockRecorder) GetAuditLogs(ctx, in interface{}, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuditLogs", reflect.TypeOf((*MockCloudServiceClient)(nil).GetAuditLogs), varargs...)
 }
 
+// GetBillingReport mocks base method.
+func (m *MockCloudServiceClient) GetBillingReport(ctx context.Context, in *cloudservice.GetBillingReportRequest, opts ...grpc.CallOption) (*cloudservice.GetBillingReportResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetBillingReport", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetBillingReportResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBillingReport indicates an expected call of GetBillingReport.
+func (mr *MockCloudServiceClientMockRecorder) GetBillingReport(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBillingReport", reflect.TypeOf((*MockCloudServiceClient)(nil).GetBillingReport), varargs...)
+}
+
 // GetConnectivityRule mocks base method.
 func (m *MockCloudServiceClient) GetConnectivityRule(ctx context.Context, in *cloudservice.GetConnectivityRuleRequest, opts ...grpc.CallOption) (*cloudservice.GetConnectivityRuleResponse, error) {
 	m.ctrl.T.Helper()
@@ -734,6 +814,66 @@ func (mr *MockCloudServiceClientMockRecorder) GetConnectivityRules(ctx, in inter
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConnectivityRules", reflect.TypeOf((*MockCloudServiceClient)(nil).GetConnectivityRules), varargs...)
+}
+
+// GetCurrentIdentity mocks base method.
+func (m *MockCloudServiceClient) GetCurrentIdentity(ctx context.Context, in *cloudservice.GetCurrentIdentityRequest, opts ...grpc.CallOption) (*cloudservice.GetCurrentIdentityResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetCurrentIdentity", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetCurrentIdentityResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCurrentIdentity indicates an expected call of GetCurrentIdentity.
+func (mr *MockCloudServiceClientMockRecorder) GetCurrentIdentity(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentIdentity", reflect.TypeOf((*MockCloudServiceClient)(nil).GetCurrentIdentity), varargs...)
+}
+
+// GetCustomRole mocks base method.
+func (m *MockCloudServiceClient) GetCustomRole(ctx context.Context, in *cloudservice.GetCustomRoleRequest, opts ...grpc.CallOption) (*cloudservice.GetCustomRoleResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetCustomRole", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetCustomRoleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCustomRole indicates an expected call of GetCustomRole.
+func (mr *MockCloudServiceClientMockRecorder) GetCustomRole(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCustomRole", reflect.TypeOf((*MockCloudServiceClient)(nil).GetCustomRole), varargs...)
+}
+
+// GetCustomRoles mocks base method.
+func (m *MockCloudServiceClient) GetCustomRoles(ctx context.Context, in *cloudservice.GetCustomRolesRequest, opts ...grpc.CallOption) (*cloudservice.GetCustomRolesResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetCustomRoles", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetCustomRolesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCustomRoles indicates an expected call of GetCustomRoles.
+func (mr *MockCloudServiceClientMockRecorder) GetCustomRoles(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCustomRoles", reflect.TypeOf((*MockCloudServiceClient)(nil).GetCustomRoles), varargs...)
 }
 
 // GetMigration mocks base method.
@@ -794,6 +934,26 @@ func (mr *MockCloudServiceClientMockRecorder) GetNamespace(ctx, in interface{}, 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespace", reflect.TypeOf((*MockCloudServiceClient)(nil).GetNamespace), varargs...)
+}
+
+// GetNamespaceCapacityInfo mocks base method.
+func (m *MockCloudServiceClient) GetNamespaceCapacityInfo(ctx context.Context, in *cloudservice.GetNamespaceCapacityInfoRequest, opts ...grpc.CallOption) (*cloudservice.GetNamespaceCapacityInfoResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetNamespaceCapacityInfo", varargs...)
+	ret0, _ := ret[0].(*cloudservice.GetNamespaceCapacityInfoResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNamespaceCapacityInfo indicates an expected call of GetNamespaceCapacityInfo.
+func (mr *MockCloudServiceClientMockRecorder) GetNamespaceCapacityInfo(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaceCapacityInfo", reflect.TypeOf((*MockCloudServiceClient)(nil).GetNamespaceCapacityInfo), varargs...)
 }
 
 // GetNamespaceExportSink mocks base method.
@@ -1276,6 +1436,26 @@ func (mr *MockCloudServiceClientMockRecorder) SetServiceAccountNamespaceAccess(c
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetServiceAccountNamespaceAccess", reflect.TypeOf((*MockCloudServiceClient)(nil).SetServiceAccountNamespaceAccess), varargs...)
 }
 
+// SetServiceAccountProjectAccess mocks base method.
+func (m *MockCloudServiceClient) SetServiceAccountProjectAccess(ctx context.Context, in *cloudservice.SetServiceAccountProjectAccessRequest, opts ...grpc.CallOption) (*cloudservice.SetServiceAccountProjectAccessResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SetServiceAccountProjectAccess", varargs...)
+	ret0, _ := ret[0].(*cloudservice.SetServiceAccountProjectAccessResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetServiceAccountProjectAccess indicates an expected call of SetServiceAccountProjectAccess.
+func (mr *MockCloudServiceClientMockRecorder) SetServiceAccountProjectAccess(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetServiceAccountProjectAccess", reflect.TypeOf((*MockCloudServiceClient)(nil).SetServiceAccountProjectAccess), varargs...)
+}
+
 // SetUserGroupNamespaceAccess mocks base method.
 func (m *MockCloudServiceClient) SetUserGroupNamespaceAccess(ctx context.Context, in *cloudservice.SetUserGroupNamespaceAccessRequest, opts ...grpc.CallOption) (*cloudservice.SetUserGroupNamespaceAccessResponse, error) {
 	m.ctrl.T.Helper()
@@ -1296,6 +1476,26 @@ func (mr *MockCloudServiceClientMockRecorder) SetUserGroupNamespaceAccess(ctx, i
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetUserGroupNamespaceAccess", reflect.TypeOf((*MockCloudServiceClient)(nil).SetUserGroupNamespaceAccess), varargs...)
 }
 
+// SetUserGroupProjectAccess mocks base method.
+func (m *MockCloudServiceClient) SetUserGroupProjectAccess(ctx context.Context, in *cloudservice.SetUserGroupProjectAccessRequest, opts ...grpc.CallOption) (*cloudservice.SetUserGroupProjectAccessResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SetUserGroupProjectAccess", varargs...)
+	ret0, _ := ret[0].(*cloudservice.SetUserGroupProjectAccessResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetUserGroupProjectAccess indicates an expected call of SetUserGroupProjectAccess.
+func (mr *MockCloudServiceClientMockRecorder) SetUserGroupProjectAccess(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetUserGroupProjectAccess", reflect.TypeOf((*MockCloudServiceClient)(nil).SetUserGroupProjectAccess), varargs...)
+}
+
 // SetUserNamespaceAccess mocks base method.
 func (m *MockCloudServiceClient) SetUserNamespaceAccess(ctx context.Context, in *cloudservice.SetUserNamespaceAccessRequest, opts ...grpc.CallOption) (*cloudservice.SetUserNamespaceAccessResponse, error) {
 	m.ctrl.T.Helper()
@@ -1314,6 +1514,26 @@ func (mr *MockCloudServiceClientMockRecorder) SetUserNamespaceAccess(ctx, in int
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetUserNamespaceAccess", reflect.TypeOf((*MockCloudServiceClient)(nil).SetUserNamespaceAccess), varargs...)
+}
+
+// SetUserProjectAccess mocks base method.
+func (m *MockCloudServiceClient) SetUserProjectAccess(ctx context.Context, in *cloudservice.SetUserProjectAccessRequest, opts ...grpc.CallOption) (*cloudservice.SetUserProjectAccessResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SetUserProjectAccess", varargs...)
+	ret0, _ := ret[0].(*cloudservice.SetUserProjectAccessResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetUserProjectAccess indicates an expected call of SetUserProjectAccess.
+func (mr *MockCloudServiceClientMockRecorder) SetUserProjectAccess(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetUserProjectAccess", reflect.TypeOf((*MockCloudServiceClient)(nil).SetUserProjectAccess), varargs...)
 }
 
 // StartMigration mocks base method.
@@ -1394,6 +1614,26 @@ func (mr *MockCloudServiceClientMockRecorder) UpdateApiKey(ctx, in interface{}, 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApiKey", reflect.TypeOf((*MockCloudServiceClient)(nil).UpdateApiKey), varargs...)
+}
+
+// UpdateCustomRole mocks base method.
+func (m *MockCloudServiceClient) UpdateCustomRole(ctx context.Context, in *cloudservice.UpdateCustomRoleRequest, opts ...grpc.CallOption) (*cloudservice.UpdateCustomRoleResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateCustomRole", varargs...)
+	ret0, _ := ret[0].(*cloudservice.UpdateCustomRoleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateCustomRole indicates an expected call of UpdateCustomRole.
+func (mr *MockCloudServiceClientMockRecorder) UpdateCustomRole(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCustomRole", reflect.TypeOf((*MockCloudServiceClient)(nil).UpdateCustomRole), varargs...)
 }
 
 // UpdateNamespace mocks base method.
@@ -1709,6 +1949,21 @@ func (mr *MockCloudServiceServerMockRecorder) CreateApiKey(arg0, arg1 interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApiKey", reflect.TypeOf((*MockCloudServiceServer)(nil).CreateApiKey), arg0, arg1)
 }
 
+// CreateBillingReport mocks base method.
+func (m *MockCloudServiceServer) CreateBillingReport(arg0 context.Context, arg1 *cloudservice.CreateBillingReportRequest) (*cloudservice.CreateBillingReportResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateBillingReport", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.CreateBillingReportResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateBillingReport indicates an expected call of CreateBillingReport.
+func (mr *MockCloudServiceServerMockRecorder) CreateBillingReport(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBillingReport", reflect.TypeOf((*MockCloudServiceServer)(nil).CreateBillingReport), arg0, arg1)
+}
+
 // CreateConnectivityRule mocks base method.
 func (m *MockCloudServiceServer) CreateConnectivityRule(arg0 context.Context, arg1 *cloudservice.CreateConnectivityRuleRequest) (*cloudservice.CreateConnectivityRuleResponse, error) {
 	m.ctrl.T.Helper()
@@ -1722,6 +1977,21 @@ func (m *MockCloudServiceServer) CreateConnectivityRule(arg0 context.Context, ar
 func (mr *MockCloudServiceServerMockRecorder) CreateConnectivityRule(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateConnectivityRule", reflect.TypeOf((*MockCloudServiceServer)(nil).CreateConnectivityRule), arg0, arg1)
+}
+
+// CreateCustomRole mocks base method.
+func (m *MockCloudServiceServer) CreateCustomRole(arg0 context.Context, arg1 *cloudservice.CreateCustomRoleRequest) (*cloudservice.CreateCustomRoleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateCustomRole", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.CreateCustomRoleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateCustomRole indicates an expected call of CreateCustomRole.
+func (mr *MockCloudServiceServerMockRecorder) CreateCustomRole(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCustomRole", reflect.TypeOf((*MockCloudServiceServer)(nil).CreateCustomRole), arg0, arg1)
 }
 
 // CreateNamespace mocks base method.
@@ -1872,6 +2142,21 @@ func (m *MockCloudServiceServer) DeleteConnectivityRule(arg0 context.Context, ar
 func (mr *MockCloudServiceServerMockRecorder) DeleteConnectivityRule(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteConnectivityRule", reflect.TypeOf((*MockCloudServiceServer)(nil).DeleteConnectivityRule), arg0, arg1)
+}
+
+// DeleteCustomRole mocks base method.
+func (m *MockCloudServiceServer) DeleteCustomRole(arg0 context.Context, arg1 *cloudservice.DeleteCustomRoleRequest) (*cloudservice.DeleteCustomRoleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteCustomRole", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.DeleteCustomRoleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteCustomRole indicates an expected call of DeleteCustomRole.
+func (mr *MockCloudServiceServerMockRecorder) DeleteCustomRole(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteCustomRole", reflect.TypeOf((*MockCloudServiceServer)(nil).DeleteCustomRole), arg0, arg1)
 }
 
 // DeleteNamespace mocks base method.
@@ -2114,6 +2399,21 @@ func (mr *MockCloudServiceServerMockRecorder) GetAuditLogs(arg0, arg1 interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuditLogs", reflect.TypeOf((*MockCloudServiceServer)(nil).GetAuditLogs), arg0, arg1)
 }
 
+// GetBillingReport mocks base method.
+func (m *MockCloudServiceServer) GetBillingReport(arg0 context.Context, arg1 *cloudservice.GetBillingReportRequest) (*cloudservice.GetBillingReportResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBillingReport", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetBillingReportResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBillingReport indicates an expected call of GetBillingReport.
+func (mr *MockCloudServiceServerMockRecorder) GetBillingReport(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBillingReport", reflect.TypeOf((*MockCloudServiceServer)(nil).GetBillingReport), arg0, arg1)
+}
+
 // GetConnectivityRule mocks base method.
 func (m *MockCloudServiceServer) GetConnectivityRule(arg0 context.Context, arg1 *cloudservice.GetConnectivityRuleRequest) (*cloudservice.GetConnectivityRuleResponse, error) {
 	m.ctrl.T.Helper()
@@ -2142,6 +2442,51 @@ func (m *MockCloudServiceServer) GetConnectivityRules(arg0 context.Context, arg1
 func (mr *MockCloudServiceServerMockRecorder) GetConnectivityRules(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConnectivityRules", reflect.TypeOf((*MockCloudServiceServer)(nil).GetConnectivityRules), arg0, arg1)
+}
+
+// GetCurrentIdentity mocks base method.
+func (m *MockCloudServiceServer) GetCurrentIdentity(arg0 context.Context, arg1 *cloudservice.GetCurrentIdentityRequest) (*cloudservice.GetCurrentIdentityResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCurrentIdentity", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetCurrentIdentityResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCurrentIdentity indicates an expected call of GetCurrentIdentity.
+func (mr *MockCloudServiceServerMockRecorder) GetCurrentIdentity(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentIdentity", reflect.TypeOf((*MockCloudServiceServer)(nil).GetCurrentIdentity), arg0, arg1)
+}
+
+// GetCustomRole mocks base method.
+func (m *MockCloudServiceServer) GetCustomRole(arg0 context.Context, arg1 *cloudservice.GetCustomRoleRequest) (*cloudservice.GetCustomRoleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCustomRole", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetCustomRoleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCustomRole indicates an expected call of GetCustomRole.
+func (mr *MockCloudServiceServerMockRecorder) GetCustomRole(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCustomRole", reflect.TypeOf((*MockCloudServiceServer)(nil).GetCustomRole), arg0, arg1)
+}
+
+// GetCustomRoles mocks base method.
+func (m *MockCloudServiceServer) GetCustomRoles(arg0 context.Context, arg1 *cloudservice.GetCustomRolesRequest) (*cloudservice.GetCustomRolesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCustomRoles", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetCustomRolesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCustomRoles indicates an expected call of GetCustomRoles.
+func (mr *MockCloudServiceServerMockRecorder) GetCustomRoles(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCustomRoles", reflect.TypeOf((*MockCloudServiceServer)(nil).GetCustomRoles), arg0, arg1)
 }
 
 // GetMigration mocks base method.
@@ -2187,6 +2532,21 @@ func (m *MockCloudServiceServer) GetNamespace(arg0 context.Context, arg1 *clouds
 func (mr *MockCloudServiceServerMockRecorder) GetNamespace(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespace", reflect.TypeOf((*MockCloudServiceServer)(nil).GetNamespace), arg0, arg1)
+}
+
+// GetNamespaceCapacityInfo mocks base method.
+func (m *MockCloudServiceServer) GetNamespaceCapacityInfo(arg0 context.Context, arg1 *cloudservice.GetNamespaceCapacityInfoRequest) (*cloudservice.GetNamespaceCapacityInfoResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNamespaceCapacityInfo", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.GetNamespaceCapacityInfoResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNamespaceCapacityInfo indicates an expected call of GetNamespaceCapacityInfo.
+func (mr *MockCloudServiceServerMockRecorder) GetNamespaceCapacityInfo(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaceCapacityInfo", reflect.TypeOf((*MockCloudServiceServer)(nil).GetNamespaceCapacityInfo), arg0, arg1)
 }
 
 // GetNamespaceExportSink mocks base method.
@@ -2549,6 +2909,21 @@ func (mr *MockCloudServiceServerMockRecorder) SetServiceAccountNamespaceAccess(a
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetServiceAccountNamespaceAccess", reflect.TypeOf((*MockCloudServiceServer)(nil).SetServiceAccountNamespaceAccess), arg0, arg1)
 }
 
+// SetServiceAccountProjectAccess mocks base method.
+func (m *MockCloudServiceServer) SetServiceAccountProjectAccess(arg0 context.Context, arg1 *cloudservice.SetServiceAccountProjectAccessRequest) (*cloudservice.SetServiceAccountProjectAccessResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetServiceAccountProjectAccess", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.SetServiceAccountProjectAccessResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetServiceAccountProjectAccess indicates an expected call of SetServiceAccountProjectAccess.
+func (mr *MockCloudServiceServerMockRecorder) SetServiceAccountProjectAccess(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetServiceAccountProjectAccess", reflect.TypeOf((*MockCloudServiceServer)(nil).SetServiceAccountProjectAccess), arg0, arg1)
+}
+
 // SetUserGroupNamespaceAccess mocks base method.
 func (m *MockCloudServiceServer) SetUserGroupNamespaceAccess(arg0 context.Context, arg1 *cloudservice.SetUserGroupNamespaceAccessRequest) (*cloudservice.SetUserGroupNamespaceAccessResponse, error) {
 	m.ctrl.T.Helper()
@@ -2564,6 +2939,21 @@ func (mr *MockCloudServiceServerMockRecorder) SetUserGroupNamespaceAccess(arg0, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetUserGroupNamespaceAccess", reflect.TypeOf((*MockCloudServiceServer)(nil).SetUserGroupNamespaceAccess), arg0, arg1)
 }
 
+// SetUserGroupProjectAccess mocks base method.
+func (m *MockCloudServiceServer) SetUserGroupProjectAccess(arg0 context.Context, arg1 *cloudservice.SetUserGroupProjectAccessRequest) (*cloudservice.SetUserGroupProjectAccessResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetUserGroupProjectAccess", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.SetUserGroupProjectAccessResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetUserGroupProjectAccess indicates an expected call of SetUserGroupProjectAccess.
+func (mr *MockCloudServiceServerMockRecorder) SetUserGroupProjectAccess(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetUserGroupProjectAccess", reflect.TypeOf((*MockCloudServiceServer)(nil).SetUserGroupProjectAccess), arg0, arg1)
+}
+
 // SetUserNamespaceAccess mocks base method.
 func (m *MockCloudServiceServer) SetUserNamespaceAccess(arg0 context.Context, arg1 *cloudservice.SetUserNamespaceAccessRequest) (*cloudservice.SetUserNamespaceAccessResponse, error) {
 	m.ctrl.T.Helper()
@@ -2577,6 +2967,21 @@ func (m *MockCloudServiceServer) SetUserNamespaceAccess(arg0 context.Context, ar
 func (mr *MockCloudServiceServerMockRecorder) SetUserNamespaceAccess(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetUserNamespaceAccess", reflect.TypeOf((*MockCloudServiceServer)(nil).SetUserNamespaceAccess), arg0, arg1)
+}
+
+// SetUserProjectAccess mocks base method.
+func (m *MockCloudServiceServer) SetUserProjectAccess(arg0 context.Context, arg1 *cloudservice.SetUserProjectAccessRequest) (*cloudservice.SetUserProjectAccessResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetUserProjectAccess", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.SetUserProjectAccessResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetUserProjectAccess indicates an expected call of SetUserProjectAccess.
+func (mr *MockCloudServiceServerMockRecorder) SetUserProjectAccess(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetUserProjectAccess", reflect.TypeOf((*MockCloudServiceServer)(nil).SetUserProjectAccess), arg0, arg1)
 }
 
 // StartMigration mocks base method.
@@ -2637,6 +3042,21 @@ func (m *MockCloudServiceServer) UpdateApiKey(arg0 context.Context, arg1 *clouds
 func (mr *MockCloudServiceServerMockRecorder) UpdateApiKey(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApiKey", reflect.TypeOf((*MockCloudServiceServer)(nil).UpdateApiKey), arg0, arg1)
+}
+
+// UpdateCustomRole mocks base method.
+func (m *MockCloudServiceServer) UpdateCustomRole(arg0 context.Context, arg1 *cloudservice.UpdateCustomRoleRequest) (*cloudservice.UpdateCustomRoleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateCustomRole", arg0, arg1)
+	ret0, _ := ret[0].(*cloudservice.UpdateCustomRoleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateCustomRole indicates an expected call of UpdateCustomRole.
+func (mr *MockCloudServiceServerMockRecorder) UpdateCustomRole(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCustomRole", reflect.TypeOf((*MockCloudServiceServer)(nil).UpdateCustomRole), arg0, arg1)
 }
 
 // UpdateNamespace mocks base method.

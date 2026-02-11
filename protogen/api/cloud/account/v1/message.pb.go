@@ -386,7 +386,6 @@ func (*AuditLogSinkSpec) XXX_OneofWrappers() []interface{} {
 }
 
 // AuditLogSink is only used by Audit Log
-// temporal:dev
 type AuditLogSink struct {
 	// Name of the sink e.g. "audit_log_01"
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
