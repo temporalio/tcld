@@ -386,6 +386,91 @@ func (c *NamespaceClient) getNamespaceCloudApi(namespace string) (*cloudNamespac
 	return res.Namespace, nil
 }
 
+func (c *NamespaceClient) getNamespaceCapacityInfoCloudApi(namespace string) (*cloudNamespace.NamespaceCapacityInfo, error) {
+	res, err := c.cloudAPIClient.GetNamespaceCapacityInfo(c.ctx, &cloudservice.GetNamespaceCapacityInfoRequest{
+		Namespace: namespace,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if res.GetCapacityInfo() == nil || res.GetCapacityInfo().Namespace == "" {
+		// this should never happen, the server should return an error when the namespace capacity info is not found or invalid
+		return nil, fmt.Errorf("invalid namespace capacity info returned by server")
+	}
+	return res.CapacityInfo, nil
+}
+
+// NamespaceCapacityInfoOutput is a flattened version of NamespaceCapacityInfo
+// that maintains backwards compatibility by keeping provisioned/onDemand and
+// latestRequest at the top level while adding new fields.
+type NamespaceCapacityInfoOutput struct {
+	Namespace       string `json:"namespace,omitempty"`
+	HasLegacyLimits bool   `json:"hasLegacyLimits"`
+	// CurrentMode fields - flattened from CurrentCapacity
+	Provisioned *cloudNamespace.Capacity_Provisioned `json:"provisioned,omitempty"`
+	OnDemand    *cloudNamespace.Capacity_OnDemand    `json:"onDemand,omitempty"`
+	// LatestRequest - flattened from CurrentCapacity
+	LatestRequest *cloudNamespace.Capacity_Request `json:"latestRequest,omitempty"`
+	// New fields
+	ModeOptions *cloudNamespace.NamespaceCapacityInfo_CapacityModeOptions `json:"modeOptions,omitempty"`
+	Stats       *NamespaceCapacityInfoOutput_Stats                        `json:"stats,omitempty"`
+}
+
+// NamespaceCapacityInfoOutput_Stats wraps the proto Stats type to ensure
+// numeric fields are always included in JSON output (no omitempty).
+type NamespaceCapacityInfoOutput_Stats struct {
+	Aps *NamespaceCapacityInfoOutput_Stats_Summary `json:"aps,omitempty"`
+}
+
+// NamespaceCapacityInfoOutput_Stats_Summary wraps the proto Stats_Summary type
+// to ensure numeric fields are always included in JSON output (no omitempty).
+type NamespaceCapacityInfoOutput_Stats_Summary struct {
+	Mean float64 `json:"mean"`
+	P90  float64 `json:"p90"`
+	P99  float64 `json:"p99"`
+}
+
+// transformCapacityInfoForOutput flattens the NamespaceCapacityInfo structure
+// to maintain backwards compatibility while including new fields.
+func transformCapacityInfoForOutput(info *cloudNamespace.NamespaceCapacityInfo) *NamespaceCapacityInfoOutput {
+	if info == nil {
+		return nil
+	}
+
+	output := &NamespaceCapacityInfoOutput{
+		Namespace:       info.Namespace,
+		HasLegacyLimits: info.HasLegacyLimits,
+		ModeOptions:     info.ModeOptions,
+	}
+
+	// Convert Stats to custom type to ensure zero values are included
+	if info.Stats != nil {
+		output.Stats = &NamespaceCapacityInfoOutput_Stats{}
+		if info.Stats.Aps != nil {
+			output.Stats.Aps = &NamespaceCapacityInfoOutput_Stats_Summary{
+				Mean: info.Stats.Aps.Mean,
+				P90:  info.Stats.Aps.P90,
+				P99:  info.Stats.Aps.P99,
+			}
+		}
+	}
+
+	// Flatten currentCapacity fields to top level
+	if info.CurrentCapacity != nil {
+		// Extract the current mode (provisioned or onDemand)
+		if prov := info.CurrentCapacity.GetProvisioned(); prov != nil {
+			output.Provisioned = prov
+		}
+		if od := info.CurrentCapacity.GetOnDemand(); od != nil {
+			output.OnDemand = od
+		}
+		// Extract latestRequest
+		output.LatestRequest = info.CurrentCapacity.LatestRequest
+	}
+
+	return output
+}
+
 // TODO: deprecate this and use getNamespaceCloudApi everywhere
 func (c *NamespaceClient) getNamespace(namespace string) (*namespace.Namespace, error) {
 	res, err := c.client.GetNamespace(c.ctx, &namespaceservice.GetNamespaceRequest{
@@ -1923,11 +2008,13 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						NamespaceFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						n, err := c.getNamespaceCloudApi(ctx.String(NamespaceFlagName))
+						n, err := c.getNamespaceCapacityInfoCloudApi(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
-						return PrintProto(n.GetCapacity())
+						// Transform to flattened output structure for backwards compatibility
+						output := transformCapacityInfoForOutput(n)
+						return PrintObj(output)
 					},
 				},
 				{
