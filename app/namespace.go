@@ -2002,7 +2002,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 			Subcommands: []*cli.Command{
 				{
 					Name:    "get",
-					Usage:   "Get namespace capacity settings",
+					Usage:   "Get namespace capacity information",
 					Aliases: []string{"g"},
 					Flags: []cli.Flag{
 						NamespaceFlag,
