@@ -3302,7 +3302,7 @@ func (s *NamespaceTestSuite) TestGetNamespaceCapacity() {
 		expectErr bool
 	}{
 		{
-			name: "get namespace capacity - success",
+			name: "get namespace capacity - provisioned mode",
 			args: []string{"namespace", "capacity", "get", "--namespace", "ns1"},
 			mock: func() {
 				s.mockCloudApiClient.EXPECT().
@@ -3318,13 +3318,25 @@ func (s *NamespaceTestSuite) TestGetNamespaceCapacity() {
 									CurrentValue: 16.0,
 								},
 							},
-							LatestRequest: &cloudNamespace.Capacity_Request{
-								State: cloudNamespace.STATE_CAPACITY_REQUEST_COMPLETED,
-							},
 						},
-						ModeOptions: &cloudNamespace.NamespaceCapacityInfo_CapacityModeOptions{
-							Provisioned: &cloudNamespace.NamespaceCapacityInfo_CapacityModeOptions_Provisioned{
-								ValidTruValues: []float64{2, 4, 8, 16},
+					},
+				}, nil).Times(1)
+			},
+		},
+		{
+			name: "get namespace capacity - on demand mode",
+			args: []string{"namespace", "capacity", "get", "--namespace", "ns2"},
+			mock: func() {
+				s.mockCloudApiClient.EXPECT().
+					GetNamespaceCapacityInfo(gomock.Any(), &cloudservice.GetNamespaceCapacityInfoRequest{
+						Namespace: "ns2",
+					}).Return(&cloudservice.GetNamespaceCapacityInfoResponse{
+					CapacityInfo: &cloudNamespace.NamespaceCapacityInfo{
+						Namespace:       "ns2",
+						HasLegacyLimits: false,
+						CurrentCapacity: &cloudNamespace.Capacity{
+							CurrentMode: &cloudNamespace.Capacity_OnDemand_{
+								OnDemand: &cloudNamespace.Capacity_OnDemand{},
 							},
 						},
 					},
