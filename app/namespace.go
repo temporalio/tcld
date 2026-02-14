@@ -386,6 +386,20 @@ func (c *NamespaceClient) getNamespaceCloudApi(namespace string) (*cloudNamespac
 	return res.Namespace, nil
 }
 
+func (c *NamespaceClient) getNamespaceCapacityInfoCloudApi(namespace string) (*cloudNamespace.NamespaceCapacityInfo, error) {
+	res, err := c.cloudAPIClient.GetNamespaceCapacityInfo(c.ctx, &cloudservice.GetNamespaceCapacityInfoRequest{
+		Namespace: namespace,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if res.GetCapacityInfo() == nil || res.GetCapacityInfo().Namespace == "" {
+		// this should never happen, the server should return an error when the namespace capacity info is not found or invalid
+		return nil, fmt.Errorf("invalid namespace capacity info returned by server")
+	}
+	return res.CapacityInfo, nil
+}
+
 // TODO: deprecate this and use getNamespaceCloudApi everywhere
 func (c *NamespaceClient) getNamespace(namespace string) (*namespace.Namespace, error) {
 	res, err := c.client.GetNamespace(c.ctx, &namespaceservice.GetNamespaceRequest{
@@ -1912,22 +1926,22 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 		},
 		{
 			Name:    "capacity",
-			Usage:   "Manage namespace capacity settings",
+			Usage:   "Manage namespace capacity",
 			Aliases: []string{"cap"},
 			Subcommands: []*cli.Command{
 				{
 					Name:    "get",
-					Usage:   "Get namespace capacity settings",
+					Usage:   "Get namespace capacity information",
 					Aliases: []string{"g"},
 					Flags: []cli.Flag{
 						NamespaceFlag,
 					},
 					Action: func(ctx *cli.Context) error {
-						n, err := c.getNamespaceCloudApi(ctx.String(NamespaceFlagName))
+						capacityInfo, err := c.getNamespaceCapacityInfoCloudApi(ctx.String(NamespaceFlagName))
 						if err != nil {
 							return err
 						}
-						return PrintProto(n.GetCapacity())
+						return PrintProto(capacityInfo)
 					},
 				},
 				{
