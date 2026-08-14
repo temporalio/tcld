@@ -131,10 +131,10 @@ func writeCommand(b *strings.Builder, cmd *cli.Command, parentPath string, headi
 			b.WriteString(fmt.Sprintf("%s %s\n\n", heading, cmd.Name))
 		}
 	} else if headingLevel == 2 {
-		b.WriteString(fmt.Sprintf("The `%s` command %s.\n\n", fullPath, lowercaseFirst(escapedUsage)))
+		b.WriteString(fmt.Sprintf("`%s`: %s.\n\n", fullPath, escapedUsage))
 	} else {
 		b.WriteString(fmt.Sprintf("%s %s\n\n", heading, cmd.Name))
-		b.WriteString(fmt.Sprintf("The `%s` command %s.\n\n", fullPath, lowercaseFirst(escapedUsage)))
+		b.WriteString(fmt.Sprintf("`%s`: %s.\n\n", fullPath, escapedUsage))
 	}
 
 	if len(cmd.Aliases) > 0 {
@@ -327,11 +327,4 @@ func escapeMDX(s string) string {
 	s = strings.ReplaceAll(s, "{", "&#123;")
 	s = strings.ReplaceAll(s, "}", "&#125;")
 	return s
-}
-
-func lowercaseFirst(s string) string {
-	if s == "" {
-		return s
-	}
-	return strings.ToLower(s[:1]) + s[1:]
 }
