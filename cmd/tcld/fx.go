@@ -28,6 +28,7 @@ func fxOptions() fx.Option {
 			app.NewNexusCommand,
 			app.NewMigrationCommand,
 			app.NewConnectivityRuleCommand,
+			app.NewClusterLinkCommand,
 			func() app.GetNamespaceClientFn {
 				return app.GetNamespaceClient
 			},
@@ -56,6 +57,7 @@ func fxOptions() fx.Option {
 				return app.GetMigrationClient
 			},
 			func() app.GetConnectivityRuleClientFn { return app.GetConnectivityRuleClient },
+			func() app.GetClusterLinkClientFn { return app.GetClusterLinkClient },
 		),
 		fx.Invoke(func(app *cli.App, shutdowner fx.Shutdowner) error {
 			err := app.Run(os.Args)
