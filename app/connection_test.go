@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/app/credentials"
+	"github.com/temporalio/tcld/protogen/api/cloud/clusterlink/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
 	"github.com/temporalio/tcld/protogen/api/request/v1"
@@ -61,6 +62,13 @@ func (s *testServer) GetAsyncOperation(ctx context.Context, req *cloudservice.Ge
 	}, nil
 }
 
+func (s *testServer) GetClusterLinks(ctx context.Context, req *cloudservice.GetClusterLinksRequest) (*cloudservice.GetClusterLinksResponse, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	s.receivedMD = md.Copy()
+
+	return &cloudservice.GetClusterLinksResponse{}, nil
+}
+
 type ServerConnectionTestSuite struct {
 	suite.Suite
 	listener    *bufconn.Listener
@@ -74,7 +82,7 @@ func TestServerConnection(t *testing.T) {
 
 func (s *ServerConnectionTestSuite) SetupTest() {
 	s.listener = bufconn.Listen(1024 * 1024)
-	s.grpcSrv = grpc.NewServer()
+	s.grpcSrv = grpc.NewServer(grpc.ForceServerCodec(gogoProtoCodec{}))
 	s.testService = &testServer{}
 
 	requestservice.RegisterRequestServiceServer(s.grpcSrv, s.testService)
@@ -217,6 +225,14 @@ func (s *ServerConnectionTestSuite) TestGetServerConnection() {
 			cloudClient := cloudservice.NewCloudServiceClient(conn)
 			_, err = cloudClient.GetAsyncOperation(connCtx, &cloudservice.GetAsyncOperationRequest{
 				AsyncOperationId: "test-async-operation-id",
+			})
+			s.NoError(err)
+			s.assertMetadata(TemporalCloudAPIVersion, tc.expectedToken)
+
+			_, err = cloudClient.GetClusterLinks(connCtx, &cloudservice.GetClusterLinksRequest{
+				ConnectionStates: []clusterlink.ClusterLink_ConnectionState{
+					clusterlink.CONNECTION_STATE_CONNECTED,
+				},
 			})
 			s.NoError(err)
 			s.assertMetadata(TemporalCloudAPIVersion, tc.expectedToken)
