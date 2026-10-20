@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 
+	"github.com/gogo/protobuf/types"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 
@@ -61,17 +62,28 @@ func (c *MigrationClient) listMigrations() error {
 	}
 }
 
-func (c *MigrationClient) startMigration(requestId, migrationEndpointId, sourceNamespace, targetNamespace string) error {
-	resp, err := c.client.StartMigration(c.ctx, &cloudservice.StartMigrationRequest{
-		Spec: &namespace.MigrationSpec{
-			MigrationEndpointId: migrationEndpointId,
-			Spec: &namespace.MigrationSpec_ToCloudSpec{
-				ToCloudSpec: &namespace.MigrationToCloudSpec{
-					SourceNamespace: sourceNamespace,
-					TargetNamespace: targetNamespace,
-				},
+func (c *MigrationClient) startMigration(
+	requestId, migrationEndpointId, sourceNamespace, targetNamespace string,
+	skipClosedWorkflows bool,
+) error {
+	spec := &namespace.MigrationSpec{
+		MigrationEndpointId: migrationEndpointId,
+		Replication: &namespace.ReplicationSpec{
+			ClosedWorkflowPolicy: &namespace.ReplicationSpec_AllClosed{AllClosed: &types.Empty{}},
+		},
+		Spec: &namespace.MigrationSpec_ToCloudSpec{
+			ToCloudSpec: &namespace.MigrationToCloudSpec{
+				SourceNamespace: sourceNamespace,
+				TargetNamespace: targetNamespace,
 			},
 		},
+	}
+	if skipClosedWorkflows {
+		spec.Replication.ClosedWorkflowPolicy = &namespace.ReplicationSpec_SkipClosed{SkipClosed: &types.Empty{}}
+	}
+
+	resp, err := c.client.StartMigration(c.ctx, &cloudservice.StartMigrationRequest{
+		Spec:             spec,
 		AsyncOperationId: requestId,
 	})
 	if err != nil {
@@ -146,6 +158,10 @@ func NewMigrationCommand(getMigrationClient GetMigrationClientFn) (CommandOut, e
 		Usage:    "The id of the replica to make active",
 		Required: true,
 	}
+	skipClosedWorkflowsFlag := &cli.BoolFlag{
+		Name:  "skip-closed-workflows",
+		Usage: "Skip migration of closed workflows",
+	}
 
 	return CommandOut{
 		Command: &cli.Command{
@@ -192,6 +208,7 @@ func NewMigrationCommand(getMigrationClient GetMigrationClientFn) (CommandOut, e
 						migrationEndpointIdFlag,
 						sourceNamespaceFlag,
 						targetNamespaceFlag,
+						skipClosedWorkflowsFlag,
 					},
 					Action: func(ctx *cli.Context) error {
 						return c.startMigration(
@@ -199,6 +216,7 @@ func NewMigrationCommand(getMigrationClient GetMigrationClientFn) (CommandOut, e
 							ctx.String(migrationEndpointIdFlag.Name),
 							ctx.String(sourceNamespaceFlag.Name),
 							ctx.String(targetNamespaceFlag.Name),
+							ctx.Bool(skipClosedWorkflowsFlag.Name),
 						)
 					},
 				},
