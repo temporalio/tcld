@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/gogo/protobuf/types"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/tcld/protogen/api/cloud/cloudservice/v1"
@@ -237,11 +238,26 @@ func (s *MigrationTestSuite) TestStart() {
 	}
 	fullTestSpec := &cloudNamespace.MigrationSpec{
 		MigrationEndpointId: "ep-123",
+		Replication: &cloudNamespace.ReplicationSpec{
+			ClosedWorkflowPolicy: &cloudNamespace.ReplicationSpec_AllClosed{AllClosed: &types.Empty{}},
+		},
 		Spec: &cloudNamespace.MigrationSpec_ToCloudSpec{
 			ToCloudSpec: &cloudNamespace.MigrationToCloudSpec{
 				SourceNamespace: "src-ns",
 				TargetNamespace: "tgt-ns",
 			},
+		},
+	}
+	skipClosedTestSpec := &cloudNamespace.MigrationSpec{
+		MigrationEndpointId: "ep-123",
+		Spec: &cloudNamespace.MigrationSpec_ToCloudSpec{
+			ToCloudSpec: &cloudNamespace.MigrationToCloudSpec{
+				SourceNamespace: "src-ns",
+				TargetNamespace: "tgt-ns",
+			},
+		},
+		Replication: &cloudNamespace.ReplicationSpec{
+			ClosedWorkflowPolicy: &cloudNamespace.ReplicationSpec_SkipClosed{SkipClosed: &types.Empty{}},
 		},
 	}
 
@@ -297,6 +313,18 @@ func (s *MigrationTestSuite) TestStart() {
 			cmd:  fullTestCmd,
 			expReq: &cloudservice.StartMigrationRequest{
 				Spec:             fullTestSpec,
+				AsyncOperationId: "req-xyz",
+			},
+			mockResp: &cloudservice.StartMigrationResponse{
+				MigrationId:    "abc",
+				AsyncOperation: &operation.AsyncOperation{Id: "req-xyz"},
+			},
+		},
+		{
+			name: "success - skip closed workflows",
+			cmd:  append(append([]string{}, fullTestCmd...), "--skip-closed-workflows"),
+			expReq: &cloudservice.StartMigrationRequest{
+				Spec:             skipClosedTestSpec,
 				AsyncOperationId: "req-xyz",
 			},
 			mockResp: &cloudservice.StartMigrationResponse{
@@ -526,6 +554,9 @@ func (s *MigrationTestSuite) makeMigration(id string) *cloudNamespace.Migration 
 					TargetNamespace: "tgt-ns",
 				},
 			},
+			Replication: &cloudNamespace.ReplicationSpec{
+				ClosedWorkflowPolicy: &cloudNamespace.ReplicationSpec_SkipClosed{SkipClosed: &types.Empty{}},
+			},
 		},
 		State: 2,
 		Replicas: []*cloudNamespace.MigrationReplica{
@@ -533,4 +564,11 @@ func (s *MigrationTestSuite) makeMigration(id string) *cloudNamespace.Migration 
 			{Id: "cloud", State: 2},
 		},
 	}
+}
+
+func (s *MigrationTestSuite) TestMigrationOutputIncludesClosedWorkflowPolicy() {
+	serialized, err := serializeProto(s.makeMigration("abc"))
+	s.Require().NoError(err)
+	s.Contains(serialized, `"replication"`)
+	s.Contains(serialized, `"skipClosed"`)
 }
