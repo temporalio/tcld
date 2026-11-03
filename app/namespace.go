@@ -645,7 +645,7 @@ func getCreateNamespaceFlags() []cli.Flag {
 		},
 		&cli.StringFlag{
 			Name:  authMethodFlagName,
-			Usage: "The authentication method to use for the namespace (e.g. 'mtls', 'api_key')",
+			Usage: "The authentication method to use for the namespace (for example, 'mtls', 'api_key')",
 			Value: AuthMethodMTLS,
 		},
 		&cli.PathFlag{
@@ -1285,7 +1285,7 @@ func NewNamespaceCommand(getNamespaceClientFn GetNamespaceClientFn) (CommandOut,
 						&cli.StringFlag{
 							Name:     authMethodFlagName,
 							Aliases:  []string{"am"},
-							Usage:    fmt.Sprintf("The authentication method used for the namespace (i.e. %s)", formatStringSlice(AuthMethods)),
+							Usage:    fmt.Sprintf("The authentication method used for the namespace (that is, %s)", formatStringSlice(AuthMethods)),
 							Required: true,
 						},
 					},

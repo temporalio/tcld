@@ -294,7 +294,7 @@ func NewAPIKeyCommand(getAPIKeyClientFn GetAPIKeyClientFn) (CommandOut, error) {
 						},
 						&cli.StringFlag{
 							Name:    ownerTypeFlagName,
-							Usage:   fmt.Sprintf("Filter API keys by owner type (i.e. %s)", formatStringSlice(OwnerTypes)),
+							Usage:   fmt.Sprintf("Filter API keys by owner type (that is, %s)", formatStringSlice(OwnerTypes)),
 							Aliases: []string{"ot"},
 						},
 					},
