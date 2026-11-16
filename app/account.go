@@ -29,7 +29,8 @@ const (
 
 var errAccountMetricsUnsupported = errors.New(
 	"the PromQL metrics endpoint has been disabled and the \"tcld account metrics\" commands are no longer supported; " +
-		"use the OpenMetrics endpoint instead: https://docs.temporal.io/cloud/metrics/openmetrics",
+		"use the OpenMetrics endpoint instead: https://docs.temporal.io/cloud/metrics/openmetrics. " +
+		"To remove an existing endpoint configuration, run \"tcld account metrics disable\"",
 )
 
 var (
@@ -159,6 +160,24 @@ func (c *AccountClient) listRegions() ([]regionInfo, error) {
 	})
 
 	return regions, nil
+}
+
+func (c *AccountClient) updateAccount(ctx *cli.Context, a *account.Account) error {
+	resourceVersion := a.ResourceVersion
+	if v := ctx.String(ResourceVersionFlagName); v != "" {
+		resourceVersion = v
+	}
+
+	res, err := c.client.UpdateAccount(c.ctx, &accountservice.UpdateAccountRequest{
+		RequestId:       ctx.String(RequestIDFlagName),
+		ResourceVersion: resourceVersion,
+		Spec:            a.Spec,
+	})
+	if err != nil {
+		return err
+	}
+
+	return PrintProto(res)
 }
 
 func toKinesisAuditLogSinkSpec(ctx *cli.Context, name string, enabled bool, roleName string, destinationUri string, region string) (*cloudaccount.AuditLogSinkSpec, error) {
@@ -297,7 +316,17 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 							Name:  "disable",
 							Usage: "Disables the metrics endpoint",
 							Action: func(ctx *cli.Context) error {
-								return errAccountMetricsUnsupported
+								a, err := c.getAccount()
+								if err != nil {
+									return err
+								}
+
+								if a.Spec.Metrics == nil || !a.Spec.Metrics.Enabled {
+									return errors.New("metrics endpoint is already disabled")
+								}
+
+								a.Spec.Metrics.Enabled = false
+								return c.updateAccount(ctx, a)
 							},
 						},
 						{

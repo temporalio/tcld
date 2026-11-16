@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -16,6 +17,7 @@ import (
 	"github.com/temporalio/tcld/protogen/api/cloud/operation/v1"
 	cloudSink "github.com/temporalio/tcld/protogen/api/cloud/sink/v1"
 	"github.com/temporalio/tcld/protogen/api/common/v1"
+	"github.com/temporalio/tcld/protogen/api/request/v1"
 	accountservicemock "github.com/temporalio/tcld/protogen/apimock/accountservice/v1"
 	apimock "github.com/temporalio/tcld/protogen/apimock/cloudservice/v1"
 	"github.com/urfave/cli/v2"
@@ -94,7 +96,6 @@ func (s *AccountTestSuite) TestMetricsUnsupported() {
 	// message without calling the account service (the gomock controller enforces that).
 	tests := [][]string{
 		{"account", "metrics", "enable"},
-		{"account", "metrics", "disable"},
 		{"a", "m", "enable"},
 		{"account", "metrics", "accepted-client-ca", "list"},
 		{"account", "metrics", "accepted-client-ca", "add", "--ca-certificate", "Y2VydA=="},
@@ -106,6 +107,83 @@ func (s *AccountTestSuite) TestMetricsUnsupported() {
 			s.ErrorIs(s.RunCmd(args...), errAccountMetricsUnsupported)
 		})
 	}
+}
+
+func (s *AccountTestSuite) TestDisable() {
+	type morphGetResp func(*accountservice.GetAccountResponse)
+	type morphUpdateReq func(*accountservice.UpdateAccountRequest)
+
+	tests := []struct {
+		args         []string
+		expectGet    morphGetResp
+		expectErrMsg string
+		expectUpdate morphUpdateReq
+	}{
+		{
+			args:         []string{"account", "metrics", "disable"},
+			expectGet:    func(g *accountservice.GetAccountResponse) {},
+			expectErrMsg: "metrics endpoint is already disabled",
+		},
+		{
+			args: []string{"a", "m", "disable"},
+			expectGet: func(g *accountservice.GetAccountResponse) {
+				g.Account.Spec.Metrics.Enabled = true
+			},
+			expectUpdate: func(r *accountservice.UpdateAccountRequest) {
+				r.Spec.Metrics.Enabled = false
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(strings.Join(tc.args, " "), func() {
+			getResp := accountservice.GetAccountResponse{
+				Account: &account.Account{
+					Spec: &account.AccountSpec{
+						Metrics: &account.MetricsSpec{
+							AcceptedClientCa: "cert1",
+						},
+					},
+					State:           account.STATE_ACTIVE,
+					ResourceVersion: "ver1",
+				},
+			}
+			if tc.expectGet != nil {
+				tc.expectGet(&getResp)
+				s.mockService.EXPECT().GetAccount(gomock.Any(), &accountservice.GetAccountRequest{}).Return(&getResp, nil).Times(1)
+			}
+
+			if tc.expectUpdate != nil {
+				spec := s.copySpec(getResp.Account.Spec)
+				req := accountservice.UpdateAccountRequest{
+					Spec:            spec,
+					ResourceVersion: getResp.Account.ResourceVersion,
+				}
+				tc.expectUpdate(&req)
+				s.mockService.EXPECT().UpdateAccount(gomock.Any(), &req).
+					Return(&accountservice.UpdateAccountResponse{
+						RequestStatus: &request.RequestStatus{},
+					}, nil).Times(1)
+			}
+
+			err := s.RunCmd(tc.args...)
+			if tc.expectErrMsg != "" {
+				s.Error(err)
+				s.ErrorContains(err, tc.expectErrMsg)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
+func (s *AccountTestSuite) copySpec(spec *account.AccountSpec) *account.AccountSpec {
+	bytes, err := json.Marshal(spec)
+	s.NoError(err)
+
+	var copy account.AccountSpec
+	s.NoError(json.Unmarshal(bytes, &copy))
+	return &copy
 }
 
 func (s *AccountTestSuite) TestCreateAuditLogSink() {
