@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -24,6 +25,11 @@ const (
 	kinesisAuditLogSinkType         = "kinesis"
 	pubsubAuditLogSinkType          = "pubsub"
 	sinkServiceAccountEmailFlagName = "service-account-email"
+)
+
+var errAccountMetricsUnsupported = errors.New(
+	"the PromQL metrics endpoint has been disabled and the \"tcld account metrics\" commands are no longer supported; " +
+		"use the OpenMetrics endpoint instead: https://docs.temporal.io/cloud/metrics/openmetrics",
 )
 
 var (
@@ -272,6 +278,86 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 							return err
 						}
 						return PrintObj(regionInfos)
+					},
+				},
+				{
+					Name:    "metrics",
+					Usage:   "Configures the metrics endpoint for the Temporal Cloud Account",
+					Aliases: []string{"m"},
+					Hidden:  true,
+					Subcommands: []*cli.Command{
+						{
+							Name:  "enable",
+							Usage: "Enables the metrics endpoint. CA Certificates *must* be configured prior to enabling the endpoint",
+							Action: func(ctx *cli.Context) error {
+								return errAccountMetricsUnsupported
+							},
+						},
+						{
+							Name:  "disable",
+							Usage: "Disables the metrics endpoint",
+							Action: func(ctx *cli.Context) error {
+								return errAccountMetricsUnsupported
+							},
+						},
+						{
+							Name:    "accepted-client-ca",
+							Usage:   "Manages configuration of ca certificates for the external metrics endpoint",
+							Aliases: []string{"ca"},
+							Subcommands: []*cli.Command{
+								{
+									Name:    "add",
+									Aliases: []string{"a"},
+									Usage:   "Add a new ca accepted client ca certificate",
+									Flags: []cli.Flag{
+										RequestIDFlag,
+										ResourceVersionFlag,
+										CaCertificateFlag,
+										CaCertificateFileFlag,
+									},
+									Action: func(ctx *cli.Context) error {
+										return errAccountMetricsUnsupported
+									},
+								},
+								{
+									Name:    "remove",
+									Aliases: []string{"r"},
+									Usage:   "Remove existing certificates",
+									Flags: []cli.Flag{
+										RequestIDFlag,
+										ResourceVersionFlag,
+										CaCertificateFlag,
+										CaCertificateFileFlag,
+										caCertificateFingerprintFlag,
+									},
+									Action: func(ctx *cli.Context) error {
+										return errAccountMetricsUnsupported
+									},
+								},
+								{
+									Name:    "set",
+									Aliases: []string{"s"},
+									Usage:   "Set the accepted client ca certificate",
+									Flags: []cli.Flag{
+										RequestIDFlag,
+										ResourceVersionFlag,
+										CaCertificateFlag,
+										CaCertificateFileFlag,
+									},
+									Action: func(ctx *cli.Context) error {
+										return errAccountMetricsUnsupported
+									},
+								},
+								{
+									Name:    "list",
+									Aliases: []string{"l"},
+									Usage:   "List the accepted client ca certificates currently configured for the account metrics endpoint",
+									Action: func(ctx *cli.Context) error {
+										return errAccountMetricsUnsupported
+									},
+								},
+							},
+						},
 					},
 				},
 			},

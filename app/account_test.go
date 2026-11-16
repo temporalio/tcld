@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -86,6 +87,25 @@ func (s *AccountTestSuite) TestListRegions() {
 		},
 	}, nil).Times(1)
 	s.NoError(s.RunCmd("account", "list-regions"))
+}
+
+func (s *AccountTestSuite) TestMetricsUnsupported() {
+	// The PromQL metrics endpoint is disabled: every old invocation must fail with the
+	// message without calling the account service (the gomock controller enforces that).
+	tests := [][]string{
+		{"account", "metrics", "enable"},
+		{"account", "metrics", "disable"},
+		{"a", "m", "enable"},
+		{"account", "metrics", "accepted-client-ca", "list"},
+		{"account", "metrics", "accepted-client-ca", "add", "--ca-certificate", "Y2VydA=="},
+		{"account", "metrics", "accepted-client-ca", "remove", "--ca-certificate-fingerprint", "abc"},
+		{"account", "metrics", "accepted-client-ca", "set", "--ca-certificate", "Y2VydA=="},
+	}
+	for _, args := range tests {
+		s.Run(strings.Join(args, " "), func() {
+			s.ErrorIs(s.RunCmd(args...), errAccountMetricsUnsupported)
+		})
+	}
 }
 
 func (s *AccountTestSuite) TestCreateAuditLogSink() {
