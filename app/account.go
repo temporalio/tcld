@@ -27,6 +27,11 @@ const (
 	sinkServiceAccountEmailFlagName = "service-account-email"
 )
 
+var errAccountMetricsUnsupported = errors.New(
+	"the PromQL metrics endpoint has been disabled and the \"tcld account metrics\" commands are no longer supported; " +
+		"use the OpenMetrics endpoint instead: https://docs.temporal.io/cloud/metrics/openmetrics",
+)
+
 var (
 	// Kinesis audit log sink flags
 	roleNameFlag = &cli.StringFlag{
@@ -156,41 +161,6 @@ func (c *AccountClient) listRegions() ([]regionInfo, error) {
 	return regions, nil
 }
 
-func (c *AccountClient) updateAccount(ctx *cli.Context, a *account.Account) error {
-	resourceVersion := a.ResourceVersion
-	if v := ctx.String(ResourceVersionFlagName); v != "" {
-		resourceVersion = v
-	}
-
-	res, err := c.client.UpdateAccount(c.ctx, &accountservice.UpdateAccountRequest{
-		RequestId:       ctx.String(RequestIDFlagName),
-		ResourceVersion: resourceVersion,
-		Spec:            a.Spec,
-	})
-	if err != nil {
-		return err
-	}
-
-	return PrintProto(res)
-}
-
-func (c *AccountClient) parseExistingMetricsCerts(ctx *cli.Context) (account *account.Account, existing caCerts, err error) {
-	a, err := c.getAccount()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var existingCerts caCerts
-	if a.GetSpec().GetMetrics() != nil && a.GetSpec().GetMetrics().GetAcceptedClientCa() != "" {
-		existingCerts, err = parseCertificates(a.GetSpec().GetMetrics().GetAcceptedClientCa())
-		if err != nil {
-			return nil, nil, err
-		}
-	}
-
-	return a, existingCerts, nil
-}
-
 func toKinesisAuditLogSinkSpec(ctx *cli.Context, name string, enabled bool, roleName string, destinationUri string, region string) (*cloudaccount.AuditLogSinkSpec, error) {
 	return &cloudaccount.AuditLogSinkSpec{
 		Name:    name,
@@ -314,43 +284,20 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 					Name:    "metrics",
 					Usage:   "Configures the metrics endpoint for the Temporal Cloud Account",
 					Aliases: []string{"m"},
+					Hidden:  true,
 					Subcommands: []*cli.Command{
 						{
 							Name:  "enable",
 							Usage: "Enables the metrics endpoint. CA Certificates *must* be configured prior to enabling the endpoint",
 							Action: func(ctx *cli.Context) error {
-								a, err := c.getAccount()
-								if err != nil {
-									return err
-								}
-
-								if a.Spec.Metrics != nil && a.Spec.Metrics.Enabled {
-									return errors.New("metrics endpoint is already enabled")
-								}
-
-								if a.Spec.Metrics == nil || a.Spec.Metrics.AcceptedClientCa == "" {
-									return errors.New("metrics endpoint cannot be enabled until ca certificates have been configured")
-								}
-
-								a.Spec.Metrics.Enabled = true
-								return c.updateAccount(ctx, a)
+								return errAccountMetricsUnsupported
 							},
 						},
 						{
 							Name:  "disable",
 							Usage: "Disables the metrics endpoint",
 							Action: func(ctx *cli.Context) error {
-								a, err := c.getAccount()
-								if err != nil {
-									return err
-								}
-
-								if a.Spec.Metrics == nil || !a.Spec.Metrics.Enabled {
-									return errors.New("metrics endpoint is already disabled")
-								}
-
-								a.Spec.Metrics.Enabled = false
-								return c.updateAccount(ctx, a)
+								return errAccountMetricsUnsupported
 							},
 						},
 						{
@@ -369,36 +316,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 										CaCertificateFileFlag,
 									},
 									Action: func(ctx *cli.Context) error {
-										newCerts, err := readAndParseCACerts(ctx)
-										if err != nil {
-											return err
-										}
-
-										a, existingCerts, err := c.parseExistingMetricsCerts(ctx)
-										if err != nil {
-											return err
-										}
-
-										existingCerts, err = addCerts(existingCerts, newCerts)
-										if err != nil {
-											return err
-										}
-
-										bundle, err := existingCerts.bundle()
-										if err != nil {
-											return err
-										}
-
-										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedClientCa == bundle {
-											return errors.New("nothing to change")
-										}
-
-										if a.Spec.Metrics == nil {
-											a.Spec.Metrics = &account.MetricsSpec{}
-										}
-
-										a.Spec.Metrics.AcceptedClientCa = bundle
-										return c.updateAccount(ctx, a)
+										return errAccountMetricsUnsupported
 									},
 								},
 								{
@@ -413,50 +331,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 										caCertificateFingerprintFlag,
 									},
 									Action: func(ctx *cli.Context) error {
-										a, existingCerts, err := c.parseExistingMetricsCerts(ctx)
-										if err != nil {
-											return err
-										}
-
-										var certs caCerts
-										if ctx.String(caCertificateFingerprintFlagName) != "" {
-											certs, err = removeCertWithFingerprint(
-												existingCerts,
-												ctx.String(caCertificateFingerprintFlagName),
-											)
-											if err != nil {
-												return err
-											}
-										} else {
-											readCerts, err := readAndParseCACerts(ctx)
-											if err != nil {
-												return err
-											}
-											certs, err = removeCerts(existingCerts, readCerts)
-											if err != nil {
-												return err
-											}
-										}
-
-										bundle, err := certs.bundle()
-										if err != nil {
-											return err
-										}
-
-										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedClientCa == bundle {
-											return errors.New("nothing to change")
-										}
-
-										if a.Spec.Metrics == nil {
-											a.Spec.Metrics = &account.MetricsSpec{}
-										}
-
-										a.Spec.Metrics.AcceptedClientCa = bundle
-										y, err := ConfirmPrompt(ctx, "removing ca certificates can cause connectivity disruption if there are any clients using certificates that cannot be verified. confirm remove?")
-										if err != nil || !y {
-											return err
-										}
-										return c.updateAccount(ctx, a)
+										return errAccountMetricsUnsupported
 									},
 								},
 								{
@@ -470,28 +345,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 										CaCertificateFileFlag,
 									},
 									Action: func(ctx *cli.Context) error {
-										cert, err := ReadCACerts(ctx)
-										if err != nil {
-											return err
-										}
-
-										a, err := c.getAccount()
-										if err != nil {
-											return err
-										}
-
-										fmt.Println("2: " + a.Spec.Metrics.AcceptedClientCa)
-
-										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedClientCa == cert {
-											fmt.Printf("%+v vs %+v\r\n", cert, a.Spec.Metrics.AcceptedClientCa)
-											return errors.New("nothing to change")
-										}
-
-										if a.Spec.Metrics == nil {
-											a.Spec.Metrics = &account.MetricsSpec{}
-										}
-										a.Spec.Metrics.AcceptedClientCa = cert
-										return c.updateAccount(ctx, a)
+										return errAccountMetricsUnsupported
 									},
 								},
 								{
@@ -499,20 +353,7 @@ func NewAccountCommand(getAccountClientFn GetAccountClientFn) (CommandOut, error
 									Aliases: []string{"l"},
 									Usage:   "List the accepted client ca certificates currently configured for the account metrics endpoint",
 									Action: func(ctx *cli.Context) error {
-										a, err := c.getAccount()
-										if err != nil {
-											return err
-										}
-
-										if a.Spec.Metrics != nil && a.Spec.Metrics.AcceptedClientCa != "" {
-											out, err := parseCertificates(a.Spec.Metrics.AcceptedClientCa)
-											if err != nil {
-												return err
-											}
-											return PrintObj(out)
-										}
-
-										return PrintObj("no client ca certificates configured for metrics endpoint")
+										return errAccountMetricsUnsupported
 									},
 								},
 							},
