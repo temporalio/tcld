@@ -1,0 +1,34 @@
+version: 2
+
+builds:
+  - main: ./cmd/tcld
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -w
+      - -X github.com/temporalio/tcld/app.date={{.Date}}
+      - -X github.com/temporalio/tcld/app.commit={{.ShortCommit}}
+      - -X github.com/temporalio/tcld/app.version={{.Tag}}
+
+archives:
+  - formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    name_template: "tcld_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: sha256sums.txt
+  algorithm: sha256
